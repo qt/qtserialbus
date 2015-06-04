@@ -1,0 +1,11 @@
+outputdir   = html
+
+headerdirs  += .. \
+               ../../plugins
+
+sourcedirs  += .. \
+               ../../plugins
+
+exampledirs = ../../../examples/
+
+imagedirs   = ./images

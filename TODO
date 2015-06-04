@@ -1,0 +1,11 @@
+Connect and Disconnect methods should be implemented to QSerialBusBackend and all the inherited classes, currently connection happens at the constructor of backend. Method for asking connection state and proper signaling should be added too.
+
+Improve error reporting for SocketCanBackend connect.
+
+Documentation should be done properly for everything.
+
+Check d pointer pattern with qserialbus / qserialbusdevice / qcanbusdevice
+
+Example app should be cleaned up. It is bit too convoluted because of iterative implementation method. Also defined flags from socket CAN header should not be used.
+
+QSerialBusBackend interface should be revised for naming and functionality.
