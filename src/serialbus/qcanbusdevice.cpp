@@ -63,7 +63,7 @@ QCanBusDevice::QCanBusDevice(QPointer<QSerialBusBackend> backend, QObject *paren
 
 /*
  * For socketCAN following configurations can be done
- * QPair<key,value>
+ * QString key, QVariant value
  * key: Loopback value: True/False
  * key: ReceiveOwnMessages value: True/False
  * key: ErrorMask value: int
@@ -71,9 +71,19 @@ QCanBusDevice::QCanBusDevice(QPointer<QSerialBusBackend> backend, QObject *paren
  * QVariant filter is QHash<QString, QVariant>,
  * QHash has 2 keys: "FilterId" and "CanMask" both values are int
  */
-void QCanBusDevice::setConfiguration(QPair<QString, QVariant> conf)
+void QCanBusDevice::setConfigurationParameter(const QString &key, const QVariant &value)
 {
-    busBackend->setConfiguration(conf);
+    busBackend->setConfigurationParameter(key, value);
+}
+
+QVariant QCanBusDevice::configurationParameter(const QString &key) const
+{
+    return busBackend->configurationParameter(key);
+}
+
+QVector<QString> QCanBusDevice::configurationKeys() const
+{
+    return busBackend->configurationKeys();
 }
 
 /*!

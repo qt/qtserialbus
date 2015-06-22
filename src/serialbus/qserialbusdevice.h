@@ -38,7 +38,9 @@
 #define QSERIALBUSDEVICE_H
 
 #include <QtSerialBus/qserialbusglobal.h>
+
 #include <QtCore/qiodevice.h>
+#include <QtCore/qpointer.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -54,8 +56,8 @@ class Q_SERIALBUS_EXPORT QSerialBusDevice : public QIODevice
 public:
     explicit QSerialBusDevice(QPointer<QSerialBusBackend> backend, QObject *parent = 0);
 protected:
-    virtual qint64 readData(char *data, qint64 maxSize) Q_DECL_OVERRIDE;
-    virtual qint64 writeData(const char *data, qint64 maxSize) Q_DECL_OVERRIDE;
+    qint64 readData(char *data, qint64 maxSize) Q_DECL_OVERRIDE;
+    qint64 writeData(const char *data, qint64 maxSize) Q_DECL_OVERRIDE;
 
 private:
     QPointer<QSerialBusBackend> busBackend;

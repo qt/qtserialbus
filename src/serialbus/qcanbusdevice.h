@@ -38,9 +38,11 @@
 #define QCANBUSDEVICE_H
 
 #include <QtSerialBus/qserialbusglobal.h>
-#include <QtCore/qpointer.h>
+
 #include "qserialbusdevice.h"
 #include "qserialbusbackend.h"
+
+#include <QtCore/qpointer.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -53,7 +55,10 @@ class Q_SERIALBUS_EXPORT QCanBusDevice : public QSerialBusDevice
     Q_OBJECT
 public:
     explicit QCanBusDevice(QPointer<QSerialBusBackend> backend, QObject *parent = 0);
-    void setConfiguration(QPair<QString, QVariant> conf);
+
+    void setConfigurationParameter(const QString &key, const QVariant &value);
+    QVariant configurationParameter(const QString &key) const;
+    QVector<QString> configurationKeys() const;
 
     void writeFrame(const QCanFrame &frame);
     QCanFrame readFrame();

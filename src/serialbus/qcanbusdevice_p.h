@@ -38,9 +38,9 @@
 #define QCANBUSDEVICE_P_H
 
 #include "qcanbusdevice.h"
-#include "private/qobject_p.h"
 
 #include <QtCore/qpointer.h>
+#include "private/qobject_p.h"
 
 //
 //  W A R N I N G
@@ -59,7 +59,6 @@ class QCanFrame;
 
 class QCanBusDevicePrivate : public QObjectPrivate
 {
-
     Q_DECLARE_PUBLIC(QCanBusDevice)
 public:
     QCanBusDevicePrivate()

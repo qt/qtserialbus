@@ -72,10 +72,10 @@ void MainWindow::init()
     QList<QByteArray> plugins = b->plugins();
     for (int i = 0; i < plugins.size(); i++)
     {
-        backends.insert(i, b->createBackend(plugins.at(i), "SocketCAN", "vcan1"));
+        backends.insert(i, b->createBackend(plugins.at(i), QStringLiteral("SocketCAN"), QStringLiteral("vcan1")));
         ui->comboBox->insertItem(i, plugins.at(i));
 
-        if (plugins.at(i) == "can") {
+        if (plugins.at(i) == QStringLiteral("can")) {
             canDevice = new QCanBusDevice(backends.at(i), this);
             if (!canDevice)
                 return;
@@ -86,8 +86,9 @@ void MainWindow::init()
             hash.insert("CanMask", CAN_EFF_MASK);
             var.append(hash);
             canDevice->setConfiguration(QPair<QString, QVariant>("CanFilter", var));*/ //NOTE: Filtering example
+            canDevice->setConfigurationParameter(QStringLiteral("ReceiveOwnMessages"), QVariant(1));
             connect(canDevice.data(), &QCanBusDevice::readyRead, this, &MainWindow::checkMessages);
-        } else if (plugins.at(i) == "dummy") {
+        } else if (plugins.at(i) == QStringLiteral("dummy")) {
             dummyDevice = new QBusDummyDevice(backends.at(i), this);
             if (!dummyDevice)
                 return;
@@ -145,11 +146,11 @@ void MainWindow::checkMessages()
             frame.setFrameId(id);
             interpretError(view, frame);
         } else {
-            view += "Id: ";
+            view += QLatin1String("Id: ");
             view += QString::number(id, 16);
-            view += " bytes: ";
+            view += QLatin1String(" bytes: ");
             view += QString::number(dataLength, 10);
-            view += " data: ";
+            view += QLatin1String(" data: ");
             view += frame.payload().data();
         }
 

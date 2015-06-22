@@ -38,6 +38,7 @@
 #define QSERIALBUSPLUGININTERFACE_H
 
 #include <QtSerialBus/qserialbusglobal.h>
+
 #include <QtCore/qplugin.h>
 
 QT_BEGIN_NAMESPACE
@@ -55,4 +56,3 @@ Q_DECLARE_INTERFACE(QSerialBusPluginInterface, "org.qt-project.Qt.QSerialBusPlug
 QT_END_NAMESPACE
 
 #endif
-

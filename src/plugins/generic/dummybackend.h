@@ -39,7 +39,6 @@
 
 #include <qserialbusbackend.h>
 #include <QtCore/qbytearray.h>
-
 #include <QtCore/qpointer.h>
 
 class QTimer;
@@ -49,13 +48,14 @@ class DummyBackend : public QSerialBusBackend
     Q_OBJECT
 public:
     explicit DummyBackend();
-    QByteArray readAll();
-    QByteArray read(qint64 maxSize);
-    void writeToBus(const QByteArray &data);
+    qint64 read(char *buffer, qint64 maxSize);
+    qint64 write(const char *, qint64);
     void setDataStreamVersion(int version);
-    void setConfiguration(const QPair<QString, QVariant> &);
+    void setConfigurationParameter(const QString &key, const QVariant &value);
+    QVariant configurationParameter(const QString &key) const;
+    QVector<QString> configurationKeys() const;
     int dataStreamVersion() const;
-    qint64 size() const;
+    qint64 bytesAvailable() const;
 
 public Q_SLOTS:
     void sendMessage();

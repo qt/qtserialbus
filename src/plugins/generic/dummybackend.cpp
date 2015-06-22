@@ -54,22 +54,26 @@ void DummyBackend::sendMessage()
     emit readyRead();
 }
 
-QByteArray DummyBackend::read(qint64 maxSize)
+qint64 DummyBackend::read(char *buffer, qint64 maxSize)
 {
     const qint64 len = byteArray.size();
     if (len > maxSize) {
-        QByteArray data = byteArray.left(maxSize);
+        const QByteArray data = byteArray.left(maxSize);
         byteArray = byteArray.mid(maxSize);
-        return data;
+        memcpy(buffer, data.constData(), maxSize);
+        return maxSize;
     } else {
-        const QByteArray data = byteArray;
+        memcpy(buffer, byteArray.constData(), len);
         byteArray.clear();
-        return data;
+        return len;
     }
 }
 
-void DummyBackend::writeToBus(const QByteArray &data) {
+qint64 DummyBackend::write(const char* buffer, qint64 size) {
+    QByteArray data;
+    data.setRawData(buffer, size);
     qDebug() << "DummyBackend wrote: " << data.data();
+    return size;
 }
 
 void DummyBackend::setDataStreamVersion(int version)
@@ -82,19 +86,23 @@ int DummyBackend::dataStreamVersion() const
     return 0;
 }
 
-qint64 DummyBackend::size() const
+qint64 DummyBackend::bytesAvailable() const
 {
     return byteArray.size();
 }
 
-QByteArray DummyBackend::readAll()
+void DummyBackend::setConfigurationParameter(const QString &key, const QVariant &value)
 {
-    QByteArray temp = byteArray;
-    byteArray.clear();
-    return temp;
+    Q_UNUSED(key);
+    Q_UNUSED(value);
 }
 
-void DummyBackend::setConfiguration(const QPair<QString, QVariant> &conf)
+QVariant DummyBackend::configurationParameter(const QString&) const
 {
-    Q_UNUSED(conf);
+    return QVariant();
+}
+
+QVector<QString> DummyBackend::configurationKeys() const
+{
+    return QVector<QString>();
 }

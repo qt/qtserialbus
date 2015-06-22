@@ -53,22 +53,24 @@ SocketCanBackend::SocketCanBackend(const QString &name) :
 {
     QDataStream stream;
     version = stream.version();
+
+    configuration.append(QPair<QString, QVariant>(QStringLiteral("LoopBack"), 1));
+    configuration.append(QPair<QString, QVariant>(QStringLiteral("ReceiveOwnMessages"), 0));
+    configuration.append(QPair<QString, QVariant>(QStringLiteral("ErrorMask"), 0));
+    configuration.append(QPair<QString, QVariant>(QStringLiteral("CanFilter"), QList<QVariant>()));
+
     //TODO: remove implicit call to connect() in ctor (related to missing open/close() call in QSerialBusDevice
     connectSocket();
 }
 
-QByteArray SocketCanBackend::readAll()
+qint64 SocketCanBackend::read(char *buffer, qint64 maxSize)
 {
-    return read(CANFD_MTU);
-}
-
-QByteArray SocketCanBackend::read(qint64 maxSize)
-{
+    //TODO: make non-blocking
     Q_UNUSED(maxSize);
     const canfd_frame frame = readFrame();
 
     if (!frame.len)
-        return QByteArray();
+        return 0;
 
     struct timeval timeStamp;
     if (ioctl(canSocket, SIOCGSTAMP, &timeStamp) < 0) {
@@ -76,7 +78,10 @@ QByteArray SocketCanBackend::read(qint64 maxSize)
         timeStamp.tv_sec = 0;
         timeStamp.tv_usec = 0;
     }
-    return serialize(frame, timeStamp);
+    const QByteArray data = serialize(frame, timeStamp);
+    memcpy(buffer, data.constData(), data.size());
+
+    return data.size();
 }
 
 QByteArray SocketCanBackend::serialize(const canfd_frame &frame, const timeval &timeStamp)
@@ -114,32 +119,55 @@ canfd_frame SocketCanBackend::deserialize(const QByteArray &array)
     return frame;
 }
 
-void SocketCanBackend::writeToBus(const QByteArray &data)
+qint64 SocketCanBackend::write(const char *buffer, qint64 size)
 {
+    QByteArray data;
+    data.setRawData(buffer, size);
     const canfd_frame frame = deserialize(data);
 
-    if (::write(canSocket, &frame, CANFD_MTU) < 0)
+    const qint64 bytesWritten = ::write(canSocket, &frame, CANFD_MTU);
+    if (bytesWritten < 0) {
         qWarning() << "ERROR SocketCanBackend: cannot write to socket";
+        return -1;
+    }
+    return bytesWritten;
 }
 
-void SocketCanBackend::setConfiguration(const QPair<QString, QVariant> &conf)
+void SocketCanBackend::insertInConfigurations(const QString &key, const QVariant &value)
 {
-    if (conf.first == QStringLiteral("Loopback")) {
-        const int loopback = conf.second.toBool() ? 1 : 0;
-        if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_LOOPBACK, &loopback, sizeof(loopback)) < 0)
+    for (int i = 0; i < configuration.size(); i++) {
+        if (configuration.at(i).first == key) {
+            QPair<QString, QVariant> conf(key, value);
+            configuration.removeAt(i);
+            configuration.append(conf);
+        }
+    }
+}
+
+void SocketCanBackend::setConfigurationParameter(const QString &key, const QVariant &value)
+{
+    if (key == QStringLiteral("Loopback")) {
+        const int loopback = value.toBool() ? 1 : 0;
+        if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_LOOPBACK, &loopback, sizeof(loopback)) < 0) {
             qWarning() << "ERROR SocketCanBackend: setsockopt CAN_RAW_LOOPBACK failed";
-    } else if (conf.first == QStringLiteral("ReceiveOwnMessages")) {
-        const int receiveOwnMessages = conf.second.toBool() ? 1 : 0;
+            return;
+        }
+    } else if (key == QStringLiteral("ReceiveOwnMessages")) {
+        const int receiveOwnMessages = value.toBool() ? 1 : 0;
         if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_RECV_OWN_MSGS,
-                       &receiveOwnMessages, sizeof(receiveOwnMessages)) < 0)
+                       &receiveOwnMessages, sizeof(receiveOwnMessages)) < 0) {
             qWarning() << "ERROR SocketCanBackend: setsockopt CAN_RAW_RECV_OWN_MSGS failed";
-    } else if (conf.first == QStringLiteral("ErrorMask")) {
-        const int errorMask = conf.second.toInt();
+            return;
+        }
+    } else if (key == QStringLiteral("ErrorMask")) {
+        const int errorMask = value.toInt();
         if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_ERR_FILTER,
-                                  &errorMask, sizeof(errorMask)) < 0)
+                                  &errorMask, sizeof(errorMask)) < 0) {
             qWarning() << "ERROR SocketCanBackend: setsockopt CAN_RAW_ERR_FILTER failed";
-    } else if (conf.first == QStringLiteral("CanFilter")) {
-        const QList<QVariant> filterList = conf.second.toList();
+            return;
+        }
+    } else if (key == QStringLiteral("CanFilter")) {
+        const QList<QVariant> filterList = value.toList();
         const int size = filterList.size();
         if (size == 0)
             qWarning() << "ERROR SocketCanBackend: \"CanFilter\" QList<QVariant> empty or not valid";
@@ -163,10 +191,29 @@ void SocketCanBackend::setConfiguration(const QPair<QString, QVariant> &conf)
         if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_FILTER, filters, sizeof(filters)) < 0)
             qWarning() << "ERROR SocketCanBackend: setsockopt CAN_RAW_FILTER failed";
     } else {
-        qWarning() << "SocketCanBackend: No such configuration as" << conf.first << "in SocketCanBackend";
+        qWarning() << "SocketCanBackend: No such configuration as" << key << "in SocketCanBackend";
     }
+    insertInConfigurations(key, value);
 }
 
+QVariant SocketCanBackend::configurationParameter(const QString &key) const
+{
+    QVariant value;
+    for (int i = 0; i < configuration.size(); i++)
+        if (configuration.at(i).first == key)
+            value = configuration.at(i).second;
+
+    return value;
+}
+
+QVector<QString> SocketCanBackend::configurationKeys() const
+{
+    QVector<QString> keys;
+    for (int i = 0; i < configuration.size(); i++) {
+        keys.append(configuration.at(i).first);
+    }
+    return keys;
+}
 
 qint64 SocketCanBackend::connectSocket()
 {
@@ -214,9 +261,12 @@ int SocketCanBackend::dataStreamVersion() const
     return version;
 }
 
-qint64 SocketCanBackend::size() const
+qint64 SocketCanBackend::bytesAvailable() const
 {
-    return CANFD_MTU;
+    qint64 bytes = 0;
+    if (canSocket)
+        ioctl(canSocket, FIONREAD, &bytes);
+    return bytes;
 }
 
 canfd_frame SocketCanBackend::readFrame()

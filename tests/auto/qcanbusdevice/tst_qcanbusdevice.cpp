@@ -45,13 +45,28 @@ class tst_Backend : public QSerialBusBackend
 {
     Q_OBJECT
 public:
-    QByteArray readAll(){ return QByteArray(); };
-    QByteArray read(qint64){ return QByteArray("data"); };
-    void setConfiguration(const QPair<QString, QVariant>&) {};
-    void writeToBus(const QByteArray &) { emit written(); };
+    qint64 read(char *buffer, qint64){
+        QByteArray data;
+        QDataStream stream(&data, QIODevice::WriteOnly);
+        QByteArray payload;
+        payload.append('A');
+        qint32 id = 22;
+        qint32 sec = 22;
+        qint32 usec = 22;
+        stream << id;
+        stream << payload;
+        stream << sec;
+        stream << usec;
+        memcpy(buffer, data.constData(), 72);
+        return 72;
+    };
+    void setConfigurationParameter(const QString&, const QVariant&) {};
+    QVariant configurationParameter(const QString&) const { return QVariant(); } ;
+    QVector<QString> configurationKeys() const { return QVector<QString>(); };
+    qint64 write(const char*, qint64) { emit written(); return 72; };
     void setDataStreamVersion(int v){ version = v; };
     int dataStreamVersion() const { return version; };
-    qint64 size() const { return 0; };
+    qint64 bytesAvailable() const { return 72; };
 
 signals:
     void written();
@@ -94,8 +109,7 @@ void tst_QCanBusDevice::initTestCase()
 
 void tst_QCanBusDevice::conf()
 {
-    QPair<QString, QVariant> configuration;
-    device->setConfiguration(configuration);
+    device->setConfigurationParameter(QStringLiteral("test"), 1);
 }
 
 void tst_QCanBusDevice::write()

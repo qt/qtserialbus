@@ -48,14 +48,7 @@ qint64 QSerialBusDevice::readData(char *data, qint64 maxSize)
     if (!busBackend)
         return -1;
 
-    qint64 length = busBackend->size();
-    if (maxSize < length)
-        length = maxSize;
-
-    const QByteArray temp = busBackend->read(length);
-    length = temp.size();
-    memcpy(data, temp.constData(), length);
-    return length;
+    return busBackend->read(data, maxSize);
 }
 
 qint64 QSerialBusDevice::writeData(const char *data, qint64 maxSize)
@@ -63,7 +56,5 @@ qint64 QSerialBusDevice::writeData(const char *data, qint64 maxSize)
     if (!busBackend)
         return -1;
 
-    QByteArray temp(data, maxSize);
-    busBackend->writeToBus(temp);
-    return 0;
+    return busBackend->write(data, maxSize);
 }

@@ -38,6 +38,7 @@
 #define QSERIALBUSBACKEND_H
 
 #include <QtSerialBus/qserialbusglobal.h>
+
 #include <QtCore/qobject.h>
 #include <QtCore/qbytearray.h>
 
@@ -47,21 +48,15 @@ class Q_SERIALBUS_EXPORT QSerialBusBackend : public QObject
 {
     Q_OBJECT
 public:
-    //TODO: remove
-    virtual QByteArray readAll() = 0;
-    virtual QByteArray read(qint64) = 0;
-    //TODO: SetConfigurationParameter?
-    //TODO: (const QString &key, const QVariant &value)?
-    //TODO: getConfiguration?
-    virtual void setConfiguration(const QPair<QString, QVariant> &) = 0;
-    //TODO: inconsistent naming.
-    //TODO: Should it be (const char*, int len) instead of QByteArray;
-    virtual void writeToBus(const QByteArray &) = 0;
+    virtual qint64 read(char *buffer, qint64 maxSize) = 0;
+    virtual void setConfigurationParameter(const QString &key, const QVariant &value) = 0;
+    virtual QVariant configurationParameter(const QString &key) const = 0;
+    virtual QVector<QString> configurationKeys() const = 0;
+    virtual qint64 write(const char* buffer, qint64 len) = 0;
     //TODO: better way than QDataStream to pass the information
     virtual void setDataStreamVersion(int) = 0;
     virtual int dataStreamVersion() const = 0;
-    //TODO: size? bytesAvailable
-    virtual qint64 size() const = 0;
+    virtual qint64 bytesAvailable() const = 0;
 
 Q_SIGNALS:
     void readyRead();
