@@ -35,6 +35,7 @@
 ****************************************************************************/
 
 #include "socketcanbackend.h"
+
 #include <QtCore/qdebug.h>
 #include <QtCore/qdatastream.h>
 #include <QtCore/qsocketnotifier.h>
@@ -48,19 +49,48 @@
 
 
 SocketCanBackend::SocketCanBackend(const QString &name) :
+    canSocket(0),
     canSocketName(name),
     version(0)
 {
     QDataStream stream;
     version = stream.version();
 
+    resetConfigurations();
+}
+
+SocketCanBackend::~SocketCanBackend()
+{
+    close();
+}
+
+void SocketCanBackend::resetConfigurations()
+{
     configuration.append(QPair<QString, QVariant>(QStringLiteral("LoopBack"), 1));
     configuration.append(QPair<QString, QVariant>(QStringLiteral("ReceiveOwnMessages"), 0));
     configuration.append(QPair<QString, QVariant>(QStringLiteral("ErrorMask"), 0));
     configuration.append(QPair<QString, QVariant>(QStringLiteral("CanFilter"), QList<QVariant>()));
+}
 
-    //TODO: remove implicit call to connect() in ctor (related to missing open/close() call in QSerialBusDevice
-    connectSocket();
+bool SocketCanBackend::open(QIODevice::OpenMode mode)
+{
+    if (mode == QIODevice::NotOpen) {
+        close();
+        return true;
+    }
+
+    if (!canSocket)
+        return connectSocket();
+    else
+        return true;
+}
+
+void SocketCanBackend::close()
+{
+    ::close(canSocket);
+    canSocket = 0;
+
+    resetConfigurations();
 }
 
 qint64 SocketCanBackend::read(char *buffer, qint64 maxSize)
@@ -78,6 +108,7 @@ qint64 SocketCanBackend::read(char *buffer, qint64 maxSize)
         timeStamp.tv_sec = 0;
         timeStamp.tv_usec = 0;
     }
+
     const QByteArray data = serialize(frame, timeStamp);
     memcpy(buffer, data.constData(), data.size());
 
@@ -215,28 +246,28 @@ QVector<QString> SocketCanBackend::configurationKeys() const
     return keys;
 }
 
-qint64 SocketCanBackend::connectSocket()
+bool SocketCanBackend::connectSocket()
 {
     struct sockaddr_can address;
     struct ifreq interface;
 
     if ((canSocket = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0) {
         qWarning() << "ERROR SocketCanBackend: cannot open socket";
-        return -1;
+        return false;
     }
 
     strcpy(interface.ifr_name, canSocketName.toLatin1().data());
     if (ioctl(canSocket, SIOCGIFINDEX, &interface) < 0) {
         qWarning() << "ERROR SocketCanBackend: failed to retrieve the interface index";
-        return -1;
+        return false;
     }
 
     address.can_family  = AF_CAN;
     address.can_ifindex = interface.ifr_ifindex;
 
-    if (bind(canSocket, (struct sockaddr *)&address, sizeof(address)) < 0) {
+    if (bind(canSocket, reinterpret_cast<struct sockaddr *>(&address), sizeof(address)) < 0) {
         qWarning() << "ERROR SocketCanBackend: cannot bind socket";
-        return -2;
+        return false;
     }
 
     const int fd_frames = 1;
@@ -247,8 +278,8 @@ qint64 SocketCanBackend::connectSocket()
     notifier = new QSocketNotifier(canSocket, QSocketNotifier::Read);
     connect(notifier.data(), &QSocketNotifier::activated, this, &SocketCanBackend::readyRead);
 
-    //TODO: improve the error reporting
-    return 0;
+    //TODO: Error reporting to QSerialBusDevice setErrorString
+    return true;
 }
 
 void SocketCanBackend::setDataStreamVersion(int version)

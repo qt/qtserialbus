@@ -37,10 +37,18 @@
 #include "qserialbusdevice.h"
 #include "qserialbusbackend.h"
 
+//TODO: error reporting missing
+//TODO: state reporting missing
+//TODO: connected/disconnected signals
 QSerialBusDevice::QSerialBusDevice(QPointer<QSerialBusBackend> backend, QObject *parent) :
     QIODevice(parent),
     busBackend(backend)
 {
+}
+
+QSerialBusDevice::~QSerialBusDevice()
+{
+    delete busBackend;
 }
 
 qint64 QSerialBusDevice::readData(char *data, qint64 maxSize)
@@ -57,4 +65,25 @@ qint64 QSerialBusDevice::writeData(const char *data, qint64 maxSize)
         return -1;
 
     return busBackend->write(data, maxSize);
+}
+
+bool QSerialBusDevice::open(QIODevice::OpenMode openMode)
+{
+    if (!busBackend)
+        return false;
+
+    if (!busBackend->open(openMode))
+        return false;
+
+    QIODevice::open(openMode);
+    return true;
+}
+
+void QSerialBusDevice::close()
+{
+    if (!busBackend)
+        return;
+
+    busBackend->close();
+    QIODevice::close();
 }

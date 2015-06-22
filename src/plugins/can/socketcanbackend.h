@@ -42,6 +42,7 @@
 #include <QtCore/qpointer.h>
 #include <QtCore/qvariant.h>
 #include <QtCore/qvector.h>
+#include <QtCore/qiodevice.h>
 
 class QSocketNotifier;
 
@@ -52,18 +53,23 @@ class SocketCanBackend : public QSerialBusBackend
     Q_OBJECT
 public:
     explicit SocketCanBackend(const QString &name);
-    qint64 read(char *buffer, qint64 maxSize);
-    qint64 write(const char *buffer, qint64 size);
-    void setDataStreamVersion(int version);
-    void setConfigurationParameter(const QString &key, const QVariant &value);
-    QVariant configurationParameter(const QString &key) const;
-    QVector<QString> configurationKeys() const;
-    int dataStreamVersion() const;
-    qint64 bytesAvailable() const;
+    ~SocketCanBackend();
+    bool open(QIODevice::OpenMode) Q_DECL_OVERRIDE;
+    void close() Q_DECL_OVERRIDE;
+    qint64 read(char *buffer, qint64 maxSize) Q_DECL_OVERRIDE;
+    qint64 write(const char *buffer, qint64 size) Q_DECL_OVERRIDE;
+    void setDataStreamVersion(int version) Q_DECL_OVERRIDE;
+    void setConfigurationParameter(const QString &key, const QVariant &value) Q_DECL_OVERRIDE;
+    QVariant configurationParameter(const QString &key) const Q_DECL_OVERRIDE;
+    QVector<QString> configurationKeys() const Q_DECL_OVERRIDE;
+    int dataStreamVersion() const Q_DECL_OVERRIDE;
+    qint64 bytesAvailable() const Q_DECL_OVERRIDE;
 
 private:
-    qint64 connectSocket();
     void insertInConfigurations(const QString &key, const QVariant &value);
+    void resetConfigurations();
+    bool connectSocket();
+
     QByteArray serialize(const canfd_frame &frame, const timeval &time);
     canfd_frame deserialize(const QByteArray &frame);
     canfd_frame readFrame();

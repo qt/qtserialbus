@@ -35,6 +35,7 @@
 ****************************************************************************/
 
 #include "dummybackend.h"
+
 #include <QtCore/qdebug.h>
 #include <QtCore/qtimer.h>
 
@@ -46,6 +47,15 @@ DummyBackend::DummyBackend() :
     sendTimer->setSingleShot(false);
     connect(sendTimer, SIGNAL(timeout()), this, SLOT(sendMessage()));
     sendTimer->start();
+}
+
+bool DummyBackend::open(QIODevice::OpenMode)
+{
+    return true;
+}
+
+void DummyBackend::close()
+{
 }
 
 void DummyBackend::sendMessage()

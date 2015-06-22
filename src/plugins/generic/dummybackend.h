@@ -38,8 +38,10 @@
 #define DUMMYBACKEND_H
 
 #include <qserialbusbackend.h>
+
 #include <QtCore/qbytearray.h>
 #include <QtCore/qpointer.h>
+#include <QtCore/qiodevice.h>
 
 class QTimer;
 
@@ -48,14 +50,16 @@ class DummyBackend : public QSerialBusBackend
     Q_OBJECT
 public:
     explicit DummyBackend();
-    qint64 read(char *buffer, qint64 maxSize);
-    qint64 write(const char *, qint64);
-    void setDataStreamVersion(int version);
-    void setConfigurationParameter(const QString &key, const QVariant &value);
-    QVariant configurationParameter(const QString &key) const;
-    QVector<QString> configurationKeys() const;
-    int dataStreamVersion() const;
-    qint64 bytesAvailable() const;
+    bool open(QIODevice::OpenMode openMode) Q_DECL_OVERRIDE;
+    void close() Q_DECL_OVERRIDE;
+    qint64 read(char *buffer, qint64 maxSize) Q_DECL_OVERRIDE;
+    qint64 write(const char *, qint64) Q_DECL_OVERRIDE;
+    void setDataStreamVersion(int version) Q_DECL_OVERRIDE;
+    void setConfigurationParameter(const QString &key, const QVariant &value) Q_DECL_OVERRIDE;
+    QVariant configurationParameter(const QString &key) const Q_DECL_OVERRIDE;
+    QVector<QString> configurationKeys() const Q_DECL_OVERRIDE;
+    int dataStreamVersion() const Q_DECL_OVERRIDE;
+    qint64 bytesAvailable() const Q_DECL_OVERRIDE;
 
 public Q_SLOTS:
     void sendMessage();

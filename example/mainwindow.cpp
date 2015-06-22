@@ -79,11 +79,12 @@ void MainWindow::init()
             canDevice = new QCanBusDevice(backends.at(i), this);
             if (!canDevice)
                 return;
-            canDevice->open(QIODevice::ReadWrite);
+            if (!canDevice->open(QIODevice::ReadWrite))
+                return;
             /*QList<QVariant> var;
             QHash<QString, QVariant> hash;
-            hash.insert("FilterId", 1);
-            hash.insert("CanMask", CAN_EFF_MASK);
+            hash.insert(QStringLiteral("FilterId"), 1);
+            hash.insert(QStringLiteral("CanMask"), CAN_EFF_MASK);
             var.append(hash);
             canDevice->setConfiguration(QPair<QString, QVariant>("CanFilter", var));*/ //NOTE: Filtering example
             canDevice->setConfigurationParameter(QStringLiteral("ReceiveOwnMessages"), QVariant(1));

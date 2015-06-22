@@ -45,7 +45,8 @@ class tst_Backend : public QSerialBusBackend
 {
     Q_OBJECT
 public:
-    qint64 read(char *buffer, qint64){
+    qint64 read(char *buffer, qint64)
+    {
         QByteArray data;
         QDataStream stream(&data, QIODevice::WriteOnly);
         QByteArray payload;
@@ -60,6 +61,8 @@ public:
         memcpy(buffer, data.constData(), 72);
         return 72;
     };
+    bool open(QIODevice::OpenMode) { return true; };
+    void close() {};
     void setConfigurationParameter(const QString&, const QVariant&) {};
     QVariant configurationParameter(const QString&) const { return QVariant(); } ;
     QVector<QString> configurationKeys() const { return QVector<QString>(); };
@@ -87,10 +90,11 @@ private slots:
     void write();
     void read();
     void version();
+    void cleanupTestCase();
 
 private:
-    QCanBusDevice *device;
-    QSerialBusBackend *backend;
+    QPointer<QCanBusDevice> device;
+    QPointer<QSerialBusBackend> backend;
 };
 
 tst_QCanBusDevice::tst_QCanBusDevice() :
@@ -139,6 +143,13 @@ void tst_QCanBusDevice::version()
     int version = 7;
     device->setDataStreamVersion(version);
     QCOMPARE(version, device->dataStreamVersion());
+}
+
+void tst_QCanBusDevice::cleanupTestCase()
+{
+    device->close();
+    QCanFrame frame = device->readFrame();
+    QVERIFY(!frame.frameId());
 }
 
 QTEST_MAIN(tst_QCanBusDevice)

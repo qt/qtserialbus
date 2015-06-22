@@ -55,7 +55,6 @@ class Q_SERIALBUS_EXPORT QCanBusDevice : public QSerialBusDevice
     Q_OBJECT
 public:
     explicit QCanBusDevice(QPointer<QSerialBusBackend> backend, QObject *parent = 0);
-
     void setConfigurationParameter(const QString &key, const QVariant &value);
     QVariant configurationParameter(const QString &key) const;
     QVector<QString> configurationKeys() const;

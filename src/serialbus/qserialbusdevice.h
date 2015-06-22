@@ -46,15 +46,16 @@ QT_BEGIN_NAMESPACE
 
 class QSerialBusBackend;
 
-//TODO: close()/open()/connect() functions missing
-//TODO: error reporting missing
-//TODO: state reporting missing
 class Q_SERIALBUS_EXPORT QSerialBusDevice : public QIODevice
 {
     Q_OBJECT
 
 public:
     explicit QSerialBusDevice(QPointer<QSerialBusBackend> backend, QObject *parent = 0);
+    ~QSerialBusDevice();
+    virtual bool open(QIODevice::OpenMode openMode) Q_DECL_OVERRIDE;
+    virtual void close() Q_DECL_OVERRIDE;
+
 protected:
     qint64 readData(char *data, qint64 maxSize) Q_DECL_OVERRIDE;
     qint64 writeData(const char *data, qint64 maxSize) Q_DECL_OVERRIDE;
