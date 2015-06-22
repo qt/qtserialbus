@@ -79,7 +79,8 @@ qint64 DummyBackend::read(char *buffer, qint64 maxSize)
     }
 }
 
-qint64 DummyBackend::write(const char* buffer, qint64 size) {
+qint64 DummyBackend::write(const char *buffer, qint64 size)
+{
     QByteArray data;
     data.setRawData(buffer, size);
     qDebug() << "DummyBackend wrote: " << data.data();

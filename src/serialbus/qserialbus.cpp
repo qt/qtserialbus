@@ -47,14 +47,18 @@
 #include <private/qfactoryloader_p.h>
 #include <private/qlibrary_p.h>
 
-QPointer<QSerialBus> QSerialBus::serialBus = Q_NULLPTR;
+QSerialBus *QSerialBus::serialBus = Q_NULLPTR;
 
 class QSerialBusPrivate
 {
     friend class QSerialBus;
 public:
     QSerialBusPrivate()
-        : loader(new QFactoryLoader("org.qt-project.Qt.QSerialBusPluginInterface", QLatin1String("/serialbuses"))) {}
+        : loader(new QFactoryLoader("org.qt-project.Qt.QSerialBusPluginInterface",
+                                    QLatin1String("/serialbuses"))) {}
+    void loadPlugins();
+    QSerialBusBackend *createBackend(const QByteArray &identifier,
+                                     const QString &type, const QString &name) const;
 
     QHash<QByteArray, QSerialBusBackendFactory*> factoryByIdentifier;
 
@@ -74,7 +78,7 @@ private:
 /*!
  * \brief Returns pointer to the QSerialBus Class. The object is loaded if necessary.
  */
-QPointer<QSerialBus> QSerialBus::instance()
+QSerialBus *QSerialBus::instance()
 {
     if (!serialBus)
         serialBus = new QSerialBus();
@@ -82,38 +86,44 @@ QPointer<QSerialBus> QSerialBus::instance()
     return serialBus;
 }
 
+Q_GLOBAL_STATIC(QSerialBusPrivate, serialBusPrivate)
+
 QSerialBus::QSerialBus(QObject *parent) :
     QObject(parent)
 {
-    loadPlugins();
+    QSerialBusPrivate *d = serialBusPrivate();
+    d->loadPlugins();
 }
 
-Q_GLOBAL_STATIC(QSerialBusPrivate, serialBusPrivate)
-
-void QSerialBus::loadPlugins()
+void QSerialBusPrivate::loadPlugins()
 {
-    QSerialBusPrivate *d = serialBusPrivate();
-    const QList<QJsonObject> meta = d->loader->metaData();
+    const QList<QJsonObject> meta = loader->metaData();
     for (int i = 0; i < meta.count(); i++) {
-        QSerialBusPluginInterface *plugin = qobject_cast<QSerialBusPluginInterface*>(d->loader->instance(i));
+        QSerialBusPluginInterface *plugin
+            = qobject_cast<QSerialBusPluginInterface*>(loader->instance(i));
         if (plugin)
             plugin->registerBus();
     }
+}
+
+QSerialBusBackend *QSerialBusPrivate::createBackend(const QByteArray &identifier,
+                                                    const QString &type, const QString &name) const
+{
+    if (!(factoryByIdentifier[identifier]))
+        return Q_NULLPTR;
+
+    return factoryByIdentifier[identifier]->createBackend(type, name);
 }
 
 /*!
  * Create a bus backend for \a identifier with \a type with \a name
  * Returns \c null if no suitable \a identifier can be found.
  */
-QPointer<QSerialBusBackend> QSerialBus::createBackend(const QByteArray &identifier, const QString &type, const QString &name)
+QSerialBusBackend *QSerialBus::createBackend(const QByteArray &identifier,
+                                             const QString &type, const QString &name) const
 {
     QSerialBusPrivate *d = serialBusPrivate();
-    loadPlugins();
-    if (!(d->factoryByIdentifier[identifier])) {
-        QPointer<QSerialBusBackend> faulty;
-        return faulty;
-    }
-    return d->factoryByIdentifier[identifier]->createBackend(type, name);
+    return d->createBackend(identifier, type, name);
 }
 
 /*!
@@ -133,7 +143,6 @@ void QSerialBus::registerBackend(const QByteArray &identifier, QSerialBusBackend
 QList<QByteArray> QSerialBus::plugins()
 {
     QSerialBusPrivate *d = serialBusPrivate();
-    loadPlugins();
     return d->factoryByIdentifier.keys();
 }
 

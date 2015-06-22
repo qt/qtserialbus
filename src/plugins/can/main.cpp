@@ -58,17 +58,13 @@ public:
         QSerialBus::registerBackend(id, this);
     }
 
-    QPointer<QSerialBusBackend> createBackend(const QString &bus, const QString &name)
+    QSerialBusBackend *createBackend(const QString &bus, const QString &name) const
     {
         if (bus == QStringLiteral("SocketCAN")) {
-            QPointer<QSerialBusBackend> backend = new SocketCanBackend(name);
-            return backend;
-        } else {
-            qWarning() << "No backend with name" << bus
-                       << "found in CAN plugin. Defaulting to SocketCAN";
-            QPointer<QSerialBusBackend> backend = new SocketCanBackend(name);
+            QSerialBusBackend *backend = new SocketCanBackend(name);
             return backend;
         }
+        return Q_NULLPTR;
     }
 };
 

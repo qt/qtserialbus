@@ -38,6 +38,7 @@
 #define QSERIALBUS_H
 
 #include <QtSerialBus/qserialbusglobal.h>
+
 #include <QtCore/qobject.h>
 #include <QtCore/qpointer.h>
 
@@ -53,20 +54,17 @@ class Q_SERIALBUS_EXPORT QSerialBus : public QObject
     Q_OBJECT
 
 public:
-    //TODO: return raw pointer
-    static QPointer<QSerialBus> instance();
+    static QSerialBus *instance();
 
     QList<QByteArray> plugins();
     static void registerBackend(const QByteArray &identifier, QSerialBusBackendFactory *factory);
-    //TODO: return raw pointer
-    QPointer<QSerialBusBackend> createBackend(const QByteArray &identifier, const QString &type, const QString &name);
+    QSerialBusBackend *createBackend(const QByteArray &identifier,
+                                     const QString &type, const QString &name) const;
 
 private:
     QSerialBus(QObject *parent = 0);
-    void loadPlugins();
-    QSerialBusPrivate *d_ptr;
 
-    static QPointer<QSerialBus> serialBus;
+    static QSerialBus *serialBus;
 
     Q_DECLARE_PRIVATE(QSerialBus)
     Q_DISABLE_COPY(QSerialBus)
@@ -76,8 +74,7 @@ private:
 class Q_SERIALBUS_EXPORT QSerialBusBackendFactory
 {
 public:
-    //TODO: return raw pointer
-    virtual QPointer<QSerialBusBackend> createBackend(const QString &busBackend, const QString &name) = 0;
+    virtual QSerialBusBackend *createBackend(const QString &busBackend, const QString &name) const = 0;
 protected:
     virtual ~QSerialBusBackendFactory();
 };

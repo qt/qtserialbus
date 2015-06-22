@@ -58,11 +58,11 @@ public:
         QSerialBus::registerBackend(id, this);
     }
 
-    QPointer<QSerialBusBackend> createBackend(const QString &bus, const QString &name)
+    QSerialBusBackend *createBackend(const QString &bus, const QString &name) const
     {
         Q_UNUSED(bus)
         Q_UNUSED(name)
-        QPointer<QSerialBusBackend> backend = new DummyBackend();
+        QSerialBusBackend *backend = new DummyBackend();
         return backend;
     }
 
