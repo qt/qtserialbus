@@ -37,13 +37,13 @@
 #include "qserialbusdevice.h"
 #include "qserialbusbackend.h"
 
-//TODO: error reporting missing
 //TODO: state reporting missing
 //TODO: connected/disconnected signals
 QSerialBusDevice::QSerialBusDevice(QPointer<QSerialBusBackend> backend, QObject *parent) :
     QIODevice(parent),
     busBackend(backend)
 {
+    connect(busBackend.data(), &QSerialBusBackend::readyRead, this, &QIODevice::readyRead);
 }
 
 QSerialBusDevice::~QSerialBusDevice()
@@ -75,7 +75,11 @@ bool QSerialBusDevice::open(QIODevice::OpenMode openMode)
     if (!busBackend->open(openMode))
         return false;
 
-    QIODevice::open(openMode);
+    if (QIODevice::openMode() == QIODevice::OpenModeFlag::NotOpen)
+        QIODevice::open(openMode);
+    else
+        QIODevice::setOpenMode(openMode);
+
     return true;
 }
 

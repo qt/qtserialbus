@@ -77,6 +77,7 @@ void MainWindow::init()
 
         if (plugins.at(i) == QStringLiteral("can")) {
             canDevice = new QCanBusDevice(backends.at(i), this);
+            connect(canDevice.data(), &QCanBusDevice::errorOccurred, this, &MainWindow::receiveError);
             if (!canDevice)
                 return;
             if (!canDevice->open(QIODevice::ReadWrite))
@@ -86,7 +87,7 @@ void MainWindow::init()
             hash.insert(QStringLiteral("FilterId"), 1);
             hash.insert(QStringLiteral("CanMask"), CAN_EFF_MASK);
             var.append(hash);
-            canDevice->setConfiguration(QPair<QString, QVariant>("CanFilter", var));*/ //NOTE: Filtering example
+            canDevice->setConfigurationParameter(QStringLiteral("CanFilter"), var);*/ //NOTE: Filtering example
             canDevice->setConfigurationParameter(QStringLiteral("ReceiveOwnMessages"), QVariant(1));
             connect(canDevice.data(), &QCanBusDevice::readyRead, this, &MainWindow::checkMessages);
         } else if (plugins.at(i) == QStringLiteral("dummy")) {
@@ -98,6 +99,19 @@ void MainWindow::init()
         }
     }
     on_connectButton_clicked(); //initialize plugin selection
+}
+
+void MainWindow::receiveError(QCanBusDevice::CanBusError error)
+{
+    switch (error) {
+    case QCanBusDevice::ReadError:
+    case QCanBusDevice::WriteError:
+    case QCanBusDevice::ConnectionError:
+    case QCanBusDevice::ConfigurationError:
+        qWarning() << canDevice->errorString();
+    default:
+        break;
+    }
 }
 
 void MainWindow::checkDummyMessages()

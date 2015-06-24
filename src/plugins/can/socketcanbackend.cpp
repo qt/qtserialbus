@@ -35,6 +35,7 @@
 ****************************************************************************/
 
 #include "socketcanbackend.h"
+#include "qcanbusdevice.h"
 
 #include <QtCore/qdebug.h>
 #include <QtCore/qdatastream.h>
@@ -49,7 +50,7 @@
 
 
 SocketCanBackend::SocketCanBackend(const QString &name) :
-    canSocket(0),
+    canSocket(-1),
     canSocketName(name),
     version(0)
 {
@@ -79,16 +80,20 @@ bool SocketCanBackend::open(QIODevice::OpenMode mode)
         return true;
     }
 
-    if (!canSocket)
-        return connectSocket();
-    else
-        return true;
+    if (canSocket == -1) {
+        if (!connectSocket()) {
+            close();
+            return false;
+        }
+    }
+
+    return true;
 }
 
 void SocketCanBackend::close()
 {
     ::close(canSocket);
-    canSocket = 0;
+    canSocket = -1;
 
     resetConfigurations();
 }
@@ -104,7 +109,7 @@ qint64 SocketCanBackend::read(char *buffer, qint64 maxSize)
 
     struct timeval timeStamp;
     if (ioctl(canSocket, SIOCGSTAMP, &timeStamp) < 0) {
-        qWarning() << "ERROR SocketCanBackend: couldn't get timestamp";
+        emit error(qt_error_string(errno), QCanBusDevice::CanBusError::ReadError);
         timeStamp.tv_sec = 0;
         timeStamp.tv_usec = 0;
     }
@@ -158,7 +163,7 @@ qint64 SocketCanBackend::write(const char *buffer, qint64 size)
 
     const qint64 bytesWritten = ::write(canSocket, &frame, CANFD_MTU);
     if (bytesWritten < 0) {
-        qWarning() << "ERROR SocketCanBackend: cannot write to socket";
+        emit error(qt_error_string(errno), QCanBusDevice::CanBusError::WriteError);
         return -1;
     }
     return bytesWritten;
@@ -180,28 +185,29 @@ void SocketCanBackend::setConfigurationParameter(const QString &key, const QVari
     if (key == QStringLiteral("Loopback")) {
         const int loopback = value.toBool() ? 1 : 0;
         if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_LOOPBACK, &loopback, sizeof(loopback)) < 0) {
-            qWarning() << "ERROR SocketCanBackend: setsockopt CAN_RAW_LOOPBACK failed";
+            emit error(qt_error_string(errno), QCanBusDevice::CanBusError::ConfigurationError);
             return;
         }
     } else if (key == QStringLiteral("ReceiveOwnMessages")) {
         const int receiveOwnMessages = value.toBool() ? 1 : 0;
         if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_RECV_OWN_MSGS,
                        &receiveOwnMessages, sizeof(receiveOwnMessages)) < 0) {
-            qWarning() << "ERROR SocketCanBackend: setsockopt CAN_RAW_RECV_OWN_MSGS failed";
+            emit error(qt_error_string(errno), QCanBusDevice::CanBusError::ConfigurationError);
             return;
         }
     } else if (key == QStringLiteral("ErrorMask")) {
         const int errorMask = value.toInt();
         if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_ERR_FILTER,
                                   &errorMask, sizeof(errorMask)) < 0) {
-            qWarning() << "ERROR SocketCanBackend: setsockopt CAN_RAW_ERR_FILTER failed";
+            emit error(qt_error_string(errno), QCanBusDevice::CanBusError::ConfigurationError);
             return;
         }
     } else if (key == QStringLiteral("CanFilter")) {
         const QList<QVariant> filterList = value.toList();
         const int size = filterList.size();
         if (size == 0)
-            qWarning() << "ERROR SocketCanBackend: \"CanFilter\" QList<QVariant> empty or not valid";
+            emit error(QStringLiteral("ERROR SocketCanBackend: \"CanFilter\" "
+                "QList<QVariant> empty or not valid"), QCanBusDevice::CanBusError::ConfigurationError);
         can_filter filters[size];
         for (int i = 0; i < size; i++) {
             can_filter filter;
@@ -209,20 +215,26 @@ void SocketCanBackend::setConfigurationParameter(const QString &key, const QVari
             bool ok = true;
             filter.can_id = filterHash.value("FilterId").toInt(&ok);
             if (!ok) {
-                qWarning() << "ERROR SocketCanBackend: \"CanFilter\" FilterId key not found or value is not valid in index:" << i;
+                emit error(QStringLiteral("ERROR SocketCanBackend: \"CanFilter\" "
+                    "FilterId key not found or value is not valid in index: ")
+                    + QString::number(i), QCanBusDevice::CanBusError::ConfigurationError);
                 return;
             }
             filter.can_mask = filterHash.value("CanMask").toInt(&ok);
             if (!ok) {
-                qWarning() << "ERROR SocketCanBackend: \"CanFilter\" CanMask key not found or value is not valid in index:" << i;
+                emit error(QStringLiteral("ERROR SocketCanBackend: \"CanFilter\" "
+                    "CanMask key not found or value is not valid in index:")
+                    + QString::number(i), QCanBusDevice::CanBusError::ConfigurationError);
                 return;
             }
             filters[i] = filter;
         }
         if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_FILTER, filters, sizeof(filters)) < 0)
-            qWarning() << "ERROR SocketCanBackend: setsockopt CAN_RAW_FILTER failed";
+            emit error(qt_error_string(errno),
+                QCanBusDevice::CanBusError::ConfigurationError);
     } else {
-        qWarning() << "SocketCanBackend: No such configuration as" << key << "in SocketCanBackend";
+        emit error(QStringLiteral("SocketCanBackend: No such configuration as")
+             + key + QStringLiteral("in SocketCanBackend"), QCanBusDevice::CanBusError::ConfigurationError);
     }
     insertInConfigurations(key, value);
 }
@@ -252,13 +264,13 @@ bool SocketCanBackend::connectSocket()
     struct ifreq interface;
 
     if ((canSocket = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0) {
-        qWarning() << "ERROR SocketCanBackend: cannot open socket";
+        emit error(qt_error_string(errno), QCanBusDevice::CanBusError::ConnectionError);
         return false;
     }
 
     strcpy(interface.ifr_name, canSocketName.toLatin1().data());
     if (ioctl(canSocket, SIOCGIFINDEX, &interface) < 0) {
-        qWarning() << "ERROR SocketCanBackend: failed to retrieve the interface index";
+        emit error(qt_error_string(errno), QCanBusDevice::CanBusError::ConnectionError);
         return false;
     }
 
@@ -266,19 +278,19 @@ bool SocketCanBackend::connectSocket()
     address.can_ifindex = interface.ifr_ifindex;
 
     if (bind(canSocket, reinterpret_cast<struct sockaddr *>(&address), sizeof(address)) < 0) {
-        qWarning() << "ERROR SocketCanBackend: cannot bind socket";
+        emit error(qt_error_string(errno), QCanBusDevice::CanBusError::ConnectionError);
         return false;
     }
 
     const int fd_frames = 1;
     if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &fd_frames, sizeof(fd_frames)) < 0) {
-        qWarning() << "ERROR SocketCanBackend: setsockopt CAN_RAW_FD_FRAMES failed";
+        emit error(qt_error_string(errno), QCanBusDevice::CanBusError::ConnectionError);
+        return false;
     }
 
     notifier = new QSocketNotifier(canSocket, QSocketNotifier::Read);
     connect(notifier.data(), &QSocketNotifier::activated, this, &SocketCanBackend::readyRead);
 
-    //TODO: Error reporting to QSerialBusDevice setErrorString
     return true;
 }
 
@@ -295,7 +307,7 @@ int SocketCanBackend::dataStreamVersion() const
 qint64 SocketCanBackend::bytesAvailable() const
 {
     qint64 bytes = 0;
-    if (canSocket)
+    if (canSocket == -1)
         ioctl(canSocket, FIONREAD, &bytes);
     return bytes;
 }

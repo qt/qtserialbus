@@ -37,14 +37,16 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QCanBusDevice>
+
 #include <QMainWindow>
-#include <linux/can.h>
 #include <QPointer>
+
+#include <linux/can.h>
 
 class QSerialBusBackend;
 class QSerialBus;
 class QBusDummyDevice;
-class QCanBusDevice;
 class QSerialBusDevice;
 class QCanFrame;
 
@@ -66,6 +68,7 @@ private Q_SLOTS:
     void checkMessages();
     void on_sendButton_clicked();
     void on_connectButton_clicked();
+    void receiveError(QCanBusDevice::CanBusError);
 
 private:
     void init();

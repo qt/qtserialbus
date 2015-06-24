@@ -63,7 +63,7 @@ public:
 
 Q_SIGNALS:
     void readyRead();
-
+    void error(QString, int);
 };
 
 QT_END_NAMESPACE

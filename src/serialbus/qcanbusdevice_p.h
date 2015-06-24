@@ -62,13 +62,16 @@ class QCanBusDevicePrivate : public QObjectPrivate
     Q_DECLARE_PUBLIC(QCanBusDevice)
 public:
     QCanBusDevicePrivate()
+        : lastError(QCanBusDevice::CanBusError::NoError)
     {
     }
 
     QByteArray writeFrame(const QCanFrame &frame);
     QCanFrame deserialize(const QByteArray &data);
     QByteArray serialize(const QCanFrame &frame);
+    void setError(const QString &errorString, int errorId);
 
+    QCanBusDevice::CanBusError lastError;
 };
 
 QT_END_NAMESPACE

@@ -53,7 +53,18 @@ class QCanFrame;
 class Q_SERIALBUS_EXPORT QCanBusDevice : public QSerialBusDevice
 {
     Q_OBJECT
+    Q_DECLARE_PRIVATE(QCanBusDevice)
+
 public:
+    enum CanBusError {
+        NoError,
+        ReadError,
+        WriteError,
+        ConnectionError,
+        ConfigurationError
+    };
+    Q_ENUM(CanBusError)
+
     explicit QCanBusDevice(QPointer<QSerialBusBackend> backend, QObject *parent = 0);
     void setConfigurationParameter(const QString &key, const QVariant &value);
     QVariant configurationParameter(const QString &key) const;
@@ -64,8 +75,13 @@ public:
     QCanFrame deserialize(const QByteArray &data);
     void setDataStreamVersion(int version);
     int dataStreamVersion();
+    CanBusError error() const;
 
-    Q_DECLARE_PRIVATE(QCanBusDevice)
+Q_SIGNALS:
+    void errorOccurred(CanBusError);
+
+private Q_SLOTS:
+    void setError(QString, int);
 
 private:
     QPointer<QSerialBusBackend> busBackend;

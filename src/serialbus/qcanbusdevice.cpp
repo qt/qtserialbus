@@ -58,7 +58,13 @@ QCanBusDevice::QCanBusDevice(QPointer<QSerialBusBackend> backend, QObject *paren
     QSerialBusDevice(backend, parent)
 {
     busBackend = backend;
-    connect(busBackend.data(), &QSerialBusBackend::readyRead, this, &QCanBusDevice::readyRead);
+    connect(busBackend.data(), &QSerialBusBackend::error, this, &QCanBusDevice::setError);
+}
+
+void QCanBusDevice::setError(QString errorString, int errorId)
+{
+    Q_D(QCanBusDevice);
+    d->setError(errorString, errorId);
 }
 
 /*
@@ -140,6 +146,11 @@ int QCanBusDevice::dataStreamVersion()
     return busBackend->dataStreamVersion();
 }
 
+QCanBusDevice::CanBusError QCanBusDevice::error() const
+{
+    return d_func()->lastError;
+}
+
 QByteArray QCanBusDevicePrivate::writeFrame(const QCanFrame &frame)
 {
     return serialize(frame);
@@ -184,4 +195,29 @@ QByteArray QCanBusDevicePrivate::serialize(const QCanFrame &frame)
     stream << frame.frameId()
            << frame.payload();
     return data;
+}
+
+void QCanBusDevicePrivate::setError(const QString &errorString, int errorId)
+{
+    Q_Q(QCanBusDevice);
+
+    q->setErrorString(errorString);
+
+    switch (errorId) {
+    case QCanBusDevice::CanBusError::ReadError:
+        lastError = QCanBusDevice::CanBusError::ReadError;
+        break;
+    case QCanBusDevice::CanBusError::WriteError:
+        lastError = QCanBusDevice::CanBusError::WriteError;
+        break;
+    case QCanBusDevice::CanBusError::ConnectionError:
+        lastError = QCanBusDevice::CanBusError::ConnectionError;
+        break;
+    case QCanBusDevice::CanBusError::ConfigurationError:
+        lastError = QCanBusDevice::CanBusError::ConfigurationError;
+        break;
+    default:
+        break;
+    }
+    emit q->errorOccurred(lastError);
 }
