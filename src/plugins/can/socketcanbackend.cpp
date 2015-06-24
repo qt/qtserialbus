@@ -40,14 +40,12 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qdatastream.h>
 #include <QtCore/qsocketnotifier.h>
-#include <QtCore/qpair.h>
 
 #include <linux/can/raw.h>
 #include <unistd.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
 #include <sys/time.h>
-
 
 SocketCanBackend::SocketCanBackend(const QString &name) :
     canSocket(-1),
@@ -100,40 +98,25 @@ void SocketCanBackend::close()
 
 qint64 SocketCanBackend::read(char *buffer, qint64 maxSize)
 {
-    //TODO: make non-blocking
-    Q_UNUSED(maxSize);
-    const canfd_frame frame = readFrame();
-
-    if (!frame.len)
+    if (frameBuffer.isEmpty() || maxSize < CANFD_MTU)
         return 0;
 
-    struct timeval timeStamp;
-    if (ioctl(canSocket, SIOCGSTAMP, &timeStamp) < 0) {
-        emit error(qt_error_string(errno), QCanBusDevice::CanBusError::ReadError);
-        timeStamp.tv_sec = 0;
-        timeStamp.tv_usec = 0;
-    }
-
-    const QByteArray data = serialize(frame, timeStamp);
+    const QCanFrame frame = frameBuffer.takeFirst();
+    const QByteArray data = serialize(frame);
     memcpy(buffer, data.constData(), data.size());
-
     return data.size();
 }
 
-QByteArray SocketCanBackend::serialize(const canfd_frame &frame, const timeval &timeStamp)
+QByteArray SocketCanBackend::serialize(const QCanFrame &frame)
 {
     QByteArray array;
     QDataStream stream(&array, QIODevice::WriteOnly);
     stream.setVersion(version);
 
-    stream << frame.can_id;
-    QByteArray payload;
-    for (int i = 0; i < frame.len; i++)
-        payload.insert(i, frame.data[i]);
-
-    stream << payload
-           << qint64(timeStamp.tv_sec)
-           << qint64(timeStamp.tv_usec);
+    stream << frame.frameId()
+           << frame.payload().data()
+           << frame.timeStamp().seconds()
+           << frame.timeStamp().microSeconds();
     return array;
 }
 
@@ -166,6 +149,7 @@ qint64 SocketCanBackend::write(const char *buffer, qint64 size)
         emit error(qt_error_string(errno), QCanBusDevice::CanBusError::WriteError);
         return -1;
     }
+
     return bytesWritten;
 }
 
@@ -263,7 +247,7 @@ bool SocketCanBackend::connectSocket()
     struct sockaddr_can address;
     struct ifreq interface;
 
-    if ((canSocket = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0) {
+    if ((canSocket = socket(PF_CAN, SOCK_RAW | SOCK_NONBLOCK, CAN_RAW)) < 0) {
         emit error(qt_error_string(errno), QCanBusDevice::CanBusError::ConnectionError);
         return false;
     }
@@ -289,7 +273,8 @@ bool SocketCanBackend::connectSocket()
     }
 
     notifier = new QSocketNotifier(canSocket, QSocketNotifier::Read);
-    connect(notifier.data(), &QSocketNotifier::activated, this, &SocketCanBackend::readyRead);
+    connect(notifier.data(), &QSocketNotifier::activated,
+            this, &SocketCanBackend::readSocket);
 
     return true;
 }
@@ -306,28 +291,46 @@ int SocketCanBackend::dataStreamVersion() const
 
 qint64 SocketCanBackend::bytesAvailable() const
 {
-    qint64 bytes = 0;
-    if (canSocket == -1)
-        ioctl(canSocket, FIONREAD, &bytes);
-    return bytes;
+    return frameBuffer.size() * CANFD_MTU;
 }
 
-canfd_frame SocketCanBackend::readFrame()
+void SocketCanBackend::readSocket()
 {
-    struct canfd_frame frame;
-    int bytesReceived = 0;
+    while (true) {
+        struct canfd_frame frame;
+        int bytesReceived = 0;
 
-    struct timeval timeout = {0, 0};
-    fd_set readSet;
-    FD_ZERO(&readSet);
-    FD_SET(canSocket, &readSet);
-    if (select((canSocket + 1), &readSet, NULL, NULL, &timeout) >= 0) {
-        if (FD_ISSET(canSocket, &readSet)) {
-            bytesReceived = ::read(canSocket, &frame, CANFD_MTU);
-            if (bytesReceived)
-                return frame;
+        bytesReceived = ::read(canSocket, &frame, CANFD_MTU);
+
+        if (bytesReceived <= 0) {
+            break;
+        } else if (!bytesReceived == CANFD_MTU) {
+            emit error(QStringLiteral("ERROR SocketCanBackend: invalid can frame"),
+                QCanBusDevice::CanBusError::ReadError);
+            continue;
         }
+
+        struct timeval timeStamp;
+        if (ioctl(canSocket, SIOCGSTAMP, &timeStamp) < 0) {
+            emit error(qt_error_string(errno), QCanBusDevice::CanBusError::ReadError);
+            timeStamp.tv_sec = 0;
+            timeStamp.tv_usec = 0;
+        }
+
+        QCanFrame::TimeStamp stamp;
+        stamp.setSeconds(timeStamp.tv_sec);
+        stamp.setMicroSeconds(timeStamp.tv_usec);
+
+        QCanFrame bufferedFrame;
+        bufferedFrame.setTimeStamp(stamp);
+        bufferedFrame.setFrameId(frame.can_id);
+
+        QByteArray load;
+        for (int i = 0; i < frame.len ; i++)
+           load.insert(i, frame.data[i]);
+        bufferedFrame.setPayload(load);
+
+        frameBuffer.append(bufferedFrame);
     }
-    frame.len = 0;
-    return frame;
+    emit readyRead();
 }

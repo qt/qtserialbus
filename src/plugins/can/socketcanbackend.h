@@ -38,11 +38,13 @@
 #define SOCKETCANBACKEND_H
 
 #include <qserialbusbackend.h>
+#include <qcanframe.h>
 
 #include <QtCore/qpointer.h>
 #include <QtCore/qvariant.h>
 #include <QtCore/qvector.h>
 #include <QtCore/qiodevice.h>
+#include <QtCore/qlist.h>
 
 class QSocketNotifier;
 
@@ -65,18 +67,21 @@ public:
     int dataStreamVersion() const Q_DECL_OVERRIDE;
     qint64 bytesAvailable() const Q_DECL_OVERRIDE;
 
+private Q_SLOTS:
+    void readSocket();
+
 private:
     void insertInConfigurations(const QString &key, const QVariant &value);
     void resetConfigurations();
     bool connectSocket();
 
     QByteArray serialize(const canfd_frame &frame, const timeval &time);
+    QByteArray serialize(const QCanFrame &frame);
     canfd_frame deserialize(const QByteArray &frame);
-    canfd_frame readFrame();
 
+    QList<QCanFrame> frameBuffer;
     qint64 canSocket;
     QPointer<QSocketNotifier> notifier;
-    QByteArray frameArray;
     QString canSocketName;
     int version;
     QVector<QPair<QString, QVariant>> configuration;
