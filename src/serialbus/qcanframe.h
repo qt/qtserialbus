@@ -50,23 +50,23 @@ class QCanFrame
 public:
     class TimeStamp {
     public:
-        Q_DECL_CONSTEXPR TimeStamp(qint64 seconds = 0, qint64 microSeconds = 0) Q_DECL_NOTHROW
-            : secs(seconds), usecs(microSeconds) {}
+        Q_DECL_CONSTEXPR TimeStamp(qint64 s = 0, qint64 usec = 0) Q_DECL_NOTHROW
+            : secs(s), usecs(usec) {}
         Q_DECL_CONSTEXPR qint64 seconds() const Q_DECL_NOTHROW { return secs; }
         Q_DECL_CONSTEXPR qint64 microSeconds() const Q_DECL_NOTHROW { return usecs; }
 
-        inline void setSeconds(qint64 seconds) { secs = seconds; }
-        inline void setMicroSeconds(qint64 microSeconds) { usecs = microSeconds; }
+        inline void setSeconds(qint64 s) { secs = s; }
+        inline void setMicroSeconds(qint64 usec) { usecs = usec; }
     private:
         qint64 secs;
         qint64 usecs;
     };
 
-    QCanFrame(qint32 identifier = 0, QByteArray payload = "") :
-        id(identifier), load(payload) {}
-    inline void setFrameId(qint32 frameId) { id = frameId; }
-    inline void setPayload(const QByteArray &payload) { load = payload; }
-    inline void setTimeStamp(const TimeStamp &timeStamp) { stamp = timeStamp; }
+    QCanFrame(qint32 identifier = 0, QByteArray data = "") :
+        id(identifier), load(data) {}
+    inline void setFrameId(qint32 newFrameId) { id = newFrameId; }
+    inline void setPayload(const QByteArray &data) { load = data; }
+    inline void setTimeStamp(const TimeStamp &ts) { stamp = ts; }
     inline qint32 frameId() const { return id; }
     QByteArray payload() const { return load; }
     TimeStamp timeStamp() const { return stamp; }
