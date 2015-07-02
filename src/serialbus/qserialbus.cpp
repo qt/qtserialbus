@@ -150,5 +150,3 @@ QList<QByteArray> QSerialBus::plugins()
 QSerialBusBackendFactory::~QSerialBusBackendFactory()
 {
 }
-
-#include "qserialbus.moc"
