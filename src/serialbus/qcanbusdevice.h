@@ -37,10 +37,8 @@
 #ifndef QCANBUSDEVICE_H
 #define QCANBUSDEVICE_H
 
-#include <QtSerialBus/qserialbusglobal.h>
-
-#include "qserialbusdevice.h"
-#include "qserialbusbackend.h"
+#include <QtSerialBus/qserialbusdevice.h>
+#include <QtSerialBus/qserialbusbackend.h>
 
 #include <QtCore/qpointer.h>
 

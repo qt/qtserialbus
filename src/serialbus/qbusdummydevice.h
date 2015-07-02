@@ -37,10 +37,8 @@
 #ifndef QBUSDUMMYDEVICE_H
 #define QBUSDUMMYDEVICE_H
 
-#include <QtSerialBus/qserialbusglobal.h>
-
-#include "qserialbusdevice.h"
-#include "qserialbusbackend.h"
+#include <QtSerialBus/qserialbusdevice.h>
+#include <QtSerialBus/qserialbusbackend.h>
 
 QT_BEGIN_NAMESPACE
 
