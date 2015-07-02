@@ -46,9 +46,11 @@
 #include <QtCore/qiodevice.h>
 #include <QtCore/qlist.h>
 
-class QSocketNotifier;
-
 struct canfd_frame;
+
+QT_BEGIN_NAMESPACE
+
+class QSocketNotifier;
 
 class SocketCanBackend : public QSerialBusBackend
 {
@@ -86,5 +88,7 @@ private:
     int version;
     QVector<QPair<QString, QVariant>> configuration;
 };
+
+QT_END_NAMESPACE
 
 #endif // SOCKETCANBACKEND_H

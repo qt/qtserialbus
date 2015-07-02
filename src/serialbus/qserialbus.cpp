@@ -47,6 +47,8 @@
 #include <private/qfactoryloader_p.h>
 #include <private/qlibrary_p.h>
 
+QT_BEGIN_NAMESPACE
+
 QSerialBus *QSerialBus::serialBus = Q_NULLPTR;
 
 class QSerialBusPrivate
@@ -150,3 +152,5 @@ QList<QByteArray> QSerialBus::plugins()
 QSerialBusBackendFactory::~QSerialBusBackendFactory()
 {
 }
+
+QT_END_NAMESPACE

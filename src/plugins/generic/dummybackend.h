@@ -43,6 +43,8 @@
 #include <QtCore/qpointer.h>
 #include <QtCore/qiodevice.h>
 
+QT_BEGIN_NAMESPACE
+
 class QTimer;
 
 class DummyBackend : public QSerialBusBackend
@@ -68,5 +70,7 @@ private:
     QPointer<QTimer> sendTimer;
     QByteArray byteArray;
 };
+
+QT_END_NAMESPACE
 
 #endif // DUMMYBACKEND_H

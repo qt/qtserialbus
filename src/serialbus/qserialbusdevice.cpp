@@ -37,6 +37,8 @@
 #include "qserialbusdevice.h"
 #include "qserialbusbackend.h"
 
+QT_BEGIN_NAMESPACE
+
 //TODO: state reporting missing
 //TODO: connected/disconnected signals
 QSerialBusDevice::QSerialBusDevice(QPointer<QSerialBusBackend> backend, QObject *parent) :
@@ -91,3 +93,5 @@ void QSerialBusDevice::close()
     busBackend->close();
     QIODevice::close();
 }
+
+QT_END_NAMESPACE

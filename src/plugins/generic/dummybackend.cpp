@@ -39,6 +39,8 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qtimer.h>
 
+QT_BEGIN_NAMESPACE
+
 DummyBackend::DummyBackend() :
     sendTimer(new QTimer(this)),
     byteArray("abc")
@@ -117,3 +119,5 @@ QVector<QString> DummyBackend::configurationKeys() const
 {
     return QVector<QString>();
 }
+
+QT_END_NAMESPACE

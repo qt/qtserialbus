@@ -44,6 +44,7 @@
 
 #include <linux/can.h>
 
+QT_BEGIN_NAMESPACE
 class QSerialBusBackend;
 class QSerialBus;
 class QBusDummyDevice;
@@ -53,6 +54,9 @@ class QCanFrame;
 namespace Ui {
 class MainWindow;
 }
+QT_END_NAMESPACE
+
+QT_USE_NAMESPACE
 
 class MainWindow : public QMainWindow
 {

@@ -47,6 +47,8 @@
 #include <sys/ioctl.h>
 #include <sys/time.h>
 
+QT_BEGIN_NAMESPACE
+
 SocketCanBackend::SocketCanBackend(const QString &name) :
     canSocket(-1),
     canSocketName(name),
@@ -334,3 +336,5 @@ void SocketCanBackend::readSocket()
     }
     emit readyRead();
 }
+
+QT_END_NAMESPACE

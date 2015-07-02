@@ -43,6 +43,8 @@
 
 #define SOCKET_CAN_MTU 72
 
+QT_BEGIN_NAMESPACE
+
 /*!
  *  \class QCanBusDevice
  *  \inmodule QtSerialBus
@@ -221,3 +223,5 @@ void QCanBusDevicePrivate::setError(const QString &errorString, int errorId)
     }
     emit q->errorOccurred(lastError);
 }
+
+QT_END_NAMESPACE
