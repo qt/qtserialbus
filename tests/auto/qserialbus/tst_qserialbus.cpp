@@ -74,9 +74,10 @@ void tst_QSerialBus::plugins()
 
 void tst_QSerialBus::createBackend()
 {
-    QPointer<QSerialBusBackend> faulty = bus->createBackend("foo","socketFoo","vfoo");
-    QVERIFY(faulty.isNull());
-    QPointer<QSerialBusBackend> dummy = bus->createBackend("dummy", "unused", "unused");
+    QSerialBusBackend *faulty = bus->createBackend("foo","socketFoo","vfoo");
+    QVERIFY(!faulty);
+    QSerialBusBackend *dummy = bus->createBackend("dummy", "unused", "unused");
+    QVERIFY(dummy);
 }
 
 QTEST_MAIN(tst_QSerialBus)
