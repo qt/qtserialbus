@@ -1,9 +1,5 @@
-TEMPLATE = app
-QT = core testlib
+QT = core testlib serialbus
 TARGET = tst_qserialbus
-
-QT += serialbus
-
-HEADERS +=
+CONFIG += testcase
 
 SOURCES += tst_qserialbus.cpp \

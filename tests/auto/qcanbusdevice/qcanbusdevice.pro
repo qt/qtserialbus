@@ -1,7 +1,5 @@
-TEMPLATE = app
-QT = core testlib
+QT = core testlib serialbus
 TARGET = tst_qcanbusdevice
-
-QT += serialbus
+CONFIG += testcase
 
 SOURCES += tst_qcanbusdevice.cpp
