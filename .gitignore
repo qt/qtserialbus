@@ -1,0 +1,7 @@
+config.log
+Makefile*
+*.pro.user
+.qmake.cache
+*.obj
+config.tests/socketcan/socketcan
+config.tests/socketcan_fd/socketcan_fd
