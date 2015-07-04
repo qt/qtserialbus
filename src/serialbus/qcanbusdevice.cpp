@@ -38,6 +38,7 @@
 #include "qcanbusdevice_p.h"
 
 #include "qcanframe.h"
+
 #include <QtCore/qdebug.h>
 #include <QtCore/qdatastream.h>
 
@@ -173,9 +174,9 @@ QCanFrame QCanBusDevicePrivate::deserialize(const QByteArray &data)
     qint64 usec;
 
     stream >> id
-           >> payload
-           >> sec
-           >> usec;
+            >> payload
+            >> sec
+            >> usec;
 
     QCanFrame::TimeStamp stamp;
     stamp.setSeconds(sec);

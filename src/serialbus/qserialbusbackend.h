@@ -40,7 +40,6 @@
 #include <QtSerialBus/qserialbusglobal.h>
 
 #include <QtCore/qobject.h>
-#include <QtCore/qbytearray.h>
 #include <QtCore/qiodevice.h>
 
 QT_BEGIN_NAMESPACE

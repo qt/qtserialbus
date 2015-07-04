@@ -39,13 +39,13 @@
 
 #include <QtSerialBus/qserialbusdevice.h>
 #include <QtSerialBus/qserialbusbackend.h>
+#include <QtSerialBus/qcanframe.h>
 
 #include <QtCore/qpointer.h>
 
 QT_BEGIN_NAMESPACE
 
 class QCanBusDevicePrivate;
-class QCanFrame;
 
 //TODO for this class: review const member functions for this class
 class Q_SERIALBUS_EXPORT QCanBusDevice : public QSerialBusDevice
@@ -86,4 +86,5 @@ private:
 };
 
 QT_END_NAMESPACE
+
 #endif // QCANBUSDEVICE_H

@@ -40,6 +40,7 @@
 #include "qcanbusdevice.h"
 
 #include <QtCore/qpointer.h>
+
 #include "private/qobject_p.h"
 
 //
@@ -54,8 +55,6 @@
 //
 
 QT_BEGIN_NAMESPACE
-
-class QCanFrame;
 
 class QCanBusDevicePrivate : public QObjectPrivate
 {

@@ -55,4 +55,4 @@ Q_DECLARE_INTERFACE(QSerialBusPluginInterface, "org.qt-project.Qt.QSerialBusPlug
 
 QT_END_NAMESPACE
 
-#endif
+#endif // QSERIALBUSPLUGININTERFACE_H

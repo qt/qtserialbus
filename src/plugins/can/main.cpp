@@ -36,11 +36,11 @@
 
 #include "socketcanbackend.h"
 
-#include <QtCore/qfile.h>
-#include <QtCore/qdebug.h>
-
 #include <qserialbusplugininterface.h>
 #include <qserialbus.h>
+
+#include <QtCore/qfile.h>
+#include <QtCore/qdebug.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -71,4 +71,3 @@ public:
 QT_END_NAMESPACE
 
 #include "main.moc"
-

@@ -43,7 +43,6 @@
 #include <QtCore/qpointer.h>
 #include <QtCore/qvariant.h>
 #include <QtCore/qvector.h>
-#include <QtCore/qiodevice.h>
 #include <QtCore/qlist.h>
 
 struct canfd_frame;

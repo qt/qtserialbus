@@ -102,7 +102,7 @@ void QSerialBusPrivate::loadPlugins()
     const QList<QJsonObject> meta = loader->metaData();
     for (int i = 0; i < meta.count(); i++) {
         QSerialBusPluginInterface *plugin
-            = qobject_cast<QSerialBusPluginInterface*>(loader->instance(i));
+                = qobject_cast<QSerialBusPluginInterface*>(loader->instance(i));
         if (plugin)
             plugin->registerBus();
     }

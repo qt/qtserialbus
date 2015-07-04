@@ -65,8 +65,6 @@ public:
         QSerialBusBackend *backend = new DummyBackend();
         return backend;
     }
-
-public slots:
 };
 
 QT_END_NAMESPACE

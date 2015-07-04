@@ -41,7 +41,6 @@
 
 #include <QtCore/qbytearray.h>
 #include <QtCore/qpointer.h>
-#include <QtCore/qiodevice.h>
 
 QT_BEGIN_NAMESPACE
 

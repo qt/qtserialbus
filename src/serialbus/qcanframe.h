@@ -38,10 +38,10 @@
 #define QCANFRAME_H
 
 #include <QtSerialBus/qserialbusglobal.h>
+
 #include <QtCore/qobject.h>
 
 QT_BEGIN_NAMESPACE
-
 
 //TODO: stream operator for this class
 //TODO: review ctors for this class

@@ -40,14 +40,12 @@
 #include <QtSerialBus/qserialbusglobal.h>
 
 #include <QtCore/qobject.h>
-#include <QtCore/qpointer.h>
 
 QT_BEGIN_NAMESPACE
 
-class QSerialBusPrivate;
 class QSerialBusBackend;
 class QSerialBusBackendFactory;
-class QFactoryLoader;
+class QSerialBusPrivate;
 
 class Q_SERIALBUS_EXPORT QSerialBus : public QObject
 {
@@ -70,7 +68,6 @@ private:
     Q_DISABLE_COPY(QSerialBus)
 };
 
-
 class Q_SERIALBUS_EXPORT QSerialBusBackendFactory
 {
 public:
@@ -78,7 +75,6 @@ public:
 protected:
     virtual ~QSerialBusBackendFactory();
 };
-
 
 QT_END_NAMESPACE
 

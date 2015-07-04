@@ -38,7 +38,6 @@
 #define QBUSDUMMYDEVICE_H
 
 #include <QtSerialBus/qserialbusdevice.h>
-#include <QtSerialBus/qserialbusbackend.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -57,4 +56,5 @@ private:
 };
 
 QT_END_NAMESPACE
+
 #endif // QBUSDUMMYDEVICE_H

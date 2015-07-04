@@ -131,7 +131,7 @@ canfd_frame SocketCanBackend::deserialize(const QByteArray &array)
     QByteArray payload;
 
     stream >> frame.can_id
-           >> payload;
+            >> payload;
 
     frame.len = payload.size();
     for (int i = 0; i < frame.len ; i++)
@@ -184,7 +184,7 @@ void SocketCanBackend::setConfigurationParameter(const QString &key, const QVari
     } else if (key == QStringLiteral("ErrorMask")) {
         const int errorMask = value.toInt();
         if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_ERR_FILTER,
-                                  &errorMask, sizeof(errorMask)) < 0) {
+                       &errorMask, sizeof(errorMask)) < 0) {
             emit error(qt_error_string(errno), QCanBusDevice::CanBusError::ConfigurationError);
             return;
         }
@@ -193,7 +193,7 @@ void SocketCanBackend::setConfigurationParameter(const QString &key, const QVari
         const int size = filterList.size();
         if (size == 0)
             emit error(QStringLiteral("ERROR SocketCanBackend: \"CanFilter\" "
-                "QList<QVariant> empty or not valid"), QCanBusDevice::CanBusError::ConfigurationError);
+                                      "QList<QVariant> empty or not valid"), QCanBusDevice::CanBusError::ConfigurationError);
         can_filter filters[size];
         for (int i = 0; i < size; i++) {
             can_filter filter;
@@ -202,25 +202,25 @@ void SocketCanBackend::setConfigurationParameter(const QString &key, const QVari
             filter.can_id = filterHash.value("FilterId").toInt(&ok);
             if (!ok) {
                 emit error(QStringLiteral("ERROR SocketCanBackend: \"CanFilter\" "
-                    "FilterId key not found or value is not valid in index: ")
-                    + QString::number(i), QCanBusDevice::CanBusError::ConfigurationError);
+                                          "FilterId key not found or value is not valid in index: ")
+                           + QString::number(i), QCanBusDevice::CanBusError::ConfigurationError);
                 return;
             }
             filter.can_mask = filterHash.value("CanMask").toInt(&ok);
             if (!ok) {
                 emit error(QStringLiteral("ERROR SocketCanBackend: \"CanFilter\" "
-                    "CanMask key not found or value is not valid in index:")
-                    + QString::number(i), QCanBusDevice::CanBusError::ConfigurationError);
+                                          "CanMask key not found or value is not valid in index:")
+                           + QString::number(i), QCanBusDevice::CanBusError::ConfigurationError);
                 return;
             }
             filters[i] = filter;
         }
         if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_FILTER, filters, sizeof(filters)) < 0)
             emit error(qt_error_string(errno),
-                QCanBusDevice::CanBusError::ConfigurationError);
+                       QCanBusDevice::CanBusError::ConfigurationError);
     } else {
         emit error(QStringLiteral("SocketCanBackend: No such configuration as")
-             + key + QStringLiteral("in SocketCanBackend"), QCanBusDevice::CanBusError::ConfigurationError);
+                   + key + QStringLiteral("in SocketCanBackend"), QCanBusDevice::CanBusError::ConfigurationError);
     }
     insertInConfigurations(key, value);
 }
@@ -308,7 +308,7 @@ void SocketCanBackend::readSocket()
             break;
         } else if (!bytesReceived == CANFD_MTU) {
             emit error(QStringLiteral("ERROR SocketCanBackend: invalid can frame"),
-                QCanBusDevice::CanBusError::ReadError);
+                       QCanBusDevice::CanBusError::ReadError);
             continue;
         }
 
@@ -329,7 +329,7 @@ void SocketCanBackend::readSocket()
 
         QByteArray load;
         for (int i = 0; i < frame.len ; i++)
-           load.insert(i, frame.data[i]);
+            load.insert(i, frame.data[i]);
         bufferedFrame.setPayload(load);
 
         frameBuffer.append(bufferedFrame);
