@@ -44,7 +44,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class SocketCanBusPlugin : public QObject, public QSerialBusPluginInterface, public QSerialBusBackendFactory
+class CanBusPlugin : public QObject, public QSerialBusPluginInterface, public QSerialBusBackendFactory
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QSerialBusPluginInterface" FILE "plugin.json")
