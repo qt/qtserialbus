@@ -60,11 +60,18 @@ public:
 
     QSerialBusBackend *createBackend(const QString &bus, const QString &name) const
     {
-        if (bus == QStringLiteral("SocketCAN")) {
+        if (bus == QLatin1String(BackendName)) {
             QSerialBusBackend *backend = new SocketCanBackend(name);
             return backend;
         }
         return Q_NULLPTR;
+    }
+
+    QStringList availableBackends() const
+    {
+        QStringList backends;
+        backends << BackendName;
+        return backends;
     }
 };
 

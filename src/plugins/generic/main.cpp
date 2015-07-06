@@ -65,6 +65,12 @@ public:
         QSerialBusBackend *backend = new DummyBackend();
         return backend;
     }
+
+    QStringList availableBackends() const
+    {
+        QStringList backends;
+        return backends;
+    }
 };
 
 QT_END_NAMESPACE

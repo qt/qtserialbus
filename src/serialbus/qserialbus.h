@@ -58,6 +58,7 @@ public:
     static void registerBackend(const QByteArray &identifier, QSerialBusBackendFactory *factory);
     QSerialBusBackend *createBackend(const QByteArray &identifier,
                                      const QString &type, const QString &name) const;
+    QStringList availableBackends(const QByteArray &identifier) const;
 
 private:
     QSerialBus(QObject *parent = 0);
@@ -72,6 +73,7 @@ class Q_SERIALBUS_EXPORT QSerialBusBackendFactory
 {
 public:
     virtual QSerialBusBackend *createBackend(const QString &busBackend, const QString &name) const = 0;
+    virtual QStringList availableBackends() const = 0;
 protected:
     virtual ~QSerialBusBackendFactory();
 };

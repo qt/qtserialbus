@@ -61,6 +61,7 @@ public:
     void loadPlugins();
     QSerialBusBackend *createBackend(const QByteArray &identifier,
                                      const QString &type, const QString &name) const;
+    QStringList availableBackends(const QByteArray &identifier) const;
 
     QHash<QByteArray, QSerialBusBackendFactory*> factoryByIdentifier;
 
@@ -117,6 +118,14 @@ QSerialBusBackend *QSerialBusPrivate::createBackend(const QByteArray &identifier
     return factoryByIdentifier[identifier]->createBackend(type, name);
 }
 
+QStringList QSerialBusPrivate::availableBackends(const QByteArray &identifier) const
+{
+    if (!(factoryByIdentifier[identifier]))
+        return QStringList();
+
+    return factoryByIdentifier[identifier]->availableBackends();
+}
+
 /*!
  * Create a bus backend for \a identifier with \a type with \a name
  * Returns \c null if no suitable \a identifier can be found.
@@ -126,6 +135,16 @@ QSerialBusBackend *QSerialBus::createBackend(const QByteArray &identifier,
 {
     QSerialBusPrivate *d = serialBusPrivate();
     return d->createBackend(identifier, type, name);
+}
+
+/*!
+ * Returns a list of available backends names for \a identifier; otherwise
+ * returns an empty list if no suitable \a identifier can be found.
+ */
+QStringList QSerialBus::availableBackends(const QByteArray &identifier) const
+{
+    QSerialBusPrivate *d = serialBusPrivate();
+    return d->availableBackends(identifier);
 }
 
 /*!
