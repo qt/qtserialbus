@@ -122,4 +122,10 @@ void QSerialBusDevice::close()
     QIODevice::close();
 }
 
+QSerialBusBackend *QSerialBusDevice::backend() const
+{
+    Q_D(const QSerialBusDevice);
+    return d->busBackend;
+}
+
 QT_END_NAMESPACE

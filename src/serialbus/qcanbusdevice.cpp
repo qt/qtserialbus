@@ -57,11 +57,10 @@ QT_BEGIN_NAMESPACE
  *  Frames written and read must be serialized/deserialized with QDataStream.
  *  writeFrame() serializes QCanFrame properly before writing.
  */
-QCanBusDevice::QCanBusDevice(QPointer<QSerialBusBackend> backend, QObject *parent) :
+QCanBusDevice::QCanBusDevice(QSerialBusBackend *backend, QObject *parent) :
     QSerialBusDevice(backend, parent)
 {
-    busBackend = backend;
-    connect(busBackend.data(), &QSerialBusBackend::error, this, &QCanBusDevice::setError);
+    connect(backend, &QSerialBusBackend::error, this, &QCanBusDevice::setError);
 }
 
 void QCanBusDevice::setError(QString errorString, int errorId)
@@ -82,17 +81,17 @@ void QCanBusDevice::setError(QString errorString, int errorId)
  */
 void QCanBusDevice::setConfigurationParameter(const QString &key, const QVariant &value)
 {
-    busBackend->setConfigurationParameter(key, value);
+    backend()->setConfigurationParameter(key, value);
 }
 
 QVariant QCanBusDevice::configurationParameter(const QString &key) const
 {
-    return busBackend->configurationParameter(key);
+    return backend()->configurationParameter(key);
 }
 
 QVector<QString> QCanBusDevice::configurationKeys() const
 {
-    return busBackend->configurationKeys();
+    return backend()->configurationKeys();
 }
 
 /*!
@@ -137,7 +136,7 @@ QCanFrame QCanBusDevice::deserialize(const QByteArray &data)
  */
 void QCanBusDevice::setDataStreamVersion(int version)
 {
-    busBackend->setDataStreamVersion(version);
+    backend()->setDataStreamVersion(version);
 }
 
 /*!
@@ -146,7 +145,7 @@ void QCanBusDevice::setDataStreamVersion(int version)
  */
 int QCanBusDevice::dataStreamVersion()
 {
-    return busBackend->dataStreamVersion();
+    return backend()->dataStreamVersion();
 }
 
 QCanBusDevice::CanBusError QCanBusDevice::error() const

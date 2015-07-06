@@ -59,6 +59,8 @@ public:
     virtual void close() Q_DECL_OVERRIDE;
 
 protected:
+    QSerialBusBackend *backend() const;
+
     qint64 readData(char *data, qint64 maxSize) Q_DECL_OVERRIDE;
     qint64 writeData(const char *data, qint64 maxSize) Q_DECL_OVERRIDE;
 };

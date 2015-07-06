@@ -63,7 +63,7 @@ public:
     };
     Q_ENUM(CanBusError)
 
-    explicit QCanBusDevice(QPointer<QSerialBusBackend> backend, QObject *parent = 0);
+    explicit QCanBusDevice(QSerialBusBackend *backend, QObject *parent = 0);
     void setConfigurationParameter(const QString &key, const QVariant &value);
     QVariant configurationParameter(const QString &key) const;
     QVector<QString> configurationKeys() const;
@@ -80,9 +80,6 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void setError(QString, int);
-
-private:
-    QPointer<QSerialBusBackend> busBackend;
 };
 
 QT_END_NAMESPACE
