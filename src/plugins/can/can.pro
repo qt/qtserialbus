@@ -4,7 +4,7 @@ TARGET = qtcanbus
 
 PLUGIN_TYPE = serialbuses
 PLUGIN_EXTENDS = serialbus
-PLUGIN_CLASS_NAME = SocketCanBusPlugin
+PLUGIN_CLASS_NAME = CanBusPlugin
 load(qt_plugin)
 
 HEADERS += \
