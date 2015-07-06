@@ -37,44 +37,70 @@
 #include "qserialbusdevice.h"
 #include "qserialbusbackend.h"
 
+#include <private/qiodevice_p.h>
+
 QT_BEGIN_NAMESPACE
+
+class QSerialBusDevicePrivate : public QIODevicePrivate
+{
+    Q_DECLARE_PUBLIC(QSerialBusDevice)
+public:
+    QSerialBusDevicePrivate(QSerialBusBackend *backend)
+        : busBackend(backend)
+    {
+        Q_ASSERT(backend);
+    }
+
+    ~QSerialBusDevicePrivate()
+    {
+        if (busBackend)
+            delete busBackend;
+    }
+
+    QPointer<QSerialBusBackend> busBackend;
+};
 
 //TODO: state reporting missing
 //TODO: connected/disconnected signals
-QSerialBusDevice::QSerialBusDevice(QPointer<QSerialBusBackend> backend, QObject *parent) :
-    QIODevice(parent),
-    busBackend(backend)
+QSerialBusDevice::QSerialBusDevice(QSerialBusBackend *backend, QObject *parent) :
+    QIODevice(*new QSerialBusDevicePrivate(backend), parent)
 {
-    connect(busBackend.data(), &QSerialBusBackend::readyRead, this, &QIODevice::readyRead);
+    Q_D(QSerialBusDevice);
+    connect(d->busBackend.data(), &QSerialBusBackend::readyRead, this, &QIODevice::readyRead);
 }
 
 QSerialBusDevice::~QSerialBusDevice()
 {
-    delete busBackend;
 }
 
 qint64 QSerialBusDevice::readData(char *data, qint64 maxSize)
 {
-    if (!busBackend)
+    Q_D(QSerialBusDevice);
+
+    if (!d->busBackend)
         return -1;
 
-    return busBackend->read(data, maxSize);
+    return d->busBackend->read(data, maxSize);
 }
 
 qint64 QSerialBusDevice::writeData(const char *data, qint64 maxSize)
 {
-    if (!busBackend)
+    Q_D(QSerialBusDevice);
+
+    if (!d->busBackend)
         return -1;
 
-    return busBackend->write(data, maxSize);
+    return d->busBackend->write(data, maxSize);
 }
 
 bool QSerialBusDevice::open(QIODevice::OpenMode openMode)
 {
-    if (!busBackend)
+    Q_D(QSerialBusDevice);
+
+    if (!d->busBackend)
         return false;
 
-    if (!busBackend->open(openMode))
+    if (!d->busBackend->open(openMode))
         return false;
 
     if (QIODevice::openMode() == QIODevice::OpenModeFlag::NotOpen)
@@ -87,10 +113,12 @@ bool QSerialBusDevice::open(QIODevice::OpenMode openMode)
 
 void QSerialBusDevice::close()
 {
-    if (!busBackend)
+    Q_D(QSerialBusDevice);
+
+    if (!d->busBackend)
         return;
 
-    busBackend->close();
+    d->busBackend->close();
     QIODevice::close();
 }
 

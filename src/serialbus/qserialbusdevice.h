@@ -44,14 +44,16 @@
 
 QT_BEGIN_NAMESPACE
 
+class QSerialBusDevicePrivate;
 class QSerialBusBackend;
 
 class Q_SERIALBUS_EXPORT QSerialBusDevice : public QIODevice
 {
     Q_OBJECT
+    Q_DECLARE_PRIVATE(QSerialBusDevice)
 
 public:
-    explicit QSerialBusDevice(QPointer<QSerialBusBackend> backend, QObject *parent = 0);
+    explicit QSerialBusDevice(QSerialBusBackend *backend, QObject *parent = 0);
     ~QSerialBusDevice();
     virtual bool open(QIODevice::OpenMode openMode) Q_DECL_OVERRIDE;
     virtual void close() Q_DECL_OVERRIDE;
@@ -59,9 +61,6 @@ public:
 protected:
     qint64 readData(char *data, qint64 maxSize) Q_DECL_OVERRIDE;
     qint64 writeData(const char *data, qint64 maxSize) Q_DECL_OVERRIDE;
-
-private:
-    QPointer<QSerialBusBackend> busBackend;
 };
 
 QT_END_NAMESPACE
