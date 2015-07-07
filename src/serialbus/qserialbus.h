@@ -45,7 +45,6 @@ QT_BEGIN_NAMESPACE
 
 class QSerialBusBackend;
 class QSerialBusBackendFactory;
-class QSerialBusPrivate;
 
 class Q_SERIALBUS_EXPORT QSerialBus : public QObject
 {
@@ -53,9 +52,9 @@ class Q_SERIALBUS_EXPORT QSerialBus : public QObject
 
 public:
     static QSerialBus *instance();
+    static void registerBackend(const QByteArray &identifier, QSerialBusBackendFactory *factory);
 
     QList<QByteArray> plugins();
-    static void registerBackend(const QByteArray &identifier, QSerialBusBackendFactory *factory);
     QSerialBusBackend *createBackend(const QByteArray &identifier,
                                      const QString &type, const QString &name) const;
     QStringList availableBackends(const QByteArray &identifier) const;
@@ -63,9 +62,6 @@ public:
 private:
     QSerialBus(QObject *parent = 0);
 
-    static QSerialBus *serialBus;
-
-    Q_DECLARE_PRIVATE(QSerialBus)
     Q_DISABLE_COPY(QSerialBus)
 };
 
