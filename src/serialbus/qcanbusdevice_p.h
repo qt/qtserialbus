@@ -38,10 +38,7 @@
 #define QCANBUSDEVICE_P_H
 
 #include "qcanbusdevice.h"
-
-#include <QtCore/qpointer.h>
-
-#include "private/qobject_p.h"
+#include "qserialbusdevice_p.h"
 
 //
 //  W A R N I N G
@@ -56,7 +53,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class QCanBusDevicePrivate : public QObjectPrivate
+class QCanBusDevicePrivate : public QSerialBusDevicePrivate
 {
     Q_DECLARE_PUBLIC(QCanBusDevice)
 public:

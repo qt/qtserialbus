@@ -40,7 +40,6 @@
 #include <QtSerialBus/qserialbusglobal.h>
 
 #include <QtCore/qiodevice.h>
-#include <QtCore/qpointer.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -59,6 +58,7 @@ public:
     virtual void close() Q_DECL_OVERRIDE;
 
 protected:
+    QSerialBusDevice(QSerialBusBackend *backend, QSerialBusDevicePrivate &dd, QObject *parent = 0);
     QSerialBusBackend *backend() const;
 
     qint64 readData(char *data, qint64 maxSize) Q_DECL_OVERRIDE;

@@ -35,37 +35,19 @@
 ****************************************************************************/
 
 #include "qserialbusdevice.h"
-#include "qserialbusbackend.h"
-
-#include <private/qiodevice_p.h>
+#include "qserialbusdevice_p.h"
 
 QT_BEGIN_NAMESPACE
-
-class QSerialBusDevicePrivate : public QIODevicePrivate
-{
-    Q_DECLARE_PUBLIC(QSerialBusDevice)
-public:
-    QSerialBusDevicePrivate(QSerialBusBackend *backend)
-        : busBackend(backend)
-    {
-        Q_ASSERT(backend);
-    }
-
-    ~QSerialBusDevicePrivate()
-    {
-        if (busBackend)
-            delete busBackend;
-    }
-
-    QPointer<QSerialBusBackend> busBackend;
-};
 
 //TODO: state reporting missing
 //TODO: connected/disconnected signals
 QSerialBusDevice::QSerialBusDevice(QSerialBusBackend *backend, QObject *parent) :
-    QIODevice(*new QSerialBusDevicePrivate(backend), parent)
+    QIODevice(*new QSerialBusDevicePrivate, parent)
 {
     Q_D(QSerialBusDevice);
+
+    Q_ASSERT(backend);
+    d->busBackend = backend;
     connect(d->busBackend.data(), &QSerialBusBackend::readyRead, this, &QIODevice::readyRead);
 }
 
@@ -120,6 +102,15 @@ void QSerialBusDevice::close()
 
     d->busBackend->close();
     QIODevice::close();
+}
+
+/*! \internal
+*/
+QSerialBusDevice::QSerialBusDevice(QSerialBusBackend *backend, QSerialBusDevicePrivate &dd, QObject *parent)
+    : QIODevice(dd, parent)
+{
+    Q_D(QSerialBusDevice);
+    d->busBackend = backend;
 }
 
 QSerialBusBackend *QSerialBusDevice::backend() const

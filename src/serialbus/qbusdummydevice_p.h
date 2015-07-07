@@ -34,52 +34,30 @@
 **
 ****************************************************************************/
 
-#ifndef QCANBUSDEVICE_H
-#define QCANBUSDEVICE_H
+#ifndef QBUSDUMMYDEVICE_P_H
+#define QBUSDUMMYDEVICE_P_H
 
-#include <QtSerialBus/qserialbusdevice.h>
-#include <QtSerialBus/qcanframe.h>
+#include "qbusdummydevice.h"
+#include "qserialbusdevice_p.h"
+
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qt API. It exists purely as an
+// implementation detail. This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
 
 QT_BEGIN_NAMESPACE
 
-class QCanBusDevicePrivate;
-
-//TODO for this class: review const member functions for this class
-class Q_SERIALBUS_EXPORT QCanBusDevice : public QSerialBusDevice
+class QBusDummyDevicePrivate : public QSerialBusDevicePrivate
 {
-    Q_OBJECT
-    Q_DECLARE_PRIVATE(QCanBusDevice)
-    Q_DISABLE_COPY(QCanBusDevice)
-
-public:
-    enum CanBusError {
-        NoError,
-        ReadError,
-        WriteError,
-        ConnectionError,
-        ConfigurationError
-    };
-    Q_ENUM(CanBusError)
-
-    explicit QCanBusDevice(QSerialBusBackend *backend, QObject *parent = 0);
-    void setConfigurationParameter(const QString &key, const QVariant &value);
-    QVariant configurationParameter(const QString &key) const;
-    QVector<QString> configurationKeys() const;
-
-    void writeFrame(const QCanFrame &frame);
-    QCanFrame readFrame();
-    QCanFrame deserialize(const QByteArray &data);
-    void setDataStreamVersion(int version);
-    int dataStreamVersion();
-    CanBusError error() const;
-
-Q_SIGNALS:
-    void errorOccurred(CanBusError);
-
-private Q_SLOTS:
-    void setError(QString, int);
+    Q_DECLARE_PUBLIC(QBusDummyDevice)
 };
 
 QT_END_NAMESPACE
 
-#endif // QCANBUSDEVICE_H
+#endif // QBUSDUMMYDEVICE_P_H

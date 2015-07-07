@@ -35,6 +35,7 @@
 ****************************************************************************/
 
 #include "qbusdummydevice.h"
+#include "qbusdummydevice_p.h"
 #include "qserialbusbackend.h"
 
 #include <QtCore/qdebug.h>
@@ -42,8 +43,7 @@
 QT_BEGIN_NAMESPACE
 
 QBusDummyDevice::QBusDummyDevice(QSerialBusBackend *backend, QObject *parent) :
-    QSerialBusDevice(backend, parent),
-    busBackend(backend)
+    QSerialBusDevice(backend, *new QBusDummyDevicePrivate, parent)
 {
     connect(backend, &QSerialBusBackend::readyRead, this, &QBusDummyDevice::readyRead);
 }

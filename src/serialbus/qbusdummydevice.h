@@ -41,18 +41,20 @@
 
 QT_BEGIN_NAMESPACE
 
+class QBusDummyDevicePrivate;
+
 //TODO: should be renamed QDummyBusDevice?
 class Q_SERIALBUS_EXPORT QBusDummyDevice : public QSerialBusDevice
 {
     Q_OBJECT
+    Q_DECLARE_PRIVATE(QBusDummyDevice)
+    Q_DISABLE_COPY(QBusDummyDevice)
+
 public:
     explicit QBusDummyDevice(QSerialBusBackend *backend, QObject *parent = 0);
 
 Q_SIGNALS:
     void newData(const QByteArray &data);
-
-private:
-    QSerialBusBackend *busBackend;
 };
 
 QT_END_NAMESPACE

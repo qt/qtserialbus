@@ -58,7 +58,7 @@ QT_BEGIN_NAMESPACE
  *  writeFrame() serializes QCanFrame properly before writing.
  */
 QCanBusDevice::QCanBusDevice(QSerialBusBackend *backend, QObject *parent) :
-    QSerialBusDevice(backend, parent)
+    QSerialBusDevice(backend, *new QCanBusDevicePrivate, parent)
 {
     connect(backend, &QSerialBusBackend::error, this, &QCanBusDevice::setError);
 }

@@ -19,7 +19,9 @@ PUBLIC_HEADERS += \
 
 PRIVATE_HEADERS += \
     qbusdummydevice.h \
-    qcanbusdevice_p.h
+    qserialbusdevice_p.h \
+    qcanbusdevice_p.h \
+    qbusdummydevice_p.h \
 
 SOURCES += \
     qbusdummydevice.cpp \
