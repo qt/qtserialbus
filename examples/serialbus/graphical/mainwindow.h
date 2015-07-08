@@ -42,8 +42,6 @@
 #include <QMainWindow>
 #include <QPointer>
 
-#include <linux/can.h>
-
 QT_BEGIN_NAMESPACE
 class QSerialBusBackend;
 class QSerialBus;
