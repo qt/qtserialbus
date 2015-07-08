@@ -55,9 +55,6 @@ public:
     virtual QVariant configurationParameter(const QString &key) const = 0;
     virtual QVector<QString> configurationKeys() const = 0;
     virtual qint64 write(const char* buffer, qint64 len) = 0;
-    //TODO: better way than QDataStream to pass the information
-    virtual void setDataStreamVersion(int) = 0;
-    virtual int dataStreamVersion() const = 0;
     virtual qint64 bytesAvailable() const = 0;
 
 Q_SIGNALS:

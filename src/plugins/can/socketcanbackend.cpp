@@ -51,12 +51,8 @@ QT_BEGIN_NAMESPACE
 
 SocketCanBackend::SocketCanBackend(const QString &name) :
     canSocket(-1),
-    canSocketName(name),
-    version(0)
+    canSocketName(name)
 {
-    QDataStream stream;
-    version = stream.version();
-
     resetConfigurations();
 }
 
@@ -113,7 +109,6 @@ QByteArray SocketCanBackend::serialize(const QCanFrame &frame)
 {
     QByteArray array;
     QDataStream stream(&array, QIODevice::WriteOnly);
-    stream.setVersion(version);
 
     stream << frame.frameId()
            << frame.payload().data()
@@ -126,7 +121,6 @@ canfd_frame SocketCanBackend::deserialize(const QByteArray &array)
 {
     canfd_frame frame;
     QDataStream stream(array);
-    stream.setVersion(version);
 
     QByteArray payload;
 
@@ -279,16 +273,6 @@ bool SocketCanBackend::connectSocket()
             this, &SocketCanBackend::readSocket);
 
     return true;
-}
-
-void SocketCanBackend::setDataStreamVersion(int version)
-{
-    version = version;
-}
-
-int SocketCanBackend::dataStreamVersion() const
-{
-    return version;
 }
 
 qint64 SocketCanBackend::bytesAvailable() const

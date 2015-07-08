@@ -89,16 +89,6 @@ qint64 DummyBackend::write(const char *buffer, qint64 size)
     return size;
 }
 
-void DummyBackend::setDataStreamVersion(int version)
-{
-    Q_UNUSED(version);
-}
-
-int DummyBackend::dataStreamVersion() const
-{
-    return 0;
-}
-
 qint64 DummyBackend::bytesAvailable() const
 {
     return byteArray.size();

@@ -71,15 +71,12 @@ public:
     QVariant configurationParameter(const QString&) const { return value; } ;
     QVector<QString> configurationKeys() const { return keys; };
     qint64 write(const char*, qint64) { emit written(); return 72; };
-    void setDataStreamVersion(int v){ version = v; };
-    int dataStreamVersion() const { return version; };
     qint64 bytesAvailable() const { return 72; };
 
 signals:
     void written();
 
 private:
-    int version;
     QVariant value;
     QVector<QString> keys;
 };
@@ -95,7 +92,6 @@ private slots:
     void conf();
     void write();
     void read();
-    void version();
     void error();
     void cleanupTestCase();
 
@@ -147,13 +143,6 @@ void tst_QCanBusDevice::read()
     QCanFrame frame2 = device->readFrame();
     QVERIFY(!frame1.frameId());
     QVERIFY(frame2.frameId());
-}
-
-void tst_QCanBusDevice::version()
-{
-    int version = 7;
-    device->setDataStreamVersion(version);
-    QCOMPARE(version, device->dataStreamVersion());
 }
 
 void tst_QCanBusDevice::error()

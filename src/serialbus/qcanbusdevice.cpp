@@ -130,24 +130,6 @@ QCanFrame QCanBusDevice::deserialize(const QByteArray &data)
     return d->deserialize(data);
 }
 
-/*!
- * \brief Sets same version of QDataStream for QCanBusDevice and backend
- * \param v enum QDataStream::Version
- */
-void QCanBusDevice::setDataStreamVersion(int version)
-{
-    backend()->setDataStreamVersion(version);
-}
-
-/*!
- * \brief Returns version of QDataStream in use by QCanBusDevice and backend
- * \return enum QDataStream::Version
- */
-int QCanBusDevice::dataStreamVersion()
-{
-    return backend()->dataStreamVersion();
-}
-
 QCanBusDevice::CanBusError QCanBusDevice::error() const
 {
     return d_func()->lastError;
@@ -160,13 +142,11 @@ QByteArray QCanBusDevicePrivate::writeFrame(const QCanFrame &frame)
 
 QCanFrame QCanBusDevicePrivate::deserialize(const QByteArray &data)
 {
-    Q_Q(QCanBusDevice);
     QCanFrame frame;
     if (data.isEmpty())
         return frame;
 
     QDataStream stream(data);
-    stream.setVersion(q->dataStreamVersion());
     QByteArray payload;
     qint32 id;
     qint64 sec;
@@ -189,11 +169,8 @@ QCanFrame QCanBusDevicePrivate::deserialize(const QByteArray &data)
 
 QByteArray QCanBusDevicePrivate::serialize(const QCanFrame &frame)
 {
-    Q_Q(QCanBusDevice);
-
     QByteArray data;
     QDataStream stream(&data, QIODevice::ReadWrite);
-    stream.setVersion(q->dataStreamVersion());
     stream << frame.frameId()
            << frame.payload();
     return data;
