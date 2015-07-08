@@ -1,4 +1,4 @@
-QT += core-private serialbus widgets
+QT += core-private serialbus
 
 TARGET = qtbusgeneric
 
