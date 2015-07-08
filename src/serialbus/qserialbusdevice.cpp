@@ -151,6 +151,7 @@ QSerialBusDevice::QSerialBusDevice(QSerialBusBackend *backend, QSerialBusDeviceP
 {
     Q_D(QSerialBusDevice);
     d->busBackend = backend;
+    connect(d->busBackend.data(), &QSerialBusBackend::readyRead, this, &QIODevice::readyRead);
 }
 
 /*!
