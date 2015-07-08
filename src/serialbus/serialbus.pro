@@ -26,6 +26,7 @@ PRIVATE_HEADERS += \
 SOURCES += \
     qbusdummydevice.cpp \
     qcanbusdevice.cpp \
+    qcanframe.cpp \
     qserialbus.cpp \
     qserialbusdevice.cpp \
 

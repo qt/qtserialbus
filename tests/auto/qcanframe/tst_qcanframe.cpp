@@ -48,6 +48,9 @@ private slots:
     void id();
     void payload();
     void timeStamp();
+
+    void streaming_data();
+    void streaming();
 };
 
 tst_QCanFrame::tst_QCanFrame()
@@ -100,6 +103,44 @@ void tst_QCanFrame::timeStamp()
     timeStamp.setSeconds(4);
     QCOMPARE(timeStamp.seconds(), 4);
     QCOMPARE(timeStamp.microSeconds(), 5);
+}
+
+void tst_QCanFrame::streaming_data()
+{
+    QTest::addColumn<qint32>("frameId");
+    QTest::addColumn<QByteArray>("payload");
+    QTest::addColumn<qint64>("seconds");
+    QTest::addColumn<qint64>("microSeconds");
+
+    QTest::newRow("emptyFrame") << qint32(0) << QByteArray() << qint64(0) << qint64(0);
+    QTest::newRow("fullFrame") << qint32(123) << QByteArray("abcdef") << qint64(456) << qint64(789);
+}
+
+void tst_QCanFrame::streaming()
+{
+    QFETCH(qint32, frameId);
+    QFETCH(QByteArray, payload);
+    QFETCH(qint64, seconds);
+    QFETCH(qint64, microSeconds);
+
+    QCanFrame originalFrame(frameId, payload);
+    const QCanFrame::TimeStamp originalStamp(seconds, microSeconds);
+    originalFrame.setTimeStamp(originalStamp);
+
+    QByteArray buffer;
+    QDataStream out(&buffer, QIODevice::WriteOnly);
+    out << originalFrame;
+
+    QDataStream in(buffer);
+    QCanFrame restoredFrame;
+    in >> restoredFrame;
+    const QCanFrame::TimeStamp restoredStamp(restoredFrame.timeStamp());
+
+    QCOMPARE(restored.frameId(), original.frameId());
+    QCOMPARE(restored.payload(), original.payload());
+
+    QCOMPARE(restoredStamp.seconds(), originalStamp.seconds());
+    QCOMPARE(restoredStamp.microSeconds(), originalStamp.microSeconds());
 }
 
 QTEST_MAIN(tst_QCanFrame)

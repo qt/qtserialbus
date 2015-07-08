@@ -5,7 +5,7 @@
 **
 ** This file is part of the QtSerialBus module of the Qt Toolkit.
 **
-** $QT_BEGIN_LICENSE:LGPL$
+** $QT_BEGIN_LICENSE:LGPL3$
 ** Commercial License Usage
 ** Licensees holding valid commercial Qt licenses may use this file in
 ** accordance with the commercial license agreement provided with the
@@ -34,58 +34,47 @@
 **
 ****************************************************************************/
 
-#ifndef QCANFRAME_H
-#define QCANFRAME_H
+#include "qcanframe.h"
 
-#include <QtSerialBus/qserialbusglobal.h>
-
-#include <QtCore/qobject.h>
+#include <QtCore/qdatastream.h>
 
 QT_BEGIN_NAMESPACE
 
-class QDataStream;
-
-//TODO: review ctors for this class
-class Q_SERIALBUS_EXPORT QCanFrame
-{
-public:
-    class TimeStamp {
-    public:
-        Q_DECL_CONSTEXPR TimeStamp(qint64 s = 0, qint64 usec = 0) Q_DECL_NOTHROW
-            : secs(s), usecs(usec) {}
-        Q_DECL_CONSTEXPR qint64 seconds() const Q_DECL_NOTHROW { return secs; }
-        Q_DECL_CONSTEXPR qint64 microSeconds() const Q_DECL_NOTHROW { return usecs; }
-
-        inline void setSeconds(qint64 s) { secs = s; }
-        inline void setMicroSeconds(qint64 usec) { usecs = usec; }
-    private:
-        qint64 secs;
-        qint64 usecs;
-    };
-
-    QCanFrame(qint32 identifier = 0, QByteArray data = "") :
-        id(identifier), load(data) {}
-    inline void setFrameId(qint32 newFrameId) { id = newFrameId; }
-    inline void setPayload(const QByteArray &data) { load = data; }
-    inline void setTimeStamp(const TimeStamp &ts) { stamp = ts; }
-    inline qint32 frameId() const { return id; }
-    QByteArray payload() const { return load; }
-    TimeStamp timeStamp() const { return stamp; }
-
-private:
-    qint32 id;
-    QByteArray load;
-    TimeStamp stamp;
-};
-
-Q_DECLARE_TYPEINFO(QCanFrame, Q_MOVABLE_TYPE);
-Q_DECLARE_TYPEINFO(QCanFrame::TimeStamp, Q_PRIMITIVE_TYPE);
-
 #ifndef QT_NO_DATASTREAM
-Q_SERIALBUS_EXPORT QDataStream &operator<<(QDataStream &, const QCanFrame &);
-Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &, QCanFrame &);
-#endif
+
+/*! \relates QCanFrame
+
+    Writes frame \a frame to the stream \a out and returns a reference
+    to the stream.
+*/
+QDataStream &operator<<(QDataStream &out, const QCanFrame &frame)
+{
+    out << frame.frameId();
+    out << frame.payload();
+    const QCanFrame::TimeStamp stamp = frame.timeStamp();
+    out << stamp.seconds();
+    out << stamp.microSeconds();
+    return out;
+}
+
+/*! \relates QCanFrame
+
+    Reads a frame into \a frame from the stream \a in and returns a
+    reference to the stream.
+*/
+QDataStream &operator>>(QDataStream &in, QCanFrame &frame)
+{
+    qint32 frameId;
+    QByteArray payload;
+    qint64 seconds;
+    qint64 microSeconds;
+    in >> frameId >> payload >> seconds >> microSeconds;
+    frame.setFrameId(frameId);
+    frame.setPayload(payload);
+    frame.setTimeStamp(QCanFrame::TimeStamp(seconds, microSeconds));
+    return in;
+}
+
+#endif // QT_NO_DATASTREAM
 
 QT_END_NAMESPACE
-
-#endif // QCANFRAME_H
