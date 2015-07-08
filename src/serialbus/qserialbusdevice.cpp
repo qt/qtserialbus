@@ -39,8 +39,27 @@
 
 QT_BEGIN_NAMESPACE
 
+/*!
+    \class QSerialBusDevice
+    \inmodule QtSerialBus
+    \since 5.6
+
+    \brief The QSerialBusDevice class handles basic communication with serial bus backends.
+
+    QSerialBusDevice is a basic class for communicating with Qt Serial Bus backends.
+    QSerialBusDevice is usually inherited to provide a backend-specific API.
+
+    QSerialBusDevice handles reading from and writing to the backend, as well as opening and closing
+    it. In addition, QSerialBusDevice reroutes the readyRead() signal from the backend to the user.
+ */
+
 //TODO: state reporting missing
 //TODO: connected/disconnected signals
+/*!
+    Constructs a serial bus device with the specified \a parent and the \a backend.
+
+    The serial bus device takes ownership of the backend.
+ */
 QSerialBusDevice::QSerialBusDevice(QSerialBusBackend *backend, QObject *parent) :
     QIODevice(*new QSerialBusDevicePrivate, parent)
 {
@@ -51,9 +70,17 @@ QSerialBusDevice::QSerialBusDevice(QSerialBusBackend *backend, QObject *parent) 
     connect(d->busBackend.data(), &QSerialBusBackend::readyRead, this, &QIODevice::readyRead);
 }
 
+/*!
+    Destroys the serial bus device.
+ */
 QSerialBusDevice::~QSerialBusDevice()
 {
 }
+
+/*!
+    Reads at most \a maxSize bytes from the device into \a data. Returns the number of bytes read,
+    or \c -1 if an error occurred.
+*/
 
 qint64 QSerialBusDevice::readData(char *data, qint64 maxSize)
 {
@@ -65,6 +92,11 @@ qint64 QSerialBusDevice::readData(char *data, qint64 maxSize)
     return d->busBackend->read(data, maxSize);
 }
 
+/*!
+    Writes at most \a maxSize bytes from \a data to the device. Returns the number of bytes read,
+    or \c -1 if an error occurred.
+*/
+
 qint64 QSerialBusDevice::writeData(const char *data, qint64 maxSize)
 {
     Q_D(QSerialBusDevice);
@@ -75,6 +107,10 @@ qint64 QSerialBusDevice::writeData(const char *data, qint64 maxSize)
     return d->busBackend->write(data, maxSize);
 }
 
+/*!
+    Opens the device and sets its OpenMode to \a openMode. Returns \c true if successful;
+    otherwise returns \c false.
+ */
 bool QSerialBusDevice::open(QIODevice::OpenMode openMode)
 {
     Q_D(QSerialBusDevice);
@@ -93,6 +129,9 @@ bool QSerialBusDevice::open(QIODevice::OpenMode openMode)
     return true;
 }
 
+/*!
+    Closes the device and sets its OpenMode to \l QIODevice::NotOpen.
+ */
 void QSerialBusDevice::close()
 {
     Q_D(QSerialBusDevice);
@@ -104,7 +143,8 @@ void QSerialBusDevice::close()
     QIODevice::close();
 }
 
-/*! \internal
+/*!
+    \internal
 */
 QSerialBusDevice::QSerialBusDevice(QSerialBusBackend *backend, QSerialBusDevicePrivate &dd, QObject *parent)
     : QIODevice(dd, parent)
@@ -113,6 +153,9 @@ QSerialBusDevice::QSerialBusDevice(QSerialBusBackend *backend, QSerialBusDeviceP
     d->busBackend = backend;
 }
 
+/*!
+    Returns the backend in use.
+ */
 QSerialBusBackend *QSerialBusDevice::backend() const
 {
     Q_D(const QSerialBusDevice);

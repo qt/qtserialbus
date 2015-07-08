@@ -71,14 +71,18 @@ static void loadPlugins()
 /*!
     \class QSerialBus
     \inmodule QtSerialBus
+    \since 5.6
 
     \brief The QSerialBus class handles registration and creation of bus backends.
 
-    Bus plugins register backends using the registerBackend() function.
+    QSerialBus loads Qt Serial Bus plugins at runtime. The ownership of serial bus backends is
+    transferred to the loader. Usually, backends are not directly used but are given to
+    \l QSerialBusDevice or a class inherited from it.
 */
 
 /*!
- * \brief Returns pointer to the QSerialBus Class. The object is loaded if necessary.
+    Returns a pointer to the QSerialBus class. The object is loaded if necessary. QSerialBus
+    uses the singleton design pattern.
  */
 QSerialBus *QSerialBus::instance()
 {
@@ -88,8 +92,8 @@ QSerialBus *QSerialBus::instance()
 }
 
 /*!
- *   Register backend for the \a identifier. The \a identifier must be unique.
- *   The \a factory will be asked to create instances of the backend.
+    Registers a backend for the identifier specified by \a identifier, which must be unique.
+    The \a factory will be asked to create instances of the backend.
  */
 void QSerialBus::registerBackend(const QByteArray &identifier, QSerialBusBackendFactory *factory)
 {
@@ -98,7 +102,7 @@ void QSerialBus::registerBackend(const QByteArray &identifier, QSerialBusBackend
 }
 
 /*!
- * Returns QList of identifiers for all loaded plugins.
+    Returns a list of identifiers for all loaded plugins.
  */
 QList<QByteArray> QSerialBus::plugins()
 {
@@ -106,8 +110,12 @@ QList<QByteArray> QSerialBus::plugins()
 }
 
 /*!
- * Create a bus backend for \a identifier with \a type with \a name
- * Returns \c null if no suitable \a identifier can be found.
+    Creates a bus backend. \a identifier is the name of the plugin as returned by the \l plugins()
+    method. \a type is the type of the backend inside the plugin. A single plugin may contain more
+    than one backend. \a name is the network interface name.
+
+    Ownership of the returned backend is transferred to the caller.
+    Returns \c null if no suitable backend for the given identifier can be found.
  */
 QSerialBusBackend *QSerialBus::createBackend(const QByteArray &identifier,
                                              const QString &type, const QString &name) const
@@ -118,9 +126,10 @@ QSerialBusBackend *QSerialBus::createBackend(const QByteArray &identifier,
 }
 
 /*!
- * Returns a list of available backends names for \a identifier; otherwise
- * returns an empty list if no suitable \a identifier can be found.
- */
+    Returns a list of available backend names for \a identifier, or an empty list if no suitable
+    \a identifier can be found.
+*/
+
 QStringList QSerialBus::availableBackends(const QByteArray &identifier) const
 {
     if (QSerialBusBackendFactory *factory = qSerialBusPlugins()->value(identifier))
@@ -134,7 +143,34 @@ QSerialBus::QSerialBus(QObject *parent) :
     loadPlugins();
 }
 
+/*!
+    \class QSerialBusBackendFactory
+    \inmodule QtSerialBus
+    \since 5.6
 
+    \brief The QSerialBusBackendFactory class instantiates instances of serial bus backends.
+
+    This interface must be implemented in order to register a serial bus backend.
+ */
+
+/*!
+    \fn QSerialBusBackendFactory::createBackend(const QString &busBackend, const QString &name) const
+
+    Instantiates a backend. \a busBackend defines the backend in the plugin to be created. \a name
+    is the network interface name.
+
+    If the factory cannot create a backend, it should return 0.
+*/
+
+/*!
+    \fn QSerialBusBackendFactory::availableBackends() const
+
+    Lists the available backends.
+*/
+
+/*!
+    \internal
+ */
 QSerialBusBackendFactory::~QSerialBusBackendFactory()
 {
 }

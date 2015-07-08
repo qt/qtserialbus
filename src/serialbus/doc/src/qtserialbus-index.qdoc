@@ -1,0 +1,83 @@
+/****************************************************************************
+**
+** Copyright (C) 2015 The Qt Company Ltd.
+** Contact: http://www.qt.io/licensing/
+**
+** This file is part of the documentation of the Qt Toolkit.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see http://www.qt.io/terms-conditions. For further
+** information use the contact form at http://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: http://www.gnu.org/copyleft/fdl.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+    \page qtserialbus-index.html
+    \title Qt Serial Bus
+    \brief Provides a framework and implementation for SocketCAN
+
+    The Qt Serial Bus API provides classes and functions to access the SocketCAN serial bus
+    interface. However, the module is designed and named so that it can be extended with access to
+    any serial bus backend.
+
+    Currently, the API is supported on \l {Qt for Linux/X11}{Linux}.
+
+    \section1 Getting Started
+
+    To include the definitions of the module's classes and functions, use the
+    following directive:
+
+    \code
+    #include <QtSerialBus>
+    \endcode
+
+    To link against the module, add this line to your qmake .pro file:
+
+    \code
+    QT += serialbus
+    \endcode
+
+    \section1 Accessing Serial Bus Backends
+
+    The QSerialBus class handles registration and creation of serial bus backends. A backend is
+    implemented by the \l QSerialBusBackend class and acts as the access point to the actual device.
+    The backend handles the bit or byte level communication with the hardware and provides the
+    data and notifications to the \l QSerialBusDevice, which is the interface between the module
+    user and the actual bus.
+
+    \section1 Creating Qt Serial Bus Plugins
+
+    To create a new plugin for Qt Serial Bus, you should be familiar with the basic classes, as well
+    the \l QSerialBusPluginInterface class, which provides a pure virtual interface to serial bus
+    plugins.
+
+    \section1 Articles and Guides
+
+    \list
+         \li \l {Qt Serial Bus Plugins}
+         \li \l {Using SocketCAN with Qt Serial Bus}
+         \li \l {Developing Qt Serial Bus Backend}
+    \endlist
+
+    \section1 API Reference
+
+    These are links to the API reference materials.
+
+    \list
+         \li \l {Qt Serial Bus C++ Classes}{C++ Classes}
+    \endlist
+*/

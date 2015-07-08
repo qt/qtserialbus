@@ -1,4 +1,4 @@
-﻿/****************************************************************************
+/****************************************************************************
 **
 ** Copyright (C) 2015 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
@@ -47,15 +47,40 @@
 QT_BEGIN_NAMESPACE
 
 /*!
- *  \class QCanBusDevice
- *  \inmodule QtSerialBus
- *  \inherits QIODevice
- *
- *  \brief The QCanBusDevice is the interface class for CAN Bus.
- *  Working CAN backend must be given in object creation.
- *  QCanBusDevice takes ownership of QSerialBusBackend given in object creation.
- *  Frames written and read must be serialized/deserialized with QDataStream.
- *  writeFrame() serializes QCanFrame properly before writing.
+    \class QCanBusDevice
+    \inmodule QtSerialBus
+    \inherits QIODevice
+    \since 5.6
+
+    \brief The QCanBusDevice class is the interface class for CAN bus.
+
+    QCanBusDevice communicates with a CAN backend providing users with a convenient API.
+    The CAN backend must be specified during the object creation.
+ */
+
+/*!
+    \enum QCanBusDevice::CanBusError
+    This enum describes all the possible error conditions.
+
+    \value NoError              No errors have occurred.
+    \value ReadError            An error occurred during a read operation.
+    \value WriteError           An error occurred during a write operation.
+    \value ConnectionError      An error occurred when attempting to open the backend.
+    \value ConfigurationError   An error occurred when attempting to set a configuration
+                                parameter.
+ */
+
+/*!
+    \fn QCanBusDevice::errorOccurred(CanBusError error)
+
+    This signal is emitted when an error of the type \a error occurs.
+ */
+
+/*!
+    Constructs a serial bus device initialized with the \a backend to use and with the specified
+    \a parent.
+
+    QCanBusDevice takes ownership of \a backend.
  */
 QCanBusDevice::QCanBusDevice(QSerialBusBackend *backend, QObject *parent) :
     QSerialBusDevice(backend, *new QCanBusDevicePrivate, parent)
@@ -69,39 +94,73 @@ void QCanBusDevice::setError(QString errorString, int errorId)
     d->setError(errorString, errorId);
 }
 
-/*
- * For socketCAN following configurations can be done
- * QString key, QVariant value
- * key: Loopback value: True/False
- * key: ReceiveOwnMessages value: True/False
- * key: ErrorMask value: int
- * key: CanFilter value: QList<QVariant filter>,
- * QVariant filter is QHash<QString, QVariant>,
- * QHash has 2 keys: "FilterId" and "CanMask" both values are int
+/*!
+    Sets the configuration parameters for the bus backend. The key-value pair is backend-specific.
+
+    The following table lists the supported \a key and \a value pairs for the SocketCAN backend:
+
+    \table
+        \header
+            \li Key
+            \li Value
+        \row
+            \li Loopback
+            \li bool
+        \row
+            \li ReceiveOwnMessages
+            \li bool
+        \row
+            \li ErrorMask
+            \li int
+        \row
+            \li CanFilter
+            \li QList<QVariant filter>
+    \endtable
+
+    \c CanFilter contains a list of filters. Each filter consists of QHash<QString, QVariant>.
+    The following table lists the key-value pairs for the filters:
+
+    \table
+        \header
+            \li Key
+            \li Value
+        \row
+            \li FilterId
+            \li int
+        \row
+            \li CanMask
+            \li int
+    \endtable
+
+    \sa configurationParameter()
  */
 void QCanBusDevice::setConfigurationParameter(const QString &key, const QVariant &value)
 {
     backend()->setConfigurationParameter(key, value);
 }
 
+/*!
+    Returns the current value assigned to the configuration parameter \a key.
+
+    \sa setConfigurationParameter()
+ */
 QVariant QCanBusDevice::configurationParameter(const QString &key) const
 {
     return backend()->configurationParameter(key);
 }
 
+/*!
+    Returns the list of keys used by the backend.
+ */
 QVector<QString> QCanBusDevice::configurationKeys() const
 {
     return backend()->configurationKeys();
 }
 
 /*!
- * \brief Writes and serializes CAN frame to CAN bus. Both standard 8 byte frame
- * and 64 byte Flexible Data-Rate(FD) frame are supported
- * \param id Frame identifier. Standard 11 bits or 29 bits with extended frame format
- * \param data Data payload. Standard max 8 bytes. FD max 64 bytes
- * \param dataLength Bytes used in payload
- * \param EFF Extended frame format. Increases identifier size to 29 bits
- * \param RTR Remote transmission request. Mark frame as remote request frame.
+    Writes \a frame to the CAN bus.
+
+    \sa readFrame()
  */
 void QCanBusDevice::writeFrame(const QCanFrame &frame)
 {
@@ -110,7 +169,9 @@ void QCanBusDevice::writeFrame(const QCanFrame &frame)
 }
 
 /*!
- * \brief Reads one CAN frame worth of information from backend
+   Reads the information contained in one CAN frame from the backend.
+
+   \sa writeFrame()
  */
 QCanFrame QCanBusDevice::readFrame()
 {
@@ -120,9 +181,7 @@ QCanFrame QCanBusDevice::readFrame()
 }
 
 /*!
- * \brief Deserializes received data to QCanFrame format.
- * \param data Serialized data.
- * \param frame Frame to put all the data in.
+    \internal
  */
 QCanFrame QCanBusDevice::deserialize(const QByteArray &data)
 {
@@ -130,6 +189,10 @@ QCanFrame QCanBusDevice::deserialize(const QByteArray &data)
     return d->deserialize(data);
 }
 
+/*!
+    Returns the last error that has occurred. The error value is always set to last error that
+    occurred and it is never reset.
+ */
 QCanBusDevice::CanBusError QCanBusDevice::error() const
 {
     return d_func()->lastError;

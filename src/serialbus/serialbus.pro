@@ -1,4 +1,5 @@
 TARGET = QtSerialBus
+MODULE = serialbus
 QT = core-private
 
 QMAKE_DOCS = $$PWD/doc/qtserialbus.qdocconf
@@ -29,5 +30,7 @@ SOURCES += \
     qcanframe.cpp \
     qserialbus.cpp \
     qserialbusdevice.cpp \
+    qserialbusbackend.cpp \
+    qserialbusplugininterface.cpp
 
 HEADERS += $$PUBLIC_HEADERS $$PRIVATE_HEADERS

@@ -1,11 +1,40 @@
-outputdir   = html
+include($QT_INSTALL_DOCS/global/qt-module-defaults.qdocconf)
 
-headerdirs  += .. \
-               ../../plugins
+project                 = QtSerialBus
+description             = Qt Serial Bus Reference Documentation
+version                 = $QT_VERSION
 
-sourcedirs  += .. \
-               ../../plugins
+examplesinstallpath     = serialbus
 
-exampledirs = ../../../examples/
+qhp.projects            = QtSerialBus
 
-imagedirs   = ./images
+qhp.QtSerialBus.file         = qtserialbus.qhp
+qhp.QtSerialBus.namespace           = org.qt-project.qtserialbus.$QT_VERSION_TAG
+qhp.QtSerialBus.virtualFolder       = qtserialbus
+qhp.QtSerialBus.indexTitle          = Qt Serial Bus
+qhp.QtSerialBus.indexRoot           =
+
+qhp.QtSerialBus.filterAttributes    = qtserialbus $QT_VERSION qtrefdoc
+qhp.QtSerialBus.customFilters.Qt.name = QtSerialBus $QT_VERSION
+qhp.QtSerialBus.customFilters.Qt.filterAttributes = qtserialbus $QT_VERSION
+
+qhp.QtSerialBus.subprojects         = classes
+qhp.QtSerialBus.subprojects.classes.title = C++ Classes
+qhp.QtSerialBus.subprojects.classes.indexTitle = Qt Serial Bus C++ Classes
+qhp.QtSerialBus.subprojects.classes.selectors = class fake:headerfile
+qhp.QtSerialBus.subprojects.classes.sortPages = true
+
+tagfile                 = ../../../doc/qtserialbus/qtserialbus.tags
+
+depends += \
+    qtcore \
+    qtdoc
+
+headerdirs  += ..
+
+sourcedirs  += ..
+
+imagedirs   += images
+
+navigation.landingpage = "Qt Serial Bus"
+navigation.cppclassespage = "Qt Serial Bus C++ Classes"
