@@ -48,6 +48,7 @@ private slots:
     void initTestCase();
     void plugins();
     void createBackend();
+    void availableBackends();
 
 private:
     QSerialBus *bus;
@@ -78,6 +79,12 @@ void tst_QSerialBus::createBackend()
     QVERIFY(!faulty);
     QSerialBusBackend *dummy = bus->createBackend("dummy", "unused", "unused");
     QVERIFY(dummy);
+}
+
+void tst_QSerialBus::availableBackends()
+{
+    QStringList list = bus->availableBackends("faulty");
+    QVERIFY(list.isEmpty());
 }
 
 QTEST_MAIN(tst_QSerialBus)

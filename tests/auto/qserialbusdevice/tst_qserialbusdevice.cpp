@@ -34,7 +34,7 @@
 **
 ****************************************************************************/
 
-#include <QtSerialBus/QCanBusDevice>
+#include <QtSerialBus/QSerialBusDevice>
 #include <QtSerialBus/QCanFrame>
 #include <QtSerialBus/QSerialBusBackend>
 
@@ -84,114 +84,67 @@ private:
     QVector<QString> keys;
 };
 
-class tst_QCanBusDevice : public QObject
+class tst_QSerialBusDevice : public QObject
 {
     Q_OBJECT
 public:
-    explicit tst_QCanBusDevice();
+    explicit tst_QSerialBusDevice();
 
 private slots:
     void initTestCase();
-    void conf();
-    void write();
-    void read();
-    void version();
-    void error();
+    void open();
+    void readWrite();
+    void close();
     void cleanupTestCase();
 
 private:
-    QPointer<QCanBusDevice> device;
+    QPointer<QSerialBusDevice> device;
     QPointer<QSerialBusBackend> backend;
 };
 
-tst_QCanBusDevice::tst_QCanBusDevice() :
+tst_QSerialBusDevice::tst_QSerialBusDevice() :
     device(0),
     backend(0)
 {
 }
 
-void tst_QCanBusDevice::initTestCase()
+void tst_QSerialBusDevice::initTestCase()
 {
     backend = new tst_Backend();
-    device = new QCanBusDevice(backend);
+    device = new QSerialBusDevice(backend);
     QVERIFY(device);
     QVERIFY(backend);
 }
 
-void tst_QCanBusDevice::conf()
+void tst_QSerialBusDevice::open()
 {
-    device->setConfigurationParameter(QStringLiteral("test"), 1);
-    QVariant value = device->configurationParameter("test");
-    QVector<QString> keys = device->configurationKeys();
-    QVERIFY(keys.count());
-    QCOMPARE(value.toInt(), 1);
+    device->open(QIODevice::WriteOnly);
+    QCOMPARE(device->openMode(), QIODevice::WriteOnly);
+    device->open(QIODevice::ReadWrite);
+    QCOMPARE(device->openMode(), QIODevice::ReadWrite);
 }
 
-void tst_QCanBusDevice::write()
+void tst_QSerialBusDevice::readWrite()
 {
     QSignalSpy spy(backend, SIGNAL(written()));
-    QCanFrame frame;
-    frame.setPayload(QByteArray("testData"));
-    device->writeFrame(frame);
-    QCOMPARE(spy.count(), 0);
-
-    device->open(QIODevice::WriteOnly);
-    device->writeFrame(frame);
+    device->open(QIODevice::ReadWrite);
+    device->write("test");
+    device->read(72);
     QCOMPARE(spy.count(), 1);
 }
 
-void tst_QCanBusDevice::read()
-{
-    QCanFrame frame1 = device->readFrame();
-    device->open(QIODevice::ReadOnly);
-    QCanFrame frame2 = device->readFrame();
-    QVERIFY(!frame1.frameId());
-    QVERIFY(frame2.frameId());
-}
-
-void tst_QCanBusDevice::version()
-{
-    int version = 7;
-    device->setDataStreamVersion(version);
-    QCOMPARE(version, device->dataStreamVersion());
-}
-
-void tst_QCanBusDevice::error()
-{
-    QSignalSpy spy(device, SIGNAL(errorOccurred(CanBusError)));
-    QString testString(QStringLiteral("testString"));
-
-    //ReadError
-    emit backend->error(testString, 1);
-    QCOMPARE(testString, device->errorString());
-    QVERIFY(device->error() == 1);
-    QCOMPARE(spy.count(), 1);
-
-    //WriteError
-    emit backend->error(testString, 2);
-    QVERIFY(device->error() == 2);
-    QCOMPARE(spy.count(), 2);
-
-    //ConnectionError
-    emit backend->error(testString, 3);
-    QVERIFY(device->error() == 3);
-    QCOMPARE(spy.count(), 3);
-
-    //ConfigurationError
-    emit backend->error(testString, 4);
-    QVERIFY(device->error() == 4);
-    QCOMPARE(spy.count(), 4);
-
-    emit backend->error(testString, 5);
-}
-
-void tst_QCanBusDevice::cleanupTestCase()
+void tst_QSerialBusDevice::close()
 {
     device->close();
-    QCanFrame frame = device->readFrame();
-    QVERIFY(!frame.frameId());
+    QCOMPARE(device->openMode(), QIODevice::NotOpen);
 }
 
-QTEST_MAIN(tst_QCanBusDevice)
+void tst_QSerialBusDevice::cleanupTestCase()
+{
+    delete device;
+    QVERIFY(backend.isNull());
+}
 
-#include "tst_qcanbusdevice.moc"
+QTEST_MAIN(tst_QSerialBusDevice)
+
+#include "tst_qserialbusdevice.moc"

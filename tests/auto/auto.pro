@@ -3,3 +3,4 @@ SUBDIRS += cmake \
            qcanframe \
            qserialbus \
            qcanbusdevice \
+           qserialbusdevice \
