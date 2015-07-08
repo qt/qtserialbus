@@ -136,8 +136,8 @@ void tst_QCanFrame::streaming()
     in >> restoredFrame;
     const QCanFrame::TimeStamp restoredStamp(restoredFrame.timeStamp());
 
-    QCOMPARE(restored.frameId(), original.frameId());
-    QCOMPARE(restored.payload(), original.payload());
+    QCOMPARE(restoredFrame.frameId(), originalFrame.frameId());
+    QCOMPARE(restoredFrame.payload(), originalFrame.payload());
 
     QCOMPARE(restoredStamp.seconds(), originalStamp.seconds());
     QCOMPARE(restoredStamp.microSeconds(), originalStamp.microSeconds());
