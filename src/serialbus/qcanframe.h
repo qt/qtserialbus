@@ -63,22 +63,90 @@ public:
         qint64 usecs;
     };
 
-    explicit QCanFrame(qint32 identifier = 0, const QByteArray &data = QByteArray()) :
-        id(identifier), load(data) {}
-    inline void setFrameId(qint32 newFrameId) { id = newFrameId; }
+    enum FrameType {
+        UnknownFrame = 0,
+        DataFrame,
+        ErrorFrame,
+        RemoteRequestFrame
+    };
+
+    explicit QCanFrame(quint32 identifier = 0, const QByteArray &data = QByteArray()) :
+        canId(identifier & 0x1FFFFFFFU),
+        format(0x1),
+        isExtendedFrame(0x1),
+        version(0x0),
+        load(data)
+    {
+        Q_UNUSED(extra);
+        Q_UNUSED(reserved);
+    }
+
+    FrameType frameType() const
+    {
+        switch (format) {
+        case 0x1: return DataFrame;
+        case 0x2: return ErrorFrame;
+        case 0x3: return RemoteRequestFrame;
+        // no default to trigger warning
+        }
+
+        return UnknownFrame;
+    }
+
+    void setFrameType(FrameType newFormat)
+    {
+        switch (newFormat) {
+        case DataFrame:
+            format = 0x1; return;
+        case ErrorFrame:
+            format = 0x2; return;
+        case RemoteRequestFrame:
+            format = 0x3; return;
+        case UnknownFrame:
+            format = 0x0; return;
+        }
+    }
+
+    inline bool hasExtendedFrameFormat() const { return (isExtendedFrame & 0x1); }
+    inline void setExtendedFrameFormat(bool isExtended)
+    {
+        isExtendedFrame = (isExtended & 0x1);
+    }
+
+    inline quint32 frameId() const { return (canId & 0x1FFFFFFFU); }
+    inline void setFrameId(quint32 newFrameId)
+    {
+        canId = (newFrameId & 0x1FFFFFFFU);
+    }
+
     inline void setPayload(const QByteArray &data) { load = data; }
     inline void setTimeStamp(const TimeStamp &ts) { stamp = ts; }
-    inline qint32 frameId() const { return id; }
+
     QByteArray payload() const { return load; }
     TimeStamp timeStamp() const { return stamp; }
 
+#ifndef QT_NO_DATASTREAM
+    friend Q_SERIALBUS_EXPORT QDataStream &operator<<(QDataStream &, const QCanFrame &);
+    friend Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &, QCanFrame &);
+#endif
+
 private:
-    qint32 id;
+    quint32 canId:29;
+    quint8 format:3; // max of 8 frame types
+
+    quint8 isExtendedFrame:1;
+    quint8 version:5;
+    quint8 extra: 2; // unused
+
+    // reserved for future use
+    quint8 reserved[3];
+
     QByteArray load;
     TimeStamp stamp;
 };
 
 Q_DECLARE_TYPEINFO(QCanFrame, Q_MOVABLE_TYPE);
+Q_DECLARE_TYPEINFO(QCanFrame::FrameType, Q_PRIMITIVE_TYPE);
 Q_DECLARE_TYPEINFO(QCanFrame::TimeStamp, Q_PRIMITIVE_TYPE);
 
 #ifndef QT_NO_DATASTREAM

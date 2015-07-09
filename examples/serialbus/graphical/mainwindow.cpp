@@ -140,42 +140,27 @@ void MainWindow::checkMessages()
         if (frame.payload().isEmpty())
             return;
 
-        bool EFF = false;
-        bool RTR = false;
-        bool ERR = false;
-
         qint32 id = frame.frameId();
-        qint8 dataLength = frame.payload().size();
 
-        if (!dataLength)
-            return;
-
-        EFF = id & CAN_EFF_FLAG;
-        RTR = id & CAN_RTR_FLAG;
-        ERR = id & CAN_ERR_FLAG;
-
-        //removes possible flags from id
-        id &= ~(CAN_EFF_FLAG|CAN_RTR_FLAG|CAN_ERR_FLAG);
-
-        if (!EFF && id > 2047) //11 bits
+        if (!frame.hasExtendedFrameFormat() && id > 2047) // 11 bits
             id = 2047;
 
         QString view;
-        if (ERR) {
+        if (frame.frameType() == QCanFrame::ErrorFrame) {
             frame.setFrameId(id);
             interpretError(view, frame);
         } else {
             view += QLatin1String("Id: ");
             view += QString::number(id, 16);
             view += QLatin1String(" bytes: ");
-            view += QString::number(dataLength, 10);
+            view += QString::number(frame.payload().size(), 10);
             view += QLatin1String(" data: ");
             view += frame.payload().data();
         }
 
-        if (RTR) {
+        if (frame.frameType() == QCanFrame::RemoteRequestFrame) {
             ui->requestList->addItem(view);
-        } else if (ERR) {
+        } else if (frame.frameType() == QCanFrame::ErrorFrame) {
             ui->errorList->addItem(view);
         } else {
             ui->listWidget->addItem(view);
@@ -207,13 +192,15 @@ void MainWindow::on_sendButton_clicked()
         if (!ui->EFF->checkState() && id > 2047) //11 bits
             id = 2047;
 
-        if (ui->EFF->checkState())
-            id |= CAN_EFF_FLAG;
-        if (ui->RTR->checkState())
-            id |= CAN_RTR_FLAG;
-        if (ui->ERR->checkState())
-            id |= CAN_ERR_FLAG;
         frame.setFrameId(id);
+        frame.setExtendedFrameFormat(ui->EFF->checkState());
+
+        if (ui->RTR->checkState())
+            frame.setFrameType(QCanFrame::RemoteRequestFrame);
+        else if (ui->ERR->checkState())
+            frame.setFrameType(QCanFrame::ErrorFrame);
+        else
+            frame.setFrameType(QCanFrame::DataFrame);
 
         canDevice->writeFrame(frame);
     } else if (ui->comboBox->itemText(currentDevice) == QStringLiteral("dummy")) {

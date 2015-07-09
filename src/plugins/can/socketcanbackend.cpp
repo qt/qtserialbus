@@ -110,26 +110,30 @@ QByteArray SocketCanBackend::serialize(const QCanFrame &frame)
     QByteArray array;
     QDataStream stream(&array, QIODevice::WriteOnly);
 
-    stream << frame.frameId()
-           << frame.payload().data()
-           << frame.timeStamp().seconds()
-           << frame.timeStamp().microSeconds();
+    stream << frame;
     return array;
 }
 
 canfd_frame SocketCanBackend::deserialize(const QByteArray &array)
 {
-    canfd_frame frame;
     QDataStream stream(array);
-
+    QCanFrame newData;
     QByteArray payload;
 
-    stream >> frame.can_id
-            >> payload;
+    stream >> newData;
 
-    frame.len = payload.size();
+    canfd_frame frame;
+    frame.can_id = newData.frameId();
+    if (newData.hasExtendedFrameFormat())
+        frame.can_id |= CAN_EFF_FLAG;
+    if (newData.frameType() == QCanFrame::ErrorFrame)
+        frame.can_id |= CAN_ERR_FLAG;
+    if (newData.frameType() == QCanFrame::RemoteRequestFrame)
+        frame.can_id |= CAN_RTR_FLAG;
+
+    frame.len = newData.payload().size();
     for (int i = 0; i < frame.len ; i++)
-        frame.data[i] = payload.at(i);
+        frame.data[i] = newData.payload().at(i);
 
     return frame;
 }
@@ -309,7 +313,14 @@ void SocketCanBackend::readSocket()
 
         QCanFrame bufferedFrame;
         bufferedFrame.setTimeStamp(stamp);
-        bufferedFrame.setFrameId(frame.can_id);
+
+        bufferedFrame.setExtendedFrameFormat(frame.can_id & CAN_EFF_FLAG);
+        if (frame.can_id & CAN_RTR_FLAG)
+            bufferedFrame.setFrameType(QCanFrame::RemoteRequestFrame);
+        if (frame.can_id & CAN_ERR_FLAG)
+            bufferedFrame.setFrameType(QCanFrame::ErrorFrame);
+
+        bufferedFrame.setFrameId(frame.can_id & CAN_EFF_MASK);
 
         QByteArray load;
         for (int i = 0; i < frame.len ; i++)

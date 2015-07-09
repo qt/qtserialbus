@@ -75,14 +75,20 @@ void tst_QCanFrame::constructors()
 
     QVERIFY(timeStamp2.seconds());
     QVERIFY(timeStamp2.microSeconds());
+
+    QVERIFY(frame1.hasExtendedFrameFormat() == true);
+    QVERIFY(frame2.hasExtendedFrameFormat() == true);
+
+    QCOMPARE(frame1.frameType(), QCanFrame::DataFrame);
+    QCOMPARE(frame2.frameType(), QCanFrame::DataFrame);
 }
 
 void tst_QCanFrame::id()
 {
     QCanFrame frame;
     QVERIFY(!frame.frameId());
-    frame.setFrameId(512);
-    QCOMPARE(frame.frameId(), 512);
+    frame.setFrameId(512u);
+    QCOMPARE(frame.frameId(), 512u);
 }
 
 void tst_QCanFrame::payload()
@@ -107,25 +113,52 @@ void tst_QCanFrame::timeStamp()
 
 void tst_QCanFrame::streaming_data()
 {
-    QTest::addColumn<qint32>("frameId");
+    QTest::addColumn<quint32>("frameId");
     QTest::addColumn<QByteArray>("payload");
     QTest::addColumn<qint64>("seconds");
     QTest::addColumn<qint64>("microSeconds");
+    QTest::addColumn<bool>("isExtended");
+    QTest::addColumn<QCanFrame::FrameType>("frameType");
 
-    QTest::newRow("emptyFrame") << qint32(0) << QByteArray() << qint64(0) << qint64(0);
-    QTest::newRow("fullFrame") << qint32(123) << QByteArray("abcdef") << qint64(456) << qint64(789);
+
+    QTest::newRow("emptyFrame") << quint32(0) << QByteArray()
+                                << qint64(0) << qint64(0)
+                                << false << QCanFrame::DataFrame;
+    QTest::newRow("fullFrame1") << quint32(123) << QByteArray("abcde1")
+                               << qint64(456) << qint64(784)
+                               << true << QCanFrame::DataFrame;
+    QTest::newRow("fullFrame2") << quint32(123) << QByteArray("abcde2")
+                               << qint64(457) << qint64(785)
+                               << false << QCanFrame::DataFrame;
+    QTest::newRow("fullFrame3") << quint32(123) << QByteArray("abcde3")
+                               << qint64(458) << qint64(786)
+                               << true << QCanFrame::RemoteRequestFrame;
+    QTest::newRow("fullFrame4") << quint32(123) << QByteArray("abcde4")
+                               << qint64(459) << qint64(787)
+                               << false << QCanFrame::RemoteRequestFrame;
+    QTest::newRow("fullFrame5") << quint32(123) << QByteArray("abcde5")
+                               << qint64(460) << qint64(789)
+                               << true << QCanFrame::ErrorFrame;
+    QTest::newRow("fullFrame6") << quint32(123) << QByteArray("abcde6")
+                               << qint64(453) << qint64(788)
+                               << false << QCanFrame::ErrorFrame;
 }
 
 void tst_QCanFrame::streaming()
 {
-    QFETCH(qint32, frameId);
+    QFETCH(quint32, frameId);
     QFETCH(QByteArray, payload);
     QFETCH(qint64, seconds);
     QFETCH(qint64, microSeconds);
+    QFETCH(bool, isExtended);
+    QFETCH(QCanFrame::FrameType, frameType);
 
     QCanFrame originalFrame(frameId, payload);
     const QCanFrame::TimeStamp originalStamp(seconds, microSeconds);
     originalFrame.setTimeStamp(originalStamp);
+
+    originalFrame.setExtendedFrameFormat(isExtended);
+    originalFrame.setFrameType(frameType);
 
     QByteArray buffer;
     QDataStream out(&buffer, QIODevice::WriteOnly);
@@ -141,7 +174,13 @@ void tst_QCanFrame::streaming()
 
     QCOMPARE(restoredStamp.seconds(), originalStamp.seconds());
     QCOMPARE(restoredStamp.microSeconds(), originalStamp.microSeconds());
+
+    QCOMPARE(restoredFrame.frameType(), originalFrame.frameType());
+    QCOMPARE(restoredFrame.hasExtendedFrameFormat(),
+             originalFrame.hasExtendedFrameFormat());
 }
+
+Q_DECLARE_METATYPE(QCanFrame::FrameType)
 
 QTEST_MAIN(tst_QCanFrame)
 

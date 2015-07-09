@@ -167,6 +167,9 @@ QT_BEGIN_NAMESPACE
 QDataStream &operator<<(QDataStream &out, const QCanFrame &frame)
 {
     out << frame.frameId();
+    out << static_cast<quint8>(frame.frameType());
+    out << static_cast<quint8>(frame.version);
+    out << frame.hasExtendedFrameFormat();
     out << frame.payload();
     const QCanFrame::TimeStamp stamp = frame.timeStamp();
     out << stamp.seconds();
@@ -181,14 +184,26 @@ QDataStream &operator<<(QDataStream &out, const QCanFrame &frame)
 */
 QDataStream &operator>>(QDataStream &in, QCanFrame &frame)
 {
-    qint32 frameId;
+    quint32 frameId;
+    quint8 frameType;
+    quint8 version;
+    bool extendedFrameFormat;
     QByteArray payload;
     qint64 seconds;
     qint64 microSeconds;
-    in >> frameId >> payload >> seconds >> microSeconds;
+
+    in >> frameId >> frameType >> version >> extendedFrameFormat
+       >> payload >> seconds >> microSeconds;
+
     frame.setFrameId(frameId);
-    frame.setPayload(payload);
+    frame.version = version;
+
+    frame.setFrameType(static_cast<QCanFrame::FrameType>(frameType));
+    frame.setExtendedFrameFormat(extendedFrameFormat);
+        frame.setPayload(payload);
+
     frame.setTimeStamp(QCanFrame::TimeStamp(seconds, microSeconds));
+
     return in;
 }
 

@@ -211,23 +211,8 @@ QCanFrame QCanBusDevicePrivate::deserialize(const QByteArray &data)
         return frame;
 
     QDataStream stream(data);
-    QByteArray payload;
-    qint32 id;
-    qint64 sec;
-    qint64 usec;
+    stream >> frame;
 
-    stream >> id
-            >> payload
-            >> sec
-            >> usec;
-
-    QCanFrame::TimeStamp stamp;
-    stamp.setSeconds(sec);
-    stamp.setMicroSeconds(usec);
-
-    frame.setFrameId(id);
-    frame.setPayload(payload);
-    frame.setTimeStamp(stamp);
     return frame;
 }
 
@@ -235,8 +220,8 @@ QByteArray QCanBusDevicePrivate::serialize(const QCanFrame &frame)
 {
     QByteArray data;
     QDataStream stream(&data, QIODevice::ReadWrite);
-    stream << frame.frameId()
-           << frame.payload();
+
+    stream << frame;
     return data;
 }
 
