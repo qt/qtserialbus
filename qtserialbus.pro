@@ -8,8 +8,6 @@ qtCompileTest(socketcan_fd)
 load(qt_parts)
 
 linux {
-    !config_socketcan:
-        warning("You need linux/can.h and linux/can/raw.h linux headers for socketCAN support, disabling it")
-    !config_socketcan_fd:
-        warning("Newer kernel needed for flexible data-rate frame support 'canfd_frame'")
+    !config_socketcan:warning("You need linux/can.h and linux/can/raw.h linux headers for socketCAN support, disabling it")
+    !config_socketcan_fd:warning("Newer kernel needed for flexible data-rate frame support 'canfd_frame'")
 }
