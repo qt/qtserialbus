@@ -57,7 +57,8 @@ public:
         ReadError,
         WriteError,
         ConnectionError,
-        ConfigurationError
+        ConfigurationError,
+        UnknownError
     };
     Q_ENUM(CanBusError)
 

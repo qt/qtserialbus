@@ -68,6 +68,7 @@ QT_BEGIN_NAMESPACE
     \value ConnectionError      An error occurred when attempting to open the backend.
     \value ConfigurationError   An error occurred when attempting to set a configuration
                                 parameter.
+    \value UnknownError         An unknown error occurred.
  */
 
 /*!
@@ -258,7 +259,9 @@ void QCanBusDevicePrivate::setError(const QString &errorString, int errorId)
     case QCanBusDevice::CanBusError::ConfigurationError:
         lastError = QCanBusDevice::CanBusError::ConfigurationError;
         break;
+    case QCanBusDevice::CanBusError::UnknownError:
     default:
+        lastError = QCanBusDevice::CanBusError::UnknownError;
         break;
     }
     emit q->errorOccurred(lastError);

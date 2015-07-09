@@ -171,7 +171,15 @@ void tst_QCanBusDevice::error()
     QVERIFY(device->error() == 4);
     QCOMPARE(spy.count(), 4);
 
+    //UnknownError
     emit backend->error(testString, 5);
+    QVERIFY(device->error() == 5);
+    QCOMPARE(spy.count(), 5);
+
+    //Faulty error identifier
+    emit backend->error(testString, 100);
+    QVERIFY(device->error() == 5);
+    QCOMPARE(spy.count(), 6);
 }
 
 void tst_QCanBusDevice::cleanupTestCase()
