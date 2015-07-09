@@ -1,4 +1,6 @@
 TEMPLATE = subdirs
-qtHaveModule(widgets) {
+
+# right now compiles on Linux only
+linux:qtHaveModule(widgets) {
     SUBDIRS += graphical
 }
