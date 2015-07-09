@@ -1,10 +1,3 @@
 Method for asking connection state and proper signaling should be added.
 
-Buffer for socketCAN backend should be added so that read can be non-blocking
-
-Documentation should be done properly for everything.
-
-Check d pointer pattern with qserialbus / qserialbusdevice / qcanbusdevice
-
-Example app should be cleaned up. It is bit too convoluted because of iterative implementation method. Also defined flags from socket CAN header should not be used.
-
+Defined flags from socket CAN header should not be used.

@@ -37,16 +37,6 @@
      <string>send</string>
     </property>
    </widget>
-   <widget class="QComboBox" name="comboBox">
-    <property name="geometry">
-     <rect>
-      <x>850</x>
-      <y>70</y>
-      <width>85</width>
-      <height>27</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QListWidget" name="listWidget">
     <property name="geometry">
      <rect>
@@ -117,45 +107,6 @@
     </property>
     <property name="text">
      <string>RTR</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="connectButton">
-    <property name="geometry">
-     <rect>
-      <x>600</x>
-      <y>40</y>
-      <width>171</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Connect</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="connectedToLabel">
-    <property name="geometry">
-     <rect>
-      <x>850</x>
-      <y>120</y>
-      <width>341</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Connected to :</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_3">
-    <property name="geometry">
-     <rect>
-      <x>850</x>
-      <y>40</y>
-      <width>67</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Plugins:</string>
     </property>
    </widget>
    <widget class="QListWidget" name="requestList">
@@ -241,6 +192,78 @@
     </property>
     <property name="text">
      <string>ERR</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="connectButton">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>130</y>
+      <width>131</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Connect</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="deviceEdit">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>40</y>
+      <width>231</width>
+      <height>27</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>20</y>
+      <width>67</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Device</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="deviceLabel">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>70</y>
+      <width>441</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Connected to:</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="pluginBox">
+    <property name="geometry">
+     <rect>
+      <x>960</x>
+      <y>40</y>
+      <width>241</width>
+      <height>27</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_7">
+    <property name="geometry">
+     <rect>
+      <x>960</x>
+      <y>20</y>
+      <width>67</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Plugin</string>
     </property>
    </widget>
   </widget>

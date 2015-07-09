@@ -70,20 +70,21 @@ public:
 private Q_SLOTS:
 
     void checkMessages();
-    void on_sendButton_clicked();
+    void on_sendButton_clicked() const;
+    void receiveError(QCanBusDevice::CanBusError) const;
     void on_connectButton_clicked();
-    void receiveError(QCanBusDevice::CanBusError);
+    void on_pluginBox_activated(int index);
 
 private:
     void init();
+    void connectDevice(int pluginIndex);
     void interpretError(QString&, const QCanBusFrame&);
 
-    QPointer<QCanBus> canBus;
-    QPointer<QCanBusDevice> dummyDevice;
     QPointer<QCanBusDevice> canDevice;
+    QString deviceName;
+    QList<QByteArray> plugins;
+
     Ui::MainWindow *ui;
-    QList<QSerialBusDevice *> devices;
-    qint64 currentDevice;
 };
 
 #endif // MAINWINDOW_H

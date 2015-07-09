@@ -38,6 +38,7 @@
 **
 ****************************************************************************/
 
+#include "global.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -48,15 +49,10 @@
 #include <QtCore/qvariant.h>
 #include <QtCore/qdebug.h>
 
-#include <iostream>
-
-#include <linux/can.h>
-#include <linux/can/error.h>
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    currentDevice(0)
+    deviceName(QStringLiteral("")),
+    ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     init();
@@ -67,54 +63,46 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+
 void MainWindow::init()
 {
-    canBus = QCanBus::instance();
-    if (!canBus)
-        return;
+    QPointer<QCanBus> canBus = QCanBus::instance();
 
-    const QList<QByteArray> plugins = canBus->plugins();
+    plugins = canBus->plugins();
     for (int i = 0; i < plugins.size(); i++)
-    {
-        ui->comboBox->insertItem(i, plugins.at(i));
-
-        if (plugins.at(i) == QStringLiteral("socketcan")) {
-            //TODO find way to dynamically detect vcan1
-            //TODO potentially instanciate every backend in the plugin - not just first
-            canDevice = canBus->createDevice(plugins.at(i), QStringLiteral("vcan1"));
-            connect(canDevice.data(), &QCanBusDevice::errorOccurred, this, &MainWindow::receiveError);
-            if (!canDevice)
-                return;
-            if (!canDevice->connectDevice())
-                return;
-            /*QList<QVariant> var;
-            QHash<QString, QVariant> hash;
-            hash.insert(QStringLiteral("FilterId"), 1);
-            hash.insert(QStringLiteral("CanMask"), CAN_EFF_MASK);
-            var.append(hash);
-            canDevice->setConfigurationParameter(QStringLiteral("CanFilter"), var);*/ //NOTE: Filtering example
-            canDevice->setConfigurationParameter(QStringLiteral("ReceiveOwnMessages"), QVariant(1));
-            connect(canDevice.data(), &QCanBusDevice::frameReceived,
-                    this, &MainWindow::checkMessages);
-        } else if (plugins.at(i) == QStringLiteral("generic")) {
-            dummyDevice = canBus->createDevice(plugins.at(i), QString());
-            if (!dummyDevice)
-                return;
-            dummyDevice->connectDevice();
-            connect(dummyDevice.data(), &QCanBusDevice::frameReceived,
-                    this, &MainWindow::checkMessages);
-        }
-    }
-    on_connectButton_clicked(); //initialize plugin selection
+        ui->pluginBox->insertItem(i, plugins.at(i));
+    connectDevice(ui->pluginBox->currentIndex());
 }
 
-void MainWindow::receiveError(QCanBusDevice::CanBusError error)
+void MainWindow::connectDevice(int pluginIndex)
+{
+    QPointer<QCanBus> canBus = QCanBus::instance();
+
+    canDevice = canBus->createDevice(plugins.at(pluginIndex), deviceName);
+
+    if (canDevice.isNull())
+        return;
+    connect(canDevice.data(), &QCanBusDevice::errorOccurred, this, &MainWindow::receiveError);
+    if (!canDevice->connectDevice()) {
+        canDevice.clear();
+        return;
+    }
+    canDevice->setConfigurationParameter(QStringLiteral("ReceiveOwnMessages"), QVariant(1));
+    connect(canDevice.data(), &QCanBusDevice::frameReceived, this, &MainWindow::checkMessages);
+
+    ui->deviceLabel->setText("Connected to: " + deviceName);
+
+    checkMessages();
+}
+
+void MainWindow::receiveError(QCanBusDevice::CanBusError error) const
 {
     switch (error) {
     case QCanBusDevice::ReadError:
     case QCanBusDevice::WriteError:
     case QCanBusDevice::ConnectionError:
     case QCanBusDevice::ConfigurationError:
+    case QCanBusDevice::UnknownError:
         qWarning() << canDevice->errorString();
     default:
         break;
@@ -123,29 +111,17 @@ void MainWindow::receiveError(QCanBusDevice::CanBusError error)
 
 void MainWindow::checkMessages()
 {
-    QCanBusDevice *device = qobject_cast<QCanBusDevice *>(sender());
-
-    // for now filter the correct device out
-    if (ui->comboBox->itemText(currentDevice) == QStringLiteral("socketcan")
-            && device != canDevice)
-        device = 0;
-
-    if (ui->comboBox->itemText(currentDevice) == QStringLiteral("generic")
-            && device != dummyDevice)
-        device = 0;
-
-    if (!device)
+    if (canDevice.isNull())
         return;
 
-    const QCanBusFrame frame = device->readFrame();
+    const QCanBusFrame frame = canDevice->readFrame();
 
     if (frame.payload().isEmpty())
         return;
 
-    qint32 id = frame.frameId();
+    const qint8 dataLength = frame.payload().size();
 
-    if (!frame.hasExtendedFrameFormat() && id > 2047) // 11 bits
-        id = 2047;
+    const qint32 id = frame.frameId();
 
     QString view;
     if (frame.frameType() == QCanBusFrame::ErrorFrame) {
@@ -154,7 +130,7 @@ void MainWindow::checkMessages()
         view += QLatin1String("Id: ");
         view += QString::number(id, 16);
         view += QLatin1String(" bytes: ");
-        view += QString::number(frame.payload().size(), 10);
+        view += QString::number(dataLength, 10);
         view += QLatin1String(" data: ");
         view += frame.payload().data();
     }
@@ -168,13 +144,10 @@ void MainWindow::checkMessages()
     }
 }
 
-void MainWindow::on_sendButton_clicked()
+void MainWindow::on_sendButton_clicked() const
 {
-    if (!canDevice || !dummyDevice) {
-        init();
-        if (!canDevice || !dummyDevice)
-            return;
-    }
+    if (canDevice.isNull())
+        return;
 
     QByteArray writings = ui->lineEdit->displayText().toUtf8();
     ui->lineEdit->clear();
@@ -202,18 +175,23 @@ void MainWindow::on_sendButton_clicked()
     else
         frame.setFrameType(QCanBusFrame::DataFrame);
 
-    if (ui->comboBox->itemText(currentDevice) == QStringLiteral("socketcan")) {
-        canDevice->writeFrame(frame);
-    } else if (ui->comboBox->itemText(currentDevice) == QStringLiteral("generic")) {
-        dummyDevice->writeFrame(frame);
-    }
+    canDevice->writeFrame(frame);
 }
 
 void MainWindow::on_connectButton_clicked()
 {
-    currentDevice = ui->comboBox->currentIndex();
-    ui->connectedToLabel->setText("Connected to : " + ui->comboBox->currentText());
-    checkMessages();
+    canDevice.clear();
+    deviceName = ui->deviceEdit->text();
+    ui->deviceEdit->clear();
+    ui->deviceLabel->setText("Connected to:");
+    connectDevice(ui->pluginBox->currentIndex());
+}
+
+void MainWindow::on_pluginBox_activated(int index)
+{
+    canDevice.clear();
+    ui->deviceLabel->setText("Connected to:");
+    connectDevice(index);
 }
 
 void MainWindow::interpretError(QString &view, const QCanBusFrame &frame)
