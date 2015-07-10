@@ -56,14 +56,14 @@ public:
         Q_DECL_CONSTEXPR qint64 seconds() const Q_DECL_NOTHROW { return secs; }
         Q_DECL_CONSTEXPR qint64 microSeconds() const Q_DECL_NOTHROW { return usecs; }
 
-        inline void setSeconds(qint64 s) { secs = s; }
-        inline void setMicroSeconds(qint64 usec) { usecs = usec; }
+        Q_DECL_RELAXED_CONSTEXPR void setSeconds(qint64 s) Q_DECL_NOTHROW { secs = s; }
+        Q_DECL_RELAXED_CONSTEXPR void setMicroSeconds(qint64 usec) Q_DECL_NOTHROW { usecs = usec; }
     private:
         qint64 secs;
         qint64 usecs;
     };
 
-    QCanFrame(qint32 identifier = 0, QByteArray data = "") :
+    explicit QCanFrame(qint32 identifier = 0, const QByteArray &data = QByteArray()) :
         id(identifier), load(data) {}
     inline void setFrameId(qint32 newFrameId) { id = newFrameId; }
     inline void setPayload(const QByteArray &data) { load = data; }
