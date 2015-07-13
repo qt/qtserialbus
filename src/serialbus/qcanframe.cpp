@@ -54,13 +54,13 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \fn QCanFrame::QCanFrame(qint32 identifier, QByteArray data)
+    \fn QCanFrame::QCanFrame(quint32 identifier, const QByteArray &data)
 
     Constructs a CAN frame using \a identifier as the frame identifier and \a data as the payload.
  */
 
 /*!
-    \fn QCanFrame::setFrameId(qint32 newFrameId)
+    \fn QCanFrame::setFrameId(quint32 newFrameId)
 
     Sets the identifier of the CAN frame to \a newFrameId. The maximum size of a CAN frame
     identifier is 11 bits, which can be extended to 29 bits by supporting the \e {CAN extended frame
@@ -88,11 +88,59 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \fn qint32 QCanFrame::frameId() const
+    \fn quint32 QCanFrame::frameId() const
 
-    Returns the CAN frame identifier.
+    Returns the CAN frame identifier. If the CAN frame uses the
+    extended frame format, the identifier has a maximum of 29 bits;
+    otherwise 11 bits.
 
-    \sa setFrameId()
+    \sa setFrameId(), hasExtendedFrameFormat()
+ */
+
+/*!
+    \fn bool QCanFrame::hasExtendedFrameFormat() const
+
+    Returns \c true if the can frame uses a 29bit identifier;
+    otherwise \c false, implying an 11bit identifier.
+
+    \sa setExtendedFrameFormat(), frameId()
+ */
+
+/*!
+    \fn  void QCanFrame::setExtendedFrameFormat(bool isExtended)
+
+    Sets the extended frame format flag to \a isExtended.
+
+    \sa hasExtendedFrameFormat()
+ */
+
+/*!
+    \enum QCanFrame::FrameType
+
+    This enum describes the type of the CAN frame.
+
+    \value UnknownFrame         The frame type is unknown.
+    \value DataFrame            This value represents a data frame.
+    \value ErrorFrame           This value represents an error frame.
+    \value RemoteRequestFrame   This value represents a remote request.
+
+    \sa setFrameType()
+ */
+
+/*!
+    \fn FrameType QCanFrame::frameType() const
+
+    Returns the type of the frame.
+
+    \sa setFrameType()
+ */
+
+/*!
+    \fn void QCanFrame::setFrameType(FrameType newType)
+
+    Sets the type of the frame to \a newType.
+
+    \sa frameType()
  */
 
 /*!
