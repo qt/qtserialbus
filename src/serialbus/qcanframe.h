@@ -46,7 +46,7 @@ QT_BEGIN_NAMESPACE
 class QDataStream;
 
 //TODO: review ctors for this class
-class Q_SERIALBUS_EXPORT QCanFrame
+class QCanFrame
 {
 public:
     class TimeStamp {
