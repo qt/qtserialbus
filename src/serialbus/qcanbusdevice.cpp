@@ -165,8 +165,12 @@ QVector<QString> QCanBusDevice::configurationKeys() const
  */
 void QCanBusDevice::writeFrame(const QCanFrame &frame)
 {
-    Q_D(QCanBusDevice);
-    write(d->writeFrame(frame));
+    QByteArray data;
+    QDataStream stream(&data, QIODevice::ReadWrite);
+
+    stream << frame;
+
+    write(data);
 }
 
 /*!
@@ -178,34 +182,8 @@ QCanFrame QCanBusDevice::readFrame()
 {
     //TODO: when additional can backends are implemented,
     //some kind of frame size chooser must be added
-    return deserialize(read(SOCKET_CAN_MTU));
-}
 
-/*!
-    \internal
- */
-QCanFrame QCanBusDevice::deserialize(const QByteArray &data)
-{
-    Q_D(QCanBusDevice);
-    return d->deserialize(data);
-}
-
-/*!
-    Returns the last error that has occurred. The error value is always set to last error that
-    occurred and it is never reset.
- */
-QCanBusDevice::CanBusError QCanBusDevice::error() const
-{
-    return d_func()->lastError;
-}
-
-QByteArray QCanBusDevicePrivate::writeFrame(const QCanFrame &frame)
-{
-    return serialize(frame);
-}
-
-QCanFrame QCanBusDevicePrivate::deserialize(const QByteArray &data)
-{
+    QByteArray data = read(SOCKET_CAN_MTU);
     QCanFrame frame;
     if (data.isEmpty())
         return frame;
@@ -216,13 +194,13 @@ QCanFrame QCanBusDevicePrivate::deserialize(const QByteArray &data)
     return frame;
 }
 
-QByteArray QCanBusDevicePrivate::serialize(const QCanFrame &frame)
+/*!
+    Returns the last error that has occurred. The error value is always set to last error that
+    occurred and it is never reset.
+ */
+QCanBusDevice::CanBusError QCanBusDevice::error() const
 {
-    QByteArray data;
-    QDataStream stream(&data, QIODevice::ReadWrite);
-
-    stream << frame;
-    return data;
+    return d_func()->lastError;
 }
 
 void QCanBusDevicePrivate::setError(const QString &errorString, int errorId)

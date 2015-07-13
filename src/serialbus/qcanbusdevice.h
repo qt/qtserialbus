@@ -69,7 +69,6 @@ public:
 
     void writeFrame(const QCanFrame &frame);
     QCanFrame readFrame();
-    QCanFrame deserialize(const QByteArray &data);
     CanBusError error() const;
 
 Q_SIGNALS:
