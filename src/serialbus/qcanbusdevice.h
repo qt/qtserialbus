@@ -72,11 +72,13 @@ public:
     CanBusError error() const;
 
 Q_SIGNALS:
-    void errorOccurred(CanBusError);
+    void errorOccurred(QCanBusDevice::CanBusError);
 
 private Q_SLOTS:
     void setError(QString, int);
 };
+
+Q_DECLARE_TYPEINFO(QCanBusDevice::CanBusError, Q_PRIMITIVE_TYPE);
 
 QT_END_NAMESPACE
 
