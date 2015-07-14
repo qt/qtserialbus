@@ -45,33 +45,54 @@ class tst_Backend : public QSerialBusBackend
 {
     Q_OBJECT
 public:
-    qint64 read(char *buffer, qint64)
+    tst_Backend()
+    {
+        referenceFrame.setFrameId(5);
+        referenceFrame.setPayload(QByteArray("FOOBAR"));
+        QCanFrame::TimeStamp stamp;
+        stamp.setSeconds(22);
+        stamp.setMicroSeconds(23);
+        referenceFrame.setTimeStamp(stamp);
+        referenceFrame.setExtendedFrameFormat(1);
+
+        QByteArray data;
+        QDataStream stream(&data, QIODevice::ReadWrite);
+        stream << referenceFrame;
+
+        referenceFrameSize = data.size();
+    }
+
+
+    qint64 read(char *buffer, qint64 size)
     {
         QByteArray data;
-        QDataStream stream(&data, QIODevice::WriteOnly);
-        QByteArray payload;
-        payload.append('A');
-        qint32 id = 22;
-        qint32 sec = 22;
-        qint32 usec = 22;
-        stream << id;
-        stream << payload;
-        stream << sec;
-        stream << usec;
-        memcpy(buffer, data.constData(), 72);
-        return 72;
-    };
-    bool open(QIODevice::OpenMode) { return true; };
-    void close() {};
+        QDataStream stream(&data, QIODevice::ReadWrite);
+        stream << referenceFrame;
+
+        if (data.size() <= size) {
+            memcpy(buffer, data.constData(), data.size());
+            return data.size();
+        }
+
+        return -1;
+    }
+
+    bool open(QIODevice::OpenMode) { return true; }
+    void close() {}
     void setConfigurationParameter(const QString &key, const QVariant &param)
     {
         value = param;
         keys.append(key);
-    };
-    QVariant configurationParameter(const QString&) const { return value; } ;
-    QVector<QString> configurationKeys() const { return keys; };
-    qint64 write(const char*, qint64) { emit written(); return 72; };
-    qint64 bytesAvailable() const { return 72; };
+    }
+    QVariant configurationParameter(const QString&) const { return value; }
+    QVector<QString> configurationKeys() const { return keys; }
+
+    qint64 write(const char*, qint64) {
+        emit written();
+        return referenceFrameSize;
+    }
+
+    qint64 bytesAvailable() const { return referenceFrameSize; }
 
 signals:
     void written();
@@ -79,6 +100,8 @@ signals:
 private:
     QVariant value;
     QVector<QString> keys;
+    QCanFrame referenceFrame;
+    qint64 referenceFrameSize;
 };
 
 class tst_QCanBusDevice : public QObject
@@ -104,12 +127,14 @@ tst_QCanBusDevice::tst_QCanBusDevice() :
     device(0),
     backend(0)
 {
+    qRegisterMetaType<QCanBusDevice::CanBusError>();
 }
 
 void tst_QCanBusDevice::initTestCase()
 {
     backend = new tst_Backend();
     device = new QCanBusDevice(backend);
+    QVERIFY(device->open(QIODevice::ReadWrite));
     QVERIFY(device);
     QVERIFY(backend);
 }
@@ -128,6 +153,7 @@ void tst_QCanBusDevice::write()
     QSignalSpy spy(backend, SIGNAL(written()));
     QCanFrame frame;
     frame.setPayload(QByteArray("testData"));
+    device->close();
     device->writeFrame(frame);
     QCOMPARE(spy.count(), 0);
 
@@ -139,7 +165,7 @@ void tst_QCanBusDevice::write()
 void tst_QCanBusDevice::read()
 {
     QCanFrame frame1 = device->readFrame();
-    device->open(QIODevice::ReadOnly);
+    QVERIFY(device->open(QIODevice::ReadOnly));
     QCanFrame frame2 = device->readFrame();
     QVERIFY(!frame1.frameId());
     QVERIFY(frame2.frameId());
@@ -147,7 +173,7 @@ void tst_QCanBusDevice::read()
 
 void tst_QCanBusDevice::error()
 {
-    QSignalSpy spy(device, SIGNAL(errorOccurred(CanBusError)));
+    QSignalSpy spy(device, SIGNAL(errorOccurred(QCanBusDevice::CanBusError)));
     QString testString(QStringLiteral("testString"));
 
     //ReadError
