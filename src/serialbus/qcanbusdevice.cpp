@@ -87,6 +87,8 @@ QCanBusDevice::QCanBusDevice(QSerialBusBackend *backend, QObject *parent) :
     QSerialBusDevice(backend, *new QCanBusDevicePrivate, parent)
 {
     connect(backend, &QSerialBusBackend::error, this, &QCanBusDevice::setError);
+    connect(backend, &QSerialBusBackend::frameReceived,
+            this, &QCanBusDevice::frameReceived);
 }
 
 void QCanBusDevice::setError(QString errorString, int errorId)
@@ -165,12 +167,11 @@ QVector<QString> QCanBusDevice::configurationKeys() const
  */
 void QCanBusDevice::writeFrame(const QCanFrame &frame)
 {
-    QByteArray data;
-    QDataStream stream(&data, QIODevice::ReadWrite);
+    // TODO Remove when not QIODevice anymore
+    if (!isWritable())
+        return;
 
-    stream << frame;
-
-    write(data);
+    backend()->writeFrame(frame);
 }
 
 /*!
@@ -180,18 +181,11 @@ void QCanBusDevice::writeFrame(const QCanFrame &frame)
  */
 QCanFrame QCanBusDevice::readFrame()
 {
-    //TODO: when additional can backends are implemented,
-    //some kind of frame size chooser must be added
+    // TODO Remove when not QIODevice anymore
+    if (!isReadable())
+        return QCanFrame();
 
-    QByteArray data = read(SOCKET_CAN_MTU);
-    QCanFrame frame;
-    if (data.isEmpty())
-        return frame;
-
-    QDataStream stream(data);
-    stream >> frame;
-
-    return frame;
+    return backend()->nextFrame();
 }
 
 /*!
@@ -201,6 +195,14 @@ QCanFrame QCanBusDevice::readFrame()
 QCanBusDevice::CanBusError QCanBusDevice::error() const
 {
     return d_func()->lastError;
+}
+
+/*!
+    Returns the number of available frames.
+ */
+qint64 QCanBusDevice::availableFrames() const
+{
+    return backend()->availableFrames();
 }
 
 void QCanBusDevicePrivate::setError(const QString &errorString, int errorId)

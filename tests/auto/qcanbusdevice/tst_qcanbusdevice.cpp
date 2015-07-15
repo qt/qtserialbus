@@ -94,6 +94,14 @@ public:
 
     qint64 bytesAvailable() const { return referenceFrameSize; }
 
+    qint64 availableFrames() const { return 0; }
+    QCanFrame nextFrame() { return referenceFrame; }
+    bool writeFrame(const QCanFrame &/*data*/)
+    {
+        emit written();
+        return true;
+    }
+
 signals:
     void written();
 

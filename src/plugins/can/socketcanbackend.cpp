@@ -284,6 +284,43 @@ qint64 SocketCanBackend::bytesAvailable() const
     return frameBuffer.size() * CANFD_MTU;
 }
 
+qint64 SocketCanBackend::availableFrames() const
+{
+    return frameBuffer.size();
+}
+
+QCanFrame SocketCanBackend::nextFrame()
+{
+    if (frameBuffer.isEmpty())
+        return QCanFrame(); //TODO add concept of invalid CanFrame
+
+    return frameBuffer.takeFirst();
+}
+
+bool SocketCanBackend::writeFrame(const QCanFrame &newData)
+{
+    canfd_frame frame;
+    frame.can_id = newData.frameId();
+    if (newData.hasExtendedFrameFormat())
+        frame.can_id |= CAN_EFF_FLAG;
+    if (newData.frameType() == QCanFrame::ErrorFrame)
+        frame.can_id |= CAN_ERR_FLAG;
+    if (newData.frameType() == QCanFrame::RemoteRequestFrame)
+        frame.can_id |= CAN_RTR_FLAG;
+
+    frame.len = newData.payload().size();
+    for (int i = 0; i < frame.len ; i++)
+        frame.data[i] = newData.payload().at(i);
+
+    const qint64 bytesWritten = ::write(canSocket, &frame, CANFD_MTU);
+    if (bytesWritten < 0) {
+        emit error(qt_error_string(errno), QCanBusDevice::CanBusError::WriteError);
+        return false;
+    }
+
+    return true;
+}
+
 void SocketCanBackend::readSocket()
 {
     while (true) {
@@ -330,6 +367,7 @@ void SocketCanBackend::readSocket()
         frameBuffer.append(bufferedFrame);
     }
     emit readyRead();
+    emit frameReceived();
 }
 
 QT_END_NAMESPACE

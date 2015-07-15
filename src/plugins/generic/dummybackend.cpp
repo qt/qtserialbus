@@ -63,7 +63,9 @@ void DummyBackend::close()
 void DummyBackend::sendMessage()
 {
     byteArray.append("def");
+
     emit readyRead();
+    emit frameReceived();
 }
 
 qint64 DummyBackend::read(char *buffer, qint64 maxSize)
@@ -92,6 +94,46 @@ qint64 DummyBackend::write(const char *buffer, qint64 size)
 qint64 DummyBackend::bytesAvailable() const
 {
     return byteArray.size();
+}
+
+#define MAX_PACKAGE_SIZE 16
+
+qint64 DummyBackend::availableFrames() const
+{
+    // assume every frame can take max payload of 16 byte
+    uint frameCount = byteArray.size() / MAX_PACKAGE_SIZE;
+    if ((byteArray.size() % MAX_PACKAGE_SIZE) > 0)
+        frameCount++;
+
+    return frameCount;
+}
+
+QCanFrame DummyBackend::nextFrame()
+{
+    QCanFrame dummyFrame;
+
+    if (byteArray.isEmpty())
+        return dummyFrame;
+
+    dummyFrame.setFrameId(12);
+
+    const qint64 len = byteArray.size();
+    if (len > MAX_PACKAGE_SIZE) {
+        const QByteArray data = byteArray.left(MAX_PACKAGE_SIZE);
+        byteArray = byteArray.mid(MAX_PACKAGE_SIZE);
+        dummyFrame.setPayload(data);
+    } else {
+        dummyFrame.setPayload(byteArray);
+        byteArray.clear();
+    }
+
+    return dummyFrame;
+}
+
+bool DummyBackend::writeFrame(const QCanFrame &data)
+{
+    qDebug() << "DummyBackend::writeFrame: " << data.payload();
+    return true;
 }
 
 void DummyBackend::setConfigurationParameter(const QString &key, const QVariant &value)

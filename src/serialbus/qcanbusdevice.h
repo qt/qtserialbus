@@ -70,9 +70,14 @@ public:
     void writeFrame(const QCanFrame &frame);
     QCanFrame readFrame();
     CanBusError error() const;
+    qint64 availableFrames() const;
+    //TODO currently assumes unbuffered write. Add support for buffered writes
+    // qint64 framesToWrite() const
+    // signal: void framesWritten(qint64 framesCount)
 
 Q_SIGNALS:
     void errorOccurred(QCanBusDevice::CanBusError);
+    void frameReceived();
 
 private Q_SLOTS:
     void setError(QString, int);

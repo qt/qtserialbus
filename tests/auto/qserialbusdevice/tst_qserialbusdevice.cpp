@@ -75,6 +75,11 @@ public:
     int dataStreamVersion() const { return version; };
     qint64 bytesAvailable() const { return 72; };
 
+    qint64 availableFrames() const { return 0; }
+    QCanFrame nextFrame() { return QCanFrame(); }
+    bool writeFrame(const QCanFrame &/*data*/) { return true; }
+
+
 signals:
     void written();
 

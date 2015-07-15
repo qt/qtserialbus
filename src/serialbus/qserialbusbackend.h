@@ -38,6 +38,7 @@
 #define QSERIALBUSBACKEND_H
 
 #include <QtSerialBus/qserialbusglobal.h>
+#include <QtSerialBus/qcanframe.h>
 
 #include <QtCore/qobject.h>
 #include <QtCore/qiodevice.h>
@@ -57,9 +58,15 @@ public:
     virtual qint64 write(const char* buffer, qint64 len) = 0;
     virtual qint64 bytesAvailable() const = 0;
 
+    virtual qint64 availableFrames() const = 0;
+    virtual QCanFrame nextFrame() = 0;
+    virtual bool writeFrame(const QCanFrame &frame) = 0;
+
 Q_SIGNALS:
     void readyRead();
     void error(QString, int);
+
+    void frameReceived();
 };
 
 QT_END_NAMESPACE

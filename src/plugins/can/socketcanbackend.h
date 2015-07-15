@@ -68,6 +68,10 @@ public:
     QVector<QString> configurationKeys() const Q_DECL_OVERRIDE;
     qint64 bytesAvailable() const Q_DECL_OVERRIDE;
 
+    qint64 availableFrames() const Q_DECL_OVERRIDE;
+    QCanFrame nextFrame() Q_DECL_OVERRIDE;
+    bool writeFrame(const QCanFrame &newData) Q_DECL_OVERRIDE;
+
 private Q_SLOTS:
     void readSocket();
 
