@@ -97,13 +97,15 @@ void MainWindow::init()
             var.append(hash);
             canDevice->setConfigurationParameter(QStringLiteral("CanFilter"), var);*/ //NOTE: Filtering example
             canDevice->setConfigurationParameter(QStringLiteral("ReceiveOwnMessages"), QVariant(1));
-            connect(canDevice.data(), &QCanBusDevice::readyRead, this, &MainWindow::checkMessages);
+            connect(canDevice.data(), &QCanBusDevice::frameReceived,
+                    this, &MainWindow::checkMessages);
         } else if (plugins.at(i) == QStringLiteral("dummy")) {
             dummyDevice = canBus->createDevice(plugins.at(i), QString(), QString());
             if (!dummyDevice)
                 return;
             dummyDevice->open(QIODevice::ReadWrite);
-            connect(dummyDevice.data(), &QBusDummyDevice::readyRead, this, &MainWindow::checkDummyMessages);
+            connect(dummyDevice.data(), &QCanBusDevice::frameReceived,
+                    this, &MainWindow::checkMessages);
         }
     }
     on_connectButton_clicked(); //initialize plugin selection
@@ -122,53 +124,50 @@ void MainWindow::receiveError(QCanBusDevice::CanBusError error)
     }
 }
 
-void MainWindow::checkDummyMessages()
-{
-    if (!dummyDevice) {
-        init();
-        if (!dummyDevice)
-            return;
-    }
-    if (ui->comboBox->itemText(currentDevice) == QStringLiteral("dummy")) {
-        const QByteArray result = dummyDevice->readAll();
-        if (!result.isEmpty())
-            ui->listWidget->addItem(result);
-    }
-}
-
 void MainWindow::checkMessages()
 {
-    if (ui->comboBox->itemText(currentDevice) == QStringLiteral("can")) {
-        QCanFrame frame = canDevice->readFrame();
+    QCanBusDevice *device = qobject_cast<QCanBusDevice *>(sender());
 
-        if (frame.payload().isEmpty())
-            return;
+    // for now filter the correct device out
+    if (ui->comboBox->itemText(currentDevice) == QStringLiteral("can")
+            && device != canDevice)
+        device = 0;
 
-        qint32 id = frame.frameId();
+    if (ui->comboBox->itemText(currentDevice) == QStringLiteral("dummy")
+            && device != dummyDevice)
+        device = 0;
 
-        if (!frame.hasExtendedFrameFormat() && id > 2047) // 11 bits
-            id = 2047;
+    if (!device)
+        return;
 
-        QString view;
-        if (frame.frameType() == QCanFrame::ErrorFrame) {
-            frame.setFrameId(id);
-            interpretError(view, frame);
-        } else {
-            view += QLatin1String("Id: ");
-            view += QString::number(id, 16);
-            view += QLatin1String(" bytes: ");
-            view += QString::number(frame.payload().size(), 10);
-            view += QLatin1String(" data: ");
-            view += frame.payload().data();
-        }
+    const QCanFrame frame = device->readFrame();
 
-        if (frame.frameType() == QCanFrame::RemoteRequestFrame) {
-            ui->requestList->addItem(view);
-        } else if (frame.frameType() == QCanFrame::ErrorFrame) {
-            ui->errorList->addItem(view);
-        } else {
-            ui->listWidget->addItem(view);
-        }
+    if (frame.payload().isEmpty())
+        return;
+
+    qint32 id = frame.frameId();
+
+    if (!frame.hasExtendedFrameFormat() && id > 2047) // 11 bits
+        id = 2047;
+
+    QString view;
+    if (frame.frameType() == QCanFrame::ErrorFrame) {
+        interpretError(view, frame);
+    } else {
+        view += QLatin1String("Id: ");
+        view += QString::number(id, 16);
+        view += QLatin1String(" bytes: ");
+        view += QString::number(frame.payload().size(), 10);
+        view += QLatin1String(" data: ");
+        view += frame.payload().data();
+    }
+
+    if (frame.frameType() == QCanFrame::RemoteRequestFrame) {
+        ui->requestList->addItem(view);
+    } else if (frame.frameType() == QCanFrame::ErrorFrame) {
+        ui->errorList->addItem(view);
+    } else {
+        ui->listWidget->addItem(view);
     }
 }
 

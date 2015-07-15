@@ -69,7 +69,6 @@ public:
 
 private Q_SLOTS:
 
-    void checkDummyMessages();
     void checkMessages();
     void on_sendButton_clicked();
     void on_connectButton_clicked();
