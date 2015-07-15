@@ -69,18 +69,22 @@ MainWindow::~MainWindow()
 
 void MainWindow::init()
 {
-    b = QCanBus::instance();
-    if (!b)
+    canBus = QCanBus::instance();
+    if (!canBus)
         return;
 
-    QList<QByteArray> plugins = b->plugins();
+    const QList<QByteArray> plugins = canBus->plugins();
     for (int i = 0; i < plugins.size(); i++)
     {
-        backends.insert(i, b->createBackend(plugins.at(i), QStringLiteral("SocketCAN"), QStringLiteral("vcan1")));
         ui->comboBox->insertItem(i, plugins.at(i));
 
         if (plugins.at(i) == QStringLiteral("can")) {
-            canDevice = new QCanBusDevice(backends.at(i), this);
+            //TODO find way to dynamically detect vcan1
+            //TODO potentially instanciate every backend in the plugin - not just first
+            const QString type = canBus->availableBackends(plugins.at(i)).first();
+            canDevice = canBus->createDevice(plugins.at(i),
+                                             type,
+                                             QStringLiteral("vcan1"));
             connect(canDevice.data(), &QCanBusDevice::errorOccurred, this, &MainWindow::receiveError);
             if (!canDevice)
                 return;
@@ -95,7 +99,7 @@ void MainWindow::init()
             canDevice->setConfigurationParameter(QStringLiteral("ReceiveOwnMessages"), QVariant(1));
             connect(canDevice.data(), &QCanBusDevice::readyRead, this, &MainWindow::checkMessages);
         } else if (plugins.at(i) == QStringLiteral("dummy")) {
-            dummyDevice = new QBusDummyDevice(backends.at(i), this);
+            dummyDevice = canBus->createDevice(plugins.at(i), QString(), QString());
             if (!dummyDevice)
                 return;
             dummyDevice->open(QIODevice::ReadWrite);

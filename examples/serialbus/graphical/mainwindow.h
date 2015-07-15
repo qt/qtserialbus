@@ -49,7 +49,6 @@
 QT_BEGIN_NAMESPACE
 class QSerialBusBackend;
 class QCanBus;
-class QBusDummyDevice;
 class QSerialBusDevice;
 class QCanFrame;
 
@@ -80,11 +79,10 @@ private:
     void init();
     void interpretError(QString&, const QCanFrame&);
 
-    QPointer<QCanBus> b;
-    QPointer<QBusDummyDevice> dummyDevice;
+    QPointer<QCanBus> canBus;
+    QPointer<QCanBusDevice> dummyDevice;
     QPointer<QCanBusDevice> canDevice;
     Ui::MainWindow *ui;
-    QList< QPointer<QSerialBusBackend> > backends;
     QList<QSerialBusDevice *> devices;
     qint64 currentDevice;
 };
