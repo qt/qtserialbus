@@ -58,6 +58,15 @@ public:
         QCanBus::registerBackend(id, this);
     }
 
+    QCanBusDevice *createDevice(const QString &identifier,
+                                            const QString &interfaceName) const
+    {
+        Q_UNUSED(identifier)
+        Q_UNUSED(interfaceName)
+        QCanBusDevice *device = new QCanBusDevice(new DummyBackend());
+        return device;
+    }
+
     QSerialBusBackend *createBackend(const QString &bus, const QString &name) const
     {
         Q_UNUSED(bus)

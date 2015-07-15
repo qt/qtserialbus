@@ -38,6 +38,7 @@
 
 #include <qserialbusplugininterface.h>
 #include <qcanbus.h>
+#include <qcanbusdevice.h>
 
 #include <QtCore/qfile.h>
 #include <QtCore/qdebug.h>
@@ -56,6 +57,17 @@ public:
     {
         const QByteArray id("can");
         QCanBus::registerBackend(id, this);
+    }
+
+    QCanBusDevice *createDevice(const QString &identifier,
+                                            const QString &interfaceName) const
+    {
+        if (identifier == QLatin1String(BackendName)) {
+            QCanBusDevice *device = new QCanBusDevice(new SocketCanBackend(interfaceName));
+            return device;
+        }
+
+        return Q_NULLPTR;
     }
 
     QSerialBusBackend *createBackend(const QString &bus, const QString &name) const

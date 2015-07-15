@@ -137,6 +137,23 @@ QStringList QCanBus::availableBackends(const QByteArray &identifier) const
     return QStringList();
 }
 
+/*!
+    Creates a CAN bus device. \a plugin is the name of the plugin as returned by the \l plugins()
+    method. \a identifier is the type of the device inside the plugin. A single plugin may contain more
+    than one device type. \a name is the network interface name.
+
+    Ownership of the returned backend is transferred to the caller.
+    Returns \c null if no suitable device can be found.
+ */
+QCanBusDevice *QCanBus::createDevice(const QByteArray &plugin,
+                                     const QString &identifier,
+                                     const QString &name) const
+{
+    if (QSerialBusBackendFactory *factory = qSerialBusPlugins()->value(plugin))
+        return factory->createDevice(identifier, name);
+    return Q_NULLPTR;
+}
+
 QCanBus::QCanBus(QObject *parent) :
     QObject(parent)
 {

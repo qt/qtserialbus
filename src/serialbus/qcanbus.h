@@ -38,6 +38,7 @@
 #define QCANBUS_H
 
 #include <QtSerialBus/qserialbusglobal.h>
+#include <QtSerialBus/qcanbusdevice.h>
 
 #include <QtCore/qobject.h>
 
@@ -59,6 +60,9 @@ public:
                                      const QString &type, const QString &name) const;
     QStringList availableBackends(const QByteArray &identifier) const;
 
+    QCanBusDevice *createDevice(const QByteArray &plugin,
+                                const QString &identifier, const QString &name) const;
+
 private:
     QCanBus(QObject *parent = 0);
 
@@ -70,6 +74,9 @@ class Q_SERIALBUS_EXPORT QSerialBusBackendFactory
 public:
     virtual QSerialBusBackend *createBackend(const QString &busBackend, const QString &name) const = 0;
     virtual QStringList availableBackends() const = 0;
+
+    virtual QCanBusDevice *createDevice(const QString &identifier,
+                                        const QString &interfaceName) const = 0;
 protected:
     virtual ~QSerialBusBackendFactory();
 };
