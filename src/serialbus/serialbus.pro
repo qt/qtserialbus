@@ -12,7 +12,7 @@ load(qt_module)
 PUBLIC_HEADERS += \
     qcanbusdevice.h \
     qcanframe.h \
-    qserialbus.h \
+    qcanbus.h \
     qserialbusbackend.h \
     qserialbusdevice.h \
     qserialbusglobal.h \
@@ -28,9 +28,9 @@ SOURCES += \
     qbusdummydevice.cpp \
     qcanbusdevice.cpp \
     qcanframe.cpp \
-    qserialbus.cpp \
     qserialbusdevice.cpp \
     qserialbusbackend.cpp \
-    qserialbusplugininterface.cpp
+    qserialbusplugininterface.cpp \
+    qcanbus.cpp
 
 HEADERS += $$PUBLIC_HEADERS $$PRIVATE_HEADERS

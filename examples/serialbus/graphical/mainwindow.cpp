@@ -69,7 +69,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::init()
 {
-    b = QSerialBus::instance();
+    b = QCanBus::instance();
     if (!b)
         return;
 

@@ -34,46 +34,59 @@
 **
 ****************************************************************************/
 
-#ifndef QSERIALBUS_H
-#define QSERIALBUS_H
+#include <QtSerialBus/qcanbus.h>
 
-#include <QtSerialBus/qserialbusglobal.h>
+#include <QtTest/QtTest>
 
-#include <QtCore/qobject.h>
-
-QT_BEGIN_NAMESPACE
-
-class QSerialBusBackend;
-class QSerialBusBackendFactory;
-
-class Q_SERIALBUS_EXPORT QSerialBus : public QObject
+class tst_QCanBus : public QObject
 {
     Q_OBJECT
-
 public:
-    static QSerialBus *instance();
-    static void registerBackend(const QByteArray &identifier, QSerialBusBackendFactory *factory);
+    explicit tst_QCanBus();
 
-    QList<QByteArray> plugins();
-    QSerialBusBackend *createBackend(const QByteArray &identifier,
-                                     const QString &type, const QString &name) const;
-    QStringList availableBackends(const QByteArray &identifier) const;
+private slots:
+    void initTestCase();
+    void plugins();
+    void createBackend();
+    void availableBackends();
 
 private:
-    QSerialBus(QObject *parent = 0);
-
-    Q_DISABLE_COPY(QSerialBus)
+    QCanBus *bus;
 };
 
-class Q_SERIALBUS_EXPORT QSerialBusBackendFactory
+tst_QCanBus::tst_QCanBus() :
+    bus(0)
 {
-public:
-    virtual QSerialBusBackend *createBackend(const QString &busBackend, const QString &name) const = 0;
-    virtual QStringList availableBackends() const = 0;
-protected:
-    virtual ~QSerialBusBackendFactory();
-};
+}
 
-QT_END_NAMESPACE
+void tst_QCanBus::initTestCase()
+{
+    bus = QCanBus::instance();
+    QVERIFY(bus != 0);
+    QCanBus *sameInstance;
+    sameInstance = QCanBus::instance();
+    QCOMPARE(bus, sameInstance);
+}
 
-#endif // QSERIALBUS_H
+void tst_QCanBus::plugins()
+{
+    QVERIFY(!bus->plugins().isEmpty());
+}
+
+void tst_QCanBus::createBackend()
+{
+    QSerialBusBackend *faulty = bus->createBackend("foo","socketFoo","vfoo");
+    QVERIFY(!faulty);
+    QSerialBusBackend *dummy = bus->createBackend("dummy", "unused", "unused");
+    QVERIFY(dummy);
+}
+
+void tst_QCanBus::availableBackends()
+{
+    QStringList list = bus->availableBackends("faulty");
+    QVERIFY(list.isEmpty());
+}
+
+QTEST_MAIN(tst_QCanBus)
+
+#include "tst_qcanbus.moc"

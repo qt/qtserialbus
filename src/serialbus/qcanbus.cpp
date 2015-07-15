@@ -35,7 +35,7 @@
 ****************************************************************************/
 
 #include "qserialbusplugininterface.h"
-#include "qserialbus.h"
+#include "qcanbus.h"
 #include "qserialbusdevice.h"
 
 #include <QtCore/qobject.h>
@@ -57,7 +57,7 @@ Q_GLOBAL_STATIC_WITH_ARGS(QFactoryLoader, qFactoryLoader,
 typedef QHash<QByteArray, QSerialBusBackendFactory*> QSerialBusPluginsHash;
 Q_GLOBAL_STATIC(QSerialBusPluginsHash, qSerialBusPlugins)
 
-static QSerialBus *globalInstance = Q_NULLPTR;
+static QCanBus *globalInstance = Q_NULLPTR;
 
 static void loadPlugins()
 {
@@ -69,25 +69,25 @@ static void loadPlugins()
 }
 
 /*!
-    \class QSerialBus
+    \class QCanBus
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QSerialBus class handles registration and creation of bus backends.
+    \brief The QCanBus class handles registration and creation of bus backends.
 
-    QSerialBus loads Qt Serial Bus plugins at runtime. The ownership of serial bus backends is
+    QCanBus loads Qt CAN Bus plugins at runtime. The ownership of serial bus backends is
     transferred to the loader. Usually, backends are not directly used but are given to
     \l QSerialBusDevice or a class inherited from it.
 */
 
 /*!
-    Returns a pointer to the QSerialBus class. The object is loaded if necessary. QSerialBus
+    Returns a pointer to the QCanBus class. The object is loaded if necessary. QCanBus
     uses the singleton design pattern.
  */
-QSerialBus *QSerialBus::instance()
+QCanBus *QCanBus::instance()
 {
     if (!globalInstance)
-        globalInstance = new QSerialBus();
+        globalInstance = new QCanBus();
     return globalInstance;
 }
 
@@ -95,7 +95,7 @@ QSerialBus *QSerialBus::instance()
     Registers a backend for the identifier specified by \a identifier, which must be unique.
     The \a factory will be asked to create instances of the backend.
  */
-void QSerialBus::registerBackend(const QByteArray &identifier, QSerialBusBackendFactory *factory)
+void QCanBus::registerBackend(const QByteArray &identifier, QSerialBusBackendFactory *factory)
 {
     if (!qSerialBusPlugins()->contains(identifier))
         qSerialBusPlugins()->insert(identifier, factory);
@@ -104,7 +104,7 @@ void QSerialBus::registerBackend(const QByteArray &identifier, QSerialBusBackend
 /*!
     Returns a list of identifiers for all loaded plugins.
  */
-QList<QByteArray> QSerialBus::plugins()
+QList<QByteArray> QCanBus::plugins()
 {
     return qSerialBusPlugins()->keys();
 }
@@ -117,7 +117,7 @@ QList<QByteArray> QSerialBus::plugins()
     Ownership of the returned backend is transferred to the caller.
     Returns \c null if no suitable backend for the given identifier can be found.
  */
-QSerialBusBackend *QSerialBus::createBackend(const QByteArray &identifier,
+QSerialBusBackend *QCanBus::createBackend(const QByteArray &identifier,
                                              const QString &type, const QString &name) const
 {
     if (QSerialBusBackendFactory *factory = qSerialBusPlugins()->value(identifier))
@@ -130,14 +130,14 @@ QSerialBusBackend *QSerialBus::createBackend(const QByteArray &identifier,
     \a identifier can be found.
 */
 
-QStringList QSerialBus::availableBackends(const QByteArray &identifier) const
+QStringList QCanBus::availableBackends(const QByteArray &identifier) const
 {
     if (QSerialBusBackendFactory *factory = qSerialBusPlugins()->value(identifier))
         return factory->availableBackends();
     return QStringList();
 }
 
-QSerialBus::QSerialBus(QObject *parent) :
+QCanBus::QCanBus(QObject *parent) :
     QObject(parent)
 {
     loadPlugins();

@@ -37,7 +37,7 @@
 #include "socketcanbackend.h"
 
 #include <qserialbusplugininterface.h>
-#include <qserialbus.h>
+#include <qcanbus.h>
 
 #include <QtCore/qfile.h>
 #include <QtCore/qdebug.h>
@@ -55,7 +55,7 @@ public:
     void registerBus()
     {
         const QByteArray id("can");
-        QSerialBus::registerBackend(id, this);
+        QCanBus::registerBackend(id, this);
     }
 
     QSerialBusBackend *createBackend(const QString &bus, const QString &name) const
