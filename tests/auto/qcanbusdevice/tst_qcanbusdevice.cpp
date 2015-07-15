@@ -142,9 +142,9 @@ void tst_QCanBusDevice::initTestCase()
 {
     backend = new tst_Backend();
     device = new QCanBusDevice(backend);
-    QVERIFY(device->open(QIODevice::ReadWrite));
     QVERIFY(device);
     QVERIFY(backend);
+    QVERIFY(device->connectDevice());
 }
 
 void tst_QCanBusDevice::conf()
@@ -161,19 +161,20 @@ void tst_QCanBusDevice::write()
     QSignalSpy spy(backend, SIGNAL(written()));
     QCanFrame frame;
     frame.setPayload(QByteArray("testData"));
-    device->close();
+    device->disconnectDevice();
     device->writeFrame(frame);
     QCOMPARE(spy.count(), 0);
 
-    device->open(QIODevice::WriteOnly);
+    device->connectDevice();
     device->writeFrame(frame);
     QCOMPARE(spy.count(), 1);
 }
 
 void tst_QCanBusDevice::read()
 {
+    device->disconnectDevice();
     QCanFrame frame1 = device->readFrame();
-    QVERIFY(device->open(QIODevice::ReadOnly));
+    QVERIFY(device->connectDevice());
     QCanFrame frame2 = device->readFrame();
     QVERIFY(!frame1.frameId());
     QVERIFY(frame2.frameId());
@@ -218,7 +219,7 @@ void tst_QCanBusDevice::error()
 
 void tst_QCanBusDevice::cleanupTestCase()
 {
-    device->close();
+    device->disconnectDevice();
     QCanFrame frame = device->readFrame();
     QVERIFY(!frame.frameId());
 }

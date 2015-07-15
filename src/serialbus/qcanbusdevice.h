@@ -75,6 +75,10 @@ public:
     // qint64 framesToWrite() const
     // signal: void framesWritten(qint64 framesCount)
 
+    // TODO rename these once QIODevice dependency has been removed
+    bool connectDevice();
+    void disconnectDevice();
+
 Q_SIGNALS:
     void errorOccurred(QCanBusDevice::CanBusError);
     void frameReceived();

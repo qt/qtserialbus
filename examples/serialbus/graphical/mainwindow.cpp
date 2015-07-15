@@ -88,7 +88,7 @@ void MainWindow::init()
             connect(canDevice.data(), &QCanBusDevice::errorOccurred, this, &MainWindow::receiveError);
             if (!canDevice)
                 return;
-            if (!canDevice->open(QIODevice::ReadWrite))
+            if (!canDevice->connectDevice())
                 return;
             /*QList<QVariant> var;
             QHash<QString, QVariant> hash;
@@ -103,7 +103,7 @@ void MainWindow::init()
             dummyDevice = canBus->createDevice(plugins.at(i), QString(), QString());
             if (!dummyDevice)
                 return;
-            dummyDevice->open(QIODevice::ReadWrite);
+            dummyDevice->connectDevice();
             connect(dummyDevice.data(), &QCanBusDevice::frameReceived,
                     this, &MainWindow::checkMessages);
         }

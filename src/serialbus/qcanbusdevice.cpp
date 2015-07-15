@@ -205,6 +205,29 @@ qint64 QCanBusDevice::availableFrames() const
     return backend()->availableFrames();
 }
 
+bool QCanBusDevice::connectDevice()
+{
+    //TODO we circumvent QSerialBusDevice but still retain
+    //     QIODevice openMode states
+    QIODevice::OpenMode mode = QIODevice::ReadWrite;
+
+    if (!backend()->open(mode))
+        return false;
+
+    if (QIODevice::openMode() == QIODevice::OpenModeFlag::NotOpen)
+        QIODevice::open(mode);
+    else
+        QIODevice::setOpenMode(mode);
+
+    return true;
+}
+
+void QCanBusDevice::disconnectDevice()
+{
+    backend()->close();
+    QIODevice::close();
+}
+
 void QCanBusDevicePrivate::setError(const QString &errorString, int errorId)
 {
     Q_Q(QCanBusDevice);
