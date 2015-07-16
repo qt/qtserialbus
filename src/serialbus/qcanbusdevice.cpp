@@ -86,6 +86,7 @@ QT_BEGIN_NAMESPACE
 QCanBusDevice::QCanBusDevice(QSerialBusBackend *backend, QObject *parent) :
     QSerialBusDevice(backend, *new QCanBusDevicePrivate, parent)
 {
+    d_func()->pluginBackend = backend;
     connect(backend, &QSerialBusBackend::error, this, &QCanBusDevice::setError);
     connect(backend, &QSerialBusBackend::frameReceived,
             this, &QCanBusDevice::frameReceived);
@@ -139,7 +140,7 @@ void QCanBusDevice::setError(QString errorString, int errorId)
  */
 void QCanBusDevice::setConfigurationParameter(const QString &key, const QVariant &value)
 {
-    backend()->setConfigurationParameter(key, value);
+    d_func()->pluginBackend->setConfigurationParameter(key, value);
 }
 
 /*!
@@ -149,7 +150,7 @@ void QCanBusDevice::setConfigurationParameter(const QString &key, const QVariant
  */
 QVariant QCanBusDevice::configurationParameter(const QString &key) const
 {
-    return backend()->configurationParameter(key);
+    return d_func()->pluginBackend->configurationParameter(key);
 }
 
 /*!
@@ -157,7 +158,7 @@ QVariant QCanBusDevice::configurationParameter(const QString &key) const
  */
 QVector<QString> QCanBusDevice::configurationKeys() const
 {
-    return backend()->configurationKeys();
+    return d_func()->pluginBackend->configurationKeys();
 }
 
 /*!
@@ -171,7 +172,7 @@ void QCanBusDevice::writeFrame(const QCanFrame &frame)
     if (!isWritable())
         return;
 
-    backend()->writeFrame(frame);
+    d_func()->pluginBackend->writeFrame(frame);
 }
 
 /*!
@@ -185,7 +186,7 @@ QCanFrame QCanBusDevice::readFrame()
     if (!isReadable())
         return QCanFrame();
 
-    return backend()->nextFrame();
+    return d_func()->pluginBackend->nextFrame();
 }
 
 /*!
@@ -202,7 +203,7 @@ QCanBusDevice::CanBusError QCanBusDevice::error() const
  */
 qint64 QCanBusDevice::availableFrames() const
 {
-    return backend()->availableFrames();
+    return d_func()->pluginBackend->availableFrames();
 }
 
 bool QCanBusDevice::connectDevice()
@@ -211,7 +212,7 @@ bool QCanBusDevice::connectDevice()
     //     QIODevice openMode states
     QIODevice::OpenMode mode = QIODevice::ReadWrite;
 
-    if (!backend()->open(mode))
+    if (!d_func()->pluginBackend->open(mode))
         return false;
 
     if (QIODevice::openMode() == QIODevice::OpenModeFlag::NotOpen)
@@ -224,7 +225,7 @@ bool QCanBusDevice::connectDevice()
 
 void QCanBusDevice::disconnectDevice()
 {
-    backend()->close();
+    d_func()->pluginBackend->close();
     QIODevice::close();
 }
 

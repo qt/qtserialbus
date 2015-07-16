@@ -65,6 +65,7 @@ public:
     void setError(const QString &errorString, int errorId);
 
     QCanBusDevice::CanBusError lastError;
+    QPointer<QSerialBusBackend> pluginBackend;
 };
 
 QT_END_NAMESPACE
