@@ -51,7 +51,7 @@ class DummyBackend : public QSerialBusBackend
     Q_OBJECT
 public:
     explicit DummyBackend();
-    bool open(QIODevice::OpenMode openMode) Q_DECL_OVERRIDE;
+    bool open() Q_DECL_OVERRIDE;
     void close() Q_DECL_OVERRIDE;
     qint64 read(char *buffer, qint64 maxSize) Q_DECL_OVERRIDE;
     qint64 write(const char *, qint64) Q_DECL_OVERRIDE;

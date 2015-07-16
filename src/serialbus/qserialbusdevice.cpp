@@ -118,7 +118,7 @@ bool QSerialBusDevice::open(QIODevice::OpenMode openMode)
     if (!d->busBackend)
         return false;
 
-    if (!d->busBackend->open(openMode))
+    if (!d->busBackend->open(/*openMode*/))
         return false;
 
     if (QIODevice::openMode() == QIODevice::OpenModeFlag::NotOpen)

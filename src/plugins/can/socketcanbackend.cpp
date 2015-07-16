@@ -69,13 +69,8 @@ void SocketCanBackend::resetConfigurations()
     configuration.append(QPair<QString, QVariant>(QStringLiteral("CanFilter"), QList<QVariant>()));
 }
 
-bool SocketCanBackend::open(QIODevice::OpenMode mode)
+bool SocketCanBackend::open()
 {
-    if (mode == QIODevice::NotOpen) {
-        close();
-        return true;
-    }
-
     if (canSocket == -1) {
         if (!connectSocket()) {
             close();
@@ -83,6 +78,7 @@ bool SocketCanBackend::open(QIODevice::OpenMode mode)
         }
     }
 
+    emit stateChanged(QCanBusDevice::ConnectedState);
     return true;
 }
 
@@ -92,6 +88,8 @@ void SocketCanBackend::close()
     canSocket = -1;
 
     resetConfigurations();
+
+    emit stateChanged(QCanBusDevice::UnconnectedState);
 }
 
 qint64 SocketCanBackend::read(char *buffer, qint64 maxSize)

@@ -59,7 +59,7 @@ class SocketCanBackend : public QSerialBusBackend
 public:
     explicit SocketCanBackend(const QString &name);
     ~SocketCanBackend();
-    bool open(QIODevice::OpenMode) Q_DECL_OVERRIDE;
+    bool open() Q_DECL_OVERRIDE;
     void close() Q_DECL_OVERRIDE;
     qint64 read(char *buffer, qint64 maxSize) Q_DECL_OVERRIDE;
     qint64 write(const char *buffer, qint64 size) Q_DECL_OVERRIDE;

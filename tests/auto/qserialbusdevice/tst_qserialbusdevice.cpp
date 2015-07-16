@@ -61,8 +61,16 @@ public:
         memcpy(buffer, data.constData(), 72);
         return 72;
     };
-    bool open(QIODevice::OpenMode) { return true; };
-    void close() {};
+    bool open()
+    {
+        emit stateChanged(QCanBusDevice::ConnectedState);
+        return true;
+    }
+
+    void close()
+    {
+        emit stateChanged(QCanBusDevice::UnconnectedState);
+    }
     void setConfigurationParameter(const QString &key, const QVariant &param)
     {
         value = param;

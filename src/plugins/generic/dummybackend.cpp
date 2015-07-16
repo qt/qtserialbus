@@ -51,13 +51,15 @@ DummyBackend::DummyBackend() :
     sendTimer->start();
 }
 
-bool DummyBackend::open(QIODevice::OpenMode)
+bool DummyBackend::open()
 {
+    emit stateChanged(QCanBusDevice::ConnectedState);
     return true;
 }
 
 void DummyBackend::close()
 {
+    emit stateChanged(QCanBusDevice::UnconnectedState);
 }
 
 void DummyBackend::sendMessage()

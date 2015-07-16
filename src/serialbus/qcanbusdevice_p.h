@@ -58,7 +58,8 @@ class QCanBusDevicePrivate : public QSerialBusDevicePrivate
     Q_DECLARE_PUBLIC(QCanBusDevice)
 public:
     QCanBusDevicePrivate()
-        : lastError(QCanBusDevice::CanBusError::NoError)
+        : lastError(QCanBusDevice::CanBusError::NoError),
+          state(QCanBusDevice::UnconnectedState)
     {
     }
 
@@ -66,6 +67,7 @@ public:
 
     QCanBusDevice::CanBusError lastError;
     QPointer<QSerialBusBackend> pluginBackend;
+    QCanBusDevice::CanBusDeviceState state;
 };
 
 QT_END_NAMESPACE

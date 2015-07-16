@@ -38,6 +38,7 @@
 #define QSERIALBUSBACKEND_H
 
 #include <QtSerialBus/qserialbusglobal.h>
+#include <QtSerialBus/qcanbusdevice.h>
 #include <QtSerialBus/qcanframe.h>
 
 #include <QtCore/qobject.h>
@@ -49,7 +50,7 @@ class Q_SERIALBUS_EXPORT QSerialBusBackend : public QObject
 {
     Q_OBJECT
 public:
-    virtual bool open(QIODevice::OpenMode openMode) = 0;
+    virtual bool open() = 0;
     virtual void close() = 0;
     virtual qint64 read(char *buffer, qint64 maxSize) = 0;
     virtual void setConfigurationParameter(const QString &key, const QVariant &value) = 0;
@@ -65,6 +66,7 @@ public:
 Q_SIGNALS:
     void readyRead();
     void error(QString, int);
+    void stateChanged(QCanBusDevice::CanBusDeviceState);
 
     void frameReceived();
 };

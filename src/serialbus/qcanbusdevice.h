@@ -62,6 +62,14 @@ public:
     };
     Q_ENUM(CanBusError)
 
+    enum CanBusDeviceState {
+        UnconnectedState,
+        ConnectingState,
+        ConnectedState,
+        ClosingState
+    };
+    Q_ENUM(CanBusDeviceState)
+
     explicit QCanBusDevice(QSerialBusBackend *backend, QObject *parent = 0);
     void setConfigurationParameter(const QString &key, const QVariant &value);
     QVariant configurationParameter(const QString &key) const;
@@ -79,15 +87,23 @@ public:
     bool connectDevice();
     void disconnectDevice();
 
+    CanBusDeviceState state() const;
+
 Q_SIGNALS:
     void errorOccurred(QCanBusDevice::CanBusError);
     void frameReceived();
+    void stateChanged(QCanBusDevice::CanBusDeviceState state);
+
+protected:
+    void setState(QCanBusDevice::CanBusDeviceState newState);
 
 private Q_SLOTS:
     void setError(QString, int);
+    void updateState(QCanBusDevice::CanBusDeviceState newState);
 };
 
 Q_DECLARE_TYPEINFO(QCanBusDevice::CanBusError, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(QCanBusDevice::CanBusDeviceState, Q_PRIMITIVE_TYPE);
 
 QT_END_NAMESPACE
 

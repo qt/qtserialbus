@@ -46,6 +46,7 @@ QT_BEGIN_NAMESPACE
 class QDataStream;
 
 //TODO: review ctors for this class
+//TODO: add concept of invalid QCanFrame
 class QCanFrame
 {
 public:

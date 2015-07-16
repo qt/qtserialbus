@@ -72,6 +72,16 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
+    \enum QCanBusDevice::CanBusDeviceState
+    This enum describes all possible device states.
+
+    \value UnconnectedState The device is disconnected.
+    \value ConnectingState  The device is being connected.
+    \value ConnectedState   The device is connected to the CAN bus.
+    \value ClosingState     The device is being closed.
+ */
+
+/*!
     \fn QCanBusDevice::errorOccurred(CanBusError error)
 
     This signal is emitted when an error of the type \a error occurs.
@@ -90,12 +100,20 @@ QCanBusDevice::QCanBusDevice(QSerialBusBackend *backend, QObject *parent) :
     connect(backend, &QSerialBusBackend::error, this, &QCanBusDevice::setError);
     connect(backend, &QSerialBusBackend::frameReceived,
             this, &QCanBusDevice::frameReceived);
+    connect(backend, &QSerialBusBackend::stateChanged,
+            this, &QCanBusDevice::updateState);
 }
 
 void QCanBusDevice::setError(QString errorString, int errorId)
 {
     Q_D(QCanBusDevice);
     d->setError(errorString, errorId);
+}
+
+//TODO Remove once QSerialBusBackend is gone
+void QCanBusDevice::updateState(QCanBusDevice::CanBusDeviceState newState)
+{
+    setState(newState);
 }
 
 /*!
@@ -168,8 +186,9 @@ QVector<QString> QCanBusDevice::configurationKeys() const
  */
 void QCanBusDevice::writeFrame(const QCanFrame &frame)
 {
-    // TODO Remove when not QIODevice anymore
-    if (!isWritable())
+    Q_D(QCanBusDevice);
+
+    if (d->state != ConnectedState)
         return;
 
     d_func()->pluginBackend->writeFrame(frame);
@@ -182,8 +201,8 @@ void QCanBusDevice::writeFrame(const QCanFrame &frame)
  */
 QCanFrame QCanBusDevice::readFrame()
 {
-    // TODO Remove when not QIODevice anymore
-    if (!isReadable())
+    Q_D(QCanBusDevice);
+    if (d->state != ConnectedState)
         return QCanFrame();
 
     return d_func()->pluginBackend->nextFrame();
@@ -208,25 +227,53 @@ qint64 QCanBusDevice::availableFrames() const
 
 bool QCanBusDevice::connectDevice()
 {
-    //TODO we circumvent QSerialBusDevice but still retain
-    //     QIODevice openMode states
-    QIODevice::OpenMode mode = QIODevice::ReadWrite;
+    Q_D(QCanBusDevice);
 
-    if (!d_func()->pluginBackend->open(mode))
+    if (d->state != QCanBusDevice::UnconnectedState)
         return false;
 
-    if (QIODevice::openMode() == QIODevice::OpenModeFlag::NotOpen)
-        QIODevice::open(mode);
-    else
-        QIODevice::setOpenMode(mode);
+    setState(ConnectingState);
 
+    if (!d->pluginBackend->open()) {
+        setState(UnconnectedState);
+        return false;
+    }
+
+    //Connected is set by backend -> might be delayed by event loop
     return true;
 }
 
 void QCanBusDevice::disconnectDevice()
 {
+    setState(QCanBusDevice::ClosingState);
+
+    //Unconnected is set by backend -> might be delayed by event loop
     d_func()->pluginBackend->close();
-    QIODevice::close();
+}
+
+/*!
+    Returns the current state of the device.
+
+    \sa setState()
+ */
+QCanBusDevice::CanBusDeviceState QCanBusDevice::state() const
+{
+    return d_func()->state;
+}
+
+/*!
+    Sets the state of the device. CAN bus implementations
+    must use this function to update the device state.
+ */
+void QCanBusDevice::setState(QCanBusDevice::CanBusDeviceState newState)
+{
+    Q_D(QCanBusDevice);
+
+    if (newState == d->state)
+        return;
+
+    d->state = newState;
+    emit stateChanged(newState);
 }
 
 void QCanBusDevicePrivate::setError(const QString &errorString, int errorId)

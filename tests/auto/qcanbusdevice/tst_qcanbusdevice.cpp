@@ -77,8 +77,17 @@ public:
         return -1;
     }
 
-    bool open(QIODevice::OpenMode) { return true; }
-    void close() {}
+    bool open()
+    {
+        emit stateChanged(QCanBusDevice::ConnectedState);
+        return true;
+    }
+
+    void close()
+    {
+        emit stateChanged(QCanBusDevice::UnconnectedState);
+    }
+
     void setConfigurationParameter(const QString &key, const QVariant &param)
     {
         value = param;
@@ -145,6 +154,10 @@ void tst_QCanBusDevice::initTestCase()
     QVERIFY(device);
     QVERIFY(backend);
     QVERIFY(device->connectDevice());
+
+    // this backend is synchronous
+    // TODO test that we get the sequence Connecting->ConnectedState
+    QCOMPARE(device->state(), QCanBusDevice::ConnectedState);
 }
 
 void tst_QCanBusDevice::conf()
@@ -162,10 +175,14 @@ void tst_QCanBusDevice::write()
     QCanFrame frame;
     frame.setPayload(QByteArray("testData"));
     device->disconnectDevice();
+    // TODO test that we get the sequence Closing->ConnectedState
+    QCOMPARE(device->state(), QCanBusDevice::UnconnectedState);
     device->writeFrame(frame);
     QCOMPARE(spy.count(), 0);
 
     device->connectDevice();
+
+    QCOMPARE(device->state(), QCanBusDevice::ConnectedState);
     device->writeFrame(frame);
     QCOMPARE(spy.count(), 1);
 }
@@ -173,8 +190,12 @@ void tst_QCanBusDevice::write()
 void tst_QCanBusDevice::read()
 {
     device->disconnectDevice();
+    QCOMPARE(device->state(), QCanBusDevice::UnconnectedState);
+
     QCanFrame frame1 = device->readFrame();
     QVERIFY(device->connectDevice());
+    QCOMPARE(device->state(), QCanBusDevice::ConnectedState);
+
     QCanFrame frame2 = device->readFrame();
     QVERIFY(!frame1.frameId());
     QVERIFY(frame2.frameId());
@@ -220,6 +241,7 @@ void tst_QCanBusDevice::error()
 void tst_QCanBusDevice::cleanupTestCase()
 {
     device->disconnectDevice();
+    QCOMPARE(device->state(), QCanBusDevice::UnconnectedState);
     QCanFrame frame = device->readFrame();
     QVERIFY(!frame.frameId());
 }
