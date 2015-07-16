@@ -39,6 +39,8 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qtimer.h>
 
+#include <QtSerialBus/qcanbusdevice.h>
+
 QT_BEGIN_NAMESPACE
 
 DummyBackend::DummyBackend() :
@@ -53,13 +55,13 @@ DummyBackend::DummyBackend() :
 
 bool DummyBackend::open()
 {
-    emit stateChanged(QCanBusDevice::ConnectedState);
+    emit stateChanged(static_cast<int>(QCanBusDevice::ConnectedState));
     return true;
 }
 
 void DummyBackend::close()
 {
-    emit stateChanged(QCanBusDevice::UnconnectedState);
+    emit stateChanged(static_cast<int>(QCanBusDevice::UnconnectedState));
 }
 
 void DummyBackend::sendMessage()

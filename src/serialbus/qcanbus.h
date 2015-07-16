@@ -39,6 +39,7 @@
 
 #include <QtSerialBus/qserialbusglobal.h>
 #include <QtSerialBus/qcanbusdevice.h>
+#include <QtSerialBus/qserialbusbackend.h>
 
 #include <QtCore/qobject.h>
 

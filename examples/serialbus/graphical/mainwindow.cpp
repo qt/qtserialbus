@@ -181,33 +181,34 @@ void MainWindow::on_sendButton_clicked()
 
     QByteArray writings = ui->lineEdit->displayText().toUtf8();
     ui->lineEdit->clear();
+
+    QCanFrame frame;
+    const int maxPayload = ui->fdBox->checkState() ? 64 : 8;
+    int size = writings.size();
+    if (size > maxPayload)
+        size = maxPayload;
+    writings = writings.left(size);
+    frame.setPayload(writings);
+
+    qint32 id = ui->idEdit->displayText().toInt();
+    ui->idEdit->clear();
+    if (!ui->EFF->checkState() && id > 2047) //11 bits
+        id = 2047;
+
+    frame.setFrameId(id);
+    frame.setExtendedFrameFormat(ui->EFF->checkState());
+
+    if (ui->RTR->checkState())
+        frame.setFrameType(QCanFrame::RemoteRequestFrame);
+    else if (ui->ERR->checkState())
+        frame.setFrameType(QCanFrame::ErrorFrame);
+    else
+        frame.setFrameType(QCanFrame::DataFrame);
+
     if (ui->comboBox->itemText(currentDevice) == QStringLiteral("can")) {
-        QCanFrame frame;
-        const int maxPayload = ui->fdBox->checkState() ? 64 : 8;
-        int size = writings.size();
-        if (size > maxPayload)
-            size = maxPayload;
-        writings = writings.left(size);
-        frame.setPayload(writings);
-
-        qint32 id = ui->idEdit->displayText().toInt();
-        ui->idEdit->clear();
-        if (!ui->EFF->checkState() && id > 2047) //11 bits
-            id = 2047;
-
-        frame.setFrameId(id);
-        frame.setExtendedFrameFormat(ui->EFF->checkState());
-
-        if (ui->RTR->checkState())
-            frame.setFrameType(QCanFrame::RemoteRequestFrame);
-        else if (ui->ERR->checkState())
-            frame.setFrameType(QCanFrame::ErrorFrame);
-        else
-            frame.setFrameType(QCanFrame::DataFrame);
-
         canDevice->writeFrame(frame);
     } else if (ui->comboBox->itemText(currentDevice) == QStringLiteral("dummy")) {
-        dummyDevice->write(writings);
+        dummyDevice->writeFrame(frame);
     }
 }
 

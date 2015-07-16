@@ -37,14 +37,16 @@
 #ifndef QBUSDUMMYDEVICE_H
 #define QBUSDUMMYDEVICE_H
 
-#include <QtSerialBus/qserialbusdevice.h>
+#include <QtSerialBus/qserialbusbackend.h>
+
+#include <QtCore/qobject.h>
 
 QT_BEGIN_NAMESPACE
 
 class QBusDummyDevicePrivate;
 
 //TODO: should be renamed QDummyBusDevice?
-class Q_SERIALBUS_EXPORT QBusDummyDevice : public QSerialBusDevice
+class Q_SERIALBUS_EXPORT QBusDummyDevice : public QObject
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(QBusDummyDevice)

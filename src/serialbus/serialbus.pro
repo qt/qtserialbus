@@ -14,13 +14,11 @@ PUBLIC_HEADERS += \
     qcanframe.h \
     qcanbus.h \
     qserialbusbackend.h \
-    qserialbusdevice.h \
     qserialbusglobal.h \
     qserialbusplugininterface.h \
 
 PRIVATE_HEADERS += \
     qbusdummydevice.h \
-    qserialbusdevice_p.h \
     qcanbusdevice_p.h \
     qbusdummydevice_p.h \
 
@@ -28,7 +26,6 @@ SOURCES += \
     qbusdummydevice.cpp \
     qcanbusdevice.cpp \
     qcanframe.cpp \
-    qserialbusdevice.cpp \
     qserialbusbackend.cpp \
     qserialbusplugininterface.cpp \
     qcanbus.cpp

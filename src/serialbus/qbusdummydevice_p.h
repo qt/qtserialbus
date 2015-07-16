@@ -38,7 +38,8 @@
 #define QBUSDUMMYDEVICE_P_H
 
 #include "qbusdummydevice.h"
-#include "qserialbusdevice_p.h"
+
+#include <QtCore/private/qobject_p.h>
 
 //
 //  W A R N I N G
@@ -53,7 +54,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class QBusDummyDevicePrivate : public QSerialBusDevicePrivate
+class QBusDummyDevicePrivate : public QObjectPrivate
 {
     Q_DECLARE_PUBLIC(QBusDummyDevice)
 };

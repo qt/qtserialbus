@@ -37,15 +37,17 @@
 #ifndef QCANBUSDEVICE_H
 #define QCANBUSDEVICE_H
 
-#include <QtSerialBus/qserialbusdevice.h>
 #include <QtSerialBus/qcanframe.h>
+#include <QtSerialBus/qserialbusbackend.h>
+
+#include <QtCore/qobject.h>
 
 QT_BEGIN_NAMESPACE
 
 class QCanBusDevicePrivate;
 
 //TODO for this class: review const member functions for this class
-class Q_SERIALBUS_EXPORT QCanBusDevice : public QSerialBusDevice
+class Q_SERIALBUS_EXPORT QCanBusDevice : public QObject
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(QCanBusDevice)
@@ -89,6 +91,8 @@ public:
 
     CanBusDeviceState state() const;
 
+    QString errorString() const;
+
 Q_SIGNALS:
     void errorOccurred(QCanBusDevice::CanBusError);
     void frameReceived();
@@ -99,7 +103,7 @@ protected:
 
 private Q_SLOTS:
     void setError(QString, int);
-    void updateState(QCanBusDevice::CanBusDeviceState newState);
+    void updateState(int newState);
 };
 
 Q_DECLARE_TYPEINFO(QCanBusDevice::CanBusError, Q_PRIMITIVE_TYPE);

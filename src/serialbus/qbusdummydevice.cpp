@@ -42,10 +42,9 @@
 
 QT_BEGIN_NAMESPACE
 
-QBusDummyDevice::QBusDummyDevice(QSerialBusBackend *backend, QObject *parent) :
-    QSerialBusDevice(backend, *new QBusDummyDevicePrivate, parent)
+QBusDummyDevice::QBusDummyDevice(QSerialBusBackend */*backend*/, QObject *parent) :
+    QObject(*new QBusDummyDevicePrivate, parent)
 {
-    connect(backend, &QSerialBusBackend::readyRead, this, &QBusDummyDevice::readyRead);
 }
 
 QT_END_NAMESPACE

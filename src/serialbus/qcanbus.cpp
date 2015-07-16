@@ -36,7 +36,6 @@
 
 #include "qserialbusplugininterface.h"
 #include "qcanbus.h"
-#include "qserialbusdevice.h"
 
 #include <QtCore/qobject.h>
 #include <QtCore/qpluginloader.h>
@@ -76,8 +75,7 @@ static void loadPlugins()
     \brief The QCanBus class handles registration and creation of bus backends.
 
     QCanBus loads Qt CAN Bus plugins at runtime. The ownership of serial bus backends is
-    transferred to the loader. Usually, backends are not directly used but are given to
-    \l QSerialBusDevice or a class inherited from it.
+    transferred to the loader.
 */
 
 /*!
@@ -139,7 +137,7 @@ QStringList QCanBus::availableBackends(const QByteArray &identifier) const
 
 /*!
     Creates a CAN bus device. \a plugin is the name of the plugin as returned by the \l plugins()
-    method. \a identifier is the type of the device inside the plugin. A single plugin may contain more
+    method. \a identifier is the typ of the device inside the plugin. A single plugin may contain more
     than one device type. \a name is the network interface name.
 
     Ownership of the returned backend is transferred to the caller.

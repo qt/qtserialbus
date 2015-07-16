@@ -78,7 +78,7 @@ bool SocketCanBackend::open()
         }
     }
 
-    emit stateChanged(QCanBusDevice::ConnectedState);
+    emit stateChanged(static_cast<int>(QCanBusDevice::ConnectedState));
     return true;
 }
 
@@ -89,7 +89,7 @@ void SocketCanBackend::close()
 
     resetConfigurations();
 
-    emit stateChanged(QCanBusDevice::UnconnectedState);
+    emit stateChanged(static_cast<int>(QCanBusDevice::UnconnectedState));
 }
 
 qint64 SocketCanBackend::read(char *buffer, qint64 maxSize)

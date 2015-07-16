@@ -38,7 +38,7 @@
 #define QCANBUSDEVICE_P_H
 
 #include "qcanbusdevice.h"
-#include "qserialbusdevice_p.h"
+#include "QtCore/private/qobject_p.h"
 
 //
 //  W A R N I N G
@@ -53,7 +53,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class QCanBusDevicePrivate : public QSerialBusDevicePrivate
+class QCanBusDevicePrivate : public QObjectPrivate
 {
     Q_DECLARE_PUBLIC(QCanBusDevice)
 public:
@@ -63,11 +63,18 @@ public:
     {
     }
 
+    ~QCanBusDevicePrivate()
+    {
+        if (pluginBackend)
+            pluginBackend.clear();
+    }
+
     void setError(const QString &errorString, int errorId);
 
     QCanBusDevice::CanBusError lastError;
     QPointer<QSerialBusBackend> pluginBackend;
     QCanBusDevice::CanBusDeviceState state;
+    QString errorText;
 };
 
 QT_END_NAMESPACE

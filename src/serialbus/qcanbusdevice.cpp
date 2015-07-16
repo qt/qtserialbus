@@ -36,6 +36,7 @@
 
 #include "qcanbusdevice.h"
 #include "qcanbusdevice_p.h"
+#include <QtSerialBus/qserialbusbackend.h>
 
 #include "qcanframe.h"
 
@@ -49,7 +50,6 @@ QT_BEGIN_NAMESPACE
 /*!
     \class QCanBusDevice
     \inmodule QtSerialBus
-    \inherits QIODevice
     \since 5.6
 
     \brief The QCanBusDevice class is the interface class for CAN bus.
@@ -94,7 +94,7 @@ QT_BEGIN_NAMESPACE
     QCanBusDevice takes ownership of \a backend.
  */
 QCanBusDevice::QCanBusDevice(QSerialBusBackend *backend, QObject *parent) :
-    QSerialBusDevice(backend, *new QCanBusDevicePrivate, parent)
+    QObject(*new QCanBusDevicePrivate, parent)
 {
     d_func()->pluginBackend = backend;
     connect(backend, &QSerialBusBackend::error, this, &QCanBusDevice::setError);
@@ -111,9 +111,9 @@ void QCanBusDevice::setError(QString errorString, int errorId)
 }
 
 //TODO Remove once QSerialBusBackend is gone
-void QCanBusDevice::updateState(QCanBusDevice::CanBusDeviceState newState)
+void QCanBusDevice::updateState(int newState)
 {
-    setState(newState);
+    setState(static_cast<QCanBusDevice::CanBusDeviceState>(newState));
 }
 
 /*!
@@ -211,10 +211,27 @@ QCanFrame QCanBusDevice::readFrame()
 /*!
     Returns the last error that has occurred. The error value is always set to last error that
     occurred and it is never reset.
+
+    \sa errorString()
  */
 QCanBusDevice::CanBusError QCanBusDevice::error() const
 {
     return d_func()->lastError;
+}
+
+/*!
+    Returns a human-readable description of the last device error that occurred.
+
+    \sa error()
+ */
+QString QCanBusDevice::errorString() const
+{
+    Q_D(const QCanBusDevice);
+
+    if (d->lastError == QCanBusDevice::NoError)
+        return QString();
+
+    return d->errorText;
 }
 
 /*!
@@ -280,7 +297,7 @@ void QCanBusDevicePrivate::setError(const QString &errorString, int errorId)
 {
     Q_Q(QCanBusDevice);
 
-    q->setErrorString(errorString);
+    errorText = errorString;
 
     switch (errorId) {
     case QCanBusDevice::CanBusError::ReadError:
