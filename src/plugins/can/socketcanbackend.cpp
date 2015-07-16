@@ -92,65 +92,6 @@ void SocketCanBackend::close()
     emit stateChanged(static_cast<int>(QCanBusDevice::UnconnectedState));
 }
 
-qint64 SocketCanBackend::read(char *buffer, qint64 maxSize)
-{
-    if (frameBuffer.isEmpty() || maxSize < CANFD_MTU)
-        return 0;
-
-    const QCanFrame frame = frameBuffer.takeFirst();
-    const QByteArray data = serialize(frame);
-    memcpy(buffer, data.constData(), data.size());
-    return data.size();
-}
-
-QByteArray SocketCanBackend::serialize(const QCanFrame &frame)
-{
-    QByteArray array;
-    QDataStream stream(&array, QIODevice::WriteOnly);
-
-    stream << frame;
-    return array;
-}
-
-canfd_frame SocketCanBackend::deserialize(const QByteArray &array)
-{
-    QDataStream stream(array);
-    QCanFrame newData;
-    QByteArray payload;
-
-    stream >> newData;
-
-    canfd_frame frame;
-    frame.can_id = newData.frameId();
-    if (newData.hasExtendedFrameFormat())
-        frame.can_id |= CAN_EFF_FLAG;
-    if (newData.frameType() == QCanFrame::ErrorFrame)
-        frame.can_id |= CAN_ERR_FLAG;
-    if (newData.frameType() == QCanFrame::RemoteRequestFrame)
-        frame.can_id |= CAN_RTR_FLAG;
-
-    frame.len = newData.payload().size();
-    for (int i = 0; i < frame.len ; i++)
-        frame.data[i] = newData.payload().at(i);
-
-    return frame;
-}
-
-qint64 SocketCanBackend::write(const char *buffer, qint64 size)
-{
-    QByteArray data;
-    data.setRawData(buffer, size);
-    const canfd_frame frame = deserialize(data);
-
-    const qint64 bytesWritten = ::write(canSocket, &frame, CANFD_MTU);
-    if (bytesWritten < 0) {
-        emit error(qt_error_string(errno), QCanBusDevice::CanBusError::WriteError);
-        return -1;
-    }
-
-    return bytesWritten;
-}
-
 void SocketCanBackend::insertInConfigurations(const QString &key, const QVariant &value)
 {
     for (int i = 0; i < configuration.size(); i++) {
@@ -277,11 +218,6 @@ bool SocketCanBackend::connectSocket()
     return true;
 }
 
-qint64 SocketCanBackend::bytesAvailable() const
-{
-    return frameBuffer.size() * CANFD_MTU;
-}
-
 qint64 SocketCanBackend::availableFrames() const
 {
     return frameBuffer.size();
@@ -364,7 +300,6 @@ void SocketCanBackend::readSocket()
 
         frameBuffer.append(bufferedFrame);
     }
-    emit readyRead();
     emit frameReceived();
 }
 

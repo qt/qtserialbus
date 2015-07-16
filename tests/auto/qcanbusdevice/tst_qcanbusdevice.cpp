@@ -58,23 +58,6 @@ public:
         QByteArray data;
         QDataStream stream(&data, QIODevice::ReadWrite);
         stream << referenceFrame;
-
-        referenceFrameSize = data.size();
-    }
-
-
-    qint64 read(char *buffer, qint64 size)
-    {
-        QByteArray data;
-        QDataStream stream(&data, QIODevice::ReadWrite);
-        stream << referenceFrame;
-
-        if (data.size() <= size) {
-            memcpy(buffer, data.constData(), data.size());
-            return data.size();
-        }
-
-        return -1;
     }
 
     bool open()
@@ -96,13 +79,6 @@ public:
     QVariant configurationParameter(const QString&) const { return value; }
     QVector<QString> configurationKeys() const { return keys; }
 
-    qint64 write(const char*, qint64) {
-        emit written();
-        return referenceFrameSize;
-    }
-
-    qint64 bytesAvailable() const { return referenceFrameSize; }
-
     qint64 availableFrames() const { return 0; }
     QCanFrame nextFrame() { return referenceFrame; }
     bool writeFrame(const QCanFrame &/*data*/)
@@ -118,7 +94,6 @@ private:
     QVariant value;
     QVector<QString> keys;
     QCanFrame referenceFrame;
-    qint64 referenceFrameSize;
 };
 
 class tst_QCanBusDevice : public QObject

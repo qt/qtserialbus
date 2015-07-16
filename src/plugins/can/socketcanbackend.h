@@ -61,12 +61,9 @@ public:
     ~SocketCanBackend();
     bool open() Q_DECL_OVERRIDE;
     void close() Q_DECL_OVERRIDE;
-    qint64 read(char *buffer, qint64 maxSize) Q_DECL_OVERRIDE;
-    qint64 write(const char *buffer, qint64 size) Q_DECL_OVERRIDE;
     void setConfigurationParameter(const QString &key, const QVariant &value) Q_DECL_OVERRIDE;
     QVariant configurationParameter(const QString &key) const Q_DECL_OVERRIDE;
     QVector<QString> configurationKeys() const Q_DECL_OVERRIDE;
-    qint64 bytesAvailable() const Q_DECL_OVERRIDE;
 
     qint64 availableFrames() const Q_DECL_OVERRIDE;
     QCanFrame nextFrame() Q_DECL_OVERRIDE;
@@ -79,10 +76,6 @@ private:
     void insertInConfigurations(const QString &key, const QVariant &value);
     void resetConfigurations();
     bool connectSocket();
-
-    QByteArray serialize(const canfd_frame &frame, const timeval &time);
-    QByteArray serialize(const QCanFrame &frame);
-    canfd_frame deserialize(const QByteArray &frame);
 
     QList<QCanFrame> frameBuffer;
     qint64 canSocket;

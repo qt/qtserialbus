@@ -68,36 +68,7 @@ void DummyBackend::sendMessage()
 {
     byteArray.append("def");
 
-    emit readyRead();
     emit frameReceived();
-}
-
-qint64 DummyBackend::read(char *buffer, qint64 maxSize)
-{
-    const qint64 len = byteArray.size();
-    if (len > maxSize) {
-        const QByteArray data = byteArray.left(maxSize);
-        byteArray = byteArray.mid(maxSize);
-        memcpy(buffer, data.constData(), maxSize);
-        return maxSize;
-    } else {
-        memcpy(buffer, byteArray.constData(), len);
-        byteArray.clear();
-        return len;
-    }
-}
-
-qint64 DummyBackend::write(const char *buffer, qint64 size)
-{
-    QByteArray data;
-    data.setRawData(buffer, size);
-    qDebug() << "DummyBackend wrote: " << data.data();
-    return size;
-}
-
-qint64 DummyBackend::bytesAvailable() const
-{
-    return byteArray.size();
 }
 
 #define MAX_PACKAGE_SIZE 16

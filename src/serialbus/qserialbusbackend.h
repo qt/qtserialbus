@@ -49,24 +49,19 @@ class Q_SERIALBUS_EXPORT QSerialBusBackend : public QObject
 {
     Q_OBJECT
 
-
-
 public:
     virtual bool open() = 0;
     virtual void close() = 0;
-    virtual qint64 read(char *buffer, qint64 maxSize) = 0;
+
     virtual void setConfigurationParameter(const QString &key, const QVariant &value) = 0;
     virtual QVariant configurationParameter(const QString &key) const = 0;
     virtual QVector<QString> configurationKeys() const = 0;
-    virtual qint64 write(const char* buffer, qint64 len) = 0;
-    virtual qint64 bytesAvailable() const = 0;
 
     virtual qint64 availableFrames() const = 0;
     virtual QCanFrame nextFrame() = 0;
     virtual bool writeFrame(const QCanFrame &frame) = 0;
 
 Q_SIGNALS:
-    void readyRead();
     void error(QString, int);
     void stateChanged(int);
 

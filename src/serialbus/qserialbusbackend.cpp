@@ -58,22 +58,6 @@
  */
 
 /*!
-    \fn qint64 QSerialBusBackend::read(char *buffer, qint64 maxSize)
-
-    Reads at most \a maxSize bytes from the backend to \a buffer. QSerialBusDevice reroutes
-    \c QIODevice::readData(char*, qint64) here. Returns the number of bytes read, or \c -1 if an
-    error occurred.
- */
-
-/*!
-    \fn qint64 QSerialBusBackend::write(const char* buffer, qint64 len)
-
-    Writes the amount of data specified by \a len from \a buffer to the backend. QSerialBusDevice
-    reroutes \c QIODevice::writeData(char*, qint64) here. Returns the number of bytes written, or
-    \c -1 if an error occurred.
- */
-
-/*!
     \fn QSerialBusBackend::setConfigurationParameter(const QString &key, const QVariant &value)
 
     Sets the value of the configuration parameter of \a key as \a value. Keys and values depend on
@@ -91,21 +75,6 @@
 
     Returns the list of keys used in the backend.
  */
-
-/*!
-    \fn qint64 QSerialBusBackend::bytesAvailable() const
-
-    Returns the number of bytes that are available for reading.
- */
-
-/*!
-    \fn void QSerialBusBackend::readyRead()
-
-    This signal is emitted once every time new data is available for reading from the device.
-    It will only be emitted again once new data is available, for example, when a new payload of
-    network data has arrived on your network socket or when a new block of data has been appended to
-    your device.
-*/
 
 /*!
     \fn void QSerialBusBackend::error(QString errorString, int errorCode)
