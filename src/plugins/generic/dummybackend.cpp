@@ -55,13 +55,13 @@ DummyBackend::DummyBackend() :
 
 bool DummyBackend::open()
 {
-    emit stateChanged(static_cast<int>(QCanBusDevice::ConnectedState));
+    setState(QCanBusDevice::ConnectedState);
     return true;
 }
 
 void DummyBackend::close()
 {
-    emit stateChanged(static_cast<int>(QCanBusDevice::UnconnectedState));
+    setState(QCanBusDevice::UnconnectedState);
 }
 
 void DummyBackend::sendMessage()
@@ -83,7 +83,7 @@ qint64 DummyBackend::availableFrames() const
     return frameCount;
 }
 
-QCanFrame DummyBackend::nextFrame()
+QCanFrame DummyBackend::readFrame()
 {
     QCanFrame dummyFrame;
 

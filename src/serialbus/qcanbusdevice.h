@@ -72,15 +72,16 @@ public:
     };
     Q_ENUM(CanBusDeviceState)
 
-    explicit QCanBusDevice(QSerialBusBackend *backend, QObject *parent = 0);
-    void setConfigurationParameter(const QString &key, const QVariant &value);
-    QVariant configurationParameter(const QString &key) const;
-    QVector<QString> configurationKeys() const;
+    explicit QCanBusDevice(QObject *parent = 0);
 
-    void writeFrame(const QCanFrame &frame);
-    QCanFrame readFrame();
-    CanBusError error() const;
-    qint64 availableFrames() const;
+    virtual void setConfigurationParameter(const QString &key, const QVariant &value) = 0;
+    virtual QVariant configurationParameter(const QString &key) const = 0;
+    virtual QVector<QString> configurationKeys() const = 0;
+
+    virtual bool writeFrame(const QCanFrame &frame) = 0;
+    virtual QCanFrame readFrame() = 0;
+    virtual qint64 availableFrames() const = 0;
+
     //TODO currently assumes unbuffered write. Add support for buffered writes
     // qint64 framesToWrite() const
     // signal: void framesWritten(qint64 framesCount)
@@ -91,6 +92,7 @@ public:
 
     CanBusDeviceState state() const;
 
+    CanBusError error() const;
     QString errorString() const;
 
 Q_SIGNALS:
@@ -100,10 +102,10 @@ Q_SIGNALS:
 
 protected:
     void setState(QCanBusDevice::CanBusDeviceState newState);
+    void setError(const QString &errorText, QCanBusDevice::CanBusError);
 
-private Q_SLOTS:
-    void setError(QString, int);
-    void updateState(int newState);
+    virtual bool open() = 0;
+    virtual void close() = 0;
 };
 
 Q_DECLARE_TYPEINFO(QCanBusDevice::CanBusError, Q_PRIMITIVE_TYPE);

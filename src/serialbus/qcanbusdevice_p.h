@@ -63,16 +63,7 @@ public:
     {
     }
 
-    ~QCanBusDevicePrivate()
-    {
-        if (pluginBackend)
-            pluginBackend.clear();
-    }
-
-    void setError(const QString &errorString, int errorId);
-
     QCanBusDevice::CanBusError lastError;
-    QPointer<QSerialBusBackend> pluginBackend;
     QCanBusDevice::CanBusDeviceState state;
     QString errorText;
 };

@@ -63,7 +63,7 @@ public:
                                             const QString &interfaceName) const
     {
         if (identifier == QLatin1String(BackendName)) {
-            QCanBusDevice *device = new QCanBusDevice(new SocketCanBackend(interfaceName));
+            QCanBusDevice *device = new SocketCanBackend(interfaceName);
             return device;
         }
 
@@ -72,10 +72,6 @@ public:
 
     QSerialBusBackend *createBackend(const QString &bus, const QString &name) const
     {
-        if (bus == QLatin1String(BackendName)) {
-            QSerialBusBackend *backend = new SocketCanBackend(name);
-            return backend;
-        }
         return Q_NULLPTR;
     }
 

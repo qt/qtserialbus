@@ -63,16 +63,13 @@ public:
     {
         Q_UNUSED(identifier)
         Q_UNUSED(interfaceName)
-        QCanBusDevice *device = new QCanBusDevice(new DummyBackend());
+        QCanBusDevice *device = new DummyBackend();
         return device;
     }
 
-    QSerialBusBackend *createBackend(const QString &bus, const QString &name) const
+    QSerialBusBackend *createBackend(const QString &/*bus*/, const QString &/*name*/) const
     {
-        Q_UNUSED(bus)
-        Q_UNUSED(name)
-        QSerialBusBackend *backend = new DummyBackend();
-        return backend;
+        return Q_NULLPTR;
     }
 
     QStringList availableBackends() const

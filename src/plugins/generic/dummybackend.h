@@ -37,7 +37,7 @@
 #ifndef DUMMYBACKEND_H
 #define DUMMYBACKEND_H
 
-#include <qserialbusbackend.h>
+#include <QtSerialBus/qcanbusdevice.h>
 
 #include <QtCore/qbytearray.h>
 #include <QtCore/qpointer.h>
@@ -46,11 +46,12 @@ QT_BEGIN_NAMESPACE
 
 class QTimer;
 
-class DummyBackend : public QSerialBusBackend
+class DummyBackend : public QCanBusDevice
 {
     Q_OBJECT
 public:
     explicit DummyBackend();
+
     bool open() Q_DECL_OVERRIDE;
     void close() Q_DECL_OVERRIDE;
 
@@ -59,7 +60,7 @@ public:
     QVector<QString> configurationKeys() const Q_DECL_OVERRIDE;
 
     qint64 availableFrames() const Q_DECL_OVERRIDE;
-    QCanFrame nextFrame() Q_DECL_OVERRIDE;
+    QCanFrame readFrame() Q_DECL_OVERRIDE;
     bool writeFrame(const QCanFrame &data) Q_DECL_OVERRIDE;
 
 public Q_SLOTS:

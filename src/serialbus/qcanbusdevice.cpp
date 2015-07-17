@@ -93,30 +93,24 @@ QT_BEGIN_NAMESPACE
 
     QCanBusDevice takes ownership of \a backend.
  */
-QCanBusDevice::QCanBusDevice(QSerialBusBackend *backend, QObject *parent) :
+QCanBusDevice::QCanBusDevice(QObject *parent) :
     QObject(*new QCanBusDevicePrivate, parent)
 {
-    d_func()->pluginBackend = backend;
-    connect(backend, &QSerialBusBackend::error, this, &QCanBusDevice::setError);
-    connect(backend, &QSerialBusBackend::frameReceived,
-            this, &QCanBusDevice::frameReceived);
-    connect(backend, &QSerialBusBackend::stateChanged,
-            this, &QCanBusDevice::updateState);
 }
 
-void QCanBusDevice::setError(QString errorString, int errorId)
+void QCanBusDevice::setError(const QString &errorText, CanBusError errorId)
 {
     Q_D(QCanBusDevice);
-    d->setError(errorString, errorId);
-}
 
-//TODO Remove once QSerialBusBackend is gone
-void QCanBusDevice::updateState(int newState)
-{
-    setState(static_cast<QCanBusDevice::CanBusDeviceState>(newState));
+    d->errorText = errorText;
+    d->lastError = errorId;
+
+    emit errorOccurred(errorId);
 }
 
 /*!
+    \fn void QCanBusDevice::setConfigurationParameter(const QString &key, const QVariant &value)
+
     Sets the configuration parameters for the bus backend. The key-value pair is backend-specific.
 
     The following table lists the supported \a key and \a value pairs for the SocketCAN backend:
@@ -156,57 +150,35 @@ void QCanBusDevice::updateState(int newState)
 
     \sa configurationParameter()
  */
-void QCanBusDevice::setConfigurationParameter(const QString &key, const QVariant &value)
-{
-    d_func()->pluginBackend->setConfigurationParameter(key, value);
-}
 
 /*!
+    \fn QVariant QCanBusDevice::configurationParameter(const QString &key) const
+
     Returns the current value assigned to the configuration parameter \a key.
 
     \sa setConfigurationParameter()
  */
-QVariant QCanBusDevice::configurationParameter(const QString &key) const
-{
-    return d_func()->pluginBackend->configurationParameter(key);
-}
 
 /*!
+    \fn QVector<QString> QCanBusDevice::configurationKeys() const
+
     Returns the list of keys used by the backend.
  */
-QVector<QString> QCanBusDevice::configurationKeys() const
-{
-    return d_func()->pluginBackend->configurationKeys();
-}
 
 /*!
-    Writes \a frame to the CAN bus.
+    Writes \a frame to the CAN bus and returns \c true on success;
+    otherwise \c false.
 
     \sa readFrame()
  */
-void QCanBusDevice::writeFrame(const QCanFrame &frame)
-{
-    Q_D(QCanBusDevice);
 
-    if (d->state != ConnectedState)
-        return;
-
-    d_func()->pluginBackend->writeFrame(frame);
-}
 
 /*!
    Reads the information contained in one CAN frame from the backend.
 
    \sa writeFrame()
  */
-QCanFrame QCanBusDevice::readFrame()
-{
-    Q_D(QCanBusDevice);
-    if (d->state != ConnectedState)
-        return QCanFrame();
 
-    return d_func()->pluginBackend->nextFrame();
-}
 
 /*!
     Returns the last error that has occurred. The error value is always set to last error that
@@ -235,13 +207,41 @@ QString QCanBusDevice::errorString() const
 }
 
 /*!
-    Returns the number of available frames.
- */
-qint64 QCanBusDevice::availableFrames() const
-{
-    return d_func()->pluginBackend->availableFrames();
-}
+    \fn qint64 QCanBusDevice::availableFrames() const
 
+    Returns the number of available frames.
+*/
+
+/*!
+    \fn bool QCanBusDevice::open()
+
+    This function is called by connectDevice(). Subclasses must provide
+    an implementation which returns \c true if the CAN bus connection
+    could be established; otherwise \c false.
+
+    The implementation must ensure that upon success the instance's \l state()
+    is set to \l QCanBusDevice::ConnectedState; otherwise
+    \l QCanBusDevice::UnconnectedState.
+
+    \sa connectDevice()
+ */
+
+/*!
+    \fn void QCanBusDevice::close()
+
+    This function is responsible for closing the CAN bus connection.
+    The implementation must ensure that the instance's
+    \l state() is set to \l QCanBusDevice::UnconnectedState.
+
+    \sa disconnectDevice()
+*/
+
+/*!
+    Connects the device to the CAN bus. Returns \c true on success;
+    otherwise \c false.
+
+    This function calls
+ */
 bool QCanBusDevice::connectDevice()
 {
     Q_D(QCanBusDevice);
@@ -251,7 +251,7 @@ bool QCanBusDevice::connectDevice()
 
     setState(ConnectingState);
 
-    if (!d->pluginBackend->open()) {
+    if (!open()) {
         setState(UnconnectedState);
         return false;
     }
@@ -265,7 +265,7 @@ void QCanBusDevice::disconnectDevice()
     setState(QCanBusDevice::ClosingState);
 
     //Unconnected is set by backend -> might be delayed by event loop
-    d_func()->pluginBackend->close();
+    close();
 }
 
 /*!
@@ -291,33 +291,6 @@ void QCanBusDevice::setState(QCanBusDevice::CanBusDeviceState newState)
 
     d->state = newState;
     emit stateChanged(newState);
-}
-
-void QCanBusDevicePrivate::setError(const QString &errorString, int errorId)
-{
-    Q_Q(QCanBusDevice);
-
-    errorText = errorString;
-
-    switch (errorId) {
-    case QCanBusDevice::CanBusError::ReadError:
-        lastError = QCanBusDevice::CanBusError::ReadError;
-        break;
-    case QCanBusDevice::CanBusError::WriteError:
-        lastError = QCanBusDevice::CanBusError::WriteError;
-        break;
-    case QCanBusDevice::CanBusError::ConnectionError:
-        lastError = QCanBusDevice::CanBusError::ConnectionError;
-        break;
-    case QCanBusDevice::CanBusError::ConfigurationError:
-        lastError = QCanBusDevice::CanBusError::ConfigurationError;
-        break;
-    case QCanBusDevice::CanBusError::UnknownError:
-    default:
-        lastError = QCanBusDevice::CanBusError::UnknownError;
-        break;
-    }
-    emit q->errorOccurred(lastError);
 }
 
 QT_END_NAMESPACE

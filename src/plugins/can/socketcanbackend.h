@@ -37,8 +37,8 @@
 #ifndef SOCKETCANBACKEND_H
 #define SOCKETCANBACKEND_H
 
-#include <qserialbusbackend.h>
-#include <qcanframe.h>
+#include <QtSerialBus/qcanframe.h>
+#include <QtSerialBus/qcanbusdevice.h>
 
 #include <QtCore/qpointer.h>
 #include <QtCore/qvariant.h>
@@ -53,20 +53,22 @@ const char BackendName[] = "SocketCAN";
 
 class QSocketNotifier;
 
-class SocketCanBackend : public QSerialBusBackend
+class SocketCanBackend : public QCanBusDevice
 {
     Q_OBJECT
 public:
     explicit SocketCanBackend(const QString &name);
     ~SocketCanBackend();
+
     bool open() Q_DECL_OVERRIDE;
     void close() Q_DECL_OVERRIDE;
+
     void setConfigurationParameter(const QString &key, const QVariant &value) Q_DECL_OVERRIDE;
     QVariant configurationParameter(const QString &key) const Q_DECL_OVERRIDE;
     QVector<QString> configurationKeys() const Q_DECL_OVERRIDE;
 
     qint64 availableFrames() const Q_DECL_OVERRIDE;
-    QCanFrame nextFrame() Q_DECL_OVERRIDE;
+    QCanFrame readFrame() Q_DECL_OVERRIDE;
     bool writeFrame(const QCanFrame &newData) Q_DECL_OVERRIDE;
 
 private Q_SLOTS:

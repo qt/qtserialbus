@@ -36,12 +36,11 @@
 
 #include <QtSerialBus/QCanBusDevice>
 #include <QtSerialBus/QCanFrame>
-#include <QtSerialBus/QSerialBusBackend>
 
 #include <QtTest/QtTest>
 #include <QSignalSpy>
 
-class tst_Backend : public QSerialBusBackend
+class tst_Backend : public QCanBusDevice
 {
     Q_OBJECT
 public:
@@ -62,13 +61,13 @@ public:
 
     bool open()
     {
-        emit stateChanged(QCanBusDevice::ConnectedState);
+        setState(QCanBusDevice::ConnectedState);
         return true;
     }
 
     void close()
     {
-        emit stateChanged(QCanBusDevice::UnconnectedState);
+        setState(QCanBusDevice::UnconnectedState);
     }
 
     void setConfigurationParameter(const QString &key, const QVariant &param)
@@ -76,15 +75,30 @@ public:
         value = param;
         keys.append(key);
     }
+
     QVariant configurationParameter(const QString&) const { return value; }
     QVector<QString> configurationKeys() const { return keys; }
 
     qint64 availableFrames() const { return 0; }
-    QCanFrame nextFrame() { return referenceFrame; }
+    QCanFrame readFrame()
+    {
+        if (state() != QCanBusDevice::ConnectedState)
+            return QCanFrame();
+
+        return referenceFrame;
+    }
     bool writeFrame(const QCanFrame &/*data*/)
     {
+        if (state() != QCanBusDevice::ConnectedState)
+            return false;
+
         emit written();
         return true;
+    }
+
+    void emulateError(const QString &text, QCanBusDevice::CanBusError e)
+    {
+        setError(text, e);
     }
 
 signals:
@@ -112,22 +126,18 @@ private slots:
 
 private:
     QPointer<QCanBusDevice> device;
-    QPointer<QSerialBusBackend> backend;
 };
 
 tst_QCanBusDevice::tst_QCanBusDevice() :
-    device(0),
-    backend(0)
+    device(0)
 {
     qRegisterMetaType<QCanBusDevice::CanBusError>();
 }
 
 void tst_QCanBusDevice::initTestCase()
 {
-    backend = new tst_Backend();
-    device = new QCanBusDevice(backend);
+    device = new tst_Backend();
     QVERIFY(device);
-    QVERIFY(backend);
     QVERIFY(device->connectDevice());
 
     // this backend is synchronous
@@ -146,7 +156,7 @@ void tst_QCanBusDevice::conf()
 
 void tst_QCanBusDevice::write()
 {
-    QSignalSpy spy(backend, SIGNAL(written()));
+    QSignalSpy spy(device, SIGNAL(written()));
     QCanFrame frame;
     frame.setPayload(QByteArray("testData"));
     device->disconnectDevice();
@@ -181,36 +191,43 @@ void tst_QCanBusDevice::error()
     QSignalSpy spy(device, SIGNAL(errorOccurred(QCanBusDevice::CanBusError)));
     QString testString(QStringLiteral("testString"));
 
+    tst_Backend *backend = qobject_cast<tst_Backend *>(device);
+    QVERIFY(backend);
+
     //ReadError
-    emit backend->error(testString, 1);
-    QCOMPARE(testString, device->errorString());
+    backend->emulateError(testString+QString::fromLatin1("a"),
+                         QCanBusDevice::ReadError);
+    QCOMPARE(testString+QString::fromLatin1("a"), device->errorString());
     QVERIFY(device->error() == 1);
     QCOMPARE(spy.count(), 1);
 
     //WriteError
-    emit backend->error(testString, 2);
+    backend->emulateError(testString+QString::fromLatin1("b"),
+                         QCanBusDevice::WriteError);
+    QCOMPARE(testString+QString::fromLatin1("b"), device->errorString());
     QVERIFY(device->error() == 2);
     QCOMPARE(spy.count(), 2);
 
     //ConnectionError
-    emit backend->error(testString, 3);
+    backend->emulateError(testString+QString::fromLatin1("c"),
+                         QCanBusDevice::ConnectionError);
+    QCOMPARE(testString+QString::fromLatin1("c"), device->errorString());
     QVERIFY(device->error() == 3);
     QCOMPARE(spy.count(), 3);
 
     //ConfigurationError
-    emit backend->error(testString, 4);
+    backend->emulateError(testString+QString::fromLatin1("d"),
+                         QCanBusDevice::ConfigurationError);
+    QCOMPARE(testString+QString::fromLatin1("d"), device->errorString());
     QVERIFY(device->error() == 4);
     QCOMPARE(spy.count(), 4);
 
     //UnknownError
-    emit backend->error(testString, 5);
+    backend->emulateError(testString+QString::fromLatin1("e"),
+                          QCanBusDevice::UnknownError);
+    QCOMPARE(testString+QString::fromLatin1("e"), device->errorString());
     QVERIFY(device->error() == 5);
     QCOMPARE(spy.count(), 5);
-
-    //Faulty error identifier
-    emit backend->error(testString, 100);
-    QVERIFY(device->error() == 5);
-    QCOMPARE(spy.count(), 6);
 }
 
 void tst_QCanBusDevice::cleanupTestCase()

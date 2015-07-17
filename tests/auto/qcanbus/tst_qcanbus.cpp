@@ -75,9 +75,9 @@ void tst_QCanBus::plugins()
 
 void tst_QCanBus::createBackend()
 {
-    QSerialBusBackend *faulty = bus->createBackend("foo","socketFoo","vfoo");
-    QVERIFY(!faulty);
-    QSerialBusBackend *dummy = bus->createBackend("dummy", "unused", "unused");
+    //TODO this test needs serious overhaul. For now it is the bare minimum
+
+    QCanBusDevice *dummy = bus->createDevice("dummy", "unused", "unused");
     QVERIFY(dummy);
 }
 
