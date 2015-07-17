@@ -67,11 +67,6 @@ public:
         return device;
     }
 
-    QSerialBusBackend *createBackend(const QString &/*bus*/, const QString &/*name*/) const
-    {
-        return Q_NULLPTR;
-    }
-
     QStringList availableBackends() const
     {
         QStringList backends;

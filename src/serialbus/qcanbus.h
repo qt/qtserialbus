@@ -39,13 +39,11 @@
 
 #include <QtSerialBus/qserialbusglobal.h>
 #include <QtSerialBus/qcanbusdevice.h>
-#include <QtSerialBus/qserialbusbackend.h>
 
 #include <QtCore/qobject.h>
 
 QT_BEGIN_NAMESPACE
 
-class QSerialBusBackend;
 class QSerialBusBackendFactory;
 
 class Q_SERIALBUS_EXPORT QCanBus : public QObject
@@ -57,8 +55,7 @@ public:
     static void registerBackend(const QByteArray &identifier, QSerialBusBackendFactory *factory);
 
     QList<QByteArray> plugins();
-    QSerialBusBackend *createBackend(const QByteArray &identifier,
-                                     const QString &type, const QString &name) const;
+
     QStringList availableBackends(const QByteArray &identifier) const;
 
     QCanBusDevice *createDevice(const QByteArray &plugin,
@@ -73,7 +70,6 @@ private:
 class Q_SERIALBUS_EXPORT QSerialBusBackendFactory
 {
 public:
-    virtual QSerialBusBackend *createBackend(const QString &busBackend, const QString &name) const = 0;
     virtual QStringList availableBackends() const = 0;
 
     virtual QCanBusDevice *createDevice(const QString &identifier,

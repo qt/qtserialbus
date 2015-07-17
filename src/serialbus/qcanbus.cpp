@@ -108,22 +108,6 @@ QList<QByteArray> QCanBus::plugins()
 }
 
 /*!
-    Creates a bus backend. \a identifier is the name of the plugin as returned by the \l plugins()
-    method. \a type is the type of the backend inside the plugin. A single plugin may contain more
-    than one backend. \a name is the network interface name.
-
-    Ownership of the returned backend is transferred to the caller.
-    Returns \c null if no suitable backend for the given identifier can be found.
- */
-QSerialBusBackend *QCanBus::createBackend(const QByteArray &identifier,
-                                             const QString &type, const QString &name) const
-{
-    if (QSerialBusBackendFactory *factory = qSerialBusPlugins()->value(identifier))
-        return factory->createBackend(type, name);
-    return Q_NULLPTR;
-}
-
-/*!
     Returns a list of available backend names for \a identifier, or an empty list if no suitable
     \a identifier can be found.
 */

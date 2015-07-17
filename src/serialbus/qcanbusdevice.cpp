@@ -36,7 +36,6 @@
 
 #include "qcanbusdevice.h"
 #include "qcanbusdevice_p.h"
-#include <QtSerialBus/qserialbusbackend.h>
 
 #include "qcanframe.h"
 
