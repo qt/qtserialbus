@@ -83,7 +83,7 @@ void tst_QCanBus::createBackend()
 
 void tst_QCanBus::availableBackends()
 {
-    QStringList list = bus->availableBackends("faulty");
+    QStringList list = bus->availableIdentifiers("faulty");
     QVERIFY(list.isEmpty());
 }
 

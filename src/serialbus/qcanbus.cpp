@@ -102,19 +102,19 @@ void QCanBus::registerBackend(const QByteArray &identifier, QSerialBusBackendFac
 /*!
     Returns a list of identifiers for all loaded plugins.
  */
-QList<QByteArray> QCanBus::plugins()
+QList<QByteArray> QCanBus::plugins() const
 {
     return qSerialBusPlugins()->keys();
 }
 
 /*!
-    Returns a list of available backend names for \a identifier, or an empty list if no suitable
-    \a identifier can be found.
+    Returns a list of all available CAN bus identifiers for a
+    given \a plugin, or an empty list if no suitable \a identifier
+    can be found.
 */
-
-QStringList QCanBus::availableBackends(const QByteArray &identifier) const
+QStringList QCanBus::availableIdentifiers(const QByteArray &plugin) const
 {
-    if (QSerialBusBackendFactory *factory = qSerialBusPlugins()->value(identifier))
+    if (QSerialBusBackendFactory *factory = qSerialBusPlugins()->value(plugin))
         return factory->availableBackends();
     return QStringList();
 }

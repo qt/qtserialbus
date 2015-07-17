@@ -81,7 +81,7 @@ void MainWindow::init()
         if (plugins.at(i) == QStringLiteral("can")) {
             //TODO find way to dynamically detect vcan1
             //TODO potentially instanciate every backend in the plugin - not just first
-            const QString type = canBus->availableBackends(plugins.at(i)).first();
+            const QString type = canBus->availableIdentifiers(plugins.at(i)).first();
             canDevice = canBus->createDevice(plugins.at(i),
                                              type,
                                              QStringLiteral("vcan1"));

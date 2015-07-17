@@ -54,9 +54,9 @@ public:
     static QCanBus *instance();
     static void registerBackend(const QByteArray &identifier, QSerialBusBackendFactory *factory);
 
-    QList<QByteArray> plugins();
+    QList<QByteArray> plugins() const;
 
-    QStringList availableBackends(const QByteArray &identifier) const;
+    QStringList availableIdentifiers(const QByteArray &plugin) const;
 
     QCanBusDevice *createDevice(const QByteArray &plugin,
                                 const QString &identifier, const QString &name) const;
