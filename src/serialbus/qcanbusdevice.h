@@ -73,7 +73,8 @@ public:
 
     explicit QCanBusDevice(QObject *parent = 0);
 
-    virtual void setConfigurationParameter(const QString &key, const QVariant &value) = 0;
+    virtual void setConfigurationParameter(const QString &key,
+                                           const QVariant &value) = 0;
     virtual QVariant configurationParameter(const QString &key) const = 0;
     virtual QVector<QString> configurationKeys() const = 0;
 

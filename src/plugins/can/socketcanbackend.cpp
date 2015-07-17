@@ -98,8 +98,8 @@ void SocketCanBackend::insertInConfigurations(const QString &key, const QVariant
     for (int i = 0; i < configuration.size(); i++) {
         if (configuration.at(i).first == key) {
             QPair<QString, QVariant> conf(key, value);
-            configuration.removeAt(i);
-            configuration.append(conf);
+            configuration[i] = conf;
+            return;
         }
     }
 }
@@ -164,27 +164,28 @@ void SocketCanBackend::setConfigurationParameter(const QString &key, const QVari
                      QCanBusDevice::CanBusError::ConfigurationError);
     } else {
         setError(QStringLiteral("SocketCanBackend: No such configuration as")
-                   + key + QStringLiteral("in SocketCanBackend"), QCanBusDevice::CanBusError::ConfigurationError);
+                   + key + QStringLiteral("in SocketCanBackend"),
+                 QCanBusDevice::CanBusError::ConfigurationError);
+        return;
     }
     insertInConfigurations(key, value);
 }
 
 QVariant SocketCanBackend::configurationParameter(const QString &key) const
 {
-    QVariant value;
     for (int i = 0; i < configuration.size(); i++)
         if (configuration.at(i).first == key)
-            value = configuration.at(i).second;
+            return configuration.at(i).second;
 
-    return value;
+    return QVariant();
 }
 
 QVector<QString> SocketCanBackend::configurationKeys() const
 {
     QVector<QString> keys;
-    for (int i = 0; i < configuration.size(); i++) {
+    for (int i = 0; i < configuration.size(); i++)
         keys.append(configuration.at(i).first);
-    }
+
     return keys;
 }
 
