@@ -238,18 +238,18 @@ qint64 SocketCanBackend::availableFrames() const
     return frameBuffer.size();
 }
 
-QCanFrame SocketCanBackend::readFrame()
+QCanBusFrame SocketCanBackend::readFrame()
 {
     if (state() != ConnectedState)
-        return QCanFrame();
+        return QCanBusFrame();
 
     if (frameBuffer.isEmpty())
-        return QCanFrame(); //TODO add concept of invalid CanFrame
+        return QCanBusFrame(); //TODO add concept of invalid CanFrame
 
     return frameBuffer.takeFirst();
 }
 
-bool SocketCanBackend::writeFrame(const QCanFrame &newData)
+bool SocketCanBackend::writeFrame(const QCanBusFrame &newData)
 {
     if (state() != ConnectedState)
         return false;
@@ -258,9 +258,9 @@ bool SocketCanBackend::writeFrame(const QCanFrame &newData)
     frame.can_id = newData.frameId();
     if (newData.hasExtendedFrameFormat())
         frame.can_id |= CAN_EFF_FLAG;
-    if (newData.frameType() == QCanFrame::ErrorFrame)
+    if (newData.frameType() == QCanBusFrame::ErrorFrame)
         frame.can_id |= CAN_ERR_FLAG;
-    if (newData.frameType() == QCanFrame::RemoteRequestFrame)
+    if (newData.frameType() == QCanBusFrame::RemoteRequestFrame)
         frame.can_id |= CAN_RTR_FLAG;
 
     frame.len = newData.payload().size();
@@ -301,18 +301,18 @@ void SocketCanBackend::readSocket()
             timeStamp.tv_usec = 0;
         }
 
-        QCanFrame::TimeStamp stamp;
+        QCanBusFrame::TimeStamp stamp;
         stamp.setSeconds(timeStamp.tv_sec);
         stamp.setMicroSeconds(timeStamp.tv_usec);
 
-        QCanFrame bufferedFrame;
+        QCanBusFrame bufferedFrame;
         bufferedFrame.setTimeStamp(stamp);
 
         bufferedFrame.setExtendedFrameFormat(frame.can_id & CAN_EFF_FLAG);
         if (frame.can_id & CAN_RTR_FLAG)
-            bufferedFrame.setFrameType(QCanFrame::RemoteRequestFrame);
+            bufferedFrame.setFrameType(QCanBusFrame::RemoteRequestFrame);
         if (frame.can_id & CAN_ERR_FLAG)
-            bufferedFrame.setFrameType(QCanFrame::ErrorFrame);
+            bufferedFrame.setFrameType(QCanBusFrame::ErrorFrame);
 
         bufferedFrame.setFrameId(frame.can_id & CAN_EFF_MASK);
 

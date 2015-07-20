@@ -1,5 +1,5 @@
 TEMPLATE = subdirs
 SUBDIRS += cmake \
-           qcanframe \
+           qcanbusframe \
            qcanbus \
            qcanbusdevice

@@ -37,7 +37,7 @@
 #ifndef SOCKETCANBACKEND_H
 #define SOCKETCANBACKEND_H
 
-#include <QtSerialBus/qcanframe.h>
+#include <QtSerialBus/qcanbusframe.h>
 #include <QtSerialBus/qcanbusdevice.h>
 
 #include <QtCore/qpointer.h>
@@ -66,8 +66,8 @@ public:
     QVector<QString> configurationKeys() const Q_DECL_OVERRIDE;
 
     qint64 availableFrames() const Q_DECL_OVERRIDE;
-    QCanFrame readFrame() Q_DECL_OVERRIDE;
-    bool writeFrame(const QCanFrame &newData) Q_DECL_OVERRIDE;
+    QCanBusFrame readFrame() Q_DECL_OVERRIDE;
+    bool writeFrame(const QCanBusFrame &newData) Q_DECL_OVERRIDE;
 
 private Q_SLOTS:
     void readSocket();
@@ -77,7 +77,7 @@ private:
     void resetConfigurations();
     bool connectSocket();
 
-    QList<QCanFrame> frameBuffer;
+    QList<QCanBusFrame> frameBuffer;
     qint64 canSocket;
     QPointer<QSocketNotifier> notifier;
     QString canSocketName;

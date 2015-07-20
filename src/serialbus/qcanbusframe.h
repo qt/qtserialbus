@@ -34,8 +34,8 @@
 **
 ****************************************************************************/
 
-#ifndef QCANFRAME_H
-#define QCANFRAME_H
+#ifndef QCANBUSFRAME_H
+#define QCANBUSFRAME_H
 
 #include <QtSerialBus/qserialbusglobal.h>
 
@@ -46,8 +46,8 @@ QT_BEGIN_NAMESPACE
 class QDataStream;
 
 //TODO: review ctors for this class
-//TODO: add concept of invalid QCanFrame
-class QCanFrame
+//TODO: add concept of invalid QCanBusFrame
+class QCanBusFrame
 {
 public:
     class TimeStamp {
@@ -71,7 +71,7 @@ public:
         RemoteRequestFrame
     };
 
-    explicit QCanFrame(quint32 identifier = 0, const QByteArray &data = QByteArray()) :
+    explicit QCanBusFrame(quint32 identifier = 0, const QByteArray &data = QByteArray()) :
         canId(identifier & 0x1FFFFFFFU),
         format(0x1),
         isExtendedFrame(0x1),
@@ -127,8 +127,8 @@ public:
     TimeStamp timeStamp() const { return stamp; }
 
 #ifndef QT_NO_DATASTREAM
-    friend Q_SERIALBUS_EXPORT QDataStream &operator<<(QDataStream &, const QCanFrame &);
-    friend Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &, QCanFrame &);
+    friend Q_SERIALBUS_EXPORT QDataStream &operator<<(QDataStream &, const QCanBusFrame &);
+    friend Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &, QCanBusFrame &);
 #endif
 
 private:
@@ -146,15 +146,15 @@ private:
     TimeStamp stamp;
 };
 
-Q_DECLARE_TYPEINFO(QCanFrame, Q_MOVABLE_TYPE);
-Q_DECLARE_TYPEINFO(QCanFrame::FrameType, Q_PRIMITIVE_TYPE);
-Q_DECLARE_TYPEINFO(QCanFrame::TimeStamp, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(QCanBusFrame, Q_MOVABLE_TYPE);
+Q_DECLARE_TYPEINFO(QCanBusFrame::FrameType, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(QCanBusFrame::TimeStamp, Q_PRIMITIVE_TYPE);
 
 #ifndef QT_NO_DATASTREAM
-Q_SERIALBUS_EXPORT QDataStream &operator<<(QDataStream &, const QCanFrame &);
-Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &, QCanFrame &);
+Q_SERIALBUS_EXPORT QDataStream &operator<<(QDataStream &, const QCanBusFrame &);
+Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &, QCanBusFrame &);
 #endif
 
 QT_END_NAMESPACE
 
-#endif // QCANFRAME_H
+#endif // QCANBUSFRAME_H

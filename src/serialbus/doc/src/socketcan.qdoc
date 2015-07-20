@@ -33,7 +33,7 @@
     \l QCanBusDevice provides an API for CAN access and plugins. It is inherited from
     QSerialBusDevice. All access to the CAN is handled by \l QCanBusDevice.
 
-    \l QCanFrame defines a CAN frame that can be written and read from QCanBusDevice.
+    \l QCanBusFrame defines a CAN frame that can be written and read from QCanBusDevice.
 
     \section1 Creating CAN Bus Devices
 
@@ -52,7 +52,7 @@
     The device is now open and can be written and read:
 
     \code
-        QCanFrame frame;
+        QCanBusFrame frame;
         frame.setFrameId(8);
         QByteArray payload("A36E");
         frame.setPayload(payload);
@@ -63,7 +63,7 @@
     \l {QIODevice::}{readyRead()} signal is emitted when a new frame is available for reading:
 
     \code
-    QCanFrame frame = socketCanDevice->readFrame();
+    QCanBusFrame frame = socketCanDevice->readFrame();
     \endcode
 
     SocketCAN provides the following configurations that can be controlled through

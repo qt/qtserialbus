@@ -83,9 +83,9 @@ qint64 DummyBackend::availableFrames() const
     return frameCount;
 }
 
-QCanFrame DummyBackend::readFrame()
+QCanBusFrame DummyBackend::readFrame()
 {
-    QCanFrame dummyFrame;
+    QCanBusFrame dummyFrame;
 
     if (byteArray.isEmpty())
         return dummyFrame;
@@ -105,7 +105,7 @@ QCanFrame DummyBackend::readFrame()
     return dummyFrame;
 }
 
-bool DummyBackend::writeFrame(const QCanFrame &data)
+bool DummyBackend::writeFrame(const QCanBusFrame &data)
 {
     qDebug() << "DummyBackend::writeFrame: " << data.payload();
     return true;

@@ -34,33 +34,33 @@
 **
 ****************************************************************************/
 
-#include "qcanframe.h"
+#include "qcanbusframe.h"
 
 #include <QtCore/qdatastream.h>
 
 QT_BEGIN_NAMESPACE
 
 /*!
-    \class QCanFrame
+    \class QCanBusFrame
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief QCanFrame is a container class representing a single CAN frame.
+    \brief QCanBusFrame is a container class representing a single CAN frame.
 
-    \l QCanBusDevice can use QCanFrame for read and write operations. It contains the frame
-    identifier and the data payload. QCanFrame contains the timestamp of the moment it was read.
+    \l QCanBusDevice can use QCanBusFrame for read and write operations. It contains the frame
+    identifier and the data payload. QCanBusFrame contains the timestamp of the moment it was read.
 
-    \sa QCanFrame::TimeStamp
+    \sa QCanBusFrame::TimeStamp
  */
 
 /*!
-    \fn QCanFrame::QCanFrame(quint32 identifier, const QByteArray &data)
+    \fn QCanBusFrame::QCanBusFrame(quint32 identifier, const QByteArray &data)
 
     Constructs a CAN frame using \a identifier as the frame identifier and \a data as the payload.
  */
 
 /*!
-    \fn QCanFrame::setFrameId(quint32 newFrameId)
+    \fn QCanBusFrame::setFrameId(quint32 newFrameId)
 
     Sets the identifier of the CAN frame to \a newFrameId. The maximum size of a CAN frame
     identifier is 11 bits, which can be extended to 29 bits by supporting the \e {CAN extended frame
@@ -70,7 +70,7 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \fn QCanFrame::setPayload(const QByteArray &data)
+    \fn QCanBusFrame::setPayload(const QByteArray &data)
 
     Sets \a data as the payload for the CAN frame. The maximum size of payload is 8 bytes, which can
     be extended to 64 bytes by supporting \e {Flexible Data-Rate}.
@@ -79,16 +79,16 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \fn QCanFrame::setTimeStamp(const TimeStamp &ts)
+    \fn QCanBusFrame::setTimeStamp(const TimeStamp &ts)
 
     Sets \a ts as the timestamp for the CAN frame. Usually, this function is not needed, because the
     timestamp is created during the read operation and not needed during the write operation.
 
-    \sa QCanFrame::TimeStamp
+    \sa QCanBusFrame::TimeStamp
  */
 
 /*!
-    \fn quint32 QCanFrame::frameId() const
+    \fn quint32 QCanBusFrame::frameId() const
 
     Returns the CAN frame identifier. If the CAN frame uses the
     extended frame format, the identifier has a maximum of 29 bits;
@@ -98,7 +98,7 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \fn bool QCanFrame::hasExtendedFrameFormat() const
+    \fn bool QCanBusFrame::hasExtendedFrameFormat() const
 
     Returns \c true if the can frame uses a 29bit identifier;
     otherwise \c false, implying an 11bit identifier.
@@ -107,7 +107,7 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \fn  void QCanFrame::setExtendedFrameFormat(bool isExtended)
+    \fn  void QCanBusFrame::setExtendedFrameFormat(bool isExtended)
 
     Sets the extended frame format flag to \a isExtended.
 
@@ -115,7 +115,7 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \enum QCanFrame::FrameType
+    \enum QCanBusFrame::FrameType
 
     This enum describes the type of the CAN frame.
 
@@ -128,7 +128,7 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \fn FrameType QCanFrame::frameType() const
+    \fn FrameType QCanBusFrame::frameType() const
 
     Returns the type of the frame.
 
@@ -136,7 +136,7 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \fn void QCanFrame::setFrameType(FrameType newType)
+    \fn void QCanBusFrame::setFrameType(FrameType newType)
 
     Sets the type of the frame to \a newType.
 
@@ -144,7 +144,7 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \fn QByteArray QCanFrame::payload() const
+    \fn QByteArray QCanBusFrame::payload() const
 
     Returns the data payload of the frame.
 
@@ -152,15 +152,15 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \fn TimeStamp QCanFrame::timeStamp() const
+    \fn TimeStamp QCanBusFrame::timeStamp() const
 
     Returns the timestamp of the frame.
 
-    \sa QCanFrame::TimeStamp, QCanFrame::setTimeStamp()
+    \sa QCanBusFrame::TimeStamp, QCanBusFrame::setTimeStamp()
  */
 
 /*!
-    \class QCanFrame::TimeStamp
+    \class QCanBusFrame::TimeStamp
     \inmodule QtSerialBus
     \since 5.6
 
@@ -207,30 +207,30 @@ QT_BEGIN_NAMESPACE
 
 #ifndef QT_NO_DATASTREAM
 
-/*! \relates QCanFrame
+/*! \relates QCanBusFrame
 
     Writes frame \a frame to the stream \a out and returns a reference
     to the stream.
 */
-QDataStream &operator<<(QDataStream &out, const QCanFrame &frame)
+QDataStream &operator<<(QDataStream &out, const QCanBusFrame &frame)
 {
     out << frame.frameId();
     out << static_cast<quint8>(frame.frameType());
     out << static_cast<quint8>(frame.version);
     out << frame.hasExtendedFrameFormat();
     out << frame.payload();
-    const QCanFrame::TimeStamp stamp = frame.timeStamp();
+    const QCanBusFrame::TimeStamp stamp = frame.timeStamp();
     out << stamp.seconds();
     out << stamp.microSeconds();
     return out;
 }
 
-/*! \relates QCanFrame
+/*! \relates QCanBusFrame
 
     Reads a frame into \a frame from the stream \a in and returns a
     reference to the stream.
 */
-QDataStream &operator>>(QDataStream &in, QCanFrame &frame)
+QDataStream &operator>>(QDataStream &in, QCanBusFrame &frame)
 {
     quint32 frameId;
     quint8 frameType;
@@ -246,11 +246,11 @@ QDataStream &operator>>(QDataStream &in, QCanFrame &frame)
     frame.setFrameId(frameId);
     frame.version = version;
 
-    frame.setFrameType(static_cast<QCanFrame::FrameType>(frameType));
+    frame.setFrameType(static_cast<QCanBusFrame::FrameType>(frameType));
     frame.setExtendedFrameFormat(extendedFrameFormat);
         frame.setPayload(payload);
 
-    frame.setTimeStamp(QCanFrame::TimeStamp(seconds, microSeconds));
+    frame.setTimeStamp(QCanBusFrame::TimeStamp(seconds, microSeconds));
 
     return in;
 }

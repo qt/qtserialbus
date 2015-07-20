@@ -42,7 +42,7 @@
 #include "ui_mainwindow.h"
 
 #include <QtSerialBus>
-#include <QCanFrame>
+#include <QCanBusFrame>
 
 #include <QtCore/qbytearray.h>
 #include <QtCore/qvariant.h>
@@ -140,7 +140,7 @@ void MainWindow::checkMessages()
     if (!device)
         return;
 
-    const QCanFrame frame = device->readFrame();
+    const QCanBusFrame frame = device->readFrame();
 
     if (frame.payload().isEmpty())
         return;
@@ -151,7 +151,7 @@ void MainWindow::checkMessages()
         id = 2047;
 
     QString view;
-    if (frame.frameType() == QCanFrame::ErrorFrame) {
+    if (frame.frameType() == QCanBusFrame::ErrorFrame) {
         interpretError(view, frame);
     } else {
         view += QLatin1String("Id: ");
@@ -162,9 +162,9 @@ void MainWindow::checkMessages()
         view += frame.payload().data();
     }
 
-    if (frame.frameType() == QCanFrame::RemoteRequestFrame) {
+    if (frame.frameType() == QCanBusFrame::RemoteRequestFrame) {
         ui->requestList->addItem(view);
-    } else if (frame.frameType() == QCanFrame::ErrorFrame) {
+    } else if (frame.frameType() == QCanBusFrame::ErrorFrame) {
         ui->errorList->addItem(view);
     } else {
         ui->listWidget->addItem(view);
@@ -182,7 +182,7 @@ void MainWindow::on_sendButton_clicked()
     QByteArray writings = ui->lineEdit->displayText().toUtf8();
     ui->lineEdit->clear();
 
-    QCanFrame frame;
+    QCanBusFrame frame;
     const int maxPayload = ui->fdBox->checkState() ? 64 : 8;
     int size = writings.size();
     if (size > maxPayload)
@@ -199,11 +199,11 @@ void MainWindow::on_sendButton_clicked()
     frame.setExtendedFrameFormat(ui->EFF->checkState());
 
     if (ui->RTR->checkState())
-        frame.setFrameType(QCanFrame::RemoteRequestFrame);
+        frame.setFrameType(QCanBusFrame::RemoteRequestFrame);
     else if (ui->ERR->checkState())
-        frame.setFrameType(QCanFrame::ErrorFrame);
+        frame.setFrameType(QCanBusFrame::ErrorFrame);
     else
-        frame.setFrameType(QCanFrame::DataFrame);
+        frame.setFrameType(QCanBusFrame::DataFrame);
 
     if (ui->comboBox->itemText(currentDevice) == QStringLiteral("socketcan")) {
         canDevice->writeFrame(frame);
@@ -219,7 +219,7 @@ void MainWindow::on_connectButton_clicked()
     checkMessages();
 }
 
-void MainWindow::interpretError(QString &view, const QCanFrame &frame)
+void MainWindow::interpretError(QString &view, const QCanBusFrame &frame)
 {
     switch (frame.frameId()) {
     case CAN_ERR_TX_TIMEOUT:

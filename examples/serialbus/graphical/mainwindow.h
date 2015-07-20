@@ -50,7 +50,7 @@ QT_BEGIN_NAMESPACE
 class QSerialBusBackend;
 class QCanBus;
 class QSerialBusDevice;
-class QCanFrame;
+class QCanBusFrame;
 
 namespace Ui {
 class MainWindow;
@@ -76,7 +76,7 @@ private Q_SLOTS:
 
 private:
     void init();
-    void interpretError(QString&, const QCanFrame&);
+    void interpretError(QString&, const QCanBusFrame&);
 
     QPointer<QCanBus> canBus;
     QPointer<QCanBusDevice> dummyDevice;

@@ -35,7 +35,7 @@
 ****************************************************************************/
 
 #include <QtSerialBus/QCanBusDevice>
-#include <QtSerialBus/QCanFrame>
+#include <QtSerialBus/QCanBusFrame>
 
 #include <QtTest/QtTest>
 #include <QSignalSpy>
@@ -48,7 +48,7 @@ public:
     {
         referenceFrame.setFrameId(5);
         referenceFrame.setPayload(QByteArray("FOOBAR"));
-        QCanFrame::TimeStamp stamp;
+        QCanBusFrame::TimeStamp stamp;
         stamp.setSeconds(22);
         stamp.setMicroSeconds(23);
         referenceFrame.setTimeStamp(stamp);
@@ -80,14 +80,14 @@ public:
     QVector<QString> configurationKeys() const { return keys; }
 
     qint64 availableFrames() const { return 0; }
-    QCanFrame readFrame()
+    QCanBusFrame readFrame()
     {
         if (state() != QCanBusDevice::ConnectedState)
-            return QCanFrame();
+            return QCanBusFrame();
 
         return referenceFrame;
     }
-    bool writeFrame(const QCanFrame &/*data*/)
+    bool writeFrame(const QCanBusFrame &/*data*/)
     {
         if (state() != QCanBusDevice::ConnectedState)
             return false;
@@ -107,7 +107,7 @@ signals:
 private:
     QVariant value;
     QVector<QString> keys;
-    QCanFrame referenceFrame;
+    QCanBusFrame referenceFrame;
 };
 
 class tst_QCanBusDevice : public QObject
@@ -157,7 +157,7 @@ void tst_QCanBusDevice::conf()
 void tst_QCanBusDevice::write()
 {
     QSignalSpy spy(device, SIGNAL(written()));
-    QCanFrame frame;
+    QCanBusFrame frame;
     frame.setPayload(QByteArray("testData"));
     device->disconnectDevice();
     // TODO test that we get the sequence Closing->ConnectedState
@@ -177,11 +177,11 @@ void tst_QCanBusDevice::read()
     device->disconnectDevice();
     QCOMPARE(device->state(), QCanBusDevice::UnconnectedState);
 
-    QCanFrame frame1 = device->readFrame();
+    QCanBusFrame frame1 = device->readFrame();
     QVERIFY(device->connectDevice());
     QCOMPARE(device->state(), QCanBusDevice::ConnectedState);
 
-    QCanFrame frame2 = device->readFrame();
+    QCanBusFrame frame2 = device->readFrame();
     QVERIFY(!frame1.frameId());
     QVERIFY(frame2.frameId());
 }
@@ -234,7 +234,7 @@ void tst_QCanBusDevice::cleanupTestCase()
 {
     device->disconnectDevice();
     QCOMPARE(device->state(), QCanBusDevice::UnconnectedState);
-    QCanFrame frame = device->readFrame();
+    QCanBusFrame frame = device->readFrame();
     QVERIFY(!frame.frameId());
 }
 

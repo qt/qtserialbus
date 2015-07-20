@@ -37,7 +37,7 @@
 #include "qcanbusdevice.h"
 #include "qcanbusdevice_p.h"
 
-#include "qcanframe.h"
+#include "qcanbusframe.h"
 
 #include <QtCore/qdebug.h>
 #include <QtCore/qdatastream.h>

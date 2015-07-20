@@ -60,8 +60,8 @@ public:
     QVector<QString> configurationKeys() const Q_DECL_OVERRIDE;
 
     qint64 availableFrames() const Q_DECL_OVERRIDE;
-    QCanFrame readFrame() Q_DECL_OVERRIDE;
-    bool writeFrame(const QCanFrame &data) Q_DECL_OVERRIDE;
+    QCanBusFrame readFrame() Q_DECL_OVERRIDE;
+    bool writeFrame(const QCanBusFrame &data) Q_DECL_OVERRIDE;
 
 public Q_SLOTS:
     void sendMessage();

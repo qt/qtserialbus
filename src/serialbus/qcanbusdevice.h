@@ -37,7 +37,7 @@
 #ifndef QCANBUSDEVICE_H
 #define QCANBUSDEVICE_H
 
-#include <QtSerialBus/qcanframe.h>
+#include <QtSerialBus/qcanbusframe.h>
 
 #include <QtCore/qobject.h>
 
@@ -78,8 +78,8 @@ public:
     virtual QVariant configurationParameter(const QString &key) const = 0;
     virtual QVector<QString> configurationKeys() const = 0;
 
-    virtual bool writeFrame(const QCanFrame &frame) = 0;
-    virtual QCanFrame readFrame() = 0;
+    virtual bool writeFrame(const QCanBusFrame &frame) = 0;
+    virtual QCanBusFrame readFrame() = 0;
     virtual qint64 availableFrames() const = 0;
 
     //TODO currently assumes unbuffered write. Add support for buffered writes
