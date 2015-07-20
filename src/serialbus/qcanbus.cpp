@@ -62,7 +62,7 @@ public:
 };
 
 Q_GLOBAL_STATIC_WITH_ARGS(QFactoryLoader, qFactoryLoader,
-    (QCanBusFactory_iid, QLatin1String("/serialbuses")))
+    (QCanBusFactory_iid, QLatin1String("/canbus")))
 
 typedef QHash<QByteArray, QCanBusPrivate> QCanBusPluginStore;
 Q_GLOBAL_STATIC(QCanBusPluginStore, qCanBusPlugins)

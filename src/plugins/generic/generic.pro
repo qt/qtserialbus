@@ -2,7 +2,7 @@ QT += core-private serialbus
 
 TARGET = qtbusgeneric
 
-PLUGIN_TYPE = serialbuses
+PLUGIN_TYPE = canbus
 PLUGIN_EXTENDS = serialbus
 PLUGIN_CLASS_NAME = DummyBusPlugin
 load(qt_plugin)
