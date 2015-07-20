@@ -49,8 +49,6 @@ struct canfd_frame;
 
 QT_BEGIN_NAMESPACE
 
-const char BackendName[] = "SocketCAN";
-
 class QSocketNotifier;
 
 class SocketCanBackend : public QCanBusDevice

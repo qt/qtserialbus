@@ -71,20 +71,33 @@ void tst_QCanBus::initTestCase()
 void tst_QCanBus::plugins()
 {
     QVERIFY(!bus->plugins().isEmpty());
+    QVERIFY(bus->plugins().contains("generic"));
+
 }
 
 void tst_QCanBus::createBackend()
 {
     //TODO this test needs serious overhaul. For now it is the bare minimum
 
-    QCanBusDevice *dummy = bus->createDevice("dummy", "unused", "unused");
+    QCanBusDevice *dummy = bus->createDevice("generic", "unused", "unused");
     QVERIFY(dummy);
+
+    QCanBusDevice *dummy2 = bus->createDevice("generic", "unused", "unused");
+    QVERIFY(dummy2);
+    QVERIFY(dummy != dummy2);
 }
 
 void tst_QCanBus::availableBackends()
 {
     QStringList list = bus->availableIdentifiers("faulty");
     QVERIFY(list.isEmpty());
+
+    QStringList dummyIdents = bus->availableIdentifiers("generic");
+    QVERIFY(!dummyIdents.isEmpty());
+    QVERIFY(dummyIdents.contains("dummy"));
+
+    QStringList dummyIdents2 = bus->availableIdentifiers("generic");
+    QCOMPARE(dummyIdents, dummyIdents2);
 }
 
 QTEST_MAIN(tst_QCanBus)

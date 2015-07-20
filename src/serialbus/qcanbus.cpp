@@ -34,27 +34,38 @@
 **
 ****************************************************************************/
 
-#include "qserialbusplugininterface.h"
 #include "qcanbus.h"
+#include "qcanbusfactory.h"
 
 #include <QtCore/qobject.h>
 #include <QtCore/qpluginloader.h>
 #include <QtCore/qdebug.h>
 #include <QtCore/qcoreapplication.h>
 #include <QtCore/qglobalstatic.h>
+#include <QtCore/qlist.h>
 
 #include <private/qfactoryloader_p.h>
 #include <private/qlibrary_p.h>
 
-#define QSerialBusPluginInterface_iid "org.qt-project.Qt.QSerialBusPluginInterface"
+#define QCanBusFactory_iid "org.qt-project.Qt.QCanBusFactory"
 
 QT_BEGIN_NAMESPACE
 
-Q_GLOBAL_STATIC_WITH_ARGS(QFactoryLoader, qFactoryLoader,
-    (QSerialBusPluginInterface_iid, QLatin1String("/serialbuses")))
+struct QCanBusPrivate
+{
+public:
+    QCanBusPrivate() : factory(Q_NULLPTR), index(-1) { }
 
-typedef QHash<QByteArray, QSerialBusBackendFactory*> QSerialBusPluginsHash;
-Q_GLOBAL_STATIC(QSerialBusPluginsHash, qSerialBusPlugins)
+    QJsonObject meta;
+    QCanBusFactory *factory;
+    int index;
+};
+
+Q_GLOBAL_STATIC_WITH_ARGS(QFactoryLoader, qFactoryLoader,
+    (QCanBusFactory_iid, QLatin1String("/serialbuses")))
+
+typedef QHash<QByteArray, QCanBusPrivate> QCanBusPluginStore;
+Q_GLOBAL_STATIC(QCanBusPluginStore, qCanBusPlugins)
 
 static QCanBus *globalInstance = Q_NULLPTR;
 
@@ -62,8 +73,15 @@ static void loadPlugins()
 {
     const QList<QJsonObject> meta = qFactoryLoader()->metaData();
     for (int i = 0; i < meta.count(); i++) {
-        if (QSerialBusPluginInterface *plugin = qobject_cast<QSerialBusPluginInterface*>(qFactoryLoader->instance(i)))
-            plugin->registerBus();
+        const QJsonObject obj = meta.at(i).value(QStringLiteral("MetaData")).toObject();
+        if (obj.isEmpty())
+            continue;
+
+        QCanBusPrivate d;
+        d.index = i;
+        d.meta = obj;
+        qCanBusPlugins()->insert(
+                    obj.value(QStringLiteral("Key")).toString().toLatin1(), d);
     }
 }
 
@@ -90,21 +108,11 @@ QCanBus *QCanBus::instance()
 }
 
 /*!
-    Registers a backend for the identifier specified by \a identifier, which must be unique.
-    The \a factory will be asked to create instances of the backend.
- */
-void QCanBus::registerBackend(const QByteArray &identifier, QSerialBusBackendFactory *factory)
-{
-    if (!qSerialBusPlugins()->contains(identifier))
-        qSerialBusPlugins()->insert(identifier, factory);
-}
-
-/*!
     Returns a list of identifiers for all loaded plugins.
  */
 QList<QByteArray> QCanBus::plugins() const
 {
-    return qSerialBusPlugins()->keys();
+    return qCanBusPlugins()->keys();
 }
 
 /*!
@@ -114,9 +122,19 @@ QList<QByteArray> QCanBus::plugins() const
 */
 QStringList QCanBus::availableIdentifiers(const QByteArray &plugin) const
 {
-    if (QSerialBusBackendFactory *factory = qSerialBusPlugins()->value(plugin))
-        return factory->availableBackends();
-    return QStringList();
+    if (!qCanBusPlugins()->contains(plugin))
+        return QStringList();
+
+    QCanBusPrivate d = qCanBusPlugins()->value(plugin);
+    if (!d.factory) {
+        d.factory
+            = qobject_cast<QCanBusFactory *>(qFactoryLoader->instance(d.index));
+        qCanBusPlugins()->insert(plugin, d);
+    }
+    if (!d.factory)
+        return QStringList();
+
+    return d.factory->availableBackends();
 }
 
 /*!
@@ -131,47 +149,28 @@ QCanBusDevice *QCanBus::createDevice(const QByteArray &plugin,
                                      const QString &identifier,
                                      const QString &name) const
 {
-    if (QSerialBusBackendFactory *factory = qSerialBusPlugins()->value(plugin))
-        return factory->createDevice(identifier, name);
-    return Q_NULLPTR;
+    if (!qCanBusPlugins()->contains(plugin))
+        return Q_NULLPTR;
+
+    QCanBusPrivate d = qCanBusPlugins()->value(plugin);
+    if (!d.factory) {
+        d.factory
+            = qobject_cast<QCanBusFactory *>(qFactoryLoader->instance(d.index));
+        if (!d.factory)
+            return Q_NULLPTR;
+
+        qCanBusPlugins()->insert(plugin, d);
+    }
+    if (!d.factory)
+        return Q_NULLPTR;
+
+    return d.factory->createDevice(identifier, name);
 }
 
 QCanBus::QCanBus(QObject *parent) :
     QObject(parent)
 {
     loadPlugins();
-}
-
-/*!
-    \class QSerialBusBackendFactory
-    \inmodule QtSerialBus
-    \since 5.6
-
-    \brief The QSerialBusBackendFactory class instantiates instances of serial bus backends.
-
-    This interface must be implemented in order to register a serial bus backend.
- */
-
-/*!
-    \fn QSerialBusBackendFactory::createBackend(const QString &busBackend, const QString &name) const
-
-    Instantiates a backend. \a busBackend defines the backend in the plugin to be created. \a name
-    is the network interface name.
-
-    If the factory cannot create a backend, it should return 0.
-*/
-
-/*!
-    \fn QSerialBusBackendFactory::availableBackends() const
-
-    Lists the available backends.
-*/
-
-/*!
-    \internal
- */
-QSerialBusBackendFactory::~QSerialBusBackendFactory()
-{
 }
 
 QT_END_NAMESPACE

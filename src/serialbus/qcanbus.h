@@ -52,8 +52,6 @@ class Q_SERIALBUS_EXPORT QCanBus : public QObject
 
 public:
     static QCanBus *instance();
-    static void registerBackend(const QByteArray &identifier, QSerialBusBackendFactory *factory);
-
     QList<QByteArray> plugins() const;
 
     QStringList availableIdentifiers(const QByteArray &plugin) const;
@@ -65,17 +63,6 @@ private:
     QCanBus(QObject *parent = 0);
 
     Q_DISABLE_COPY(QCanBus)
-};
-
-class Q_SERIALBUS_EXPORT QSerialBusBackendFactory
-{
-public:
-    virtual QStringList availableBackends() const = 0;
-
-    virtual QCanBusDevice *createDevice(const QString &identifier,
-                                        const QString &interfaceName) const = 0;
-protected:
-    virtual ~QSerialBusBackendFactory();
 };
 
 QT_END_NAMESPACE

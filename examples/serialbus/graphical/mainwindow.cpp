@@ -78,7 +78,7 @@ void MainWindow::init()
     {
         ui->comboBox->insertItem(i, plugins.at(i));
 
-        if (plugins.at(i) == QStringLiteral("can")) {
+        if (plugins.at(i) == QStringLiteral("socketcan")) {
             //TODO find way to dynamically detect vcan1
             //TODO potentially instanciate every backend in the plugin - not just first
             const QString type = canBus->availableIdentifiers(plugins.at(i)).first();
@@ -99,7 +99,7 @@ void MainWindow::init()
             canDevice->setConfigurationParameter(QStringLiteral("ReceiveOwnMessages"), QVariant(1));
             connect(canDevice.data(), &QCanBusDevice::frameReceived,
                     this, &MainWindow::checkMessages);
-        } else if (plugins.at(i) == QStringLiteral("dummy")) {
+        } else if (plugins.at(i) == QStringLiteral("generic")) {
             dummyDevice = canBus->createDevice(plugins.at(i), QString(), QString());
             if (!dummyDevice)
                 return;
@@ -129,11 +129,11 @@ void MainWindow::checkMessages()
     QCanBusDevice *device = qobject_cast<QCanBusDevice *>(sender());
 
     // for now filter the correct device out
-    if (ui->comboBox->itemText(currentDevice) == QStringLiteral("can")
+    if (ui->comboBox->itemText(currentDevice) == QStringLiteral("socketcan")
             && device != canDevice)
         device = 0;
 
-    if (ui->comboBox->itemText(currentDevice) == QStringLiteral("dummy")
+    if (ui->comboBox->itemText(currentDevice) == QStringLiteral("generic")
             && device != dummyDevice)
         device = 0;
 
@@ -205,9 +205,9 @@ void MainWindow::on_sendButton_clicked()
     else
         frame.setFrameType(QCanFrame::DataFrame);
 
-    if (ui->comboBox->itemText(currentDevice) == QStringLiteral("can")) {
+    if (ui->comboBox->itemText(currentDevice) == QStringLiteral("socketcan")) {
         canDevice->writeFrame(frame);
-    } else if (ui->comboBox->itemText(currentDevice) == QStringLiteral("dummy")) {
+    } else if (ui->comboBox->itemText(currentDevice) == QStringLiteral("generic")) {
         dummyDevice->writeFrame(frame);
     }
 }

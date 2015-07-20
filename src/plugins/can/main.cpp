@@ -36,29 +36,24 @@
 
 #include "socketcanbackend.h"
 
-#include <qserialbusplugininterface.h>
-#include <qcanbus.h>
-#include <qcanbusdevice.h>
+#include <QtSerialBus/qcanbus.h>
+#include <QtSerialBus/qcanbusdevice.h>
+#include <QtSerialBus/qcanbusfactory.h>
 
 #include <QtCore/qfile.h>
-#include <QtCore/qdebug.h>
 
 QT_BEGIN_NAMESPACE
 
-class CanBusPlugin : public QObject, public QSerialBusPluginInterface, public QSerialBusBackendFactory
+const char BackendName[] = "SocketCAN";
+
+class CanBusPlugin : public QObject, public QCanBusFactory
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QSerialBusPluginInterface" FILE "plugin.json")
-    Q_INTERFACES(QSerialBusPluginInterface)
+    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QCanBusFactory" FILE "plugin.json")
+    Q_INTERFACES(QCanBusFactory)
 
 
 public:
-    void registerBus()
-    {
-        const QByteArray id("can");
-        QCanBus::registerBackend(id, this);
-    }
-
     QCanBusDevice *createDevice(const QString &identifier,
                                             const QString &interfaceName) const
     {
@@ -72,9 +67,7 @@ public:
 
     QStringList availableBackends() const
     {
-        QStringList backends;
-        backends << BackendName;
-        return backends;
+        return QStringList() << QLatin1String(BackendName);
     }
 };
 

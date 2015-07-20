@@ -14,7 +14,6 @@ PUBLIC_HEADERS += \
     qcanframe.h \
     qcanbus.h \
     qserialbusglobal.h \
-    qserialbusplugininterface.h \
     qcanbusfactory.h
 
 PRIVATE_HEADERS += \
@@ -23,7 +22,6 @@ PRIVATE_HEADERS += \
 SOURCES += \
     qcanbusdevice.cpp \
     qcanframe.cpp \
-    qserialbusplugininterface.cpp \
     qcanbus.cpp \
     qcanbusfactory.cpp
 
