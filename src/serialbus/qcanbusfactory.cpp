@@ -50,9 +50,9 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \fn QCanBusDevice *QCanBusFactory::createDevice(const QString &identifier, const QString &interfaceName) const
+    \fn QCanBusDevice *QCanBusFactory::createDevice(const QString &interfaceName) const
 
-    Returns a new QCanBusDevice associated with \a identifier.
+    Creates a new QCanBusDevice.
     \a interfaceName is the network/CAN interface name. The caller must take
     ownership of the returned pointer.
 

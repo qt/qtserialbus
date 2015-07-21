@@ -87,16 +87,23 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    Constructs a serial bus device initialized with the \a backend to use and with the specified
-    \a parent.
-
-    QCanBusDevice takes ownership of \a backend.
+    Constructs a serial bus device with the specified \a parent.
  */
 QCanBusDevice::QCanBusDevice(QObject *parent) :
     QObject(*new QCanBusDevicePrivate, parent)
 {
 }
 
+
+/*!
+    Sets the human readable description of the last device error to
+    \a errorText. \a errorId categorizes the type of error.
+
+    CAN bus implementations must use this function to update the device's
+    error state.
+
+    \sa error(), errorOccurred()
+ */
 void QCanBusDevice::setError(const QString &errorText, CanBusError errorId)
 {
     Q_D(QCanBusDevice);
@@ -165,21 +172,6 @@ void QCanBusDevice::setError(const QString &errorText, CanBusError errorId)
  */
 
 /*!
-    Writes \a frame to the CAN bus and returns \c true on success;
-    otherwise \c false.
-
-    \sa readFrame()
- */
-
-
-/*!
-   Reads the information contained in one CAN frame from the backend.
-
-   \sa writeFrame()
- */
-
-
-/*!
     Returns the last error that has occurred. The error value is always set to last error that
     occurred and it is never reset.
 
@@ -208,7 +200,10 @@ QString QCanBusDevice::errorString() const
 /*!
     \fn qint64 QCanBusDevice::availableFrames() const
 
-    Returns the number of available frames.
+    Returns the number of available frames. If no frames are available,
+    this function returns 0.
+
+    \sa readFrame()
 */
 
 /*!
@@ -236,10 +231,35 @@ QString QCanBusDevice::errorString() const
 */
 
 /*!
+    \fn void QCanBusDevice::frameReceived()
+
+    This signal is emitted when one or more frames have been received.
+    The frames should be read using \l readFrame() and \l availableFrames().
+ */
+
+/*!
+    \fn QCanBusFrame QCanBusDevice::readFrame()
+
+    Returns the next \l QCanBusFrame from the queue; otherwise returns
+    an empty QCanBusFrame.
+
+    The queue operates according to the FIFO principle.
+
+    \sa availableFrames()
+ */
+
+/*!
+    \fn bool QCanBusDevice::writeFrame(const QCanBusFrame &frame)
+
+    Writes \a frame to the CAN bus and returns \c true on success;
+    otherwise \c false.
+ */
+
+/*!
     Connects the device to the CAN bus. Returns \c true on success;
     otherwise \c false.
 
-    This function calls
+    This function calls \l open() as part of its implementation.
  */
 bool QCanBusDevice::connectDevice()
 {
@@ -259,6 +279,12 @@ bool QCanBusDevice::connectDevice()
     return true;
 }
 
+
+/*!
+    Disconnects the device from the CAN bus.
+
+    This function calls \l close() as part of its implementation.
+ */
 void QCanBusDevice::disconnectDevice()
 {
     setState(QCanBusDevice::ClosingState);
@@ -268,9 +294,18 @@ void QCanBusDevice::disconnectDevice()
 }
 
 /*!
+    \fn void QCanBusDevice::stateChanged(QCanBusDevice::CanBusDeviceState state)
+
+    This signal is emitted every time the state of the device changes.
+    The new state is represented by \a state.
+
+    \sa setState(), state()
+ */
+
+/*!
     Returns the current state of the device.
 
-    \sa setState()
+    \sa setState(), stateChanged()
  */
 QCanBusDevice::CanBusDeviceState QCanBusDevice::state() const
 {
@@ -278,7 +313,7 @@ QCanBusDevice::CanBusDeviceState QCanBusDevice::state() const
 }
 
 /*!
-    Sets the state of the device. CAN bus implementations
+    Sets the state of the device to \a newState. CAN bus implementations
     must use this function to update the device state.
  */
 void QCanBusDevice::setState(QCanBusDevice::CanBusDeviceState newState)
