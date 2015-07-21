@@ -68,8 +68,17 @@ public:
         UnknownFrame = 0,
         DataFrame,
         ErrorFrame,
-        RemoteRequestFrame
+        RemoteRequestFrame,
+        InvalidFrame
     };
+
+    explicit QCanBusFrame(QCanBusFrame::FrameType type) :
+        canId(0x0),
+        isExtendedFrame(0x1),
+        version(0x0)
+    {
+        setFrameType(type);
+    }
 
     explicit QCanBusFrame(quint32 identifier = 0, const QByteArray &data = QByteArray()) :
         canId(identifier & 0x1FFFFFFFU),
@@ -82,12 +91,18 @@ public:
         Q_UNUSED(reserved);
     }
 
+    bool isValid() const
+    {
+        return (format != 0x4);
+    }
+
     FrameType frameType() const
     {
         switch (format) {
         case 0x1: return DataFrame;
         case 0x2: return ErrorFrame;
         case 0x3: return RemoteRequestFrame;
+        case 0x4: return InvalidFrame;
         // no default to trigger warning
         }
 
@@ -105,6 +120,8 @@ public:
             format = 0x3; return;
         case UnknownFrame:
             format = 0x0; return;
+        case InvalidFrame:
+            format = 0x4; return;
         }
     }
 

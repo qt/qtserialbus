@@ -54,9 +54,21 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
+    \fn QCanBusFrame::QCanBusFrame(QCanBusFrame::FrameType type)
+
+    Constructs a CAN frame of type \a type.
+ */
+
+/*!
     \fn QCanBusFrame::QCanBusFrame(quint32 identifier, const QByteArray &data)
 
     Constructs a CAN frame using \a identifier as the frame identifier and \a data as the payload.
+ */
+
+/*!
+    \fn bool QCanBusFrame::isValid() const
+
+    Returns \c true if the \l frameType() is \l InvalidFrame; otherwise \c false.
  */
 
 /*!
@@ -123,6 +135,8 @@ QT_BEGIN_NAMESPACE
     \value DataFrame            This value represents a data frame.
     \value ErrorFrame           This value represents an error frame.
     \value RemoteRequestFrame   This value represents a remote request.
+    \value InvalidFrame         This value represents an invalid frame.
+                                This type is used for error reporting.
 
     \sa setFrameType()
  */

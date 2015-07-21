@@ -49,6 +49,9 @@ private slots:
     void payload();
     void timeStamp();
 
+    void tst_isValid_data();
+    void tst_isValid();
+
     void streaming_data();
     void streaming();
 };
@@ -109,6 +112,36 @@ void tst_QCanBusFrame::timeStamp()
     timeStamp.setSeconds(4);
     QCOMPARE(timeStamp.seconds(), 4);
     QCOMPARE(timeStamp.microSeconds(), 5);
+}
+
+void tst_QCanBusFrame::tst_isValid_data()
+{
+    QTest::addColumn<QCanBusFrame::FrameType>("frameType");
+    QTest::addColumn<bool>("isValid");
+
+    QTest::newRow("invalid frame") << QCanBusFrame::InvalidFrame << false;
+    QTest::newRow("data frame") << QCanBusFrame::DataFrame << true;
+    QTest::newRow("error frame") << QCanBusFrame::ErrorFrame << true;
+    QTest::newRow("remote request frame") << QCanBusFrame::RemoteRequestFrame << true;
+    QTest::newRow("unknown frame") << QCanBusFrame::UnknownFrame << true;
+}
+
+void tst_QCanBusFrame::tst_isValid()
+{
+    QFETCH(QCanBusFrame::FrameType, frameType);
+    QFETCH(bool, isValid);
+
+    QCanBusFrame frame(frameType);
+    QCOMPARE(isValid, frame.isValid());
+    QCOMPARE(frameType, frame.frameType());
+
+    frame.setFrameType(QCanBusFrame::ErrorFrame);
+    QCOMPARE(true, frame.isValid());
+    QCOMPARE(frame.frameType(), QCanBusFrame::ErrorFrame);
+
+    frame.setFrameType(QCanBusFrame::InvalidFrame);
+    QCOMPARE(false, frame.isValid());
+    QCOMPARE(frame.frameType(), QCanBusFrame::InvalidFrame);
 }
 
 void tst_QCanBusFrame::streaming_data()

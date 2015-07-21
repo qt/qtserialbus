@@ -83,7 +83,7 @@ public:
     QCanBusFrame readFrame()
     {
         if (state() != QCanBusDevice::ConnectedState)
-            return QCanBusFrame();
+            return QCanBusFrame(QCanBusFrame::InvalidFrame);
 
         return referenceFrame;
     }
@@ -183,7 +183,9 @@ void tst_QCanBusDevice::read()
 
     QCanBusFrame frame2 = device->readFrame();
     QVERIFY(!frame1.frameId());
+    QVERIFY(!frame1.isValid());
     QVERIFY(frame2.frameId());
+    QVERIFY(frame2.isValid());
 }
 
 void tst_QCanBusDevice::error()

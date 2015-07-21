@@ -241,10 +241,10 @@ qint64 SocketCanBackend::availableFrames() const
 QCanBusFrame SocketCanBackend::readFrame()
 {
     if (state() != ConnectedState)
-        return QCanBusFrame();
+        return QCanBusFrame(QCanBusFrame::InvalidFrame);
 
     if (frameBuffer.isEmpty())
-        return QCanBusFrame(); //TODO add concept of invalid CanFrame
+        return QCanBusFrame(QCanBusFrame::InvalidFrame);
 
     return frameBuffer.takeFirst();
 }

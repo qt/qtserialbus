@@ -85,11 +85,10 @@ qint64 DummyBackend::availableFrames() const
 
 QCanBusFrame DummyBackend::readFrame()
 {
-    QCanBusFrame dummyFrame;
-
     if (byteArray.isEmpty())
-        return dummyFrame;
+        return QCanBusFrame(QCanBusFrame::InvalidFrame);
 
+    QCanBusFrame dummyFrame;
     dummyFrame.setFrameId(12);
 
     const qint64 len = byteArray.size();
