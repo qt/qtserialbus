@@ -47,10 +47,7 @@ QT_BEGIN_NAMESPACE
 class Q_SERIALBUS_EXPORT QCanBusFactory
 {
 public:
-    virtual QStringList availableBackends() const = 0;
-
-    virtual QCanBusDevice *createDevice(const QString &identifier,
-                                        const QString &interfaceName) const = 0;
+    virtual QCanBusDevice *createDevice(const QString &interfaceName) const = 0;
 protected:
     virtual ~QCanBusFactory();
 };

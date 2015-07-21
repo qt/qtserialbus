@@ -50,18 +50,11 @@ class GenericBusPlugin : public QObject, public QCanBusFactory
     Q_INTERFACES(QCanBusFactory)
 
 public:
-    QCanBusDevice *createDevice(const QString &identifier,
-                                            const QString &interfaceName) const
+    QCanBusDevice *createDevice(const QString &interfaceName) const
     {
-        Q_UNUSED(identifier)
         Q_UNUSED(interfaceName)
         QCanBusDevice *device = new DummyBackend();
         return device;
-    }
-
-    QStringList availableBackends() const
-    {
-        return QStringList() << QStringList("dummy");
     }
 };
 

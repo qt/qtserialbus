@@ -44,8 +44,6 @@
 
 QT_BEGIN_NAMESPACE
 
-const char BackendName[] = "SocketCAN";
-
 class CanBusPlugin : public QObject, public QCanBusFactory
 {
     Q_OBJECT
@@ -54,20 +52,10 @@ class CanBusPlugin : public QObject, public QCanBusFactory
 
 
 public:
-    QCanBusDevice *createDevice(const QString &identifier,
-                                            const QString &interfaceName) const
+    QCanBusDevice *createDevice(const QString &interfaceName) const
     {
-        if (identifier == QLatin1String(BackendName)) {
-            QCanBusDevice *device = new SocketCanBackend(interfaceName);
-            return device;
-        }
-
-        return Q_NULLPTR;
-    }
-
-    QStringList availableBackends() const
-    {
-        return QStringList() << QLatin1String(BackendName);
+        QCanBusDevice *device = new SocketCanBackend(interfaceName);
+        return device;
     }
 };
 

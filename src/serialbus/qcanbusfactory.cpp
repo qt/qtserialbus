@@ -60,12 +60,6 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \fn QCanBusFactory::availableBackends() const
-
-    Lists the available backends inside the plugin.
-*/
-
-/*!
     \internal
  */
 QCanBusFactory::~QCanBusFactory()

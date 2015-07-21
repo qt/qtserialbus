@@ -116,28 +116,6 @@ QList<QByteArray> QCanBus::plugins() const
 }
 
 /*!
-    Returns a list of all available CAN bus identifiers for a
-    given \a plugin, or an empty list if no suitable \a identifier
-    can be found.
-*/
-QStringList QCanBus::availableIdentifiers(const QByteArray &plugin) const
-{
-    if (!qCanBusPlugins()->contains(plugin))
-        return QStringList();
-
-    QCanBusPrivate d = qCanBusPlugins()->value(plugin);
-    if (!d.factory) {
-        d.factory
-            = qobject_cast<QCanBusFactory *>(qFactoryLoader->instance(d.index));
-        qCanBusPlugins()->insert(plugin, d);
-    }
-    if (!d.factory)
-        return QStringList();
-
-    return d.factory->availableBackends();
-}
-
-/*!
     Creates a CAN bus device. \a plugin is the name of the plugin as returned by the \l plugins()
     method. \a identifier is the typ of the device inside the plugin. A single plugin may contain more
     than one device type. \a name is the network interface name.
@@ -146,8 +124,7 @@ QStringList QCanBus::availableIdentifiers(const QByteArray &plugin) const
     Returns \c null if no suitable device can be found.
  */
 QCanBusDevice *QCanBus::createDevice(const QByteArray &plugin,
-                                     const QString &identifier,
-                                     const QString &name) const
+                                     const QString &interfaceName) const
 {
     if (!qCanBusPlugins()->contains(plugin))
         return Q_NULLPTR;
@@ -164,7 +141,7 @@ QCanBusDevice *QCanBus::createDevice(const QByteArray &plugin,
     if (!d.factory)
         return Q_NULLPTR;
 
-    return d.factory->createDevice(identifier, name);
+    return d.factory->createDevice(interfaceName);
 }
 
 QCanBus::QCanBus(QObject *parent) :

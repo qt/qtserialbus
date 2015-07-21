@@ -81,10 +81,7 @@ void MainWindow::init()
         if (plugins.at(i) == QStringLiteral("socketcan")) {
             //TODO find way to dynamically detect vcan1
             //TODO potentially instanciate every backend in the plugin - not just first
-            const QString type = canBus->availableIdentifiers(plugins.at(i)).first();
-            canDevice = canBus->createDevice(plugins.at(i),
-                                             type,
-                                             QStringLiteral("vcan1"));
+            canDevice = canBus->createDevice(plugins.at(i), QStringLiteral("vcan1"));
             connect(canDevice.data(), &QCanBusDevice::errorOccurred, this, &MainWindow::receiveError);
             if (!canDevice)
                 return;
@@ -100,7 +97,7 @@ void MainWindow::init()
             connect(canDevice.data(), &QCanBusDevice::frameReceived,
                     this, &MainWindow::checkMessages);
         } else if (plugins.at(i) == QStringLiteral("generic")) {
-            dummyDevice = canBus->createDevice(plugins.at(i), QString(), QString());
+            dummyDevice = canBus->createDevice(plugins.at(i), QString());
             if (!dummyDevice)
                 return;
             dummyDevice->connectDevice();
