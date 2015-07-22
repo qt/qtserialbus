@@ -1,4 +1,2 @@
 TEMPLATE = subdirs
-config_socketcan {
-    SUBDIRS += can
-}
+SUBDIRS += canbus

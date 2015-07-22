@@ -1,6 +1,6 @@
 QT += core-private serialbus
 
-TARGET = qtcanbus
+TARGET = qtsocketcanbus
 
 PLUGIN_TYPE = canbus
 PLUGIN_EXTENDS = serialbus
