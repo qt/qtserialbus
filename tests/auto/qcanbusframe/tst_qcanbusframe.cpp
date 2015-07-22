@@ -54,6 +54,8 @@ private slots:
 
     void streaming_data();
     void streaming();
+
+    void tst_error();
 };
 
 tst_QCanBusFrame::tst_QCanBusFrame()
@@ -211,6 +213,36 @@ void tst_QCanBusFrame::streaming()
     QCOMPARE(restoredFrame.frameType(), originalFrame.frameType());
     QCOMPARE(restoredFrame.hasExtendedFrameFormat(),
              originalFrame.hasExtendedFrameFormat());
+}
+
+void tst_QCanBusFrame::tst_error()
+{
+    QCanBusFrame frame(1);
+    QCOMPARE(frame.frameType(), QCanBusFrame::DataFrame);
+    QCOMPARE(frame.frameId(), 1u);
+    QCOMPARE(frame.error(), QCanBusFrame::NoError);
+
+    //set error -> should be ignored since still DataFrame
+    frame.setError(QCanBusFrame::AnyError);
+    QCOMPARE(frame.frameType(), QCanBusFrame::DataFrame);
+    QCOMPARE(frame.frameId(), 1u);
+    QCOMPARE(frame.error(), QCanBusFrame::NoError);
+
+    frame.setFrameType(QCanBusFrame::ErrorFrame);
+    QCOMPARE(frame.frameType(), QCanBusFrame::ErrorFrame);
+    QCOMPARE(frame.frameId(), 0u); //id of Error frame always 0
+    QCOMPARE(frame.error(), QCanBusFrame::TransmissionTimeoutError);
+
+    frame.setError(QCanBusFrame::FrameErrors(QCanBusFrame::ControllerError|QCanBusFrame::ProtocolViolationError));
+    QCOMPARE(frame.frameType(), QCanBusFrame::ErrorFrame);
+    QCOMPARE(frame.frameId(), 0u); //id of Error frame always 0
+    QCOMPARE(frame.error(),
+             QCanBusFrame::ControllerError|QCanBusFrame::ProtocolViolationError);
+
+    frame.setFrameType(QCanBusFrame::RemoteRequestFrame);
+    QCOMPARE(frame.frameType(), QCanBusFrame::RemoteRequestFrame);
+    QCOMPARE(frame.frameId(), (uint)(QCanBusFrame::ControllerError|QCanBusFrame::ProtocolViolationError));
+    QCOMPARE(frame.error(), QCanBusFrame::NoError);
 }
 
 Q_DECLARE_METATYPE(QCanBusFrame::FrameType)

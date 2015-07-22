@@ -106,6 +106,8 @@ QT_BEGIN_NAMESPACE
     extended frame format, the identifier has a maximum of 29 bits;
     otherwise 11 bits.
 
+    If the frame is of type \l ErrorFrame this ID is always 0.
+
     \sa setFrameId(), hasExtendedFrameFormat()
  */
 
@@ -142,6 +144,27 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
+    \enum QCanBusError::FrameError
+
+    This enum describes the possible error types.
+
+    \value NoError                      No error has occurred.
+    \value TransmissionTimeoutError     The transmission has timed out.
+    \value LostArbitrationError         The frame could not be sent due to lost
+                                        arbitration on the bus.
+    \value ControllerError              The controller encountered an error.
+    \value ProtocolViolationError       A protocol violation has occurred.
+    \value TransceiverError             A transceiver error occurred
+    \value MissingAcknowledgmentError   The transmission received no
+                                        acknowledgment.
+    \value BusOffError                  The CAN bus is offline.
+    \value BusError                     A CAN bus error occurred.
+    \value ControllerRestartError       The controller restarted.
+    \value UnknownError                 An unknown error has occurred.
+    \value AnyError                     Matches every other error type.
+ */
+
+/*!
     \fn FrameType QCanBusFrame::frameType() const
 
     Returns the type of the frame.
@@ -171,6 +194,24 @@ QT_BEGIN_NAMESPACE
     Returns the timestamp of the frame.
 
     \sa QCanBusFrame::TimeStamp, QCanBusFrame::setTimeStamp()
+ */
+
+/*!
+    \fn FrameErrors QCanBusFrame::error() const
+
+    Returns the error of the current error frame. If the frame
+    is not an \l ErrorFrame this function always returns \l NoError.
+
+    \sa setError()
+ */
+
+/*!
+    \fn void QCanBusFrame::setError(FrameErrors error)
+
+    Sets the frames \a error type. This function does nothing if
+    \l frameType() is not an \l ErrorFrame.
+
+    \sa error()
  */
 
 /*!

@@ -80,6 +80,24 @@ public:
         setFrameType(type);
     }
 
+    enum FrameError {
+        NoError                     = 0,
+        TransmissionTimeoutError    = (1 << 0),
+        LostArbitrationError        = (1 << 1),
+        ControllerError             = (1 << 2),
+        ProtocolViolationError      = (1 << 3),
+        TransceiverError            = (1 << 4),
+        MissingAcknowledgmentError  = (1 << 5),
+        BusOffError                 = (1 << 6),
+        BusError                    = (1 << 7),
+        ControllerRestartError      = (1 << 8),
+        UnknownError                = (1 << 9),
+        AnyError                    = 0x1FFFFFFFU
+        //only 29 bits usable
+    };
+    Q_DECLARE_FLAGS(FrameErrors, FrameError)
+    Q_FLAGS(FrameErrors)
+
     explicit QCanBusFrame(quint32 identifier = 0, const QByteArray &data = QByteArray()) :
         canId(identifier & 0x1FFFFFFFU),
         format(0x1),
@@ -131,7 +149,12 @@ public:
         isExtendedFrame = (isExtended & 0x1);
     }
 
-    inline quint32 frameId() const { return (canId & 0x1FFFFFFFU); }
+    inline quint32 frameId() const
+    {
+        if (format == 0x2)
+            return 0;
+        return (canId & 0x1FFFFFFFU);
+    }
     inline void setFrameId(quint32 newFrameId)
     {
         canId = (newFrameId & 0x1FFFFFFFU);
@@ -143,13 +166,27 @@ public:
     QByteArray payload() const { return load; }
     TimeStamp timeStamp() const { return stamp; }
 
+    QCanBusFrame::FrameErrors error() const
+    {
+        if (format != 0x2)
+            return QCanBusFrame::FrameErrors(QCanBusFrame::NoError);
+
+        return FrameErrors(canId & 0x1FFFFFFFU);
+    }
+    void setError(QCanBusFrame::FrameErrors e)
+    {
+        if (format != 0x2)
+            return;
+        canId = (e & AnyError);
+    }
+
 #ifndef QT_NO_DATASTREAM
     friend Q_SERIALBUS_EXPORT QDataStream &operator<<(QDataStream &, const QCanBusFrame &);
     friend Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &, QCanBusFrame &);
 #endif
 
 private:
-    quint32 canId:29;
+    quint32 canId:29; // acts as container for error codes too
     quint8 format:3; // max of 8 frame types
 
     quint8 isExtendedFrame:1;
@@ -164,6 +201,7 @@ private:
 };
 
 Q_DECLARE_TYPEINFO(QCanBusFrame, Q_MOVABLE_TYPE);
+Q_DECLARE_TYPEINFO(QCanBusFrame::FrameError, Q_PRIMITIVE_TYPE);
 Q_DECLARE_TYPEINFO(QCanBusFrame::FrameType, Q_PRIMITIVE_TYPE);
 Q_DECLARE_TYPEINFO(QCanBusFrame::TimeStamp, Q_PRIMITIVE_TYPE);
 
