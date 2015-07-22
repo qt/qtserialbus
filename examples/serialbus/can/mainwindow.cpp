@@ -88,6 +88,7 @@ void MainWindow::connectDevice(int pluginIndex)
         return;
     }
     canDevice->setConfigurationParameter(QStringLiteral("ReceiveOwnMessages"), QVariant(1));
+    canDevice->setConfigurationParameter(QStringLiteral("ErrorMask"), QVariant(0x1FFFFFFFU));
     connect(canDevice.data(), &QCanBusDevice::frameReceived, this, &MainWindow::checkMessages);
 
     ui->deviceLabel->setText("Connected to: " + deviceName);
@@ -196,32 +197,32 @@ void MainWindow::on_pluginBox_activated(int index)
 
 void MainWindow::interpretError(QString &view, const QCanBusFrame &frame)
 {
-    switch (frame.frameId()) {
-    case CAN_ERR_TX_TIMEOUT:
+    switch (frame.error()) {
+    case QCanBusFrame::TransmissionTimeoutError:
         view += QStringLiteral("TX timeout\n");
         break;
-    case CAN_ERR_LOSTARB:
+    case QCanBusFrame::LostArbitrationError:
         view += QStringLiteral("lost arbitration\n");
         break;
-    case CAN_ERR_CRTL:
+    case QCanBusFrame::ControllerError:
         view += QStringLiteral("controller problems\n");
         break;
-    case CAN_ERR_PROT:
+    case QCanBusFrame::ProtocolViolationError:
         view += QStringLiteral("protocol violations\n");
         break;
-    case CAN_ERR_TRX:
+    case QCanBusFrame::TransceiverError:
         view += QStringLiteral("transceiver status\n");
         break;
-    case CAN_ERR_ACK:
+    case QCanBusFrame::MissingAcknowledgmentError:
         view += QStringLiteral("received no ACK on transmission\n");
         break;
-    case CAN_ERR_BUSOFF:
+    case QCanBusFrame::BusOffError:
         view += QStringLiteral("bus off\n");
         break;
-    case CAN_ERR_BUSERROR:
+    case QCanBusFrame::BusError:
         view += QStringLiteral("bus error\n");
         break;
-    case CAN_ERR_RESTARTED:
+    case QCanBusFrame::ControllerRestartError:
         view += QStringLiteral("controller restarted\n");
         break;
     default:
@@ -229,9 +230,15 @@ void MainWindow::interpretError(QString &view, const QCanBusFrame &frame)
     }
 
     const QByteArray payload = frame.payload();
+    if (payload.isEmpty())
+        return;
+
     view += QStringLiteral("arbitration lost in bit: ");
     view += QString::number(payload.at(0), 16);
     view += QStringLiteral("\n");
+
+    if (payload.size() < 2)
+        return;
 
     switch (payload.at(1)) {
     case CAN_ERR_CRTL_RX_OVERFLOW:
@@ -255,6 +262,9 @@ void MainWindow::interpretError(QString &view, const QCanBusFrame &frame)
     default:
         break;
     }
+
+    if (payload.size() < 3)
+        return;
 
     switch (payload.at(2)) { //type
     case CAN_ERR_PROT_BIT:
@@ -284,6 +294,9 @@ void MainWindow::interpretError(QString &view, const QCanBusFrame &frame)
     default:
         break;
     }
+
+    if (payload.size() < 4)
+        return;
 
     switch (payload.at(3)) { //location
     case CAN_ERR_PROT_LOC_SOF:
@@ -346,6 +359,9 @@ void MainWindow::interpretError(QString &view, const QCanBusFrame &frame)
     default:
         break;
     }
+
+    if (payload.size() < 5)
+        return;
 
     switch (payload.at(4)) {
     case CAN_ERR_TRX_CANH_NO_WIRE:
