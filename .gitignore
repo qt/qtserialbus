@@ -5,3 +5,11 @@ Makefile*
 *.obj
 config.tests/socketcan/socketcan
 config.tests/socketcan_fd/socketcan_fd
+*.moc
+*.uic
+*.pch
+examples/serialbus/can/can
+tests/auto/qcanbus/tst_qcanbus
+tests/auto/qcanbusdevice/tst_qcanbusdevice
+tests/auto/qcanbusframe/tst_qcanbusframe
+
