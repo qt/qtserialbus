@@ -44,7 +44,8 @@ class tst_Backend : public QCanBusDevice
 {
     Q_OBJECT
 public:
-    tst_Backend()
+    tst_Backend() :
+        firstOpen(true)
     {
         referenceFrame.setFrameId(5);
         referenceFrame.setPayload(QByteArray("FOOBAR"));
@@ -62,6 +63,10 @@ public:
 
     bool open()
     {
+        if (firstOpen) {
+            firstOpen = false;
+            return false;
+        }
         setState(QCanBusDevice::ConnectedState);
         return true;
     }
@@ -95,6 +100,7 @@ signals:
 
 private:
     QCanBusFrame referenceFrame;
+    bool firstOpen;
 };
 
 class tst_QCanBusDevice : public QObject
@@ -115,8 +121,7 @@ private:
     QPointer<QCanBusDevice> device;
 };
 
-tst_QCanBusDevice::tst_QCanBusDevice() :
-    device(0)
+tst_QCanBusDevice::tst_QCanBusDevice()
 {
     qRegisterMetaType<QCanBusDevice::CanBusDeviceState>();
     qRegisterMetaType<QCanBusDevice::CanBusError>();
@@ -130,14 +135,18 @@ void tst_QCanBusDevice::initTestCase()
     QSignalSpy stateSpy(device.data(),
                         SIGNAL(stateChanged(QCanBusDevice::CanBusDeviceState)));
 
-
+    QVERIFY(!device->connectDevice()); //first connect triggered to fail
     QVERIFY(device->connectDevice());
     QTRY_VERIFY_WITH_TIMEOUT(device->state() == QCanBusDevice::ConnectedState,
                              5000);
-    QCOMPARE(stateSpy.count(), 2);
+    QCOMPARE(stateSpy.count(), 4);
     QCOMPARE(stateSpy[0].at(0).value<QCanBusDevice::CanBusDeviceState>(),
              QCanBusDevice::ConnectingState);
     QCOMPARE(stateSpy[1].at(0).value<QCanBusDevice::CanBusDeviceState>(),
+             QCanBusDevice::UnconnectedState);
+    QCOMPARE(stateSpy[2].at(0).value<QCanBusDevice::CanBusDeviceState>(),
+             QCanBusDevice::ConnectingState);
+    QCOMPARE(stateSpy[3].at(0).value<QCanBusDevice::CanBusDeviceState>(),
              QCanBusDevice::ConnectedState);
 }
 
@@ -239,6 +248,9 @@ void tst_QCanBusDevice::error()
 
     tst_Backend *backend = qobject_cast<tst_Backend *>(device);
     QVERIFY(backend);
+
+    //NoError
+    QVERIFY(device->errorString().isEmpty());
 
     //ReadError
     backend->emulateError(testString+QString::fromLatin1("a"),

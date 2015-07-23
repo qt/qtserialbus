@@ -35,6 +35,7 @@
 ****************************************************************************/
 
 #include <QtSerialBus/qcanbus.h>
+#include <QtSerialBus/qcanbusfactory.h>
 
 #include <QtTest/QtTest>
 
@@ -47,14 +48,13 @@ public:
 private slots:
     void initTestCase();
     void plugins();
-    void createBackend();
+    void createDevice();
 
 private:
-    QCanBus *bus;
+    QPointer<QCanBus> bus;
 };
 
-tst_QCanBus::tst_QCanBus() :
-    bus(0)
+tst_QCanBus::tst_QCanBus()
 {
 }
 
@@ -71,28 +71,30 @@ void tst_QCanBus::initTestCase()
 #endif
     bus = QCanBus::instance();
     QVERIFY(bus != 0);
-    QCanBus *sameInstance;
+    QPointer<QCanBus> sameInstance;
     sameInstance = QCanBus::instance();
     QCOMPARE(bus, sameInstance);
 }
 
 void tst_QCanBus::plugins()
 {
-    QVERIFY(!bus->plugins().isEmpty());
-    QVERIFY(bus->plugins().contains("generic"));
+    QList<QByteArray> pluginList = bus->plugins();
+    QVERIFY(!pluginList.isEmpty());
+    QVERIFY(pluginList.contains("generic"));
 
 }
 
-void tst_QCanBus::createBackend()
+void tst_QCanBus::createDevice()
 {
-    //TODO this test needs serious overhaul. For now it is the bare minimum
-
     QCanBusDevice *dummy = bus->createDevice("generic", "unused");
-    QVERIFY(dummy);
-
     QCanBusDevice *dummy2 = bus->createDevice("generic", "unused");
+    QCanBusDevice *faulty = bus->createDevice("faulty", "faulty");
+    QVERIFY(dummy);
     QVERIFY(dummy2);
-    QVERIFY(dummy != dummy2);
+    QVERIFY(!faulty);
+
+    delete dummy;
+    delete dummy2;
 }
 
 QTEST_MAIN(tst_QCanBus)

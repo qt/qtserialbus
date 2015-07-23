@@ -49,7 +49,7 @@ class Q_SERIALBUS_EXPORT QCanBusFactory
 public:
     virtual QCanBusDevice *createDevice(const QString &interfaceName) const = 0;
 protected:
-    virtual ~QCanBusFactory();
+    virtual ~QCanBusFactory() {}
 };
 
 Q_DECLARE_INTERFACE(QCanBusFactory,
