@@ -198,7 +198,7 @@ QString QCanBusDevice::errorString() const
 }
 
 /*!
-    \fn qint64 QCanBusDevice::availableFrames() const
+    \fn qint64 QCanBusDevice::framesAvailable() const
 
     Returns the number of available frames. If no frames are available,
     this function returns 0.
@@ -234,7 +234,7 @@ QString QCanBusDevice::errorString() const
     \fn void QCanBusDevice::frameReceived()
 
     This signal is emitted when one or more frames have been received.
-    The frames should be read using \l readFrame() and \l availableFrames().
+    The frames should be read using \l readFrame() and \l framesAvailable().
  */
 
 /*!
@@ -245,7 +245,7 @@ QString QCanBusDevice::errorString() const
 
     The queue operates according to the FIFO principle.
 
-    \sa availableFrames()
+    \sa framesAvailable()
  */
 
 /*!

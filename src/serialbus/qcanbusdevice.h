@@ -80,7 +80,7 @@ public:
 
     virtual bool writeFrame(const QCanBusFrame &frame) = 0;
     virtual QCanBusFrame readFrame() = 0;
-    virtual qint64 availableFrames() const = 0;
+    virtual qint64 framesAvailable() const = 0;
 
     //TODO currently assumes unbuffered write. Add support for buffered writes
     // qint64 framesToWrite() const

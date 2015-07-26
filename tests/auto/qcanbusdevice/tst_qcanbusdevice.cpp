@@ -75,7 +75,7 @@ public:
     QVariant configurationParameter(const QString&) const { return value; }
     QVector<QString> configurationKeys() const { return keys; }
 
-    qint64 availableFrames() const { return 0; }
+    qint64 framesAvailable() const { return 0; }
     QCanBusFrame readFrame()
     {
         if (state() != QCanBusDevice::ConnectedState)

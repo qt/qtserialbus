@@ -73,7 +73,7 @@ void DummyBackend::sendMessage()
 
 #define MAX_PACKAGE_SIZE 16
 
-qint64 DummyBackend::availableFrames() const
+qint64 DummyBackend::framesAvailable() const
 {
     // assume every frame can take max payload of 16 byte
     uint frameCount = byteArray.size() / MAX_PACKAGE_SIZE;

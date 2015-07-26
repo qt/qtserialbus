@@ -234,7 +234,7 @@ bool SocketCanBackend::connectSocket()
     return true;
 }
 
-qint64 SocketCanBackend::availableFrames() const
+qint64 SocketCanBackend::framesAvailable() const
 {
     return frameBuffer.size();
 }
