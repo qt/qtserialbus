@@ -53,10 +53,6 @@ public:
         stamp.setMicroSeconds(23);
         referenceFrame.setTimeStamp(stamp);
         referenceFrame.setExtendedFrameFormat(1);
-
-        QByteArray data;
-        QDataStream stream(&data, QIODevice::ReadWrite);
-        stream << referenceFrame;
     }
 
     bool open()
@@ -136,6 +132,7 @@ private:
 tst_QCanBusDevice::tst_QCanBusDevice() :
     device(0)
 {
+    qRegisterMetaType<QCanBusDevice::CanBusDeviceState>();
     qRegisterMetaType<QCanBusDevice::CanBusError>();
 }
 
@@ -143,11 +140,19 @@ void tst_QCanBusDevice::initTestCase()
 {
     device = new tst_Backend();
     QVERIFY(device);
-    QVERIFY(device->connectDevice());
 
-    // this backend is synchronous
-    // TODO test that we get the sequence Connecting->ConnectedState
-    QCOMPARE(device->state(), QCanBusDevice::ConnectedState);
+    QSignalSpy stateSpy(device.data(),
+                        SIGNAL(stateChanged(QCanBusDevice::CanBusDeviceState)));
+
+
+    QVERIFY(device->connectDevice());
+    QTRY_VERIFY_WITH_TIMEOUT(device->state() == QCanBusDevice::ConnectedState,
+                             5000);
+    QCOMPARE(stateSpy.count(), 2);
+    QCOMPARE(stateSpy[0].at(0).value<QCanBusDevice::CanBusDeviceState>(),
+             QCanBusDevice::ConnectingState);
+    QCOMPARE(stateSpy[1].at(0).value<QCanBusDevice::CanBusDeviceState>(),
+             QCanBusDevice::ConnectedState);
 }
 
 void tst_QCanBusDevice::conf()
@@ -162,31 +167,61 @@ void tst_QCanBusDevice::conf()
 void tst_QCanBusDevice::write()
 {
     QSignalSpy spy(device, SIGNAL(written()));
+    QSignalSpy stateSpy(device,
+                        SIGNAL(stateChanged(QCanBusDevice::CanBusDeviceState)));
+
     QCanBusFrame frame;
     frame.setPayload(QByteArray("testData"));
+
     device->disconnectDevice();
-    // TODO test that we get the sequence Closing->ConnectedState
-    QCOMPARE(device->state(), QCanBusDevice::UnconnectedState);
+    QTRY_VERIFY_WITH_TIMEOUT(device->state() == QCanBusDevice::UnconnectedState,
+                             5000);
+    QCOMPARE(stateSpy.count(), 2);
+    QCOMPARE(stateSpy[0].at(0).value<QCanBusDevice::CanBusDeviceState>(),
+             QCanBusDevice::ClosingState);
+    QCOMPARE(stateSpy[1].at(0).value<QCanBusDevice::CanBusDeviceState>(),
+             QCanBusDevice::UnconnectedState);
+    stateSpy.clear();
+    QVERIFY(stateSpy.isEmpty());
+
     device->writeFrame(frame);
     QCOMPARE(spy.count(), 0);
 
-    device->connectDevice();
 
-    QCOMPARE(device->state(), QCanBusDevice::ConnectedState);
+    device->connectDevice();
+    QTRY_VERIFY_WITH_TIMEOUT(device->state() == QCanBusDevice::ConnectedState,
+                             5000);
+    QCOMPARE(stateSpy.count(), 2);
+    QCOMPARE(stateSpy[0].at(0).value<QCanBusDevice::CanBusDeviceState>(),
+             QCanBusDevice::ConnectingState);
+    QCOMPARE(stateSpy[1].at(0).value<QCanBusDevice::CanBusDeviceState>(),
+             QCanBusDevice::ConnectedState);
+
     device->writeFrame(frame);
     QCOMPARE(spy.count(), 1);
 }
 
 void tst_QCanBusDevice::read()
 {
+    QSignalSpy stateSpy(device,
+                        SIGNAL(stateChanged(QCanBusDevice::CanBusDeviceState)));
+
     device->disconnectDevice();
     QCOMPARE(device->state(), QCanBusDevice::UnconnectedState);
+    stateSpy.clear();
 
-    QCanBusFrame frame1 = device->readFrame();
+    const QCanBusFrame frame1 = device->readFrame();
+
     QVERIFY(device->connectDevice());
-    QCOMPARE(device->state(), QCanBusDevice::ConnectedState);
+    QTRY_VERIFY_WITH_TIMEOUT(device->state() == QCanBusDevice::ConnectedState,
+                             5000);
+    QCOMPARE(stateSpy.count(), 2);
+    QCOMPARE(stateSpy[0].at(0).value<QCanBusDevice::CanBusDeviceState>(),
+             QCanBusDevice::ConnectingState);
+    QCOMPARE(stateSpy[1].at(0).value<QCanBusDevice::CanBusDeviceState>(),
+             QCanBusDevice::ConnectedState);
 
-    QCanBusFrame frame2 = device->readFrame();
+    const QCanBusFrame frame2 = device->readFrame();
     QVERIFY(!frame1.frameId());
     QVERIFY(!frame1.isValid());
     QVERIFY(frame2.frameId());
