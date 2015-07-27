@@ -110,6 +110,11 @@ bool DummyBackend::writeFrame(const QCanBusFrame &data)
     return true;
 }
 
+QString DummyBackend::interpretErrorFrame(const QCanBusFrame &/*errorFrame*/)
+{
+    return QString();
+}
+
 void DummyBackend::setConfigurationParameter(const QString &key, const QVariant &value)
 {
     Q_UNUSED(key);

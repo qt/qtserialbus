@@ -69,6 +69,8 @@ public:
     QCanBusFrame readFrame() Q_DECL_OVERRIDE;
     bool writeFrame(const QCanBusFrame &newData) Q_DECL_OVERRIDE;
 
+    QString interpretErrorFrame(const QCanBusFrame &errorFrame) Q_DECL_OVERRIDE;
+
 private Q_SLOTS:
     void readSocket();
 

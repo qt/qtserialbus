@@ -3,10 +3,9 @@ QT      += core gui serialbus widgets
 TARGET = can
 TEMPLATE = app
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
+SOURCES += main.cpp \
+        mainwindow.cpp
 
-HEADERS += mainwindow.h \
-        global.h
+HEADERS += mainwindow.h
 
 FORMS   += mainwindow.ui

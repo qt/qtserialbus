@@ -101,6 +101,11 @@ public:
         setError(text, e);
     }
 
+    QString interpretErrorFrame(const QCanBusFrame &/*errorFrame*/)
+    {
+        return QString();
+    }
+
 signals:
     void written();
 

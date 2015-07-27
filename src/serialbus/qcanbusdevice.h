@@ -95,6 +95,8 @@ public:
     CanBusError error() const;
     QString errorString() const;
 
+    virtual QString interpretErrorFrame(const QCanBusFrame &errorFrame) = 0;
+
 Q_SIGNALS:
     void errorOccurred(QCanBusDevice::CanBusError);
     void frameReceived();

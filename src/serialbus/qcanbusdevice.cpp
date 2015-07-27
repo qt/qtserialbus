@@ -255,6 +255,15 @@ QString QCanBusDevice::errorString() const
     otherwise \c false.
  */
 
+/*
+    \fn QString interpretErrorFrame(const QCanBusFrame &frame)
+
+    Interprets \a frame as error frame and returns a human readable
+    description of the error.
+
+    If \a frame is not an error frame, the return string is empty.
+ */
+
 /*!
     Connects the device to the CAN bus. Returns \c true on success;
     otherwise \c false.

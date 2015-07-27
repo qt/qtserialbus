@@ -1,6 +1,5 @@
 TEMPLATE = subdirs
 
-# right now compiles on Linux only
-linux:qtHaveModule(widgets) {
+qtHaveModule(widgets) {
     SUBDIRS += can
 }

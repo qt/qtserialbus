@@ -63,6 +63,8 @@ public:
     QCanBusFrame readFrame() Q_DECL_OVERRIDE;
     bool writeFrame(const QCanBusFrame &data) Q_DECL_OVERRIDE;
 
+    QString interpretErrorFrame(const QCanBusFrame &) Q_DECL_OVERRIDE;
+
 public Q_SLOTS:
     void sendMessage();
 

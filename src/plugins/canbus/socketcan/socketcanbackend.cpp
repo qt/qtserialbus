@@ -41,6 +41,7 @@
 #include <QtCore/qdatastream.h>
 #include <QtCore/qsocketnotifier.h>
 
+#include <linux/can/error.h>
 #include <linux/can/raw.h>
 #include <unistd.h>
 #include <net/if.h>
@@ -277,6 +278,169 @@ bool SocketCanBackend::writeFrame(const QCanBusFrame &newData)
     }
 
     return true;
+}
+
+QString SocketCanBackend::interpretErrorFrame(const QCanBusFrame &errorFrame)
+{
+    if (errorFrame.frameType() != QCanBusFrame::ErrorFrame)
+        return QString();
+
+    // the payload may contain the error details
+    const QByteArray data = errorFrame.payload();
+    QString errorMsg;
+
+    if (errorFrame.error() & QCanBusFrame::TransmissionTimeoutError)
+        errorMsg += QStringLiteral("TX timout\n");
+
+    if (errorFrame.error() & QCanBusFrame::MissingAcknowledgmentError)
+        errorMsg += QStringLiteral("Received no ACK on transmission\n");
+
+    if (errorFrame.error() & QCanBusFrame::BusOffError)
+        errorMsg += QStringLiteral("Bus off\n");
+
+    if (errorFrame.error() & QCanBusFrame::BusError)
+        errorMsg += QStringLiteral("Bus error\n");
+
+    if (errorFrame.error() & QCanBusFrame::ControllerRestartError)
+        errorMsg += QStringLiteral("Controller restarted\n");
+
+    if (errorFrame.error() & QCanBusFrame::UnknownError)
+        errorMsg += QStringLiteral("Unknown error\n");
+
+    if (errorFrame.error() & QCanBusFrame::LostArbitrationError) {
+        errorMsg += QStringLiteral("Lost arbitration:\n");
+        if (data.size() >= 1) {
+            errorMsg += QString::number(data.at(0), 16);
+            errorMsg += QStringLiteral(" bit\n");
+        }
+    }
+
+    if (errorFrame.error() & QCanBusFrame::ControllerError) {
+        errorMsg += QStringLiteral("Controller problem:\n");
+        if (data.size() >= 2) {
+            char b = data.at(1) ;
+            if (b & CAN_ERR_CRTL_RX_OVERFLOW)
+                errorMsg += QStringLiteral(" RX buffer overflow\n");
+            if (b & CAN_ERR_CRTL_TX_OVERFLOW)
+                errorMsg += QStringLiteral(" TX buffer overflow\n");
+            if (b & CAN_ERR_CRTL_RX_WARNING)
+                errorMsg += QStringLiteral(" reached warning level for RX errors\n");
+            if (b & CAN_ERR_CRTL_TX_WARNING)
+                errorMsg += QStringLiteral(" reached warning level for TX errors\n");
+            if (b & CAN_ERR_CRTL_RX_PASSIVE)
+                errorMsg += QStringLiteral(" reached error passive status RX\n");
+            if (b & CAN_ERR_CRTL_TX_PASSIVE)
+                errorMsg += QStringLiteral(" reached error passive status TX\n");
+
+            if (b == CAN_ERR_CRTL_UNSPEC)
+                errorMsg += QStringLiteral(" Unspecified error\n");
+        }
+    }
+
+    if (errorFrame.error() & QCanBusFrame::TransceiverError) {
+        errorMsg = QStringLiteral("Transceiver status:");
+        if (data.size() >= 5) {
+            char b = data.at(4);
+            if (b & CAN_ERR_TRX_CANH_NO_WIRE)
+                errorMsg += QStringLiteral(" CAN-transceiver CANH no wire\n");
+            if (b & CAN_ERR_TRX_CANH_SHORT_TO_BAT)
+                errorMsg += QStringLiteral(" CAN-transceiver CANH short to bat\n");
+            if (b & CAN_ERR_TRX_CANH_SHORT_TO_VCC)
+                errorMsg += QStringLiteral(" CAN-transceiver CANH short to vcc\n");
+            if (b & CAN_ERR_TRX_CANH_SHORT_TO_GND)
+                errorMsg += QStringLiteral(" CAN-transceiver CANH short to ground\n");
+            if (b & CAN_ERR_TRX_CANL_NO_WIRE)
+                errorMsg += QStringLiteral(" CAN-transceiver CANL no wire\n");
+            if (b & CAN_ERR_TRX_CANL_SHORT_TO_BAT)
+                errorMsg += QStringLiteral(" CAN-transceiver CANL short to bat\n");
+            if (b & CAN_ERR_TRX_CANL_SHORT_TO_VCC)
+                errorMsg += QStringLiteral(" CAN-transceiver CANL short to vcc\n");
+            if (b & CAN_ERR_TRX_CANL_SHORT_TO_GND)
+                errorMsg += QStringLiteral(" CAN-transceiver CANL short to ground\n");
+            if (b & CAN_ERR_TRX_CANL_SHORT_TO_CANH)
+                errorMsg += QStringLiteral(" CAN-transceiver CANL short to CANH\n");
+
+            if (b == CAN_ERR_TRX_UNSPEC)
+                errorMsg += QStringLiteral(" unspecified\n");
+        }
+
+    }
+
+    if (errorFrame.error() & QCanBusFrame::ProtocolViolationError) {
+        errorMsg += QStringLiteral("Protocol violation:\n");
+        if (data.size() > 3) {
+            char b = data.at(2);
+            if (b & CAN_ERR_PROT_BIT)
+                errorMsg += QStringLiteral(" single bit error\n");
+            if (b & CAN_ERR_PROT_FORM)
+                errorMsg += QStringLiteral(" frame format error\n");
+            if (b & CAN_ERR_PROT_STUFF)
+                errorMsg += QStringLiteral(" bit stuffing error\n");
+            if (b & CAN_ERR_PROT_BIT0)
+                errorMsg += QStringLiteral(" unable to send dominant bit\n");
+            if (b & CAN_ERR_PROT_BIT1)
+                errorMsg += QStringLiteral(" unable to send recessive bit\n");
+            if (b & CAN_ERR_PROT_OVERLOAD)
+                errorMsg += QStringLiteral(" bus overload\n");
+            if (b & CAN_ERR_PROT_ACTIVE)
+                errorMsg += QStringLiteral(" active error announcement\n");
+            if (b & CAN_ERR_PROT_TX)
+                errorMsg += QStringLiteral(" error occurred on transmission\n");
+
+            if (b == CAN_ERR_PROT_UNSPEC)
+                errorMsg += QStringLiteral(" unspecified\n");
+        }
+        if (data.size() > 4) {
+            char b = data.at(3);
+            if (b == CAN_ERR_PROT_LOC_SOF)
+                errorMsg += QStringLiteral(" start of frame\n");
+            if (b == CAN_ERR_PROT_LOC_ID28_21)
+                errorMsg += QStringLiteral(" ID bits 28 - 21 (SFF: 10 - 3)\n");
+            if (b == CAN_ERR_PROT_LOC_ID20_18)
+                errorMsg += QStringLiteral(" ID bits 20 - 18 (SFF: 2 - 0 )\n");
+            if (b == CAN_ERR_PROT_LOC_SRTR)
+                errorMsg += QStringLiteral(" substitute RTR (SFF: RTR)\n");
+            if (b == CAN_ERR_PROT_LOC_IDE)
+                errorMsg += QStringLiteral(" identifier extension\n");
+            if (b == CAN_ERR_PROT_LOC_ID17_13)
+                errorMsg += QStringLiteral(" ID bits 17-13\n");
+            if (b == CAN_ERR_PROT_LOC_ID12_05)
+                errorMsg += QStringLiteral(" ID bits 12-5\n");
+            if (b == CAN_ERR_PROT_LOC_ID04_00)
+                errorMsg += QStringLiteral(" ID bits 4-0\n");
+            if (b == CAN_ERR_PROT_LOC_RTR)
+                errorMsg += QStringLiteral(" RTR\n");
+            if (b == CAN_ERR_PROT_LOC_RES1)
+                errorMsg += QStringLiteral(" reserved bit 1\n");
+            if (b == CAN_ERR_PROT_LOC_RES0)
+                errorMsg += QStringLiteral(" reserved bit 0\n");
+            if (b == CAN_ERR_PROT_LOC_DLC)
+                errorMsg += QStringLiteral(" data length code\n");
+            if (b == CAN_ERR_PROT_LOC_DATA)
+                errorMsg += QStringLiteral(" data section\n");
+            if (b == CAN_ERR_PROT_LOC_CRC_SEQ)
+                errorMsg += QStringLiteral(" CRC sequence\n");
+            if (b == CAN_ERR_PROT_LOC_CRC_DEL)
+                errorMsg += QStringLiteral(" CRC delimiter\n");
+            if (b == CAN_ERR_PROT_LOC_ACK)
+                errorMsg += QStringLiteral(" ACK slot\n");
+            if (b == CAN_ERR_PROT_LOC_ACK_DEL)
+                errorMsg += QStringLiteral(" ACK delimiter\n");
+            if (b == CAN_ERR_PROT_LOC_EOF)
+                errorMsg += QStringLiteral(" end of frame\n");
+            if (b == CAN_ERR_PROT_LOC_INTERM)
+                errorMsg += QStringLiteral(" Intermission\n");
+
+            if (b == CAN_ERR_PROT_LOC_UNSPEC)
+                errorMsg += QStringLiteral(" unspecified\n");
+        }
+    }
+
+    // cut trailing \n
+    if (!errorMsg.isEmpty())
+        errorMsg.chop(1);
+
+    return errorMsg;
 }
 
 void SocketCanBackend::readSocket()
