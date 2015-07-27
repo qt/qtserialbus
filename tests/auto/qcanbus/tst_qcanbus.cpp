@@ -65,6 +65,10 @@ void tst_QCanBus::initTestCase()
      */
     QCoreApplication::addLibraryPath(QCoreApplication::applicationDirPath()
                                      + QStringLiteral("/../../../plugins"));
+#ifdef Q_OS_WIN
+    QCoreApplication::addLibraryPath(QCoreApplication::applicationDirPath()
+                                     + QStringLiteral("/../../../../plugins"));
+#endif
     bus = QCanBus::instance();
     QVERIFY(bus != 0);
     QCanBus *sameInstance;
