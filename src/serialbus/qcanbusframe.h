@@ -65,11 +65,11 @@ public:
     };
 
     enum FrameType {
-        UnknownFrame = 0,
-        DataFrame,
-        ErrorFrame,
-        RemoteRequestFrame,
-        InvalidFrame
+        UnknownFrame        = 0x0,
+        DataFrame           = 0x1,
+        ErrorFrame          = 0x2,
+        RemoteRequestFrame  = 0x3,
+        InvalidFrame        = 0x4
     };
 
     explicit QCanBusFrame(QCanBusFrame::FrameType type) :
@@ -100,7 +100,7 @@ public:
 
     explicit QCanBusFrame(quint32 identifier = 0, const QByteArray &data = QByteArray()) :
         canId(identifier & 0x1FFFFFFFU),
-        format(0x1),
+        format(DataFrame),
         isExtendedFrame(0x1),
         version(0x0),
         load(data)
@@ -151,7 +151,7 @@ public:
 
     inline quint32 frameId() const
     {
-        if (format == 0x2)
+        if (format == ErrorFrame)
             return 0;
         return (canId & 0x1FFFFFFFU);
     }
@@ -168,14 +168,14 @@ public:
 
     QCanBusFrame::FrameErrors error() const
     {
-        if (format != 0x2)
+        if (format != ErrorFrame)
             return QCanBusFrame::FrameErrors(QCanBusFrame::NoError);
 
         return FrameErrors(canId & 0x1FFFFFFFU);
     }
     void setError(QCanBusFrame::FrameErrors e)
     {
-        if (format != 0x2)
+        if (format != ErrorFrame)
             return;
         canId = (e & AnyError);
     }
