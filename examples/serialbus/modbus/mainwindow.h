@@ -42,8 +42,10 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QModBusDevice>
+#include <QModBusSlave>
 #include <QPointer>
+
+class QSerialPort;
 
 namespace Ui {
 class MainWindow;
@@ -57,13 +59,17 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+private slots:
+    void on_pushButton_clicked();
+
 private:
     void init();
     void connectDevice(int pluginIndex);
 
     QList<QByteArray> plugins;
-    QPointer<QModBusDevice> modBusDevice;
+    QPointer<QModBusSlave> modBusDevice;
     Ui::MainWindow *ui;
+    QPointer<QSerialPort> serialPort;
 };
 
 #endif // MAINWINDOW_H

@@ -38,9 +38,10 @@
 #define QMODBUS_H
 
 #include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qmodbusdevice.h>
+#include <QtSerialBus/qmodbusslave.h>
 
 #include <QtCore/qobject.h>
+#include <QtCore/qiodevice.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -51,8 +52,8 @@ public:
     static QModBus *instance();
     QList<QByteArray> plugins() const;
 
-    QModBusDevice *createDevice(const QByteArray &plugin,
-                       const QString &interfaceName) const;
+    QModBusSlave *createSlave(const QByteArray &plugin,
+                               QIODevice *transport) const;
 
 private:
     QModBus(QObject *parent = 0);

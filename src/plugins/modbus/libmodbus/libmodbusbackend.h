@@ -37,17 +37,58 @@
 #ifndef LIBMODBUSBACKEND_H
 #define LIBMODBUSBACKEND_H
 
-#include <QtSerialBus/qmodbusdevice.h>
+#include <modbus/modbus.h>
+
+#include <QtSerialBus/qmodbusslave.h>
+#include <QSerialPort>
 
 #include <QtCore/qstring.h>
+#include <QtCore/qthread.h>
+#include <QtCore/qpointer.h>
 
 QT_BEGIN_NAMESPACE
 
-class LibModBusBackend : public QModBusDevice
+class ListenThread : public QObject
+{
+    Q_OBJECT
+
+public slots:
+    void doWork();
+
+public:
+    modbus_t *context;
+    modbus_mapping_t *mapping;
+
+Q_SIGNALS:
+    void fail();
+};
+
+class LibModBusBackend : public QModBusSlave
 {
     Q_OBJECT
 public:
-    explicit LibModBusBackend(const QString &name);
+    explicit LibModBusBackend(QSerialPort *transport);
+    ~LibModBusBackend();
+    bool setMapping(int discreteInputMax,
+                    int coilMax,
+                    int inputRegisterMax,
+                    int holdingRegisterMax) Q_DECL_OVERRIDE;
+    bool open() Q_DECL_OVERRIDE;
+    void close() Q_DECL_OVERRIDE;
+    int slaveId() const Q_DECL_OVERRIDE;
+    void setSlaveId(int id) Q_DECL_OVERRIDE;
+
+Q_SIGNALS:
+    void operate();
+
+private:
+    QPointer<ListenThread> listener;
+    QThread thread;
+    QSerialPort *serialPort;
+    modbus_t *context;
+    modbus_mapping_t *mapping;
+    bool connected;
+    int slave;
 };
 
 QT_END_NAMESPACE

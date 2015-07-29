@@ -40,6 +40,8 @@
 #include <QtCore/qpluginloader.h>
 #include <QtCore/qglobalstatic.h>
 
+#include <QSerialPort>
+
 #include <private/qfactoryloader_p.h>
 #include <private/qlibrary_p.h>
 
@@ -81,6 +83,21 @@ static void loadPlugins()
     }
 }
 
+/*!
+    \class QModBus
+    \inmodule QtSerialBus
+    \since 5.6
+
+    \brief The QModBus class handles registration and creation of Modbus backends.
+
+    QModBus loads Modbus plugins at runtime. The ownership of serial bus backends is
+    transferred to the loader.
+*/
+
+/*!
+    Returns a pointer to the QModBus class. The object is loaded if necessary. QModBus
+    uses the singleton design pattern.
+ */
 QModBus *QModBus::instance()
 {
     if (!globalInstance)
@@ -88,13 +105,29 @@ QModBus *QModBus::instance()
     return globalInstance;
 }
 
+/*!
+    Returns a list of identifiers for all loaded plugins.
+ */
 QList<QByteArray> QModBus::plugins() const
 {
     return qModBusPlugins()->keys();
 }
 
-QModBusDevice *QModBus::createDevice(const QByteArray &plugin,
-                            const QString &interfaceName) const
+/*!
+    Creates a Modbus Slave. \a plugin is the name of the plugin as returned by the \l plugins()
+    method. \a transport is the method of connection to Modbus network. Currently only QSerialPort
+    is supported.
+
+    \a discreteInputMax is a maximum address of discrete inputs (read only bits)
+    \a coilMax is a maximum address of coils (read/write bits)
+    \a inputRegisterMax is a maximum address of input registers (read only bytes)
+    \a holdingRegisterMax is a maximum address of holdign registers (read/write bytes)
+
+    Ownership of the returned backend is transferred to the caller.
+    Returns \c null if no suitable device can be found.
+ */
+QModBusSlave *QModBus::createSlave(const QByteArray &plugin,
+                                    QIODevice *transport) const
 {
     if (!qModBusPlugins()->contains(plugin))
         return Q_NULLPTR;
@@ -111,7 +144,13 @@ QModBusDevice *QModBus::createDevice(const QByteArray &plugin,
     if (!d.factory)
         return Q_NULLPTR;
 
-    return d.factory->createDevice(interfaceName);}
+    QSerialPort *port = qobject_cast<QSerialPort *>(transport);
+    if (port) {
+        return d.factory->createDevice(port);
+    } else {
+        return Q_NULLPTR;
+    }
+}
 
 QModBus::QModBus(QObject *parent) :
     QObject(parent)

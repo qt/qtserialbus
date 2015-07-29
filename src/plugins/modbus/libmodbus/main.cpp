@@ -37,8 +37,9 @@
 #include "libmodbusbackend.h"
 
 #include <QtSerialBus/qmodbus.h>
-#include <QtSerialBus/qmodbusdevice.h>
 #include <QtSerialBus/qmodbusfactory.h>
+
+#include <QtSerialPort>
 
 #include <QtCore/qfile.h>
 #include <QtCore/qdebug.h>
@@ -53,9 +54,9 @@ class ModBusPlugin : public QObject, public QModBusFactory
 
 
 public:
-    QModBusDevice *createDevice(const QString &interfaceName) const
+    QModBusSlave *createDevice(QSerialPort *transport) const
     {
-        QModBusDevice *device = new LibModBusBackend(interfaceName);
+        QModBusSlave *device = new LibModBusBackend(transport);
         return device;
     }
 };

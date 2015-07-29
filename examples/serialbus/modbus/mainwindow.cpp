@@ -42,6 +42,8 @@
 #include "ui_mainwindow.h"
 
 #include <QtSerialBus>
+#include <QSerialPort>
+#include <QSerialPortInfo>
 
 #include <QtCore/qbytearray.h>
 #include <QtCore/qdebug.h>
@@ -56,6 +58,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    if (!modBusDevice.isNull())
+        modBusDevice->close();
     delete ui;
 }
 
@@ -66,15 +70,35 @@ void MainWindow::init()
     plugins = modBus->plugins();
     for (int i = 0; i < plugins.size(); i++)
         ui->pluginBox->insertItem(i, plugins.at(i));
-
 }
 
 void MainWindow::connectDevice(int pluginIndex)
 {
     QPointer<QModBus> modBus = QModBus::instance();
 
-    modBusDevice = modBus->createDevice(plugins.at(pluginIndex), "unused");
+    if (!serialPort.isNull())
+        serialPort.clear();
+    if (!modBusDevice.isNull())
+        modBusDevice.clear();
+
+    serialPort = new QSerialPort(ui->portEdit->text());
+    ui->portEdit->clear();
+
+    modBusDevice = modBus->createSlave(plugins.at(pluginIndex), serialPort);
+    if (!modBusDevice->setMapping(10, 10, 10, 10))
+        return;
 
     if (modBusDevice.isNull())
         return;
+
+    if (!modBusDevice->open())
+        return;
+
+    ui->connectedLabel->setText("Connected to: " + serialPort->portName());
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    ui->connectedLabel->setText("Connected to: ");
+    connectDevice(ui->pluginBox->currentIndex());
 }

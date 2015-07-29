@@ -1,6 +1,9 @@
-QT += core-private serialbus
+QT += core-private serialbus serialport
 
 TARGET = qtmodbus
+
+CONFIG += link_pkgconfig
+PKGCONFIG += libmodbus
 
 PLUGIN_TYPE = modbus
 PLUGIN_EXTENDS = serialbus

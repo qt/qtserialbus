@@ -36,11 +36,173 @@
 
 #include "libmodbusbackend.h"
 
+#include <QtCore/qdebug.h>
+
+#if defined(Q_OS_WIN)
+#include <winsock2.h>
+#elif defined(Q_OS_UNIX)
+#include <sys/select.h>
+#endif
+
+//TODO: proper error handling
+//TODO: remove linux specific portName
+//TODO: read/write mapping
+//TODO: proper connection state indication
+
+const int MODBUS_SERIAL_ADU_SIZE = 256;
+
 QT_BEGIN_NAMESPACE
 
-LibModBusBackend::LibModBusBackend(const QString &name)
+LibModBusBackend::LibModBusBackend(QSerialPort *transport) :
+    QModBusSlave(),
+    serialPort(transport),
+    context(0),
+    mapping(modbus_mapping_new(0,0,0,0)),
+    connected(false),
+    slave(1)
 {
-    Q_UNUSED(name);
+}
+
+LibModBusBackend::~LibModBusBackend()
+{
+    close();
+    modbus_mapping_free(mapping);
+    mapping = 0;
+}
+
+bool LibModBusBackend::setMapping(int discreteInputMax, int coilMax,
+                                  int inputRegisterMax, int holdingRegisterMax)
+{
+    if (connected)
+        return false;
+    if (mapping) {
+        modbus_mapping_free(mapping);
+        mapping = 0;
+    }
+    mapping = modbus_mapping_new(discreteInputMax, coilMax,
+                                 inputRegisterMax, holdingRegisterMax);
+    if (mapping == NULL) {
+        qWarning() << qt_error_string(errno);
+        modbus_mapping_free(mapping);
+        mapping = 0;
+        return false;
+    }
+    return true;
+}
+
+bool LibModBusBackend::open()
+{
+    if (connected)
+        return true;
+
+    QChar parity;
+
+    switch (serialPort->parity()) {
+    case QSerialPort::NoParity:
+        parity = 'N';
+        break;
+    case QSerialPort::EvenParity:
+        parity = 'E';
+        break;
+    case QSerialPort::OddParity:
+        parity = 'O';
+        break;
+    default:
+        return false;
+    }
+
+    QString portName = serialPort->portName();
+    portName.prepend(QStringLiteral("/dev/")); //FIXME: Linux specific
+
+    context = modbus_new_rtu(portName.toLatin1(),
+                             serialPort->baudRate(),
+                             parity.toLatin1(),
+                             serialPort->dataBits(),
+                             serialPort->stopBits());
+    if (context == NULL) {
+        qWarning() << "Unable to create the libmodbus context";
+        return false;
+    }
+    modbus_set_slave(context, slave);
+
+    modbus_set_debug(context, TRUE);
+    if (modbus_connect(context) == -1) {
+        qWarning() << qt_error_string(errno);
+        close();
+        return false;
+    }
+
+    listener = new ListenThread();
+    listener->context = context;
+    listener->mapping = mapping;
+    listener->moveToThread(&thread);
+    connect(&thread, &QThread::finished, listener, &QObject::deleteLater);
+    connect(this, &LibModBusBackend::operate, listener, &ListenThread::doWork);
+    connect(listener, &ListenThread::fail, this, &LibModBusBackend::close);
+    thread.start();
+    emit operate();
+    connected = true;
+    return true;
+}
+
+void LibModBusBackend::close()
+{
+    thread.requestInterruption();
+    thread.quit();
+    thread.wait();
+    listener.clear();
+
+    modbus_close(context);
+    modbus_free(context);
+    context = 0;
+    connected = false;
+}
+
+int LibModBusBackend::slaveId() const
+{
+    return slave;
+}
+
+void LibModBusBackend::setSlaveId(int id)
+{
+    slave = id;
+    modbus_set_slave(context, slave);
+}
+
+void ListenThread::doWork()
+{
+    quint8 query[MODBUS_SERIAL_ADU_SIZE];
+    struct timeval timeout;
+    struct timeval *timeoutptr = &timeout;
+    timeout.tv_sec = 1;
+    timeout.tv_usec = 0;
+
+    while (!QThread::currentThread()->isInterruptionRequested()) {
+        // The FD_ZERO and FD_SET need to be done at every loop.
+        int socket = modbus_get_socket(context);
+        fd_set rset;
+        FD_ZERO(&rset);
+        FD_SET(socket, &rset);
+
+        // Because modbus_receive doesn't obey timeouts properly, first wait with select until there
+        // is something to read.
+        int req = select(socket+1, &rset, NULL, NULL, timeoutptr);
+
+        // Read only if select returned that there is something to read
+        if (req > 0)
+            req = modbus_receive(context, query);
+
+        // Check for errors on both select and modbus_receive
+        if (req == -1) {
+            qWarning() << qt_error_string(errno);
+            emit fail();
+            break;
+        }
+
+        // Send reply only if data was received.
+        if (req > 0)
+            modbus_reply(context, query, req, mapping);
+    }
 }
 
 QT_END_NAMESPACE

@@ -38,16 +38,19 @@
 #define QMODBUSFACTORY_H
 
 #include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qmodbusdevice.h>
+#include <QtSerialBus/qmodbusslave.h>
+
+#include <QSerialPort>
 
 #include <QtCore/qstringlist.h>
+#include <QtCore/qiodevice.h>
 
 QT_BEGIN_NAMESPACE
 
 class Q_SERIALBUS_EXPORT QModBusFactory
 {
 public:
-    virtual QModBusDevice *createDevice(const QString &interfaceName) const = 0;
+    virtual QModBusSlave *createDevice(QSerialPort *transport) const = 0;
 protected:
     virtual ~QModBusFactory() {}
 };

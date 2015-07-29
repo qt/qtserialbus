@@ -34,21 +34,59 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSDEVICE_H
-#define QMODBUSDEVICE_H
-
-#include <QtSerialBus/qserialbusglobal.h>
-
-#include <QtCore/qobject.h>
+#include "qmodbusslave.h"
 
 QT_BEGIN_NAMESPACE
 
-class Q_SERIALBUS_EXPORT QModBusDevice : public QObject
+/*!
+    \class QModBusSlave
+    \inmodule QtSerialBus
+    \since 5.6
+
+    \brief The QCanBusDevice class is the interface class for modbus.
+
+    QCanBusDevice communicates with a modbus backend providing users with a convenient API.
+    The modbus backend must be specified during the object creation.
+ */
+
+/*!
+    Constructs a serial bus device with the specified \a parent.
+ */
+QModBusSlave::QModBusSlave(QObject *parent) :
+    QObject(parent)
 {
-    Q_OBJECT
-public:
-    explicit QModBusDevice(QObject *parent = 0);
-};
+}
+
+/*!
+    \fn bool QModBusSlave::open()
+
+    Connects QModBusSlave to Modbus network.
+ */
+
+/*!
+    \fn void QModBusSlave::close()
+
+    This function is responsible for closing the Modbus connection.
+
+    \sa disconnectDevice()
+ */
+
+/*!
+    \fn int QModBusSlave::slaveId()
+    Multiple Modbus devices can be connected together on the same physical link,
+    slave id will be used to filter received messages. Each slave should have unique id.
+    Returns slave id.
+
+    \sa setSlaveId()
+ */
+
+/*!
+    \fn void QModBusSlave::setSlaveId(int id)
+    Multiple Modbus devices can be connected together on the same physical link,
+    slave id will be used to filter received messages. Each slave should have unique id.
+    Sets \a id as slave id.
+
+    \sa slaveId()
+ */
 
 QT_END_NAMESPACE
-#endif // QMODBUSDEVICE_H

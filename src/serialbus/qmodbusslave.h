@@ -34,13 +34,29 @@
 **
 ****************************************************************************/
 
-#include "qmodbusdevice.h"
+#ifndef QMODBUSSLAVE_H
+#define QMODBUSSLAVE_H
+
+#include <QtSerialBus/qserialbusglobal.h>
+
+#include <QtCore/qobject.h>
 
 QT_BEGIN_NAMESPACE
 
-QModBusDevice::QModBusDevice(QObject *parent) :
-    QObject(parent)
+class Q_SERIALBUS_EXPORT QModBusSlave : public QObject
 {
-}
+    Q_OBJECT
+public:
+    explicit QModBusSlave(QObject *parent = 0);
+    virtual bool setMapping(int discreteInputMax,
+                            int coilMax,
+                            int inputRegisterMax,
+                            int holdingRegisterMax) = 0;
+    virtual bool open() = 0;
+    virtual void close() = 0;
+    virtual int slaveId() const = 0;
+    virtual void setSlaveId(int id) = 0;
+};
 
 QT_END_NAMESPACE
+#endif // QMODBUSSLAVE_H
