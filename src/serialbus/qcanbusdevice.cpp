@@ -115,6 +115,23 @@ void QCanBusDevice::setError(const QString &errorText, CanBusError errorId)
 }
 
 /*!
+    Adds \a newFrame to the internal list of frames which can be
+    accessed using \l readFrame() and emits the \l frameReceived()
+    signal.
+
+    Subclasses must call this function when they receive a new frame.
+
+ */
+void QCanBusDevice::enqueueReceivedFrame(const QCanBusFrame &newFrame)
+{
+    if (!newFrame.isValid())
+        return;
+
+    d_func()->incomingFrames.append(newFrame);
+    emit frameReceived();
+}
+
+/*!
     \fn void QCanBusDevice::setConfigurationParameter(const QString &key, const QVariant &value)
 
     Sets the configuration parameters for the bus backend. The key-value pair is backend-specific.
@@ -205,6 +222,10 @@ QString QCanBusDevice::errorString() const
 
     \sa readFrame()
 */
+qint64 QCanBusDevice::framesAvailable() const
+{
+    return d_func()->incomingFrames.size();
+}
 
 /*!
     \fn bool QCanBusDevice::open()
@@ -238,8 +259,6 @@ QString QCanBusDevice::errorString() const
  */
 
 /*!
-    \fn QCanBusFrame QCanBusDevice::readFrame()
-
     Returns the next \l QCanBusFrame from the queue; otherwise returns
     an empty QCanBusFrame.
 
@@ -247,6 +266,18 @@ QString QCanBusDevice::errorString() const
 
     \sa framesAvailable()
  */
+QCanBusFrame QCanBusDevice::readFrame()
+{
+    Q_D(QCanBusDevice);
+
+    if (d->state != ConnectedState)
+        return QCanBusFrame(QCanBusFrame::InvalidFrame);
+
+    if (d->incomingFrames.isEmpty())
+        return QCanBusFrame(QCanBusFrame::InvalidFrame);
+
+    return d->incomingFrames.takeFirst();
+}
 
 /*!
     \fn bool QCanBusDevice::writeFrame(const QCanBusFrame &frame)
@@ -255,7 +286,7 @@ QString QCanBusDevice::errorString() const
     otherwise \c false.
  */
 
-/*
+/*!
     \fn QString interpretErrorFrame(const QCanBusFrame &frame)
 
     Interprets \a frame as error frame and returns a human readable

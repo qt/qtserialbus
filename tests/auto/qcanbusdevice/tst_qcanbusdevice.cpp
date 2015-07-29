@@ -53,6 +53,11 @@ public:
         stamp.setMicroSeconds(23);
         referenceFrame.setTimeStamp(stamp);
         referenceFrame.setExtendedFrameFormat(1);
+
+        // this test assumes that each readFrame() call returns referenceFrame
+        // fill the buffer with frames
+        for (int i = 0; i < 5; i++)
+            enqueueReceivedFrame(referenceFrame);
     }
 
     bool open()
@@ -75,14 +80,6 @@ public:
     QVariant configurationParameter(const QString&) const { return value; }
     QVector<QString> configurationKeys() const { return keys; }
 
-    qint64 framesAvailable() const { return 0; }
-    QCanBusFrame readFrame()
-    {
-        if (state() != QCanBusDevice::ConnectedState)
-            return QCanBusFrame(QCanBusFrame::InvalidFrame);
-
-        return referenceFrame;
-    }
     bool writeFrame(const QCanBusFrame &/*data*/)
     {
         if (state() != QCanBusDevice::ConnectedState)

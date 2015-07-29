@@ -234,22 +234,6 @@ bool SocketCanBackend::connectSocket()
     return true;
 }
 
-qint64 SocketCanBackend::framesAvailable() const
-{
-    return frameBuffer.size();
-}
-
-QCanBusFrame SocketCanBackend::readFrame()
-{
-    if (state() != ConnectedState)
-        return QCanBusFrame(QCanBusFrame::InvalidFrame);
-
-    if (frameBuffer.isEmpty())
-        return QCanBusFrame(QCanBusFrame::InvalidFrame);
-
-    return frameBuffer.takeFirst();
-}
-
 bool SocketCanBackend::writeFrame(const QCanBusFrame &newData)
 {
     if (state() != ConnectedState)
@@ -487,9 +471,8 @@ void SocketCanBackend::readSocket()
             load.insert(i, frame.data[i]);
         bufferedFrame.setPayload(load);
 
-        frameBuffer.append(bufferedFrame);
+        enqueueReceivedFrame(bufferedFrame);
     }
-    emit frameReceived();
 }
 
 QT_END_NAMESPACE

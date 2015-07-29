@@ -79,8 +79,8 @@ public:
     virtual QVector<QString> configurationKeys() const = 0;
 
     virtual bool writeFrame(const QCanBusFrame &frame) = 0;
-    virtual QCanBusFrame readFrame() = 0;
-    virtual qint64 framesAvailable() const = 0;
+    QCanBusFrame readFrame();
+    qint64 framesAvailable() const;
 
     //TODO currently assumes unbuffered write. Add support for buffered writes
     // qint64 framesToWrite() const
@@ -105,6 +105,8 @@ Q_SIGNALS:
 protected:
     void setState(QCanBusDevice::CanBusDeviceState newState);
     void setError(const QString &errorText, QCanBusDevice::CanBusError);
+
+    void enqueueReceivedFrame(const QCanBusFrame &newFrame);
 
     virtual bool open() = 0;
     virtual void close() = 0;

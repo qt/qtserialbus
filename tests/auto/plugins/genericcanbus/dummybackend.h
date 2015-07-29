@@ -59,8 +59,6 @@ public:
     QVariant configurationParameter(const QString &key) const Q_DECL_OVERRIDE;
     QVector<QString> configurationKeys() const Q_DECL_OVERRIDE;
 
-    qint64 framesAvailable() const Q_DECL_OVERRIDE;
-    QCanBusFrame readFrame() Q_DECL_OVERRIDE;
     bool writeFrame(const QCanBusFrame &data) Q_DECL_OVERRIDE;
 
     QString interpretErrorFrame(const QCanBusFrame &) Q_DECL_OVERRIDE;

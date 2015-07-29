@@ -66,42 +66,11 @@ void DummyBackend::close()
 
 void DummyBackend::sendMessage()
 {
-    byteArray.append("def");
-
-    emit frameReceived();
-}
-
-#define MAX_PACKAGE_SIZE 16
-
-qint64 DummyBackend::framesAvailable() const
-{
-    // assume every frame can take max payload of 16 byte
-    uint frameCount = byteArray.size() / MAX_PACKAGE_SIZE;
-    if ((byteArray.size() % MAX_PACKAGE_SIZE) > 0)
-        frameCount++;
-
-    return frameCount;
-}
-
-QCanBusFrame DummyBackend::readFrame()
-{
-    if (byteArray.isEmpty())
-        return QCanBusFrame(QCanBusFrame::InvalidFrame);
-
     QCanBusFrame dummyFrame;
     dummyFrame.setFrameId(12);
+    dummyFrame.setPayload(QByteArray("def"));
 
-    const qint64 len = byteArray.size();
-    if (len > MAX_PACKAGE_SIZE) {
-        const QByteArray data = byteArray.left(MAX_PACKAGE_SIZE);
-        byteArray = byteArray.mid(MAX_PACKAGE_SIZE);
-        dummyFrame.setPayload(data);
-    } else {
-        dummyFrame.setPayload(byteArray);
-        byteArray.clear();
-    }
-
-    return dummyFrame;
+    enqueueReceivedFrame(dummyFrame);
 }
 
 bool DummyBackend::writeFrame(const QCanBusFrame &data)

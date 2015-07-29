@@ -66,6 +66,8 @@ public:
     QCanBusDevice::CanBusError lastError;
     QCanBusDevice::CanBusDeviceState state;
     QString errorText;
+
+    QVector<QCanBusFrame> incomingFrames;
 };
 
 QT_END_NAMESPACE
