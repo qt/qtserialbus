@@ -61,9 +61,7 @@ public:
     bool open() Q_DECL_OVERRIDE;
     void close() Q_DECL_OVERRIDE;
 
-    void setConfigurationParameter(const QString &key, const QVariant &value) Q_DECL_OVERRIDE;
-    QVariant configurationParameter(const QString &key) const Q_DECL_OVERRIDE;
-    QVector<QString> configurationKeys() const Q_DECL_OVERRIDE;
+    void setConfigurationParameter(int key, const QVariant &value) Q_DECL_OVERRIDE;
 
     bool writeFrame(const QCanBusFrame &newData) Q_DECL_OVERRIDE;
 
@@ -73,14 +71,12 @@ private Q_SLOTS:
     void readSocket();
 
 private:
-    void insertInConfigurations(const QString &key, const QVariant &value);
     void resetConfigurations();
     bool connectSocket();
 
     qint64 canSocket;
     QPointer<QSocketNotifier> notifier;
     QString canSocketName;
-    QVector<QPair<QString, QVariant>> configuration;
 };
 
 QT_END_NAMESPACE

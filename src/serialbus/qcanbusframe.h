@@ -205,11 +205,15 @@ Q_DECLARE_TYPEINFO(QCanBusFrame::FrameError, Q_PRIMITIVE_TYPE);
 Q_DECLARE_TYPEINFO(QCanBusFrame::FrameType, Q_PRIMITIVE_TYPE);
 Q_DECLARE_TYPEINFO(QCanBusFrame::TimeStamp, Q_PRIMITIVE_TYPE);
 
+Q_DECLARE_OPERATORS_FOR_FLAGS(QCanBusFrame::FrameErrors)
+
 #ifndef QT_NO_DATASTREAM
 Q_SERIALBUS_EXPORT QDataStream &operator<<(QDataStream &, const QCanBusFrame &);
 Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &, QCanBusFrame &);
 #endif
 
 QT_END_NAMESPACE
+
+Q_DECLARE_METATYPE(QCanBusFrame::FrameErrors)
 
 #endif // QCANBUSFRAME_H

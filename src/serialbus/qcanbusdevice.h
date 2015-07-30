@@ -71,12 +71,21 @@ public:
     };
     Q_ENUM(CanBusDeviceState)
 
+    enum ConfigurationKey {
+        RawFilterKey = 0,
+        ErrorFilterKey,
+        LoopbackKey,
+        ReceiveOwnKey,
+        UserKey = 30
+    };
+    Q_ENUM(ConfigurationKey)
+
     explicit QCanBusDevice(QObject *parent = 0);
 
-    virtual void setConfigurationParameter(const QString &key,
-                                           const QVariant &value) = 0;
-    virtual QVariant configurationParameter(const QString &key) const = 0;
-    virtual QVector<QString> configurationKeys() const = 0;
+    virtual void setConfigurationParameter(int key,
+                                           const QVariant &value);
+    QVariant configurationParameter(int key) const;
+    QVector<int> configurationKeys() const;
 
     virtual bool writeFrame(const QCanBusFrame &frame) = 0;
     QCanBusFrame readFrame();
@@ -114,6 +123,7 @@ protected:
 
 Q_DECLARE_TYPEINFO(QCanBusDevice::CanBusError, Q_PRIMITIVE_TYPE);
 Q_DECLARE_TYPEINFO(QCanBusDevice::CanBusDeviceState, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(QCanBusDevice::ConfigurationKey, Q_PRIMITIVE_TYPE);
 
 QT_END_NAMESPACE
 

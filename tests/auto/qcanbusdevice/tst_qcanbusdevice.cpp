@@ -71,15 +71,6 @@ public:
         setState(QCanBusDevice::UnconnectedState);
     }
 
-    void setConfigurationParameter(const QString &key, const QVariant &param)
-    {
-        value = param;
-        keys.append(key);
-    }
-
-    QVariant configurationParameter(const QString&) const { return value; }
-    QVector<QString> configurationKeys() const { return keys; }
-
     bool writeFrame(const QCanBusFrame &/*data*/)
     {
         if (state() != QCanBusDevice::ConnectedState)
@@ -103,8 +94,6 @@ signals:
     void written();
 
 private:
-    QVariant value;
-    QVector<QString> keys;
     QCanBusFrame referenceFrame;
 };
 
@@ -154,11 +143,29 @@ void tst_QCanBusDevice::initTestCase()
 
 void tst_QCanBusDevice::conf()
 {
-    device->setConfigurationParameter(QStringLiteral("test"), 1);
-    QVariant value = device->configurationParameter("test");
-    QVector<QString> keys = device->configurationKeys();
-    QVERIFY(keys.count());
-    QCOMPARE(value.toInt(), 1);
+    QVERIFY(device->configurationKeys().isEmpty());
+
+    // invalid QVariant ignored
+    device->setConfigurationParameter(QCanBusDevice::RawFilterKey, QVariant());
+    QVERIFY(device->configurationKeys().isEmpty());
+
+    QCanBusFrame::FrameErrors error =
+            (QCanBusFrame::LostArbitrationError | QCanBusFrame::BusError);
+
+    device->setConfigurationParameter(
+                QCanBusDevice::ErrorFilterKey, QVariant::fromValue(error));
+    QVariant value = device->configurationParameter(QCanBusDevice::ErrorFilterKey);
+    QVERIFY(value.isValid());
+
+    QVector<int> keys = device->configurationKeys();
+    QCOMPARE(keys.size(), 1);
+    QVERIFY(keys[0] == QCanBusDevice::ErrorFilterKey);
+
+    QCOMPARE(value.value<QCanBusFrame::FrameErrors>(),
+             QCanBusFrame::LostArbitrationError | QCanBusFrame::BusError);
+
+    device->setConfigurationParameter(QCanBusDevice::ErrorFilterKey, QVariant());
+    QVERIFY(device->configurationKeys().isEmpty());
 }
 
 void tst_QCanBusDevice::write()

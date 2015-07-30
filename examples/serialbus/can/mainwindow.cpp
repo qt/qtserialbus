@@ -82,13 +82,17 @@ void MainWindow::connectDevice(int pluginIndex)
     if (canDevice.isNull())
         return;
     connect(canDevice.data(), &QCanBusDevice::errorOccurred, this, &MainWindow::receiveError);
+
     if (!canDevice->connectDevice()) {
         canDevice.clear();
         return;
     }
-    canDevice->setConfigurationParameter(QStringLiteral("ReceiveOwnMessages"), QVariant(1));
-    canDevice->setConfigurationParameter(QStringLiteral("ErrorMask"), QVariant(0x1FFFFFFFU));
-    connect(canDevice.data(), &QCanBusDevice::frameReceived, this, &MainWindow::checkMessages);
+    canDevice->setConfigurationParameter(QCanBusDevice::ReceiveOwnKey, QVariant(true));
+    canDevice->setConfigurationParameter(
+                QCanBusDevice::ErrorFilterKey,
+                QVariant::fromValue(QCanBusFrame::FrameErrors(QCanBusFrame::AnyError)));
+    connect(canDevice.data(), &QCanBusDevice::frameReceived,
+            this, &MainWindow::checkMessages);
 
     ui->deviceLabel->setText("Connected to: " + deviceName);
 

@@ -35,7 +35,7 @@
 ****************************************************************************/
 
 #include "socketcanbackend.h"
-#include "qcanbusdevice.h"
+#include <QtSerialBus/qcanbusdevice.h>
 
 #include <QtCore/qdebug.h>
 #include <QtCore/qdatastream.h>
@@ -65,10 +65,14 @@ SocketCanBackend::~SocketCanBackend()
 
 void SocketCanBackend::resetConfigurations()
 {
-    configuration.append(QPair<QString, QVariant>(QStringLiteral("LoopBack"), 1));
-    configuration.append(QPair<QString, QVariant>(QStringLiteral("ReceiveOwnMessages"), 0));
-    configuration.append(QPair<QString, QVariant>(QStringLiteral("ErrorMask"), 0));
-    configuration.append(QPair<QString, QVariant>(QStringLiteral("CanFilter"), QList<QVariant>()));
+    QCanBusDevice::setConfigurationParameter(
+                QCanBusDevice::LoopbackKey, true);
+    QCanBusDevice::setConfigurationParameter(
+                QCanBusDevice::ReceiveOwnKey, false);
+    QCanBusDevice::setConfigurationParameter(
+                QCanBusDevice::ErrorFilterKey, QCanBusFrame::NoError);
+    QCanBusDevice::setConfigurationParameter(
+                QCanBusDevice::RawFilterKey, QList<QVariant>());
 }
 
 bool SocketCanBackend::open()
@@ -94,27 +98,17 @@ void SocketCanBackend::close()
     setState(QCanBusDevice::UnconnectedState);
 }
 
-void SocketCanBackend::insertInConfigurations(const QString &key, const QVariant &value)
+void SocketCanBackend::setConfigurationParameter(int key, const QVariant &value)
 {
-    for (int i = 0; i < configuration.size(); i++) {
-        if (configuration.at(i).first == key) {
-            QPair<QString, QVariant> conf(key, value);
-            configuration[i] = conf;
-            return;
-        }
-    }
-}
 
-void SocketCanBackend::setConfigurationParameter(const QString &key, const QVariant &value)
-{
-    if (key == QStringLiteral("Loopback")) {
+    if (key == QCanBusDevice::LoopbackKey) {
         const int loopback = value.toBool() ? 1 : 0;
         if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_LOOPBACK, &loopback, sizeof(loopback)) < 0) {
             setError(qt_error_string(errno),
                      QCanBusDevice::CanBusError::ConfigurationError);
             return;
         }
-    } else if (key == QStringLiteral("ReceiveOwnMessages")) {
+    } else if (key == QCanBusDevice::ReceiveOwnKey) {
         const int receiveOwnMessages = value.toBool() ? 1 : 0;
         if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_RECV_OWN_MSGS,
                        &receiveOwnMessages, sizeof(receiveOwnMessages)) < 0) {
@@ -122,15 +116,15 @@ void SocketCanBackend::setConfigurationParameter(const QString &key, const QVari
                      QCanBusDevice::CanBusError::ConfigurationError);
             return;
         }
-    } else if (key == QStringLiteral("ErrorMask")) {
-        const int errorMask = value.toInt();
+    } else if (key == QCanBusDevice::ErrorFilterKey) {
+        const int errorMask = value.value<QCanBusFrame::FrameErrors>();
         if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_ERR_FILTER,
                        &errorMask, sizeof(errorMask)) < 0) {
             setError(qt_error_string(errno),
                      QCanBusDevice::CanBusError::ConfigurationError);
             return;
         }
-    } else if (key == QStringLiteral("CanFilter")) {
+    } else if (key == QCanBusDevice::RawFilterKey) {
         const QList<QVariant> filterList = value.toList();
         const int size = filterList.size();
         if (size == 0)
@@ -169,25 +163,8 @@ void SocketCanBackend::setConfigurationParameter(const QString &key, const QVari
                  QCanBusDevice::CanBusError::ConfigurationError);
         return;
     }
-    insertInConfigurations(key, value);
-}
 
-QVariant SocketCanBackend::configurationParameter(const QString &key) const
-{
-    for (int i = 0; i < configuration.size(); i++)
-        if (configuration.at(i).first == key)
-            return configuration.at(i).second;
-
-    return QVariant();
-}
-
-QVector<QString> SocketCanBackend::configurationKeys() const
-{
-    QVector<QString> keys;
-    for (int i = 0; i < configuration.size(); i++)
-        keys.append(configuration.at(i).first);
-
-    return keys;
+    QCanBusDevice::setConfigurationParameter(key, value);
 }
 
 bool SocketCanBackend::connectSocket()

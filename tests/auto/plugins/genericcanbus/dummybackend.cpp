@@ -84,20 +84,4 @@ QString DummyBackend::interpretErrorFrame(const QCanBusFrame &/*errorFrame*/)
     return QString();
 }
 
-void DummyBackend::setConfigurationParameter(const QString &key, const QVariant &value)
-{
-    Q_UNUSED(key);
-    Q_UNUSED(value);
-}
-
-QVariant DummyBackend::configurationParameter(const QString&) const
-{
-    return QVariant();
-}
-
-QVector<QString> DummyBackend::configurationKeys() const
-{
-    return QVector<QString>();
-}
-
 QT_END_NAMESPACE

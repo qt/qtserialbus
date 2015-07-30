@@ -55,10 +55,6 @@ public:
     bool open() Q_DECL_OVERRIDE;
     void close() Q_DECL_OVERRIDE;
 
-    void setConfigurationParameter(const QString &key, const QVariant &value) Q_DECL_OVERRIDE;
-    QVariant configurationParameter(const QString &key) const Q_DECL_OVERRIDE;
-    QVector<QString> configurationKeys() const Q_DECL_OVERRIDE;
-
     bool writeFrame(const QCanBusFrame &data) Q_DECL_OVERRIDE;
 
     QString interpretErrorFrame(const QCanBusFrame &) Q_DECL_OVERRIDE;

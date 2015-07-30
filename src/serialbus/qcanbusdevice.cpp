@@ -80,6 +80,29 @@ QT_BEGIN_NAMESPACE
     \value ClosingState     The device is being closed.
  */
 
+//TODO unwrap the RawFilterKey value. List inside lists are too complex & unintuitive
+
+/*!
+    \enum QCanBusDevice::ConfigurationKey
+    This enum describes the possible configuration options for
+    the CAN bus connection.
+
+    \value RawFilterKey     This configuration determines the type of CAN bus frames
+                            which the current device accepts. The expected value
+                            is \c QList<QVariant>.
+    \value ErrorFilterKey   This key defines the type of error which should be
+                            forwarded via the current connection. The associated
+                            value should be of type \l QCanBusFrame::FrameErrors.
+    \value LoopbackKey      This key defines whether the can bus device should
+                            operate in loopback mode. The expected value for this
+                            key is \c bool.
+    \value ReceiveOwnKey    This key defines whether this CAN device can send messages.
+                            The expected value for this key is \c bool.
+    \value UserKey          This key defines the range where custom keys start. It's most
+                            common purpose is to permit platform specific configuration
+                            options.
+ */
+
 /*!
     \fn QCanBusDevice::errorOccurred(CanBusError error)
 
@@ -132,61 +155,73 @@ void QCanBusDevice::enqueueReceivedFrame(const QCanBusFrame &newFrame)
 }
 
 /*!
-    \fn void QCanBusDevice::setConfigurationParameter(const QString &key, const QVariant &value)
+    Sets the configuration parameter \a key for the CAN bus connection
+    to \a value. The potential keys are represented by \l ConfigurationKey.
 
-    Sets the configuration parameters for the bus backend. The key-value pair is backend-specific.
-
-    The following table lists the supported \a key and \a value pairs for the SocketCAN backend:
-
-    \table
-        \header
-            \li Key
-            \li Value
-        \row
-            \li Loopback
-            \li bool
-        \row
-            \li ReceiveOwnMessages
-            \li bool
-        \row
-            \li ErrorMask
-            \li int
-        \row
-            \li CanFilter
-            \li QList<QVariant filter>
-    \endtable
-
-    \c CanFilter contains a list of filters. Each filter consists of QHash<QString, QVariant>.
-    The following table lists the key-value pairs for the filters:
-
-    \table
-        \header
-            \li Key
-            \li Value
-        \row
-            \li FilterId
-            \li int
-        \row
-            \li CanMask
-            \li int
-    \endtable
+    A paramenter can be unset by setting an invalid \l QVariant.
 
     \sa configurationParameter()
  */
+void QCanBusDevice::setConfigurationParameter(int key,
+                                              const QVariant &value)
+{
+    Q_D(QCanBusDevice);
+
+    for (int i = 0; i < d->configOptions.size(); i++) {
+        if (d->configOptions.at(i).first == key) {
+            if (value.isValid()) {
+                ConfigEntry entry = d->configOptions.at(i);
+                entry.second = value;
+                d->configOptions.replace(i, entry);
+            } else {
+                d->configOptions.remove(i);
+            }
+            return;
+        }
+    }
+
+    if (!value.isValid())
+        return;
+
+    ConfigEntry newEntry(key, value);
+    d->configOptions.append(newEntry);
+}
 
 /*!
-    \fn QVariant QCanBusDevice::configurationParameter(const QString &key) const
+    Returns the current value assigned to the \l ConfigurationKey \a key; otherwise
+    an invalid \l QVariant.
 
-    Returns the current value assigned to the configuration parameter \a key.
-
-    \sa setConfigurationParameter()
+    \sa setConfigurationParameter(), configurationKeys()
  */
+QVariant QCanBusDevice::configurationParameter(int key) const
+{
+    Q_D(const QCanBusDevice);
+
+    foreach (const ConfigEntry &e, d->configOptions) {
+        if (e.first == key)
+            return e.second;
+    }
+
+    return QVariant();
+}
 
 /*!
-    \fn QVector<QString> QCanBusDevice::configurationKeys() const
+    Returns the list of keys used by the CAN bus connection.
 
-    Returns the list of keys used by the backend.
+    The the meaning of the keys is equivalent to \l ConfigurationKey.
+    If a key is not explicitly mentioned the platform's
+    default setting for the relevant key is used.
  */
+QVector<int> QCanBusDevice::configurationKeys() const
+{
+    Q_D(const QCanBusDevice);
+
+    QVector<int> result;
+    foreach (const ConfigEntry &e, d->configOptions)
+        result.append(e.first);
+
+    return result;
+}
 
 /*!
     Returns the last error that has occurred. The error value is always set to last error that

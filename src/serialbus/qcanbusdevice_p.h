@@ -53,6 +53,8 @@
 
 QT_BEGIN_NAMESPACE
 
+typedef QPair<int, QVariant > ConfigEntry;
+
 class QCanBusDevicePrivate : public QObjectPrivate
 {
     Q_DECLARE_PUBLIC(QCanBusDevice)
@@ -68,6 +70,7 @@ public:
     QString errorText;
 
     QVector<QCanBusFrame> incomingFrames;
+    QVector<ConfigEntry> configOptions;
 };
 
 QT_END_NAMESPACE
