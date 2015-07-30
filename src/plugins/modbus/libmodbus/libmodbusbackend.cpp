@@ -45,7 +45,6 @@
 #endif
 
 //TODO: proper error handling
-//TODO: remove linux specific portName
 //TODO: read/write mapping
 //TODO: proper connection state indication
 
@@ -111,10 +110,9 @@ bool LibModBusBackend::open()
         return false;
     }
 
-    QString portName = serialPort->portName();
-    portName.prepend(QStringLiteral("/dev/")); //FIXME: Linux specific
+    QString location = portNameToSystemLocation(serialPort->portName());
 
-    context = modbus_new_rtu(portName.toLatin1(),
+    context = modbus_new_rtu(location.toLatin1(),
                              serialPort->baudRate(),
                              parity.toLatin1(),
                              serialPort->dataBits(),
@@ -167,6 +165,24 @@ void LibModBusBackend::setSlaveId(int id)
 {
     slave = id;
     modbus_set_slave(context, slave);
+}
+
+QString LibModBusBackend::portNameToSystemLocation(QString source)
+{
+#if defined(Q_OS_WINCE)
+    return source.endsWith(QLatin1Char(':'))
+            ? source : (source + QLatin1Char(':'));
+#elif defined(Q_OS_WIN32)
+    return source.startsWith(QLatin1String("COM"))
+            ? (QLatin1String("\\\\.\\") + source) : source;
+#elif defined(Q_OS_UNIX)
+    return (source.startsWith(QLatin1Char('/'))
+            || source.startsWith(QLatin1String("./"))
+            || source.startsWith(QLatin1String("../")))
+            ? source : (QLatin1String("/dev/") + source);
+#else
+#  error Unsupported OS
+#endif
 }
 
 void ListenThread::doWork()

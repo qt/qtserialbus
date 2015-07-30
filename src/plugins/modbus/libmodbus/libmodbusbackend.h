@@ -82,6 +82,9 @@ Q_SIGNALS:
     void operate();
 
 private:
+    static QString portNameToSystemLocation(QString source);
+
+private:
     QPointer<ListenThread> listener;
     QThread thread;
     QSerialPort *serialPort;
