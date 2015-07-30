@@ -172,9 +172,9 @@ void MainWindow::on_sendButton_clicked() const
     frame.setFrameId(id);
     frame.setExtendedFrameFormat(ui->EFF->checkState());
 
-    if (ui->RTR->checkState())
+    if (ui->remoteFrame->isChecked())
         frame.setFrameType(QCanBusFrame::RemoteRequestFrame);
-    else if (ui->ERR->checkState())
+    else if (ui->errorFrame->isChecked())
         frame.setFrameType(QCanBusFrame::ErrorFrame);
     else
         frame.setFrameType(QCanBusFrame::DataFrame);
