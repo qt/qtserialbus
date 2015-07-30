@@ -144,7 +144,7 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \enum QCanBusError::FrameError
+    \enum QCanBusFrame::FrameError
 
     This enum describes the possible error types.
 
