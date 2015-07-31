@@ -58,11 +58,8 @@ class QModBusSlavePrivate : public QObjectPrivate
     Q_DECLARE_PUBLIC(QModBusSlave)
 public:
     QModBusSlavePrivate()
-        : state(QModBusSlave::UnconnectedState)
     {
     }
-
-    QModBusSlave::ModBusSlaveState state;
 };
 
 QT_END_NAMESPACE

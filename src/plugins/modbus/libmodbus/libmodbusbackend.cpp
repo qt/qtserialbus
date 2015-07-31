@@ -139,7 +139,7 @@ bool LibModBusBackend::open()
     thread.start();
     emit operate();
     connected = true;
-    setState(ConnectedState);
+    setState(QModBusDevice::ConnectedState);
     return true;
 }
 
@@ -154,7 +154,7 @@ void LibModBusBackend::close()
     modbus_free(context);
     context = 0;
     connected = false;
-    setState(UnconnectedState);
+    setState(QModBusDevice::UnconnectedState);
 }
 
 int LibModBusBackend::slaveId() const

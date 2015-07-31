@@ -73,8 +73,6 @@ public:
                     int coilMax,
                     int inputRegisterMax,
                     int holdingRegisterMax) Q_DECL_OVERRIDE;
-    bool open() Q_DECL_OVERRIDE;
-    void close() Q_DECL_OVERRIDE;
     int slaveId() const Q_DECL_OVERRIDE;
     void setSlaveId(int id) Q_DECL_OVERRIDE;
 
@@ -82,6 +80,8 @@ Q_SIGNALS:
     void operate();
 
 private:
+    bool open() Q_DECL_OVERRIDE;
+    void close() Q_DECL_OVERRIDE;
     static QString portNameToSystemLocation(QString source);
 
 private:

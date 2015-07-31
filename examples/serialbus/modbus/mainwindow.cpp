@@ -59,7 +59,7 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     if (!modBusDevice.isNull())
-        modBusDevice->close();
+        modBusDevice->disconnectDevice();
     delete ui;
 }
 
@@ -93,14 +93,14 @@ void MainWindow::connectDevice(int pluginIndex)
 
     connect(modBusDevice.data(), &QModBusSlave::stateChanged, this, &MainWindow::onSlaveStateChanged);
 
-    modBusDevice->open();
+    modBusDevice->connectDevice();
 }
 
 void MainWindow::onSlaveStateChanged(int state)
 {
-    if (state == QModBusSlave::UnconnectedState)
+    if (state == QModBusDevice::UnconnectedState)
         ui->connectedLabel->setText("Connected to: ");
-    else if (state == QModBusSlave::ConnectedState)
+    else if (state == QModBusDevice::ConnectedState)
         ui->connectedLabel->setText("Connected to: " + serialPort->portName());
 }
 

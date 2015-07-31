@@ -34,34 +34,36 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUS_H
-#define QMODBUS_H
+#ifndef QMODBUSDEVICE_P_H
+#define QMODBUSDEVICE_P_H
 
-#include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qmodbusslave.h>
-#include <QtSerialBus/qmodbusdevice.h>
+#include "qmodbusdevice.h"
+#include "QtCore/private/qobject_p.h"
 
-#include <QtCore/qobject.h>
-#include <QtCore/qiodevice.h>
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qt API. It exists purely as an
+// implementation detail. This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
 
 QT_BEGIN_NAMESPACE
 
-class Q_SERIALBUS_EXPORT QModBus : public QObject
+class QModBusDevicePrivate : public QObjectPrivate
 {
-    Q_OBJECT
+    Q_DECLARE_PUBLIC(QModBusDevice)
 public:
-    static QModBus *instance();
-    QList<QByteArray> plugins() const;
+    QModBusDevicePrivate()
+        : state(QModBusDevice::UnconnectedState)
+    {
+    }
 
-    QModBusSlave *createSlave(const QByteArray &plugin,
-                               QIODevice *transport) const;
-
-private:
-    QModBus(QObject *parent = 0);
-
-    Q_DISABLE_COPY(QModBus)
+    QModBusDevice::ModBusDeviceState state;
 };
 
 QT_END_NAMESPACE
-
-#endif // QMODBUS_H
+#endif // QMODBUSDEVICE_P_H

@@ -33,35 +33,79 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-
-#ifndef QMODBUS_H
-#define QMODBUS_H
+#ifndef QMODBUSDEVICE_H
+#define QMODBUSDEVICE_H
 
 #include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qmodbusslave.h>
-#include <QtSerialBus/qmodbusdevice.h>
 
 #include <QtCore/qobject.h>
-#include <QtCore/qiodevice.h>
 
 QT_BEGIN_NAMESPACE
 
-class Q_SERIALBUS_EXPORT QModBus : public QObject
+class QModBusDevicePrivate;
+
+
+class Q_SERIALBUS_EXPORT QModBusDevice : public QObject
 {
     Q_OBJECT
+    Q_DECLARE_PRIVATE(QModBusDevice)
+
 public:
-    static QModBus *instance();
-    QList<QByteArray> plugins() const;
 
-    QModBusSlave *createSlave(const QByteArray &plugin,
-                               QIODevice *transport) const;
+    enum ApplicationDataUnit {
+        NotSpecified,
+        RemoteTerminalUnit,
+        TCP
+    };
+    Q_ENUM(ApplicationDataUnit)
 
-private:
-    QModBus(QObject *parent = 0);
+    enum ModBusTable {
+        DiscreteInputs,
+        Coils,
+        InputRegisters,
+        HoldingRegisters
+    };
+    Q_ENUM(ModBusTable)
 
-    Q_DISABLE_COPY(QModBus)
+    enum ModBusError {
+        NoError,
+        ReadError,
+        WriteError,
+        ConnectionError,
+        ConfigurationError,
+        UnknownError
+    };
+    Q_ENUM(ModBusError)
+
+    enum ModBusDeviceState {
+        UnconnectedState,
+        ConnectingState,
+        ConnectedState,
+        ClosingState
+    };
+    Q_ENUM(ModBusDeviceState)
+
+    explicit QModBusDevice(QObject *parent = 0);
+
+    bool connectDevice();
+    void disconnectDevice();
+
+    ModBusDeviceState state() const;
+
+Q_SIGNALS:
+    void errorOccurred(QModBusDevice::ModBusError);
+    void stateChanged(QModBusDevice::ModBusDeviceState state);
+
+protected:
+    void setState(QModBusDevice::ModBusDeviceState newState);
+    virtual bool open() = 0;
+    virtual void close() = 0;
 };
 
-QT_END_NAMESPACE
+Q_DECLARE_TYPEINFO(QModBusDevice::ApplicationDataUnit, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(QModBusDevice::ModBusTable, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(QModBusDevice::ModBusError, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(QModBusDevice::ModBusDeviceState, Q_PRIMITIVE_TYPE);
 
-#endif // QMODBUS_H
+QT_END_NAMESPACE
+#endif // QMODBUSDEVICE_H

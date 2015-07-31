@@ -54,23 +54,9 @@ QT_BEGIN_NAMESPACE
     Constructs a serial bus device with the specified \a parent.
  */
 QModBusSlave::QModBusSlave(QObject *parent) :
-    QObject(parent)
+    QModBusDevice(parent)
 {
 }
-
-/*!
-    \fn bool QModBusSlave::open()
-
-    Connects QModBusSlave to Modbus network.
- */
-
-/*!
-    \fn void QModBusSlave::close()
-
-    This function is responsible for closing the Modbus connection.
-
-    \sa disconnectDevice()
- */
 
 /*!
     \fn int QModBusSlave::slaveId()
@@ -89,20 +75,5 @@ QModBusSlave::QModBusSlave(QObject *parent) :
 
     \sa slaveId()
  */
-
-/*!
-    Sets the state of the slave to \a newState. ModBus slave implementations
-    must use this function to update the slave state.
- */
-void QModBusSlave::setState(QModBusSlave::ModBusSlaveState newState)
-{
-    Q_D(QModBusSlave);
-
-    if (newState == d->state)
-        return;
-
-    d->state = newState;
-    emit stateChanged(newState);
-}
 
 QT_END_NAMESPACE
