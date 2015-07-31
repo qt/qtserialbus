@@ -56,8 +56,10 @@ class LibModBusMaster : public QModBusMaster
 public:
     explicit LibModBusMaster(QSerialPort *transport);
     bool setADU(ApplicationDataUnit adu) Q_DECL_OVERRIDE;
-    QModBusReply* write(const QModBusDataUnit &request) Q_DECL_OVERRIDE;
-    QModBusReply* write(const QList<QModBusDataUnit> &requests) Q_DECL_OVERRIDE;
+
+    QModBusReply* write(const QModBusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
+    QModBusReply* write(const QList<QModBusDataUnit> &requests, int slaveId = 1) Q_DECL_OVERRIDE;
+
     QModBusReply* read(QModBusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
     QModBusReply* read(QList<QModBusDataUnit> &requests, int slaveId = 1) Q_DECL_OVERRIDE;
 

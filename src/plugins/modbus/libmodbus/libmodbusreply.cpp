@@ -41,6 +41,46 @@
 
 QT_BEGIN_NAMESPACE
 
+void RequestThread::write()
+{
+    modbus_set_slave(context, slaveId);
+
+    switch (table) {
+    case QModBusDevice::Coils:
+        writeBits();
+        break;
+    case QModBusDevice::HoldingRegisters:
+        writeBytes();
+        break;
+    default:
+        break;//internal error
+    }
+}
+
+void RequestThread::writeBits()
+{
+    quint8 bits[values.size()];
+    for (int i = 0; i < values.size(); i++) {
+        if (values.at(i))
+            bits[i] = true;
+        else
+            bits[i] = false;
+    }
+    modbus_write_bits(context, startAddress, values.size(), bits);
+
+    emit writeReady();
+}
+
+void RequestThread::writeBytes()
+{
+    quint16 bytes[values.size()];
+    for (int i = 0; i < values.size(); i++)
+        bytes[i] = values.at(i);
+    modbus_write_registers(context, startAddress, values.size(), bytes);
+
+    emit writeReady();
+}
+
 void RequestThread::read()
 {
     modbus_set_slave(context, slaveId);
@@ -55,7 +95,7 @@ void RequestThread::read()
             readBytes();
         break;
     default:
-        //error
+        //internal error
         break;
     }
 }
@@ -67,10 +107,10 @@ void RequestThread::readBits()
         modbus_read_input_bits(context, startAddress, size, bits);
     else
         modbus_read_bits(context, startAddress, size, bits);
-    QByteArray readBits;
+    QByteArray bitsRead;
     for (int i = 0; i < size; i++)
-        readBits[i] = bits[i];
-    emit ready(readBits);
+        bitsRead[i] = bits[i];
+    emit readReady(bitsRead);
 }
 
 void RequestThread::readBytes()
@@ -81,36 +121,60 @@ void RequestThread::readBytes()
     else //Holding Register
         modbus_read_registers(context, startAddress, size, bytes);
 
-    QByteArray readBytes;
-    QDataStream packer(&readBytes, QIODevice::WriteOnly);
+    QByteArray bytesRead;
+    QDataStream packer(&bytesRead, QIODevice::WriteOnly);
     for (int i = 0; i < size; i++)
         packer << bytes[i];
 
-    emit ready(readBytes);
+    emit readReady(bytesRead);
 }
 
-void Reply::read(QModBusDevice::ModBusTable table, quint16 startAddress,
-                quint16 size, int slaveId, modbus_t *context)
+void Reply::read(const QList<QModBusDataUnit> &requests, int slaveId, modbus_t *context)
 {
     request = new RequestThread();
-    request->table = table;
-    this->table = table;
-    request->startAddress = startAddress;
-    this->startAddress = startAddress;
-    request->size = size;
+    request->table = requests.first().tableType();
+    this->table = requests.first().tableType();
+    request->startAddress = requests.first().address();
+    this->startAddress = requests.first().address();
+    request->size = requests.size();
     request->slaveId = slaveId;
     request->context = context;
     request->moveToThread(&thread);
     connect(this, &Reply::startRead, request.data(), &RequestThread::read);
     connect(&thread, &QThread::finished, request.data(), &QObject::deleteLater);
-    connect(request.data(), &RequestThread::ready, this, &Reply::setPayload);
+    connect(request.data(), &RequestThread::readReady, this, &Reply::setResults);
     thread.start();
     emit startRead();
 }
 
-void Reply::setFinished(bool finished)
+void Reply::write(const QList<QModBusDataUnit> &requests, int slaveId, modbus_t *context)
 {
-    Q_UNUSED(finished);
+    request = new RequestThread();
+    for (int i = 0; i < requests.size(); i++)
+        values.append(requests.at(i).value());
+    request->values = values;
+    table = requests.first().tableType();
+    request->table = requests.first().tableType();
+    startAddress = requests.first().address();
+    request->startAddress = requests.first().address();
+    request->slaveId = slaveId;
+    request->context = context;
+    request->moveToThread(&thread);
+    connect(this, &Reply::startWrite, request.data(), &RequestThread::write);
+    connect(&thread, &QThread::finished, request.data(), &QObject::deleteLater);
+    connect(request.data(), &RequestThread::writeReady, this, &Reply::setFinished);
+    thread.start();
+    emit startWrite();
+}
+
+void Reply::setFinished()
+{
+    for (int i = 0; i < values.size(); i++) {
+        QModBusDataUnit unit(table, startAddress + i, values.at(i));
+        payload.append(unit);
+    }
+    finish = true;
+    emit finished();
 }
 
 void Reply::setError(QModBusReply::RequestException exceptionCode, const QString &errorString)
@@ -119,23 +183,18 @@ void Reply::setError(QModBusReply::RequestException exceptionCode, const QString
     Q_UNUSED(errorString);
 }
 
-void Reply::setPayload(QByteArray load)
+void Reply::setResults(QByteArray load)
 {
     if (table == QModBusDevice::InputRegisters || table == QModBusDevice::HoldingRegisters) {
         for (int i = 0; i < load.size(); i = i + 2) {
-            QModBusDataUnit unit(table, startAddress + i);
             quint16 result = (load.at(i) << 8) + load.at(i + 1);
-            unit.setValue(result);
-            payload.append(unit);
+            values.append(result);
         }
     } else { //Coils and Discrete Inputs
-        for (int i = 0; i < load.size(); i++) {
-            QModBusDataUnit unit(table, startAddress + i, load.at(i));
-            payload.append(unit);
-        }
+        for (int i = 0; i < load.size(); i++)
+            values.append(load.at(i));
     }
-    finish = true;
-    emit finished();
+    setFinished();
 }
 
 QT_END_NAMESPACE

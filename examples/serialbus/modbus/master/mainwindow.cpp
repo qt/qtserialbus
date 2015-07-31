@@ -113,7 +113,7 @@ void MainWindow::on_pushButton_2_clicked()
 {
     lastRequest.clear();
 
-    QModBusDataUnit unit(QModBusDevice::InputRegisters, 3);
+    QModBusDataUnit unit(QModBusDevice::HoldingRegisters, 5);
 
     lastRequest = modBusDevice->read(unit, 1);
     connect(lastRequest.data(), &QModBusReply::finished, this, &MainWindow::readReady);
@@ -124,5 +124,20 @@ void MainWindow::readReady()
     QList<QModBusDataUnit> units = lastRequest->result();
     for (int i = 0; i < units.size(); i++)
         qDebug() << "Value at address" << units.at(i).address() << "is" << units.at(i).value();
+    lastRequest.clear();
+}
+
+void MainWindow::on_writeButton_clicked()
+{
+    lastRequest.clear();
+
+    QModBusDataUnit unit(QModBusDevice::HoldingRegisters, 5, 0xda2f);
+
+    lastRequest = modBusDevice->write(unit);
+    connect(lastRequest.data(), &QModBusReply::finished, this, &MainWindow::writeReady);
+}
+
+void MainWindow::writeReady()
+{
     lastRequest.clear();
 }

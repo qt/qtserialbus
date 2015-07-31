@@ -59,6 +59,7 @@ public:
     RequestException exception() const;
     bool isFinished() const;
     bool isRunning() const;
+
     QList<QModBusDataUnit> result() const;
 
 Q_SIGNALS:
@@ -66,7 +67,7 @@ Q_SIGNALS:
     void finished();
 
 protected:
-    virtual void setFinished(bool finished) = 0;
+    virtual void setFinished() = 0;
     virtual void setError(RequestException exceptionCode, const QString &errorString) = 0;
 
     QList<QModBusDataUnit> payload;

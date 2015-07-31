@@ -62,11 +62,14 @@ public:
 public slots:
     void onMasterStateChanged(int state);
     void readReady();
+    void writeReady();
 
 private slots:
     void on_pushButton_clicked();
 
     void on_pushButton_2_clicked();
+
+    void on_writeButton_clicked();
 
 private:
     void init();

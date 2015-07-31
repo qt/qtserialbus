@@ -54,20 +54,25 @@ class RequestThread : public QObject
 public:
     QModBusDevice::ModBusTable table;
     quint16 startAddress;
+    QList<quint16> values;
     quint16 size;
     int slaveId;
     modbus_t *context;
 
 public Q_SLOTS:
     void read();
+    void write();
 
 Q_SIGNALS:
     void exception();
-    void ready(QByteArray);
+    void readReady(QByteArray);
+    void writeReady();
 
 private:
     void readBits();
     void readBytes();
+    void writeBits();
+    void writeBytes();
 };
 
 class Reply : public QModBusReply
@@ -75,23 +80,26 @@ class Reply : public QModBusReply
     Q_OBJECT
 public:
     explicit Reply(QObject *parent = 0) : QModBusReply(parent) {}
-    void read(QModBusDevice::ModBusTable table, quint16 startAddress,
-              quint16 size, int slaveId, modbus_t *context);
+    void read(const QList<QModBusDataUnit> &requests, int slaveId, modbus_t *context);
+    void write(const QList<QModBusDataUnit> &requests, int slaveId, modbus_t *context);
 
 protected:
-    void setFinished(bool finished) Q_DECL_OVERRIDE;
+    void setFinished() Q_DECL_OVERRIDE;
     void setError(QModBusReply::RequestException exceptionCode,
                   const QString &errorString) Q_DECL_OVERRIDE;
-    void setPayload(QByteArray payload);
 
 Q_SIGNALS:
     void startRead();
+    void startWrite();
 
 private:
+    void setResults(QByteArray payload);
+
     QModBusDevice::ModBusTable table;
     quint16 startAddress;
     QPointer<RequestThread> request;
     QThread thread;
+    QList<quint16> values;
 };
 
 QT_END_NAMESPACE

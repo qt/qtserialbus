@@ -99,7 +99,20 @@
      </rect>
     </property>
     <property name="text">
-     <string>check</string>
+     <string>Read</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="writeButton">
+    <property name="geometry">
+     <rect>
+      <x>540</x>
+      <y>150</y>
+      <width>99</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Write</string>
     </property>
    </widget>
   </widget>

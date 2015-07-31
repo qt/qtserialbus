@@ -54,19 +54,38 @@ bool LibModBusMaster::setADU(ApplicationDataUnit adu)
     //Only RTU supported at the moment
     if (adu == QModBusDevice::RemoteTerminalUnit)
         return true;
+
     return false;
 }
 
-QModBusReply* LibModBusMaster::write(const QModBusDataUnit &request)
+QModBusReply* LibModBusMaster::write(const QModBusDataUnit &request, int slaveId)
 {
-    Q_UNUSED(request);
-    return 0;
+    QList<QModBusDataUnit> units;
+    units.append(request);
+    return write(units, slaveId);
 }
 
-QModBusReply* LibModBusMaster::write(const QList<QModBusDataUnit> &requests)
+QModBusReply* LibModBusMaster::write(const QList<QModBusDataUnit> &requests, int slaveId)
 {
-    Q_UNUSED(requests);
-    return 0;
+    if (requests.empty())
+        return 0;
+
+    const QModBusDevice::ModBusTable writeTable(requests.first().tableType());
+
+    if (writeTable != QModBusDevice::Coils && writeTable != QModBusDevice::HoldingRegisters)
+        return 0;
+
+    int address = requests.first().address();
+
+    for (int i = 1; i < requests.size(); i++) {
+        address++;
+        if ((requests.at(i).tableType() != writeTable) ||
+            (requests.at(i).address() != writeTable))
+            return 0;
+    }
+    Reply *reply = new Reply();
+    reply->write(requests, slaveId, context);
+    return reply;
 }
 
 QModBusReply* LibModBusMaster::read(QModBusDataUnit &request, int slaveId)
@@ -92,8 +111,7 @@ QModBusReply* LibModBusMaster::read(QList<QModBusDataUnit> &requests, int slaveI
     }
 
     Reply *reply = new Reply();
-    reply->read(requests.first().tableType(), requests.first().address(),
-                requests.size(), slaveId, context);
+    reply->read(requests, slaveId, context);
     return reply;
 }
 
