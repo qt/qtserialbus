@@ -46,7 +46,6 @@
 
 //TODO: proper error handling
 //TODO: read/write mapping
-//TODO: proper connection state indication
 
 const int MODBUS_SERIAL_ADU_SIZE = 256;
 
@@ -140,6 +139,7 @@ bool LibModBusBackend::open()
     thread.start();
     emit operate();
     connected = true;
+    setState(ConnectedState);
     return true;
 }
 
@@ -154,6 +154,7 @@ void LibModBusBackend::close()
     modbus_free(context);
     context = 0;
     connected = false;
+    setState(UnconnectedState);
 }
 
 int LibModBusBackend::slaveId() const

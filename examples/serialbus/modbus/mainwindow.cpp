@@ -91,14 +91,20 @@ void MainWindow::connectDevice(int pluginIndex)
     if (modBusDevice.isNull())
         return;
 
-    if (!modBusDevice->open())
-        return;
+    connect(modBusDevice.data(), &QModBusSlave::stateChanged, this, &MainWindow::onSlaveStateChanged);
 
-    ui->connectedLabel->setText("Connected to: " + serialPort->portName());
+    modBusDevice->open();
+}
+
+void MainWindow::onSlaveStateChanged(int state)
+{
+    if (state == QModBusSlave::UnconnectedState)
+        ui->connectedLabel->setText("Connected to: ");
+    else if (state == QModBusSlave::ConnectedState)
+        ui->connectedLabel->setText("Connected to: " + serialPort->portName());
 }
 
 void MainWindow::on_pushButton_clicked()
 {
-    ui->connectedLabel->setText("Connected to: ");
     connectDevice(ui->pluginBox->currentIndex());
 }

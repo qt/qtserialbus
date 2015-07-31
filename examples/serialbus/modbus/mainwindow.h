@@ -59,6 +59,9 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+public slots:
+    void onSlaveStateChanged(int state);
+
 private slots:
     void on_pushButton_clicked();
 

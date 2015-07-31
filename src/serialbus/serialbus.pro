@@ -21,6 +21,7 @@ PUBLIC_HEADERS += \
 
 PRIVATE_HEADERS += \
     qcanbusdevice_p.h \
+    qmodbusslave_p.h \
 
 SOURCES += \
     qcanbusdevice.cpp \

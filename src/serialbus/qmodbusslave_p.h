@@ -34,48 +34,38 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSSLAVE_H
-#define QMODBUSSLAVE_H
+#ifndef QMODBUSSLAVE_P_H
+#define QMODBUSSLAVE_P_H
 
-#include <QtSerialBus/qserialbusglobal.h>
+#include "qmodbusslave.h"
+#include "QtCore/private/qobject_p.h"
 
-#include <QtCore/qobject.h>
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qt API. It exists purely as an
+// implementation detail. This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
 
 QT_BEGIN_NAMESPACE
 
-class QModBusSlavePrivate;
-
-class Q_SERIALBUS_EXPORT QModBusSlave : public QObject
+class QModBusSlavePrivate : public QObjectPrivate
 {
-    Q_OBJECT
-    Q_DECLARE_PRIVATE(QModBusSlave)
-
+    Q_DECLARE_PUBLIC(QModBusSlave)
 public:
-    enum ModBusSlaveState {
-        UnconnectedState,
-        ConnectingState,
-        ConnectedState,
-        ClosingState
-    };
-    Q_ENUM(ModBusSlaveState)
+    QModBusSlavePrivate()
+        : state(QModBusSlave::UnconnectedState)
+    {
+    }
 
-    explicit QModBusSlave(QObject *parent = 0);
-    virtual bool setMapping(int discreteInputMax,
-                            int coilMax,
-                            int inputRegisterMax,
-                            int holdingRegisterMax) = 0;
-    virtual bool open() = 0;
-    virtual void close() = 0;
-    virtual int slaveId() const = 0;
-    virtual void setSlaveId(int id) = 0;
-
-Q_SIGNALS:
-    void stateChanged(ModBusSlaveState state);
-
-protected:
-    void setState(ModBusSlaveState newState);
-
+    QModBusSlave::ModBusSlaveState state;
 };
 
 QT_END_NAMESPACE
-#endif // QMODBUSSLAVE_H
+
+#endif // QMODBUSSLAVE_P_H
+

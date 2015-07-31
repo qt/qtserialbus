@@ -35,6 +35,7 @@
 ****************************************************************************/
 
 #include "qmodbusslave.h"
+#include "qmodbusslave_p.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -88,5 +89,20 @@ QModBusSlave::QModBusSlave(QObject *parent) :
 
     \sa slaveId()
  */
+
+/*!
+    Sets the state of the slave to \a newState. ModBus slave implementations
+    must use this function to update the slave state.
+ */
+void QModBusSlave::setState(QModBusSlave::ModBusSlaveState newState)
+{
+    Q_D(QModBusSlave);
+
+    if (newState == d->state)
+        return;
+
+    d->state = newState;
+    emit stateChanged(newState);
+}
 
 QT_END_NAMESPACE
