@@ -147,10 +147,14 @@ void QCanBusDevice::setError(const QString &errorText, CanBusError errorId)
  */
 void QCanBusDevice::enqueueReceivedFrame(const QCanBusFrame &newFrame)
 {
+    Q_D(QCanBusDevice);
+
     if (!newFrame.isValid())
         return;
 
+    d->incomingFramesGuard.lock();
     d_func()->incomingFrames.append(newFrame);
+    d->incomingFramesGuard.unlock();
     emit frameReceived();
 }
 
@@ -307,6 +311,8 @@ QCanBusFrame QCanBusDevice::readFrame()
 
     if (d->state != ConnectedState)
         return QCanBusFrame(QCanBusFrame::InvalidFrame);
+
+    QMutexLocker locker(&d->incomingFramesGuard);
 
     if (d->incomingFrames.isEmpty())
         return QCanBusFrame(QCanBusFrame::InvalidFrame);

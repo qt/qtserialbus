@@ -38,7 +38,10 @@
 #define QCANBUSDEVICE_P_H
 
 #include "qcanbusdevice.h"
-#include "QtCore/private/qobject_p.h"
+
+#include <QtCore/qmutex.h>
+
+#include <QtCore/private/qobject_p.h>
 
 //
 //  W A R N I N G
@@ -70,6 +73,7 @@ public:
     QString errorText;
 
     QVector<QCanBusFrame> incomingFrames;
+    QMutex incomingFramesGuard;
     QVector<ConfigEntry> configOptions;
 };
 
