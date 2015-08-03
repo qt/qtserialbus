@@ -84,6 +84,7 @@ QModBusSlave::QModBusSlave(QObject *parent) :
 
 /*!
     \fn bool setADU(QModBusSlave::ApplicationDataUnit adu)
+
     Set the type of transport (i.e ApplicationDataUnit) to use.
  */
 

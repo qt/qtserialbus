@@ -34,38 +34,50 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUS_H
-#define QMODBUS_H
+#include "libmodbusmaster.h"
 
-#include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qmodbusslave.h>
-#include <QtSerialBus/qmodbusmaster.h>
-#include <QtSerialBus/qmodbusdevice.h>
-
-#include <QtCore/qobject.h>
-#include <QtCore/qiodevice.h>
-
-QT_BEGIN_NAMESPACE
-
-class Q_SERIALBUS_EXPORT QModBus : public QObject
+LibModBusMaster::LibModBusMaster(QSerialPort *transport) :
+    QModBusMaster(),
+    port(transport)
 {
-    Q_OBJECT
-public:
-    static QModBus *instance();
-    QList<QByteArray> plugins() const;
+}
 
-    QModBusSlave *createSlave(const QByteArray &plugin,
-                               QIODevice *transport) const;
+bool LibModBusMaster::setADU(ApplicationDataUnit adu)
+{
+    Q_UNUSED(adu);
+    return false;
+}
 
-    QModBusMaster *createMaster(const QByteArray &plugin,
-                                QIODevice *transport) const;
+QModBusReply* LibModBusMaster::write(const QModBusDataUnit &request)
+{
+    Q_UNUSED(request);
+    return 0;
+}
 
-private:
-    QModBus(QObject *parent = 0);
+QModBusReply* LibModBusMaster::write(const QVector<QModBusDataUnit> &requests)
+{
+    Q_UNUSED(requests);
+    return 0;
+}
 
-    Q_DISABLE_COPY(QModBus)
-};
+QModBusReply* LibModBusMaster::read(QModBusDataUnit &request)
+{
+    Q_UNUSED(request);
+    return 0;
+}
 
-QT_END_NAMESPACE
+QModBusReply* LibModBusMaster::read(QVector<QModBusDataUnit> &requests)
+{
+    Q_UNUSED(requests);
+    return 0;
+}
 
-#endif // QMODBUS_H
+bool LibModBusMaster::open()
+{
+    return false;
+}
+
+void LibModBusMaster::close()
+{
+    return;
+}

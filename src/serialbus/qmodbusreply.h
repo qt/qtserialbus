@@ -34,38 +34,42 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUS_H
-#define QMODBUS_H
+#ifndef QMODBUSREPLY_H
+#define QMODBUSREPLY_H
 
 #include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qmodbusslave.h>
-#include <QtSerialBus/qmodbusmaster.h>
-#include <QtSerialBus/qmodbusdevice.h>
+#include <QtSerialBus/qmodbusdataunit.h>
 
 #include <QtCore/qobject.h>
-#include <QtCore/qiodevice.h>
+#include <QtCore/qvector.h>
 
 QT_BEGIN_NAMESPACE
 
-class Q_SERIALBUS_EXPORT QModBus : public QObject
+class Q_SERIALBUS_EXPORT QModBusReply : public QObject
 {
     Q_OBJECT
 public:
-    static QModBus *instance();
-    QList<QByteArray> plugins() const;
+    enum RequestException {
+        NoException
+        //TODO: list different exception cases with modbus request
+    };
+    explicit QModBusReply(QObject *parent = 0);
 
-    QModBusSlave *createSlave(const QByteArray &plugin,
-                               QIODevice *transport) const;
+    RequestException exception() const;
+    bool isFinished() const;
+    bool isRunning() const;
+    QVector<QModBusDataUnit> result() const;
 
-    QModBusMaster *createMaster(const QByteArray &plugin,
-                                QIODevice *transport) const;
+Q_SIGNALS:
+    void exceptionOccurred(RequestException code);
+    void finished();
 
-private:
-    QModBus(QObject *parent = 0);
-
-    Q_DISABLE_COPY(QModBus)
+protected:
+    virtual void setFinished(bool finished) = 0;
+    virtual void setError(RequestException errorCode, const QString & errorString) = 0;
+    virtual void setPayload(QByteArray payload) = 0;
 };
 
 QT_END_NAMESPACE
 
-#endif // QMODBUS_H
+#endif // QMODBUSREPLY_H

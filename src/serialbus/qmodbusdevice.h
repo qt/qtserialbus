@@ -87,8 +87,8 @@ public:
 
     explicit QModBusDevice(QObject *parent = 0);
 
-    bool connectDevice();
-    void disconnectDevice();
+    virtual bool connectDevice();
+    virtual void disconnectDevice();
 
     ModBusDeviceState state() const;
 
@@ -102,6 +102,7 @@ Q_SIGNALS:
 protected:
     void setState(QModBusDevice::ModBusDeviceState newState);
     void setError(const QString &errorText, QModBusDevice::ModBusError error);
+
     virtual bool open() = 0;
     virtual void close() = 0;
 };

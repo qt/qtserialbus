@@ -34,38 +34,30 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUS_H
-#define QMODBUS_H
+#ifndef LIBMODBUSMASTER_H
+#define LIBMODBUSMASTER_H
 
-#include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qmodbusslave.h>
 #include <QtSerialBus/qmodbusmaster.h>
-#include <QtSerialBus/qmodbusdevice.h>
 
-#include <QtCore/qobject.h>
-#include <QtCore/qiodevice.h>
+#include <QSerialPort>
 
-QT_BEGIN_NAMESPACE
-
-class Q_SERIALBUS_EXPORT QModBus : public QObject
+class LibModBusMaster : public QModBusMaster
 {
     Q_OBJECT
 public:
-    static QModBus *instance();
-    QList<QByteArray> plugins() const;
+    explicit LibModBusMaster(QSerialPort *transport);
+    bool setADU(ApplicationDataUnit adu) Q_DECL_OVERRIDE;
+    QModBusReply* write(const QModBusDataUnit &request);
+    QModBusReply* write(const QVector<QModBusDataUnit> &requests);
+    QModBusReply* read(QModBusDataUnit &request);
+    QModBusReply* read(QVector<QModBusDataUnit> &requests);
 
-    QModBusSlave *createSlave(const QByteArray &plugin,
-                               QIODevice *transport) const;
-
-    QModBusMaster *createMaster(const QByteArray &plugin,
-                                QIODevice *transport) const;
+protected:
+    bool open() Q_DECL_OVERRIDE;
+    void close() Q_DECL_OVERRIDE;
 
 private:
-    QModBus(QObject *parent = 0);
-
-    Q_DISABLE_COPY(QModBus)
+    QSerialPort *port;
 };
 
-QT_END_NAMESPACE
-
-#endif // QMODBUS_H
+#endif // LIBMODBUSMASTER_H

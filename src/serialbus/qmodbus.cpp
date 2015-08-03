@@ -118,11 +118,6 @@ QList<QByteArray> QModBus::plugins() const
     method. \a transport is the method of connection to Modbus network. Currently only QSerialPort
     is supported.
 
-    \a discreteInputMax is a maximum address of discrete inputs (read only bits)
-    \a coilMax is a maximum address of coils (read/write bits)
-    \a inputRegisterMax is a maximum address of input registers (read only bytes)
-    \a holdingRegisterMax is a maximum address of holdign registers (read/write bytes)
-
     Ownership of the returned backend is transferred to the caller.
     Returns \c null if no suitable device can be found.
  */
@@ -147,6 +142,40 @@ QModBusSlave *QModBus::createSlave(const QByteArray &plugin,
     QSerialPort *port = qobject_cast<QSerialPort *>(transport);
     if (port) {
         return d.factory->createSlave(port);
+    } else {
+        return Q_NULLPTR;
+    }
+}
+
+/*!
+    Creates a Modbus Master. \a plugin is the name of the plugin as returned by the \l plugins()
+    method. \a transport is the method of connection to Modbus network. Currently only QSerialPort
+    is supported.
+
+    Ownership of the returned backend is transferred to the caller.
+    Returns \c null if no suitable device can be found.
+ */
+QModBusMaster *QModBus::createMaster(const QByteArray &plugin,
+                                    QIODevice *transport) const
+{
+    if (!qModBusPlugins()->contains(plugin))
+        return Q_NULLPTR;
+
+    QModBusPrivate d = qModBusPlugins()->value(plugin);
+    if (!d.factory) {
+        d.factory
+            = qobject_cast<QModBusFactory *>(qFactoryLoader->instance(d.index));
+        if (!d.factory)
+            return Q_NULLPTR;
+
+        qModBusPlugins()->insert(plugin, d);
+    }
+    if (!d.factory)
+        return Q_NULLPTR;
+
+    QSerialPort *port = qobject_cast<QSerialPort *>(transport);
+    if (port) {
+        return d.factory->createMaster(port);
     } else {
         return Q_NULLPTR;
     }

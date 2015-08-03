@@ -136,11 +136,11 @@ bool LibModBusSlave::open()
     listener->context = context;
     listener->mapping = mapping;
     listener->moveToThread(&thread);
-    connect(&thread, &QThread::finished, listener, &QObject::deleteLater);
-    connect(this, &LibModBusSlave::operate, listener, &ListenThread::doWork);
-    connect(listener, &ListenThread::fail, this, &LibModBusSlave::close);
-    connect(listener, &ListenThread::slaveRead, this, &LibModBusSlave::slaveRead);
-    connect(listener, &ListenThread::slaveWritten, this, &LibModBusSlave::slaveWritten);
+    connect(&thread, &QThread::finished, listener.data(), &QObject::deleteLater);
+    connect(this, &LibModBusSlave::operate, listener.data(), &ListenThread::doWork);
+    connect(listener.data(), &ListenThread::fail, this, &LibModBusSlave::close);
+    connect(listener.data(), &ListenThread::slaveRead, this, &LibModBusSlave::slaveRead);
+    connect(listener.data(), &ListenThread::slaveWritten, this, &LibModBusSlave::slaveWritten);
     thread.start();
     emit operate();
     connected = true;

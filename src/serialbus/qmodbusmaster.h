@@ -34,38 +34,38 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUS_H
-#define QMODBUS_H
+#ifndef QMODBUSMASTER_H
+#define QMODBUSMASTER_H
 
 #include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qmodbusslave.h>
-#include <QtSerialBus/qmodbusmaster.h>
 #include <QtSerialBus/qmodbusdevice.h>
+#include <QtSerialBus/qmodbusdataunit.h>
+#include <QtSerialBus/qmodbusreply.h>
 
 #include <QtCore/qobject.h>
-#include <QtCore/qiodevice.h>
 
 QT_BEGIN_NAMESPACE
 
-class Q_SERIALBUS_EXPORT QModBus : public QObject
+class Q_SERIALBUS_EXPORT QModBusMaster : public QModBusDevice
 {
     Q_OBJECT
 public:
-    static QModBus *instance();
-    QList<QByteArray> plugins() const;
 
-    QModBusSlave *createSlave(const QByteArray &plugin,
-                               QIODevice *transport) const;
+    explicit QModBusMaster(QModBusDevice *parent = 0);
 
-    QModBusMaster *createMaster(const QByteArray &plugin,
-                                QIODevice *transport) const;
+    virtual bool setADU(QModBusDevice::ApplicationDataUnit adu) = 0;
 
-private:
-    QModBus(QObject *parent = 0);
+    virtual QModBusReply *write(const QModBusDataUnit &request) = 0;
+    virtual QModBusReply *write(const QVector<QModBusDataUnit> &requests) = 0;
+    virtual QModBusReply *read(QModBusDataUnit &request) = 0;
+    virtual QModBusReply *read(QVector<QModBusDataUnit> &requests) = 0;
 
-    Q_DISABLE_COPY(QModBus)
+
+protected:
+
+    virtual bool open() = 0;
+    virtual void close() = 0;
 };
 
 QT_END_NAMESPACE
-
-#endif // QMODBUS_H
+#endif // QMODBUSMASTER_H

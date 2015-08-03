@@ -34,38 +34,87 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUS_H
-#define QMODBUS_H
-
-#include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qmodbusslave.h>
-#include <QtSerialBus/qmodbusmaster.h>
-#include <QtSerialBus/qmodbusdevice.h>
-
-#include <QtCore/qobject.h>
-#include <QtCore/qiodevice.h>
+#include "qmodbusreply.h"
 
 QT_BEGIN_NAMESPACE
 
-class Q_SERIALBUS_EXPORT QModBus : public QObject
+/*!
+    \class QModBusReply
+    \inmodule QtSerialBus
+    \since 5.6
+
+    \brief The QCanBusReply class contains the data and address for the request sent with
+    QModBusMaster.
+ */
+
+/*!
+    Constructs a QModBusReply object with \a parent.
+ */
+QModBusReply::QModBusReply(QObject *parent) :
+    QObject(parent)
 {
-    Q_OBJECT
-public:
-    static QModBus *instance();
-    QList<QByteArray> plugins() const;
 
-    QModBusSlave *createSlave(const QByteArray &plugin,
-                               QIODevice *transport) const;
+}
 
-    QModBusMaster *createMaster(const QByteArray &plugin,
-                                QIODevice *transport) const;
+/*!
+    \fn QModBusReply::exceptionOccurred(RequestException exception)
 
-private:
-    QModBus(QObject *parent = 0);
+    This signal is emitted when when request is aborted and exception of the type
+    \a exception is received.
 
-    Q_DISABLE_COPY(QModBus)
-};
+    \sa QModBusReply::exception()
+ */
+
+/*!
+    \fn QModBusReply::finished()
+
+    This signal is emitted when request is successfully executed.
+
+    \sa QModBusReply::isFinished()
+ */
+
+/*!
+    \enum QModBusReply::RequestException
+    This enum describes all the possible exception causes.
+
+    \value NoException      No exception has occurred.
+ */
+
+/*!
+    Returns the \l RequestException that was found during the processing of this request.
+    If no exception was found, returns \l NoError.
+ */
+QModBusReply::RequestException QModBusReply::exception() const
+{
+    return NoException;
+}
+
+/*!
+    Returns \c true when the reply has finished or was aborted.
+
+    \sa QModBusReply::finished()
+ */
+bool QModBusReply::isFinished() const
+{
+    return false;
+}
+
+/*!
+    Returns \c true when the request is still processing and the reply has not
+    finished or was aborted yet.
+ */
+bool QModBusReply::isRunning() const
+{
+    return false;
+}
+
+/*!
+    Returns data units read/written if QModBusReply is finished.
+    Otherwise returns empty QVector.
+ */
+QVector<QModBusDataUnit> QModBusReply::result() const
+{
+    return QVector<QModBusDataUnit>();
+}
 
 QT_END_NAMESPACE
-
-#endif // QMODBUS_H

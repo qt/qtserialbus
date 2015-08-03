@@ -35,6 +35,7 @@
 ****************************************************************************/
 
 #include "libmodbusslave.h"
+#include "libmodbusmaster.h"
 
 #include <QtSerialBus/qmodbus.h>
 #include <QtSerialBus/qmodbusfactory.h>
@@ -57,6 +58,12 @@ public:
     QModBusSlave *createSlave(QSerialPort *transport) const
     {
         QModBusSlave *device = new LibModBusSlave(transport);
+        return device;
+    }
+
+    QModBusMaster *createMaster(QSerialPort *transport) const
+    {
+        QModBusMaster *device = new LibModBusMaster(transport);
         return device;
     }
 };
