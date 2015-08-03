@@ -37,3 +37,4 @@ SOURCES += \
     qmodbusdataunit.cpp
 
 HEADERS += $$PUBLIC_HEADERS $$PRIVATE_HEADERS
+

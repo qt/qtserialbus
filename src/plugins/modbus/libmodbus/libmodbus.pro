@@ -11,9 +11,9 @@ PLUGIN_CLASS_NAME = LibModBusPlugin
 load(qt_plugin)
 
 HEADERS += \
-    libmodbusbackend.h
+    libmodbusslave.h
 
 SOURCES += main.cpp \
-    libmodbusbackend.cpp
+    libmodbusslave.cpp
 
 OTHER_FILES = plugin.json

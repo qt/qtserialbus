@@ -39,6 +39,7 @@
 
 #include <QtSerialBus/qserialbusglobal.h>
 #include <QtSerialBus/qmodbusdevice.h>
+#include <QtSerialBus/qmodbusdataunit.h>
 
 #include <QtCore/qobject.h>
 
@@ -55,12 +56,21 @@ class Q_SERIALBUS_EXPORT QModBusSlave : public QModBusDevice
 public:
 
     explicit QModBusSlave(QObject *parent = 0);
-    virtual bool setMapping(int discreteInputMax,
-                            int coilMax,
-                            int inputRegisterMax,
-                            int holdingRegisterMax) = 0;
+
+    virtual bool setMap(QModBusDevice::ModBusTable table, quint16 size) = 0;
+
     virtual int slaveId() const = 0;
     virtual void setSlaveId(int id) = 0;
+
+    virtual bool setADU(QModBusDevice::ApplicationDataUnit adu) = 0;
+
+    //TODO: Review if QModBusMap would be useful. It could replace setMap(), data() and setData()
+    virtual bool data(QModBusDevice::ModBusTable table, quint16 address, quint16& data) = 0;
+    virtual bool setData(QModBusDevice::ModBusTable table, quint16 address, quint16 data) = 0;
+
+Q_SIGNALS:
+    void slaveRead();
+    void slaveWritten(QVector<QModBusDataUnit>);
 };
 
 QT_END_NAMESPACE

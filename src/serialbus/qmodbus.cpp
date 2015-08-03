@@ -146,7 +146,7 @@ QModBusSlave *QModBus::createSlave(const QByteArray &plugin,
 
     QSerialPort *port = qobject_cast<QSerialPort *>(transport);
     if (port) {
-        return d.factory->createDevice(port);
+        return d.factory->createSlave(port);
     } else {
         return Q_NULLPTR;
     }

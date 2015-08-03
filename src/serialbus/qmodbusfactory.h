@@ -50,7 +50,8 @@ QT_BEGIN_NAMESPACE
 class Q_SERIALBUS_EXPORT QModBusFactory
 {
 public:
-    virtual QModBusSlave *createDevice(QSerialPort *transport) const = 0;
+    //TODO: transport should be abstract QIODevice not any specific transport
+    virtual QModBusSlave *createSlave(QSerialPort *transport) const = 0;
 protected:
     virtual ~QModBusFactory() {}
 };

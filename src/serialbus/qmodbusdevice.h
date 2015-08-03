@@ -92,12 +92,16 @@ public:
 
     ModBusDeviceState state() const;
 
+    ModBusError error() const;
+    QString errorString() const;
+
 Q_SIGNALS:
     void errorOccurred(QModBusDevice::ModBusError);
     void stateChanged(QModBusDevice::ModBusDeviceState state);
 
 protected:
     void setState(QModBusDevice::ModBusDeviceState newState);
+    void setError(const QString &errorText, QModBusDevice::ModBusError error);
     virtual bool open() = 0;
     virtual void close() = 0;
 };

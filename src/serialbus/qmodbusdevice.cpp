@@ -173,6 +173,43 @@ QModBusDevice::ModBusDeviceState QModBusDevice::state() const
 }
 
 /*!
+    Sets the error state of the device. ModBus device implementations
+    must use this function in case of error.
+    \a error type of error
+    \a errorText descriptive text detailing the error
+
+    \sa QModBusDevice::ModBusError
+ */
+void QModBusDevice::setError(const QString &errorText, QModBusDevice::ModBusError error)
+{
+    Q_D(QModBusDevice);
+
+    d->error = error;
+    d->errorString = errorText;
+    emit errorOccurred(error);
+}
+
+/*!
+    Returns the error state of the device.
+
+    \sa QModBusDevice::ModBusError
+ */
+QModBusDevice::ModBusError QModBusDevice::error() const
+{
+    return d_func()->error;
+}
+
+/*!
+    Returns descriptive error text for the device error.
+
+    \sa QModBusDevice::ModBusError
+ */
+QString QModBusDevice::errorString() const
+{
+    return d_func()->errorString;
+}
+
+/*!
     \fn bool QModBusDevice::open()
 
     This function is called by connectDevice(). Subclasses must provide

@@ -44,19 +44,25 @@ QT_BEGIN_NAMESPACE
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QCanBusDevice class is the interface class for modbus.
+    \brief The QModBusSlave class is the interface class for modbus.
 
-    QCanBusDevice communicates with a modbus backend providing users with a convenient API.
-    The modbus backend must be specified during the object creation.
+    Modbus network might have multiple slaves. Slaves are read/written by a
+    master device \l QModBusMaster. QModBusSlave communicates with a modbus backend providing users
+    with a convenient API. The modbus backend must be specified during the object creation.
  */
 
 /*!
-    Constructs a serial bus device with the specified \a parent.
+    Constructs a modbus slave with the specified \a parent.
  */
 QModBusSlave::QModBusSlave(QObject *parent) :
     QModBusDevice(parent)
 {
 }
+
+/*!
+    \fn bool setMap(QModBusSlave::ModBusTable table, quint16 size)
+    Map a size for one table. If a table is not set, it's size will be zero (0).
+ */
 
 /*!
     \fn int QModBusSlave::slaveId()
@@ -74,6 +80,32 @@ QModBusSlave::QModBusSlave(QObject *parent) :
     Sets \a id as slave id.
 
     \sa slaveId()
+ */
+
+/*!
+    \fn bool setADU(QModBusSlave::ApplicationDataUnit adu)
+    Set the type of transport (i.e ApplicationDataUnit) to use.
+ */
+
+/*!
+    \fn bool data(QModBusSlave::ModBusTable table, quint16 address, quint16 &data)
+
+    Read data stored in the slave. Slave has four \a tables and each have their unique
+    \a address fields. \a data will be read from the desired field.
+    See QModBusDevice::ModBusTable for more information about the tables.
+    Returns \c false if address is outside of the map range.
+
+    \sa QModBusDevice::ModBusTable, setData()
+ */
+
+/*!
+    \fn bool setData(QModBusDevice::ModBusTable table, quint16 address, quint16 data)
+
+    Writes data to the slave. Slave has four \a tables and each have their unique
+    \a address fields. \a data will be written to the desired field.
+    Returns \c false if address outside of the map range.
+
+    \sa QModBusDevice::ModBusTable, data()
  */
 
 QT_END_NAMESPACE

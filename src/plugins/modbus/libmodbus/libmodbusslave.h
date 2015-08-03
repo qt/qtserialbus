@@ -45,6 +45,7 @@
 #include <QtCore/qstring.h>
 #include <QtCore/qthread.h>
 #include <QtCore/qpointer.h>
+#include <QtCore/qmap.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -61,20 +62,23 @@ public:
 
 Q_SIGNALS:
     void fail();
+    void slaveRead();
+    void slaveWritten(QVector<QModBusDataUnit>);
 };
 
-class LibModBusBackend : public QModBusSlave
+class LibModBusSlave : public QModBusSlave
 {
     Q_OBJECT
 public:
-    explicit LibModBusBackend(QSerialPort *transport);
-    ~LibModBusBackend();
-    bool setMapping(int discreteInputMax,
-                    int coilMax,
-                    int inputRegisterMax,
-                    int holdingRegisterMax) Q_DECL_OVERRIDE;
+    explicit LibModBusSlave(QSerialPort *transport);
+    ~LibModBusSlave();
+    bool setMap(QModBusDevice::ModBusTable table, quint16 size) Q_DECL_OVERRIDE;
     int slaveId() const Q_DECL_OVERRIDE;
     void setSlaveId(int id) Q_DECL_OVERRIDE;
+    bool setADU(QModBusDevice::ApplicationDataUnit adu) Q_DECL_OVERRIDE;
+
+    bool data(QModBusDevice::ModBusTable table, quint16 address, quint16& data) Q_DECL_OVERRIDE;
+    bool setData(QModBusDevice::ModBusTable table, quint16 address, quint16 data) Q_DECL_OVERRIDE;
 
 Q_SIGNALS:
     void operate();
@@ -92,6 +96,8 @@ private:
     modbus_mapping_t *mapping;
     bool connected;
     int slave;
+    QMap<QModBusDevice::ModBusTable, int> mappingTable;
+    QModBusDevice::ApplicationDataUnit adu;
 };
 
 QT_END_NAMESPACE

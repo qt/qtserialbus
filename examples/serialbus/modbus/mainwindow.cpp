@@ -85,7 +85,13 @@ void MainWindow::connectDevice(int pluginIndex)
     ui->portEdit->clear();
 
     modBusDevice = modBus->createSlave(plugins.at(pluginIndex), serialPort);
-    if (!modBusDevice->setMapping(10, 10, 10, 10))
+    if (!modBusDevice->setMap(QModBusDevice::DiscreteInputs, 10))
+        return;
+    if (!modBusDevice->setMap(QModBusDevice::Coils, 10))
+        return;
+    if (!modBusDevice->setMap(QModBusDevice::InputRegisters, 10))
+        return;
+    if (!modBusDevice->setMap(QModBusDevice::HoldingRegisters, 10))
         return;
 
     if (modBusDevice.isNull())
@@ -93,7 +99,19 @@ void MainWindow::connectDevice(int pluginIndex)
 
     connect(modBusDevice.data(), &QModBusSlave::stateChanged, this, &MainWindow::onSlaveStateChanged);
 
-    modBusDevice->connectDevice();
+    if (!modBusDevice->connectDevice()) {
+        qWarning() << "Connect failed: " << modBusDevice->errorString();
+        return;
+    }
+
+    if (!modBusDevice->setData(QModBusDevice::DiscreteInputs, 2, 1))
+        qWarning() << modBusDevice->errorString();
+    if (!modBusDevice->setData(QModBusDevice::Coils, 4, 1))
+        qWarning() << modBusDevice->errorString();
+    if (!modBusDevice->setData(QModBusDevice::InputRegisters, 3, 0xf043))
+        qWarning() << modBusDevice->errorString();
+    if (!modBusDevice->setData(QModBusDevice::HoldingRegisters, 4, 0xa2))
+        qWarning() << modBusDevice->errorString();
 }
 
 void MainWindow::onSlaveStateChanged(int state)

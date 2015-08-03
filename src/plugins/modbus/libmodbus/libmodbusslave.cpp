@@ -34,7 +34,7 @@
 **
 ****************************************************************************/
 
-#include "libmodbusbackend.h"
+#include "libmodbusslave.h"
 
 #include <QtCore/qdebug.h>
 
@@ -51,7 +51,7 @@ const int MODBUS_SERIAL_ADU_SIZE = 256;
 
 QT_BEGIN_NAMESPACE
 
-LibModBusBackend::LibModBusBackend(QSerialPort *transport) :
+LibModBusSlave::LibModBusSlave(QSerialPort *transport) :
     QModBusSlave(),
     serialPort(transport),
     context(0),
@@ -61,34 +61,24 @@ LibModBusBackend::LibModBusBackend(QSerialPort *transport) :
 {
 }
 
-LibModBusBackend::~LibModBusBackend()
+LibModBusSlave::~LibModBusSlave()
 {
     close();
     modbus_mapping_free(mapping);
     mapping = 0;
 }
 
-bool LibModBusBackend::setMapping(int discreteInputMax, int coilMax,
-                                  int inputRegisterMax, int holdingRegisterMax)
+bool LibModBusSlave::setMap(QModBusDevice::ModBusTable table, quint16 size)
 {
     if (connected)
         return false;
-    if (mapping) {
-        modbus_mapping_free(mapping);
-        mapping = 0;
-    }
-    mapping = modbus_mapping_new(discreteInputMax, coilMax,
-                                 inputRegisterMax, holdingRegisterMax);
-    if (mapping == NULL) {
-        qWarning() << qt_error_string(errno);
-        modbus_mapping_free(mapping);
-        mapping = 0;
-        return false;
-    }
+
+    mappingTable[table] = size;
+
     return true;
 }
 
-bool LibModBusBackend::open()
+bool LibModBusSlave::open()
 {
     if (connected)
         return true;
@@ -129,13 +119,28 @@ bool LibModBusBackend::open()
         return false;
     }
 
+    if (mapping) {
+        modbus_mapping_free(mapping);
+        mapping = 0;
+    }
+    mapping = modbus_mapping_new(mappingTable[QModBusDevice::Coils],
+                                 mappingTable[QModBusDevice::DiscreteInputs],
+                                 mappingTable[QModBusDevice::HoldingRegisters],
+                                 mappingTable[QModBusDevice::InputRegisters]);
+    if (mapping == NULL) {
+        qWarning() << qt_error_string(errno);
+        return false;
+    }
+
     listener = new ListenThread();
     listener->context = context;
     listener->mapping = mapping;
     listener->moveToThread(&thread);
     connect(&thread, &QThread::finished, listener, &QObject::deleteLater);
-    connect(this, &LibModBusBackend::operate, listener, &ListenThread::doWork);
-    connect(listener, &ListenThread::fail, this, &LibModBusBackend::close);
+    connect(this, &LibModBusSlave::operate, listener, &ListenThread::doWork);
+    connect(listener, &ListenThread::fail, this, &LibModBusSlave::close);
+    connect(listener, &ListenThread::slaveRead, this, &LibModBusSlave::slaveRead);
+    connect(listener, &ListenThread::slaveWritten, this, &LibModBusSlave::slaveWritten);
     thread.start();
     emit operate();
     connected = true;
@@ -143,7 +148,7 @@ bool LibModBusBackend::open()
     return true;
 }
 
-void LibModBusBackend::close()
+void LibModBusSlave::close()
 {
     thread.requestInterruption();
     thread.quit();
@@ -157,18 +162,78 @@ void LibModBusBackend::close()
     setState(QModBusDevice::UnconnectedState);
 }
 
-int LibModBusBackend::slaveId() const
+int LibModBusSlave::slaveId() const
 {
     return slave;
 }
 
-void LibModBusBackend::setSlaveId(int id)
+void LibModBusSlave::setSlaveId(int id)
 {
     slave = id;
     modbus_set_slave(context, slave);
 }
 
-QString LibModBusBackend::portNameToSystemLocation(QString source)
+bool LibModBusSlave::setADU(QModBusDevice::ApplicationDataUnit adu)
+{
+    if (connected)
+        return false;
+
+    // TODO this needs to be used in the open(). Also need to change the QSerialPort from the constructor?
+    this->adu = adu;
+    return true;
+}
+
+bool LibModBusSlave::data(QModBusDevice::ModBusTable table, quint16 address, quint16& data)
+{
+    if (mappingTable[table] >= address) {
+        switch (table) {
+            case QModBusDevice::DiscreteInputs:
+                data = mapping->tab_input_bits[address];
+                break;
+            case QModBusDevice::Coils:
+                data = mapping->tab_bits[address];
+                break;
+            case QModBusDevice::InputRegisters:
+                data = mapping->tab_input_registers[address];
+                break;
+            case QModBusDevice::HoldingRegisters:
+                data = mapping->tab_registers[address];
+                break;
+        }
+    } else {
+        setError("ReadError: invalid parameters", QModBusDevice::ReadError);
+        return false;
+    }
+
+    return true;
+}
+
+bool LibModBusSlave::setData(QModBusDevice::ModBusTable table, quint16 address, quint16 data)
+{
+    if (mappingTable[table] >= address) {
+        switch (table) {
+            case QModBusDevice::DiscreteInputs:
+                mapping->tab_input_bits[address] = (uint8_t)data;
+                break;
+            case QModBusDevice::Coils:
+                mapping->tab_bits[address] = (uint8_t)data;
+                break;
+            case QModBusDevice::InputRegisters:
+                mapping->tab_input_registers[address] = data;
+                break;
+            case QModBusDevice::HoldingRegisters:
+                mapping->tab_registers[address] = data;
+                break;
+        }
+    } else {
+        setError("WriteError: invalid parameters", QModBusDevice::WriteError);
+        return false;
+    }
+
+    return true;
+}
+
+QString LibModBusSlave::portNameToSystemLocation(QString source)
 {
 #if defined(Q_OS_WINCE)
     return source.endsWith(QLatin1Char(':'))
@@ -217,8 +282,10 @@ void ListenThread::doWork()
         }
 
         // Send reply only if data was received.
-        if (req > 0)
+        if (req > 0) {
             modbus_reply(context, query, req, mapping);
+            emit slaveRead();
+        }
     }
 }
 

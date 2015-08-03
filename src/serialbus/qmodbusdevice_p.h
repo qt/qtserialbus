@@ -58,11 +58,14 @@ class QModBusDevicePrivate : public QObjectPrivate
     Q_DECLARE_PUBLIC(QModBusDevice)
 public:
     QModBusDevicePrivate()
-        : state(QModBusDevice::UnconnectedState)
+        : state(QModBusDevice::UnconnectedState),
+          error(QModBusDevice::NoError)
     {
     }
 
     QModBusDevice::ModBusDeviceState state;
+    QModBusDevice::ModBusError error;
+    QString errorString;
 };
 
 QT_END_NAMESPACE
