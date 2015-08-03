@@ -34,46 +34,35 @@
 **
 ****************************************************************************/
 
-#include "qmodbusslave.h"
-#include "qmodbusslave_p.h"
+#ifndef QMODBUSDATAUNIT_H
+#define QMODBUSDATAUNIT_H
+
+#include <QtSerialBus/qserialbusglobal.h>
+#include <QtSerialBus/qmodbusdevice.h>
+
+#include <QtCore/qobject.h>
 
 QT_BEGIN_NAMESPACE
 
-/*!
-    \class QModBusSlave
-    \inmodule QtSerialBus
-    \since 5.6
-
-    \brief The QCanBusDevice class is the interface class for modbus.
-
-    QCanBusDevice communicates with a modbus backend providing users with a convenient API.
-    The modbus backend must be specified during the object creation.
- */
-
-/*!
-    Constructs a serial bus device with the specified \a parent.
- */
-QModBusSlave::QModBusSlave(QObject *parent) :
-    QModBusDevice(parent)
+class QModBusDataUnit
 {
-}
+    explicit QModBusDataUnit(QModBusDevice::ModBusTable table,
+               int dataAddress = 0, qint16 initValue = 0) :
+        mapping(table),
+        location(dataAddress),
+        dataValue(initValue) {}
+    void setTableType(QModBusDevice::ModBusTable table) {mapping = table;}
+    inline void setAddress(int newAddress) {location = newAddress;}
+    inline void setValue(qint16 newValue) {dataValue = newValue;}
+    QModBusDevice::ModBusTable tableType() const {return mapping;}
+    inline int address() const {return location;}
+    inline int value() const {return dataValue;}
 
-/*!
-    \fn int QModBusSlave::slaveId()
-    Multiple Modbus devices can be connected together on the same physical link.
-    Slave id will be used to filter received messages. Each slave should have unique id.
-    Returns slave id.
-
-    \sa setSlaveId()
- */
-
-/*!
-    \fn void QModBusSlave::setSlaveId(int id)
-    Multiple Modbus devices can be connected together on the same physical link.
-    Slave id will be used to filter received messages. Each slave should have unique id.
-    Sets \a id as slave id.
-
-    \sa slaveId()
- */
+private:
+    QModBusDevice::ModBusTable mapping;
+    int location;
+    qint16 dataValue;
+};
 
 QT_END_NAMESPACE
+#endif // QMODBUSDATAUNIT_H

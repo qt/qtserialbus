@@ -34,46 +34,70 @@
 **
 ****************************************************************************/
 
-#include "qmodbusslave.h"
-#include "qmodbusslave_p.h"
+#include "qmodbusdataunit.h"
+
+#include <QtCore/qdatastream.h>
 
 QT_BEGIN_NAMESPACE
 
 /*!
-    \class QModBusSlave
+    \class QModBusDataUnit
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QCanBusDevice class is the interface class for modbus.
+    \brief QModBusDataUnit is a container class representing a single bit / 16 bit word in the modbus table
 
-    QCanBusDevice communicates with a modbus backend providing users with a convenient API.
-    The modbus backend must be specified during the object creation.
+    \l QModBusDataUnit can be used for read and write operations. It contains it's table, address of it
+    in the table and data value.
  */
 
 /*!
-    Constructs a serial bus device with the specified \a parent.
- */
-QModBusSlave::QModBusSlave(QObject *parent) :
-    QModBusDevice(parent)
-{
-}
+    \fn void QModBusDataUnit::setTableType(QModBusDevice::ModBusTable table)
 
-/*!
-    \fn int QModBusSlave::slaveId()
-    Multiple Modbus devices can be connected together on the same physical link.
-    Slave id will be used to filter received messages. Each slave should have unique id.
-    Returns slave id.
+    Sets the \a table type data belongs to.
 
-    \sa setSlaveId()
+    \sa tableType(), QModBusDevice::ModBusTable
  */
 
 /*!
-    \fn void QModBusSlave::setSlaveId(int id)
-    Multiple Modbus devices can be connected together on the same physical link.
-    Slave id will be used to filter received messages. Each slave should have unique id.
-    Sets \a id as slave id.
+    \fn QModBusDevice::ModBusTable QModBusDataUnit::tableType()
 
-    \sa slaveId()
+    Returns the type of the table data belongs to.
+
+    \sa setTableType(), QModBusDevice::ModBusTable
+ */
+
+/*!
+    \fn void QModBusDataUnit::setAddress(int address)
+
+    Sets the \a address of the data unit.
+
+    \sa address()
+ */
+
+/*!
+    \fn int QModBusDataUnit::address()
+
+    Returns the address of data unit in the table.
+
+    \sa setAddress()
+ */
+
+/*!
+    \fn void QModBusDataUnit::setValue(qint16 value)
+
+    Sets the \a value of the data unit. Since Discrete Inputs and Coils tables only accept single bit
+    as value, 0 will be interpreted as 0 and anything else as 1.
+
+    \sa value()
+ */
+
+/*!
+    \fn qint16 QModBusDataUnit::value()
+
+    Returns the data in the data unit.
+
+    \sa setValue()
  */
 
 QT_END_NAMESPACE
