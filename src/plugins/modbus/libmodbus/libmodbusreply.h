@@ -34,88 +34,66 @@
 **
 ****************************************************************************/
 
-#include "qmodbusreply.h"
+#ifndef REPLY_H
+#define REPLY_H
+
+#include <modbus/modbus.h>
+
+#include <QtCore/qobject.h>
+#include <QtCore/qthread.h>
+#include <QtCore/qpointer.h>
+
+#include <QtSerialBus/qmodbusreply.h>
+#include <QtSerialBus/qmodbusmaster.h>
 
 QT_BEGIN_NAMESPACE
 
-/*!
-    \class QModBusReply
-    \inmodule QtSerialBus
-    \since 5.6
-
-    \brief The QCanBusReply class contains the data and address for the request sent with
-    QModBusMaster.
- */
-
-/*!
-    Constructs a QModBusReply object with \a parent.
- */
-QModBusReply::QModBusReply(QObject *parent) :
-    QObject(parent),
-    finish(false)
+class RequestThread : public QObject
 {
+    Q_OBJECT
+public:
+    QModBusDevice::ModBusTable table;
+    quint16 startAddress;
+    quint16 size;
+    int slaveId;
+    modbus_t *context;
 
-}
+public Q_SLOTS:
+    void read();
 
-/*!
-    \fn QModBusReply::exceptionOccurred(RequestException exception)
+Q_SIGNALS:
+    void exception();
+    void ready(QByteArray);
 
-    This signal is emitted when when request is aborted and exception of the type
-    \a exception is received.
+private:
+    void readBits();
+    void readBytes();
+};
 
-    \sa QModBusReply::exception()
- */
-
-/*!
-    \fn QModBusReply::finished()
-
-    This signal is emitted when request is successfully executed.
-
-    \sa QModBusReply::isFinished()
- */
-
-/*!
-    \enum QModBusReply::RequestException
-    This enum describes all the possible exception causes.
-
-    \value NoException      No exception has occurred.
- */
-
-/*!
-    Returns the \l RequestException that was found during the processing of this request.
-    If no exception was found, returns \l NoError.
- */
-QModBusReply::RequestException QModBusReply::exception() const
+class Reply : public QModBusReply
 {
-    return NoException;
-}
+    Q_OBJECT
+public:
+    explicit Reply(QObject *parent = 0) : QModBusReply(parent) {}
+    void read(QModBusDevice::ModBusTable table, quint16 startAddress,
+              quint16 size, int slaveId, modbus_t *context);
 
-/*!
-    Returns \c true when the reply has finished or was aborted.
+protected:
+    void setFinished(bool finished) Q_DECL_OVERRIDE;
+    void setError(QModBusReply::RequestException exceptionCode,
+                  const QString &errorString) Q_DECL_OVERRIDE;
+    void setPayload(QByteArray payload);
 
-    \sa QModBusReply::finished()
- */
-bool QModBusReply::isFinished() const
-{
-    return false;
-}
+Q_SIGNALS:
+    void startRead();
 
-/*!
-    Returns \c true when the request is still processing and the reply has not
-    finished or was aborted yet.
- */
-bool QModBusReply::isRunning() const
-{
-    return false;
-}
-
-/*!
-    Returns data units read/written if QModBusReply is finished.
-    Otherwise returns empty QVector.
- */
-QList<QModBusDataUnit> QModBusReply::result() const
-{
-    return payload;
-}
+private:
+    QModBusDevice::ModBusTable table;
+    quint16 startAddress;
+    QPointer<RequestThread> request;
+    QThread thread;
+};
 
 QT_END_NAMESPACE
+
+#endif // REPLY_H

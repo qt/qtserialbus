@@ -36,15 +36,24 @@
 
 #include "libmodbusmaster.h"
 
+#include <QtCore/qdebug.h>
+#include <QtCore/qdatastream.h>
+
+QT_BEGIN_NAMESPACE
+
 LibModBusMaster::LibModBusMaster(QSerialPort *transport) :
     QModBusMaster(),
-    port(transport)
+    serialPort(transport),
+    connected(false),
+    adu(QModBusDevice::RemoteTerminalUnit)
 {
 }
 
 bool LibModBusMaster::setADU(ApplicationDataUnit adu)
 {
-    Q_UNUSED(adu);
+    //Only RTU supported at the moment
+    if (adu == QModBusDevice::RemoteTerminalUnit)
+        return true;
     return false;
 }
 
@@ -54,30 +63,107 @@ QModBusReply* LibModBusMaster::write(const QModBusDataUnit &request)
     return 0;
 }
 
-QModBusReply* LibModBusMaster::write(const QVector<QModBusDataUnit> &requests)
+QModBusReply* LibModBusMaster::write(const QList<QModBusDataUnit> &requests)
 {
     Q_UNUSED(requests);
     return 0;
 }
 
-QModBusReply* LibModBusMaster::read(QModBusDataUnit &request)
+QModBusReply* LibModBusMaster::read(QModBusDataUnit &request, int slaveId)
 {
-    Q_UNUSED(request);
-    return 0;
+    QList<QModBusDataUnit> units;
+    units.append(request);
+    return read(units, slaveId);
 }
 
-QModBusReply* LibModBusMaster::read(QVector<QModBusDataUnit> &requests)
+QModBusReply* LibModBusMaster::read(QList<QModBusDataUnit> &requests, int slaveId)
 {
-    Q_UNUSED(requests);
-    return 0;
+    if (requests.empty())
+        return 0;
+
+    const QModBusDevice::ModBusTable readTable(requests.first().tableType());
+    int address = requests.first().address();
+
+    for (int i = 1; i < requests.size(); i++) {
+        address++;
+        if ((requests.at(i).tableType() != readTable) ||
+            (requests.at(i).address() != address))
+            return 0;
+    }
+
+    Reply *reply = new Reply();
+    reply->read(requests.first().tableType(), requests.first().address(),
+                requests.size(), slaveId, context);
+    return reply;
 }
 
 bool LibModBusMaster::open()
 {
-    return false;
+    if (connected)
+        return true;
+
+    QChar parity;
+
+    switch (serialPort->parity()) {
+    case QSerialPort::NoParity:
+        parity = 'N';
+        break;
+    case QSerialPort::EvenParity:
+        parity = 'E';
+        break;
+    case QSerialPort::OddParity:
+        parity = 'O';
+        break;
+    default:
+        return false;
+    }
+
+    QString location = portNameToSystemLocation(serialPort->portName());
+
+    context = modbus_new_rtu(location.toLatin1(),
+                             serialPort->baudRate(),
+                             parity.toLatin1(),
+                             serialPort->dataBits(),
+                             serialPort->stopBits());
+    if (context == NULL) {
+        qWarning() << "Unable to create the libmodbus context";
+        return false;
+    }
+
+    modbus_set_debug(context, TRUE);
+    if (modbus_connect(context) == -1) {
+        qWarning() << qt_error_string(errno);
+        close();
+        return false;
+    }
+
+    connected = true;
+    setState(QModBusDevice::ConnectedState);
+    return true;
 }
 
 void LibModBusMaster::close()
 {
-    return;
+    connected = false;
+    setState(QModBusDevice::UnconnectedState);
 }
+
+QString LibModBusMaster::portNameToSystemLocation(QString source)
+{
+#if defined(Q_OS_WINCE)
+    return source.endsWith(QLatin1Char(':'))
+            ? source : (source + QLatin1Char(':'));
+#elif defined(Q_OS_WIN32)
+    return source.startsWith(QLatin1String("COM"))
+            ? (QLatin1String("\\\\.\\") + source) : source;
+#elif defined(Q_OS_UNIX)
+    return (source.startsWith(QLatin1Char('/'))
+            || source.startsWith(QLatin1String("./"))
+            || source.startsWith(QLatin1String("../")))
+            ? source : (QLatin1String("/dev/") + source);
+#else
+#  error Unsupported OS
+#endif
+}
+
+QT_END_NAMESPACE

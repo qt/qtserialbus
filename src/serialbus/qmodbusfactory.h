@@ -54,6 +54,7 @@ public:
     //TODO: transport should be abstract QIODevice not any specific transport
     virtual QModBusSlave *createSlave(QSerialPort *transport) const = 0;
     virtual QModBusMaster *createMaster(QSerialPort *transport) const = 0;
+
 protected:
     virtual ~QModBusFactory() {}
 };

@@ -41,7 +41,8 @@
 #include <QtSerialBus/qmodbusdataunit.h>
 
 #include <QtCore/qobject.h>
-#include <QtCore/qvector.h>
+#include <QtCore/qiodevice.h>
+
 
 QT_BEGIN_NAMESPACE
 
@@ -58,7 +59,7 @@ public:
     RequestException exception() const;
     bool isFinished() const;
     bool isRunning() const;
-    QVector<QModBusDataUnit> result() const;
+    QList<QModBusDataUnit> result() const;
 
 Q_SIGNALS:
     void exceptionOccurred(RequestException code);
@@ -66,8 +67,10 @@ Q_SIGNALS:
 
 protected:
     virtual void setFinished(bool finished) = 0;
-    virtual void setError(RequestException errorCode, const QString & errorString) = 0;
-    virtual void setPayload(QByteArray payload) = 0;
+    virtual void setError(RequestException exceptionCode, const QString &errorString) = 0;
+
+    QList<QModBusDataUnit> payload;
+    bool finish;
 };
 
 QT_END_NAMESPACE

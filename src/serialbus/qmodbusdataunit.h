@@ -39,6 +39,7 @@
 
 #include <QtSerialBus/qserialbusglobal.h>
 #include <QtSerialBus/qmodbusdevice.h>
+#include <QtSerialBus/qmodbusdataunit.h>
 
 #include <QtCore/qobject.h>
 
@@ -46,6 +47,7 @@ QT_BEGIN_NAMESPACE
 
 class QModBusDataUnit
 {
+public:
     explicit QModBusDataUnit(QModBusDevice::ModBusTable table,
                int dataAddress = 0, qint16 initValue = 0) :
         mapping(table),

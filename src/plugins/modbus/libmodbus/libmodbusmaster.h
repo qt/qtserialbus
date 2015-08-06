@@ -37,9 +37,18 @@
 #ifndef LIBMODBUSMASTER_H
 #define LIBMODBUSMASTER_H
 
-#include <QtSerialBus/qmodbusmaster.h>
+#include "libmodbusreply.h"
 
+#include <modbus/modbus.h>
+
+#include <QtSerialBus/qmodbusmaster.h>
+#include <QtSerialBus/qmodbusreply.h>
+#include <QtSerialBus/qmodbusdataunit.h>
 #include <QSerialPort>
+
+#include <QtCore/qpointer.h>
+
+QT_BEGIN_NAMESPACE
 
 class LibModBusMaster : public QModBusMaster
 {
@@ -47,17 +56,24 @@ class LibModBusMaster : public QModBusMaster
 public:
     explicit LibModBusMaster(QSerialPort *transport);
     bool setADU(ApplicationDataUnit adu) Q_DECL_OVERRIDE;
-    QModBusReply* write(const QModBusDataUnit &request);
-    QModBusReply* write(const QVector<QModBusDataUnit> &requests);
-    QModBusReply* read(QModBusDataUnit &request);
-    QModBusReply* read(QVector<QModBusDataUnit> &requests);
+    QModBusReply* write(const QModBusDataUnit &request) Q_DECL_OVERRIDE;
+    QModBusReply* write(const QList<QModBusDataUnit> &requests) Q_DECL_OVERRIDE;
+    QModBusReply* read(QModBusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
+    QModBusReply* read(QList<QModBusDataUnit> &requests, int slaveId = 1) Q_DECL_OVERRIDE;
 
 protected:
     bool open() Q_DECL_OVERRIDE;
     void close() Q_DECL_OVERRIDE;
 
 private:
-    QSerialPort *port;
+    QString portNameToSystemLocation(QString source);
+
+    QSerialPort *serialPort;
+    modbus_t *context;
+    bool connected;
+    QModBusDevice::ApplicationDataUnit adu;
 };
+
+QT_BEGIN_NAMESPACE
 
 #endif // LIBMODBUSMASTER_H

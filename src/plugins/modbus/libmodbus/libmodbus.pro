@@ -12,10 +12,12 @@ load(qt_plugin)
 
 HEADERS += \
     libmodbusslave.h \
-    libmodbusmaster.h
+    libmodbusmaster.h \
+    libmodbusreply.h
 
 SOURCES += main.cpp \
     libmodbusslave.cpp \
-    libmodbusmaster.cpp
+    libmodbusmaster.cpp \
+    libmodbusreply.cpp
 
 OTHER_FILES = plugin.json

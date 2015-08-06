@@ -56,9 +56,9 @@ public:
     virtual bool setADU(QModBusDevice::ApplicationDataUnit adu) = 0;
 
     virtual QModBusReply *write(const QModBusDataUnit &request) = 0;
-    virtual QModBusReply *write(const QVector<QModBusDataUnit> &requests) = 0;
-    virtual QModBusReply *read(QModBusDataUnit &request) = 0;
-    virtual QModBusReply *read(QVector<QModBusDataUnit> &requests) = 0;
+    virtual QModBusReply *write(const QList<QModBusDataUnit> &requests) = 0;
+    virtual QModBusReply *read(QModBusDataUnit &request, int slaveId = 1) = 0;
+    virtual QModBusReply *read(QList<QModBusDataUnit> &requests, int slaveId = 1) = 0;
 
 
 protected:

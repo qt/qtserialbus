@@ -59,8 +59,8 @@ public:
 
     virtual bool setMap(QModBusDevice::ModBusTable table, quint16 size) = 0;
 
-    virtual int slaveId() const = 0;
     virtual void setSlaveId(int id) = 0;
+    virtual int slaveId() const = 0;
 
     virtual bool setADU(QModBusDevice::ApplicationDataUnit adu) = 0;
 
