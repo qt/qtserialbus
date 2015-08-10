@@ -50,26 +50,38 @@ class Q_SERIALBUS_EXPORT QModBusReply : public QObject
 {
     Q_OBJECT
 public:
-    enum RequestException {
-        NoException
-        //TODO: list different exception cases with modbus request
+    enum RequestError {
+        NoError,
+        IllegalFunction,
+        IllegalDataAddress,
+        IllegalDataValue,
+        SlaveFailure,
+        Acknowledge,
+        SlaveBusy,
+        MemoryParity,
+        GatewayUnavailable,
+        NoResponse,
+        InvalidCRC,
+        InvalidError
     };
     explicit QModBusReply(QObject *parent = 0);
 
-    RequestException exception() const;
+    RequestError error() const;
+    QString errorString() const;
     bool isFinished() const;
     bool isRunning() const;
-
     QList<QModBusDataUnit> result() const;
 
 Q_SIGNALS:
-    void exceptionOccurred(RequestException code);
+    void errorOccurred(RequestError code);
     void finished();
 
 protected:
     virtual void setFinished() = 0;
-    virtual void setError(RequestException exceptionCode, const QString &errorString) = 0;
+    virtual void setError(RequestError errorCode, const QString &errorString) = 0;
 
+    RequestError errorType;
+    QString errorText;
     QList<QModBusDataUnit> payload;
     bool finish;
 };

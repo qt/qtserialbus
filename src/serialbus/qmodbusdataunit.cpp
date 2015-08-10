@@ -52,6 +52,11 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
+    \fn QModBusDataUnit::QModBusDataUnit(QModBusDevice::ModBusTable table, int address = 0, quint16 value = 0)
+    Constructs one unit of data in \a table. Address of the data is \a address and value of the data is \a value.
+ */
+
+/*!
     \fn void QModBusDataUnit::setTableType(QModBusDevice::ModBusTable table)
 
     Sets the \a table type data belongs to.
@@ -60,7 +65,7 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \fn QModBusDevice::ModBusTable QModBusDataUnit::tableType()
+    \fn QModBusDevice::ModBusTable QModBusDataUnit::tableType() const
 
     Returns the type of the table data belongs to.
 
@@ -76,7 +81,7 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \fn int QModBusDataUnit::address()
+    \fn int QModBusDataUnit::address() const
 
     Returns the address of data unit in the table.
 
@@ -84,7 +89,7 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \fn void QModBusDataUnit::setValue(qint16 value)
+    \fn void QModBusDataUnit::setValue(quint16 value)
 
     Sets the \a value of the data unit. Since Discrete Inputs and Coils tables only accept single bit
     as value, 0 will be interpreted as 0 and anything else as 1.
@@ -93,7 +98,7 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \fn qint16 QModBusDataUnit::value()
+    \fn quint16 QModBusDataUnit::value() const
 
     Returns the data in the data unit.
 

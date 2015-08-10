@@ -52,18 +52,41 @@ QT_BEGIN_NAMESPACE
  */
 QModBusReply::QModBusReply(QObject *parent) :
     QObject(parent),
+    errorType(NoError),
     finish(false)
 {
 
 }
 
 /*!
-    \fn QModBusReply::exceptionOccurred(RequestException exception)
+    \enum QModBusReply::RequestError
+    This enum describes the type of error that has occurred.
 
-    This signal is emitted when when request is aborted and exception of the type
-    \a exception is received.
+    \value NoError              No error has occurred.
+    \value IllegalFunction      The received request is not an allowable action for the slave.
+    \value IllegalDataAddress   The received data address in the query is not an allowable address for
+                                the slave.
+    \value IllegalDataValue     The contained value in the request data field is not an allowable
+                                value for the slave.
+    \value SlaveFailure         An unrecoverable error occurred while the slave was attempting to perform
+                                the requested action.
+    \value Acknowledge          Specialized use in conjunction with programming commands.
+    \value SlaveBusy            The slave is engaged in processing a long–duration program command.
+    \value MemoryParity         Indicates that the extended file area failed to pass a consistency check.
+    \value GatewayUnavailable   Indicates that the gateway was unable to allocate an internal communication
+                                path from the input port to the output port for processing the request.
+    \value NoResponse           Indicates that no response was obtained from the target device.
+    \value InvalidCRC           CRC error occurred.
+    \value InvalidError         An unknown error occurred.
+ */
 
-    \sa QModBusReply::exception()
+/*!
+    \fn QModBusReply::errorOccurred(RequestError error)
+
+    This signal is emitted when when request is aborted and error of the type
+    \a error is received.
+
+    \sa QModBusReply::error()
  */
 
 /*!
@@ -75,19 +98,36 @@ QModBusReply::QModBusReply(QObject *parent) :
  */
 
 /*!
-    \enum QModBusReply::RequestException
-    This enum describes all the possible exception causes.
+    \fn void QModBusReply::setFinished()
 
-    \value NoException      No exception has occurred.
+    Sets the reply as finished.
+    After having this set the replies data must not change.
  */
 
 /*!
-    Returns the \l RequestException that was found during the processing of this request.
-    If no exception was found, returns \l NoError.
+    \fn void QModBusReply::setError(RequestError errorCode, const QString &errorString)
+
+    Sets the error condition to be \a errorCode. The human-readable message is set with \a errorString.
  */
-QModBusReply::RequestException QModBusReply::exception() const
+
+/*!
+    Returns the \l RequestError that was found during the processing of this request.
+    If no error was found, returns \l NoError.
+ */
+QModBusReply::RequestError QModBusReply::error() const
 {
-    return NoException;
+    return errorType;
+}
+
+/*!
+    Returns a human-readable description of the error that occurred. Returns empty string
+    if no error has occurred.
+
+    \sa error()
+ */
+QString QModBusReply::errorString() const
+{
+    return errorText;
 }
 
 /*!

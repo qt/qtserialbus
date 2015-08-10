@@ -58,14 +58,15 @@ QModBusMaster::QModBusMaster(QModBusDevice *parent) :
 }
 
 /*!
-    \fn QModBusReply *QModBusMaster::write(const QModBusDataUnit &request)
+    \fn QModBusReply *QModBusMaster::write(const QModBusDataUnit &request, int slaveId)
 
     Sends a request to modify the contents of the data pointed by \a request. Returns a new QModbusReply object
     which emits the finished() signal whenever a positive response for the write request has been received.
+    Modbus network may have multiple slaves, each slave has unique \a slaveId.
  */
 
 /*!
-    \fn QModBusReply *QModBusMaster::write(const QVector<QModBusDataUnit> &requests)
+    \fn QModBusReply *QModBusMaster::write(const QList<QModBusDataUnit> &requests, int slaveId)
 
     This is an overloaded function.
 
@@ -74,14 +75,15 @@ QModBusMaster::QModBusMaster(QModBusDevice *parent) :
  */
 
 /*!
-    \fn QModBusReply *QModBusMaster::read(QModBusDataUnit &request)
+    \fn QModBusReply *QModBusMaster::read(QModBusDataUnit &request, int slaveId)
 
     Sends a request to read the contents of the data pointed by \a request. Returns a new QModBusReply object
-    which emits the finished() signal whenever data arrives.
+    which emits the finished() signal whenever data arrives. Modbus network may have multiple slaves,
+    each slave has unique \a slaveId.
  */
 
 /*!
-    \fn QModBusReply *QModBusMaster::read(QVector<QModBusDataUnit> &requests)
+    \fn QModBusReply *QModBusMaster::read(QList<QModBusDataUnit> &requests, int slaveId)
 
     This is an overloaded function.
 

@@ -59,11 +59,6 @@ public:
     virtual QModBusReply *write(const QList<QModBusDataUnit> &requests, int slaveId = 1) = 0;
     virtual QModBusReply *read(QModBusDataUnit &request, int slaveId = 1) = 0;
     virtual QModBusReply *read(QList<QModBusDataUnit> &requests, int slaveId = 1) = 0;
-
-protected:
-
-    virtual bool open() = 0;
-    virtual void close() = 0;
 };
 
 QT_END_NAMESPACE

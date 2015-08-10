@@ -60,12 +60,12 @@ QModBusSlave::QModBusSlave(QObject *parent) :
 }
 
 /*!
-    \fn bool setMap(QModBusSlave::ModBusTable table, quint16 size)
+    \fn bool QModBusSlave::setMap(QModBusDevice::ModBusTable table, quint16 size)
     Map a size for one table. If a table is not set, it's size will be zero (0).
  */
 
 /*!
-    \fn int QModBusSlave::slaveId()
+    \fn int QModBusSlave::slaveId() const
     Multiple Modbus devices can be connected together on the same physical link.
     Slave id will be used to filter received messages. Each slave should have unique id.
     Returns slave id.
@@ -83,15 +83,15 @@ QModBusSlave::QModBusSlave(QObject *parent) :
  */
 
 /*!
-    \fn bool setADU(QModBusSlave::ApplicationDataUnit adu)
+    \fn bool QModBusSlave::setADU(QModBusDevice::ApplicationDataUnit adu)
 
     Set the type of transport (i.e ApplicationDataUnit) to use.
  */
 
 /*!
-    \fn bool data(QModBusSlave::ModBusTable table, quint16 address, quint16 &data)
+    \fn bool QModBusSlave::data(QModBusDevice::ModBusTable table, quint16 address, quint16 &data)
 
-    Read data stored in the slave. Slave has four \a tables and each have their unique
+    Read data stored in the slave. Slave has four tables \a table and each have their unique
     \a address fields. \a data will be read from the desired field.
     See QModBusDevice::ModBusTable for more information about the tables.
     Returns \c false if address is outside of the map range.
@@ -100,13 +100,26 @@ QModBusSlave::QModBusSlave(QObject *parent) :
  */
 
 /*!
-    \fn bool setData(QModBusDevice::ModBusTable table, quint16 address, quint16 data)
+    \fn bool QModBusSlave::setData(QModBusDevice::ModBusTable table, quint16 address, quint16 data)
 
-    Writes data to the slave. Slave has four \a tables and each have their unique
+    Writes data to the slave. Slave has four tables \a table and each have their unique
     \a address fields. \a data will be written to the desired field.
     Returns \c false if address outside of the map range.
 
     \sa QModBusDevice::ModBusTable, data()
+ */
+
+/*!
+    \fn void QModBusSlave::slaveRead()
+
+    This signal is emitted when master has read one or more fields of data from this slave.
+ */
+
+/*!
+    \fn void QModBusSlave::slaveWritten(QVector<QModBusDataUnit> units)
+
+    This signal is emitted when master has written one or more fields of data to this slave.
+    \a units is a list of data units that was written to.
  */
 
 QT_END_NAMESPACE

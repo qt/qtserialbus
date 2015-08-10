@@ -64,7 +64,7 @@ public Q_SLOTS:
     void write();
 
 Q_SIGNALS:
-    void exception();
+    void error(int errorNumber);
     void readReady(QByteArray);
     void writeReady();
 
@@ -85,7 +85,7 @@ public:
 
 protected:
     void setFinished() Q_DECL_OVERRIDE;
-    void setError(QModBusReply::RequestException exceptionCode,
+    void setError(QModBusReply::RequestError errorCode,
                   const QString &errorString) Q_DECL_OVERRIDE;
 
 Q_SIGNALS:
@@ -94,6 +94,7 @@ Q_SIGNALS:
 
 private:
     void setResults(QByteArray payload);
+    void handleError(int errorNumber);
 
     QModBusDevice::ModBusTable table;
     quint16 startAddress;

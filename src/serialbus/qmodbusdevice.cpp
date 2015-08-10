@@ -47,6 +47,10 @@ QT_BEGIN_NAMESPACE
     \brief The QModBusDevice class is the base class for Modbus classes \l QModBusSlave
     and \l QModBusMaster.
  */
+
+/*!
+    Constructs a modbus device with specified \a parent.
+ */
 QModBusDevice::QModBusDevice(QObject *parent)
  : QObject(*new QModBusDevicePrivate, parent)
 {
@@ -96,13 +100,13 @@ QModBusDevice::QModBusDevice(QObject *parent)
  */
 
 /*!
-    \fn QModBusDevice::errorOccurred(CanModError error)
+    \fn QModBusDevice::errorOccurred(QModBusDevice::ModBusError error)
 
     This signal is emitted when an error of the type \a error occurs.
  */
 
 /*!
-    \fn void QModBusDevice::stateChanged(QModBusDevice::CanModDeviceState state)
+    \fn void QModBusDevice::stateChanged(QModBusDevice::ModBusDeviceState state)
 
     This signal is emitted every time the state of the device changes.
     The new state is represented by \a state.

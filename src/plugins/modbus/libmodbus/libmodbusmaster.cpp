@@ -55,6 +55,7 @@ bool LibModBusMaster::setADU(ApplicationDataUnit adu)
     if (adu == QModBusDevice::RemoteTerminalUnit)
         return true;
 
+    setError(tr("ADU not supported by libmodbus plugin."), QModBusDevice::ConfigurationError);
     return false;
 }
 
@@ -68,20 +69,31 @@ QModBusReply* LibModBusMaster::write(const QModBusDataUnit &request, int slaveId
 QModBusReply* LibModBusMaster::write(const QList<QModBusDataUnit> &requests, int slaveId)
 {
     if (requests.empty())
+        setError(tr("Empty write request."), QModBusDevice::WriteError);
         return 0;
 
     const QModBusDevice::ModBusTable writeTable(requests.first().tableType());
 
-    if (writeTable != QModBusDevice::Coils && writeTable != QModBusDevice::HoldingRegisters)
+    if (writeTable != QModBusDevice::Coils
+        && writeTable != QModBusDevice::HoldingRegisters) {
+        setError(tr("Trying to write read only table."), QModBusDevice::WriteError);
         return 0;
+    }
 
     int address = requests.first().address();
 
     for (int i = 1; i < requests.size(); i++) {
         address++;
-        if ((requests.at(i).tableType() != writeTable) ||
-            (requests.at(i).address() != writeTable))
+        if (requests.at(i).tableType() != writeTable) {
+            setError(tr("Data units in write request must be from same table."),
+                     QModBusDevice::WriteError);
             return 0;
+        }
+        if (requests.at(i).address() != writeTable) {
+            setError(tr("Data units in write request must be adjacent to each other."),
+                     QModBusDevice::WriteError);
+            return 0;
+        }
     }
     Reply *reply = new Reply();
     reply->write(requests, slaveId, context);
@@ -97,17 +109,26 @@ QModBusReply* LibModBusMaster::read(QModBusDataUnit &request, int slaveId)
 
 QModBusReply* LibModBusMaster::read(QList<QModBusDataUnit> &requests, int slaveId)
 {
-    if (requests.empty())
+    if (requests.empty()) {
+        setError(tr("Empty read reaquest."), QModBusDevice::ReadError);
         return 0;
+    }
 
     const QModBusDevice::ModBusTable readTable(requests.first().tableType());
     int address = requests.first().address();
 
     for (int i = 1; i < requests.size(); i++) {
         address++;
-        if ((requests.at(i).tableType() != readTable) ||
-            (requests.at(i).address() != address))
+        if (requests.at(i).tableType() != readTable) {
+            setError(tr("Data units in write request must be from same table."),
+                     QModBusDevice::ReadError);
             return 0;
+        }
+        if (requests.at(i).address() != address) {
+            setError(tr("Data units in read request must be adjacent to each other."),
+                     QModBusDevice::ReadError);
+            return 0;
+        }
     }
 
     Reply *reply = new Reply();
@@ -133,6 +154,8 @@ bool LibModBusMaster::open()
         parity = 'O';
         break;
     default:
+        setError(tr("Unsupported parity."),
+                 QModBusDevice::ConnectionError);
         return false;
     }
 
@@ -144,13 +167,13 @@ bool LibModBusMaster::open()
                              serialPort->dataBits(),
                              serialPort->stopBits());
     if (context == NULL) {
-        qWarning() << "Unable to create the libmodbus context";
+        setError(qt_error_string(errno), QModBusDevice::ConnectionError);
         return false;
     }
 
     modbus_set_debug(context, TRUE);
     if (modbus_connect(context) == -1) {
-        qWarning() << qt_error_string(errno);
+        setError(qt_error_string(errno), QModBusDevice::ConnectionError);
         close();
         return false;
     }

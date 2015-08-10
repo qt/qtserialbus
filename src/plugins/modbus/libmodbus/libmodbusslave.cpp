@@ -44,9 +44,6 @@
 #include <sys/select.h>
 #endif
 
-//TODO: proper error handling
-//TODO: read/write mapping
-
 const int MODBUS_SERIAL_ADU_SIZE = 256;
 
 QT_BEGIN_NAMESPACE
@@ -70,12 +67,21 @@ LibModBusSlave::~LibModBusSlave()
 
 bool LibModBusSlave::setMap(QModBusDevice::ModBusTable table, quint16 size)
 {
-    if (connected)
+    if (connected) {
+        setError(tr("Cannot set maps when slave is connected to the network."),
+                 QModBusDevice::WriteError);
         return false;
+    }
 
     mappingTable[table] = size;
 
     return true;
+}
+
+void LibModBusSlave::handleError(int errorNumber)
+{
+    setError(qt_error_string(errorNumber), QModBusDevice::ReadError);
+    close();
 }
 
 bool LibModBusSlave::open()
@@ -96,6 +102,8 @@ bool LibModBusSlave::open()
         parity = 'O';
         break;
     default:
+        setError(tr("Unsupported parity."),
+                 QModBusDevice::ConnectionError);
         return false;
     }
 
@@ -107,14 +115,14 @@ bool LibModBusSlave::open()
                              serialPort->dataBits(),
                              serialPort->stopBits());
     if (context == NULL) {
-        qWarning() << "Unable to create the libmodbus context";
+        setError(qt_error_string(errno), QModBusDevice::ConnectionError);
         return false;
     }
     modbus_set_slave(context, slave);
 
     modbus_set_debug(context, TRUE);
     if (modbus_connect(context) == -1) {
-        qWarning() << qt_error_string(errno);
+        setError(qt_error_string(errno), QModBusDevice::ConnectionError);
         close();
         return false;
     }
@@ -128,7 +136,7 @@ bool LibModBusSlave::open()
                                  mappingTable[QModBusDevice::HoldingRegisters],
                                  mappingTable[QModBusDevice::InputRegisters]);
     if (mapping == NULL) {
-        qWarning() << qt_error_string(errno);
+        setError(qt_error_string(errno), QModBusDevice::ConnectionError);
         return false;
     }
 
@@ -138,7 +146,7 @@ bool LibModBusSlave::open()
     listener->moveToThread(&thread);
     connect(&thread, &QThread::finished, listener.data(), &QObject::deleteLater);
     connect(this, &LibModBusSlave::operate, listener.data(), &ListenThread::doWork);
-    connect(listener.data(), &ListenThread::fail, this, &LibModBusSlave::close);
+    connect(listener.data(), &ListenThread::error, this, &LibModBusSlave::handleError);
     connect(listener.data(), &ListenThread::slaveRead, this, &LibModBusSlave::slaveRead);
     connect(listener.data(), &ListenThread::slaveWritten, this, &LibModBusSlave::slaveWritten);
     thread.start();
@@ -276,8 +284,7 @@ void ListenThread::doWork()
 
         // Check for errors on both select and modbus_receive
         if (req == -1) {
-            qWarning() << qt_error_string(errno);
-            emit fail();
+            emit error(errno);
             break;
         }
 

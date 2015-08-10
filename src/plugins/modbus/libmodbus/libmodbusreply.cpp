@@ -53,7 +53,8 @@ void RequestThread::write()
         writeBytes();
         break;
     default:
-        break;//internal error
+        //internal error
+        break;
     }
 }
 
@@ -66,7 +67,10 @@ void RequestThread::writeBits()
         else
             bits[i] = false;
     }
-    modbus_write_bits(context, startAddress, values.size(), bits);
+    if (modbus_write_bits(context, startAddress, values.size(), bits) == -1) {
+        emit error(errno);
+        return;
+    }
 
     emit writeReady();
 }
@@ -76,7 +80,10 @@ void RequestThread::writeBytes()
     quint16 bytes[values.size()];
     for (int i = 0; i < values.size(); i++)
         bytes[i] = values.at(i);
-    modbus_write_registers(context, startAddress, values.size(), bytes);
+    if (modbus_write_registers(context, startAddress, values.size(), bytes) == -1) {
+        emit error(errno);
+        return;
+    }
 
     emit writeReady();
 }
@@ -103,10 +110,17 @@ void RequestThread::read()
 void RequestThread::readBits()
 {
     quint8 bits[size];
-    if (table == QModBusDevice::DiscreteInputs)
-        modbus_read_input_bits(context, startAddress, size, bits);
-    else
-        modbus_read_bits(context, startAddress, size, bits);
+    if (table == QModBusDevice::DiscreteInputs) {
+        if (modbus_read_input_bits(context, startAddress, size, bits) == -1) {
+            emit error(errno);
+            return;
+        }
+    } else {
+        if (modbus_read_bits(context, startAddress, size, bits) == -1) {
+            emit error(errno);
+            return;
+        }
+    }
     QByteArray bitsRead;
     for (int i = 0; i < size; i++)
         bitsRead[i] = bits[i];
@@ -116,10 +130,17 @@ void RequestThread::readBits()
 void RequestThread::readBytes()
 {
     quint16 bytes[size];
-    if (table == QModBusDevice::InputRegisters)
-        modbus_read_input_registers(context, startAddress, size, bytes);
-    else //Holding Register
-        modbus_read_registers(context, startAddress, size, bytes);
+    if (table == QModBusDevice::InputRegisters) {
+        if (modbus_read_input_registers(context, startAddress, size, bytes) == -1) {
+            emit error(errno);
+            return;
+        }
+    } else { //Holding Register
+        if (modbus_read_registers(context, startAddress, size, bytes) == -1) {
+            emit error(errno);
+            return;
+        }
+    }
 
     QByteArray bytesRead;
     QDataStream packer(&bytesRead, QIODevice::WriteOnly);
@@ -143,6 +164,7 @@ void Reply::read(const QList<QModBusDataUnit> &requests, int slaveId, modbus_t *
     connect(this, &Reply::startRead, request.data(), &RequestThread::read);
     connect(&thread, &QThread::finished, request.data(), &QObject::deleteLater);
     connect(request.data(), &RequestThread::readReady, this, &Reply::setResults);
+    connect(request.data(), &RequestThread::error, this, &Reply::handleError);
     thread.start();
     emit startRead();
 }
@@ -163,6 +185,7 @@ void Reply::write(const QList<QModBusDataUnit> &requests, int slaveId, modbus_t 
     connect(this, &Reply::startWrite, request.data(), &RequestThread::write);
     connect(&thread, &QThread::finished, request.data(), &QObject::deleteLater);
     connect(request.data(), &RequestThread::writeReady, this, &Reply::setFinished);
+    connect(request.data(), &RequestThread::error, this, &Reply::handleError);
     thread.start();
     emit startWrite();
 }
@@ -177,10 +200,14 @@ void Reply::setFinished()
     emit finished();
 }
 
-void Reply::setError(QModBusReply::RequestException exceptionCode, const QString &errorString)
+void Reply::setError(QModBusReply::RequestError errorCode, const QString &errorString)
 {
-    Q_UNUSED(exceptionCode);
-    Q_UNUSED(errorString);
+    payload.clear();
+    errorType = errorCode;
+    errorText = errorString;
+    emit errorOccurred(errorCode);
+    finish = true;
+    emit finished();
 }
 
 void Reply::setResults(QByteArray load)
@@ -195,6 +222,68 @@ void Reply::setResults(QByteArray load)
             values.append(load.at(i));
     }
     setFinished();
+}
+
+void Reply::handleError(int errorNumber)
+{
+    QString errorText;
+    QModBusReply::RequestError error;
+    // defined in libmodbus
+    switch (errorNumber) {
+    case EMBXILFUN:
+        error = QModBusReply::IllegalFunction;
+        errorText = modbus_strerror(errorNumber);
+        break;
+    case EMBXILADD:
+        error = QModBusReply::IllegalDataAddress;
+        errorText = modbus_strerror(errorNumber);
+        break;
+    case EMBXILVAL:
+        error = QModBusReply::IllegalDataValue;
+        errorText = modbus_strerror(errorNumber);
+        break;
+    case EMBXSFAIL:
+        error = QModBusReply::SlaveFailure;
+        errorText = modbus_strerror(errorNumber);
+        break;
+    case EMBXACK:
+        error = QModBusReply::Acknowledge;
+        errorText = modbus_strerror(errorNumber);
+        break;
+    case EMBXSBUSY:
+        error = QModBusReply::SlaveBusy;
+        errorText = modbus_strerror(errorNumber);
+        break;
+    case EMBXMEMPAR:
+        error = QModBusReply::MemoryParity;
+        errorText = modbus_strerror(errorNumber);
+        break;
+    case EMBXGPATH:
+        error = QModBusReply::GatewayUnavailable;
+        errorText = modbus_strerror(errorNumber);
+        break;
+    case EMBXGTAR:
+        error = QModBusReply::NoResponse;
+        errorText = modbus_strerror(errorNumber);
+        break;
+    case EMBBADCRC:
+        error = QModBusReply::InvalidCRC;
+        errorText = modbus_strerror(errorNumber);
+        break;
+    case EMBXNACK:
+    case EMBBADDATA:
+    case EMBBADEXC:
+    case EMBUNKEXC:
+    case EMBMDATA:
+        error = QModBusReply::InvalidError;
+        errorText = modbus_strerror(errorNumber);
+        break;
+    default:
+        error = QModBusReply::InvalidError;
+        errorText = qt_error_string(errorNumber);
+        break;
+    }
+    setError(error, errorText);
 }
 
 QT_END_NAMESPACE

@@ -61,7 +61,7 @@ public:
     modbus_mapping_t *mapping;
 
 Q_SIGNALS:
-    void fail();
+    void error(int errorNumber);
     void slaveRead();
     void slaveWritten(QVector<QModBusDataUnit>);
 };
@@ -82,6 +82,9 @@ public:
 
 Q_SIGNALS:
     void operate();
+
+private Q_SLOTS:
+    void handleError(int errorNumber);
 
 private:
     bool open() Q_DECL_OVERRIDE;
