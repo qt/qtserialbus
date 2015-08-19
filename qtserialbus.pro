@@ -7,7 +7,10 @@ lessThan(QT_MAJOR_VERSION, 5) {
 load(configure)
 qtCompileTest(socketcan)
 qtCompileTest(socketcan_fd)
+qtCompileTest(libmodbus)
 load(qt_parts)
+
+!config_libmodbus:warning("Cannot build libmodbus plugin. No libmodbus found")
 
 linux {
     !config_socketcan:warning("You need linux/can.h and linux/can/raw.h linux headers for socketCAN support, disabling it")
