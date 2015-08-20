@@ -28,13 +28,10 @@
 /*!
     \page qtserialbus-index.html
     \title Qt Serial Bus
-    \brief Provides a framework and implementation for SocketCAN
+    \brief Provides an API to access various serial bus devices
 
-    The Qt Serial Bus API provides classes and functions to access the SocketCAN serial bus
-    interface. However, the module is designed and named so that it can be extended with access to
-    any serial bus backend.
-
-    Currently, the API is supported on \l {Qt for Linux/X11}{Linux}.
+    The Qt Serial Bus API provides classes and functions to access the various
+    industrial serial buses and protocols, such as CAN, ModBus, and others.
 
     \section1 Getting Started
 
@@ -51,26 +48,10 @@
     QT += serialbus
     \endcode
 
-    \section1 Accessing Serial Bus Backends
-
-    The QSerialBus class handles registration and creation of serial bus backends. A backend is
-    implemented by the \l QSerialBusBackend class and acts as the access point to the actual device.
-    The backend handles the bit or byte level communication with the hardware and provides the
-    data and notifications to the \l QSerialBusDevice, which is the interface between the module
-    user and the actual bus.
-
-    \section1 Creating Qt Serial Bus Plugins
-
-    To create a new plugin for Qt Serial Bus, you should be familiar with the basic classes, as well
-    the \l QSerialBusPluginInterface class, which provides a pure virtual interface to serial bus
-    plugins.
-
-    \section1 Articles and Guides
+    \section1 Supported Buses and Protocols
 
     \list
-         \li \l {Qt Serial Bus Plugins}
-         \li \l {Using SocketCAN with Qt Serial Bus}
-         \li \l {Developing Qt Serial Bus Backend}
+         \li \l {Qt CAN Bus}
     \endlist
 
     \section1 API Reference

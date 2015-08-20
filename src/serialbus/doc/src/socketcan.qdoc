@@ -26,28 +26,38 @@
 ****************************************************************************/
 /*!
     \page qtserialbus-socketcan-overview.html
-    \title Using SocketCAN with Qt Serial Bus
+    \title Using SocketCAN Backend
 
-    \brief Overview of how to use SocketCAN with Qt Serial Bus.
+    \brief Overview of how to use the SocketCAN backend.
 
-    \l QCanBusDevice provides an API for CAN access and plugins. It is inherited from
-    QSerialBusDevice. All access to the CAN is handled by \l QCanBusDevice.
-
-    \l QCanBusFrame defines a CAN frame that can be written and read from QCanBusDevice.
+    The SocketCAN backend encapsulates the Linux sockets API for accessing the CAN devices.
+    This API is a set of open source CAN drivers and a networking stack contributed by
+    Volkswagen Research to the Linux kernel.
 
     \section1 Creating CAN Bus Devices
 
-    For example, we can create a device for CAN bus communication via a SocketCAN backend. In the
-    following example code, we have an active CAN interface, \e can0. The SocketCAN backend is part
-    of a CAN plugin. In the CAN plugin, we want to use the SocketCAN backend:
+    At first it is necessary to check that QCanBus provides the desired backend:
 
     \code
-        QPointer<QSerialBus> serialBus = QSerialBus::instance();
-        QSerialBusBackend *socketCanBackend = serialBus->createBackend("can", "socketcan", "can0");
-        QPointer<QCanBusDevice> socketCanDevice = new QCanBusDevice(socketCanBackend, this);
-
-        socketCanDevice->open(QIODevice::ReadWrite);
+        foreach (const QByteArray &backend, QCanBus::instance()->plugins()) {
+            if (backend == "socketcan") {
+                // were found
+                break;
+            }
+        }
     \endcode
+
+    Where, \e socketcan is the backend name.
+
+    Further, it is necessary to request from QCanBus the device with the active SocketCAN
+    interface:
+
+    \code
+        QCanBusDevice *device = QCanBus::createDevice("socketcan", QStringLiteral("can0"));
+        device->connectDevice();
+    \endcode
+
+    Where,\e can0 is the active CAN interface name.
 
     The device is now open and can be written and read:
 
@@ -56,14 +66,15 @@
         frame.setFrameId(8);
         QByteArray payload("A36E");
         frame.setPayload(payload);
-        socketCanDevice->writeFrame(frame);
+        device->writeFrame(frame);
     \endcode
 
     The reading can be done using the \l {QCanBusDevice::}{readFrame()} method. The
-    \l {QIODevice::}{readyRead()} signal is emitted when a new frame is available for reading:
+    \l {QCanBusDevice::}{frameReceived()} signal is emitted when a new frame is available
+    for reading:
 
     \code
-    QCanBusFrame frame = socketCanDevice->readFrame();
+    QCanBusFrame frame = device->readFrame();
     \endcode
 
     SocketCAN provides the following configurations that can be controlled through
@@ -71,39 +82,32 @@
 
     \table
         \header
-            \li Configuration parameter
+            \li Configuration parameter key
             \li Description
         \row
-            \li LoopBack
+            \li QCanBusDevice::LoopbackKey
             \li To meet the multiple-user needs, the local loopback is enabled by default.
         \row
-            \li ReceiveOwnMessages
+            \li QCanBusDevice::ReceiveOwnKey
             \li The reception of the CAN frames on the same socket that was sending the CAN frame
-            is assumed to be unwanted and therefore disabled by default.
+                is disabled by default.
         \row
-            \li ErrorMask
+            \li QCanBusDevice::ErrorFilterKey
             \li A CAN interface driver can generate so called \e {Error Message Frames} that can
                 optionally be passed to the user application in the same way as other CAN frames.
                 The possible errors are divided into different error classes that may be filtered
                 using the appropriate error mask. The values for the error mask are defined in
                 \c {linux/can/error.h}.
         \row
-            \li CanFilter
+            \li QCanBusDevice::RawFilterKey
             \li A CAN filter can contain multiple filters, each of which contains two variables.
-                Therefore, the value of \c CanFilter is a nested QVariant. The first QVariant
-                contains QList<QVariant> that contains QHash<QString, QVariant>. This last QHash
-                contains two keys: \c FilterId and \c CanMask.
     \endtable
 
     For example:
 
     \code
-        QList<QVariant> var;
-        QHash<QString, QVariant> hash;
-        hash.insert(QStringLiteral("FilterId"), 0x12);
-        hash.insert(QStringLiteral("CanMask"), 0x1FFFFFFFU);
-        var.append(hash);
-        canDevice->setConfigurationParameter(QStringLiteral("CanFilter"), var);
+        device->setConfigurationParameter(QCanBusDevice::RawFilterKey, 0x12);
+        device->setConfigurationParameter(QCanBusDevice::ErrorFilterKey, 0x1FFFFFFFU);
     \endcode
 
     Efficient frame format and flexible data-rate are supported in SocketCAN.

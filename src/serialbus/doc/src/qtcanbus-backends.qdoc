@@ -25,19 +25,35 @@
 **
 ****************************************************************************/
 /*!
-    \page qtserialbus-plugins.html
-    \title Qt Serial Bus Plugins
+    \page qtcanbus-backends.html
+    \title Qt CAN Bus
 
-    \brief Implemented Qt Serial Bus plugins.
+    \brief Implemented Qt CAN Bus.
+
+    A Controller Area Network (CAN) is a vehicle bus standard designed to allow microcontrollers
+    and devices to communicate with each other in applications without a host computer.
+
+    It is a message-based protocol, designed originally for multiplex electrical wiring within
+    automobiles, but is also used in many other contexts.
+
+    The CAN Bus API provides some common API to access the CAN devices:
+
+    \list
+        \li QCanBusDevice provides an API for direct access to the CAN device.
+        \li QCanBusFrame defines a CAN frame that can be written and read from QCanBusDevice.
+    \endlist
+
+    Various vendors provide CAN devices with different API for access. The CAN bus plugin
+    supports the following set of backends for various devices:
 
     \table
         \header
-            \li Plugin
+            \li Vendor
             \li Backend
             \li Brief description
         \row
-            \li CAN
-            \li \l {Using SocketCAN with Qt Serial Bus}{SocketCAN}
-            \li CAN bus plugin using Linux sockets and open source drivers.
+            \li CAN over Linux sockets
+            \li \l {Using SocketCAN Backend}{SocketCAN}
+            \li CAN bus backend using Linux sockets and open source drivers.
     \endtable
  */
