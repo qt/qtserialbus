@@ -4,4 +4,5 @@
 
 %dependencies = (
         "qtbase" => "",
+        "qtserialport" => "",
 );
