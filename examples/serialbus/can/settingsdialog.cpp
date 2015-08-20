@@ -38,51 +38,56 @@
 **
 ****************************************************************************/
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#include "settingsdialog.h"
+#include "ui_settingsdialog.h"
 
-#include <QCanBusDevice> // for CanBusError
-
-#include <QMainWindow>
-
-QT_BEGIN_NAMESPACE
-class QLabel;
-
-class QCanBusFrame;
-
-class SettingsDialog;
-
-namespace Ui {
-class MainWindow;
-}
-QT_END_NAMESPACE
+#include <QCanBus>
 
 QT_USE_NAMESPACE
 
-class MainWindow : public QMainWindow
+SettingsDialog::SettingsDialog(QWidget *parent) :
+    QDialog(parent),
+    m_ui(new Ui::SettingsDialog)
 {
-    Q_OBJECT
+    m_ui->setupUi(this);
 
-public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    connect(m_ui->applyButton, &QPushButton::clicked, this, &SettingsDialog::apply);
+    connect(m_ui->useConfigurationBox, &QCheckBox::clicked, m_ui->configurationBox, &QGroupBox::setEnabled);
 
-private Q_SLOTS:
-    void checkMessages();
-    void sendMessage() const;
-    void receiveError(QCanBusDevice::CanBusError) const;
-    void connectDevice();
-    void disconnectDevice();
+    fillBackends();
 
-private:
-    void showStatusMessage(const QString &message);
-    void initActionsConnections();
-    void interpretError(QString &, const QCanBusFrame &);
+    updateSettings();
+}
 
-    Ui::MainWindow *m_ui;
-    QLabel *m_status;
-    SettingsDialog *m_settings;
-    QCanBusDevice *m_canDevice;
-};
+SettingsDialog::~SettingsDialog()
+{
+    delete m_ui;
+}
 
-#endif // MAINWINDOW_H
+SettingsDialog::Settings SettingsDialog::settings() const
+{
+    return m_currentSettings;
+}
+
+void SettingsDialog::apply()
+{
+    updateSettings();
+    hide();
+}
+
+void SettingsDialog::updateSettings()
+{
+    m_currentSettings.backendName = m_ui->backendListBox->currentText();
+    m_currentSettings.deviceInterfaceName = m_ui->interfaceNameEdit->text();
+    m_currentSettings.useConfigurationEnabled = m_ui->useConfigurationBox->isChecked();
+
+    if (m_currentSettings.useConfigurationEnabled) {
+        // FIXME: update configuration
+    }
+}
+
+void SettingsDialog::fillBackends()
+{
+    foreach (const QByteArray &backend, QCanBus::instance()->plugins())
+        m_ui->backendListBox->addItem(backend);
+}

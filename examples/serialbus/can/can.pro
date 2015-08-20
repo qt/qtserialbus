@@ -4,8 +4,13 @@ TARGET = can
 TEMPLATE = app
 
 SOURCES += main.cpp \
-        mainwindow.cpp
+    mainwindow.cpp \
+    settingsdialog.cpp
 
-HEADERS += mainwindow.h
+HEADERS += mainwindow.h \
+    settingsdialog.h
 
-FORMS   += mainwindow.ui
+FORMS   += mainwindow.ui \
+    settingsdialog.ui
+
+RESOURCES += can.qrc

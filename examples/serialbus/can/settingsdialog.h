@@ -38,51 +38,52 @@
 **
 ****************************************************************************/
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef SETTINGSDIALOG_H
+#define SETTINGSDIALOG_H
 
-#include <QCanBusDevice> // for CanBusError
+#include <QCanBusDevice>
 
-#include <QMainWindow>
+#include <QDialog>
 
 QT_BEGIN_NAMESPACE
-class QLabel;
-
-class QCanBusFrame;
-
-class SettingsDialog;
 
 namespace Ui {
-class MainWindow;
+class SettingsDialog;
 }
+
 QT_END_NAMESPACE
 
 QT_USE_NAMESPACE
 
-class MainWindow : public QMainWindow
+class SettingsDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    typedef QPair<QCanBusDevice::ConfigurationKey, QVariant> ConfigurationItem;
 
-private Q_SLOTS:
-    void checkMessages();
-    void sendMessage() const;
-    void receiveError(QCanBusDevice::CanBusError) const;
-    void connectDevice();
-    void disconnectDevice();
+    struct Settings {
+        QString backendName;
+        QString deviceInterfaceName;
+        QList<ConfigurationItem> configurations;
+        bool useConfigurationEnabled;
+    };
+
+    explicit SettingsDialog(QWidget *parent = 0);
+    ~SettingsDialog();
+
+    Settings settings() const;
+
+private slots:
+    void apply();
 
 private:
-    void showStatusMessage(const QString &message);
-    void initActionsConnections();
-    void interpretError(QString &, const QCanBusFrame &);
+    void updateSettings();
+    void fillBackends();
 
-    Ui::MainWindow *m_ui;
-    QLabel *m_status;
-    SettingsDialog *m_settings;
-    QCanBusDevice *m_canDevice;
+private:
+    Ui::SettingsDialog *m_ui;
+    Settings m_currentSettings;
 };
 
-#endif // MAINWINDOW_H
+#endif // SETTINGSDIALOG_H

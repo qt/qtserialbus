@@ -40,9 +40,10 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "settingsdialog.h"
 
-#include <QtSerialBus>
 #include <QCanBusFrame>
+#include <QCanBus>
 
 #include <QtCore/qbytearray.h>
 #include <QtCore/qvariant.h>
@@ -50,53 +51,49 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    deviceName(QStringLiteral("")),
-    ui(new Ui::MainWindow)
+    m_ui(new Ui::MainWindow),
+    m_canDevice(Q_NULLPTR)
 {
-    ui->setupUi(this);
-    init();
+    m_ui->setupUi(this);
+
+    m_settings = new SettingsDialog;
+
+    m_status = new QLabel;
+    m_ui->statusBar->addWidget(m_status);
+
+    m_ui->sendMessagesBox->setEnabled(false);
+
+    initActionsConnections();
+
+    connect(m_ui->sendButton, &QPushButton::clicked, this, &MainWindow::sendMessage);
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
+    if (m_canDevice)
+        delete m_canDevice;
+
+    delete m_settings;
+    delete m_ui;
 }
 
-
-void MainWindow::init()
+void MainWindow::showStatusMessage(const QString &message)
 {
-    QPointer<QCanBus> canBus = QCanBus::instance();
-
-    plugins = canBus->plugins();
-    for (int i = 0; i < plugins.size(); i++)
-        ui->pluginBox->insertItem(i, plugins.at(i));
-    connectDevice(ui->pluginBox->currentIndex());
+    m_status->setText(message);
 }
 
-void MainWindow::connectDevice(int pluginIndex)
+void MainWindow::initActionsConnections()
 {
-    QPointer<QCanBus> canBus = QCanBus::instance();
+    m_ui->actionConnect->setEnabled(true);
+    m_ui->actionDisconnect->setEnabled(false);
+    m_ui->actionQuit->setEnabled(true);
+    m_ui->actionConfigure->setEnabled(true);
 
-    canDevice = canBus->createDevice(plugins.at(pluginIndex), deviceName);
-
-    if (canDevice.isNull())
-        return;
-    connect(canDevice.data(), &QCanBusDevice::errorOccurred, this, &MainWindow::receiveError);
-
-    if (!canDevice->connectDevice()) {
-        canDevice.clear();
-        return;
-    }
-    canDevice->setConfigurationParameter(QCanBusDevice::ReceiveOwnKey, QVariant(true));
-    canDevice->setConfigurationParameter(
-                QCanBusDevice::ErrorFilterKey,
-                QVariant::fromValue(QCanBusFrame::FrameErrors(QCanBusFrame::AnyError)));
-    connect(canDevice.data(), &QCanBusDevice::frameReceived,
-            this, &MainWindow::checkMessages);
-
-    ui->deviceLabel->setText("Connected to: " + deviceName);
-
-    checkMessages();
+    connect(m_ui->actionConnect, &QAction::triggered, this, &MainWindow::connectDevice);
+    connect(m_ui->actionDisconnect, &QAction::triggered, this, &MainWindow::disconnectDevice);
+    connect(m_ui->actionQuit, SIGNAL(triggered()), this, SLOT(close()));
+    connect(m_ui->actionConfigure, &QAction::triggered, m_settings, &SettingsDialog::show);
+    connect(m_ui->actionAboutQt, &QAction::triggered, qApp, &QApplication::aboutQt);
 }
 
 void MainWindow::receiveError(QCanBusDevice::CanBusError error) const
@@ -107,18 +104,71 @@ void MainWindow::receiveError(QCanBusDevice::CanBusError error) const
     case QCanBusDevice::ConnectionError:
     case QCanBusDevice::ConfigurationError:
     case QCanBusDevice::UnknownError:
-        qWarning() << canDevice->errorString();
+        qWarning() << m_canDevice->errorString();
     default:
         break;
     }
 }
 
-void MainWindow::checkMessages()
+void MainWindow::connectDevice()
 {
-    if (canDevice.isNull())
+    const SettingsDialog::Settings p = m_settings->settings();
+
+    m_canDevice = QCanBus::instance()->createDevice(p.backendName.toLocal8Bit(), p.deviceInterfaceName);
+    if (!m_canDevice) {
+        showStatusMessage(tr("Connection error"));
+        return;
+    }
+
+    connect(m_canDevice, &QCanBusDevice::errorOccurred, this, &MainWindow::receiveError);
+    connect(m_canDevice, &QCanBusDevice::frameReceived, this, &MainWindow::checkMessages);
+
+    if (p.useConfigurationEnabled) {
+        foreach (const SettingsDialog::ConfigurationItem &item, p.configurations)
+            m_canDevice->setConfigurationParameter(item.first, item.second);
+    }
+
+    if (!m_canDevice->connectDevice()) {
+        delete m_canDevice;
+        m_canDevice = Q_NULLPTR;
+
+        showStatusMessage(tr("Connection error"));
+    } else {
+        m_ui->actionConnect->setEnabled(false);
+        m_ui->actionDisconnect->setEnabled(true);
+        m_ui->actionConfigure->setEnabled(false);
+
+        m_ui->sendMessagesBox->setEnabled(true);
+
+        showStatusMessage(tr("Backend: %1, Connected to: %2")
+                          .arg(p.backendName).arg(p.deviceInterfaceName));
+    }
+}
+
+void MainWindow::disconnectDevice()
+{
+    if (!m_canDevice)
         return;
 
-    const QCanBusFrame frame = canDevice->readFrame();
+    m_canDevice->disconnectDevice();
+    delete m_canDevice;
+    m_canDevice = Q_NULLPTR;
+
+    m_ui->actionConnect->setEnabled(true);
+    m_ui->actionDisconnect->setEnabled(false);
+    m_ui->actionConfigure->setEnabled(true);
+
+    m_ui->sendMessagesBox->setEnabled(false);
+
+    showStatusMessage(tr("Disconnected"));
+}
+
+void MainWindow::checkMessages()
+{
+    if (!m_canDevice)
+        return;
+
+    const QCanBusFrame frame = m_canDevice->readFrame();
 
     if (frame.payload().isEmpty())
         return;
@@ -140,68 +190,52 @@ void MainWindow::checkMessages()
     }
 
     if (frame.frameType() == QCanBusFrame::RemoteRequestFrame) {
-        ui->requestList->addItem(view);
+        m_ui->requestList->addItem(view);
     } else if (frame.frameType() == QCanBusFrame::ErrorFrame) {
-        ui->errorList->addItem(view);
+        m_ui->errorList->addItem(view);
     } else {
-        ui->listWidget->addItem(view);
+        m_ui->listWidget->addItem(view);
     }
 }
 
-void MainWindow::on_sendButton_clicked() const
+void MainWindow::sendMessage() const
 {
-    if (canDevice.isNull())
+    if (!m_canDevice)
         return;
 
-    QByteArray writings = ui->lineEdit->displayText().toUtf8();
-    ui->lineEdit->clear();
+    QByteArray writings = m_ui->lineEdit->displayText().toUtf8();
+    m_ui->lineEdit->clear();
 
     QCanBusFrame frame;
-    const int maxPayload = ui->fdBox->checkState() ? 64 : 8;
+    const int maxPayload = m_ui->fdBox->checkState() ? 64 : 8;
     int size = writings.size();
     if (size > maxPayload)
         size = maxPayload;
     writings = writings.left(size);
     frame.setPayload(writings);
 
-    qint32 id = ui->idEdit->displayText().toInt();
-    ui->idEdit->clear();
-    if (!ui->EFF->checkState() && id > 2047) //11 bits
+    qint32 id = m_ui->idEdit->displayText().toInt();
+    m_ui->idEdit->clear();
+    if (!m_ui->EFF->checkState() && id > 2047) //11 bits
         id = 2047;
 
     frame.setFrameId(id);
-    frame.setExtendedFrameFormat(ui->EFF->checkState());
+    frame.setExtendedFrameFormat(m_ui->EFF->checkState());
 
-    if (ui->remoteFrame->isChecked())
+    if (m_ui->remoteFrame->isChecked())
         frame.setFrameType(QCanBusFrame::RemoteRequestFrame);
-    else if (ui->errorFrame->isChecked())
+    else if (m_ui->errorFrame->isChecked())
         frame.setFrameType(QCanBusFrame::ErrorFrame);
     else
         frame.setFrameType(QCanBusFrame::DataFrame);
 
-    canDevice->writeFrame(frame);
-}
-
-void MainWindow::on_connectButton_clicked()
-{
-    canDevice.clear();
-    deviceName = ui->deviceEdit->text();
-    ui->deviceEdit->clear();
-    ui->deviceLabel->setText("Connected to:");
-    connectDevice(ui->pluginBox->currentIndex());
-}
-
-void MainWindow::on_pluginBox_activated(int index)
-{
-    canDevice.clear();
-    ui->deviceLabel->setText("Connected to:");
-    connectDevice(index);
+    m_canDevice->writeFrame(frame);
 }
 
 void MainWindow::interpretError(QString &view, const QCanBusFrame &frame)
 {
-    if (canDevice.isNull())
+    if (!m_canDevice)
         return;
 
-    view = canDevice->interpretErrorFrame(frame);
+    view = m_canDevice->interpretErrorFrame(frame);
 }
