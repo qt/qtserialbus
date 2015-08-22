@@ -1,0 +1,470 @@
+﻿/****************************************************************************
+**
+** Copyright (C) 2015 Denis Shienkov <denis.shienkov@gmail.com>
+** Copyright (C) 2015 The Qt Company Ltd.
+** Contact: http://www.qt.io/licensing/
+**
+** This file is part of the QtSerialBus module of the Qt Toolkit.
+**
+** $QT_BEGIN_LICENSE:LGPL3$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see http://www.qt.io/terms-conditions. For further
+** information use the contact form at http://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPLv3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl.html.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or later as published by the Free
+** Software Foundation and appearing in the file LICENSE.GPL included in
+** the packaging of this file. Please review the following information to
+** ensure the GNU General Public License version 2.0 requirements will be
+** met: http://www.gnu.org/licenses/gpl-2.0.html.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+#include "tinycanbackend.h"
+#include "tinycanbackend_p.h"
+
+#include "tinycan_symbols_p.h"
+
+#include <QtSerialBus/qcanbusdevice.h>
+
+#include <QtCore/qtimer.h>
+#include <QtCore/qmutex.h>
+#include <QtCore/qcoreevent.h>
+
+QT_BEGIN_NAMESPACE
+
+#ifndef LINK_LIBMHSTCAN
+Q_GLOBAL_STATIC(QLibrary, mhstcanLibrary)
+#endif
+
+bool TinyCanBackend::canCreate(QString *errorReason)
+{
+#ifdef LINK_LIBMHSTCAN
+    return true;
+#else
+    static bool symbolsResolved = resolveSymbols(mhstcanLibrary());
+    if (!symbolsResolved) {
+        *errorReason = tr("The MHSTCAN runtime library is not found");
+        return false;
+    }
+    return true;
+#endif
+}
+
+Q_GLOBAL_STATIC(QList<TinyCanBackendPrivate *>, qChannels)
+
+static QMutex channelsGuard(QMutex::NonRecursive);
+
+class OutgoingEventNotifier : public QTimer
+{
+public:
+    OutgoingEventNotifier(TinyCanBackendPrivate *d, QObject *parent)
+        : QTimer(parent)
+        , dptr(d)
+    {
+    }
+
+protected:
+    void timerEvent(QTimerEvent *e) Q_DECL_OVERRIDE
+    {
+        if (e->timerId() == timerId()) {
+            dptr->canWriteNotification();
+            return;
+        }
+        QTimer::timerEvent(e);
+    }
+
+private:
+    TinyCanBackendPrivate *dptr;
+};
+
+static int driverRefCount = 0;
+
+static void DRV_CALLBACK_TYPE canRxEventCallback(quint32 index, TCanMsg *frame, qint32 count)
+{
+    Q_UNUSED(frame);
+    Q_UNUSED(count);
+
+    QMutexLocker lock(&channelsGuard);
+    foreach (TinyCanBackendPrivate *p, *qChannels()) {
+        if (p->channelIndex == int(index)) {
+            p->canReadNotification();
+            return;
+        }
+    }
+}
+
+TinyCanBackendPrivate::TinyCanBackendPrivate(TinyCanBackend *q)
+    : q_ptr(q)
+    , isOpen(false)
+    , channelIndex(-1)
+{
+    startupDriver();
+
+    QMutexLocker lock(&channelsGuard);
+    qChannels()->append(this);
+}
+
+TinyCanBackendPrivate::~TinyCanBackendPrivate()
+{
+    cleanupDriver();
+
+    QMutexLocker lock(&channelsGuard);
+    qChannels()->removeAll(this);
+}
+
+bool TinyCanBackendPrivate::open()
+{
+    Q_Q(TinyCanBackend);
+
+    if (int ret = ::CanSetSpeed(channelIndex, CAN_500K_BIT) < 0) {
+        q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
+        return false;
+    }
+
+    char options[] = "AutoConnect=1;AutoReopen=0";
+    if (int ret = ::CanSetOptions(options) < 0) {
+        q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
+        return false;
+    }
+
+    if (int ret = ::CanDeviceOpen(channelIndex, Q_NULLPTR) < 0) {
+        q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
+        return false;
+    }
+
+    if (int ret = ::CanSetMode(channelIndex, OP_CAN_START, CAN_CMD_ALL_CLEAR) < 0) {
+        q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
+        ::CanDeviceClose(channelIndex);
+        return false;
+    }
+
+    isOpen = true;
+    return true;
+}
+
+void TinyCanBackendPrivate::close()
+{
+    Q_Q(TinyCanBackend);
+
+    if (int ret = ::CanDeviceClose(channelIndex) < 0)
+        q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
+
+    isOpen = false;
+}
+
+// TODO: Implement me
+bool TinyCanBackendPrivate::setConfigurationParameter(int key, const QVariant &value)
+{
+    Q_UNUSED(key);
+    Q_UNUSED(value);
+
+    return false;
+}
+
+// These error codes taked from the errors.h file, which
+// exists only in linux sources.
+QString TinyCanBackendPrivate::systemErrorString(int errorCode)
+{
+    switch (errorCode) {
+    case 0:
+        return TinyCanBackend::tr("No error");
+    case -1:
+        return TinyCanBackend::tr("Driver not initialized");
+    case -2:
+        return TinyCanBackend::tr("Invalid parameters values were passed");
+    case -3:
+        return TinyCanBackend::tr("Invalid index value");
+    case -4:
+        return TinyCanBackend::tr("More invalid CAN-channel");
+    case -5:
+        return TinyCanBackend::tr("General error");
+    case -6:
+        return TinyCanBackend::tr("The FIFO cannot be written");
+    case -7:
+        return TinyCanBackend::tr("The buffer cannot be written");
+    case -8:
+        return TinyCanBackend::tr("The FIFO cannot be read");
+    case -9:
+        return TinyCanBackend::tr("The buffer cannot be read");
+    case -10:
+        return TinyCanBackend::tr("Variable not found");
+    case -11:
+        return TinyCanBackend::tr("Reading of the variable does not permit");
+    case -12:
+        return TinyCanBackend::tr("Reading buffer for variable too small");
+    case -13:
+        return TinyCanBackend::tr("Writing of the variable does not permit");
+    case -14:
+        return TinyCanBackend::tr("The string/stream to be written is to majority");
+    case -15:
+        return TinyCanBackend::tr("Fell short min of value");
+    case -16:
+        return TinyCanBackend::tr("Max value crossed");
+    case -17:
+        return TinyCanBackend::tr("Access refuses");
+    case -18:
+        return TinyCanBackend::tr("Invalid value of CAN speed");
+    case -19:
+        return TinyCanBackend::tr("Invalid value of baud rate");
+    case -20:
+        return TinyCanBackend::tr("Value not put");
+    case -21:
+        return TinyCanBackend::tr("No connection to the hardware");
+    case -22:
+        return TinyCanBackend::tr("Communication error to the hardware");
+    case -23:
+        return TinyCanBackend::tr("Hardware sends wrong number of parameters");
+    case -24:
+        return TinyCanBackend::tr("Not enough main memory");
+    case -25:
+        return TinyCanBackend::tr("The system cannot provide the enough resources");
+    case -26:
+        return TinyCanBackend::tr("A system call returns with an error");
+    case -27:
+        return TinyCanBackend::tr("The main thread is occupied");
+    case -28:
+        return TinyCanBackend::tr("User allocated memory not found");
+    case -29:
+        return TinyCanBackend::tr("The main thread cannot be launched");
+        // the codes -30...-33 are skipped, as they belongs to sockets
+    default:
+        return TinyCanBackend::tr("Unknown error");
+    }
+}
+
+static int channelIndexFromName(const QString &interfaceName)
+{
+    if (interfaceName == QStringLiteral("channela"))
+        return INDEX_CAN_KANAL_A;
+    else if (interfaceName == QStringLiteral("channelb"))
+        return INDEX_CAN_KANAL_B;
+    else
+        return -1;
+}
+
+void TinyCanBackendPrivate::setupChannel(const QString &interfaceName)
+{
+    channelIndex = channelIndexFromName(interfaceName);
+}
+
+void TinyCanBackendPrivate::enableWriteNotification(bool enable)
+{
+    Q_Q(TinyCanBackend);
+
+    if (outgoingEventNotifier) {
+        if (enable) {
+            if (!outgoingEventNotifier->isActive())
+                outgoingEventNotifier->start();
+        } else {
+            outgoingEventNotifier->stop();
+        }
+    } else if (enable) {
+        outgoingEventNotifier = new OutgoingEventNotifier(this, q);
+        outgoingEventNotifier->setInterval(0);
+        outgoingEventNotifier->start();
+    }
+}
+
+void TinyCanBackendPrivate::canWriteNotification()
+{
+    Q_Q(TinyCanBackend);
+
+    if (outgoingFrames.isEmpty()) {
+        enableWriteNotification(false);
+        return;
+    }
+
+    const QCanBusFrame frame = outgoingFrames.takeFirst();
+    const QByteArray payload = frame.payload();
+
+    TCanMsg message;
+    ::memset(&message, 0, sizeof(message));
+
+    if (payload.size() > int(sizeof(message.Data.Bytes))) {
+        qWarning("Impossible to write the message with unacceptable data size %d, ignored", payload.size());
+    } else {
+        message.Id = frame.frameId();
+        message.Flags.Flag.Len = payload.size();
+        message.Flags.Flag.RTR = (frame.frameType() == QCanBusFrame::RemoteRequestFrame);
+        message.Flags.Flag.TxD = 1;
+        message.Flags.Flag.EFF = frame.hasExtendedFrameFormat();
+
+        const qint32 messagesToWrite = 1;
+        ::memcpy(message.Data.Bytes, payload.constData(), sizeof(message.Data.Bytes));
+        if (int ret = ::CanTransmit(channelIndex, &message, messagesToWrite) < 0) {
+            q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::WriteError);
+        } else {
+            // TODO: Emit the future signal that the frame has been written
+        }
+    }
+
+    if (!outgoingFrames.isEmpty())
+        enableWriteNotification(true);
+}
+
+bool TinyCanBackendPrivate::enableReadNotification()
+{
+    ::CanSetRxEventCallback(&canRxEventCallback);
+    ::CanSetEvents(EVENT_ENABLE_RX_MESSAGES);
+
+    return true;
+}
+
+// this method is called from the different thread!
+void TinyCanBackendPrivate::canReadNotification()
+{
+    Q_Q(TinyCanBackend);
+
+    forever {
+        if (!::CanReceiveGetCount(channelIndex))
+            break;
+
+        TCanMsg message;
+        ::memset(&message, 0, sizeof(message));
+
+        const int messagesToRead = 1;
+        if (int ret = ::CanReceive(channelIndex, &message, messagesToRead) < 0) {
+            q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ReadError);
+
+            TDeviceStatus status;
+            ::memset(&status, 0, sizeof(status));
+
+            if (::CanGetDeviceStatus(channelIndex, &status) < 0) {
+                q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ReadError);
+            } else {
+                if (status.CanStatus == CAN_STATUS_BUS_OFF) {
+                    qWarning("CAN bus is in off state, trying to reset the bus");
+                    if (::CanSetMode(channelIndex, OP_CAN_RESET, CAN_CMD_NONE) < 0)
+                        q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ReadError);
+                }
+            }
+
+            continue;
+        }
+
+        QCanBusFrame frame(message.Id, QByteArray(reinterpret_cast<char *>(message.Data.Bytes),
+                                                  int(message.Flags.Flag.Len)));
+        frame.setTimeStamp(QCanBusFrame::TimeStamp(message.Time.Sec, message.Time.USec));
+
+        q->enqueueReceivedFrame(frame);
+    }
+}
+
+void TinyCanBackendPrivate::startupDriver()
+{
+    Q_Q(TinyCanBackend);
+
+    if (driverRefCount == 0) {
+        if (int ret = ::CanInitDriver(Q_NULLPTR) < 0) {
+            q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
+            return;
+        }
+
+        enableReadNotification();
+
+    } else if (driverRefCount < 0) {
+        qCritical("Wrong reference counter: %d", driverRefCount);
+        return;
+    }
+
+    ++driverRefCount;
+}
+
+void TinyCanBackendPrivate::cleanupDriver()
+{
+    --driverRefCount;
+
+    if (driverRefCount < 0) {
+        qCritical("Wrong reference counter: %d", driverRefCount);
+        driverRefCount = 0;
+    } else if (driverRefCount == 0) {
+        ::CanSetEvents(EVENT_DISABLE_ALL);
+        ::CanDownDriver();
+    }
+}
+
+TinyCanBackend::TinyCanBackend(const QString &name, QObject *parent)
+    : QCanBusDevice(parent)
+    , d_ptr(new TinyCanBackendPrivate(this))
+{
+    Q_D(TinyCanBackend);
+
+    d->setupChannel(name);
+}
+
+TinyCanBackend::~TinyCanBackend()
+{
+    close();
+    delete d_ptr;
+}
+
+bool TinyCanBackend::open()
+{
+    Q_D(TinyCanBackend);
+
+    if (!d->isOpen) {
+        if (!d->open()) {
+            close(); // sets UnconnectedState
+            return false;
+        }
+    }
+
+    setState(QCanBusDevice::ConnectedState);
+    return true;
+}
+
+void TinyCanBackend::close()
+{
+    Q_D(TinyCanBackend);
+
+    d->close();
+
+    setState(QCanBusDevice::UnconnectedState);
+}
+
+void TinyCanBackend::setConfigurationParameter(int key, const QVariant &value)
+{
+    Q_D(TinyCanBackend);
+
+    if (d->setConfigurationParameter(key, value))
+        QCanBusDevice::setConfigurationParameter(key, value);
+}
+
+bool TinyCanBackend::writeFrame(const QCanBusFrame &newData)
+{
+    Q_D(TinyCanBackend);
+
+    if (state() != QCanBusDevice::ConnectedState)
+        return false;
+
+    d->outgoingFrames.append(newData);
+    d->enableWriteNotification(true);
+
+    return true;
+}
+
+// TODO: Implement me
+QString TinyCanBackend::interpretErrorFrame(const QCanBusFrame &errorFrame)
+{
+    Q_UNUSED(errorFrame);
+
+    return QString();
+}
+
+QT_END_NAMESPACE

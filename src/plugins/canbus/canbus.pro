@@ -4,4 +4,4 @@ config_socketcan {
     SUBDIRS += socketcan
 }
 
-SUBDIRS += peakcan
+SUBDIRS += peakcan tinycan
