@@ -59,4 +59,11 @@ QT_BEGIN_NAMESPACE
     If the factory cannot create a backend, it returns 0.
 */
 
+/*!
+    \internal
+
+    \fn QCanBusFactory::~QCanBusFactory()
+*/
+
+
 QT_END_NAMESPACE
