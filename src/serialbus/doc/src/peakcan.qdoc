@@ -1,0 +1,81 @@
+/****************************************************************************
+**
+** Copyright (C) 2015 The Qt Company Ltd.
+** Contact: http://www.qt.io/licensing/
+**
+** This file is part of the documentation of the Qt Toolkit.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see http://www.qt.io/terms-conditions. For further
+** information use the contact form at http://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: http://www.gnu.org/copyleft/fdl.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+/*!
+    \page qtserialbus-peakcan-overview.html
+    \title Using PeakCAN Backend
+
+    \brief Overview of how to use the PeakCAN backend.
+
+    The PeakCAN backend encapsulates the low-level API to work with the
+    \l{http://www.peak-system.com/}{PCAN} adapters.
+
+    \section1 Creating CAN Bus Devices
+
+    At first it is necessary to check that QCanBus provides the desired backend:
+
+    \code
+        foreach (const QByteArray &backend, QCanBus::instance()->plugins()) {
+            if (backend == "peakcan") {
+                // were found
+                break;
+            }
+        }
+    \endcode
+
+    Where, \e peakcan is the backend name.
+
+    Further, it is necessary to request from QCanBus the device with the active PeakCan
+    interface:
+
+    \code
+        QCanBusDevice *device = QCanBus::createDevice("peakcan", QStringLiteral("usbbus1"));
+        device->connectDevice();
+    \endcode
+
+    Where, \e usbbus1 is the active CAN interface name. The PCAN API provides only eight
+    interfaces from \e usbbus1 to \e usbbus8.
+
+    Note: Only the USB adapters are supported currently by this backend.
+
+    The device is now open and can be written and read:
+
+    \code
+        QCanBusFrame frame;
+        frame.setFrameId(8);
+        QByteArray payload("A36E");
+        frame.setPayload(payload);
+        device->writeFrame(frame);
+    \endcode
+
+    The reading can be done using the \l {QCanBusDevice::}{readFrame()} method. The
+    \l {QCanBusDevice::}{frameReceived()} signal is emitted when a new frame is available
+    for reading:
+
+    \code
+    QCanBusFrame frame = device->readFrame();
+    \endcode
+ */

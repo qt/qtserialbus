@@ -55,5 +55,9 @@
             \li CAN over Linux sockets
             \li \l {Using SocketCAN Backend}{SocketCAN}
             \li CAN bus backend using Linux sockets and open source drivers.
+        \row
+            \li PEAK-System
+            \li \l {Using PeakCAN Backend}{PeakCAN}
+            \li CAN bus backend using the PCAN adapters.
     \endtable
  */
