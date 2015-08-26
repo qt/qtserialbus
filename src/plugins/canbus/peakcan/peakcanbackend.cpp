@@ -49,6 +49,7 @@ PeakCanBackend::PeakCanBackend(const QString &name, QObject *parent)
     Q_D(PeakCanBackend);
 
     d->setupChannel(name);
+    d->setupDefaultConfigurations();
 }
 
 PeakCanBackend::~PeakCanBackend()

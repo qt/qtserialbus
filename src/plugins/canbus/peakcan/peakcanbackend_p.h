@@ -72,6 +72,7 @@ public:
     void close();
     bool setConfigurationParameter(int key, const QVariant &value);
     void setupChannel(const QString &interfaceName);
+    void setupDefaultConfigurations();
 
     PeakCanBackend * const q_ptr;
 
@@ -85,6 +86,8 @@ public:
     void canWriteNotification();
     bool enableReadNotification();
     void canReadNotification();
+
+    bool verifyBitRate(int bitrate);
 
     QPointer<QWinEventNotifier> incomingEventNotifier;
     QPointer<QTimer> outgoingEventNotifier;

@@ -98,6 +98,7 @@ QT_BEGIN_NAMESPACE
                             key is \c bool.
     \value ReceiveOwnKey    This key defines whether this CAN device can send messages.
                             The expected value for this key is \c bool.
+    \value BitRateKey       This key defines the bitrate in bits per second.
     \value UserKey          This key defines the range where custom keys start. It's most
                             common purpose is to permit platform specific configuration
                             options.

@@ -42,6 +42,8 @@
 #include <QtCore/qtimer.h>
 #include <QtCore/qcoreevent.h>
 
+#include <algorithm>
+
 QT_BEGIN_NAMESPACE
 
 #ifndef LINK_LIBPCANBASIC
@@ -116,12 +118,54 @@ PeakCanBackendPrivate::PeakCanBackendPrivate(PeakCanBackend *q)
 {
 }
 
+struct BitrateItem
+{
+    int bitrate;
+    int code;
+};
+
+struct BitrateLessFunctor
+{
+    bool operator()( const BitrateItem &item1, const BitrateItem &item2) const
+    {
+        return item1.bitrate < item2.bitrate;
+    }
+};
+
+static int bitrateCodeFromBitrate(int bitrate)
+{
+    static const BitrateItem bitratetable[] = {
+        { 5000, PCAN_BAUD_5K },
+        { 10000, PCAN_BAUD_10K },
+        { 20000, PCAN_BAUD_20K },
+        { 33000, PCAN_BAUD_33K },
+        { 47000, PCAN_BAUD_47K },
+        { 50000, PCAN_BAUD_50K },
+        { 83000, PCAN_BAUD_83K },
+        { 95000, PCAN_BAUD_95K },
+        { 100000, PCAN_BAUD_100K },
+        { 125000, PCAN_BAUD_125K },
+        { 250000, PCAN_BAUD_250K },
+        { 500000, PCAN_BAUD_500K },
+        { 800000, PCAN_BAUD_800K },
+        { 1000000, PCAN_BAUD_1M }
+    };
+
+    static const BitrateItem *endtable = bitratetable + (sizeof(bitratetable) / sizeof(*bitratetable));
+
+    const BitrateItem item = { bitrate , 0 };
+    const BitrateItem *where = std::lower_bound(bitratetable, endtable, item, BitrateLessFunctor());
+    return where != endtable ? where->code : -1;
+}
+
 bool PeakCanBackendPrivate::open()
 {
     Q_Q(PeakCanBackend);
 
-    // TODO: Maybe need to move the PCAN_BAUD_500K to the configuration parameters?
-    if (TPCANStatus st = ::CAN_Initialize(channelIndex, PCAN_BAUD_500K, 0, 0, 0) != PCAN_ERROR_OK) {
+    const int bitrate = q->configurationParameter(QCanBusDevice::BitRateKey).toInt();
+    const int bitrateCode = bitrateCodeFromBitrate(bitrate);
+
+    if (TPCANStatus st = ::CAN_Initialize(channelIndex, bitrateCode, 0, 0, 0) != PCAN_ERROR_OK) {
         q->setError(systemErrorString(st), QCanBusDevice::ConnectionError);
         return false;
     }
@@ -161,13 +205,17 @@ void PeakCanBackendPrivate::close()
     isOpen = false;
 }
 
-// TODO: Implement me
 bool PeakCanBackendPrivate::setConfigurationParameter(int key, const QVariant &value)
 {
-    Q_UNUSED(key);
-    Q_UNUSED(value);
+    Q_Q(PeakCanBackend);
 
-    return false;
+    switch (key) {
+    case QCanBusDevice::BitRateKey:
+        return verifyBitRate(value.toInt());
+    default:
+        q->setError(PeakCanBackend::tr("Unsuported configuration key"), QCanBusDevice::ConfigurationError);
+        return false;
+    }
 }
 
 static int channelIndexFromName(const QString &interfaceName)
@@ -195,6 +243,14 @@ static int channelIndexFromName(const QString &interfaceName)
 void PeakCanBackendPrivate::setupChannel(const QString &interfaceName)
 {
     channelIndex = channelIndexFromName(interfaceName);
+}
+
+// Calls only when the device is closed
+void PeakCanBackendPrivate::setupDefaultConfigurations()
+{
+    Q_Q(PeakCanBackend);
+
+    q->setConfigurationParameter(QCanBusDevice::BitRateKey, 500000);
 }
 
 QString PeakCanBackendPrivate::systemErrorString(int errorCode)
@@ -309,6 +365,25 @@ void PeakCanBackendPrivate::canReadNotification()
 
     // re-trigger the read event
     enableReadNotification();
+}
+
+bool PeakCanBackendPrivate::verifyBitRate(int bitrate)
+{
+    Q_Q(PeakCanBackend);
+
+    if (isOpen) {
+        q->setError(PeakCanBackend::tr("Impossible to reconfigure bitrate for the opened device"),
+                    QCanBusDevice::ConfigurationError);
+        return false;
+    }
+
+    if (bitrateCodeFromBitrate(bitrate) == -1) {
+        q->setError(PeakCanBackend::tr("Unsupported bitrate value"),
+                    QCanBusDevice::ConfigurationError);
+        return false;
+    }
+
+    return true;
 }
 
 QT_END_NAMESPACE

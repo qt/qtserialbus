@@ -76,6 +76,7 @@ public:
         ErrorFilterKey,
         LoopbackKey,
         ReceiveOwnKey,
+        BitRateKey,
         UserKey = 30
     };
     Q_ENUM(ConfigurationKey)

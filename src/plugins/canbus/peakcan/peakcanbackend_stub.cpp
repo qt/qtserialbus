@@ -78,4 +78,9 @@ void PeakCanBackendPrivate::setupChannel(const QString &interfaceName)
     Q_UNUSED(interfaceName);
 }
 
+// TODO: Implement me
+void PeakCanBackendPrivate::setupDefaultConfigurations()
+{
+}
+
 QT_END_NAMESPACE
