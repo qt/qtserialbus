@@ -199,9 +199,10 @@ void PeakCanBackendPrivate::setupChannel(const QString &interfaceName)
 
 QString PeakCanBackendPrivate::systemErrorString(int errorCode)
 {
-    QByteArray buffer(2048, 0);
-    ::CAN_GetErrorText(errorCode, 0, reinterpret_cast<LPSTR>(buffer.data()));
-    return QString::fromWCharArray(reinterpret_cast<const wchar_t *>(buffer.constData()));
+    QByteArray buffer(256, 0);
+    if (::CAN_GetErrorText(errorCode, 0, reinterpret_cast<LPSTR>(buffer.data())) != PCAN_ERROR_OK)
+        return PeakCanBackend::tr("Unable to retrieve an error string");
+    return QString::fromLatin1(buffer);
 }
 
 void PeakCanBackendPrivate::enableWriteNotification(bool enable)
