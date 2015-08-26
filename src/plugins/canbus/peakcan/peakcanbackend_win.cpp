@@ -294,20 +294,19 @@ void PeakCanBackendPrivate::canWriteNotification()
     TPCANMsg message;
     ::memset(&message, 0, sizeof(message));
 
-    if (payload.size() > int(sizeof(message.DATA))) {
-        qWarning("Impossible to write the message with unacceptable payload size %d, ignored",
-                 payload.size());
-    } else {
-        message.ID = frame.frameId();
-        message.LEN = payload.size();
-        message.MSGTYPE = frame.hasExtendedFrameFormat() ? PCAN_MESSAGE_EXTENDED : PCAN_MESSAGE_STANDARD;
+    message.ID = frame.frameId();
+    message.LEN = payload.size();
+    message.MSGTYPE = frame.hasExtendedFrameFormat() ? PCAN_MESSAGE_EXTENDED : PCAN_MESSAGE_STANDARD;
 
+    if (frame.frameType() == QCanBusFrame::RemoteRequestFrame)
+        message.MSGTYPE |= PCAN_MESSAGE_RTR; // we do not care about the payload
+    else
         ::memcpy(message.DATA, payload.constData(), sizeof(message.DATA));
-        if (TPCANStatus st = ::CAN_Write(channelIndex, &message) != PCAN_ERROR_OK) {
-            q->setError(systemErrorString(st), QCanBusDevice::WriteError);
-        } else {
-            // TODO: Emit the future signal that the frame has been written
-        }
+
+    if (TPCANStatus st = ::CAN_Write(channelIndex, &message) != PCAN_ERROR_OK) {
+        q->setError(systemErrorString(st), QCanBusDevice::WriteError);
+    } else {
+        // TODO: Emit the future signal that the frame has been written
     }
 
     if (!outgoingFrames.isEmpty())
