@@ -412,7 +412,7 @@ void SocketCanBackend::readSocket()
 
         if (bytesReceived <= 0) {
             break;
-        } else if (!bytesReceived == CANFD_MTU) {
+        } else if (bytesReceived != CANFD_MTU) {
             setError(QStringLiteral("ERROR SocketCanBackend: invalid can frame"),
                      QCanBusDevice::CanBusError::ReadError);
             continue;
