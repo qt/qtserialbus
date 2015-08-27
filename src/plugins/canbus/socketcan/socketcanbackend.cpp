@@ -93,8 +93,6 @@ void SocketCanBackend::close()
     ::close(canSocket);
     canSocket = -1;
 
-    resetConfigurations();
-
     setState(QCanBusDevice::UnconnectedState);
 }
 
