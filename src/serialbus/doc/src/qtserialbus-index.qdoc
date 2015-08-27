@@ -51,7 +51,8 @@
     \section1 Supported Buses and Protocols
 
     \list
-         \li \l {Qt CAN Bus}
+        \li \l {Qt CAN Bus}
+        \li \l {Qt Modbus}
     \endlist
 
     \section1 API Reference

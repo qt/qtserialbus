@@ -1,0 +1,86 @@
+/****************************************************************************
+**
+** Copyright (C) 2015 The Qt Company Ltd.
+** Contact: http://www.qt.io/licensing/
+**
+** This file is part of the documentation of the Qt Toolkit.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see http://www.qt.io/terms-conditions. For further
+** information use the contact form at http://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: http://www.gnu.org/copyleft/fdl.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+/*!
+    \page qtmodbus-backends.html
+    \title Qt Modbus
+
+    \brief Implemented Qt Modbus.
+
+    Modbus is a request/reply protocol that has one master in its network and may have many
+    slaves. Slaves can control only their own internal states and master can read and write
+    data in the slaves. Modbus is not restricted by network type, in theory it can use any
+    QIODevice. Every plugin does not support every QIODevice derived class though.
+
+    Each slave has four tables it can set data.
+
+    \table
+        \header
+            \li name
+            \li data range in one field
+            \li permissions for master
+        \row
+            \li Discrete Inputs
+            \li 0-1
+            \li Read
+        \row
+            \li Coils
+            \li 0-1
+            \li Read/Write
+        \row
+            \li Input Registers
+            \li 0-65535 (0xffff)
+            \li Read
+        \row
+            \li Holding Registers
+            \li 0-65535 (0xffff)
+            \li Read/Write
+    \endtable
+
+    The Modmus API provides some common API to access the modbus devices:
+
+    \list
+        \li QModBusDevice provides an API for common functionality with master and slave.
+        \li QModBusMaster provides an API for direct access to modbus master.
+        \li QModBusSlave provides an API for direct access to modbus slave.
+        \li QModBusDataUnit is representation of one data value.
+        \li QModBusReply is created by QModBusMaster as handle for write/read operation.
+    \endlist
+
+    The Modbus plugin supports the following set of backends for various devices:
+
+    \table
+        \header
+            \li Vendor
+            \li Backend
+            \li Brief description
+        \row
+            \li libmodbus.org
+            \li \l {Using libmodbus Backend}{libmodbus}
+            \li libmodbus is a free software library to send/receive data according to the modbus protocol.
+                This library is written in C and supports RTU (serial) and TCP (Ethernet) communications.
+    \endtable
+ */
