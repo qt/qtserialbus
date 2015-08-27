@@ -45,7 +45,6 @@ QT_BEGIN_NAMESPACE
 
 class QCanBusDevicePrivate;
 
-//TODO for this class: review const member functions for this class
 class Q_SERIALBUS_EXPORT QCanBusDevice : public QObject
 {
     Q_OBJECT

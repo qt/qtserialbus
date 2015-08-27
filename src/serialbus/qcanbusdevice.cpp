@@ -303,7 +303,7 @@ qint64 QCanBusDevice::framesAvailable() const
 
 /*!
     Returns the next \l QCanBusFrame from the queue; otherwise returns
-    an empty QCanBusFrame.
+    an empty QCanBusFrame. The returned frame is removed from the queue.
 
     The queue operates according to the FIFO principle.
 
