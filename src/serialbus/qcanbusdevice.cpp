@@ -164,6 +164,9 @@ void QCanBusDevice::enqueueReceivedFrame(const QCanBusFrame &newFrame)
 
     A paramenter can be unset by setting an invalid \l QVariant.
 
+    \note In most cases, configuration changes only take effect
+    after a reconnect.
+
     \sa configurationParameter()
  */
 void QCanBusDevice::setConfigurationParameter(int key,

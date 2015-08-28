@@ -42,6 +42,7 @@
 #include "ui_settingsdialog.h"
 
 #include <QCanBus>
+#include <QDebug>
 
 QT_USE_NAMESPACE
 
@@ -50,6 +51,16 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     m_ui(new Ui::SettingsDialog)
 {
     m_ui->setupUi(this);
+    m_ui->speedEdit->setValidator(new QIntValidator(0, 1000000, this));
+    m_ui->errorFilterEdit->setValidator(new QIntValidator(0, 0x1FFFFFFFU, this));
+
+    m_ui->loopbackBox->addItem(tr("unspecified"), QVariant());
+    m_ui->loopbackBox->addItem(tr("false"), QVariant(false));
+    m_ui->loopbackBox->addItem(tr("true"), QVariant(true));
+
+    m_ui->receiveOwnBox->addItem(tr("unspecified"), QVariant());
+    m_ui->receiveOwnBox->addItem(tr("false"), QVariant(false));
+    m_ui->receiveOwnBox->addItem(tr("true"), QVariant(true));
 
     connect(m_ui->applyButton, &QPushButton::clicked, this, &SettingsDialog::apply);
     connect(m_ui->useConfigurationBox, &QCheckBox::clicked, m_ui->configurationBox, &QGroupBox::setEnabled);
@@ -82,7 +93,56 @@ void SettingsDialog::updateSettings()
     m_currentSettings.useConfigurationEnabled = m_ui->useConfigurationBox->isChecked();
 
     if (m_currentSettings.useConfigurationEnabled) {
-        // FIXME: update configuration
+        m_currentSettings.configurations.clear();
+        // process LoopBack
+        if (m_ui->loopbackBox->currentIndex() != 0) {
+            ConfigurationItem item;
+            item.first = QCanBusDevice::LoopbackKey;
+            item.second = m_ui->loopbackBox->currentData();
+            m_currentSettings.configurations.append(item);
+        }
+
+        // process ReceiveOwnKey
+        if (m_ui->receiveOwnBox->currentIndex() != 0) {
+            ConfigurationItem item;
+            item.first = QCanBusDevice::ReceiveOwnKey;
+            item.second = m_ui->receiveOwnBox->currentData();
+            m_currentSettings.configurations.append(item);
+        }
+
+        // process error filter
+        if (!m_ui->errorFilterEdit->text().isEmpty()) {
+            QString value = m_ui->errorFilterEdit->text();
+            bool ok = false;
+            int dec = value.toInt(&ok);
+            if (ok) {
+                ConfigurationItem item;
+                item.first = QCanBusDevice::ErrorFilterKey;
+                item.second = QVariant::fromValue(QCanBusFrame::FrameErrors(dec));
+                m_currentSettings.configurations.append(item);
+            }
+        }
+
+        // process raw filter list
+        if (!m_ui->rawFilterEdit->text().isEmpty()) {
+            //TODO current ui not sfficient to reflect this param
+        }
+
+        // process bitrate
+        if (!m_ui->speedEdit->text().isEmpty()) {
+            //TODO
+//            QString value = m_ui->errorFilterEdit->text();
+//            bool ok = false;
+//            int dec = value.toInt(&ok);
+//            if (ok) {
+//                ConfigurationItem item;
+//                // TODO change to QCanBusDevice::BitRateKey
+//                //item.first = QCanBusDevice::ErrorFilterKey;
+//                //item.second = QVariant(dec);
+//                //m_currentSettings.configurations.append(item);
+//            }
+        }
+
     }
 }
 

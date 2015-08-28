@@ -70,7 +70,8 @@ void SocketCanBackend::resetConfigurations()
     QCanBusDevice::setConfigurationParameter(
                 QCanBusDevice::ReceiveOwnKey, false);
     QCanBusDevice::setConfigurationParameter(
-                QCanBusDevice::ErrorFilterKey, QCanBusFrame::NoError);
+                QCanBusDevice::ErrorFilterKey,
+                QVariant::fromValue(QCanBusFrame::FrameErrors(QCanBusFrame::AnyError)));
 }
 
 bool SocketCanBackend::open()
@@ -183,7 +184,7 @@ bool SocketCanBackend::applyConfigurationParameter(int key, const QVariant &valu
         break;
     }
 
-    qDebug() << "applyConfiguration" << key << value << success;
+    //qDebug() << "applyConfiguration" << key << value << success;
     return success;
 }
 
