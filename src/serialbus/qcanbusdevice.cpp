@@ -80,8 +80,6 @@ QT_BEGIN_NAMESPACE
     \value ClosingState     The device is being closed.
  */
 
-//TODO unwrap the RawFilterKey value. List inside lists are too complex & unintuitive
-
 /*!
     \enum QCanBusDevice::ConfigurationKey
     This enum describes the possible configuration options for
@@ -89,7 +87,8 @@ QT_BEGIN_NAMESPACE
 
     \value RawFilterKey     This configuration determines the type of CAN bus frames
                             which the current device accepts. The expected value
-                            is \c QList<QVariant>.
+                            is \c QList<QCanBusDevice::Filter>. Passing an empty list unsets
+                            all previously set filters including default filters.
     \value ErrorFilterKey   This key defines the type of error which should be
                             forwarded via the current connection. The associated
                             value should be of type \l QCanBusFrame::FrameErrors.
@@ -102,6 +101,80 @@ QT_BEGIN_NAMESPACE
     \value UserKey          This key defines the range where custom keys start. It's most
                             common purpose is to permit platform specific configuration
                             options.
+ */
+
+/*!
+    \class QCanBusDevice::Filter
+    \inmodule QtSerialBus
+    \since 5.6
+
+    \brief The QCanBusDevice::Filter struct defines a filter for CAN bus messages.
+
+    A list of QCanBusDevice::Filter instances is passed to
+    \l QCanBusDevice::setConfigurationParameter() to enable filtering. If a received CAN messages
+    matches at least one of the filters in the list, the QCanBusDevice will accept it.
+ */
+
+/*!
+    \enum QCanBusDevice::Filter::FormatFilter
+    This enum describes the format pattern, which is used to filter incoming
+    CAN bus messages.
+
+    \value MatchBaseFormat              The CAN bus message must use the base message format
+                                        (11 bit identifier).
+    \value MatchExtendedFormat          The CAN bus message must use the extended message format
+                                        (29 bit identifier).
+    \value MatchBaseAndExtendedFormat   The CAN bus message can have a base or an extended
+                                        message format.
+ */
+
+/*!
+    \variable QCanBusDevice::Filter::frameId
+
+    \brief the frame id that must match the frame id of the received message.
+
+    The frameId is used in conjunction with \a frameIdMask.
+    The matching is successful when the following evaluates to \c true:
+
+    \code
+        (receivedFrameId & frameIdMask) == (frameId & frameIdMask)
+    \endcode
+
+    \sa frameIdMask
+ */
+
+/*!
+    \variable QCanBusDevice::Filter::frameIdMask
+
+    \brief the bit mask that is applied to the frame id of the filter and the received message.
+
+    The two frame ids are matching if the following evaluates to \c true:
+
+    \code
+        (receivedFrameId & frameIdMask) == (frameId & frameIdMask)
+    \endcode
+
+    \sa frameId
+ */
+
+/*!
+    \variable QCanBusDevice::Filter::type
+
+    \brief the type of the message which can match the filter.
+
+    If multiple message types has to be matched
+
+    Any CAN bus message type can be matched by setting this variable
+    to \l QCanBusFrame::InvalidFrame. The filter object is invalid if
+    type is equal to \l QCanBusFrame::UnknownFrame.
+
+    \sa QCanBusFrame::FrameType
+ */
+
+/*!
+    \variable QCanBusDevice::Filter::format
+
+    \brief the message format of the matching CAN bus message.
  */
 
 /*!
@@ -202,6 +275,8 @@ bool QCanBusDevice::hasOutgoingFrames() const
     to \a value. The potential keys are represented by \l ConfigurationKey.
 
     A paramenter can be unset by setting an invalid \l QVariant.
+    Unsetting a parameter implies that the configuration is reset to
+    its default setting.
 
     \note In most cases, configuration changes only take effect
     after a reconnect.

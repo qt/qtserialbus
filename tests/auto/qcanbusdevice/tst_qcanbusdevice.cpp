@@ -116,6 +116,7 @@ private slots:
     void read();
     void error();
     void cleanupTestCase();
+    void tst_filtering();
 
 private:
     QPointer<QCanBusDevice> device;
@@ -294,6 +295,43 @@ void tst_QCanBusDevice::cleanupTestCase()
     QCOMPARE(device->state(), QCanBusDevice::UnconnectedState);
     QCanBusFrame frame = device->readFrame();
     QVERIFY(!frame.frameId());
+}
+
+void tst_QCanBusDevice::tst_filtering()
+{
+    QList<QCanBusDevice::Filter> filters;
+    QCanBusDevice::Filter f;
+    f.frameId = 0x1;
+    f.type = QCanBusFrame::DataFrame;
+    f.frameIdMask = 0xFF;
+    f.format = QCanBusDevice::Filter::MatchBaseAndExtendedFormat;
+    filters.append(f);
+
+    f.frameId = 0x2;
+    f.type = QCanBusFrame::RemoteRequestFrame;
+    f.frameIdMask = 0x0;
+    f.format = QCanBusDevice::Filter::MatchBaseFormat;
+    filters.append(f);
+
+    QVariant wrapper = QVariant::fromValue(filters);
+    QList<QCanBusDevice::Filter> newFilter
+            = wrapper.value<QList<QCanBusDevice::Filter> >();
+    QCOMPARE(newFilter.count(), 2);
+
+    QCOMPARE(newFilter.at(0).type, QCanBusFrame::DataFrame);
+    QCOMPARE(newFilter.at(0).frameId, 0x1u);
+    QCOMPARE(newFilter.at(0).frameIdMask, 0xFFu);
+    QVERIFY(newFilter.at(0).format & QCanBusDevice::Filter::MatchBaseAndExtendedFormat);
+    QVERIFY(newFilter.at(0).format & QCanBusDevice::Filter::MatchBaseFormat);
+    QVERIFY(newFilter.at(0).format & QCanBusDevice::Filter::MatchExtendedFormat);
+
+    QCOMPARE(newFilter.at(1).type, QCanBusFrame::RemoteRequestFrame);
+    QCOMPARE(newFilter.at(1).frameId, 0x2u);
+    QCOMPARE(newFilter.at(1).frameIdMask, 0x0u);
+    QVERIFY((newFilter.at(1).format & QCanBusDevice::Filter::MatchBaseAndExtendedFormat)
+              != QCanBusDevice::Filter::MatchBaseAndExtendedFormat);
+    QVERIFY(newFilter.at(1).format & QCanBusDevice::Filter::MatchBaseFormat);
+    QVERIFY(!(newFilter.at(1).format & QCanBusDevice::Filter::MatchExtendedFormat));
 }
 
 QTEST_MAIN(tst_QCanBusDevice)

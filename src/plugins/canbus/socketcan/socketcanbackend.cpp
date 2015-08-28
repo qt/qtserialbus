@@ -137,36 +137,63 @@ bool SocketCanBackend::applyConfigurationParameter(int key, const QVariant &valu
     }
     case QCanBusDevice::RawFilterKey:
     {
-        const QList<QVariant> filterList = value.toList();
-        const int size = filterList.size();
-        if (!size) {
-            setError(tr("ERROR SocketCanBackend: \"CanFilter\" "
-                                    "QList<QVariant> empty or not valid"),
-                     QCanBusDevice::CanBusError::ConfigurationError);
+        const QList<QCanBusDevice::Filter> filterList
+                = value.value<QList<QCanBusDevice::Filter> >();
+        if (!value.isValid() || filterList.isEmpty()) {
+            // permit every frame - no restrictions (filter reset)
+            can_filter filters = {0, 0};
+            socklen_t s = sizeof(can_filter);
+            if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_FILTER,
+                           &filters, s) != 0) {
+                qWarning() << "Cannot unset socket filters";
+                setError(qt_error_string(errno),
+                         QCanBusDevice::CanBusError::ConfigurationError);
+                break;
+            }
+            success = true;
             break;
         }
 
-        can_filter filters[size];
-        for (int i = 0; i < size; i++) {
+        can_filter filters[filterList.size()];
+        for (int i = 0; i < filterList.size(); i++) {
+            const QCanBusDevice::Filter f = filterList.at(i);
             can_filter filter;
-            const QHash<QString, QVariant> filterHash = filterList.at(i).toHash();
-            bool ok = true;
-            filter.can_id = filterHash.value("FilterId").toInt(&ok);
-            if (!ok) {
-                setError(tr("ERROR SocketCanBackend: \"CanFilter\" "
-                                        "FilterId key not found or value is not valid in index: ")
-                                        + QString::number(i),
+            filter.can_id = f.frameId;
+            filter.can_mask = f.frameIdMask;
+
+            // frame type filter
+            switch (f.type) {
+            default:
+                // any other type cannot be filtered upon
+                setError(tr("Cannot set filter for frame type: %1").arg(f.type),
                          QCanBusDevice::CanBusError::ConfigurationError);
+                return false;
+            case QCanBusFrame::InvalidFrame:
+                break;
+            case QCanBusFrame::DataFrame:
+                filter.can_mask |= CAN_RTR_FLAG;
+                break;
+            case QCanBusFrame::ErrorFrame:
+                filter.can_mask |= CAN_ERR_FLAG;
+                filter.can_id |= CAN_ERR_FLAG;
+                break;
+            case QCanBusFrame::RemoteRequestFrame:
+                filter.can_mask |= CAN_RTR_FLAG;
+                filter.can_id |= CAN_RTR_FLAG;
                 break;
             }
-            filter.can_mask = filterHash.value("CanMask").toInt(&ok);
-            if (!ok) {
-                setError(tr("ERROR SocketCanBackend: \"CanFilter\" "
-                                        "CanMask key not found or value is not valid in index: ")
-                                        + QString::number(i),
-                         QCanBusDevice::CanBusError::ConfigurationError);
-                break;
+
+            // frame format filter
+            if ((f.format & QCanBusDevice::Filter::MatchBaseAndExtendedFormat)
+                    == QCanBusDevice::Filter::MatchBaseAndExtendedFormat) {
+                // nothing
+            } else if (f.format & QCanBusDevice::Filter::MatchBaseFormat) {
+                filter.can_mask |= CAN_EFF_FLAG;
+            } else if (f.format & QCanBusDevice::Filter::MatchExtendedFormat) {
+                filter.can_mask |= CAN_EFF_FLAG;
+                filter.can_id |= CAN_EFF_FLAG;
             }
+
             filters[i] = filter;
         }
         if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_FILTER, filters, sizeof(filters)) < 0) {
@@ -243,6 +270,33 @@ bool SocketCanBackend::connectSocket()
 
 void SocketCanBackend::setConfigurationParameter(int key, const QVariant &value)
 {
+    if (key == QCanBusDevice::RawFilterKey) {
+        //verify valid/supported filters
+
+        QList<QCanBusDevice::Filter> filters
+                = value.value<QList<QCanBusDevice::Filter> >();
+        foreach (QCanBusDevice::Filter f, filters) {
+            switch (f.type) {
+            case QCanBusFrame::UnknownFrame:
+
+            default:
+                setError(tr("Cannot set filter for frame type: %1").arg(f.type),
+                         QCanBusDevice::CanBusError::ConfigurationError);
+                return;
+            case QCanBusFrame::InvalidFrame:
+            case QCanBusFrame::DataFrame:
+            case QCanBusFrame::ErrorFrame:
+            case QCanBusFrame::RemoteRequestFrame:
+                break;
+            }
+
+            if (f.frameId > 0x1FFFFFFFU) {
+                setError(tr("FrameId %1 larger than 29 bit.").arg(f.frameId),
+                         QCanBusDevice::CanBusError::ConfigurationError);
+                return;
+            }
+        }
+    }
     // connected & params not applyable/invalid
     if (canSocket != -1 && !applyConfigurationParameter(key, value))
         return;

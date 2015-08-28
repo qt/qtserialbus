@@ -80,6 +80,22 @@ public:
     };
     Q_ENUM(ConfigurationKey)
 
+    struct Filter
+    {
+        enum FormatFilter {
+            MatchBaseFormat = 0x0001,
+            MatchExtendedFormat = 0x0002,
+            MatchBaseAndExtendedFormat = 0x0003,
+        };
+        Q_DECLARE_FLAGS(FormatFilters, FormatFilter)
+
+
+        quint32 frameId;
+        quint32 frameIdMask;
+        QCanBusFrame::FrameType type;
+        FormatFilter format;
+    };
+
     explicit QCanBusDevice(QObject *parent = 0);
 
     virtual void setConfigurationParameter(int key,
@@ -126,7 +142,14 @@ protected:
 Q_DECLARE_TYPEINFO(QCanBusDevice::CanBusError, Q_PRIMITIVE_TYPE);
 Q_DECLARE_TYPEINFO(QCanBusDevice::CanBusDeviceState, Q_PRIMITIVE_TYPE);
 Q_DECLARE_TYPEINFO(QCanBusDevice::ConfigurationKey, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(QCanBusDevice::Filter, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(QCanBusDevice::Filter::FormatFilter, Q_PRIMITIVE_TYPE);
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(QCanBusDevice::Filter::FormatFilters)
 
 QT_END_NAMESPACE
+
+Q_DECLARE_METATYPE(QCanBusDevice::Filter::FormatFilter)
+Q_DECLARE_METATYPE(QList<QCanBusDevice::Filter>)
 
 #endif // QCANBUSDEVICE_H
