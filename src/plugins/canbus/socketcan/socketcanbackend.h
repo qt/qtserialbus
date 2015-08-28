@@ -73,6 +73,7 @@ private Q_SLOTS:
 private:
     void resetConfigurations();
     bool connectSocket();
+    bool applyConfigurationParameter(int key, const QVariant &value);
 
     qint64 canSocket;
     QPointer<QSocketNotifier> notifier;

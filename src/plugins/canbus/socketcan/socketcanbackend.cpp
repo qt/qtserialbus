@@ -71,8 +71,6 @@ void SocketCanBackend::resetConfigurations()
                 QCanBusDevice::ReceiveOwnKey, false);
     QCanBusDevice::setConfigurationParameter(
                 QCanBusDevice::ErrorFilterKey, QCanBusFrame::NoError);
-    QCanBusDevice::setConfigurationParameter(
-                QCanBusDevice::RawFilterKey, QList<QVariant>());
 }
 
 bool SocketCanBackend::open()
@@ -96,39 +94,57 @@ void SocketCanBackend::close()
     setState(QCanBusDevice::UnconnectedState);
 }
 
-void SocketCanBackend::setConfigurationParameter(int key, const QVariant &value)
+bool SocketCanBackend::applyConfigurationParameter(int key, const QVariant &value)
 {
+    bool success = false;
 
-    if (key == QCanBusDevice::LoopbackKey) {
+    switch (key) {
+    case QCanBusDevice::LoopbackKey:
+    {
         const int loopback = value.toBool() ? 1 : 0;
         if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_LOOPBACK, &loopback, sizeof(loopback)) < 0) {
             setError(qt_error_string(errno),
                      QCanBusDevice::CanBusError::ConfigurationError);
-            return;
+            break;
         }
-    } else if (key == QCanBusDevice::ReceiveOwnKey) {
+        success = true;
+        break;
+    }
+    case QCanBusDevice::ReceiveOwnKey:
+    {
         const int receiveOwnMessages = value.toBool() ? 1 : 0;
         if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_RECV_OWN_MSGS,
                        &receiveOwnMessages, sizeof(receiveOwnMessages)) < 0) {
             setError(qt_error_string(errno),
                      QCanBusDevice::CanBusError::ConfigurationError);
-            return;
+            break;
         }
-    } else if (key == QCanBusDevice::ErrorFilterKey) {
+        success = true;
+        break;
+    }
+    case QCanBusDevice::ErrorFilterKey:
+    {
         const int errorMask = value.value<QCanBusFrame::FrameErrors>();
         if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_ERR_FILTER,
                        &errorMask, sizeof(errorMask)) < 0) {
             setError(qt_error_string(errno),
                      QCanBusDevice::CanBusError::ConfigurationError);
-            return;
+            break;
         }
-    } else if (key == QCanBusDevice::RawFilterKey) {
+        success = true;
+        break;
+    }
+    case QCanBusDevice::RawFilterKey:
+    {
         const QList<QVariant> filterList = value.toList();
         const int size = filterList.size();
-        if (size == 0)
+        if (!size) {
             setError(QStringLiteral("ERROR SocketCanBackend: \"CanFilter\" "
                                     "QList<QVariant> empty or not valid"),
                      QCanBusDevice::CanBusError::ConfigurationError);
+            break;
+        }
+
         can_filter filters[size];
         for (int i = 0; i < size; i++) {
             can_filter filter;
@@ -140,7 +156,7 @@ void SocketCanBackend::setConfigurationParameter(int key, const QVariant &value)
                                         "FilterId key not found or value is not valid in index: ")
                                         + QString::number(i),
                          QCanBusDevice::CanBusError::ConfigurationError);
-                return;
+                break;
             }
             filter.can_mask = filterHash.value("CanMask").toInt(&ok);
             if (!ok) {
@@ -148,21 +164,27 @@ void SocketCanBackend::setConfigurationParameter(int key, const QVariant &value)
                                         "CanMask key not found or value is not valid in index:")
                                         + QString::number(i),
                          QCanBusDevice::CanBusError::ConfigurationError);
-                return;
+                break;
             }
             filters[i] = filter;
         }
-        if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_FILTER, filters, sizeof(filters)) < 0)
+        if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_FILTER, filters, sizeof(filters)) < 0) {
             setError(qt_error_string(errno),
                      QCanBusDevice::CanBusError::ConfigurationError);
-    } else {
+            break;
+        }
+        success = true;
+        break;
+    }
+    default:
         setError(QStringLiteral("SocketCanBackend: No such configuration as")
                    + key + QStringLiteral("in SocketCanBackend"),
                  QCanBusDevice::CanBusError::ConfigurationError);
-        return;
+        break;
     }
 
-    QCanBusDevice::setConfigurationParameter(key, value);
+    qDebug() << "applyConfiguration" << key << value << success;
+    return success;
 }
 
 bool SocketCanBackend::connectSocket()
@@ -206,7 +228,26 @@ bool SocketCanBackend::connectSocket()
     connect(notifier.data(), &QSocketNotifier::activated,
             this, &SocketCanBackend::readSocket);
 
+    //apply all stored configurations
+    foreach (int key, configurationKeys()) {
+        const QVariant param = configurationParameter(key);
+        bool success = applyConfigurationParameter(key, param);
+        if (!success) {
+            qWarning() << "Cannot apply parameter:" << key
+                       << "with value:" << param;
+        }
+    }
+
     return true;
+}
+
+void SocketCanBackend::setConfigurationParameter(int key, const QVariant &value)
+{
+    // connected & params not applyable/invalid
+    if (canSocket != -1 && !applyConfigurationParameter(key, value))
+        return;
+
+    QCanBusDevice::setConfigurationParameter(key, value);
 }
 
 bool SocketCanBackend::writeFrame(const QCanBusFrame &newData)
