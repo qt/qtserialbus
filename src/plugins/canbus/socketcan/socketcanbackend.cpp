@@ -140,7 +140,7 @@ bool SocketCanBackend::applyConfigurationParameter(int key, const QVariant &valu
         const QList<QVariant> filterList = value.toList();
         const int size = filterList.size();
         if (!size) {
-            setError(QStringLiteral("ERROR SocketCanBackend: \"CanFilter\" "
+            setError(tr("ERROR SocketCanBackend: \"CanFilter\" "
                                     "QList<QVariant> empty or not valid"),
                      QCanBusDevice::CanBusError::ConfigurationError);
             break;
@@ -153,7 +153,7 @@ bool SocketCanBackend::applyConfigurationParameter(int key, const QVariant &valu
             bool ok = true;
             filter.can_id = filterHash.value("FilterId").toInt(&ok);
             if (!ok) {
-                setError(QStringLiteral("ERROR SocketCanBackend: \"CanFilter\" "
+                setError(tr("ERROR SocketCanBackend: \"CanFilter\" "
                                         "FilterId key not found or value is not valid in index: ")
                                         + QString::number(i),
                          QCanBusDevice::CanBusError::ConfigurationError);
@@ -161,8 +161,8 @@ bool SocketCanBackend::applyConfigurationParameter(int key, const QVariant &valu
             }
             filter.can_mask = filterHash.value("CanMask").toInt(&ok);
             if (!ok) {
-                setError(QStringLiteral("ERROR SocketCanBackend: \"CanFilter\" "
-                                        "CanMask key not found or value is not valid in index:")
+                setError(tr("ERROR SocketCanBackend: \"CanFilter\" "
+                                        "CanMask key not found or value is not valid in index: ")
                                         + QString::number(i),
                          QCanBusDevice::CanBusError::ConfigurationError);
                 break;
@@ -178,8 +178,7 @@ bool SocketCanBackend::applyConfigurationParameter(int key, const QVariant &valu
         break;
     }
     default:
-        setError(QStringLiteral("SocketCanBackend: No such configuration as")
-                   + key + QStringLiteral("in SocketCanBackend"),
+        setError(tr("SocketCanBackend: No such configuration as %1 in SocketCanBackend").arg(key),
                  QCanBusDevice::CanBusError::ConfigurationError);
         break;
     }
@@ -455,7 +454,7 @@ void SocketCanBackend::readSocket()
         if (bytesReceived <= 0) {
             break;
         } else if (bytesReceived != CANFD_MTU) {
-            setError(QStringLiteral("ERROR SocketCanBackend: invalid can frame"),
+            setError(tr("ERROR SocketCanBackend: invalid can frame"),
                      QCanBusDevice::CanBusError::ReadError);
             continue;
         }
