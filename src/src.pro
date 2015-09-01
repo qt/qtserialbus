@@ -13,3 +13,11 @@ SUBDIRS += tools
 tools.subdir = tools
 tools.target = sub-tools
 tools.depends = serialbus
+
+!android:contains(QT_CONFIG, private_tests) {
+    SUBDIRS += serialbus_doc_snippets
+    serialbus_doc_snippets.subdir = serialbus/doc/snippets
+
+    #plugin dependency required during static builds
+    serialbus_doc_snippets.depends = serialbus plugins
+}

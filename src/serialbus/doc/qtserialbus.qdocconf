@@ -34,6 +34,11 @@ headerdirs  += ..
 
 sourcedirs  += ..
 
+examplesinstallpath = serialbus
+
+exampledirs += ../../../examples/serialbus \
+               snippets/
+
 imagedirs   += images
 
 navigation.landingpage = "Qt Serial Bus"

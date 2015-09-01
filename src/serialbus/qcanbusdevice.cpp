@@ -113,6 +113,10 @@ QT_BEGIN_NAMESPACE
     A list of QCanBusDevice::Filter instances is passed to
     \l QCanBusDevice::setConfigurationParameter() to enable filtering. If a received CAN messages
     matches at least one of the filters in the list, the QCanBusDevice will accept it.
+
+    The example below provides examples how this struct could be used:
+
+    \snippet main.cpp Filter Examples
  */
 
 /*!
