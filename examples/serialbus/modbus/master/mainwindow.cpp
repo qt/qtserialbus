@@ -47,15 +47,14 @@
 #include <QtCore/qbytearray.h>
 #include <QtCore/qdebug.h>
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
+    , modBusDevice(Q_NULLPTR)
+    , serialPort(Q_NULLPTR)
+    , lastRequest(Q_NULLPTR)
 {
     ui->setupUi(this);
-    ui->writeAddress->setInputMask("9");
-    ui->writeAddress->setInputMask("9");
-    ui->writeSlave->setInputMask("999");
-    ui->readSlave->setInputMask("999");
     init();
 }
 
@@ -68,12 +67,15 @@ MainWindow::~MainWindow()
 
 void MainWindow::init()
 {
+    ui->writeAddress->setInputMask(QStringLiteral("9"));
     on_writeTable_currentIndexChanged(ui->writeTable->currentText());
+
     QPointer<QModBus> modBus = QModBus::instance();
 
     plugins = modBus->plugins();
     for (int i = 0; i < plugins.size(); i++)
-        ui->pluginBox->insertItem(i, plugins.at(i));
+        ui->pluginBox->insertItem(i, QString::fromLatin1(plugins.at(i)));
+    ui->pluginBox->setCurrentText(QStringLiteral("libmodbus"));
 }
 
 void MainWindow::connectDevice(int pluginIndex)
@@ -86,8 +88,6 @@ void MainWindow::connectDevice(int pluginIndex)
         modBusDevice.clear();
 
     serialPort = new QSerialPort(ui->portEdit->text());
-    ui->portEdit->clear();
-
     modBusDevice = modBus->createMaster(plugins.at(pluginIndex));
 
     if (modBusDevice.isNull())
@@ -98,22 +98,30 @@ void MainWindow::connectDevice(int pluginIndex)
     connect(modBusDevice.data(), &QModBusMaster::stateChanged, this, &MainWindow::onMasterStateChanged);
 
     if (!modBusDevice->connectDevice()) {
-        qWarning() << "Connect failed: " << modBusDevice->errorString();
+        qWarning() << tr("Connect failed: ") << modBusDevice->errorString();
         return;
     }
 }
 
 void MainWindow::onMasterStateChanged(int state)
 {
-    if (state == QModBusDevice::UnconnectedState)
-        ui->connectedLabel->setText("Connected to: ");
-    else if (state == QModBusDevice::ConnectedState)
-        ui->connectedLabel->setText("Connected to: " + serialPort->portName());
+    if (state == QModBusDevice::UnconnectedState) {
+        ui->pushButton->setText(tr("Connect"));
+        ui->connectedLabel->setText(tr("Connected to: "));
+    } else if (state == QModBusDevice::ConnectedState) {
+        ui->pushButton->setText(tr("Disconnect"));
+        ui->connectedLabel->setText(tr("Connected to: ") + serialPort->portName());
+    }
 }
 
 void MainWindow::on_pushButton_clicked()
 {
-    connectDevice(ui->pluginBox->currentIndex());
+    if (modBusDevice && modBusDevice->state() == QModBusDevice::ConnectedState) {
+        modBusDevice->disconnectDevice();
+        modBusDevice.clear();
+    } else {
+        connectDevice(ui->pluginBox->currentIndex());
+    }
 }
 
 void MainWindow::on_readButton_clicked()
@@ -121,21 +129,19 @@ void MainWindow::on_readButton_clicked()
     lastRequest.clear();
     QList<QModBusDataUnit> units;
     QModBusDevice::ModBusTable table;
-    if (ui->readTable->currentText() == QStringLiteral("Discrete Inputs"))
+    if (ui->readTable->currentText() == tr("Discrete Inputs"))
         table = QModBusDevice::DiscreteInputs;
-    else if (ui->readTable->currentText() == QStringLiteral("Coils"))
+    else if (ui->readTable->currentText() == tr("Coils"))
         table = QModBusDevice::Coils;
-    else if (ui->readTable->currentText() == QStringLiteral("Input Registers"))
+    else if (ui->readTable->currentText() == tr("Input Registers"))
         table = QModBusDevice::InputRegisters;
-    else if (ui->readTable->currentText() == QStringLiteral("Holding Registers"))
+    else if (ui->readTable->currentText() == tr("Holding Registers"))
         table = QModBusDevice::HoldingRegisters;
     else
         return;
 
-    for (int i = 0; i < ui->readSize->currentText().toInt(); i++) {
-        QModBusDataUnit unit(table, ui->readAddress->text().toInt() + i);
-        units.append(unit);
-    }
+    for (int i = 0; i < ui->readSize->currentText().toInt(); i++)
+        units.append(QModBusDataUnit(table, ui->readAddress->text().toInt() + i));
 
     lastRequest = modBusDevice->read(units, ui->readSlave->text().toInt());
     connect(lastRequest.data(), &QModBusReply::finished, this, &MainWindow::readReady);
@@ -145,10 +151,8 @@ void MainWindow::readReady()
 {
     QList<QModBusDataUnit> units = lastRequest->result();
     for (int i = 0; i < units.size(); i++) {
-        const QString entry = QStringLiteral("Address: ")
-                            + QString::number(units.at(i).address())
-                            + QStringLiteral(" Value: ")
-                            + QString::number(units.at(i).value());
+        const QString entry = tr("Address: ") + QString::number(units.at(i).address())
+            + tr(" Value: ") + QString::number(units.at(i).value());
         ui->readValue->addItem(entry);
     }
     lastRequest.clear();
@@ -159,13 +163,13 @@ void MainWindow::on_writeButton_clicked()
     lastRequest.clear();
 
     QModBusDevice::ModBusTable table;
-    if (ui->writeTable->currentText() == QStringLiteral("Coils"))
+    if (ui->writeTable->currentText() == tr("Coils"))
         table = QModBusDevice::Coils;
     else
         table = QModBusDevice::HoldingRegisters;
 
-    QModBusDataUnit unit(table, ui->writeAddress->text().toInt(), ui->writeValue->text().toInt(0,16));
-
+    const QModBusDataUnit unit(table, ui->writeAddress->text().toInt(), ui->writeValue->text()
+        .toInt(0,16));
     lastRequest = modBusDevice->write(unit, ui->readSlave->text().toInt());
     if (lastRequest.isNull())
         qWarning() << modBusDevice->errorString();
@@ -180,9 +184,9 @@ void MainWindow::writeReady()
 
 void MainWindow::on_writeTable_currentIndexChanged(const QString &text)
 {
-    if (text == QStringLiteral("Coils")) {
-        ui->writeValue->setInputMask("B");
-    } else if (text == QStringLiteral("Holding Registers")) {
-        ui->writeValue->setInputMask("HHHH");
+    if (text == tr("Coils")) {
+        ui->writeValue->setInputMask(QStringLiteral("B"));
+    } else if (text == tr("Holding Registers")) {
+        ui->writeValue->setInputMask(QStringLiteral("HHHH"));
     }
 }
