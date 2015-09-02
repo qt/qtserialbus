@@ -107,7 +107,7 @@ bool LibModBusSlave::open()
         return true;
 
     if (!serialPort) {
-        setError(QStringLiteral("No transport device specified"), QModBusDevice::ConnectionError);
+        setError(tr("No transport device specified."), QModBusDevice::ConnectionError);
         return false;
     }
 
@@ -124,8 +124,7 @@ bool LibModBusSlave::open()
         parity = 'O';
         break;
     default:
-        setError(tr("Unsupported parity."),
-                 QModBusDevice::ConnectionError);
+        setError(tr("Unsupported parity."), QModBusDevice::ConnectionError);
         return false;
     }
 
@@ -221,7 +220,7 @@ bool LibModBusSlave::data(QModBusDevice::ModBusTable table, quint16 address, qui
                 break;
         }
     } else {
-        setError("ReadError: invalid parameters", QModBusDevice::ReadError);
+        setError(tr("ReadError: invalid parameters."), QModBusDevice::ReadError);
         return false;
     }
 
@@ -246,7 +245,7 @@ bool LibModBusSlave::setData(QModBusDevice::ModBusTable table, quint16 address, 
                 break;
         }
     } else {
-        setError("WriteError: invalid parameters", QModBusDevice::WriteError);
+        setError(tr("WriteError: invalid parameters."), QModBusDevice::WriteError);
         return false;
     }
 
