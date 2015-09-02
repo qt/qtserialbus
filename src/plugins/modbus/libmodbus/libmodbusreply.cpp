@@ -110,6 +110,7 @@ void RequestThread::read()
 void RequestThread::readBits()
 {
     quint8 bits[size];
+    std::fill(bits, bits + values.size(), 0);
     if (table == QModBusDevice::DiscreteInputs) {
         if (modbus_read_input_bits(context, startAddress, size, bits) == -1) {
             emit error(errno);
@@ -130,6 +131,7 @@ void RequestThread::readBits()
 void RequestThread::readBytes()
 {
     quint16 bytes[size];
+    std::fill(bytes, bytes + values.size(), 0);
     if (table == QModBusDevice::InputRegisters) {
         if (modbus_read_input_registers(context, startAddress, size, bytes) == -1) {
             emit error(errno);

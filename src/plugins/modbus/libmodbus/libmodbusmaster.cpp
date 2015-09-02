@@ -68,9 +68,10 @@ QModBusReply* LibModBusMaster::write(const QModBusDataUnit &request, int slaveId
 
 QModBusReply* LibModBusMaster::write(const QList<QModBusDataUnit> &requests, int slaveId)
 {
-    if (requests.empty())
+    if (requests.empty()) {
         setError(tr("Empty write request."), QModBusDevice::WriteError);
         return 0;
+    }
 
     const QModBusDevice::ModBusTable writeTable(requests.first().tableType());
 
@@ -89,6 +90,7 @@ QModBusReply* LibModBusMaster::write(const QList<QModBusDataUnit> &requests, int
                      QModBusDevice::WriteError);
             return 0;
         }
+
         if (requests.at(i).address() != writeTable) {
             setError(tr("Data units in write request must be adjacent to each other."),
                      QModBusDevice::WriteError);

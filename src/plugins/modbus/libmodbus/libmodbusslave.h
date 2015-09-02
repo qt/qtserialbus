@@ -53,6 +53,18 @@ class ListenThread : public QObject
 {
     Q_OBJECT
 
+    enum FunctionId {
+        ReadCoils = 1,
+        ReadDiscreteInputs = 2,
+        ReadHoldingRegisters = 3,
+        ReadInputRegisters = 4,
+        WriteSingleCoil = 5,
+        WriteSingleRegister = 6,
+        WriteMultipleCoils = 15,
+        WriteMultipleRegisters = 16,
+        ReadWriteRegisters = 23
+    };
+
 public slots:
     void doWork();
 
@@ -63,7 +75,7 @@ public:
 Q_SIGNALS:
     void error(int errorNumber);
     void slaveRead();
-    void slaveWritten(QVector<QModBusDataUnit>);
+    void slaveWritten(QModBusDevice::ModBusTable table, int address, int size);
 };
 
 class LibModBusSlave : public QModBusSlave

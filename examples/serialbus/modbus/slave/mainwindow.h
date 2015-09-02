@@ -44,6 +44,7 @@
 #include <QMainWindow>
 #include <QModBusSlave>
 #include <QPointer>
+#include <QLineEdit>
 
 class QSerialPort;
 
@@ -59,20 +60,25 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-public slots:
+private Q_SLOTS:
     void onSlaveStateChanged(int state);
-
-private slots:
     void on_pushButton_clicked();
+    void coilChanged(int id);
+    void discreteInputChanged(int id);
+    void bitChanged(int id, QModBusDevice::ModBusTable table, bool value);
+    void setRegister(const QString &value);
+    void updateWidgets(QModBusDevice::ModBusTable table, int address, int size);
 
 private:
     void init();
     void connectDevice(int pluginIndex);
+    void setLineEdits();
 
     QList<QByteArray> plugins;
     QPointer<QModBusSlave> modBusDevice;
     Ui::MainWindow *ui;
     QPointer<QSerialPort> serialPort;
+    QList<QLineEdit*> registerFields;
 };
 
 #endif // MAINWINDOW_H

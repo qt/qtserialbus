@@ -44,7 +44,12 @@
 #include <sys/select.h>
 #endif
 
-const int MODBUS_SERIAL_ADU_SIZE = 256;
+#define MODBUS_SERIAL_ADU_SIZE 256
+#define FUNCTION_ID 1
+#define START_ADDRESS_HI 2
+#define START_ADDRESS_LO 3
+#define QUANTITY_HI 4
+#define QUANTITY_LO 5
 
 QT_BEGIN_NAMESPACE
 
@@ -56,6 +61,7 @@ LibModBusSlave::LibModBusSlave() :
     connected(false),
     slave(1)
 {
+    qRegisterMetaType<QModBusDevice::ModBusTable>("QModBusDevice::ModBusTable");
 }
 
 LibModBusSlave::~LibModBusSlave()
@@ -268,10 +274,6 @@ QString LibModBusSlave::portNameToSystemLocation(QString source)
 void ListenThread::doWork()
 {
     quint8 query[MODBUS_SERIAL_ADU_SIZE];
-    struct timeval timeout;
-    struct timeval *timeoutptr = &timeout;
-    timeout.tv_sec = 1;
-    timeout.tv_usec = 0;
 
     while (!QThread::currentThread()->isInterruptionRequested()) {
         // The FD_ZERO and FD_SET need to be done at every loop.
@@ -282,7 +284,10 @@ void ListenThread::doWork()
 
         // Because modbus_receive doesn't obey timeouts properly, first wait with select until there
         // is something to read.
-        int req = select(socket+1, &rset, NULL, NULL, timeoutptr);
+        struct timeval timeout;
+        timeout.tv_sec = 1;
+        timeout.tv_usec = 0;
+        int req = select(socket + 1, &rset, NULL, NULL, &timeout);
 
         // Read only if select returned that there is something to read
         if (req > 0)
@@ -295,9 +300,53 @@ void ListenThread::doWork()
         }
 
         // Send reply only if data was received.
-        if (req > 0) {
+        if (req > 1) {
             modbus_reply(context, query, req, mapping);
-            emit slaveRead();
+
+            //emit proper signal(s)
+            const int functionId = query[FUNCTION_ID];
+            quint16 startAddress = 0;
+            quint16 quantity = 0;
+            QModBusDevice::ModBusTable table;
+            switch (functionId) {
+            case ReadCoils:
+            case ReadDiscreteInputs:
+            case ReadHoldingRegisters:
+            case ReadInputRegisters:
+                emit slaveRead();
+                break;
+            case WriteSingleCoil:
+                table = QModBusDevice::Coils;
+                startAddress = (query[START_ADDRESS_HI] << 8) + query[START_ADDRESS_LO];
+                emit slaveWritten(table, startAddress, 1);
+                break;
+            case WriteMultipleCoils:
+                table = QModBusDevice::Coils;
+                startAddress = (query[START_ADDRESS_HI] << 8) + query[START_ADDRESS_LO];
+                quantity = (query[QUANTITY_HI] << 8) + query[QUANTITY_LO];
+                emit slaveWritten(table, startAddress, quantity);
+                break;
+            case WriteSingleRegister:
+                table = QModBusDevice::HoldingRegisters;
+                startAddress = (query[START_ADDRESS_HI] << 8) + query[START_ADDRESS_LO];
+                emit slaveWritten(table, startAddress, 1);
+                break;
+            case WriteMultipleRegisters:
+                table = QModBusDevice::HoldingRegisters;
+                startAddress = (query[START_ADDRESS_HI] << 8) + query[START_ADDRESS_LO];
+                quantity = (query[QUANTITY_HI] << 8) + query[QUANTITY_LO];
+                emit slaveWritten(table, startAddress, quantity);
+                break;
+            case ReadWriteRegisters:
+                emit slaveRead();
+                table = QModBusDevice::HoldingRegisters;
+                startAddress = (query[START_ADDRESS_HI] << 8) + query[START_ADDRESS_LO];
+                quantity = (query[QUANTITY_HI] << 8) + query[QUANTITY_LO];
+                emit slaveWritten(table, startAddress, quantity);
+                break;
+            default:
+                break;
+            }
         }
     }
 }

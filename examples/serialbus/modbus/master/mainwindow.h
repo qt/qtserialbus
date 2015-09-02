@@ -67,9 +67,11 @@ public slots:
 private slots:
     void on_pushButton_clicked();
 
-    void on_pushButton_2_clicked();
+    void on_readButton_clicked();
 
     void on_writeButton_clicked();
+
+    void on_writeTable_currentIndexChanged(const QString &arg1);
 
 private:
     void init();

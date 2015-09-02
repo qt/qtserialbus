@@ -47,12 +47,17 @@
 
 #include <QtCore/qbytearray.h>
 #include <QtCore/qdebug.h>
+#include <QButtonGroup>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    setLineEdits();
+
+    connect(ui->discreteButtons, SIGNAL(buttonClicked(int)), this, SLOT(discreteInputChanged(int)));
+    connect(ui->coilButtons, SIGNAL(buttonClicked(int)), this, SLOT(coilChanged(int)));
     init();
 }
 
@@ -61,6 +66,30 @@ MainWindow::~MainWindow()
     if (!modBusDevice.isNull())
         modBusDevice->disconnectDevice();
     delete ui;
+}
+
+void MainWindow::discreteInputChanged(int id)
+{
+    QAbstractButton *button = ui->discreteButtons->button(id);
+    bitChanged(id, QModBusDevice::DiscreteInputs, button->isChecked());
+}
+
+void MainWindow::coilChanged(int id)
+{
+    QAbstractButton *button = ui->coilButtons->button(id);
+    bitChanged(id, QModBusDevice::Coils, button->isChecked());
+}
+
+void MainWindow::bitChanged(int id, QModBusDevice::ModBusTable table, bool value)
+{
+    if (!modBusDevice)
+        return;
+
+    int mapId = qAbs(id) - 2; //default button group id goes from -2 to downwards
+
+    if (!modBusDevice->setData(table, mapId, value)) {
+        qWarning() << modBusDevice->errorString();
+    }
 }
 
 void MainWindow::init()
@@ -107,14 +136,50 @@ void MainWindow::connectDevice(int pluginIndex)
         return;
     }
 
-    if (!modBusDevice->setData(QModBusDevice::DiscreteInputs, 2, 1))
-        qWarning() << modBusDevice->errorString();
-    if (!modBusDevice->setData(QModBusDevice::Coils, 4, 1))
-        qWarning() << modBusDevice->errorString();
-    if (!modBusDevice->setData(QModBusDevice::InputRegisters, 3, 0xf043))
-        qWarning() << modBusDevice->errorString();
-    if (!modBusDevice->setData(QModBusDevice::HoldingRegisters, 4, 0xa2))
-        qWarning() << modBusDevice->errorString();
+    modBusDevice->setSlaveId(ui->slaveEdit->text().toInt());
+
+    for (int i = -2; i > (-2 - ui->discreteButtons->buttons().size()); i--) //default button group id goes from -2 to downwards
+        modBusDevice->setData(QModBusDevice::DiscreteInputs, qAbs(i) - 2, ui->discreteButtons->button(i)->isChecked());
+
+
+    for (int i = -2; i > (-2 - ui->coilButtons->buttons().size()); i--)
+        modBusDevice->setData(QModBusDevice::Coils, qAbs(i) - 2, ui->coilButtons->button(i)->isChecked());
+
+    for (int i = 0; i < 10; i++) {
+        if (!registerFields.at(i)->text().isEmpty()) {
+            bool ok;
+            modBusDevice->setData(QModBusDevice::InputRegisters, i, registerFields.at(i)->text().toInt(&ok, 16));
+        }
+    }
+    for (int i = 10; i < 20; i++) {
+        if (!registerFields.at(i)->text().isEmpty()) {
+            bool ok;
+            modBusDevice->setData(QModBusDevice::HoldingRegisters, (i - 10), registerFields.at(i)->text().toInt(&ok, 16));
+        }
+    }
+
+    connect(modBusDevice.data(), &QModBusSlave::slaveWritten, this, &MainWindow::updateWidgets);
+}
+
+void MainWindow::updateWidgets(QModBusDevice::ModBusTable table, int address, int size)
+{
+    for (int i = 0; i < size; i++) {
+        quint16 value;
+        QString text;
+        switch (table) {
+        case QModBusDevice::Coils:
+            modBusDevice->data(QModBusDevice::Coils, address + i, value);
+            ui->coilButtons->button(-2 - address - i)->setChecked(value); //default button group id goes from -2 to downwards
+            break;
+        case QModBusDevice::HoldingRegisters:
+            modBusDevice->data(QModBusDevice::HoldingRegisters, address + i, value);
+            text.setNum(value, 16);
+            registerFields.at(10 + address + i)->setText(text);
+            break;
+        default:
+            break;
+        }
+    }
 }
 
 void MainWindow::onSlaveStateChanged(int state)
@@ -128,4 +193,53 @@ void MainWindow::onSlaveStateChanged(int state)
 void MainWindow::on_pushButton_clicked()
 {
     connectDevice(ui->pluginBox->currentIndex());
+}
+
+void MainWindow::setLineEdits()
+{
+    ui->slaveEdit->setInputMask("999");
+    registerFields.append(ui->lineEdit);
+    registerFields.append(ui->lineEdit_2);
+    registerFields.append(ui->lineEdit_3);
+    registerFields.append(ui->lineEdit_4);
+    registerFields.append(ui->lineEdit_5);
+    registerFields.append(ui->lineEdit_6);
+    registerFields.append(ui->lineEdit_7);
+    registerFields.append(ui->lineEdit_8);
+    registerFields.append(ui->lineEdit_9);
+    registerFields.append(ui->lineEdit_10);
+    registerFields.append(ui->lineEdit_11);
+    registerFields.append(ui->lineEdit_12);
+    registerFields.append(ui->lineEdit_13);
+    registerFields.append(ui->lineEdit_14);
+    registerFields.append(ui->lineEdit_15);
+    registerFields.append(ui->lineEdit_16);
+    registerFields.append(ui->lineEdit_17);
+    registerFields.append(ui->lineEdit_18);
+    registerFields.append(ui->lineEdit_19);
+    registerFields.append(ui->lineEdit_20);
+
+    for (int i = 0; i < registerFields.size(); i++) {
+        registerFields.at(i)->setInputMask("HHHH");
+        registerFields.at(i)->setProperty("id", i);
+        connect(registerFields.at(i), &QLineEdit::textChanged, this, &MainWindow::setRegister);
+    }
+}
+
+void MainWindow::setRegister(const QString &value)
+{
+    bool ok;
+    int hex = value.toInt(&ok, 16);
+    if (!modBusDevice || !ok)
+        return;
+    int id = QObject::sender()->property("id").toInt();
+    if (id < 10) {
+        if (!modBusDevice->setData(QModBusDevice::InputRegisters, id, hex)) {
+            qWarning() << modBusDevice->errorString();
+        }
+    } else {
+        if (!modBusDevice->setData(QModBusDevice::HoldingRegisters, (id - 10), hex)) {
+            qWarning() << modBusDevice->errorString();
+        }
+    }
 }

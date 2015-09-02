@@ -52,6 +52,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->writeAddress->setInputMask("9");
+    ui->writeAddress->setInputMask("9");
+    ui->writeSlave->setInputMask("999");
+    ui->readSlave->setInputMask("999");
     init();
 }
 
@@ -64,6 +68,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::init()
 {
+    on_writeTable_currentIndexChanged(ui->writeTable->currentText());
     QPointer<QModBus> modBus = QModBus::instance();
 
     plugins = modBus->plugins();
@@ -111,21 +116,41 @@ void MainWindow::on_pushButton_clicked()
     connectDevice(ui->pluginBox->currentIndex());
 }
 
-void MainWindow::on_pushButton_2_clicked()
+void MainWindow::on_readButton_clicked()
 {
     lastRequest.clear();
+    QList<QModBusDataUnit> units;
+    QModBusDevice::ModBusTable table;
+    if (ui->readTable->currentText() == QStringLiteral("Discrete Inputs"))
+        table = QModBusDevice::DiscreteInputs;
+    else if (ui->readTable->currentText() == QStringLiteral("Coils"))
+        table = QModBusDevice::Coils;
+    else if (ui->readTable->currentText() == QStringLiteral("Input Registers"))
+        table = QModBusDevice::InputRegisters;
+    else if (ui->readTable->currentText() == QStringLiteral("Holding Registers"))
+        table = QModBusDevice::HoldingRegisters;
+    else
+        return;
 
-    QModBusDataUnit unit(QModBusDevice::HoldingRegisters, 5);
+    for (int i = 0; i < ui->readSize->currentText().toInt(); i++) {
+        QModBusDataUnit unit(table, ui->readAddress->text().toInt() + i);
+        units.append(unit);
+    }
 
-    lastRequest = modBusDevice->read(unit, 1);
+    lastRequest = modBusDevice->read(units, ui->readSlave->text().toInt());
     connect(lastRequest.data(), &QModBusReply::finished, this, &MainWindow::readReady);
 }
 
 void MainWindow::readReady()
 {
     QList<QModBusDataUnit> units = lastRequest->result();
-    for (int i = 0; i < units.size(); i++)
-        qDebug() << "Value at address" << units.at(i).address() << "is" << units.at(i).value();
+    for (int i = 0; i < units.size(); i++) {
+        const QString entry = QStringLiteral("Address: ")
+                            + QString::number(units.at(i).address())
+                            + QStringLiteral(" Value: ")
+                            + QString::number(units.at(i).value());
+        ui->readValue->addItem(entry);
+    }
     lastRequest.clear();
 }
 
@@ -133,13 +158,31 @@ void MainWindow::on_writeButton_clicked()
 {
     lastRequest.clear();
 
-    QModBusDataUnit unit(QModBusDevice::HoldingRegisters, 5, 0xda2f);
+    QModBusDevice::ModBusTable table;
+    if (ui->writeTable->currentText() == QStringLiteral("Coils"))
+        table = QModBusDevice::Coils;
+    else
+        table = QModBusDevice::HoldingRegisters;
 
-    lastRequest = modBusDevice->write(unit);
+    QModBusDataUnit unit(table, ui->writeAddress->text().toInt(), ui->writeValue->text().toInt(0,16));
+
+    lastRequest = modBusDevice->write(unit, ui->readSlave->text().toInt());
+    if (lastRequest.isNull())
+        qWarning() << modBusDevice->errorString();
+
     connect(lastRequest.data(), &QModBusReply::finished, this, &MainWindow::writeReady);
 }
 
 void MainWindow::writeReady()
 {
     lastRequest.clear();
+}
+
+void MainWindow::on_writeTable_currentIndexChanged(const QString &text)
+{
+    if (text == QStringLiteral("Coils")) {
+        ui->writeValue->setInputMask("B");
+    } else if (text == QStringLiteral("Holding Registers")) {
+        ui->writeValue->setInputMask("HHHH");
+    }
 }

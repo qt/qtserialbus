@@ -68,7 +68,7 @@ public:
 
 Q_SIGNALS:
     void slaveRead();
-    void slaveWritten(QVector<QModBusDataUnit>);
+    void slaveWritten(QModBusDevice::ModBusTable table, int address, int size);
 };
 
 QT_END_NAMESPACE
