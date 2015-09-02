@@ -39,6 +39,7 @@
 #include <QtSerialBus/qserialbusglobal.h>
 
 #include <QtCore/qobject.h>
+#include <QtCore/qiodevice.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -89,6 +90,8 @@ public:
 
     bool connectDevice();
     void disconnectDevice();
+
+    virtual bool setDevice(QIODevice *transport, ApplicationDataUnit ADU = NotSpecified) = 0;
 
     ModBusDeviceState state() const;
 

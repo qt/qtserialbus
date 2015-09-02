@@ -41,22 +41,22 @@
 
 QT_BEGIN_NAMESPACE
 
-LibModBusMaster::LibModBusMaster(QSerialPort *transport) :
+LibModBusMaster::LibModBusMaster() :
     QModBusMaster(),
-    serialPort(transport),
+    serialPort(0),
     connected(false),
     adu(QModBusDevice::RemoteTerminalUnit)
 {
 }
 
-bool LibModBusMaster::setADU(ApplicationDataUnit adu)
+bool LibModBusMaster::setDevice(QIODevice *transport, ApplicationDataUnit ADU)
 {
-    //Only RTU supported at the moment
-    if (adu == QModBusDevice::RemoteTerminalUnit)
-        return true;
-
-    setError(tr("ADU not supported by libmodbus plugin."), QModBusDevice::ConfigurationError);
-    return false;
+    //Only serialport supported at the moment
+    adu = ADU;
+    serialPort = qobject_cast<QSerialPort*>(transport);
+    if (!serialPort)
+        return false;
+    return true;
 }
 
 QModBusReply* LibModBusMaster::write(const QModBusDataUnit &request, int slaveId)
@@ -141,6 +141,11 @@ bool LibModBusMaster::open()
     if (connected)
         return true;
 
+    if (!serialPort) {
+        setError(tr("No transport device specified."), QModBusDevice::ConnectionError);
+        return false;
+    }
+
     QChar parity;
 
     switch (serialPort->parity()) {
@@ -154,8 +159,7 @@ bool LibModBusMaster::open()
         parity = 'O';
         break;
     default:
-        setError(tr("Unsupported parity."),
-                 QModBusDevice::ConnectionError);
+        setError(tr("Unsupported parity."), QModBusDevice::ConnectionError);
         return false;
     }
 

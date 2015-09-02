@@ -48,9 +48,9 @@ const int MODBUS_SERIAL_ADU_SIZE = 256;
 
 QT_BEGIN_NAMESPACE
 
-LibModBusSlave::LibModBusSlave(QSerialPort *transport) :
+LibModBusSlave::LibModBusSlave() :
     QModBusSlave(),
-    serialPort(transport),
+    serialPort(0),
     context(0),
     mapping(modbus_mapping_new(0,0,0,0)),
     connected(false),
@@ -63,6 +63,17 @@ LibModBusSlave::~LibModBusSlave()
     close();
     modbus_mapping_free(mapping);
     mapping = 0;
+}
+
+bool LibModBusSlave::setDevice(QIODevice *transport, ApplicationDataUnit ADU)
+{
+    //Only serialport supported at the moment
+    adu = ADU;
+    serialPort = qobject_cast<QSerialPort*>(transport);
+    if (!serialPort)
+        return false;
+
+    return true;
 }
 
 bool LibModBusSlave::setMap(QModBusDevice::ModBusTable table, quint16 size)
@@ -88,6 +99,11 @@ bool LibModBusSlave::open()
 {
     if (connected)
         return true;
+
+    if (!serialPort) {
+        setError(QStringLiteral("No transport device specified"), QModBusDevice::ConnectionError);
+        return false;
+    }
 
     QChar parity;
 
@@ -179,16 +195,6 @@ void LibModBusSlave::setSlaveId(int id)
 {
     slave = id;
     modbus_set_slave(context, slave);
-}
-
-bool LibModBusSlave::setADU(QModBusDevice::ApplicationDataUnit adu)
-{
-    if (connected)
-        return false;
-
-    // TODO this needs to be used in the open(). Also need to change the QSerialPort from the constructor?
-    this->adu = adu;
-    return true;
 }
 
 bool LibModBusSlave::data(QModBusDevice::ModBusTable table, quint16 address, quint16& data)

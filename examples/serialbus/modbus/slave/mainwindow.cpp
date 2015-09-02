@@ -84,7 +84,13 @@ void MainWindow::connectDevice(int pluginIndex)
     serialPort = new QSerialPort(ui->portEdit->text());
     ui->portEdit->clear();
 
-    modBusDevice = modBus->createSlave(plugins.at(pluginIndex), serialPort);
+    modBusDevice = modBus->createSlave(plugins.at(pluginIndex));
+
+    if (modBusDevice.isNull())
+        return;
+
+    modBusDevice->setDevice(serialPort, QModBusDevice::RemoteTerminalUnit);
+
     if (!modBusDevice->setMap(QModBusDevice::DiscreteInputs, 10))
         return;
     if (!modBusDevice->setMap(QModBusDevice::Coils, 10))
@@ -92,9 +98,6 @@ void MainWindow::connectDevice(int pluginIndex)
     if (!modBusDevice->setMap(QModBusDevice::InputRegisters, 10))
         return;
     if (!modBusDevice->setMap(QModBusDevice::HoldingRegisters, 10))
-        return;
-
-    if (modBusDevice.isNull())
         return;
 
     connect(modBusDevice.data(), &QModBusSlave::stateChanged, this, &MainWindow::onSlaveStateChanged);

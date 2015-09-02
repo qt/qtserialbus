@@ -113,72 +113,54 @@ QList<QByteArray> QModBus::plugins() const
     return qModBusPlugins()->keys();
 }
 
-/*!
-    Creates a Modbus Slave. \a plugin is the name of the plugin as returned by the \l plugins()
-    method. \a transport is the method of connection to Modbus network. Currently only QSerialPort
-    is supported.
-
-    Ownership of the returned backend is transferred to the caller.
-    Returns \c null if no suitable device can be found.
- */
-QModBusSlave *QModBus::createSlave(const QByteArray &plugin,
-                                    QIODevice *transport) const
+QModBusPrivate QModBus::setFactory(const QByteArray &plugin) const
 {
-    if (!qModBusPlugins()->contains(plugin))
-        return Q_NULLPTR;
-
     QModBusPrivate d = qModBusPlugins()->value(plugin);
     if (!d.factory) {
         d.factory
             = qobject_cast<QModBusFactory *>(qFactoryLoader->instance(d.index));
         if (!d.factory)
-            return Q_NULLPTR;
+            return d;
 
         qModBusPlugins()->insert(plugin, d);
     }
+    return d;
+}
+
+/*!
+    Creates a Modbus Slave. \a plugin is the name of the plugin as returned by the \l plugins()
+    method.
+
+    Ownership of the returned backend is transferred to the caller.
+    Returns \c null if no suitable device can be found.
+ */
+QModBusSlave *QModBus::createSlave(const QByteArray &plugin) const
+{
+    if (!qModBusPlugins()->contains(plugin))
+        return Q_NULLPTR;
+    QModBusPrivate d = setFactory(plugin);
     if (!d.factory)
         return Q_NULLPTR;
 
-    QSerialPort *port = qobject_cast<QSerialPort *>(transport);
-    if (port) {
-        return d.factory->createSlave(port);
-    } else {
-        return Q_NULLPTR;
-    }
+    return d.factory->createSlave();
 }
 
 /*!
     Creates a Modbus Master. \a plugin is the name of the plugin as returned by the \l plugins()
-    method. \a transport is the method of connection to Modbus network. Currently only QSerialPort
-    is supported.
+    method.
 
     Ownership of the returned backend is transferred to the caller.
     Returns \c null if no suitable device can be found.
  */
-QModBusMaster *QModBus::createMaster(const QByteArray &plugin,
-                                    QIODevice *transport) const
+QModBusMaster *QModBus::createMaster(const QByteArray &plugin) const
 {
     if (!qModBusPlugins()->contains(plugin))
         return Q_NULLPTR;
-
-    QModBusPrivate d = qModBusPlugins()->value(plugin);
-    if (!d.factory) {
-        d.factory
-            = qobject_cast<QModBusFactory *>(qFactoryLoader->instance(d.index));
-        if (!d.factory)
-            return Q_NULLPTR;
-
-        qModBusPlugins()->insert(plugin, d);
-    }
+    QModBusPrivate d = setFactory(plugin);
     if (!d.factory)
         return Q_NULLPTR;
 
-    QSerialPort *port = qobject_cast<QSerialPort *>(transport);
-    if (port) {
-        return d.factory->createMaster(port);
-    } else {
-        return Q_NULLPTR;
-    }
+    return d.factory->createMaster();
 }
 
 QModBus::QModBus(QObject *parent) :

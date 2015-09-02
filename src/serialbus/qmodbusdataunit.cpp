@@ -52,8 +52,8 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \fn QModBusDataUnit::QModBusDataUnit(QModBusDevice::ModBusTable table, int address = 0, quint16 value = 0)
-    Constructs one unit of data in \a table. Address of the data is \a address and value of the data is \a value.
+    \fn QModBusDataUnit::QModBusDataUnit(QModBusDevice::ModBusTable table, int dataAddress = 0, quint16 initValue = 0)
+    Constructs one unit of data in \a table. Address of the data is \a dataAddress and value of the data is \a initValue.
  */
 
 /*!

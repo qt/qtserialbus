@@ -55,16 +55,14 @@ class ModBusPlugin : public QObject, public QModBusFactory
 
 
 public:
-    QModBusSlave *createSlave(QSerialPort *transport) const
+    QModBusSlave *createSlave() const
     {
-        QModBusSlave *device = new LibModBusSlave(transport);
-        return device;
+        return new LibModBusSlave();
     }
 
-    QModBusMaster *createMaster(QSerialPort *transport) const
+    QModBusMaster *createMaster() const
     {
-        QModBusMaster *device = new LibModBusMaster(transport);
-        return device;
+        return new LibModBusMaster();
     }
 };
 

@@ -70,12 +70,12 @@ class LibModBusSlave : public QModBusSlave
 {
     Q_OBJECT
 public:
-    explicit LibModBusSlave(QSerialPort *transport);
+    LibModBusSlave();
     ~LibModBusSlave();
+    bool setDevice(QIODevice *transport, ApplicationDataUnit ADU) Q_DECL_OVERRIDE;
     bool setMap(QModBusDevice::ModBusTable table, quint16 size) Q_DECL_OVERRIDE;
     int slaveId() const Q_DECL_OVERRIDE;
     void setSlaveId(int id) Q_DECL_OVERRIDE;
-    bool setADU(QModBusDevice::ApplicationDataUnit adu) Q_DECL_OVERRIDE;
 
     bool data(QModBusDevice::ModBusTable table, quint16 address, quint16& data) Q_DECL_OVERRIDE;
     bool setData(QModBusDevice::ModBusTable table, quint16 address, quint16 data) Q_DECL_OVERRIDE;

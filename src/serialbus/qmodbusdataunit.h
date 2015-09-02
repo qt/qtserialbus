@@ -49,13 +49,13 @@ class QModBusDataUnit
 {
 public:
     explicit QModBusDataUnit(QModBusDevice::ModBusTable table,
-               int dataAddress = 0, qint16 initValue = 0) :
+               int dataAddress = 0, quint16 initValue = 0) :
         mapping(table),
         location(dataAddress),
         dataValue(initValue) {}
     void setTableType(QModBusDevice::ModBusTable table) {mapping = table;}
     inline void setAddress(int newAddress) {location = newAddress;}
-    inline void setValue(qint16 newValue) {dataValue = newValue;}
+    inline void setValue(quint16 newValue) {dataValue = newValue;}
     QModBusDevice::ModBusTable tableType() const {return mapping;}
     inline int address() const {return location;}
     inline int value() const {return dataValue;}

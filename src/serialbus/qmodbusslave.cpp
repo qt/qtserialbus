@@ -61,7 +61,8 @@ QModBusSlave::QModBusSlave(QObject *parent) :
 
 /*!
     \fn bool QModBusSlave::setMap(QModBusDevice::ModBusTable table, quint16 size)
-    Map a size for one table. If a table is not set, it's size will be zero (0).
+    Map a \a size for one \a table. If a table is not set, it's \a size will be zero (0).
+    Return \c true on success; otherwise \c false.
  */
 
 /*!
@@ -80,12 +81,6 @@ QModBusSlave::QModBusSlave(QObject *parent) :
     Sets \a id as slave id.
 
     \sa slaveId()
- */
-
-/*!
-    \fn bool QModBusSlave::setADU(QModBusDevice::ApplicationDataUnit adu)
-
-    Set the type of transport (i.e ApplicationDataUnit) to use.
  */
 
 /*!
@@ -116,10 +111,12 @@ QModBusSlave::QModBusSlave(QObject *parent) :
  */
 
 /*!
-    \fn void QModBusSlave::slaveWritten(QVector<QModBusDataUnit> units)
+    \fn void QModBusSlave::slaveWritten(QModBusDevice::ModBusTable table, int address, int size)
 
     This signal is emitted when master has written one or more fields of data to this slave.
-    \a units is a list of data units that was written to.
+    Signal contains information of which fields are written. \a table tells which table was written,
+    \a address is address of first field written, \a size tells how many consecutive fields was written
+    starting from \a address.
  */
 
 QT_END_NAMESPACE

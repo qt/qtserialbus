@@ -53,8 +53,6 @@ public:
 
     explicit QModBusMaster(QModBusDevice *parent = 0);
 
-    virtual bool setADU(QModBusDevice::ApplicationDataUnit adu) = 0;
-
     virtual QModBusReply *write(const QModBusDataUnit &request, int slaveId = 1) = 0;
     virtual QModBusReply *write(const QList<QModBusDataUnit> &requests, int slaveId = 1) = 0;
     virtual QModBusReply *read(QModBusDataUnit &request, int slaveId = 1) = 0;

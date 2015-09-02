@@ -83,10 +83,12 @@ void MainWindow::connectDevice(int pluginIndex)
     serialPort = new QSerialPort(ui->portEdit->text());
     ui->portEdit->clear();
 
-    modBusDevice = modBus->createMaster(plugins.at(pluginIndex), serialPort);
+    modBusDevice = modBus->createMaster(plugins.at(pluginIndex));
 
     if (modBusDevice.isNull())
         return;
+
+    modBusDevice->setDevice(serialPort, QModBusDevice::RemoteTerminalUnit);
 
     connect(modBusDevice.data(), &QModBusMaster::stateChanged, this, &MainWindow::onMasterStateChanged);
 
