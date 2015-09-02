@@ -11,22 +11,12 @@ PUBLIC_HEADERS += \
     peakcanbackend.h
 
 PRIVATE_HEADERS += \
-    peakcanbackend_p.h
+    peakcanbackend_p.h \
+    peakcan_symbols_p.h
 
 SOURCES += \
     main.cpp \
     peakcanbackend.cpp
-
-win32:!wince* {
-    PRIVATE_HEADERS += \
-        symbols_win_p.h
-
-    SOURCES += \
-        peakcanbackend_win.cpp
-} else {
-    SOURCES += \
-        peakcanbackend_stub.cpp
-}
 
 OTHER_FILES = plugin.json
 

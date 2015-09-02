@@ -59,6 +59,7 @@
 
 QT_BEGIN_NAMESPACE
 
+class QSocketNotifier;
 class QWinEventNotifier;
 class QTimer;
 
@@ -73,25 +74,26 @@ public:
     bool setConfigurationParameter(int key, const QVariant &value);
     void setupChannel(const QString &interfaceName);
     void setupDefaultConfigurations();
+    QString systemErrorString(int errorCode);
+    void enableWriteNotification(bool enable);
+    void canWriteNotification();
+    bool enableReadNotification();
+    void canReadNotification();
+    bool verifyBitRate(int bitrate);
 
     PeakCanBackend * const q_ptr;
 
     bool isOpen;
     int channelIndex;
     QVector<QCanBusFrame> outgoingFrames;
+    QPointer<QTimer> outgoingEventNotifier;
 
 #if defined(Q_OS_WIN32)
-    QString systemErrorString(int errorCode);
-    void enableWriteNotification(bool enable);
-    void canWriteNotification();
-    bool enableReadNotification();
-    void canReadNotification();
-
-    bool verifyBitRate(int bitrate);
-
     QPointer<QWinEventNotifier> incomingEventNotifier;
-    QPointer<QTimer> outgoingEventNotifier;
     HANDLE incomingEventHandle;
+#else
+    QPointer<QSocketNotifier> incomingEventNotifier;
+    int incomingEventHandle;
 #endif
 };
 

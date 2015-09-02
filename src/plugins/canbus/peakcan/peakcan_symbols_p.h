@@ -35,8 +35,8 @@
 **
 ****************************************************************************/
 
-#ifndef REAKCAN_SYMBOLS_WIN_P_H
-#define REAKCAN_SYMBOLS_WIN_P_H
+#ifndef REAKCAN_SYMBOLS_P_H
+#define REAKCAN_SYMBOLS_P_H
 
 //
 //  W A R N I N G
@@ -62,7 +62,12 @@ extern "C"
 #include <QtCore/qstring.h>
 #include <QtCore/qdebug.h>
 
+#ifdef Q_OS_WIN32
 #include <windows.h>
+#define DRV_CALLBACK_TYPE WINAPI
+#else
+#define DRV_CALLBACK_TYPE
+#endif
 
 // Currently defined and supported PCAN channels
 #define PCAN_NONEBUS             0x00  // Undefined/default value for a PCAN bus
@@ -220,36 +225,36 @@ extern "C"
 #define PCAN_TYPE_DNG_SJA_EPP    0x06  // PCAN-Dongle EPP SJA1000
 
 // Type definitions
-#define TPCANHandle              BYTE  // Represents a PCAN hardware channel handle
-#define TPCANStatus              DWORD // Represents a PCAN status/error code
-#define TPCANParameter           BYTE  // Represents a PCAN parameter to be read or set
-#define TPCANDevice              BYTE  // Represents a PCAN device
-#define TPCANMessageType         BYTE  // Represents the type of a PCAN message
-#define TPCANType                BYTE  // Represents the type of PCAN hardware to be initialized
-#define TPCANMode                BYTE  // Represents a PCAN filter mode
-#define TPCANBaudrate            WORD  // Represents a PCAN Baud rate register value
+#define TPCANHandle              quint8  // Represents a PCAN hardware channel handle
+#define TPCANStatus              quint32 // Represents a PCAN status/error code
+#define TPCANParameter           quint8  // Represents a PCAN parameter to be read or set
+#define TPCANDevice              quint8  // Represents a PCAN device
+#define TPCANMessageType         quint8  // Represents the type of a PCAN message
+#define TPCANType                quint8  // Represents the type of PCAN hardware to be initialized
+#define TPCANMode                quint8  // Represents a PCAN filter mode
+#define TPCANBaudrate            quint16  // Represents a PCAN Baud rate register value
 
 // Represents a PCAN message
 typedef struct tagTPCANMsg
 {
-    DWORD             ID;      // 11/29-bit message identifier
-    TPCANMessageType  MSGTYPE; // Type of the message
-    BYTE              LEN;     // Data Length Code of the message (0..8)
-    BYTE              DATA[8]; // Data of the message (DATA[0]..DATA[7])
+    quint32             ID;      // 11/29-bit message identifier
+    TPCANMessageType    MSGTYPE; // Type of the message
+    quint8              LEN;     // Data Length Code of the message (0..8)
+    quint8              DATA[8]; // Data of the message (DATA[0]..DATA[7])
 } TPCANMsg;
 
 // Represents a timestamp of a received PCAN message
 // Total Microseconds = micros + 1000 * millis + 0xFFFFFFFF * 1000 * millis_overflow
 typedef struct tagTPCANTimestamp
 {
-    DWORD  millis;             // Base-value: milliseconds: 0.. 2^32-1
-    WORD   millis_overflow;    // Roll-arounds of millis
-    WORD   micros;             // Microseconds: 0..999
+    quint32   millis;             // Base-value: milliseconds: 0.. 2^32-1
+    quint16   millis_overflow;    // Roll-arounds of millis
+    quint16   micros;             // Microseconds: 0..999
 } TPCANTimestamp;
 
 
 #define GENERATE_SYMBOL_VARIABLE(returnType, symbolName, ...) \
-    typedef returnType (WINAPI *fp_##symbolName)(__VA_ARGS__); \
+    typedef returnType (DRV_CALLBACK_TYPE *fp_##symbolName)(__VA_ARGS__); \
     static fp_##symbolName symbolName;
 
 #define RESOLVE_SYMBOL(symbolName) \
@@ -257,16 +262,16 @@ typedef struct tagTPCANTimestamp
     if (!symbolName) \
         return false;
 
-GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Initialize, TPCANHandle, TPCANBaudrate, TPCANType, DWORD, WORD)
+GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Initialize, TPCANHandle, TPCANBaudrate, TPCANType, quint32, quint16)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Uninitialize, TPCANHandle)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Reset, TPCANHandle)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_GetStatus, TPCANHandle)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Read, TPCANHandle, TPCANMsg*, TPCANTimestamp*)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Write, TPCANHandle, TPCANMsg*)
-GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_FilterMessages, TPCANHandle, DWORD, DWORD, TPCANMode)
-GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_GetValue, TPCANHandle, TPCANParameter, PVOID, DWORD)
-GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_SetValue, TPCANHandle, TPCANParameter, PVOID, DWORD)
-GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_GetErrorText, TPCANStatus, WORD, LPSTR)
+GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_FilterMessages, TPCANHandle, quint32, quint32, TPCANMode)
+GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_GetValue, TPCANHandle, TPCANParameter, void *, quint32)
+GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_SetValue, TPCANHandle, TPCANParameter, void *, quint32)
+GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_GetErrorText, TPCANStatus, quint16, char *)
 
 inline QFunctionPointer resolveSymbol(QLibrary *pcanLibrary, const char *symbolName)
 {
@@ -303,4 +308,4 @@ inline bool resolveSymbols(QLibrary *pcanLibrary)
 
 #endif
 
-#endif // REAKCAN_SYMBOLS_WIN_P_H
+#endif // REAKCAN_SYMBOLS_P_H
