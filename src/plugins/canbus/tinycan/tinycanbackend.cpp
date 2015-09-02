@@ -361,6 +361,8 @@ void TinyCanBackendPrivate::canReadNotification()
         QCanBusFrame frame(message.Id, QByteArray(reinterpret_cast<char *>(message.Data.Bytes),
                                                   int(message.Flags.Flag.Len)));
         frame.setTimeStamp(QCanBusFrame::TimeStamp(message.Time.Sec, message.Time.USec));
+        frame.setExtendedFrameFormat(message.Flags.Flag.EFF);
+        frame.setFrameType(message.Flags.Flag.RTR ? QCanBusFrame::RemoteRequestFrame : QCanBusFrame::DataFrame);
 
         q->enqueueReceivedFrame(frame);
     }
