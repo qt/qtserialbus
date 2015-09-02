@@ -29,6 +29,7 @@
     \page qtserialbus-index.html
     \title Qt Serial Bus
     \brief Provides an API to access various serial bus devices
+    \ingroup technology-apis
 
     The Qt Serial Bus API provides classes and functions to access the various
     industrial serial buses and protocols, such as CAN, ModBus, and others.
@@ -61,5 +62,11 @@
 
     \list
          \li \l {Qt Serial Bus C++ Classes}{C++ Classes}
+    \endlist
+
+    \section1 Examples
+
+    \list
+         \li \l {CAN Bus Example}
     \endlist
 */

@@ -26,26 +26,12 @@
 ****************************************************************************/
 
 /*!
+    \group qtserialbus-examples
+    \title Qt SerialBus Examples
+    \brief Examples for the Qt SerialBus module
+    \ingroup all-examples
+    \ingroup qtserialbus
 
-    \module QtSerialBus
-    \title Qt Serial Bus C++ Classes
-    \ingroup modules
-    \qtvariable serialbus
-    \since 5.6
+    These are the \l{Qt Serial Bus} examples.
 
-    \brief Provides classes to read and write serial bus data.
-
-    Provides classes to access various serial buses.
-
-    For C++ projects include the header appropriate for the current use case,
-    for example applications using the CAN bus device may use
-
-    \code #include <QCanBusDevice> \endcode
-
-    The .pro file should have the \e serialbus keyword added
-
-    \code QT += serialbus \endcode
-
-
-    See more in the \l {Qt Serial Bus} {Qt Serial Bus Overview}.
 */
