@@ -130,19 +130,16 @@ void SettingsDialog::updateSettings()
 
         // process bitrate
         if (!m_ui->speedEdit->text().isEmpty()) {
-            //TODO
-//            QString value = m_ui->errorFilterEdit->text();
-//            bool ok = false;
-//            int dec = value.toInt(&ok);
-//            if (ok) {
-//                ConfigurationItem item;
-//                // TODO change to QCanBusDevice::BitRateKey
-//                //item.first = QCanBusDevice::ErrorFilterKey;
-//                //item.second = QVariant(dec);
-//                //m_currentSettings.configurations.append(item);
-//            }
+            QString value = m_ui->speedEdit->text();
+            bool ok = false;
+            int dec = value.toInt(&ok);
+            if (ok && !value.isEmpty()) {
+                ConfigurationItem item;
+                item.first = QCanBusDevice::BitRateKey;
+                item.second = QVariant(dec);
+                m_currentSettings.configurations.append(item);
+            }
         }
-
     }
 }
 
