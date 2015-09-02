@@ -57,7 +57,8 @@
         device->connectDevice();
     \endcode
 
-    Where,\e can0 is the active CAN interface name.
+    Where, \e can0 is the active CAN interface name. CAN interfaces act like regular network interfaces
+    on Linux systems and can be discovered using \c ifconfig.
 
     The device is now open and can be written and read:
 
@@ -77,7 +78,7 @@
     QCanBusFrame frame = device->readFrame();
     \endcode
 
-    SocketCAN provides the following configurations that can be controlled through
+    SocketCAN supports the following configurations that can be controlled through
     \l {QCanBusDevice::}{setConfigurationParameter()}:
 
     \table
@@ -100,15 +101,17 @@
                 \c {linux/can/error.h}.
         \row
             \li QCanBusDevice::RawFilterKey
-            \li A CAN filter can contain multiple filters, each of which contains two variables.
+            \li This configuration can contain multiple filters of type \l QCanBusDevice::Filter.
+                By default, the connection is configured to accept any CAN bus message.
+        \row
+            \li QCanBusDevice::BitRateKey
+            \li This configuration is not supported by the socketcan backend. However
+            it is possible to set the rate when configuring the CAN network interface using the \c {ip link} command.
     \endtable
 
     For example:
 
-    \code
-        device->setConfigurationParameter(QCanBusDevice::RawFilterKey, 0x12);
-        device->setConfigurationParameter(QCanBusDevice::ErrorFilterKey, 0x1FFFFFFFU);
-    \endcode
+    \snippet main.cpp SocketCan Filter Example
 
     Efficient frame format and flexible data-rate are supported in SocketCAN.
  */

@@ -38,10 +38,13 @@
 **
 ****************************************************************************/
 
+#include <QVariant>
 #include <QCanBusDevice>
 
 int main(int /*argc*/, char ** /*argv*/)
 {
+    QCanBusDevice * device = Q_NULLPTR;
+
     //! [Filter Examples]
     QCanBusDevice::Filter filter;
 
@@ -58,6 +61,20 @@ int main(int /*argc*/, char ** /*argv*/)
     filter.type = QCanBusFrame::DataFrame;
 
     //! [Filter Examples]
+
+    //! [SocketCan Filter Example]
+    QList<QCanBusDevice::Filter> list;
+
+    filter.frameId = 0x544;
+    filter.frameIdMask = 0x7FF;
+    filter.format = QCanBusDevice::Filter::MatchBaseAndExtendedFormat;
+    filter.type = QCanBusFrame::RemoteRequestFrame;
+    list.append(filter);
+
+    device->setConfigurationParameter(QCanBusDevice::RawFilterKey, QVariant::fromValue(list));
+    device->setConfigurationParameter(QCanBusDevice::ErrorFilterKey,
+                                      QVariant::fromValue(QCanBusFrame::FrameErrors(QCanBusFrame::AnyError)));
+    //! [SocketCan Filter Example]
 
     Q_UNUSED(filter);
     return 0;
