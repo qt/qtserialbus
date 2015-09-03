@@ -85,7 +85,6 @@ public:
 
     bool isOpen;
     int channelIndex;
-    QVector<QCanBusFrame> outgoingFrames;
     QPointer<QTimer> outgoingEventNotifier;
 
 #if defined(Q_OS_WIN32)

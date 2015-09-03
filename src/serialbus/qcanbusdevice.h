@@ -90,10 +90,7 @@ public:
     virtual bool writeFrame(const QCanBusFrame &frame) = 0;
     QCanBusFrame readFrame();
     qint64 framesAvailable() const;
-
-    //TODO currently assumes unbuffered write. Add support for buffered writes
-    // qint64 framesToWrite() const
-    // signal: void framesWritten(qint64 framesCount)
+    qint64 framesToWrite() const;
 
     // TODO rename these once QIODevice dependency has been removed
     bool connectDevice();
@@ -109,6 +106,7 @@ public:
 Q_SIGNALS:
     void errorOccurred(QCanBusDevice::CanBusError);
     void framesReceived();
+    void framesWritten(qint64 framesCount);
     void stateChanged(QCanBusDevice::CanBusDeviceState state);
 
 protected:
@@ -116,6 +114,10 @@ protected:
     void setError(const QString &errorText, QCanBusDevice::CanBusError);
 
     void enqueueReceivedFrames(const QVector<QCanBusFrame> &newFrames);
+
+    void enqueueOutgoingFrame(const QCanBusFrame &newFrame);
+    QCanBusFrame dequeueOutgoingFrame();
+    bool hasOutgoingFrames() const;
 
     virtual bool open() = 0;
     virtual void close() = 0;

@@ -324,12 +324,12 @@ void PeakCanBackendPrivate::canWriteNotification()
 {
     Q_Q(PeakCanBackend);
 
-    if (outgoingFrames.isEmpty()) {
+    if (!q->hasOutgoingFrames()) {
         enableWriteNotification(false);
         return;
     }
 
-    const QCanBusFrame frame = outgoingFrames.takeFirst();
+    const QCanBusFrame frame = q->dequeueOutgoingFrame();
     const QByteArray payload = frame.payload();
 
     TPCANMsg message;
@@ -344,13 +344,12 @@ void PeakCanBackendPrivate::canWriteNotification()
     else
         ::memcpy(message.DATA, payload.constData(), sizeof(message.DATA));
 
-    if (TPCANStatus st = ::CAN_Write(channelIndex, &message) != PCAN_ERROR_OK) {
+    if (TPCANStatus st = ::CAN_Write(channelIndex, &message) != PCAN_ERROR_OK)
         q->setError(systemErrorString(st), QCanBusDevice::WriteError);
-    } else {
-        // TODO: Emit the future signal that the frame has been written
-    }
+    else
+        emit q->framesWritten(qint64(1));
 
-    if (!outgoingFrames.isEmpty())
+    if (q->hasOutgoingFrames())
         enableWriteNotification(true);
 }
 
@@ -508,7 +507,7 @@ bool PeakCanBackend::writeFrame(const QCanBusFrame &newData)
         return false;
     }
 
-    d->outgoingFrames.append(newData);
+    enqueueOutgoingFrame(newData);
 
 #if defined(Q_OS_WIN32)
     d->enableWriteNotification(true);

@@ -160,6 +160,44 @@ void QCanBusDevice::enqueueReceivedFrames(const QVector<QCanBusFrame> &newFrames
 }
 
 /*!
+    Appends \a newFrame to the internal list of outgoing frames which
+    can be accessed by \l writeFrame().
+
+    Subclasses must call this function when they write a new frame.
+ */
+void QCanBusDevice::enqueueOutgoingFrame(const QCanBusFrame &newFrame)
+{
+    Q_D(QCanBusDevice);
+
+    d->outgoingFrames.append(newFrame);
+}
+
+/*!
+    Returns the next \l QCanBusFrame from the internal list of outgoing frames;
+    otherwise returns an invalid QCanBusFrame. The returned frame is removed
+    from the internal list.
+ */
+QCanBusFrame QCanBusDevice::dequeueOutgoingFrame()
+{
+    Q_D(QCanBusDevice);
+
+    if (d->outgoingFrames.isEmpty())
+        return QCanBusFrame(QCanBusFrame::InvalidFrame);
+    return d->outgoingFrames.takeFirst();
+}
+
+/*!
+    Returns \c true if the internal list of outgoing frames is not
+    empty; otherwise returns \c false.
+ */
+bool QCanBusDevice::hasOutgoingFrames() const
+{
+    Q_D(const QCanBusDevice);
+
+    return !d->outgoingFrames.isEmpty();
+}
+
+/*!
     Sets the configuration parameter \a key for the CAN bus connection
     to \a value. The potential keys are represented by \l ConfigurationKey.
 
@@ -271,6 +309,18 @@ qint64 QCanBusDevice::framesAvailable() const
 }
 
 /*!
+    \fn qint64 QCanBusDevice::framesToWrite() const
+
+    Returns the number of frames waiting to be written.
+
+    \sa writeFrame()
+*/
+qint64 QCanBusDevice::framesToWrite() const
+{
+    return d_func()->outgoingFrames.size();
+}
+
+/*!
     \fn bool QCanBusDevice::open()
 
     This function is called by connectDevice(). Subclasses must provide
@@ -323,6 +373,14 @@ QCanBusFrame QCanBusDevice::readFrame()
 
     return d->incomingFrames.takeFirst();
 }
+
+/*!
+    \fn void QCanBusDevice::framesWritten(qint64 framesCount)
+
+    This signal is emitted every time a payload of frames has been
+    written to the CAN bus. The \a framesCount argument is set to
+    the number of frames that were written in this payload.
+ */
 
 /*!
     \fn bool QCanBusDevice::writeFrame(const QCanBusFrame &frame)

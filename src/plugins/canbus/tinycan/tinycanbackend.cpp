@@ -285,12 +285,12 @@ void TinyCanBackendPrivate::canWriteNotification()
 {
     Q_Q(TinyCanBackend);
 
-    if (outgoingFrames.isEmpty()) {
+    if (!q->hasOutgoingFrames()) {
         enableWriteNotification(false);
         return;
     }
 
-    const QCanBusFrame frame = outgoingFrames.takeFirst();
+    const QCanBusFrame frame = q->dequeueOutgoingFrame();
     const QByteArray payload = frame.payload();
 
     TCanMsg message;
@@ -307,14 +307,13 @@ void TinyCanBackendPrivate::canWriteNotification()
 
         const qint32 messagesToWrite = 1;
         ::memcpy(message.Data.Bytes, payload.constData(), sizeof(message.Data.Bytes));
-        if (int ret = ::CanTransmit(channelIndex, &message, messagesToWrite) < 0) {
+        if (int ret = ::CanTransmit(channelIndex, &message, messagesToWrite) < 0)
             q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::WriteError);
-        } else {
-            // TODO: Emit the future signal that the frame has been written
-        }
+        else
+            emit q->framesWritten(messagesToWrite);
     }
 
-    if (!outgoingFrames.isEmpty())
+    if (q->hasOutgoingFrames())
         enableWriteNotification(true);
 }
 
@@ -459,7 +458,7 @@ bool TinyCanBackend::writeFrame(const QCanBusFrame &newData)
     if (state() != QCanBusDevice::ConnectedState)
         return false;
 
-    d->outgoingFrames.append(newData);
+    enqueueOutgoingFrame(newData);
     d->enableWriteNotification(true);
 
     return true;

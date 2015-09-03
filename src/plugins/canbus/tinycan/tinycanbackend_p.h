@@ -79,7 +79,6 @@ public:
     TinyCanBackend * const q_ptr;
     bool isOpen;
     int channelIndex;
-    QVector<QCanBusFrame> outgoingFrames;
     QPointer<QTimer> outgoingEventNotifier;
 };
 

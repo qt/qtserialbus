@@ -74,6 +74,7 @@ public:
 
     QVector<QCanBusFrame> incomingFrames;
     QMutex incomingFramesGuard;
+    QVector<QCanBusFrame> outgoingFrames;
     QVector<ConfigEntry> configOptions;
 };
 
