@@ -393,6 +393,8 @@ void PeakCanBackendPrivate::canReadNotification()
 {
     Q_Q(PeakCanBackend);
 
+    QVector<QCanBusFrame> newFrames;
+
     forever {
         TPCANMsg message;
         ::memset(&message, 0, sizeof(message));
@@ -410,11 +412,13 @@ void PeakCanBackendPrivate::canReadNotification()
         frame.setExtendedFrameFormat(message.MSGTYPE & PCAN_MESSAGE_EXTENDED);
         frame.setFrameType((message.MSGTYPE & PCAN_MESSAGE_RTR) ? QCanBusFrame::RemoteRequestFrame : QCanBusFrame::DataFrame);
 
-        q->enqueueReceivedFrame(frame);
+        newFrames.append(frame);
     }
 
     // re-trigger the read event
     enableReadNotification();
+
+    q->enqueueReceivedFrames(newFrames);
 }
 
 bool PeakCanBackendPrivate::verifyBitRate(int bitrate)

@@ -445,6 +445,8 @@ QString SocketCanBackend::interpretErrorFrame(const QCanBusFrame &errorFrame)
 
 void SocketCanBackend::readSocket()
 {
+    QVector<QCanBusFrame> newFrames;
+
     while (true) {
         struct canfd_frame frame;
         int bytesReceived = 0;
@@ -487,8 +489,10 @@ void SocketCanBackend::readSocket()
             load.insert(i, frame.data[i]);
         bufferedFrame.setPayload(load);
 
-        enqueueReceivedFrame(bufferedFrame);
+        newFrames.append(bufferedFrame);
     }
+
+    enqueueReceivedFrames(newFrames);
 }
 
 QT_END_NAMESPACE

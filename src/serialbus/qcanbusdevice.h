@@ -108,14 +108,14 @@ public:
 
 Q_SIGNALS:
     void errorOccurred(QCanBusDevice::CanBusError);
-    void frameReceived();
+    void framesReceived();
     void stateChanged(QCanBusDevice::CanBusDeviceState state);
 
 protected:
     void setState(QCanBusDevice::CanBusDeviceState newState);
     void setError(const QString &errorText, QCanBusDevice::CanBusError);
 
-    void enqueueReceivedFrame(const QCanBusFrame &newFrame);
+    void enqueueReceivedFrames(const QVector<QCanBusFrame> &newFrames);
 
     virtual bool open() = 0;
     virtual void close() = 0;

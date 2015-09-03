@@ -139,24 +139,24 @@ void QCanBusDevice::setError(const QString &errorText, CanBusError errorId)
 }
 
 /*!
-    Adds \a newFrame to the internal list of frames which can be
-    accessed using \l readFrame() and emits the \l frameReceived()
+    Appends \a newFrames to the internal list of frames which can be
+    accessed using \l readFrame() and emits the \l framesReceived()
     signal.
 
-    Subclasses must call this function when they receive a new frame.
+    Subclasses must call this function when they receive frames.
 
  */
-void QCanBusDevice::enqueueReceivedFrame(const QCanBusFrame &newFrame)
+void QCanBusDevice::enqueueReceivedFrames(const QVector<QCanBusFrame> &newFrames)
 {
     Q_D(QCanBusDevice);
 
-    if (!newFrame.isValid())
+    if (newFrames.isEmpty())
         return;
 
     d->incomingFramesGuard.lock();
-    d_func()->incomingFrames.append(newFrame);
+    d->incomingFrames.append(newFrames);
     d->incomingFramesGuard.unlock();
-    emit frameReceived();
+    emit framesReceived();
 }
 
 /*!
@@ -295,7 +295,7 @@ qint64 QCanBusDevice::framesAvailable() const
 */
 
 /*!
-    \fn void QCanBusDevice::frameReceived()
+    \fn void QCanBusDevice::framesReceived()
 
     This signal is emitted when one or more frames have been received.
     The frames should be read using \l readFrame() and \l framesAvailable().

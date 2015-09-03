@@ -70,7 +70,7 @@ void DummyBackend::sendMessage()
     dummyFrame.setFrameId(12);
     dummyFrame.setPayload(QByteArray("def"));
 
-    enqueueReceivedFrame(dummyFrame);
+    enqueueReceivedFrames(QVector<QCanBusFrame>() << dummyFrame);
 }
 
 bool DummyBackend::writeFrame(const QCanBusFrame &data)

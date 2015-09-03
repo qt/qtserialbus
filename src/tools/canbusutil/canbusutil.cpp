@@ -62,7 +62,7 @@ bool CanBusUtil::start(int argc, char *argv[])
         return false;
 
     if (listening) {
-        connect(canDevice.data(), &QCanBusDevice::frameReceived, readTask.data(), &ReadTask::checkMessages);
+        connect(canDevice.data(), &QCanBusDevice::framesReceived, readTask.data(), &ReadTask::checkMessages);
     } else {
         if (!sendData())
             return false;

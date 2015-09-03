@@ -331,6 +331,8 @@ void TinyCanBackendPrivate::canReadNotification()
 {
     Q_Q(TinyCanBackend);
 
+    QVector<QCanBusFrame> newFrames;
+
     forever {
         if (!::CanReceiveGetCount(channelIndex))
             break;
@@ -364,8 +366,10 @@ void TinyCanBackendPrivate::canReadNotification()
         frame.setExtendedFrameFormat(message.Flags.Flag.EFF);
         frame.setFrameType(message.Flags.Flag.RTR ? QCanBusFrame::RemoteRequestFrame : QCanBusFrame::DataFrame);
 
-        q->enqueueReceivedFrame(frame);
+        newFrames.append(frame);
     }
+
+    q->enqueueReceivedFrames(newFrames);
 }
 
 void TinyCanBackendPrivate::startupDriver()

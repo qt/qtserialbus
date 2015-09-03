@@ -58,7 +58,7 @@ public:
         // this test assumes that each readFrame() call returns referenceFrame
         // fill the buffer with frames
         for (int i = 0; i < 5; i++)
-            enqueueReceivedFrame(referenceFrame);
+            enqueueReceivedFrames(QVector<QCanBusFrame>() << referenceFrame);
     }
 
     bool open()

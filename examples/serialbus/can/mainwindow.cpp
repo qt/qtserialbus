@@ -121,7 +121,7 @@ void MainWindow::connectDevice()
     }
 
     connect(m_canDevice, &QCanBusDevice::errorOccurred, this, &MainWindow::receiveError);
-    connect(m_canDevice, &QCanBusDevice::frameReceived, this, &MainWindow::checkMessages);
+    connect(m_canDevice, &QCanBusDevice::framesReceived, this, &MainWindow::checkMessages);
 
     if (p.useConfigurationEnabled) {
         foreach (const SettingsDialog::ConfigurationItem &item, p.configurations)
