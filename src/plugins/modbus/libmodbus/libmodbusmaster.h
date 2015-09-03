@@ -76,6 +76,6 @@ private:
     QModBusDevice::ApplicationDataUnit adu;
 };
 
-QT_BEGIN_NAMESPACE
+QT_END_NAMESPACE
 
 #endif // LIBMODBUSMASTER_H
