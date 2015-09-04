@@ -34,30 +34,27 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSMASTER_H
-#define QMODBUSMASTER_H
+#ifndef DUMMYMASTER_H
+#define DUMMYMASTER_H
 
-#include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qmodbusdevice.h>
-#include <QtSerialBus/qmodbusdataunit.h>
-#include <QtSerialBus/qmodbusreply.h>
+#include <QtSerialBus/qmodbusmaster.h>
 
-#include <QtCore/qobject.h>
-
-QT_BEGIN_NAMESPACE
-
-class Q_SERIALBUS_EXPORT QModBusMaster : public QModBusDevice
+class DummyMaster : public QModBusMaster
 {
     Q_OBJECT
 public:
+    explicit DummyMaster(QObject *parent = 0);
+    bool setDevice(QIODevice *transport, ApplicationDataUnit ADU = NotSpecified);
 
-    explicit QModBusMaster(QObject *parent = 0);
+    QModBusReply *write(const QModBusDataUnit &request, int slaveId);
+    QModBusReply *write(const QList<QModBusDataUnit> &requests, int slaveId);
+    QModBusReply *read(QModBusDataUnit &request, int slaveId);
+    QModBusReply *read(QList<QModBusDataUnit> &requests, int slaveId);
 
-    virtual QModBusReply *write(const QModBusDataUnit &request, int slaveId = 1) = 0;
-    virtual QModBusReply *write(const QList<QModBusDataUnit> &requests, int slaveId = 1) = 0;
-    virtual QModBusReply *read(QModBusDataUnit &request, int slaveId = 1) = 0;
-    virtual QModBusReply *read(QList<QModBusDataUnit> &requests, int slaveId = 1) = 0;
+protected:
+    bool open();
+    void close();
+
 };
 
-QT_END_NAMESPACE
-#endif // QMODBUSMASTER_H
+#endif // DUMMYMASTER_H

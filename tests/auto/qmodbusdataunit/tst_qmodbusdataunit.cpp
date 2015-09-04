@@ -34,30 +34,53 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSMASTER_H
-#define QMODBUSMASTER_H
+#include <QtTest/QtTest>
+#include <QtSerialBus/QModBusDataUnit>
 
-#include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qmodbusdevice.h>
-#include <QtSerialBus/qmodbusdataunit.h>
-#include <QtSerialBus/qmodbusreply.h>
-
-#include <QtCore/qobject.h>
-
-QT_BEGIN_NAMESPACE
-
-class Q_SERIALBUS_EXPORT QModBusMaster : public QModBusDevice
+class tst_QModBusDataUnit : public QObject
 {
     Q_OBJECT
 public:
+    explicit tst_QModBusDataUnit();
 
-    explicit QModBusMaster(QObject *parent = 0);
-
-    virtual QModBusReply *write(const QModBusDataUnit &request, int slaveId = 1) = 0;
-    virtual QModBusReply *write(const QList<QModBusDataUnit> &requests, int slaveId = 1) = 0;
-    virtual QModBusReply *read(QModBusDataUnit &request, int slaveId = 1) = 0;
-    virtual QModBusReply *read(QList<QModBusDataUnit> &requests, int slaveId = 1) = 0;
+private slots:
+    void constructors();
+    void setters();
 };
 
-QT_END_NAMESPACE
-#endif // QMODBUSMASTER_H
+tst_QModBusDataUnit::tst_QModBusDataUnit()
+{
+}
+
+void tst_QModBusDataUnit::constructors()
+{
+    QModBusDataUnit unit1(QModBusDevice::Coils);
+    QModBusDataUnit unit2(QModBusDevice::HoldingRegisters, 3, 9);
+
+    QCOMPARE(unit1.tableType(), QModBusDevice::Coils);
+    QCOMPARE(unit1.address(), 0);
+    quint16 value = 0;
+    QCOMPARE(unit1.value(), value);
+
+    QCOMPARE(unit2.tableType(), QModBusDevice::HoldingRegisters);
+    QCOMPARE(unit2.address(), 3);
+    value = 9;
+    QCOMPARE(unit2.value(), value);
+}
+
+void tst_QModBusDataUnit::setters()
+{
+    QModBusDataUnit unit(QModBusDevice::HoldingRegisters, 3, 9);
+    unit.setTableType(QModBusDevice::InputRegisters);
+    unit.setAddress(2);
+    unit.setValue(5);
+
+    QCOMPARE(unit.tableType(), QModBusDevice::InputRegisters);
+    QCOMPARE(unit.address(), 2);
+    quint16 value = 5;
+    QCOMPARE(unit.value(), value);
+}
+
+QTEST_MAIN(tst_QModBusDataUnit)
+
+#include "tst_qmodbusdataunit.moc"

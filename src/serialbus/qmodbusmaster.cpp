@@ -52,7 +52,7 @@ QT_BEGIN_NAMESPACE
 /*!
     Constructs a modbus master device with the specified \a parent.
  */
-QModBusMaster::QModBusMaster(QModBusDevice *parent) :
+QModBusMaster::QModBusMaster(QObject *parent) :
     QModBusDevice(parent)
 {
 }

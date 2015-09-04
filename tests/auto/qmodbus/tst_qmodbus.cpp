@@ -34,30 +34,61 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSMASTER_H
-#define QMODBUSMASTER_H
+#include <QtSerialBus/qmodbus.h>
 
-#include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qmodbusdevice.h>
-#include <QtSerialBus/qmodbusdataunit.h>
-#include <QtSerialBus/qmodbusreply.h>
+#include <QtTest/QtTest>
 
-#include <QtCore/qobject.h>
-
-QT_BEGIN_NAMESPACE
-
-class Q_SERIALBUS_EXPORT QModBusMaster : public QModBusDevice
+class tst_QModBus : public QObject
 {
     Q_OBJECT
 public:
+    tst_QModBus();
 
-    explicit QModBusMaster(QObject *parent = 0);
-
-    virtual QModBusReply *write(const QModBusDataUnit &request, int slaveId = 1) = 0;
-    virtual QModBusReply *write(const QList<QModBusDataUnit> &requests, int slaveId = 1) = 0;
-    virtual QModBusReply *read(QModBusDataUnit &request, int slaveId = 1) = 0;
-    virtual QModBusReply *read(QList<QModBusDataUnit> &requests, int slaveId = 1) = 0;
+private slots:
+    void initTestCase();
+    void plugins();
+    void createBackend();
+private:
+    QModBus *bus;
 };
 
-QT_END_NAMESPACE
-#endif // QMODBUSMASTER_H
+tst_QModBus::tst_QModBus() : bus(0)
+{
+}
+
+void tst_QModBus::initTestCase()
+{
+    /*
+     * Set custom path since CI doesn't install test plugins
+     */
+    QCoreApplication::addLibraryPath(QCoreApplication::applicationDirPath()
+                                     + QStringLiteral("/../../../plugins"));
+#ifdef Q_OS_WIN
+    QCoreApplication::addLibraryPath(QCoreApplication::applicationDirPath()
+                                     + QStringLiteral("/../../../../plugins"));
+#endif
+    bus = QModBus::instance();
+    QVERIFY(bus != 0);
+    QModBus *sameInstance;
+    sameInstance = QModBus::instance();
+    QCOMPARE(bus, sameInstance);
+}
+
+void tst_QModBus::plugins()
+{
+    QCOMPARE(bus->plugins().isEmpty(), false);
+    QCOMPARE(bus->plugins().contains("generic"), true);
+}
+
+void tst_QModBus::createBackend()
+{
+    QVERIFY(bus->createSlave("foo") == Q_NULLPTR);
+    QVERIFY(bus->createMaster("foo") == Q_NULLPTR);
+
+    QVERIFY(bus->createSlave("generic") != Q_NULLPTR);
+    QVERIFY(bus->createMaster("generic") != Q_NULLPTR);
+}
+
+QTEST_MAIN(tst_QModBus)
+
+#include "tst_qmodbus.moc"

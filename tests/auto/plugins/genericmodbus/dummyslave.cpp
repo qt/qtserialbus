@@ -34,30 +34,62 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSMASTER_H
-#define QMODBUSMASTER_H
+#include "dummyslave.h"
 
-#include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qmodbusdevice.h>
-#include <QtSerialBus/qmodbusdataunit.h>
-#include <QtSerialBus/qmodbusreply.h>
+#include <QIODevice>
 
-#include <QtCore/qobject.h>
-
-QT_BEGIN_NAMESPACE
-
-class Q_SERIALBUS_EXPORT QModBusMaster : public QModBusDevice
+DummySlave::DummySlave(QObject *parent) :
+    QModBusSlave(parent)
 {
-    Q_OBJECT
-public:
+}
 
-    explicit QModBusMaster(QObject *parent = 0);
+bool DummySlave::setDevice(QIODevice *transport, ApplicationDataUnit ADU)
+{
+    Q_UNUSED(transport);
+    Q_UNUSED(ADU);
 
-    virtual QModBusReply *write(const QModBusDataUnit &request, int slaveId = 1) = 0;
-    virtual QModBusReply *write(const QList<QModBusDataUnit> &requests, int slaveId = 1) = 0;
-    virtual QModBusReply *read(QModBusDataUnit &request, int slaveId = 1) = 0;
-    virtual QModBusReply *read(QList<QModBusDataUnit> &requests, int slaveId = 1) = 0;
-};
+    return true;
+}
 
-QT_END_NAMESPACE
-#endif // QMODBUSMASTER_H
+bool DummySlave::open()
+{
+    return true;
+}
+
+void DummySlave::close()
+{
+
+}
+
+bool DummySlave::setMap(QModBusDevice::ModBusTable table, quint16 size)
+{
+    Q_UNUSED(table);
+    Q_UNUSED(size);
+    return true;
+}
+
+void DummySlave::setSlaveId(int id)
+{
+    Q_UNUSED(id);
+}
+
+int DummySlave::slaveId() const
+{
+    return 1;
+}
+
+bool DummySlave::data(QModBusDevice::ModBusTable table, quint16 address, quint16 &data)
+{
+    Q_UNUSED(table);
+    Q_UNUSED(address);
+    data = 9;
+    return true;
+}
+
+bool DummySlave::setData(QModBusDevice::ModBusTable table, quint16 address, quint16 data)
+{
+    Q_UNUSED(table);
+    Q_UNUSED(address);
+    Q_UNUSED(data);
+    return true;
+}

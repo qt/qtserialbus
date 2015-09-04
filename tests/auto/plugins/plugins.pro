@@ -1,2 +1,3 @@
 TEMPLATE = subdirs
-SUBDIRS += genericcanbus
+SUBDIRS += genericcanbus \
+           genericmodbus

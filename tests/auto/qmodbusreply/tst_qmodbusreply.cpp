@@ -34,30 +34,73 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSMASTER_H
-#define QMODBUSMASTER_H
+#include <QtTest/QtTest>
+#include <QtSerialBus/QModBusReply>
+#include <QtCore/qpointer.h>
 
-#include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qmodbusdevice.h>
-#include <QtSerialBus/qmodbusdataunit.h>
-#include <QtSerialBus/qmodbusreply.h>
+class dummyReply : public QModBusReply
+{
+friend class tst_QModBusReply;
 
-#include <QtCore/qobject.h>
+protected:
+    void setFinished() Q_DECL_OVERRIDE { finish = true; }
+    void setError(QModBusReply::RequestError errorCode, const QString &errorString) Q_DECL_OVERRIDE
+    {
+        errorType = errorCode;
+        errorText = errorString;
+    }
+};
 
-QT_BEGIN_NAMESPACE
-
-class Q_SERIALBUS_EXPORT QModBusMaster : public QModBusDevice
+class tst_QModBusReply : public QObject
 {
     Q_OBJECT
 public:
+    explicit tst_QModBusReply();
 
-    explicit QModBusMaster(QObject *parent = 0);
+private slots:
+    void error();
+    void errorString();
+    void finished();
+    void result();
 
-    virtual QModBusReply *write(const QModBusDataUnit &request, int slaveId = 1) = 0;
-    virtual QModBusReply *write(const QList<QModBusDataUnit> &requests, int slaveId = 1) = 0;
-    virtual QModBusReply *read(QModBusDataUnit &request, int slaveId = 1) = 0;
-    virtual QModBusReply *read(QList<QModBusDataUnit> &requests, int slaveId = 1) = 0;
+private:
+    QPointer<dummyReply> reply;
 };
 
-QT_END_NAMESPACE
-#endif // QMODBUSMASTER_H
+tst_QModBusReply::tst_QModBusReply()
+{
+    reply = new dummyReply();
+}
+
+void tst_QModBusReply::error()
+{
+    QCOMPARE(reply->error(), QModBusReply::NoError);
+}
+
+void tst_QModBusReply::errorString()
+{
+    QString error("error string");
+    reply->setError(QModBusReply::IllegalFunction, error);
+    QCOMPARE(reply->errorString(), error);
+}
+
+void tst_QModBusReply::finished()
+{
+    QVERIFY(!reply->isFinished());
+    QVERIFY(reply->isRunning());
+
+    reply->setFinished();
+
+    QVERIFY(reply->isFinished());
+    QVERIFY(!reply->isRunning());
+}
+
+void tst_QModBusReply::result()
+{
+    QList<QModBusDataUnit> units = reply->result();
+    QVERIFY(units.isEmpty());
+}
+
+QTEST_MAIN(tst_QModBusReply)
+
+#include "tst_qmodbusreply.moc"

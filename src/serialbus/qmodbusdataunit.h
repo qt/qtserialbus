@@ -58,12 +58,12 @@ public:
     inline void setValue(quint16 newValue) {dataValue = newValue;}
     QModBusDevice::ModBusTable tableType() const {return mapping;}
     inline int address() const {return location;}
-    inline int value() const {return dataValue;}
+    inline quint16 value() const {return dataValue;}
 
 private:
     QModBusDevice::ModBusTable mapping;
     int location;
-    qint16 dataValue;
+    quint16 dataValue;
 };
 
 QT_END_NAMESPACE

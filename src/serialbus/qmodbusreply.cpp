@@ -137,7 +137,7 @@ QString QModBusReply::errorString() const
  */
 bool QModBusReply::isFinished() const
 {
-    return false;
+    return finish;
 }
 
 /*!
@@ -146,7 +146,7 @@ bool QModBusReply::isFinished() const
  */
 bool QModBusReply::isRunning() const
 {
-    return false;
+    return !finish;
 }
 
 /*!

@@ -34,30 +34,54 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSMASTER_H
-#define QMODBUSMASTER_H
+#include "dummymaster.h"
 
-#include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qmodbusdevice.h>
-#include <QtSerialBus/qmodbusdataunit.h>
-#include <QtSerialBus/qmodbusreply.h>
-
-#include <QtCore/qobject.h>
-
-QT_BEGIN_NAMESPACE
-
-class Q_SERIALBUS_EXPORT QModBusMaster : public QModBusDevice
+DummyMaster::DummyMaster(QObject *parent) :
+    QModBusMaster(parent)
 {
-    Q_OBJECT
-public:
+}
 
-    explicit QModBusMaster(QObject *parent = 0);
+bool DummyMaster::setDevice(QIODevice *transport, ApplicationDataUnit ADU)
+{
+    Q_UNUSED(transport);
+    Q_UNUSED(ADU);
+    return true;
+}
 
-    virtual QModBusReply *write(const QModBusDataUnit &request, int slaveId = 1) = 0;
-    virtual QModBusReply *write(const QList<QModBusDataUnit> &requests, int slaveId = 1) = 0;
-    virtual QModBusReply *read(QModBusDataUnit &request, int slaveId = 1) = 0;
-    virtual QModBusReply *read(QList<QModBusDataUnit> &requests, int slaveId = 1) = 0;
-};
+bool DummyMaster::open()
+{
+    return true;
+}
 
-QT_END_NAMESPACE
-#endif // QMODBUSMASTER_H
+void DummyMaster::close()
+{
+
+}
+
+QModBusReply* DummyMaster::write(const QModBusDataUnit &request, int slaveId)
+{
+    Q_UNUSED(request);
+    Q_UNUSED(slaveId);
+    return 0;
+}
+
+QModBusReply* DummyMaster::write(const QList<QModBusDataUnit> &requests, int slaveId)
+{
+    Q_UNUSED(requests);
+    Q_UNUSED(slaveId);
+    return 0;
+}
+
+QModBusReply* DummyMaster::read(QModBusDataUnit &request, int slaveId)
+{
+    Q_UNUSED(request);
+    Q_UNUSED(slaveId);
+    return 0;
+}
+
+QModBusReply* DummyMaster::read(QList<QModBusDataUnit> &requests, int slaveId)
+{
+    Q_UNUSED(requests);
+    Q_UNUSED(slaveId);
+    return 0;
+}

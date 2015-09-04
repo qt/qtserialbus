@@ -34,30 +34,38 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSMASTER_H
-#define QMODBUSMASTER_H
+#include "dummyslave.h"
+#include "dummymaster.h"
 
-#include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qmodbusdevice.h>
-#include <QtSerialBus/qmodbusdataunit.h>
-#include <QtSerialBus/qmodbusreply.h>
+#include <QtSerialBus/qmodbus.h>
+#include <QtSerialBus/qmodbusfactory.h>
 
-#include <QtCore/qobject.h>
+#include <QtSerialPort>
+
+#include <QtCore/qfile.h>
+#include <QtCore/qdebug.h>
 
 QT_BEGIN_NAMESPACE
 
-class Q_SERIALBUS_EXPORT QModBusMaster : public QModBusDevice
+class GenericBusPlugin : public QObject, public QModBusFactory
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QModBusFactory" FILE "plugin.json")
+    Q_INTERFACES(QModBusFactory)
+
+
 public:
+    QModBusSlave *createSlave() const
+    {
+        return new DummySlave();
+    }
 
-    explicit QModBusMaster(QObject *parent = 0);
-
-    virtual QModBusReply *write(const QModBusDataUnit &request, int slaveId = 1) = 0;
-    virtual QModBusReply *write(const QList<QModBusDataUnit> &requests, int slaveId = 1) = 0;
-    virtual QModBusReply *read(QModBusDataUnit &request, int slaveId = 1) = 0;
-    virtual QModBusReply *read(QList<QModBusDataUnit> &requests, int slaveId = 1) = 0;
+    QModBusMaster *createMaster() const
+    {
+        return new DummyMaster();
+    }
 };
 
 QT_END_NAMESPACE
-#endif // QMODBUSMASTER_H
+
+#include "main.moc"
