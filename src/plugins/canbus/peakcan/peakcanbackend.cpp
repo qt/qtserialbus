@@ -508,10 +508,7 @@ bool PeakCanBackend::writeFrame(const QCanBusFrame &newData)
     }
 
     enqueueOutgoingFrame(newData);
-
-#if defined(Q_OS_WIN32)
     d->enableWriteNotification(true);
-#endif
 
     return true;
 }
