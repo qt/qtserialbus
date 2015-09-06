@@ -464,6 +464,19 @@ bool PeakCanBackend::open()
             close(); // sets UnconnectedState
             return false;
         }
+
+        // apply all stored configurations except bitrate, because
+        // the bitrate can not be applied after opening of device
+        foreach (int key, configurationKeys()) {
+            if (key == QCanBusDevice::BitRateKey)
+                continue;
+            const QVariant param = configurationParameter(key);
+            const bool success = d->setConfigurationParameter(key, param);
+            if (!success) {
+                qWarning() << "Cannot apply parameter:" << key
+                           << "with value:" << param;
+            }
+        }
     }
 
     setState(QCanBusDevice::ConnectedState);
