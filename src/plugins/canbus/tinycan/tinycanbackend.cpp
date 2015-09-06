@@ -301,6 +301,7 @@ void TinyCanBackendPrivate::canWriteNotification()
     } else {
         message.Id = frame.frameId();
         message.Flags.Flag.Len = payload.size();
+        message.Flags.Flag.Error = (frame.frameType() == QCanBusFrame::ErrorFrame);
         message.Flags.Flag.RTR = (frame.frameType() == QCanBusFrame::RemoteRequestFrame);
         message.Flags.Flag.TxD = 1;
         message.Flags.Flag.EFF = frame.hasExtendedFrameFormat();
@@ -363,7 +364,13 @@ void TinyCanBackendPrivate::canReadNotification()
                                                   int(message.Flags.Flag.Len)));
         frame.setTimeStamp(QCanBusFrame::TimeStamp(message.Time.Sec, message.Time.USec));
         frame.setExtendedFrameFormat(message.Flags.Flag.EFF);
-        frame.setFrameType(message.Flags.Flag.RTR ? QCanBusFrame::RemoteRequestFrame : QCanBusFrame::DataFrame);
+
+        if (message.Flags.Flag.Error)
+            frame.setFrameType(QCanBusFrame::ErrorFrame);
+        else if (message.Flags.Flag.RTR)
+            frame.setFrameType(QCanBusFrame::RemoteRequestFrame);
+        else
+            frame.setFrameType(QCanBusFrame::DataFrame);
 
         newFrames.append(frame);
     }
@@ -457,6 +464,20 @@ bool TinyCanBackend::writeFrame(const QCanBusFrame &newData)
 
     if (state() != QCanBusDevice::ConnectedState)
         return false;
+
+    if (newData.frameType() != QCanBusFrame::DataFrame
+            && newData.frameType() != QCanBusFrame::RemoteRequestFrame
+            && newData.frameType() != QCanBusFrame::ErrorFrame) {
+        setError(tr("Unable to write a frame with unacceptable type"),
+                 QCanBusDevice::WriteError);
+        return false;
+    }
+
+    if (newData.payload().size() > 8) {
+        setError(tr("Unable to write a frame with unacceptable payload size"),
+                 QCanBusDevice::WriteError);
+        return false;
+    }
 
     enqueueOutgoingFrame(newData);
     d->enableWriteNotification(true);
