@@ -69,12 +69,15 @@ public:
 
     QString systemErrorString(int errorCode);
     void setupChannel(const QString &interfaceName);
+    void setupDefaultConfigurations();
     void enableWriteNotification(bool enable);
     void canWriteNotification();
     bool enableReadNotification();
     void canReadNotification();
     void startupDriver();
     void cleanupDriver();
+
+    bool setBitRate(int bitrate);
 
     TinyCanBackend * const q_ptr;
     bool isOpen;

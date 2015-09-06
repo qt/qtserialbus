@@ -46,6 +46,8 @@
 #include <QtCore/qmutex.h>
 #include <QtCore/qcoreevent.h>
 
+#include <algorithm>
+
 QT_BEGIN_NAMESPACE
 
 #ifndef LINK_LIBMHSTCAN
@@ -128,14 +130,44 @@ TinyCanBackendPrivate::~TinyCanBackendPrivate()
     qChannels()->removeAll(this);
 }
 
+struct BitrateItem
+{
+    int bitrate;
+    int code;
+};
+
+struct BitrateLessFunctor
+{
+    bool operator()( const BitrateItem &item1, const BitrateItem &item2) const
+    {
+        return item1.bitrate < item2.bitrate;
+    }
+};
+
+static int bitrateCodeFromBitrate(int bitrate)
+{
+    static const BitrateItem bitratetable[] = {
+        { 10000, CAN_10K_BIT },
+        { 20000, CAN_20K_BIT },
+        { 50000, CAN_50K_BIT },
+        { 100000, CAN_100K_BIT },
+        { 125000, CAN_125K_BIT },
+        { 250000, CAN_250K_BIT },
+        { 500000, CAN_500K_BIT },
+        { 800000, CAN_800K_BIT },
+        { 1000000, CAN_1M_BIT }
+    };
+
+    static const BitrateItem *endtable = bitratetable + (sizeof(bitratetable) / sizeof(*bitratetable));
+
+    const BitrateItem item = { bitrate , 0 };
+    const BitrateItem *where = std::lower_bound(bitratetable, endtable, item, BitrateLessFunctor());
+    return where != endtable ? where->code : -1;
+}
+
 bool TinyCanBackendPrivate::open()
 {
     Q_Q(TinyCanBackend);
-
-    if (int ret = ::CanSetSpeed(channelIndex, CAN_500K_BIT) < 0) {
-        q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
-        return false;
-    }
 
     char options[] = "AutoConnect=1;AutoReopen=0";
     if (int ret = ::CanSetOptions(options) < 0) {
@@ -168,13 +200,17 @@ void TinyCanBackendPrivate::close()
     isOpen = false;
 }
 
-// TODO: Implement me
 bool TinyCanBackendPrivate::setConfigurationParameter(int key, const QVariant &value)
 {
-    Q_UNUSED(key);
-    Q_UNUSED(value);
+    Q_Q(TinyCanBackend);
 
-    return false;
+    switch (key) {
+    case QCanBusDevice::BitRateKey:
+        return setBitRate(value.toInt());
+    default:
+        q->setError(TinyCanBackend::tr("Unsuported configuration key"), QCanBusDevice::ConfigurationError);
+        return false;
+    }
 }
 
 // These error codes taked from the errors.h file, which
@@ -261,6 +297,14 @@ static int channelIndexFromName(const QString &interfaceName)
 void TinyCanBackendPrivate::setupChannel(const QString &interfaceName)
 {
     channelIndex = channelIndexFromName(interfaceName);
+}
+
+// Calls only in constructor
+void TinyCanBackendPrivate::setupDefaultConfigurations()
+{
+    Q_Q(TinyCanBackend);
+
+    q->setConfigurationParameter(QCanBusDevice::BitRateKey, 500000);
 }
 
 void TinyCanBackendPrivate::enableWriteNotification(bool enable)
@@ -411,6 +455,27 @@ void TinyCanBackendPrivate::cleanupDriver()
     }
 }
 
+bool TinyCanBackendPrivate::setBitRate(int bitrate)
+{
+    Q_Q(TinyCanBackend);
+
+    const int bitrateCode = bitrateCodeFromBitrate(bitrate);
+    if (bitrateCode == -1) {
+        q->setError(TinyCanBackend::tr("Unsupported bitrate value"),
+                    QCanBusDevice::ConfigurationError);
+        return false;
+    }
+
+    if (isOpen) {
+        if (int ret = ::CanSetSpeed(channelIndex, bitrateCode) < 0) {
+            q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConfigurationError);
+            return false;
+        }
+    }
+
+    return true;
+}
+
 TinyCanBackend::TinyCanBackend(const QString &name, QObject *parent)
     : QCanBusDevice(parent)
     , d_ptr(new TinyCanBackendPrivate(this))
@@ -418,6 +483,7 @@ TinyCanBackend::TinyCanBackend(const QString &name, QObject *parent)
     Q_D(TinyCanBackend);
 
     d->setupChannel(name);
+    d->setupDefaultConfigurations();
 }
 
 TinyCanBackend::~TinyCanBackend()
@@ -434,6 +500,16 @@ bool TinyCanBackend::open()
         if (!d->open()) {
             close(); // sets UnconnectedState
             return false;
+        }
+
+        // apply all stored configurations
+        foreach (int key, configurationKeys()) {
+            const QVariant param = configurationParameter(key);
+            const bool success = d->setConfigurationParameter(key, param);
+            if (!success) {
+                qWarning() << "Cannot apply parameter:" << key
+                           << "with value:" << param;
+            }
         }
     }
 
