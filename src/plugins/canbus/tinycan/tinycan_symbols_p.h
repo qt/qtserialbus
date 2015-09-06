@@ -71,6 +71,8 @@ extern "C"
 #define DRV_CALLBACK_TYPE
 #endif
 
+#define INDEX_INVALID          0xFFFFFFFF
+
 #define INDEX_FIFO_PUFFER_MASK 0x0000FFFF
 #define INDEX_SOFT_FLAG        0x02000000
 #define INDEX_RXD_TXT_FLAG     0x01000000
@@ -86,24 +88,29 @@ extern "C"
 #define MsgRTR Flags.Flag.RTR
 #define MsgEFF Flags.Flag.EFF
 #define MsgTxD Flags.Flag.TxD
+#define MsgErr Flags.Flag.Error
+#define MsgSource Flags.Flag.Source
 #define MsgData Data.Bytes
 
 struct TCanFlagsBits
 {
-    unsigned Len:4;   // Dlc
-    unsigned TxD:1;   // TxD -> 1 = Tx CAN Message, 0 = Rx CAN Message
-    unsigned Res:1;   // Reserved
-    unsigned RTR:1;   // remote transmit request bit
-    unsigned EFF:1;   // extended frame bit
-    unsigned Res2:8;
+    unsigned Len:4;     // DLC -> data length 0 - 8 byte
+    unsigned TxD:1;     // TxD -> 1 = Tx CAN Message, 0 = Rx CAN Message
+    unsigned Error:1;   // Error -> 1 = bus CAN error message
+    unsigned RTR:1;     // Remote Transmission Request bit -> If message RTR marks
+    unsigned EFF:1;     // Extended Frame Format bit -> 1 = 29 Bit Id's, 0 = 11 Bit Id's
+    unsigned Source:8;  // Source of the message (Device)
 };
 
+#pragma pack(push, 1)
 union TCanFlags
 {
     struct TCanFlagsBits Flag;
     quint32 Long;
 };
+#pragma pack(pop)
 
+#pragma pack(push, 1)
 union TCanData
 {
     char Chars[8];
@@ -111,13 +118,17 @@ union TCanData
     quint16 Words[4];
     quint32 Longs[2];
 };
+#pragma pack(pop)
 
+#pragma pack(push, 1)
 struct TTime
 {
     quint32 Sec;
     quint32 USec;
 };
+#pragma pack(pop)
 
+#pragma pack(push, 1)
 struct TCanMsg
 {
     quint32 Id;
@@ -125,9 +136,11 @@ struct TCanMsg
     union TCanData Data;
     struct TTime Time;
 };
+#pragma pack(pop)
 
 // CAN Message Filter Type
 #define FilFlags Flags.Long
+#define FilRTR Flags.Flag.RTR
 #define FilEFF Flags.Flag.EFF
 #define FilMode Flags.Flag.Mode
 #define FilIdMode Flags.Flag.IdMode
@@ -136,33 +149,33 @@ struct TCanMsg
 struct TMsgFilterFlagsBits
 {
     // 1. byte
-    unsigned Len:4;   // dlc
-    unsigned Res:2;   // reserved
-    unsigned RTR:1;   // remote transmit request bit
-    unsigned EFF:1;   // extended frame bit
+    unsigned Len:4;         // DLC
+    unsigned Res:2;         // Reserved
+    unsigned RTR:1;         // Remote Transmit Request bit
+    unsigned EFF:1;         // Extended Frame Format bit
     // 2. byte
-    unsigned IdMode:2;   // 0 = Mask & Code
-    // 1 = start & stop
-    // 2 = single id
+    unsigned IdMode:2;      // 0 = Mask & Code; 1 = Start & Sstop; 2 = Single Id
     unsigned DLCCheck:1;
     unsigned DataCheck:1;
     unsigned Res1:4;
     // 3. byte
     unsigned Res2:8;
     // 4. byte
-    unsigned Type:4;   // 0 = single buffer
+    unsigned Type:4;        // 0 = Single buffer
     unsigned Res3:2;
-    unsigned Mode:1;   // 0 = Delete message
-    // 1 = Don't delete message
-    unsigned Enable:1;
+    unsigned Mode:1;        // 0 = Delete message; 1 = Don't delete message
+    unsigned Enable:1;      // 0 = Close filter; 1 = Release filter
 };
 
+#pragma pack(push, 1)
 union TMsgFilterFlags
 {
     struct TMsgFilterFlagsBits Flag;
     quint32  Long;
 };
+#pragma pack(pop)
 
+#pragma pack(push, 1)
 struct TMsgFilter
 {
     quint32  Maske;
@@ -170,6 +183,7 @@ struct TMsgFilter
     union TMsgFilterFlags Flags;
     union TCanData Data;
 };
+#pragma pack(pop)
 
 // CAN speed
 #define CAN_10K_BIT   10    // 10 kBit/s
@@ -241,12 +255,14 @@ struct TMsgFilter
 #define EVENT_DISABLE_RX_MESSAGES        0x0800
 #define EVENT_DISABLE_ALL                0xFF00
 
+#pragma pack(push, 1)
 struct TDeviceStatus
 {
     quint32 DrvStatus;
     quint8 CanStatus;
     quint8 FifoStatus;
 };
+#pragma pack(pop)
 
 typedef void (DRV_CALLBACK_TYPE *CanPnPEventCallback)(
     quint32 index,

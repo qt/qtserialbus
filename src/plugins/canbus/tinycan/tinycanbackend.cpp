@@ -112,7 +112,7 @@ static void DRV_CALLBACK_TYPE canRxEventCallback(quint32 index, TCanMsg *frame, 
 TinyCanBackendPrivate::TinyCanBackendPrivate(TinyCanBackend *q)
     : q_ptr(q)
     , isOpen(false)
-    , channelIndex(-1)
+    , channelIndex(INDEX_INVALID)
 {
     startupDriver();
 
@@ -255,7 +255,7 @@ static int channelIndexFromName(const QString &interfaceName)
     else if (interfaceName == QStringLiteral("channelb"))
         return INDEX_CAN_KANAL_B;
     else
-        return -1;
+        return INDEX_INVALID;
 }
 
 void TinyCanBackendPrivate::setupChannel(const QString &interfaceName)
