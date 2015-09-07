@@ -113,7 +113,7 @@ QList<QByteArray> QModBus::plugins() const
     return qModBusPlugins()->keys();
 }
 
-QModBusPrivate QModBus::setFactory(const QByteArray &plugin) const
+QModBusPrivate setFactory(const QByteArray &plugin)
 {
     QModBusPrivate d = qModBusPlugins()->value(plugin);
     if (!d.factory) {

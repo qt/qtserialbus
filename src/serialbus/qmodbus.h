@@ -46,8 +46,6 @@
 
 QT_BEGIN_NAMESPACE
 
-struct QModBusPrivate;
-
 class Q_SERIALBUS_EXPORT QModBus : public QObject
 {
     Q_OBJECT
@@ -61,9 +59,6 @@ public:
 
 private:
     QModBus(QObject *parent = 0);
-
-    //TODO remove - should not be public
-    QModBusPrivate setFactory(const QByteArray &plugin) const;
 
     Q_DISABLE_COPY(QModBus)
 };
