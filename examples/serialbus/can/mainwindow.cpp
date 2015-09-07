@@ -120,8 +120,12 @@ void MainWindow::connectDevice()
         return;
     }
 
-    connect(m_canDevice, &QCanBusDevice::errorOccurred, this, &MainWindow::receiveError);
-    connect(m_canDevice, &QCanBusDevice::framesReceived, this, &MainWindow::checkMessages);
+    connect(m_canDevice, &QCanBusDevice::errorOccurred,
+            this, &MainWindow::receiveError);
+    connect(m_canDevice, &QCanBusDevice::framesReceived,
+            this, &MainWindow::checkMessages);
+    connect(m_canDevice, &QCanBusDevice::framesWritten,
+            this, &MainWindow::framesWritten);
 
     if (p.useConfigurationEnabled) {
         foreach (const SettingsDialog::ConfigurationItem &item, p.configurations)
@@ -161,6 +165,11 @@ void MainWindow::disconnectDevice()
     m_ui->sendMessagesBox->setEnabled(false);
 
     showStatusMessage(tr("Disconnected"));
+}
+
+void MainWindow::framesWritten(qint64 count)
+{
+    qDebug() << "Number of frames written:" << count;
 }
 
 void MainWindow::checkMessages()

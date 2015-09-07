@@ -73,6 +73,7 @@ private Q_SLOTS:
     void receiveError(QCanBusDevice::CanBusError) const;
     void connectDevice();
     void disconnectDevice();
+    void framesWritten(qint64);
 
 private:
     void showStatusMessage(const QString &message);

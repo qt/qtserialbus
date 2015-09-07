@@ -331,6 +331,8 @@ bool SocketCanBackend::writeFrame(const QCanBusFrame &newData)
         return false;
     }
 
+    emit framesWritten(1);
+
     return true;
 }
 
