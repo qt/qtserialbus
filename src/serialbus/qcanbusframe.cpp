@@ -56,7 +56,7 @@ QT_BEGIN_NAMESPACE
 /*!
     \fn QCanBusFrame::QCanBusFrame(QCanBusFrame::FrameType type)
 
-    Constructs a CAN frame of type \a type.
+    Constructs a CAN frame of the specified \a type.
  */
 
 /*!
@@ -75,7 +75,7 @@ QT_BEGIN_NAMESPACE
     \fn QCanBusFrame::setFrameId(quint32 newFrameId)
 
     Sets the identifier of the CAN frame to \a newFrameId. The maximum size of a CAN frame
-    identifier is 11 bits, which can be extended to 29 bits by supporting the \e {CAN extended frame
+    identifier is 11 bits, which can be extended up to 29 bits by supporting the \e {CAN extended frame
     format}.
 
     \sa frameId()
@@ -85,7 +85,7 @@ QT_BEGIN_NAMESPACE
     \fn QCanBusFrame::setPayload(const QByteArray &data)
 
     Sets \a data as the payload for the CAN frame. The maximum size of payload is 8 bytes, which can
-    be extended to 64 bytes by supporting \e {Flexible Data-Rate}.
+    be extended up to 64 bytes by supporting \e {Flexible Data-Rate}.
 
     \sa payload()
  */
@@ -106,7 +106,7 @@ QT_BEGIN_NAMESPACE
     extended frame format, the identifier has a maximum of 29 bits;
     otherwise 11 bits.
 
-    If the frame is of type \l ErrorFrame this ID is always 0.
+    If the frame is of \l ErrorFrame type, this ID is always 0.
 
     \sa setFrameId(), hasExtendedFrameFormat()
  */
@@ -114,7 +114,7 @@ QT_BEGIN_NAMESPACE
 /*!
     \fn bool QCanBusFrame::hasExtendedFrameFormat() const
 
-    Returns \c true if the can frame uses a 29bit identifier;
+    Returns \c true if the CAN frame uses a 29bit identifier;
     otherwise \c false, implying an 11bit identifier.
 
     \sa setExtendedFrameFormat(), frameId()
@@ -200,7 +200,7 @@ QT_BEGIN_NAMESPACE
     \fn FrameErrors QCanBusFrame::error() const
 
     Returns the error of the current error frame. If the frame
-    is not an \l ErrorFrame this function always returns \l NoError.
+    is not an \l ErrorFrame, this function returns \l NoError.
 
     \sa setError()
  */
@@ -208,7 +208,7 @@ QT_BEGIN_NAMESPACE
 /*!
     \fn void QCanBusFrame::setError(FrameErrors error)
 
-    Sets the frames \a error type. This function does nothing if
+    Sets the frame's \a error type. This function does nothing if
     \l frameType() is not an \l ErrorFrame.
 
     \sa error()
@@ -264,8 +264,8 @@ QT_BEGIN_NAMESPACE
 
 /*! \relates QCanBusFrame
 
-    Writes frame \a frame to the stream \a out and returns a reference
-    to the stream.
+    Writes a \a frame to the stream (\a out) and returns a reference
+    to the it.
 */
 QDataStream &operator<<(QDataStream &out, const QCanBusFrame &frame)
 {
@@ -282,8 +282,8 @@ QDataStream &operator<<(QDataStream &out, const QCanBusFrame &frame)
 
 /*! \relates QCanBusFrame
 
-    Reads a frame into \a frame from the stream \a in and returns a
-    reference to the stream.
+    Reads a \a frame from the stream (\a in) and returns a
+    reference to the it.
 */
 QDataStream &operator>>(QDataStream &in, QCanBusFrame &frame)
 {

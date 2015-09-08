@@ -32,10 +32,10 @@
 
     Modbus is a request/reply protocol that has one master in its network and may have many
     slaves. Slaves can control only their own internal states and master can read and write
-    data in the slaves. Modbus is not restricted by network type, in theory it can use any
-    QIODevice. Every plugin does not support every QIODevice derived class though.
+    data in them. Modbus is not restricted by the network type, in theory it can use any
+    QIODevice. However, not every plugin supports all classes derived from QIODevice.
 
-    Each slave has four tables it can set data.
+    Each slave has four tables in which it can store data.
 
     \table
         \header
@@ -60,14 +60,14 @@
             \li Read/Write
     \endtable
 
-    The Modmus API provides some common API to access the modbus devices:
+    The Modbus API provides some common API to access the Modbus devices:
 
     \list
         \li QModBusDevice provides an API for common functionality with master and slave.
-        \li QModBusMaster provides an API for direct access to modbus master.
-        \li QModBusSlave provides an API for direct access to modbus slave.
-        \li QModBusDataUnit is representation of one data value.
-        \li QModBusReply is created by QModBusMaster as handle for write/read operation.
+        \li QModBusMaster provides an API for direct access to Modbus master.
+        \li QModBusSlave provides an API for direct access to Modbus slave.
+        \li QModBusDataUnit represents a data value.
+        \li QModBusReply is created by QModBusMaster as a handle for write/read operation.
     \endlist
 
     The Modbus plugin supports the following set of backends for various devices:
@@ -76,11 +76,11 @@
         \header
             \li Vendor
             \li Backend
-            \li Brief description
+            \li Brief Description
         \row
-            \li libmodbus.org
+            \li \l libmodbus.org
             \li \l {Using libmodbus Backend}{libmodbus}
-            \li libmodbus is a free software library to send/receive data according to the modbus protocol.
+            \li libmodbus is a free software library to send/receive data according to the Modbus protocol.
                 This library is written in C and supports RTU (serial) and TCP (Ethernet) communications.
     \endtable
  */

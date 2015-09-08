@@ -86,20 +86,20 @@ QT_BEGIN_NAMESPACE
     the CAN bus connection.
 
     \value RawFilterKey     This configuration determines the type of CAN bus frames
-                            which the current device accepts. The expected value
-                            is \c QList<QCanBusDevice::Filter>. Passing an empty list unsets
+                            that the current device accepts. The expected value
+                            is \c QList<QCanBusDevice::Filter>. Passing an empty list clears
                             all previously set filters including default filters.
-    \value ErrorFilterKey   This key defines the type of error which should be
+    \value ErrorFilterKey   This key defines the type of error that should be
                             forwarded via the current connection. The associated
                             value should be of type \l QCanBusFrame::FrameErrors.
-    \value LoopbackKey      This key defines whether the can bus device should
+    \value LoopbackKey      This key defines whether the CAN bus device should
                             operate in loopback mode. The expected value for this
                             key is \c bool.
     \value ReceiveOwnKey    This key defines whether this CAN device can send messages.
                             The expected value for this key is \c bool.
     \value BitRateKey       This key defines the bitrate in bits per second.
     \value UserKey          This key defines the range where custom keys start. It's most
-                            common purpose is to permit platform specific configuration
+                            common purpose is to permit platform-specific configuration
                             options.
  */
 
@@ -111,10 +111,10 @@ QT_BEGIN_NAMESPACE
     \brief The QCanBusDevice::Filter struct defines a filter for CAN bus messages.
 
     A list of QCanBusDevice::Filter instances is passed to
-    \l QCanBusDevice::setConfigurationParameter() to enable filtering. If a received CAN messages
+    \l QCanBusDevice::setConfigurationParameter() to enable filtering. If a received CAN message
     matches at least one of the filters in the list, the QCanBusDevice will accept it.
 
-    The example below provides examples how this struct could be used:
+    The example below demonstrates how to use the struct:
 
     \snippet main.cpp Filter Examples
  */
@@ -135,10 +135,10 @@ QT_BEGIN_NAMESPACE
 /*!
     \variable QCanBusDevice::Filter::frameId
 
-    \brief the frame id that must match the frame id of the received message.
+    \brief the frame id used to filter the incoming messages.
 
     The frameId is used in conjunction with \a frameIdMask.
-    The matching is successful when the following evaluates to \c true:
+    The matching is successful if the following evaluates to \c true:
 
     \code
         (receivedFrameId & frameIdMask) == (frameId & frameIdMask)
@@ -164,7 +164,7 @@ QT_BEGIN_NAMESPACE
 /*!
     \variable QCanBusDevice::Filter::type
 
-    \brief the type of the message which can match the filter.
+    \brief the type of the message to be filtered.
 
     If multiple message types has to be matched
 
@@ -278,7 +278,7 @@ bool QCanBusDevice::hasOutgoingFrames() const
     Sets the configuration parameter \a key for the CAN bus connection
     to \a value. The potential keys are represented by \l ConfigurationKey.
 
-    A paramenter can be unset by setting an invalid \l QVariant.
+    A parameter can be unset by setting an invalid \l QVariant.
     Unsetting a parameter implies that the configuration is reset to
     its default setting.
 

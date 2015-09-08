@@ -45,10 +45,10 @@ QT_BEGIN_NAMESPACE
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief QModBusDataUnit is a container class representing a single bit / 16 bit word in the modbus table
+    \brief QModBusDataUnit is a container class representing a single bit / 16 bit word in the Modbus table
 
-    \l QModBusDataUnit can be used for read and write operations. It contains it's table, address of it
-    in the table and data value.
+    \l QModBusDataUnit can be used for read and write operations. It contains table, address of it
+    in the table, and data value.
  */
 
 /*!
@@ -59,7 +59,7 @@ QT_BEGIN_NAMESPACE
 /*!
     \fn void QModBusDataUnit::setTableType(QModBusDevice::ModBusTable table)
 
-    Sets the \a table type data belongs to.
+    Sets the \a table type.
 
     \sa tableType(), QModBusDevice::ModBusTable
  */
@@ -67,7 +67,7 @@ QT_BEGIN_NAMESPACE
 /*!
     \fn QModBusDevice::ModBusTable QModBusDataUnit::tableType() const
 
-    Returns the type of the table data belongs to.
+    Returns the type of the table.
 
     \sa setTableType(), QModBusDevice::ModBusTable
  */
@@ -91,8 +91,9 @@ QT_BEGIN_NAMESPACE
 /*!
     \fn void QModBusDataUnit::setValue(quint16 value)
 
-    Sets the \a value of the data unit. Since Discrete Inputs and Coils tables only accept single bit
-    as value, 0 will be interpreted as 0 and anything else as 1.
+    Sets the \a value of the data unit. \l{QModBusDevice::}{DiscreteInputs}
+    and \l{QModBusDevice::}{Coils} tables only accept single bit
+    value, so 0 is interpreted as 0 and anything else as 1.
 
     \sa value()
  */

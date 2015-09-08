@@ -43,14 +43,14 @@ QT_BEGIN_NAMESPACE
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QModBusMaster class is the interface class for modbus master device.
+    \brief The QModBusMaster class is the interface class for Modbus master device.
 
-    QModBusMaster communicates with the modbus backend providing users with a convenient API.
-    The modbus backend must be specified during the object creation.
+    QModBusMaster communicates with the Modbus backend providing users with a convenient API.
+    The Modbus backend must be specified during the object creation.
 */
 
 /*!
-    Constructs a modbus master device with the specified \a parent.
+    Constructs a Modbus master device with the specified \a parent.
  */
 QModBusMaster::QModBusMaster(QObject *parent) :
     QModBusDevice(parent)
@@ -67,9 +67,10 @@ QModBusMaster::~QModBusMaster()
 /*!
     \fn QModBusReply *QModBusMaster::write(const QModBusDataUnit &request, int slaveId)
 
-    Sends a request to modify the contents of the data pointed by \a request. Returns a new QModbusReply object
-    which emits the finished() signal whenever a positive response for the write request has been received.
-    Modbus network may have multiple slaves, each slave has unique \a slaveId.
+    Sends a request to modify the contents of the data pointed by \a request. Returns a
+    new QModbusReply object, which emits the finished() signal whenever a positive response
+    for the write request is received. Modbus network may have multiple slaves, each slave has
+    a unique \a slaveId.
  */
 
 /*!
@@ -77,14 +78,14 @@ QModBusMaster::~QModBusMaster()
 
     This is an overloaded function.
 
-    Requests multiple data units to be written. \a requests is used to read the contents of continuous
-    block from a specific table. Only one continuous block can be written with a single write operation.
+    Requests multiple data units to be written. The \a requests are used to read the contents of continuous
+    block from a specific table. Only one continuous block can be written in a single write operation.
  */
 
 /*!
     \fn QModBusReply *QModBusMaster::read(QModBusDataUnit &request, int slaveId)
 
-    Sends a request to read the contents of the data pointed by \a request. Returns a new QModBusReply object
+    Sends a request to read the contents of the data pointed by \a request. Returns a new QModBusReply object,
     which emits the finished() signal whenever data arrives. Modbus network may have multiple slaves,
     each slave has unique \a slaveId.
  */
@@ -94,8 +95,8 @@ QModBusMaster::~QModBusMaster()
 
     This is an overloaded function.
 
-    Requests multiple data units to be read. \a requests is used to read the contents of continuous
-    block from a specific table. Only one continuous block can be read with a single read operation.
+    Requests multiple data units to be read. The \a requests are used to read the contents of a continuous
+    block from a specific table. Only one continuous block can be read in a single read operation.
  */
 
 QT_END_NAMESPACE

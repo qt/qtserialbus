@@ -48,7 +48,7 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    Constructs a QModBusReply object with \a parent.
+    Constructs a QModBusReply object with the \a parent.
  */
 QModBusReply::QModBusReply(QObject *parent) :
     QObject(parent),
@@ -68,7 +68,7 @@ QModBusReply::QModBusReply(QObject *parent) :
                                 the slave.
     \value IllegalDataValue     The contained value in the request data field is not an allowable
                                 value for the slave.
-    \value SlaveFailure         An unrecoverable error occurred while the slave was attempting to perform
+    \value SlaveFailure         An irrecoverable error occurred while the slave was attempting to perform
                                 the requested action.
     \value Acknowledge          Specialized use in conjunction with programming commands.
     \value SlaveBusy            The slave is engaged in processing a long–duration program command.
@@ -83,7 +83,7 @@ QModBusReply::QModBusReply(QObject *parent) :
 /*!
     \fn QModBusReply::errorOccurred(RequestError error)
 
-    This signal is emitted when when request is aborted and error of the type
+    This signal is emitted when a request is aborted and error of the type
     \a error is received.
 
     \sa QModBusReply::error()
@@ -92,7 +92,7 @@ QModBusReply::QModBusReply(QObject *parent) :
 /*!
     \fn QModBusReply::finished()
 
-    This signal is emitted when request is successfully executed.
+    This signal is emitted when a request is successfully completed.
 
     \sa QModBusReply::isFinished()
  */
@@ -101,17 +101,17 @@ QModBusReply::QModBusReply(QObject *parent) :
     \fn void QModBusReply::setFinished()
 
     Sets the reply as finished.
-    After having this set the replies data must not change.
+    After having this set the reply's data must not change.
  */
 
 /*!
     \fn void QModBusReply::setError(RequestError errorCode, const QString &errorString)
 
-    Sets the error condition to be \a errorCode. The human-readable message is set with \a errorString.
+    Sets the error condition to be \a errorCode. The human-readable message is set to \a errorString.
  */
 
 /*!
-    Returns the \l RequestError that was found during the processing of this request.
+    Returns the \l RequestError that was found while processing of the request.
     If no error was found, returns \l NoError.
  */
 QModBusReply::RequestError QModBusReply::error() const
@@ -141,8 +141,8 @@ bool QModBusReply::isFinished() const
 }
 
 /*!
-    Returns \c true when the request is still processing and the reply has not
-    finished or was aborted yet.
+    Returns \c true if the request is still being processed and the reply
+    has not finished or is not aborted yet.
  */
 bool QModBusReply::isRunning() const
 {
@@ -151,7 +151,7 @@ bool QModBusReply::isRunning() const
 
 /*!
     Returns data units read/written if QModBusReply is finished.
-    Otherwise returns empty QVector.
+    Otherwise returns an empty QVector.
  */
 QList<QModBusDataUnit> QModBusReply::result() const
 {

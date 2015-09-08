@@ -44,9 +44,9 @@ QT_BEGIN_NAMESPACE
     \since 5.6
 
     \brief The QCanBusFactory class is a factory class used as the
-    plugin interface for can bus plugins.
+    plugin interface for CAN bus plugins.
 
-    This functions must be implemented by all plugins.
+    All plugins must implement the functions provided by this factory class.
  */
 
 /*!

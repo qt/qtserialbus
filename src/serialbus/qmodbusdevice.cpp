@@ -44,12 +44,12 @@ QT_BEGIN_NAMESPACE
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QModBusDevice class is the base class for Modbus classes \l QModBusSlave
+    \brief The QModBusDevice class is the base class for Modbus classes, \l QModBusSlave
     and \l QModBusMaster.
  */
 
 /*!
-    Constructs a modbus device with specified \a parent.
+    Constructs a Modbus device with the specified \a parent.
  */
 QModBusDevice::QModBusDevice(QObject *parent)
  : QObject(*new QModBusDevicePrivate, parent)
@@ -68,19 +68,19 @@ QModBusDevice::~QModBusDevice()
     \enum QModBusDevice::ApplicationDataUnit
     This enum describes different Modbus ADU types.
 
-    \value NotSpecified         ADU not specified
-    \value RemoteTerminalUnit   Usually used with serial port connection
-    \value TCP                  Usually used with TCP connection
+    \value NotSpecified         ADU not specified.
+    \value RemoteTerminalUnit   Usually used with serial port connection.
+    \value TCP                  Usually used with TCP connection.
  */
 
 /*!
     \enum QModBusDevice::ModBusTable
     This enum describes different primary tables used in Modbus.
 
-    \value DiscreteInputs       Table of read only bits
-    \value Coils                Table of read/write bits
-    \value InputRegisters       Table of read only 16 bit words
-    \value HoldingRegisters     Table of read/write 16 bit words
+    \value DiscreteInputs       Table with read-only bits.
+    \value Coils                Table with read/write bits.
+    \value InputRegisters       Table with read-only 16 bit words.
+    \value HoldingRegisters     Table with read/write 16 bit words.
  */
 
 /*!
@@ -109,7 +109,7 @@ QModBusDevice::~QModBusDevice()
 /*!
     \fn QModBusDevice::errorOccurred(QModBusDevice::ModBusError error)
 
-    This signal is emitted when an error of the type \a error occurs.
+    This signal is emitted when an error of the type, \a error, occurs.
  */
 
 /*!
@@ -159,7 +159,7 @@ void QModBusDevice::disconnectDevice()
 }
 
 /*!
-    Sets the state of the device to \a newState. ModBus device implementations
+    Sets the state of the device to \a newState. Modbus device implementations
     must use this function to update the device state.
  */
 void QModBusDevice::setState(QModBusDevice::ModBusDeviceState newState)
@@ -185,9 +185,8 @@ QModBusDevice::ModBusDeviceState QModBusDevice::state() const
 
 /*!
     Sets the error state of the device. ModBus device implementations
-    must use this function in case of error.
-    \a error type of error
-    \a errorText descriptive text detailing the error
+    must use this function in case of an error to set the \a error type and
+    a descriptive \a errorText.
 
     \sa QModBusDevice::ModBusError
  */
@@ -223,22 +222,22 @@ QString QModBusDevice::errorString() const
 /*!
     \fn bool QModBusDevice::setDevice(QIODevice *transport, ApplicationDataUnit ADU = NotSpecified)
 
-    Sets the method of connection to Modbus network. In theory \a transport can be any kind of connection
-    derived from QIODevice, but since implementations are plugin specific, not every plugin will support
-    every kind of connection. The mapping of MODBUS protocol on specific buses or network can introduce some
-    additional fields on the application data unit \a ADU. Returns \c true if \a transport and \a ADU is supported
-    and accepted; otherwise \c false.
+    Sets the method of connection to Modbus network. In theory, \a transport can be any kind of connection
+    derived from QIODevice, but implementation is plugin-specific. The mapping of Modbus protocol on specific
+    buses or network can introduce additional fields on the application data unit (\a ADU).
+
+    The function returns \c true if \a transport and \a ADU is supported and accepted; otherwise \c false.
  */
 
 /*!
     \fn bool QModBusDevice::open()
 
     This function is called by connectDevice(). Subclasses must provide
-    an implementation which returns \c true if the modbus connection
-    could be established; otherwise \c false.
+    an implementation that returns \c true on successful Modbus connection
+    or \c false otherwise.
 
-    The implementation must ensure that upon success the instance's \l state()
-    is set to \l QModBusDevice::ConnectedState; otherwise
+    The implementation must ensure that the instance's \l state()
+    is set to \l QModBusDevice::ConnectedState upon success; otherwise
     \l QModBusDevice::UnconnectedState.
 
     \sa connectDevice()
@@ -247,7 +246,7 @@ QString QModBusDevice::errorString() const
 /*!
     \fn void QModBusDevice::close()
 
-    This function is responsible for closing the modbus connection.
+    This function is responsible for closing the Modbus connection.
     The implementation must ensure that the instance's
     \l state() is set to \l QModBusDevice::UnconnectedState.
 

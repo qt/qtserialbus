@@ -44,15 +44,16 @@ QT_BEGIN_NAMESPACE
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QModBusSlave class is the interface class for modbus.
+    \brief The QModBusSlave class is the interface class for Modbus.
 
-    Modbus network might have multiple slaves. Slaves are read/written by a
-    master device \l QModBusMaster. QModBusSlave communicates with a modbus backend providing users
-    with a convenient API. The modbus backend must be specified during the object creation.
+    Modbus networks can have multiple slaves. Slaves are read/written by a
+    master device represented by \l QModBusMaster. QModBusSlave communicates
+    with a Modbus backend, providing users with a convenient API.
+    The Modbus backend must be specified during the object creation.
  */
 
 /*!
-    Constructs a modbus slave with the specified \a parent.
+    Constructs a Modbus slave with the specified \a parent.
  */
 QModBusSlave::QModBusSlave(QObject *parent) :
     QModBusDevice(parent)
@@ -68,14 +69,17 @@ QModBusSlave::~QModBusSlave()
 
 /*!
     \fn bool QModBusSlave::setMap(QModBusDevice::ModBusTable table, quint16 size)
-    Map a \a size for one \a table. If a table is not set, it's \a size will be zero (0).
+    Sets the \a size for \a table. If a table is not set, it's \a size will be zero (0).
+
     Return \c true on success; otherwise \c false.
  */
 
 /*!
     \fn int QModBusSlave::slaveId() const
     Multiple Modbus devices can be connected together on the same physical link.
-    Slave id will be used to filter received messages. Each slave should have unique id.
+    Slave id is a unique identifier that each slave must have, and it is used
+    to filter out incoming messages.
+
     Returns slave id.
 
     \sa setSlaveId()
@@ -84,7 +88,8 @@ QModBusSlave::~QModBusSlave()
 /*!
     \fn void QModBusSlave::setSlaveId(int id)
     Multiple Modbus devices can be connected together on the same physical link.
-    Slave id will be used to filter received messages. Each slave should have unique id.
+    So it is important that each slave is identified by a unique id.
+
     Sets \a id as slave id.
 
     \sa slaveId()
@@ -93,9 +98,9 @@ QModBusSlave::~QModBusSlave()
 /*!
     \fn bool QModBusSlave::data(QModBusDevice::ModBusTable table, quint16 address, quint16 &data)
 
-    Read data stored in the slave. Slave has four tables \a table and each have their unique
-    \a address fields. \a data will be read from the desired field.
-    See QModBusDevice::ModBusTable for more information about the tables.
+    Reads data stored in the slave. Slave has four tables (\a table) and each have a unique
+    \a address field, which is used to read \a data from the desired field.
+    See QModBusDevice::ModBusTable for more information about the different tables.
     Returns \c false if address is outside of the map range.
 
     \sa QModBusDevice::ModBusTable, setData()
@@ -104,8 +109,8 @@ QModBusSlave::~QModBusSlave()
 /*!
     \fn bool QModBusSlave::setData(QModBusDevice::ModBusTable table, quint16 address, quint16 data)
 
-    Writes data to the slave. Slave has four tables \a table and each have their unique
-    \a address fields. \a data will be written to the desired field.
+    Writes data to the slave. Slave has four tables (\a table) and each have a unique
+    \a address field, which is used to write \a data to the desired field.
     Returns \c false if address outside of the map range.
 
     \sa QModBusDevice::ModBusTable, data()
@@ -114,16 +119,19 @@ QModBusSlave::~QModBusSlave()
 /*!
     \fn void QModBusSlave::slaveRead()
 
-    This signal is emitted when master has read one or more fields of data from this slave.
+    This signal is emitted when master has read one or more fields of data from the slave.
  */
 
 /*!
     \fn void QModBusSlave::slaveWritten(QModBusDevice::ModBusTable table, int address, int size)
 
-    This signal is emitted when master has written one or more fields of data to this slave.
-    Signal contains information of which fields are written. \a table tells which table was written,
-    \a address is address of first field written, \a size tells how many consecutive fields was written
-    starting from \a address.
+    This signal is emitted when master has written one or more fields of data to the slave.
+    Signal contains information about the fields that were written:
+    \list
+     \li \a table that was written,
+     \li \a address of the first field that was written,
+     \li and \a size of the consecutive fields that were written starting from \a address.
+    \endlist
  */
 
 QT_END_NAMESPACE
