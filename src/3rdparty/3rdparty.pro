@@ -1,2 +1,3 @@
 TEMPLATE = subdirs
-SUBDIRS += libmodbus
+
+!config_libmodbus_systemlib:SUBDIRS += libmodbus

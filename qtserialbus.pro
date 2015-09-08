@@ -9,6 +9,10 @@ lessThan(QT_MAJOR_VERSION, 5) {
 load(configure)
 qtCompileTest(socketcan)
 qtCompileTest(socketcan_fd)
+
+# Check we have a platform libmodbus in case we prefer the platform version.
+qtCompileTest(libmodbus_systemlib)
+
 qtCompileTest(libmodbus_accept4)
 qtCompileTest(libmodbus_byteswap)
 qtCompileTest(libmodbus_rs485)
@@ -19,4 +23,10 @@ load(qt_parts)
 linux {
     !config_socketcan:warning("You need linux/can.h and linux/can/raw.h linux headers for socketCAN support, disabling it")
     !config_socketcan_fd:warning("Newer kernel needed for flexible data-rate frame support 'canfd_frame'")
+}
+
+config_libmodbus_systemlib {
+    message("Using platform's libmodbus")
+} else {
+    message("Using internal libmodbus")
 }
