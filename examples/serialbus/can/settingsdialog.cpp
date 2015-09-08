@@ -44,8 +44,6 @@
 #include <QCanBus>
 #include <QDebug>
 
-QT_USE_NAMESPACE
-
 SettingsDialog::SettingsDialog(QWidget *parent) :
     QDialog(parent),
     m_ui(new Ui::SettingsDialog),

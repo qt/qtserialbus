@@ -55,8 +55,6 @@ class QIntValidator;
 
 QT_END_NAMESPACE
 
-QT_USE_NAMESPACE
-
 class SettingsDialog : public QDialog
 {
     Q_OBJECT

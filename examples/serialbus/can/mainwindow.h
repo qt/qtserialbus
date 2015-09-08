@@ -45,19 +45,18 @@
 
 #include <QMainWindow>
 
+class SettingsDialog;
+
 QT_BEGIN_NAMESPACE
-class QLabel;
 
 class QCanBusFrame;
-
-class SettingsDialog;
+class QLabel;
 
 namespace Ui {
 class MainWindow;
 }
-QT_END_NAMESPACE
 
-QT_USE_NAMESPACE
+QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
 {

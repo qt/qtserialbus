@@ -45,11 +45,15 @@
 #include <QtSerialBus>
 #include <QPointer>
 
+QT_BEGIN_NAMESPACE
+
 class QSerialPort;
 
 namespace Ui {
 class MainWindow;
 }
+
+QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
 {
