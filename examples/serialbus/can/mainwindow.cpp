@@ -213,7 +213,6 @@ void MainWindow::sendMessage() const
         return;
 
     QByteArray writings = m_ui->lineEdit->displayText().toUtf8();
-    m_ui->lineEdit->clear();
 
     QCanBusFrame frame;
     const int maxPayload = m_ui->fdBox->checkState() ? 64 : 8;
@@ -224,7 +223,6 @@ void MainWindow::sendMessage() const
     frame.setPayload(writings);
 
     qint32 id = m_ui->idEdit->displayText().toInt();
-    m_ui->idEdit->clear();
     if (!m_ui->EFF->checkState() && id > 2047) //11 bits
         id = 2047;
 
