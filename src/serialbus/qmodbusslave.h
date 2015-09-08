@@ -56,6 +56,7 @@ class Q_SERIALBUS_EXPORT QModBusSlave : public QModBusDevice
 public:
 
     explicit QModBusSlave(QObject *parent = 0);
+    virtual ~QModBusSlave();
 
     virtual bool setMap(QModBusDevice::ModBusTable table, quint16 size) = 0;
 

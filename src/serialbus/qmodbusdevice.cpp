@@ -58,6 +58,13 @@ QModBusDevice::QModBusDevice(QObject *parent)
 }
 
 /*!
+    Destroys the QModBusDevice instance
+*/
+QModBusDevice::~QModBusDevice()
+{
+}
+
+/*!
     \enum QModBusDevice::ApplicationDataUnit
     This enum describes different Modbus ADU types.
 

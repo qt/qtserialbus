@@ -58,6 +58,13 @@ QModBusMaster::QModBusMaster(QObject *parent) :
 }
 
 /*!
+    \internal
+*/
+QModBusMaster::~QModBusMaster()
+{
+}
+
+/*!
     \fn QModBusReply *QModBusMaster::write(const QModBusDataUnit &request, int slaveId)
 
     Sends a request to modify the contents of the data pointed by \a request. Returns a new QModbusReply object

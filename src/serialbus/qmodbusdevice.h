@@ -87,6 +87,7 @@ public:
     Q_ENUM(ModBusDeviceState)
 
     explicit QModBusDevice(QObject *parent = 0);
+    virtual ~QModBusDevice();
 
     bool connectDevice();
     void disconnectDevice();

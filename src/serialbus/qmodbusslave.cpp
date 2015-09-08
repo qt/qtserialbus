@@ -60,6 +60,13 @@ QModBusSlave::QModBusSlave(QObject *parent) :
 }
 
 /*!
+    \internal
+*/
+QModBusSlave::~QModBusSlave()
+{
+}
+
+/*!
     \fn bool QModBusSlave::setMap(QModBusDevice::ModBusTable table, quint16 size)
     Map a \a size for one \a table. If a table is not set, it's \a size will be zero (0).
     Return \c true on success; otherwise \c false.
