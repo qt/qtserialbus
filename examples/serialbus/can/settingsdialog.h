@@ -51,6 +51,8 @@ namespace Ui {
 class SettingsDialog;
 }
 
+class QIntValidator;
+
 QT_END_NAMESPACE
 
 QT_USE_NAMESPACE
@@ -75,14 +77,17 @@ public:
     Settings settings() const;
 
 private slots:
+    void checkCustomSpeedPolicy(int idx);
     void apply();
 
 private:
     void updateSettings();
     void fillBackends();
+    void fillSpeeds();
 
 private:
     Ui::SettingsDialog *m_ui;
+    QIntValidator *m_customSpeedValidator;
     Settings m_currentSettings;
 };
 
