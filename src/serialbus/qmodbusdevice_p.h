@@ -66,6 +66,7 @@ public:
     QModBusDevice::ModBusDeviceState state;
     QModBusDevice::ModBusError error;
     QString errorString;
+    QString portName;
 };
 
 QT_END_NAMESPACE

@@ -89,9 +89,14 @@ public:
     explicit QModBusDevice(QObject *parent = 0);
     virtual ~QModBusDevice();
 
+    //TODO should become part of connect call in RTS specific sub class
+    void setPortName(const QString& name);
+    QString portName() const;
+
     bool connectDevice();
     void disconnectDevice();
 
+    // TODO Remove
     virtual bool setDevice(QIODevice *transport, ApplicationDataUnit ADU = NotSpecified) = 0;
 
     ModBusDeviceState state() const;

@@ -64,6 +64,18 @@ QModBusDevice::~QModBusDevice()
 {
 }
 
+void QModBusDevice::setPortName(const QString &name)
+{
+    Q_D(QModBusDevice);
+    d->portName = name;
+}
+
+QString QModBusDevice::portName() const
+{
+    Q_D(const QModBusDevice);
+    return d->portName;
+}
+
 /*!
     \enum QModBusDevice::ApplicationDataUnit
     This enum describes different Modbus ADU types.

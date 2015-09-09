@@ -42,7 +42,6 @@
 #include <QtSerialBus/qmodbusmaster.h>
 #include <QtSerialBus/qmodbusreply.h>
 #include <QtSerialBus/qmodbusdataunit.h>
-#include <QSerialPort>
 
 #include <QtCore/qpointer.h>
 
@@ -55,7 +54,7 @@ class LibModBusMaster : public QModBusMaster
     Q_OBJECT
 public:
     LibModBusMaster();
-    bool setDevice(QIODevice *transport, ApplicationDataUnit ADU) Q_DECL_OVERRIDE;
+    bool setDevice(QIODevice *, ApplicationDataUnit) Q_DECL_OVERRIDE;
 
     QModBusReply* write(const QModBusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
     QModBusReply* write(const QList<QModBusDataUnit> &requests, int slaveId = 1) Q_DECL_OVERRIDE;
@@ -68,12 +67,10 @@ protected:
     void close() Q_DECL_OVERRIDE;
 
 private:
-    QString portNameToSystemLocation(QString source);
+    QString portNameToSystemLocation(const QString &source) const;
 
-    QSerialPort *serialPort;
     modbus_t *context;
     bool connected;
-    QModBusDevice::ApplicationDataUnit adu;
 };
 
 QT_END_NAMESPACE
