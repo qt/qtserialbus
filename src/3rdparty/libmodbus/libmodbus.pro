@@ -4,6 +4,8 @@ TARGET = modbus
 CONFIG += staticlib
 win32:include(libmodbus_win.pri)
 
+CONFIG += warn_off
+
 load(qt_helper_lib)
 
 HEADERS += modbus.h \

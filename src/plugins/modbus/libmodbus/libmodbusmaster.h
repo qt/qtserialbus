@@ -39,14 +39,14 @@
 
 #include "libmodbusreply.h"
 
-#include <modbus.h>
-
 #include <QtSerialBus/qmodbusmaster.h>
 #include <QtSerialBus/qmodbusreply.h>
 #include <QtSerialBus/qmodbusdataunit.h>
 #include <QSerialPort>
 
 #include <QtCore/qpointer.h>
+
+#include <modbus.h>
 
 QT_BEGIN_NAMESPACE
 

@@ -37,14 +37,14 @@
 #ifndef REPLY_H
 #define REPLY_H
 
-#include <modbus.h>
-
 #include <QtCore/qobject.h>
 #include <QtCore/qthread.h>
 #include <QtCore/qpointer.h>
 
 #include <QtSerialBus/qmodbusreply.h>
 #include <QtSerialBus/qmodbusmaster.h>
+
+#include <modbus.h>
 
 QT_BEGIN_NAMESPACE
 

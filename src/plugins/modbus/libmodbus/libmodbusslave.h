@@ -37,8 +37,6 @@
 #ifndef LIBMODBUSBACKEND_H
 #define LIBMODBUSBACKEND_H
 
-#include <modbus.h>
-
 #include <QtSerialBus/qmodbusslave.h>
 #include <QSerialPort>
 
@@ -46,6 +44,8 @@
 #include <QtCore/qthread.h>
 #include <QtCore/qpointer.h>
 #include <QtCore/qmap.h>
+
+#include <modbus.h>
 
 QT_BEGIN_NAMESPACE
 
