@@ -109,6 +109,8 @@ Q_SIGNALS:
     void stateChanged(QModBusDevice::ModBusDeviceState state);
 
 protected:
+    QModBusDevice(QModBusDevicePrivate &dd, QObject *parent = Q_NULLPTR);
+
     void setState(QModBusDevice::ModBusDeviceState newState);
     void setError(const QString &errorText, QModBusDevice::ModBusError error);
     virtual bool open() = 0;

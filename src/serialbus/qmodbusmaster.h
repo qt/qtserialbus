@@ -46,9 +46,12 @@
 
 QT_BEGIN_NAMESPACE
 
+class QModBusMasterPrivate;
+
 class Q_SERIALBUS_EXPORT QModBusMaster : public QModBusDevice
 {
     Q_OBJECT
+    Q_DECLARE_PRIVATE(QModBusMaster)
 public:
 
     explicit QModBusMaster(QObject *parent = 0);
@@ -58,6 +61,9 @@ public:
     virtual QModBusReply *write(const QList<QModBusDataUnit> &requests, int slaveId = 1) = 0;
     virtual QModBusReply *read(QModBusDataUnit &request, int slaveId = 1) = 0;
     virtual QModBusReply *read(QList<QModBusDataUnit> &requests, int slaveId = 1) = 0;
+
+protected:
+    QModBusMaster(QModBusMasterPrivate &dd, QObject *parent = Q_NULLPTR);
 };
 
 QT_END_NAMESPACE

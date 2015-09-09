@@ -56,7 +56,7 @@ QT_BEGIN_NAMESPACE
     Constructs a Modbus slave with the specified \a parent.
  */
 QModBusSlave::QModBusSlave(QObject *parent) :
-    QModBusDevice(parent)
+    QModBusDevice(*new QModBusSlavePrivate, parent)
 {
 }
 
@@ -64,6 +64,14 @@ QModBusSlave::QModBusSlave(QObject *parent) :
     \internal
 */
 QModBusSlave::~QModBusSlave()
+{
+}
+
+/*!
+    \internal
+ */
+QModBusSlave::QModBusSlave(QModBusSlavePrivate &dd, QObject *parent) :
+    QModBusDevice(dd, parent)
 {
 }
 

@@ -26,6 +26,7 @@ PUBLIC_HEADERS += \
 PRIVATE_HEADERS += \
     qcanbusdevice_p.h \
     qmodbusslave_p.h \
+    qmodbusmaster_p.h \
     qmodbusdevice_p.h
 
 SOURCES += \
@@ -41,3 +42,4 @@ SOURCES += \
     qmodbusreply.cpp
 
 HEADERS += $$PUBLIC_HEADERS $$PRIVATE_HEADERS
+

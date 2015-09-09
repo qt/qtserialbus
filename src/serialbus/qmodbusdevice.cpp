@@ -58,6 +58,14 @@ QModBusDevice::QModBusDevice(QObject *parent)
 }
 
 /*!
+    \internal
+*/
+QModBusDevice::QModBusDevice(QModBusDevicePrivate &dd, QObject *parent)
+ : QObject(dd, parent)
+{
+}
+
+/*!
     Destroys the QModBusDevice instance
 */
 QModBusDevice::~QModBusDevice()

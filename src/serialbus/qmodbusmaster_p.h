@@ -34,10 +34,10 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSSLAVE_P_H
-#define QMODBUSSLAVE_P_H
+#ifndef QMODBUSMASTER_P_H
+#define QMODBUSMASTER_P_H
 
-#include "qmodbusslave.h"
+#include "qmodbusmaster.h"
 #include "qmodbusdevice_p.h"
 
 //
@@ -53,16 +53,16 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModBusSlavePrivate : public QModBusDevicePrivate
+class QModBusMasterPrivate : public QModBusDevicePrivate
 {
-    Q_DECLARE_PUBLIC(QModBusSlave)
+    Q_DECLARE_PUBLIC(QModBusMaster)
 public:
-    QModBusSlavePrivate()
+    QModBusMasterPrivate()
     {
     }
 };
 
 QT_END_NAMESPACE
 
-#endif // QMODBUSSLAVE_P_H
+#endif // QMODBUSMASTER_P_H
 

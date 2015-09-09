@@ -35,6 +35,7 @@
 ****************************************************************************/
 
 #include "qmodbusmaster.h"
+#include "qmodbusmaster_p.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -52,8 +53,8 @@ QT_BEGIN_NAMESPACE
 /*!
     Constructs a Modbus master device with the specified \a parent.
  */
-QModBusMaster::QModBusMaster(QObject *parent) :
-    QModBusDevice(parent)
+QModBusMaster::QModBusMaster(QObject *parent)
+    : QModBusDevice(*new QModBusMasterPrivate, parent)
 {
 }
 
@@ -62,6 +63,12 @@ QModBusMaster::QModBusMaster(QObject *parent) :
 */
 QModBusMaster::~QModBusMaster()
 {
+}
+
+QModBusMaster::QModBusMaster(QModBusMasterPrivate &dd, QObject *parent) :
+    QModBusDevice(dd, parent)
+{
+
 }
 
 /*!

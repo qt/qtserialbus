@@ -70,6 +70,9 @@ public:
 Q_SIGNALS:
     void slaveRead();
     void slaveWritten(QModBusDevice::ModBusTable table, int address, int size);
+
+protected:
+    QModBusSlave(QModBusSlavePrivate &dd, QObject *parent = Q_NULLPTR);
 };
 
 QT_END_NAMESPACE
