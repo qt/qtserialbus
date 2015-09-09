@@ -117,6 +117,7 @@ void MainWindow::connectDevice(int pluginIndex)
         return;
 
     modBusDevice->setDevice(serialPort, QModBusDevice::RemoteTerminalUnit);
+    modBusDevice->setPortName(ui->portEdit->text());
 
     if (!modBusDevice->setMap(QModBusDevice::DiscreteInputs, 10))
         return;

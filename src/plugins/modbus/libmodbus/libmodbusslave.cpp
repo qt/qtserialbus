@@ -56,7 +56,6 @@ QT_BEGIN_NAMESPACE
 
 LibModBusSlave::LibModBusSlave() :
     QModBusSlave(),
-    serialPort(0),
     context(0),
     mapping(modbus_mapping_new(0,0,0,0)),
     connected(false),
@@ -72,14 +71,9 @@ LibModBusSlave::~LibModBusSlave()
     mapping = 0;
 }
 
-bool LibModBusSlave::setDevice(QIODevice *transport, ApplicationDataUnit ADU)
+bool LibModBusSlave::setDevice(QIODevice */*transport*/, ApplicationDataUnit /*ADU*/)
 {
-    //Only serialport supported at the moment
-    adu = ADU;
-    serialPort = qobject_cast<QSerialPort*>(transport);
-    if (!serialPort)
-        return false;
-
+    // TODO Remove
     return true;
 }
 
@@ -107,36 +101,25 @@ bool LibModBusSlave::open()
     if (connected)
         return true;
 
-    if (!serialPort) {
-        setError(tr("No transport device specified."), QModBusDevice::ConnectionError);
+    QString location = portName();
+    if (!location.isEmpty())
+        location = portNameToSystemLocation(location);
+
+    if (location.isEmpty()) {
+        setError(tr("No portname for serial port specified."),
+                 QModBusDevice::ConnectionError);
         return false;
     }
 
-    QChar parity;
-
-    switch (serialPort->parity()) {
-    case QSerialPort::NoParity:
-        parity = 'N';
-        break;
-    case QSerialPort::EvenParity:
-        parity = 'E';
-        break;
-    case QSerialPort::OddParity:
-        parity = 'O';
-        break;
-    default:
-        setError(tr("Unsupported parity."), QModBusDevice::ConnectionError);
-        return false;
-    }
-
-    QString location = portNameToSystemLocation(serialPort->portName());
+    //TODO For now the parameters are fixed -> need to add API to adjust this
+    char parity = 'N';
+    int baud = 9600;
+    int stopBits = 1;
+    int dataBits = 8;
 
     context = modbus_new_rtu(location.toLatin1(),
-                             serialPort->baudRate(),
-                             parity.toLatin1(),
-                             serialPort->dataBits(),
-                             serialPort->stopBits());
-    if (context == NULL) {
+                             baud, parity, dataBits, stopBits);
+    if (!context) {
         setError(qt_error_string(errno), QModBusDevice::ConnectionError);
         return false;
     }
@@ -256,7 +239,7 @@ bool LibModBusSlave::setData(QModBusDevice::ModBusTable table, quint16 address, 
     return true;
 }
 
-QString LibModBusSlave::portNameToSystemLocation(QString source)
+QString LibModBusSlave::portNameToSystemLocation(const QString &source)
 {
 #if defined(Q_OS_WINCE)
     return source.endsWith(QLatin1Char(':'))
@@ -270,7 +253,7 @@ QString LibModBusSlave::portNameToSystemLocation(QString source)
             || source.startsWith(QLatin1String("../")))
             ? source : (QLatin1String("/dev/") + source);
 #else
-#  error Unsupported OS
+    return QString();
 #endif
 }
 

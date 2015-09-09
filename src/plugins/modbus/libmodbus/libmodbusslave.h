@@ -38,7 +38,6 @@
 #define LIBMODBUSBACKEND_H
 
 #include <QtSerialBus/qmodbusslave.h>
-#include <QSerialPort>
 
 #include <QtCore/qstring.h>
 #include <QtCore/qthread.h>
@@ -84,7 +83,7 @@ class LibModBusSlave : public QModBusSlave
 public:
     LibModBusSlave();
     ~LibModBusSlave();
-    bool setDevice(QIODevice *transport, ApplicationDataUnit ADU) Q_DECL_OVERRIDE;
+    bool setDevice(QIODevice *, ApplicationDataUnit) Q_DECL_OVERRIDE;
     bool setMap(QModBusDevice::ModBusTable table, quint16 size) Q_DECL_OVERRIDE;
     int slaveId() const Q_DECL_OVERRIDE;
     void setSlaveId(int id) Q_DECL_OVERRIDE;
@@ -101,18 +100,16 @@ private Q_SLOTS:
 private:
     bool open() Q_DECL_OVERRIDE;
     void close() Q_DECL_OVERRIDE;
-    static QString portNameToSystemLocation(QString source);
+    static QString portNameToSystemLocation(const QString &source);
 
 private:
     QPointer<ListenThread> listener;
     QThread thread;
-    QSerialPort *serialPort;
     modbus_t *context;
     modbus_mapping_t *mapping;
     bool connected;
     int slave;
     QMap<QModBusDevice::ModBusTable, int> mappingTable;
-    QModBusDevice::ApplicationDataUnit adu;
 };
 
 QT_END_NAMESPACE

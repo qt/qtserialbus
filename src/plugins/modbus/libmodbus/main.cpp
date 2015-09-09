@@ -40,8 +40,6 @@
 #include <QtSerialBus/qmodbus.h>
 #include <QtSerialBus/qmodbusfactory.h>
 
-#include <QtSerialPort>
-
 #include <QtCore/qfile.h>
 #include <QtCore/qdebug.h>
 
