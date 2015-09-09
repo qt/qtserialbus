@@ -40,8 +40,6 @@
 #include <QtCore/qpluginloader.h>
 #include <QtCore/qglobalstatic.h>
 
-#include <QSerialPort>
-
 #include <private/qfactoryloader_p.h>
 #include <private/qlibrary_p.h>
 

@@ -41,8 +41,6 @@
 #include <QtSerialBus/qmodbusslave.h>
 #include <QtSerialBus/qmodbusmaster.h>
 
-#include <QSerialPort>
-
 #include <QtCore/qstringlist.h>
 #include <QtCore/qiodevice.h>
 

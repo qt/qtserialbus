@@ -1,6 +1,6 @@
 TARGET = QtSerialBus
 MODULE = serialbus
-QT += core-private serialport
+QT += core-private
 
 QMAKE_DOCS = $$PWD/doc/qtserialbus.qdocconf
 

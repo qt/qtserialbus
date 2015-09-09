@@ -1,4 +1,4 @@
-QT += core-private serialbus serialport
+QT += core-private serialbus
 
 TARGET = qtmodbus
 
