@@ -85,6 +85,8 @@ public:
     ~LibModBusSlave();
     bool setDevice(QIODevice *, ApplicationDataUnit) Q_DECL_OVERRIDE;
     bool setMap(QModBusDevice::ModBusTable table, quint16 size) Q_DECL_OVERRIDE;
+    bool setMap(const QModBusRegister &) Q_DECL_OVERRIDE;
+
     int slaveId() const Q_DECL_OVERRIDE;
     void setSlaveId(int id) Q_DECL_OVERRIDE;
 

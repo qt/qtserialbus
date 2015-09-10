@@ -34,67 +34,37 @@
 **
 ****************************************************************************/
 
-#include "dummyslave.h"
+#ifndef QMODBUSREGISTER_H
+#define QMODBUSREGISTER_H
 
-#include <QIODevice>
+#include <QtSerialBus/qmodbusdevice.h>
+#include <QtCore/qvector.h>
 
-DummySlave::DummySlave(QObject *parent) :
-    QModBusSlave(parent)
+QT_BEGIN_NAMESPACE
+
+class QModBusRegister
 {
-}
+public:
+    QModBusRegister() { dataSet.fill(0u, 4); }
 
-bool DummySlave::setDevice(QIODevice *transport, ApplicationDataUnit ADU)
-{
-    Q_UNUSED(transport);
-    Q_UNUSED(ADU);
+    // TODO Move QModBusDevice::ModeBusTable enum here
 
-    return true;
-}
+    void setRegisterSize(QModBusDevice::ModBusTable registerType, quint16 size)
+    {
+        dataSet[registerType] = size;
+    }
 
-bool DummySlave::open()
-{
-    return true;
-}
+    quint16 registerSize(QModBusDevice::ModBusTable registerType) const
+    {
+        return dataSet[registerType];
+    }
 
-void DummySlave::close()
-{
+private:
+    QVector<quint16> dataSet;
+};
 
-}
+Q_DECLARE_TYPEINFO(QModBusRegister, Q_MOVABLE_TYPE);
 
-bool DummySlave::setMap(QModBusDevice::ModBusTable table, quint16 size)
-{
-    Q_UNUSED(table);
-    Q_UNUSED(size);
-    return true;
-}
+QT_END_NAMESPACE
 
-bool DummySlave::setMap(const QModBusRegister &/*newRegister*/)
-{
-    return false;
-}
-
-void DummySlave::setSlaveId(int id)
-{
-    Q_UNUSED(id);
-}
-
-int DummySlave::slaveId() const
-{
-    return 1;
-}
-
-bool DummySlave::data(QModBusDevice::ModBusTable table, quint16 address, quint16 *data)
-{
-    Q_UNUSED(table);
-    Q_UNUSED(address);
-    *data = 9;
-    return true;
-}
-
-bool DummySlave::setData(QModBusDevice::ModBusTable table, quint16 address, quint16 data)
-{
-    Q_UNUSED(table);
-    Q_UNUSED(address);
-    Q_UNUSED(data);
-    return true;
-}
+#endif // QMODBUSREGISTER_H

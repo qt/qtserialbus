@@ -34,67 +34,37 @@
 **
 ****************************************************************************/
 
-#include "dummyslave.h"
+#include "qmodbusregister.h"
 
-#include <QIODevice>
+QT_BEGIN_NAMESPACE
 
-DummySlave::DummySlave(QObject *parent) :
-    QModBusSlave(parent)
-{
-}
+/*!
+    \class QModBusRegister
+    \inmodule QtSerialBus
+    \since 5.6
 
-bool DummySlave::setDevice(QIODevice *transport, ApplicationDataUnit ADU)
-{
-    Q_UNUSED(transport);
-    Q_UNUSED(ADU);
+    \brief QModBusRegister is a container class indicating the size of
+    the ModBus register maintained by a QModBusSlave instance.
 
-    return true;
-}
+ */
 
-bool DummySlave::open()
-{
-    return true;
-}
+/*!
+    \fn QModBusRegister::QModBusRegister()
 
-void DummySlave::close()
-{
+    Constructs a ModBus register instance. The resulting object
+    sets the size of each register type to 0.
+ */
 
-}
+/*!
+    \fn void QModBusRegister::setRegisterSize(QModBusDevice::ModBusTable type, quint16 size)
 
-bool DummySlave::setMap(QModBusDevice::ModBusTable table, quint16 size)
-{
-    Q_UNUSED(table);
-    Q_UNUSED(size);
-    return true;
-}
+    Sets the size of the register with \a type to \a size.
+ */
 
-bool DummySlave::setMap(const QModBusRegister &/*newRegister*/)
-{
-    return false;
-}
+/*!
+    \fn quint16 QModBusRegister::registerSize(QModBusDevice::ModBusTable type) const
 
-void DummySlave::setSlaveId(int id)
-{
-    Q_UNUSED(id);
-}
+    Returns the size of the register \a type.
+ */
 
-int DummySlave::slaveId() const
-{
-    return 1;
-}
-
-bool DummySlave::data(QModBusDevice::ModBusTable table, quint16 address, quint16 *data)
-{
-    Q_UNUSED(table);
-    Q_UNUSED(address);
-    *data = 9;
-    return true;
-}
-
-bool DummySlave::setData(QModBusDevice::ModBusTable table, quint16 address, quint16 data)
-{
-    Q_UNUSED(table);
-    Q_UNUSED(address);
-    Q_UNUSED(data);
-    return true;
-}
+QT_END_NAMESPACE

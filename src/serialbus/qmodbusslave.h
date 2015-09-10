@@ -40,6 +40,7 @@
 #include <QtSerialBus/qserialbusglobal.h>
 #include <QtSerialBus/qmodbusdevice.h>
 #include <QtSerialBus/qmodbusdataunit.h>
+#include <QtSerialBus/qmodbusregister.h>
 
 #include <QtCore/qobject.h>
 
@@ -58,7 +59,8 @@ public:
     explicit QModBusSlave(QObject *parent = 0);
     virtual ~QModBusSlave();
 
-    virtual bool setMap(QModBusDevice::ModBusTable table, quint16 size) = 0;
+    virtual bool setMap(QModBusDevice::ModBusTable table, quint16 size) = 0; //TODO remove
+    virtual bool setMap(const QModBusRegister &newRegister) = 0;
 
     virtual void setSlaveId(int id) = 0;
     virtual int slaveId() const = 0;

@@ -83,6 +83,16 @@ QModBusSlave::QModBusSlave(QModBusSlavePrivate &dd, QObject *parent) :
  */
 
 /*!
+    \fn bool QModBusSlave::setMap(const QModBusRegister &newRegister)
+
+    Sets the registered map structure for requests from other ModBus masters.
+    The register values are initialized with zero. Returns \c true on success;
+    otherwise \c false.
+
+    \note Calling this function discards any value that was previously set.
+ */
+
+/*!
     \fn int QModBusSlave::slaveId() const
     Multiple Modbus devices can be connected together on the same physical link.
     Slave id is a unique identifier that each slave must have, and it is used

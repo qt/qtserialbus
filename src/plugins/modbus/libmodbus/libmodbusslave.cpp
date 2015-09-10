@@ -90,6 +90,12 @@ bool LibModBusSlave::setMap(QModBusDevice::ModBusTable table, quint16 size)
     return true;
 }
 
+bool LibModBusSlave::setMap(const QModBusRegister &/*newRegister*/)
+{
+    //TODO
+    return false;
+}
+
 void LibModBusSlave::handleError(int errorNumber)
 {
     setError(qt_error_string(errorNumber), QModBusDevice::ReadError);
