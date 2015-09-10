@@ -39,6 +39,10 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qdatastream.h>
 
+#if defined(Q_OS_UNIX)
+# include <errno.h>
+#endif
+
 QT_BEGIN_NAMESPACE
 
 LibModBusMaster::LibModBusMaster() :

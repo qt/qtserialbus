@@ -37,7 +37,7 @@
 #ifndef LIBMODBUSBACKEND_H
 #define LIBMODBUSBACKEND_H
 
-#include <modbus/modbus.h>
+#include <modbus.h>
 
 #include <QtSerialBus/qmodbusslave.h>
 #include <QSerialPort>

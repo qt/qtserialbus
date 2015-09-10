@@ -39,6 +39,10 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qdatastream.h>
 
+#if defined(Q_OS_UNIX)
+# include <errno.h>
+#endif
+
 QT_BEGIN_NAMESPACE
 
 void RequestThread::write()
@@ -60,14 +64,14 @@ void RequestThread::write()
 
 void RequestThread::writeBits()
 {
-    quint8 bits[values.size()];
+    QByteArray bits(values.size(), Qt::Uninitialized);
     for (int i = 0; i < values.size(); i++) {
         if (values.at(i))
             bits[i] = true;
         else
             bits[i] = false;
     }
-    if (modbus_write_bits(context, startAddress, values.size(), bits) == -1) {
+    if (modbus_write_bits(context, startAddress, values.size(), (uint8_t*) bits.data()) == -1) {
         emit error(errno);
         return;
     }
@@ -77,10 +81,10 @@ void RequestThread::writeBits()
 
 void RequestThread::writeBytes()
 {
-    quint16 bytes[values.size()];
+    QVector<quint16> bytes(values.size());
     for (int i = 0; i < values.size(); i++)
         bytes[i] = values.at(i);
-    if (modbus_write_registers(context, startAddress, values.size(), bytes) == -1) {
+    if (modbus_write_registers(context, startAddress, values.size(), bytes.data()) == -1) {
         emit error(errno);
         return;
     }
@@ -109,15 +113,14 @@ void RequestThread::read()
 
 void RequestThread::readBits()
 {
-    quint8 bits[size];
-    std::fill(bits, bits + values.size(), 0);
+    QByteArray bits(size, 0);
     if (table == QModBusDevice::DiscreteInputs) {
-        if (modbus_read_input_bits(context, startAddress, size, bits) == -1) {
+        if (modbus_read_input_bits(context, startAddress, size, (uint8_t*) bits.data()) == -1) {
             emit error(errno);
             return;
         }
     } else {
-        if (modbus_read_bits(context, startAddress, size, bits) == -1) {
+        if (modbus_read_bits(context, startAddress, size, (uint8_t*) bits.data()) == -1) {
             emit error(errno);
             return;
         }
@@ -130,15 +133,14 @@ void RequestThread::readBits()
 
 void RequestThread::readBytes()
 {
-    quint16 bytes[size];
-    std::fill(bytes, bytes + values.size(), 0);
+    QVector<quint16> bytes(size, 0);
     if (table == QModBusDevice::InputRegisters) {
-        if (modbus_read_input_registers(context, startAddress, size, bytes) == -1) {
+        if (modbus_read_input_registers(context, startAddress, size, bytes.data()) == -1) {
             emit error(errno);
             return;
         }
     } else { //Holding Register
-        if (modbus_read_registers(context, startAddress, size, bytes) == -1) {
+        if (modbus_read_registers(context, startAddress, size, bytes.data()) == -1) {
             emit error(errno);
             return;
         }

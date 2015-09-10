@@ -33,49 +33,12 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+#include <sys/types.h>
+#include <sys/socket.h>
 
-#ifndef LIBMODBUSMASTER_H
-#define LIBMODBUSMASTER_H
-
-#include "libmodbusreply.h"
-
-#include <modbus.h>
-
-#include <QtSerialBus/qmodbusmaster.h>
-#include <QtSerialBus/qmodbusreply.h>
-#include <QtSerialBus/qmodbusdataunit.h>
-#include <QSerialPort>
-
-#include <QtCore/qpointer.h>
-
-QT_BEGIN_NAMESPACE
-
-class LibModBusMaster : public QModBusMaster
+int main()
 {
-    Q_OBJECT
-public:
-    LibModBusMaster();
-    bool setDevice(QIODevice *transport, ApplicationDataUnit ADU) Q_DECL_OVERRIDE;
-
-    QModBusReply* write(const QModBusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
-    QModBusReply* write(const QList<QModBusDataUnit> &requests, int slaveId = 1) Q_DECL_OVERRIDE;
-
-    QModBusReply* read(QModBusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
-    QModBusReply* read(QList<QModBusDataUnit> &requests, int slaveId = 1) Q_DECL_OVERRIDE;
-
-protected:
-    bool open() Q_DECL_OVERRIDE;
-    void close() Q_DECL_OVERRIDE;
-
-private:
-    QString portNameToSystemLocation(QString source);
-
-    QSerialPort *serialPort;
-    modbus_t *context;
-    bool connected;
-    QModBusDevice::ApplicationDataUnit adu;
-};
-
-QT_END_NAMESPACE
-
-#endif // LIBMODBUSMASTER_H
+    socklen_t length = 0;
+    accept4(1, 0, &length, SOCK_CLOEXEC);
+    return 0;
+}

@@ -37,7 +37,7 @@
 #ifndef REPLY_H
 #define REPLY_H
 
-#include <modbus/modbus.h>
+#include <modbus.h>
 
 #include <QtCore/qobject.h>
 #include <QtCore/qthread.h>

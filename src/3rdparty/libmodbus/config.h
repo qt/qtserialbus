@@ -34,48 +34,8 @@
 **
 ****************************************************************************/
 
-#ifndef LIBMODBUSMASTER_H
-#define LIBMODBUSMASTER_H
-
-#include "libmodbusreply.h"
-
-#include <modbus.h>
-
-#include <QtSerialBus/qmodbusmaster.h>
-#include <QtSerialBus/qmodbusreply.h>
-#include <QtSerialBus/qmodbusdataunit.h>
-#include <QSerialPort>
-
-#include <QtCore/qpointer.h>
-
-QT_BEGIN_NAMESPACE
-
-class LibModBusMaster : public QModBusMaster
-{
-    Q_OBJECT
-public:
-    LibModBusMaster();
-    bool setDevice(QIODevice *transport, ApplicationDataUnit ADU) Q_DECL_OVERRIDE;
-
-    QModBusReply* write(const QModBusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
-    QModBusReply* write(const QList<QModBusDataUnit> &requests, int slaveId = 1) Q_DECL_OVERRIDE;
-
-    QModBusReply* read(QModBusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
-    QModBusReply* read(QList<QModBusDataUnit> &requests, int slaveId = 1) Q_DECL_OVERRIDE;
-
-protected:
-    bool open() Q_DECL_OVERRIDE;
-    void close() Q_DECL_OVERRIDE;
-
-private:
-    QString portNameToSystemLocation(QString source);
-
-    QSerialPort *serialPort;
-    modbus_t *context;
-    bool connected;
-    QModBusDevice::ApplicationDataUnit adu;
-};
-
-QT_END_NAMESPACE
-
-#endif // LIBMODBUSMASTER_H
+/*
+    This file exists to satisfy the config.h include requirements. The project
+    only uses HAVE_STRLCPY and HAVE_DECL_TIOCSRS485. Those checks are done
+    via a config test and added to the build via the qmake project.
+*/

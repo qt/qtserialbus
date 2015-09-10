@@ -33,12 +33,9 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include <modbus/modbus.h>
+#include <byteswap.h>
 
 int main()
 {
-    modbus_mapping_t *mapping;
-    mapping = modbus_mapping_new(0,0,0,0);
-    modbus_mapping_free(mapping);
     return 0;
 }

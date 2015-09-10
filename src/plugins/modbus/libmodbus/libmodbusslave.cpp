@@ -41,6 +41,7 @@
 #if defined(Q_OS_WIN)
 #include <winsock2.h>
 #elif defined(Q_OS_UNIX)
+#include <errno.h>
 #include <sys/select.h>
 #endif
 
