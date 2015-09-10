@@ -135,6 +135,8 @@ protected:
     QCanBusFrame dequeueOutgoingFrame();
     bool hasOutgoingFrames() const;
 
+    // TODO Remove once official plugin system is gone
+    //      Can be folded into one call to connectDevice() & disconnectDevice()
     virtual bool open() = 0;
     virtual void close() = 0;
 };
