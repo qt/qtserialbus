@@ -78,11 +78,11 @@ int DummySlave::slaveId() const
     return 1;
 }
 
-bool DummySlave::data(QModBusDevice::ModBusTable table, quint16 address, quint16 &data)
+bool DummySlave::data(QModBusDevice::ModBusTable table, quint16 address, quint16 *data)
 {
     Q_UNUSED(table);
     Q_UNUSED(address);
-    data = 9;
+    *data = 9;
     return true;
 }
 

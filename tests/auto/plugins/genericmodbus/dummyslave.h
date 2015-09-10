@@ -50,7 +50,7 @@ public:
     bool setMap(QModBusDevice::ModBusTable table, quint16 size);
     void setSlaveId(int id);
     int slaveId() const;
-    bool data(QModBusDevice::ModBusTable table, quint16 address, quint16& data);
+    bool data(QModBusDevice::ModBusTable table, quint16 address, quint16 *data);
     bool setData(QModBusDevice::ModBusTable table, quint16 address, quint16 data);
 
 protected:

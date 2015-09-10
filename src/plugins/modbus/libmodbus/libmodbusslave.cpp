@@ -203,21 +203,24 @@ void LibModBusSlave::setSlaveId(int id)
     modbus_set_slave(context, slave);
 }
 
-bool LibModBusSlave::data(QModBusDevice::ModBusTable table, quint16 address, quint16& data)
+bool LibModBusSlave::data(QModBusDevice::ModBusTable table, quint16 address, quint16 *data)
 {
+    if (!data)
+        return false;
+
     if (mappingTable[table] >= address) {
         switch (table) {
             case QModBusDevice::DiscreteInputs:
-                data = mapping->tab_input_bits[address];
+                *data = mapping->tab_input_bits[address];
                 break;
             case QModBusDevice::Coils:
-                data = mapping->tab_bits[address];
+                *data = mapping->tab_bits[address];
                 break;
             case QModBusDevice::InputRegisters:
-                data = mapping->tab_input_registers[address];
+                *data = mapping->tab_input_registers[address];
                 break;
             case QModBusDevice::HoldingRegisters:
-                data = mapping->tab_registers[address];
+                *data = mapping->tab_registers[address];
                 break;
         }
     } else {

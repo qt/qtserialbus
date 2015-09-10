@@ -173,12 +173,12 @@ void MainWindow::updateWidgets(QModBusDevice::ModBusTable table, int address, in
         QString text;
         switch (table) {
         case QModBusDevice::Coils:
-            modBusDevice->data(QModBusDevice::Coils, address + i, value);
+            modBusDevice->data(QModBusDevice::Coils, address + i, &value);
              //default button group id goes from -2 to downwards
             ui->coilButtons->button(-2 - address - i)->setChecked(value);
             break;
         case QModBusDevice::HoldingRegisters:
-            modBusDevice->data(QModBusDevice::HoldingRegisters, address + i, value);
+            modBusDevice->data(QModBusDevice::HoldingRegisters, address + i, &value);
             text.setNum(value, 16);
             registerFields.at(10 + address + i)->setText(text);
             break;

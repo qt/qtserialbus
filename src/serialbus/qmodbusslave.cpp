@@ -96,7 +96,7 @@ QModBusSlave::~QModBusSlave()
  */
 
 /*!
-    \fn bool QModBusSlave::data(QModBusDevice::ModBusTable table, quint16 address, quint16 &data)
+    \fn bool QModBusSlave::data(QModBusDevice::ModBusTable table, quint16 address, quint16 *data)
 
     Reads data stored in the slave. Slave has four tables (\a table) and each have a unique
     \a address field, which is used to read \a data from the desired field.

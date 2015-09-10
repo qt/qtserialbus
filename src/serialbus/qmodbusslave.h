@@ -64,7 +64,7 @@ public:
     virtual int slaveId() const = 0;
 
     //TODO: Review if QModBusMap would be useful. It could replace setMap(), data() and setData()
-    virtual bool data(QModBusDevice::ModBusTable table, quint16 address, quint16& data) = 0;
+    virtual bool data(QModBusDevice::ModBusTable table, quint16 address, quint16 *data) = 0;
     virtual bool setData(QModBusDevice::ModBusTable table, quint16 address, quint16 data) = 0;
 
 Q_SIGNALS:
