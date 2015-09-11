@@ -218,7 +218,7 @@ void Reply::setResults(QByteArray load)
 {
     if (table == QModBusDevice::InputRegisters || table == QModBusDevice::HoldingRegisters) {
         for (int i = 0; i < load.size(); i = i + 2) {
-            quint16 result = (load.at(i) << 8) + load.at(i + 1);
+            quint16 result = (load.at(i) << 8) | load.at(i + 1);
             values.append(result);
         }
     } else { //Coils and Discrete Inputs
