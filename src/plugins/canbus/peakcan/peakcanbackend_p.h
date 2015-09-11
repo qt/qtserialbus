@@ -78,6 +78,7 @@ public:
     void enableWriteNotification(bool enable);
     void canWriteNotification();
     bool enableReadNotification();
+    void disableReadNotification();
     void canReadNotification();
     bool verifyBitRate(int bitrate);
 

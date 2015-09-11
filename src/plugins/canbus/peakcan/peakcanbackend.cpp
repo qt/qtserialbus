@@ -223,20 +223,7 @@ void PeakCanBackendPrivate::close()
     Q_Q(PeakCanBackend);
 
     enableWriteNotification(false);
-
-    if (incomingEventNotifier) {
-        incomingEventNotifier->setEnabled(false);
-        incomingEventNotifier->deleteLater();
-    }
-
-#if defined(Q_OS_WIN32)
-    if (incomingEventHandle != INVALID_HANDLE_VALUE) {
-        ::CloseHandle(incomingEventHandle);
-        incomingEventHandle = INVALID_HANDLE_VALUE;
-    }
-#else
-    incomingEventHandle = -1;
-#endif
+    disableReadNotification();
 
     if (outgoingEventNotifier)
         outgoingEventNotifier->deleteLater();
@@ -380,6 +367,30 @@ bool PeakCanBackendPrivate::enableReadNotification()
     }
 
     return true;
+}
+
+void PeakCanBackendPrivate::disableReadNotification()
+{
+    Q_Q(PeakCanBackend);
+
+    quint32 value = 0;
+    if (TPCANStatus st = ::CAN_SetValue(channelIndex, PCAN_RECEIVE_EVENT, &value, sizeof(value)) != PCAN_ERROR_OK)
+        q->setError(systemErrorString(st), QCanBusDevice::ConnectionError);
+
+    if (incomingEventNotifier) {
+        delete incomingEventNotifier;
+        incomingEventNotifier = Q_NULLPTR;
+    }
+
+#if defined(Q_OS_WIN32)
+    if (incomingEventHandle && (incomingEventHandle != INVALID_HANDLE_VALUE)) {
+        if (!::CloseHandle(incomingEventHandle))
+            q->setError(qt_error_string(::GetLastError()), QCanBusDevice::ConnectionError);
+        incomingEventHandle = INVALID_HANDLE_VALUE;
+    }
+#else
+    incomingEventHandle = -1;
+#endif
 }
 
 void PeakCanBackendPrivate::canReadNotification()
