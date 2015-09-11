@@ -59,5 +59,9 @@
             \li PEAK-System
             \li \l {Using PeakCAN Backend}{PeakCAN}
             \li CAN bus backend using the PCAN adapters.
+        \row
+            \li MHS Elektronik
+            \li \l {Using TinyCAN Backend}{TinyCAN}
+            \li CAN bus backend using the Tiny-CAN adapters.
     \endtable
  */
