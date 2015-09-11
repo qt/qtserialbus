@@ -80,6 +80,7 @@ public:
         : QWinEventNotifier(parent)
         , dptr(d)
     {
+        setHandle(dptr->incomingEventHandle);
     }
 
 protected:
@@ -375,9 +376,6 @@ bool PeakCanBackendPrivate::enableReadNotification()
 
     if (!incomingEventNotifier) {
         incomingEventNotifier = new IncomingEventNotifier(this, q);
-#if defined(Q_OS_WIN32)
-        incomingEventNotifier->setHandle(incomingEventHandle);
-#endif
         incomingEventNotifier->setEnabled(true);
     }
 
