@@ -71,7 +71,7 @@ LibModBusSlave::~LibModBusSlave()
     mapping = 0;
 }
 
-bool LibModBusSlave::setDevice(QIODevice */*transport*/, ApplicationDataUnit /*ADU*/)
+bool LibModBusSlave::setDevice(QIODevice * /*transport*/, ApplicationDataUnit /*ADU*/)
 {
     // TODO Remove
     return true;
@@ -90,7 +90,7 @@ bool LibModBusSlave::setMap(QModBusDevice::ModBusTable table, quint16 size)
     return true;
 }
 
-bool LibModBusSlave::setMap(const QModBusRegister &/*newRegister*/)
+bool LibModBusSlave::setMap(const QModBusRegister & /*newRegister*/)
 {
     //TODO
     return false;

@@ -51,7 +51,7 @@ LibModBusMaster::LibModBusMaster() :
 {
 }
 
-bool LibModBusMaster::setDevice(QIODevice */*transport*/, ApplicationDataUnit /*ADU*/)
+bool LibModBusMaster::setDevice(QIODevice * /*transport*/, ApplicationDataUnit /*ADU*/)
 {
     //TODO remove
     return true;
