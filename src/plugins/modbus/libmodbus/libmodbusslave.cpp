@@ -61,7 +61,6 @@ LibModBusSlave::LibModBusSlave() :
     connected(false),
     slave(1)
 {
-    qRegisterMetaType<QModBusDevice::ModBusTable>("QModBusDevice::ModBusTable");
 }
 
 LibModBusSlave::~LibModBusSlave()

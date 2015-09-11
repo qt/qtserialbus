@@ -54,7 +54,7 @@ QT_BEGIN_NAMESPACE
 QModBusDevice::QModBusDevice(QObject *parent)
  : QObject(*new QModBusDevicePrivate, parent)
 {
-
+    qRegisterMetaType<QModBusDevice::ModBusTable>();
 }
 
 /*!
@@ -63,6 +63,7 @@ QModBusDevice::QModBusDevice(QObject *parent)
 QModBusDevice::QModBusDevice(QModBusDevicePrivate &dd, QObject *parent)
  : QObject(dd, parent)
 {
+    qRegisterMetaType<QModBusDevice::ModBusTable>();
 }
 
 /*!
