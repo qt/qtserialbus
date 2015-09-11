@@ -225,8 +225,10 @@ void PeakCanBackendPrivate::close()
     enableWriteNotification(false);
     disableReadNotification();
 
-    if (outgoingEventNotifier)
-        outgoingEventNotifier->deleteLater();
+    if (outgoingEventNotifier) {
+        delete outgoingEventNotifier;
+        outgoingEventNotifier = Q_NULLPTR;
+    }
 
     if (TPCANStatus st = ::CAN_Uninitialize(channelIndex) != PCAN_ERROR_OK)
         emit q->setError(systemErrorString(st), QCanBusDevice::ConnectionError);
