@@ -42,12 +42,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QtSerialBus>
-#include <QPointer>
 
 QT_BEGIN_NAMESPACE
 
-class QSerialPort;
+class QModBusMaster;
+class QModBusReply;
 
 namespace Ui {
 class MainWindow;
@@ -63,29 +62,22 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-public slots:
-    void onMasterStateChanged(int state);
-    void readReady();
-    void writeReady();
-
 private slots:
     void on_pushButton_clicked();
+    void onStateChanged(int state);
 
     void on_readButton_clicked();
+    void readReady();
 
     void on_writeButton_clicked();
+    void writeReady();
 
     void on_writeTable_currentIndexChanged(const QString &arg1);
 
 private:
-    void init();
-    void connectDevice(int pluginIndex);
-
-    QList<QByteArray> plugins;
-    QPointer<QModBusMaster> modBusDevice;
     Ui::MainWindow *ui;
-    QPointer<QSerialPort> serialPort;
-    QPointer<QModBusReply> lastRequest;
+    QModBusReply* lastRequest;
+    QModBusMaster* modBusDevice;
 };
 
 #endif // MAINWINDOW_H

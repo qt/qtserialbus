@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>312</width>
-    <height>381</height>
+    <width>458</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,82 +17,20 @@
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+      <item row="0" column="2">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-        <property name="text">
-         <string>Plugin:</string>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
         </property>
-       </widget>
+       </spacer>
       </item>
-      <item row="1" column="4">
-       <widget class="QSpinBox" name="slaveEdit">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>255</number>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="3">
-       <widget class="QLabel" name="label_27">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Slave Id:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="pluginBox">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Port:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="portEdit">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="5">
+      <item row="0" column="5">
        <widget class="QPushButton" name="pushButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
@@ -108,30 +46,72 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0" colspan="6">
-       <widget class="QLabel" name="connectedLabel">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
-         <string>Connected to:</string>
+         <string>Port:</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="portEdit">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QLabel" name="label_27">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-       </spacer>
+        <property name="text">
+         <string>Slave Id:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QSpinBox" name="slaveEdit">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>255</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="6">
+       <widget class="QLabel" name="errorLabel">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
     <item>
-     <spacer name="verticalSpacer_2">
+     <spacer name="verticalSpacer">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
@@ -149,577 +129,553 @@
     <item>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="0">
-       <widget class="QLabel" name="label_6">
-        <property name="text">
-         <string>Discrete Inputs</string>
+       <widget class="QLabel" name="coils">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLabel" name="label_5">
         <property name="text">
          <string>Coils</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="2" colspan="2">
-       <widget class="QLabel" name="label_4">
+      <item row="0" column="1">
+       <widget class="QLabel" name="discreteInputs">
+        <property name="text">
+         <string>Discrete Inputs</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="address">
+        <property name="text">
+         <string>Address</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QLabel" name="inputRegisters">
         <property name="text">
          <string>Input Registers</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="4" colspan="2">
-       <widget class="QLabel" name="label_3">
+      <item row="0" column="4">
+       <widget class="QLabel" name="holdingRegisters">
         <property name="text">
          <string>Holding Registers</string>
         </property>
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QCheckBox" name="checkBox">
+       <widget class="QCheckBox" name="coils_0">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>0</string>
         </property>
-        <attribute name="buttonGroup">
-         <string notr="true">discreteButtons</string>
-        </attribute>
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QCheckBox" name="checkBox_11">
+       <widget class="QCheckBox" name="disc_0">
         <property name="text">
          <string>0</string>
         </property>
-        <attribute name="buttonGroup">
-         <string notr="true">coilButtons</string>
-        </attribute>
        </widget>
       </item>
       <item row="1" column="2">
-       <widget class="QLineEdit" name="lineEdit">
-        <property name="inputMask">
-         <string>HHHH</string>
+       <widget class="QLabel" name="label_21">
+        <property name="text">
+         <string>0</string>
         </property>
-        <property name="maxLength">
-         <number>4</number>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
       <item row="1" column="3">
-       <widget class="QLabel" name="label_7">
-        <property name="text">
-         <string>0</string>
+       <widget class="QLineEdit" name="inReg_0">
+        <property name="maxLength">
+         <number>32767</number>
+        </property>
+        <property name="placeholderText">
+         <string>Hexadecimal A-F, a-f, 0-9.</string>
         </property>
        </widget>
       </item>
       <item row="1" column="4">
-       <widget class="QLineEdit" name="lineEdit_11">
-        <property name="inputMask">
-         <string>HHHH</string>
-        </property>
+       <widget class="QLineEdit" name="holdReg_0">
         <property name="maxLength">
-         <number>4</number>
+         <number>32767</number>
         </property>
-       </widget>
-      </item>
-      <item row="1" column="5">
-       <widget class="QLabel" name="label_17">
-        <property name="text">
-         <string>0</string>
+        <property name="placeholderText">
+         <string>Hexadecimal A-F, a-f, 0-9.</string>
         </property>
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QCheckBox" name="checkBox_2">
+       <widget class="QCheckBox" name="coils_1">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>1</string>
         </property>
-        <attribute name="buttonGroup">
-         <string notr="true">discreteButtons</string>
-        </attribute>
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QCheckBox" name="checkBox_12">
+       <widget class="QCheckBox" name="disc_1">
         <property name="text">
          <string>1</string>
         </property>
-        <attribute name="buttonGroup">
-         <string notr="true">coilButtons</string>
-        </attribute>
        </widget>
       </item>
       <item row="2" column="2">
-       <widget class="QLineEdit" name="lineEdit_2">
-        <property name="inputMask">
-         <string>HHHH</string>
+       <widget class="QLabel" name="label_22">
+        <property name="text">
+         <string>1</string>
         </property>
-        <property name="maxLength">
-         <number>4</number>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
       <item row="2" column="3">
-       <widget class="QLabel" name="label_16">
-        <property name="text">
-         <string>1</string>
+       <widget class="QLineEdit" name="inReg_1">
+        <property name="maxLength">
+         <number>32767</number>
+        </property>
+        <property name="placeholderText">
+         <string>Hexadecimal A-F, a-f, 0-9.</string>
         </property>
        </widget>
       </item>
       <item row="2" column="4">
-       <widget class="QLineEdit" name="lineEdit_12">
-        <property name="inputMask">
-         <string>HHHH</string>
-        </property>
+       <widget class="QLineEdit" name="holdReg_1">
         <property name="maxLength">
-         <number>4</number>
+         <number>32767</number>
         </property>
-       </widget>
-      </item>
-      <item row="2" column="5">
-       <widget class="QLabel" name="label_18">
-        <property name="text">
-         <string>1</string>
+        <property name="placeholderText">
+         <string>Hexadecimal A-F, a-f, 0-9.</string>
         </property>
        </widget>
       </item>
       <item row="3" column="0">
-       <widget class="QCheckBox" name="checkBox_3">
+       <widget class="QCheckBox" name="coils_2">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>2</string>
         </property>
-        <attribute name="buttonGroup">
-         <string notr="true">discreteButtons</string>
-        </attribute>
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QCheckBox" name="checkBox_13">
+       <widget class="QCheckBox" name="disc_2">
         <property name="text">
          <string>2</string>
         </property>
-        <attribute name="buttonGroup">
-         <string notr="true">coilButtons</string>
-        </attribute>
        </widget>
       </item>
       <item row="3" column="2">
-       <widget class="QLineEdit" name="lineEdit_3">
-        <property name="inputMask">
-         <string>HHHH</string>
+       <widget class="QLabel" name="label_23">
+        <property name="text">
+         <string>2</string>
         </property>
-        <property name="maxLength">
-         <number>4</number>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
       <item row="3" column="3">
-       <widget class="QLabel" name="label_9">
-        <property name="text">
-         <string>2</string>
+       <widget class="QLineEdit" name="inReg_2">
+        <property name="maxLength">
+         <number>32767</number>
+        </property>
+        <property name="placeholderText">
+         <string>Hexadecimal A-F, a-f, 0-9.</string>
         </property>
        </widget>
       </item>
       <item row="3" column="4">
-       <widget class="QLineEdit" name="lineEdit_13">
-        <property name="inputMask">
-         <string>HHHH</string>
-        </property>
+       <widget class="QLineEdit" name="holdReg_2">
         <property name="maxLength">
-         <number>4</number>
+         <number>32767</number>
         </property>
-       </widget>
-      </item>
-      <item row="3" column="5">
-       <widget class="QLabel" name="label_19">
-        <property name="text">
-         <string>2</string>
+        <property name="placeholderText">
+         <string>Hexadecimal A-F, a-f, 0-9.</string>
         </property>
        </widget>
       </item>
       <item row="4" column="0">
-       <widget class="QCheckBox" name="checkBox_4">
+       <widget class="QCheckBox" name="coils_3">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>3</string>
         </property>
-        <attribute name="buttonGroup">
-         <string notr="true">discreteButtons</string>
-        </attribute>
        </widget>
       </item>
       <item row="4" column="1">
-       <widget class="QCheckBox" name="checkBox_14">
+       <widget class="QCheckBox" name="disc_3">
         <property name="text">
          <string>3</string>
         </property>
-        <attribute name="buttonGroup">
-         <string notr="true">coilButtons</string>
-        </attribute>
        </widget>
       </item>
       <item row="4" column="2">
-       <widget class="QLineEdit" name="lineEdit_4">
-        <property name="inputMask">
-         <string>HHHH</string>
+       <widget class="QLabel" name="label_11">
+        <property name="text">
+         <string>3</string>
         </property>
-        <property name="maxLength">
-         <number>4</number>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
       <item row="4" column="3">
-       <widget class="QLabel" name="label_14">
-        <property name="text">
-         <string>3</string>
+       <widget class="QLineEdit" name="inReg_3">
+        <property name="maxLength">
+         <number>32767</number>
+        </property>
+        <property name="placeholderText">
+         <string>Hexadecimal A-F, a-f, 0-9.</string>
         </property>
        </widget>
       </item>
       <item row="4" column="4">
-       <widget class="QLineEdit" name="lineEdit_14">
-        <property name="inputMask">
-         <string>HHHH</string>
-        </property>
+       <widget class="QLineEdit" name="holdReg_3">
         <property name="maxLength">
-         <number>4</number>
+         <number>32767</number>
         </property>
-       </widget>
-      </item>
-      <item row="4" column="5">
-       <widget class="QLabel" name="label_20">
-        <property name="text">
-         <string>3</string>
+        <property name="placeholderText">
+         <string>Hexadecimal A-F, a-f, 0-9.</string>
         </property>
        </widget>
       </item>
       <item row="5" column="0">
-       <widget class="QCheckBox" name="checkBox_5">
+       <widget class="QCheckBox" name="coils_4">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>4</string>
         </property>
-        <attribute name="buttonGroup">
-         <string notr="true">discreteButtons</string>
-        </attribute>
        </widget>
       </item>
       <item row="5" column="1">
-       <widget class="QCheckBox" name="checkBox_15">
+       <widget class="QCheckBox" name="disc_4">
         <property name="text">
          <string>4</string>
         </property>
-        <attribute name="buttonGroup">
-         <string notr="true">coilButtons</string>
-        </attribute>
        </widget>
       </item>
       <item row="5" column="2">
-       <widget class="QLineEdit" name="lineEdit_5">
-        <property name="inputMask">
-         <string>HHHH</string>
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>4</string>
         </property>
-        <property name="maxLength">
-         <number>4</number>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
       <item row="5" column="3">
-       <widget class="QLabel" name="label_15">
-        <property name="text">
-         <string>4</string>
+       <widget class="QLineEdit" name="inReg_4">
+        <property name="maxLength">
+         <number>32767</number>
+        </property>
+        <property name="placeholderText">
+         <string>Hexadecimal A-F, a-f, 0-9.</string>
         </property>
        </widget>
       </item>
       <item row="5" column="4">
-       <widget class="QLineEdit" name="lineEdit_15">
-        <property name="inputMask">
-         <string>HHHH</string>
-        </property>
+       <widget class="QLineEdit" name="holdReg_4">
         <property name="maxLength">
-         <number>4</number>
+         <number>32767</number>
         </property>
-       </widget>
-      </item>
-      <item row="5" column="5">
-       <widget class="QLabel" name="label_21">
-        <property name="text">
-         <string>4</string>
+        <property name="placeholderText">
+         <string>Hexadecimal A-F, a-f, 0-9.</string>
         </property>
        </widget>
       </item>
       <item row="6" column="0">
-       <widget class="QCheckBox" name="checkBox_6">
+       <widget class="QCheckBox" name="coils_5">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>5</string>
         </property>
-        <attribute name="buttonGroup">
-         <string notr="true">discreteButtons</string>
-        </attribute>
        </widget>
       </item>
       <item row="6" column="1">
-       <widget class="QCheckBox" name="checkBox_16">
+       <widget class="QCheckBox" name="disc_5">
         <property name="text">
          <string>5</string>
         </property>
-        <attribute name="buttonGroup">
-         <string notr="true">coilButtons</string>
-        </attribute>
        </widget>
       </item>
       <item row="6" column="2">
-       <widget class="QLineEdit" name="lineEdit_6">
-        <property name="inputMask">
-         <string>HHHH</string>
+       <widget class="QLabel" name="label_12">
+        <property name="text">
+         <string>5</string>
         </property>
-        <property name="maxLength">
-         <number>4</number>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
       <item row="6" column="3">
-       <widget class="QLabel" name="label_13">
-        <property name="text">
-         <string>5</string>
+       <widget class="QLineEdit" name="inReg_5">
+        <property name="maxLength">
+         <number>32767</number>
+        </property>
+        <property name="placeholderText">
+         <string>Hexadecimal A-F, a-f, 0-9.</string>
         </property>
        </widget>
       </item>
       <item row="6" column="4">
-       <widget class="QLineEdit" name="lineEdit_16">
-        <property name="inputMask">
-         <string>HHHH</string>
-        </property>
+       <widget class="QLineEdit" name="holdReg_5">
         <property name="maxLength">
-         <number>4</number>
+         <number>32767</number>
         </property>
-       </widget>
-      </item>
-      <item row="6" column="5">
-       <widget class="QLabel" name="label_22">
-        <property name="text">
-         <string>5</string>
+        <property name="placeholderText">
+         <string>Hexadecimal A-F, a-f, 0-9.</string>
         </property>
        </widget>
       </item>
       <item row="7" column="0">
-       <widget class="QCheckBox" name="checkBox_7">
+       <widget class="QCheckBox" name="coils_6">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>6</string>
         </property>
-        <attribute name="buttonGroup">
-         <string notr="true">discreteButtons</string>
-        </attribute>
        </widget>
       </item>
       <item row="7" column="1">
-       <widget class="QCheckBox" name="checkBox_17">
+       <widget class="QCheckBox" name="disc_6">
         <property name="text">
          <string>6</string>
         </property>
-        <attribute name="buttonGroup">
-         <string notr="true">coilButtons</string>
-        </attribute>
        </widget>
       </item>
       <item row="7" column="2">
-       <widget class="QLineEdit" name="lineEdit_7">
-        <property name="inputMask">
-         <string>HHHH</string>
+       <widget class="QLabel" name="label_13">
+        <property name="text">
+         <string>6</string>
         </property>
-        <property name="maxLength">
-         <number>4</number>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
       <item row="7" column="3">
-       <widget class="QLabel" name="label_8">
-        <property name="text">
-         <string>6</string>
+       <widget class="QLineEdit" name="inReg_6">
+        <property name="maxLength">
+         <number>32767</number>
+        </property>
+        <property name="placeholderText">
+         <string>Hexadecimal A-F, a-f, 0-9.</string>
         </property>
        </widget>
       </item>
       <item row="7" column="4">
-       <widget class="QLineEdit" name="lineEdit_17">
-        <property name="inputMask">
-         <string>HHHH</string>
-        </property>
+       <widget class="QLineEdit" name="holdReg_6">
         <property name="maxLength">
-         <number>4</number>
+         <number>32767</number>
         </property>
-       </widget>
-      </item>
-      <item row="7" column="5">
-       <widget class="QLabel" name="label_24">
-        <property name="text">
-         <string>6</string>
+        <property name="placeholderText">
+         <string>Hexadecimal A-F, a-f, 0-9.</string>
         </property>
        </widget>
       </item>
       <item row="8" column="0">
-       <widget class="QCheckBox" name="checkBox_8">
+       <widget class="QCheckBox" name="coils_7">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>7</string>
         </property>
-        <attribute name="buttonGroup">
-         <string notr="true">discreteButtons</string>
-        </attribute>
        </widget>
       </item>
       <item row="8" column="1">
-       <widget class="QCheckBox" name="checkBox_18">
+       <widget class="QCheckBox" name="disc_7">
         <property name="text">
          <string>7</string>
         </property>
-        <attribute name="buttonGroup">
-         <string notr="true">coilButtons</string>
-        </attribute>
        </widget>
       </item>
       <item row="8" column="2">
-       <widget class="QLineEdit" name="lineEdit_8">
-        <property name="inputMask">
-         <string>HHHH</string>
+       <widget class="QLabel" name="label_14">
+        <property name="text">
+         <string>7</string>
         </property>
-        <property name="maxLength">
-         <number>4</number>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
       <item row="8" column="3">
-       <widget class="QLabel" name="label_10">
-        <property name="text">
-         <string>7</string>
+       <widget class="QLineEdit" name="inReg_7">
+        <property name="maxLength">
+         <number>32767</number>
+        </property>
+        <property name="placeholderText">
+         <string>Hexadecimal A-F, a-f, 0-9.</string>
         </property>
        </widget>
       </item>
       <item row="8" column="4">
-       <widget class="QLineEdit" name="lineEdit_18">
-        <property name="inputMask">
-         <string>HHHH</string>
-        </property>
+       <widget class="QLineEdit" name="holdReg_7">
         <property name="maxLength">
-         <number>4</number>
+         <number>32767</number>
         </property>
-       </widget>
-      </item>
-      <item row="8" column="5">
-       <widget class="QLabel" name="label_23">
-        <property name="text">
-         <string>7</string>
+        <property name="placeholderText">
+         <string>Hexadecimal A-F, a-f, 0-9.</string>
         </property>
        </widget>
       </item>
       <item row="9" column="0">
-       <widget class="QCheckBox" name="checkBox_9">
+       <widget class="QCheckBox" name="coils_8">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>8</string>
         </property>
-        <attribute name="buttonGroup">
-         <string notr="true">discreteButtons</string>
-        </attribute>
        </widget>
       </item>
       <item row="9" column="1">
-       <widget class="QCheckBox" name="checkBox_19">
+       <widget class="QCheckBox" name="disc_8">
         <property name="text">
          <string>8</string>
         </property>
-        <attribute name="buttonGroup">
-         <string notr="true">coilButtons</string>
-        </attribute>
        </widget>
       </item>
       <item row="9" column="2">
-       <widget class="QLineEdit" name="lineEdit_9">
-        <property name="inputMask">
-         <string>HHHH</string>
+       <widget class="QLabel" name="label_15">
+        <property name="text">
+         <string>8</string>
         </property>
-        <property name="maxLength">
-         <number>4</number>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
       <item row="9" column="3">
-       <widget class="QLabel" name="label_11">
-        <property name="text">
-         <string>8</string>
+       <widget class="QLineEdit" name="inReg_8">
+        <property name="maxLength">
+         <number>32767</number>
+        </property>
+        <property name="placeholderText">
+         <string>Hexadecimal A-F, a-f, 0-9.</string>
         </property>
        </widget>
       </item>
       <item row="9" column="4">
-       <widget class="QLineEdit" name="lineEdit_19">
-        <property name="inputMask">
-         <string>HHHH</string>
-        </property>
+       <widget class="QLineEdit" name="holdReg_8">
         <property name="maxLength">
-         <number>4</number>
+         <number>32767</number>
         </property>
-       </widget>
-      </item>
-      <item row="9" column="5">
-       <widget class="QLabel" name="label_25">
-        <property name="text">
-         <string>8</string>
+        <property name="placeholderText">
+         <string>Hexadecimal A-F, a-f, 0-9.</string>
         </property>
        </widget>
       </item>
       <item row="10" column="0">
-       <widget class="QCheckBox" name="checkBox_10">
+       <widget class="QCheckBox" name="coils_9">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
          <string>9</string>
         </property>
-        <attribute name="buttonGroup">
-         <string notr="true">discreteButtons</string>
-        </attribute>
        </widget>
       </item>
       <item row="10" column="1">
-       <widget class="QCheckBox" name="checkBox_20">
+       <widget class="QCheckBox" name="disc_9">
         <property name="text">
          <string>9</string>
         </property>
-        <attribute name="buttonGroup">
-         <string notr="true">coilButtons</string>
-        </attribute>
        </widget>
       </item>
       <item row="10" column="2">
-       <widget class="QLineEdit" name="lineEdit_10">
-        <property name="inputMask">
-         <string>HHHH</string>
+       <widget class="QLabel" name="label_16">
+        <property name="text">
+         <string>9</string>
         </property>
-        <property name="maxLength">
-         <number>4</number>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
       <item row="10" column="3">
-       <widget class="QLabel" name="label_12">
-        <property name="text">
-         <string>9</string>
+       <widget class="QLineEdit" name="inReg_9">
+        <property name="maxLength">
+         <number>32767</number>
+        </property>
+        <property name="placeholderText">
+         <string>Hexadecimal A-F, a-f, 0-9.</string>
         </property>
        </widget>
       </item>
       <item row="10" column="4">
-       <widget class="QLineEdit" name="lineEdit_20">
-        <property name="inputMask">
-         <string>HHHH</string>
-        </property>
+       <widget class="QLineEdit" name="holdReg_9">
         <property name="maxLength">
-         <number>4</number>
+         <number>32767</number>
         </property>
-       </widget>
-      </item>
-      <item row="10" column="5">
-       <widget class="QLabel" name="label_26">
-        <property name="text">
-         <string>9</string>
+        <property name="placeholderText">
+         <string>Hexadecimal A-F, a-f, 0-9.</string>
         </property>
        </widget>
       </item>
      </layout>
     </item>
     <item>
-     <spacer name="verticalSpacer">
+     <spacer name="verticalSpacer_2">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
@@ -737,16 +693,4 @@
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
  <connections/>
- <buttongroups>
-  <buttongroup name="discreteButtons">
-   <property name="exclusive">
-    <bool>false</bool>
-   </property>
-  </buttongroup>
-  <buttongroup name="coilButtons">
-   <property name="exclusive">
-    <bool>false</bool>
-   </property>
-  </buttongroup>
- </buttongroups>
 </ui>

@@ -41,14 +41,13 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QButtonGroup>
 #include <QMainWindow>
 #include <QModBusSlave>
-#include <QPointer>
-#include <QLineEdit>
 
 QT_BEGIN_NAMESPACE
 
-class QSerialPort;
+class QLineEdit;
 
 namespace Ui {
 class MainWindow;
@@ -65,24 +64,26 @@ public:
     ~MainWindow();
 
 private Q_SLOTS:
-    void onSlaveStateChanged(int state);
     void on_pushButton_clicked();
+    void onStateChanged(int state);
+
     void coilChanged(int id);
     void discreteInputChanged(int id);
     void bitChanged(int id, QModBusDevice::ModBusTable table, bool value);
+
     void setRegister(const QString &value);
     void updateWidgets(QModBusDevice::ModBusTable table, int address, int size);
 
 private:
-    void init();
-    void connectDevice(int pluginIndex);
-    void setLineEdits();
+    void setupDeviceData();
+    void setupWidgetContainers();
 
-    QList<QByteArray> plugins;
-    QPointer<QModBusSlave> modBusDevice;
     Ui::MainWindow *ui;
-    QPointer<QSerialPort> serialPort;
-    QList<QLineEdit*> registerFields;
+    QModBusSlave* modBusDevice;
+
+    QButtonGroup coilButtons;
+    QButtonGroup discreteButtons;
+    QHash<QString, QLineEdit*> registers;
 };
 
 #endif // MAINWINDOW_H

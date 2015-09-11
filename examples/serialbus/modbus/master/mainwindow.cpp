@@ -41,153 +41,130 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <QSerialPort>
-#include <QSerialPortInfo>
-
-#include <QtCore/qbytearray.h>
-#include <QtCore/qdebug.h>
+#include <QByteArray>
+#include <QModBus>
+#include <QModBusMaster>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , modBusDevice(Q_NULLPTR)
-    , serialPort(Q_NULLPTR)
     , lastRequest(Q_NULLPTR)
+    , modBusDevice(Q_NULLPTR)
 {
     ui->setupUi(this);
-    init();
+    ui->readTable->addItem(tr("Coils"), QModBusDevice::Coils);
+    ui->readTable->addItem(tr("Discrete Inputs"), QModBusDevice::DiscreteInputs);
+    ui->readTable->addItem(tr("Input Registers"), QModBusDevice::InputRegisters);
+    ui->readTable->addItem(tr("Holding Registers"), QModBusDevice::HoldingRegisters);
+    on_writeTable_currentIndexChanged(ui->writeTable->currentText());
+
+    modBusDevice = QModBus::instance()->createMaster("libmodbus");
+    if (!modBusDevice) {
+        ui->pushButton->setDisabled(true);
+        ui->errorLabel->setText(tr("Could not create modbus master."));
+    } else {
+        connect(modBusDevice, &QModBusMaster::stateChanged, this, &MainWindow::onStateChanged);
+    }
 }
 
 MainWindow::~MainWindow()
 {
-    if (!modBusDevice.isNull())
+    if (modBusDevice)
         modBusDevice->disconnectDevice();
+    delete modBusDevice;
+
     delete ui;
-}
-
-void MainWindow::init()
-{
-    ui->writeAddress->setInputMask(QStringLiteral("9"));
-    on_writeTable_currentIndexChanged(ui->writeTable->currentText());
-
-    QPointer<QModBus> modBus = QModBus::instance();
-
-    plugins = modBus->plugins();
-    for (int i = 0; i < plugins.size(); i++)
-        ui->pluginBox->insertItem(i, QString::fromLatin1(plugins.at(i)));
-    ui->pluginBox->setCurrentText(QStringLiteral("libmodbus"));
-}
-
-void MainWindow::connectDevice(int pluginIndex)
-{
-    QPointer<QModBus> modBus = QModBus::instance();
-
-    if (!serialPort.isNull())
-        serialPort.clear();
-    if (!modBusDevice.isNull())
-        modBusDevice.clear();
-
-    serialPort = new QSerialPort(ui->portEdit->text());
-    modBusDevice = modBus->createMaster(plugins.at(pluginIndex));
-
-    if (modBusDevice.isNull())
-        return;
-
-    modBusDevice->setDevice(serialPort, QModBusDevice::RemoteTerminalUnit);
-    modBusDevice->setPortName(ui->portEdit->text());
-
-    connect(modBusDevice.data(), &QModBusMaster::stateChanged, this, &MainWindow::onMasterStateChanged);
-
-    if (!modBusDevice->connectDevice()) {
-        qWarning() << tr("Connect failed: ") << modBusDevice->errorString();
-        return;
-    }
-}
-
-void MainWindow::onMasterStateChanged(int state)
-{
-    if (state == QModBusDevice::UnconnectedState) {
-        ui->pushButton->setText(tr("Connect"));
-        ui->connectedLabel->setText(tr("Connected to: "));
-    } else if (state == QModBusDevice::ConnectedState) {
-        ui->pushButton->setText(tr("Disconnect"));
-        ui->connectedLabel->setText(tr("Connected to: ") + serialPort->portName());
-    }
 }
 
 void MainWindow::on_pushButton_clicked()
 {
-    if (modBusDevice && modBusDevice->state() == QModBusDevice::ConnectedState) {
-        modBusDevice->disconnectDevice();
-        modBusDevice.clear();
+    if (!modBusDevice)
+        return;
+
+    ui->errorLabel->setText(QString());
+    if (modBusDevice->state() != QModBusDevice::ConnectedState) {
+        modBusDevice->setPortName(ui->portEdit->text());
+        if (!modBusDevice->connectDevice())
+            ui->errorLabel->setText(tr("Connect failed: ") + modBusDevice->errorString());
     } else {
-        connectDevice(ui->pluginBox->currentIndex());
+        modBusDevice->disconnectDevice();
     }
+}
+
+void MainWindow::onStateChanged(int state)
+{
+    if (state == QModBusDevice::UnconnectedState)
+        ui->pushButton->setText(tr("Connect"));
+    else if (state == QModBusDevice::ConnectedState)
+        ui->pushButton->setText(tr("Disconnect"));
 }
 
 void MainWindow::on_readButton_clicked()
 {
-    lastRequest.clear();
-    QList<QModBusDataUnit> units;
-    QModBusDevice::ModBusTable table;
-    if (ui->readTable->currentText() == tr("Discrete Inputs"))
-        table = QModBusDevice::DiscreteInputs;
-    else if (ui->readTable->currentText() == tr("Coils"))
-        table = QModBusDevice::Coils;
-    else if (ui->readTable->currentText() == tr("Input Registers"))
-        table = QModBusDevice::InputRegisters;
-    else if (ui->readTable->currentText() == tr("Holding Registers"))
-        table = QModBusDevice::HoldingRegisters;
-    else
+    delete lastRequest;
+    if (!modBusDevice || modBusDevice->state() != QModBusDevice::ConnectedState)
         return;
 
-    for (int i = 0; i < ui->readSize->currentText().toInt(); i++)
+    QList<QModBusDataUnit> units;
+    const QModBusDevice::ModBusTable table =
+        static_cast<QModBusDevice::ModBusTable> (ui->readTable->currentData().toInt());
+    for (int i = 0; i < ui->readSize->currentText().toInt(); ++i)
         units.append(QModBusDataUnit(table, ui->readAddress->text().toInt() + i));
 
+    ui->readValue->clear();
     lastRequest = modBusDevice->read(units, ui->readSlave->text().toInt());
-    connect(lastRequest.data(), &QModBusReply::finished, this, &MainWindow::readReady);
+    if (lastRequest)
+        connect(lastRequest, &QModBusReply::finished, this, &MainWindow::readReady);
+    else
+        ui->errorLabel->setText(tr("Read error: ") + modBusDevice->errorString());
 }
 
 void MainWindow::readReady()
 {
-    QList<QModBusDataUnit> units = lastRequest->result();
+    const QList<QModBusDataUnit> units = lastRequest->result();
     for (int i = 0; i < units.size(); i++) {
         const QString entry = tr("Address: ") + QString::number(units.at(i).address())
-            + tr(" Value: ") + QString::number(units.at(i).value());
+            + tr(" Value: ") + QString::number(units.at(i).value(),
+                units.at(i).tableType() <= QModBusDevice::Coils ? 10 : 16);
         ui->readValue->addItem(entry);
     }
-    lastRequest.clear();
+    lastRequest->deleteLater();
+    lastRequest = Q_NULLPTR;
 }
 
 void MainWindow::on_writeButton_clicked()
 {
-    lastRequest.clear();
+    delete lastRequest;
+    if (!modBusDevice || modBusDevice->state() != QModBusDevice::ConnectedState)
+        return;
 
-    QModBusDevice::ModBusTable table;
+    QModBusDevice::ModBusTable table = QModBusDevice::HoldingRegisters;
     if (ui->writeTable->currentText() == tr("Coils"))
         table = QModBusDevice::Coils;
+
+    lastRequest = modBusDevice->write(QModBusDataUnit(table, ui->writeAddress->text().toInt(),
+        ui->writeValue->text().toInt(0, 16)), ui->readSlave->text().toInt());
+    if (lastRequest)
+        connect(lastRequest, &QModBusReply::finished, this, &MainWindow::writeReady);
     else
-        table = QModBusDevice::HoldingRegisters;
-
-    const QModBusDataUnit unit(table, ui->writeAddress->text().toInt(), ui->writeValue->text()
-        .toInt(0,16));
-    lastRequest = modBusDevice->write(unit, ui->readSlave->text().toInt());
-    if (lastRequest.isNull())
-        qWarning() << modBusDevice->errorString();
-
-    connect(lastRequest.data(), &QModBusReply::finished, this, &MainWindow::writeReady);
+        ui->errorLabel->setText(tr("Write error: ") + modBusDevice->errorString());
 }
 
 void MainWindow::writeReady()
 {
-    lastRequest.clear();
+    lastRequest->deleteLater();
+    lastRequest = Q_NULLPTR;
 }
 
 void MainWindow::on_writeTable_currentIndexChanged(const QString &text)
 {
+    ui->writeValue->clear();
     if (text == tr("Coils")) {
-        ui->writeValue->setInputMask(QStringLiteral("B"));
+        ui->writeValue->setValidator(new QIntValidator(0, 1, this));
+        ui->writeValue->setPlaceholderText(tr("Binary 0-1."));
     } else if (text == tr("Holding Registers")) {
-        ui->writeValue->setInputMask(QStringLiteral("HHHH"));
+        ui->writeValue->setValidator(new QRegExpValidator(QRegExp(QStringLiteral("[0-9a-f]{0,4}"),
+            Qt::CaseInsensitive), this));
+        ui->writeValue->setPlaceholderText(tr("Hexadecimal A-F, a-f, 0-9."));
     }
 }

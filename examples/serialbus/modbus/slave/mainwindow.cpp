@@ -41,147 +41,122 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <QDebug>
-#include <QByteArray>
-#include <QtSerialBus>
-#include <QSerialPort>
-#include <QSerialPortInfo>
+#include <QModBus>
+#include <QRegularExpression>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , modBusDevice(Q_NULLPTR)
-    , serialPort(Q_NULLPTR)
 {
     ui->setupUi(this);
-    init();
+    setupWidgetContainers();
+
+    modBusDevice = QModBus::instance()->createSlave("libmodbus");
+    if (modBusDevice) {
+        modBusDevice->setMap(QModBusDevice::Coils, 10);
+        modBusDevice->setMap(QModBusDevice::DiscreteInputs, 10);
+        modBusDevice->setMap(QModBusDevice::InputRegisters, 10);
+        modBusDevice->setMap(QModBusDevice::HoldingRegisters, 10);
+
+        connect(modBusDevice, &QModBusSlave::slaveWritten, this, &MainWindow::updateWidgets);
+        connect(modBusDevice, &QModBusSlave::stateChanged, this, &MainWindow::onStateChanged);
+    } else {
+        ui->pushButton->setDisabled(true);
+        ui->errorLabel->setText(tr("Could not create modbus slave."));
+    }
 }
 
 MainWindow::~MainWindow()
 {
-    if (!modBusDevice.isNull())
+    if (modBusDevice)
         modBusDevice->disconnectDevice();
+    delete modBusDevice;
+
     delete ui;
 }
 
-void MainWindow::discreteInputChanged(int id)
-{
-    QAbstractButton *button = ui->discreteButtons->button(id);
-    bitChanged(id, QModBusDevice::DiscreteInputs, button->isChecked());
-}
-
-void MainWindow::coilChanged(int id)
-{
-    QAbstractButton *button = ui->coilButtons->button(id);
-    bitChanged(id, QModBusDevice::Coils, button->isChecked());
-}
-
-void MainWindow::bitChanged(int id, QModBusDevice::ModBusTable table, bool value)
+void MainWindow::on_pushButton_clicked()
 {
     if (!modBusDevice)
         return;
 
-    int mapId = qAbs(id) - 2; //default button group id goes from -2 to downwards
-
-    if (!modBusDevice->setData(table, mapId, value))
-        qWarning() << modBusDevice->errorString();
+    ui->errorLabel->setText(QString());
+    if (modBusDevice->state() != QModBusDevice::ConnectedState) {
+        modBusDevice->setPortName(ui->portEdit->text());
+        modBusDevice->setSlaveId(ui->slaveEdit->text().toInt());
+        if (modBusDevice->connectDevice()) {
+            setupDeviceData();
+        } else {
+            ui->errorLabel->setText(tr("Connect failed: ") + modBusDevice->errorString());
+        }
+    } else {
+        modBusDevice->disconnectDevice();
+    }
 }
 
-void MainWindow::init()
+void MainWindow::onStateChanged(int state)
 {
-    setLineEdits();
-    connect(ui->discreteButtons, SIGNAL(buttonClicked(int)), this, SLOT(discreteInputChanged(int)));
-    connect(ui->coilButtons, SIGNAL(buttonClicked(int)), this, SLOT(coilChanged(int)));
-
-    QPointer<QModBus> modBus = QModBus::instance();
-
-    plugins = modBus->plugins();
-    for (int i = 0; i < plugins.size(); i++)
-        ui->pluginBox->insertItem(i, QString::fromLatin1(plugins.at(i)));
-    ui->pluginBox->setCurrentText(QStringLiteral("libmodbus"));
+    if (state == QModBusDevice::UnconnectedState)
+        ui->pushButton->setText(tr("Connect"));
+    else if (state == QModBusDevice::ConnectedState)
+        ui->pushButton->setText(tr("Disconnect"));
 }
 
-void MainWindow::connectDevice(int pluginIndex)
+void MainWindow::coilChanged(int id)
 {
-    QPointer<QModBus> modBus = QModBus::instance();
+    QAbstractButton *button = coilButtons.button(id);
+    bitChanged(id, QModBusDevice::Coils, button->isChecked());
+}
 
-    if (!serialPort.isNull())
-        serialPort.clear();
-    if (!modBusDevice.isNull())
-        modBusDevice.clear();
+void MainWindow::discreteInputChanged(int id)
+{
+    QAbstractButton *button = discreteButtons.button(id);
+    bitChanged(id, QModBusDevice::DiscreteInputs, button->isChecked());
+}
 
-    serialPort = new QSerialPort(ui->portEdit->text());
-    modBusDevice = modBus->createSlave(plugins.at(pluginIndex));
-
-    if (modBusDevice.isNull())
+void MainWindow::bitChanged(int id, QModBusDevice::ModBusTable table, bool value)
+{
+    if (!modBusDevice || modBusDevice->state() != QModBusDevice::ConnectedState)
         return;
 
-    modBusDevice->setDevice(serialPort, QModBusDevice::RemoteTerminalUnit);
-    modBusDevice->setPortName(ui->portEdit->text());
+    if (!modBusDevice->setData(table, id, value))
+        ui->errorLabel->setText(tr("Could not set data: ") + modBusDevice->errorString());
+}
 
-    if (!modBusDevice->setMap(QModBusDevice::DiscreteInputs, 10))
-        return;
-    if (!modBusDevice->setMap(QModBusDevice::Coils, 10))
-        return;
-    if (!modBusDevice->setMap(QModBusDevice::InputRegisters, 10))
-        return;
-    if (!modBusDevice->setMap(QModBusDevice::HoldingRegisters, 10))
+void MainWindow::setRegister(const QString &value)
+{
+    if (!modBusDevice || modBusDevice->state() != QModBusDevice::ConnectedState)
         return;
 
-    connect(modBusDevice.data(), &QModBusSlave::stateChanged, this, &MainWindow::onSlaveStateChanged);
+    const QString objectName = QObject::sender()->objectName();
+    if (registers.contains(objectName)) {
+        bool ok = true;
+        const int id = QObject::sender()->property("ID").toInt();
+        if (objectName.startsWith(QStringLiteral("inReg")))
+            ok = modBusDevice->setData(QModBusDevice::InputRegisters, id, value.toInt(&ok, 16));
+        else if (objectName.startsWith(QStringLiteral("holdReg")))
+            ok = modBusDevice->setData(QModBusDevice::HoldingRegisters, id, value.toInt(&ok, 16));
 
-    if (!modBusDevice->connectDevice()) {
-        qWarning() << tr("Connect failed: ") << modBusDevice->errorString();
-        return;
+        if (!ok)
+            ui->errorLabel->setText(tr("Could not set register: ") + modBusDevice->errorString());
     }
-
-    modBusDevice->setSlaveId(ui->slaveEdit->text().toInt());
-
-     //default button group id goes from -2 to downwards
-    for (int i = -2; i > (-2 - ui->discreteButtons->buttons().size()); i--) {
-        modBusDevice->setData(QModBusDevice::DiscreteInputs, qAbs(i) - 2,
-            ui->discreteButtons->button(i)->isChecked());
-    }
-
-
-    for (int i = -2; i > (-2 - ui->coilButtons->buttons().size()); i--) {
-        modBusDevice->setData(QModBusDevice::Coils, qAbs(i) - 2,
-            ui->coilButtons->button(i)->isChecked());
-    }
-
-    bool ok;
-    for (int i = 0; i < 10; i++) {
-        if (!registerFields.at(i)->text().isEmpty()) {
-            modBusDevice->setData(QModBusDevice::InputRegisters, i,
-                registerFields.at(i)->text().toInt(&ok, 16));
-        }
-    }
-
-    for (int i = 10; i < 20; i++) {
-        if (!registerFields.at(i)->text().isEmpty()) {
-            modBusDevice->setData(QModBusDevice::HoldingRegisters, (i - 10),
-                registerFields.at(i)->text().toInt(&ok, 16));
-        }
-    }
-
-    connect(modBusDevice.data(), &QModBusSlave::slaveWritten, this, &MainWindow::updateWidgets);
 }
 
 void MainWindow::updateWidgets(QModBusDevice::ModBusTable table, int address, int size)
 {
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < size; ++i) {
         quint16 value;
         QString text;
         switch (table) {
         case QModBusDevice::Coils:
             modBusDevice->data(QModBusDevice::Coils, address + i, &value);
-             //default button group id goes from -2 to downwards
-            ui->coilButtons->button(-2 - address - i)->setChecked(value);
+            coilButtons.button(address + i)->setChecked(value);
             break;
         case QModBusDevice::HoldingRegisters:
             modBusDevice->data(QModBusDevice::HoldingRegisters, address + i, &value);
-            text.setNum(value, 16);
-            registerFields.at(10 + address + i)->setText(text);
+            registers.value(QStringLiteral("holdReg_%1").arg(address + i))->setText(text
+                .setNum(value, 16));
             break;
         default:
             break;
@@ -189,69 +164,57 @@ void MainWindow::updateWidgets(QModBusDevice::ModBusTable table, int address, in
     }
 }
 
-void MainWindow::onSlaveStateChanged(int state)
-{
-    if (state == QModBusDevice::UnconnectedState) {
-        ui->pushButton->setText(tr("Connect"));
-        ui->connectedLabel->setText(tr("Connected to: "));
-    } else if (state == QModBusDevice::ConnectedState) {
-        ui->pushButton->setText(tr("Disconnect"));
-        ui->connectedLabel->setText(tr("Connected to: ") + serialPort->portName());
-    }
-}
+// -- private
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::setupDeviceData()
 {
-    if (modBusDevice && modBusDevice->state() == QModBusDevice::ConnectedState) {
-        modBusDevice->disconnectDevice();
-        modBusDevice.clear();
-    } else {
-        connectDevice(ui->pluginBox->currentIndex());
-    }
-}
-
-void MainWindow::setLineEdits()
-{
-    registerFields.append(ui->lineEdit);
-    registerFields.append(ui->lineEdit_2);
-    registerFields.append(ui->lineEdit_3);
-    registerFields.append(ui->lineEdit_4);
-    registerFields.append(ui->lineEdit_5);
-    registerFields.append(ui->lineEdit_6);
-    registerFields.append(ui->lineEdit_7);
-    registerFields.append(ui->lineEdit_8);
-    registerFields.append(ui->lineEdit_9);
-    registerFields.append(ui->lineEdit_10);
-    registerFields.append(ui->lineEdit_11);
-    registerFields.append(ui->lineEdit_12);
-    registerFields.append(ui->lineEdit_13);
-    registerFields.append(ui->lineEdit_14);
-    registerFields.append(ui->lineEdit_15);
-    registerFields.append(ui->lineEdit_16);
-    registerFields.append(ui->lineEdit_17);
-    registerFields.append(ui->lineEdit_18);
-    registerFields.append(ui->lineEdit_19);
-    registerFields.append(ui->lineEdit_20);
-
-    for (int i = 0; i < registerFields.size(); i++) {
-        registerFields.at(i)->setProperty("id", i);
-        connect(registerFields.at(i), &QLineEdit::textChanged, this, &MainWindow::setRegister);
-    }
-}
-
-void MainWindow::setRegister(const QString &value)
-{
-    bool ok;
-    int hex = value.toInt(&ok, 16);
-    if (!modBusDevice || !ok)
+    if (!modBusDevice || modBusDevice->state() != QModBusDevice::ConnectedState)
         return;
 
-    int id = QObject::sender()->property("id").toInt();
-    if (id < 10) {
-        if (!modBusDevice->setData(QModBusDevice::InputRegisters, id, hex))
-            qWarning() << modBusDevice->errorString();
-    } else {
-        if (!modBusDevice->setData(QModBusDevice::HoldingRegisters, (id - 10), hex))
-            qWarning() << modBusDevice->errorString();
+    for (int i = 0; i < coilButtons.buttons().count(); ++i)
+        modBusDevice->setData(QModBusDevice::Coils, i, coilButtons.button(i)->isChecked());
+
+    for (int i = 0; i < discreteButtons.buttons().count(); ++i) {
+        modBusDevice->setData(QModBusDevice::DiscreteInputs, i,
+            discreteButtons.button(i)->isChecked());
+    }
+
+    bool ok;
+    foreach (QLineEdit *widget, registers) {
+        if (widget->objectName().startsWith(QStringLiteral("inReg"))) {
+            modBusDevice->setData(QModBusDevice::InputRegisters, widget->property("ID").toInt(),
+                widget->text().toInt(&ok, 16));
+        } else if (widget->objectName().startsWith(QStringLiteral("holdReg"))) {
+            modBusDevice->setData(QModBusDevice::HoldingRegisters, widget->property("ID").toInt(),
+                widget->text().toInt(&ok, 16));
+        }
+    }
+}
+
+void MainWindow::setupWidgetContainers()
+{
+    coilButtons.setExclusive(false);
+    discreteButtons.setExclusive(false);
+
+    QRegularExpression regexp(QStringLiteral("coils_(?<ID>\\d+)"));
+    const QList<QCheckBox*> coils = findChildren<QCheckBox*>(regexp);
+    foreach (QCheckBox *cbx, coils)
+        coilButtons.addButton(cbx, regexp.match(cbx->objectName()).captured("ID").toInt());
+    connect(&coilButtons, SIGNAL(buttonClicked(int)), this, SLOT(coilChanged(int)));
+
+    regexp.setPattern(QStringLiteral("discs_(?<ID>\\d+)"));
+    const QList<QCheckBox*> discs = findChildren<QCheckBox*>(regexp);
+    foreach (QCheckBox *cbx, discs)
+        discreteButtons.addButton(cbx, regexp.match(cbx->objectName()).captured("ID").toInt());
+    connect(&discreteButtons, SIGNAL(buttonClicked(int)), this, SLOT(discreteInputChanged(int)));
+
+    regexp.setPattern(QLatin1String("(in|hold)Reg_(?<ID>\\d+)"));
+    const QList<QLineEdit*> qle = findChildren<QLineEdit*>(regexp);
+    foreach (QLineEdit *lineEdit, qle) {
+        registers.insert(lineEdit->objectName(), lineEdit);
+        lineEdit->setProperty("ID", regexp.match(lineEdit->objectName()).captured("ID").toInt());
+        lineEdit->setValidator(new QRegExpValidator(QRegExp(QStringLiteral("[0-9a-f]{0,4}"),
+            Qt::CaseInsensitive), this));
+        connect(lineEdit, &QLineEdit::textChanged, this, &MainWindow::setRegister);
     }
 }
