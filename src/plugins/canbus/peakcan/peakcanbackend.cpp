@@ -365,10 +365,6 @@ bool PeakCanBackendPrivate::enableReadNotification()
             return false;
         }
     }
-#else
-    // do not call the PCAN_RECEIVE_EVENT property multiple times
-    if (incomingEventHandle != -1)
-        return true;
 #endif
 
     if (TPCANStatus st = ::CAN_SetValue(channelIndex, PCAN_RECEIVE_EVENT, &incomingEventHandle, sizeof(incomingEventHandle))
@@ -413,9 +409,6 @@ void PeakCanBackendPrivate::canReadNotification()
 
         newFrames.append(frame);
     }
-
-    // re-trigger the read event
-    enableReadNotification();
 
     q->enqueueReceivedFrames(newFrames);
 }
