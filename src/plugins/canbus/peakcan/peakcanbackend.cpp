@@ -210,7 +210,7 @@ bool PeakCanBackendPrivate::open()
         return false;
     }
 
-    if (!enableReadNotification()) {
+    if (!acquireReadNotification()) {
         if (TPCANStatus st = ::CAN_Uninitialize(channelIndex) != PCAN_ERROR_OK)
             q->setError(systemErrorString(st), QCanBusDevice::ConnectionError);
         return false;
@@ -225,7 +225,7 @@ void PeakCanBackendPrivate::close()
     Q_Q(PeakCanBackend);
 
     enableWriteNotification(false);
-    disableReadNotification();
+    releaseReadNotification();
 
     if (outgoingEventNotifier) {
         delete outgoingEventNotifier;
@@ -345,7 +345,7 @@ void PeakCanBackendPrivate::canWriteNotification()
         enableWriteNotification(true);
 }
 
-bool PeakCanBackendPrivate::enableReadNotification()
+bool PeakCanBackendPrivate::acquireReadNotification()
 {
     Q_Q(PeakCanBackend);
 
@@ -373,7 +373,7 @@ bool PeakCanBackendPrivate::enableReadNotification()
     return true;
 }
 
-void PeakCanBackendPrivate::disableReadNotification()
+void PeakCanBackendPrivate::releaseReadNotification()
 {
     Q_Q(PeakCanBackend);
 

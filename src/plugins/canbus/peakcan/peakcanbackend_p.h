@@ -77,8 +77,8 @@ public:
     QString systemErrorString(int errorCode);
     void enableWriteNotification(bool enable);
     void canWriteNotification();
-    bool enableReadNotification();
-    void disableReadNotification();
+    bool acquireReadNotification();
+    void releaseReadNotification();
     void canReadNotification();
     bool verifyBitRate(int bitrate);
 
