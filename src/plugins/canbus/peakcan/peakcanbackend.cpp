@@ -457,7 +457,11 @@ PeakCanBackend::PeakCanBackend(const QString &name, QObject *parent)
 
 PeakCanBackend::~PeakCanBackend()
 {
-    close();
+    Q_D(PeakCanBackend);
+
+    if (d->isOpen)
+        close();
+
     delete d_ptr;
 }
 
