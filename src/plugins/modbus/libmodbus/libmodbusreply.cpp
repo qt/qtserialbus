@@ -216,14 +216,21 @@ void Reply::setError(QModBusReply::RequestError errorCode, const QString &errorS
 
 void Reply::setResults(QByteArray load)
 {
-    if (table == QModBusDevice::InputRegisters || table == QModBusDevice::HoldingRegisters) {
-        for (int i = 0; i < load.size(); i = i + 2) {
-            quint16 result = (load.at(i) << 8) | load.at(i + 1);
-            values.append(result);
-        }
-    } else { //Coils and Discrete Inputs
+    switch (table) {
+    case QModBusDevice::Coils:
+    case QModBusDevice::DiscreteInputs:
         for (int i = 0; i < load.size(); i++)
             values.append(load.at(i));
+        break;
+
+    case QModBusDevice::InputRegisters:
+    case QModBusDevice::HoldingRegisters:
+        for (int i = 0; i < load.size(); i = i + 2)
+            values.append((load.at(i) << 8) | load.at(i + 1));
+        break;
+
+    default:
+        break;
     }
     setFinished();
 }
