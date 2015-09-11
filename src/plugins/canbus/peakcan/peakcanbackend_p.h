@@ -86,13 +86,13 @@ public:
 
     bool isOpen;
     int channelIndex;
-    QPointer<QTimer> outgoingEventNotifier;
+    QTimer *outgoingEventNotifier;
 
 #if defined(Q_OS_WIN32)
-    QPointer<QWinEventNotifier> incomingEventNotifier;
+    QWinEventNotifier *incomingEventNotifier;
     HANDLE incomingEventHandle;
 #else
-    QPointer<QSocketNotifier> incomingEventNotifier;
+    QSocketNotifier *incomingEventNotifier;
     int incomingEventHandle;
 #endif
 };

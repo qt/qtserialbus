@@ -148,6 +148,8 @@ PeakCanBackendPrivate::PeakCanBackendPrivate(PeakCanBackend *q)
     : q_ptr(q)
     , isOpen(false)
     , channelIndex(PCAN_NONEBUS)
+    , outgoingEventNotifier(Q_NULLPTR)
+    , incomingEventNotifier(Q_NULLPTR)
 #if defined(Q_OS_WIN32)
     , incomingEventHandle(INVALID_HANDLE_VALUE)
 #else

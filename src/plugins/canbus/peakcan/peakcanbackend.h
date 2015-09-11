@@ -41,7 +41,6 @@
 #include <QtSerialBus/qcanbusframe.h>
 #include <QtSerialBus/qcanbusdevice.h>
 
-#include <QtCore/qpointer.h>
 #include <QtCore/qvariant.h>
 #include <QtCore/qvector.h>
 #include <QtCore/qlist.h>
