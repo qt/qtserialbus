@@ -150,10 +150,10 @@ Reply::~Reply()
 void Reply::read(const QList<QModBusDataUnit> &requests, int slaveId, modbus_t *context)
 {
     request = new RequestThread();
-    request->table = requests.first().tableType();
-    this->table = requests.first().tableType();
-    request->startAddress = requests.first().address();
-    this->startAddress = requests.first().address();
+    request->table = requests.first().registerType();
+    this->table = request->table;
+    request->startAddress = requests.first().startAddress();
+    this->startAddress = requests.first().startAddress();
     request->size = requests.size();
     request->slaveId = slaveId;
     request->context = context;
@@ -170,12 +170,12 @@ void Reply::write(const QList<QModBusDataUnit> &requests, int slaveId, modbus_t 
 {
     request = new RequestThread();
     for (int i = 0; i < requests.size(); i++)
-        values.append(requests.at(i).value());
+        values.append(requests.at(i).values().at(0));
     request->values = values;
-    table = requests.first().tableType();
-    request->table = requests.first().tableType();
-    startAddress = requests.first().address();
-    request->startAddress = requests.first().address();
+    table = requests.first().registerType();
+    request->table = table;
+    startAddress = requests.first().startAddress();
+    request->startAddress = requests.first().startAddress();
     request->slaveId = slaveId;
     request->context = context;
     request->moveToThread(&thread);

@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2015 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
@@ -37,34 +37,69 @@
 #ifndef QMODBUSDATAUNIT_H
 #define QMODBUSDATAUNIT_H
 
-#include <QtSerialBus/qserialbusglobal.h>
 #include <QtSerialBus/qmodbusdevice.h>
 #include <QtSerialBus/qmodbusdataunit.h>
 
-#include <QtCore/qobject.h>
+#include <QtCore/qvector.h>
 
 QT_BEGIN_NAMESPACE
 
 class QModBusDataUnit
 {
 public:
-    explicit QModBusDataUnit(QModBusDevice::ModBusTable table,
-               int dataAddress = 0, quint16 initValue = 0) :
-        mapping(table),
-        location(dataAddress),
-        dataValue(initValue) {}
-    void setTableType(QModBusDevice::ModBusTable table) {mapping = table;}
-    inline void setAddress(int newAddress) {location = newAddress;}
-    inline void setValue(quint16 newValue) {dataValue = newValue;}
-    QModBusDevice::ModBusTable tableType() const {return mapping;}
-    inline int address() const {return location;}
-    inline quint16 value() const {return dataValue;}
+    QModBusDataUnit(QModBusDevice::ModBusTable regType,
+                             int dataAddress, quint16 initValue)
+        : rType(regType),
+          sAddress(dataAddress),
+          dataRange(1)
+    {
+        dataValue.fill(initValue, 1);
+    }
+
+    QModBusDataUnit(QModBusDevice::ModBusTable regType,
+                             int newStartAddress, const QVector<quint16> &data)
+        : rType(regType),
+          sAddress(newStartAddress),
+          dataValue(data),
+          dataRange(data.size())
+    {
+
+    }
+
+    explicit QModBusDataUnit(QModBusDevice::ModBusTable regType)
+        : rType(regType),
+          sAddress(0),
+          dataRange(0)
+    {
+    }
+
+    QModBusDevice::ModBusTable registerType() const { return rType; }
+    void setRegisterType(QModBusDevice::ModBusTable newRegisterType)
+    {
+        rType = newRegisterType;
+    }
+
+    inline int startAddress() const { return sAddress; }
+    inline void setStartAddress(int newAddress) { sAddress = newAddress; }
+
+    inline QVector<quint16> values() const { return dataValue; }
+    inline void setValues(const QVector<quint16> &newValue)
+    {
+        dataValue = newValue;
+        dataRange = newValue.size();
+    }
+
+    inline int valueCount() const { return dataRange; }
+    inline void setValueCount(int newCount) { dataRange = newCount; }
 
 private:
-    QModBusDevice::ModBusTable mapping;
-    int location;
-    quint16 dataValue;
+    QModBusDevice::ModBusTable rType;
+    int sAddress;
+    QVector<quint16> dataValue;
+    int dataRange;
 };
+
+Q_DECLARE_TYPEINFO(QModBusDataUnit, Q_MOVABLE_TYPE);
 
 QT_END_NAMESPACE
 #endif // QMODBUSDATAUNIT_H

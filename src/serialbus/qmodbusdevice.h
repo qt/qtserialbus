@@ -60,7 +60,7 @@ public:
     };
     Q_ENUM(ApplicationDataUnit)
 
-    enum ModBusTable {
+    enum ModBusTable { // TODO rename ModBusRegisterType
         DiscreteInputs,
         Coils,
         InputRegisters,

@@ -109,7 +109,7 @@ void MainWindow::on_readButton_clicked()
     const QModBusDevice::ModBusTable table =
         static_cast<QModBusDevice::ModBusTable> (ui->readTable->currentData().toInt());
     for (int i = 0; i < ui->readSize->currentText().toInt(); ++i)
-        units.append(QModBusDataUnit(table, ui->readAddress->text().toInt() + i));
+        units.append(QModBusDataUnit(table, ui->readAddress->text().toInt() + i, 0));
 
     ui->readValue->clear();
     lastRequest = modBusDevice->read(units, ui->readSlave->text().toInt());
@@ -123,9 +123,9 @@ void MainWindow::readReady()
 {
     const QList<QModBusDataUnit> units = lastRequest->result();
     for (int i = 0; i < units.size(); i++) {
-        const QString entry = tr("Address: ") + QString::number(units.at(i).address())
-            + tr(" Value: ") + QString::number(units.at(i).value(),
-                units.at(i).tableType() <= QModBusDevice::Coils ? 10 : 16);
+        const QString entry = tr("Address: ") + QString::number(units.at(i).startAddress())
+            + tr(" Value: ") + QString::number(units.at(i).values().at(0),
+                units.at(i).registerType() <= QModBusDevice::Coils ? 10 : 16);
         ui->readValue->addItem(entry);
     }
     lastRequest->deleteLater();

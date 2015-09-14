@@ -71,7 +71,7 @@ QModBusReply* LibModBusMaster::write(const QList<QModBusDataUnit> &requests, int
         return 0;
     }
 
-    const QModBusDevice::ModBusTable writeTable(requests.first().tableType());
+    const QModBusDevice::ModBusTable writeTable(requests.first().registerType());
 
     if (writeTable != QModBusDevice::Coils
         && writeTable != QModBusDevice::HoldingRegisters) {
@@ -79,17 +79,17 @@ QModBusReply* LibModBusMaster::write(const QList<QModBusDataUnit> &requests, int
         return 0;
     }
 
-    int address = requests.first().address();
+    int address = requests.first().startAddress();
 
     for (int i = 1; i < requests.size(); i++) {
         address++;
-        if (requests.at(i).tableType() != writeTable) {
+        if (requests.at(i).registerType() != writeTable) {
             setError(tr("Data units in write request must be from same table."),
                      QModBusDevice::WriteError);
             return 0;
         }
 
-        if (requests.at(i).address() != writeTable) {
+        if (requests.at(i).startAddress() != writeTable) {
             setError(tr("Data units in write request must be adjacent to each other."),
                      QModBusDevice::WriteError);
             return 0;
@@ -114,17 +114,17 @@ QModBusReply* LibModBusMaster::read(QList<QModBusDataUnit> &requests, int slaveI
         return 0;
     }
 
-    const QModBusDevice::ModBusTable readTable(requests.first().tableType());
-    int address = requests.first().address();
+    const QModBusDevice::ModBusTable readTable(requests.first().registerType());
+    int address = requests.first().startAddress();
 
     for (int i = 1; i < requests.size(); i++) {
         address++;
-        if (requests.at(i).tableType() != readTable) {
+        if (requests.at(i).registerType() != readTable) {
             setError(tr("Data units in write request must be from same table."),
                      QModBusDevice::ReadError);
             return 0;
         }
-        if (requests.at(i).address() != address) {
+        if (requests.at(i).startAddress() != address) {
             setError(tr("Data units in read request must be adjacent to each other."),
                      QModBusDevice::ReadError);
             return 0;

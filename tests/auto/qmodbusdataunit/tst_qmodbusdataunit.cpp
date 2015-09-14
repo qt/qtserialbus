@@ -55,30 +55,59 @@ tst_QModBusDataUnit::tst_QModBusDataUnit()
 void tst_QModBusDataUnit::constructors()
 {
     QModBusDataUnit unit1(QModBusDevice::Coils);
+
+    QCOMPARE(unit1.registerType(), QModBusDevice::Coils);
+    QCOMPARE(unit1.startAddress(), 0);
+    QCOMPARE(unit1.valueCount(), 0);
+    QVERIFY(unit1.values().isEmpty());
+
     QModBusDataUnit unit2(QModBusDevice::HoldingRegisters, 3, 9);
+    QCOMPARE(unit2.registerType(), QModBusDevice::HoldingRegisters);
+    QCOMPARE(unit2.startAddress(), 3);
+    QCOMPARE(unit2.values().size(), 1);
+    QCOMPARE(unit2.values().at(0), (quint16) 9);
+    QCOMPARE(unit2.valueCount(), 1);
 
-    QCOMPARE(unit1.tableType(), QModBusDevice::Coils);
-    QCOMPARE(unit1.address(), 0);
-    quint16 value = 0;
-    QCOMPARE(unit1.value(), value);
+    QVector<quint16> data;
+    data.append(5);
+    data.append(6);
+    data.append(7);
 
-    QCOMPARE(unit2.tableType(), QModBusDevice::HoldingRegisters);
-    QCOMPARE(unit2.address(), 3);
-    value = 9;
-    QCOMPARE(unit2.value(), value);
+    QModBusDataUnit unit3(QModBusDevice::InputRegisters, 2, data);
+    QCOMPARE(unit3.registerType(), QModBusDevice::InputRegisters);
+    QCOMPARE(unit3.startAddress(), 2);
+    QCOMPARE(unit3.values().size(), 3);
+    QCOMPARE(unit3.values().at(0), (quint16) 5);
+    QCOMPARE(unit3.values().at(1), (quint16) 6);
+    QCOMPARE(unit3.values().at(2), (quint16) 7);
+    QCOMPARE(unit3.valueCount(), 3);
 }
 
 void tst_QModBusDataUnit::setters()
 {
     QModBusDataUnit unit(QModBusDevice::HoldingRegisters, 3, 9);
-    unit.setTableType(QModBusDevice::InputRegisters);
-    unit.setAddress(2);
-    unit.setValue(5);
+    QCOMPARE(unit.valueCount(), 1);
 
-    QCOMPARE(unit.tableType(), QModBusDevice::InputRegisters);
-    QCOMPARE(unit.address(), 2);
-    quint16 value = 5;
-    QCOMPARE(unit.value(), value);
+    unit.setRegisterType(QModBusDevice::InputRegisters);
+    unit.setStartAddress(2);
+    QVector<quint16> data;
+    data.append(9u);
+    data.append(5u);
+    unit.setValues(data);
+
+    QCOMPARE(unit.registerType(), QModBusDevice::InputRegisters);
+    QCOMPARE(unit.startAddress(), 2);
+    QCOMPARE(unit.valueCount(), 2);
+    QCOMPARE(unit.values().size(), 2);
+    QCOMPARE(unit.values().at(0), (quint16) 9);
+    QCOMPARE(unit.values().at(1), (quint16) 5);
+
+    //valueCount can be adjusted but values() stays the same
+    unit.setValueCount(1);
+    QCOMPARE(unit.valueCount(), 1);
+    QCOMPARE(unit.values().size(), 2);
+    QCOMPARE(unit.values().at(0), (quint16) 9);
+    QCOMPARE(unit.values().at(1), (quint16) 5);
 }
 
 QTEST_MAIN(tst_QModBusDataUnit)
