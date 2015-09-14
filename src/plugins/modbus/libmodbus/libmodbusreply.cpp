@@ -65,31 +65,21 @@ void RequestThread::write()
 void RequestThread::writeBits()
 {
     QByteArray bits(values.size(), Qt::Uninitialized);
-    for (int i = 0; i < values.size(); i++) {
-        if (values.at(i))
-            bits[i] = true;
-        else
-            bits[i] = false;
-    }
-    if (modbus_write_bits(context, startAddress, values.size(), (uint8_t*) bits.data()) == -1) {
-        emit error(errno);
-        return;
-    }
+    for (int i = 0; i < values.size(); i++)
+        bits[i] = (values.at(i) != 0);
 
-    emit writeReady();
+    if (modbus_write_bits(context, startAddress, values.size(), (uint8_t*) bits.data()) != -1)
+        emit writeReady();
+    else
+        emit error(errno);
 }
 
 void RequestThread::writeBytes()
 {
-    QVector<quint16> bytes(values.size());
-    for (int i = 0; i < values.size(); i++)
-        bytes[i] = values.at(i);
-    if (modbus_write_registers(context, startAddress, values.size(), bytes.data()) == -1) {
+    if (modbus_write_registers(context, startAddress, values.size(), values.data()) != -1)
+        emit writeReady();
+    else
         emit error(errno);
-        return;
-    }
-
-    emit writeReady();
 }
 
 void RequestThread::read()
@@ -113,45 +103,42 @@ void RequestThread::read()
 
 void RequestThread::readBits()
 {
-    QByteArray bits(size, 0);
-    if (table == QModBusDevice::DiscreteInputs) {
-        if (modbus_read_input_bits(context, startAddress, size, (uint8_t*) bits.data()) == -1) {
-            emit error(errno);
-            return;
-        }
+    int read = -1;
+    QVector<quint8> bits(size, 0);
+    if (table == QModBusDevice::DiscreteInputs)
+        read = modbus_read_input_bits(context, startAddress, size, bits.data());
+    else
+        read = modbus_read_bits(context, startAddress, size, bits.data());
+
+    if (read != -1) {
+        QVector<quint16> bitsRead;
+        foreach (quint8 bit, bits)
+            bitsRead << bit;
+        emit readReady(bitsRead);
     } else {
-        if (modbus_read_bits(context, startAddress, size, (uint8_t*) bits.data()) == -1) {
-            emit error(errno);
-            return;
-        }
+        emit error(errno);
     }
-    QByteArray bitsRead;
-    for (int i = 0; i < size; i++)
-        bitsRead[i] = bits[i];
-    emit readReady(bitsRead);
 }
 
 void RequestThread::readBytes()
 {
+    int read = -1;
     QVector<quint16> bytes(size, 0);
-    if (table == QModBusDevice::InputRegisters) {
-        if (modbus_read_input_registers(context, startAddress, size, bytes.data()) == -1) {
-            emit error(errno);
-            return;
-        }
-    } else { //Holding Register
-        if (modbus_read_registers(context, startAddress, size, bytes.data()) == -1) {
-            emit error(errno);
-            return;
-        }
-    }
+    if (table == QModBusDevice::InputRegisters)
+        read = modbus_read_input_registers(context, startAddress, size, bytes.data());
+    else
+        read = modbus_read_registers(context, startAddress, size, bytes.data());
 
-    QByteArray bytesRead;
-    QDataStream packer(&bytesRead, QIODevice::WriteOnly);
-    for (int i = 0; i < size; i++)
-        packer << bytes[i];
+    if (read != -1)
+        emit readReady(bytes);
+    else
+        emit error(errno);
+}
 
-    emit readReady(bytesRead);
+Reply::Reply(QObject *parent)
+    : QModBusReply(parent)
+{
+    qRegisterMetaType<QVector<quint16> >("QVector<quint16>");
 }
 
 void Reply::read(const QList<QModBusDataUnit> &requests, int slaveId, modbus_t *context)
@@ -214,24 +201,9 @@ void Reply::setError(QModBusReply::RequestError errorCode, const QString &errorS
     emit finished();
 }
 
-void Reply::setResults(QByteArray load)
+void Reply::setResults(const QVector<quint16> &payload)
 {
-    switch (table) {
-    case QModBusDevice::Coils:
-    case QModBusDevice::DiscreteInputs:
-        for (int i = 0; i < load.size(); i++)
-            values.append(load.at(i));
-        break;
-
-    case QModBusDevice::InputRegisters:
-    case QModBusDevice::HoldingRegisters:
-        for (int i = 0; i < load.size(); i = i + 2)
-            values.append((load.at(i) << 8) | load.at(i + 1));
-        break;
-
-    default:
-        break;
-    }
+    values = payload;
     setFinished();
 }
 

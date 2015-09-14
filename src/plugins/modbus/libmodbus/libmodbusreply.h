@@ -40,6 +40,7 @@
 #include <QtCore/qobject.h>
 #include <QtCore/qthread.h>
 #include <QtCore/qpointer.h>
+#include <QtCore/qvector.h>
 
 #include <QtSerialBus/qmodbusreply.h>
 #include <QtSerialBus/qmodbusmaster.h>
@@ -54,7 +55,7 @@ class RequestThread : public QObject
 public:
     QModBusDevice::ModBusTable table;
     quint16 startAddress;
-    QList<quint16> values;
+    QVector<quint16> values;
     quint16 size;
     int slaveId;
     modbus_t *context;
@@ -65,7 +66,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void error(int errorNumber);
-    void readReady(QByteArray);
+    void readReady(const QVector<quint16> &payload);
     void writeReady();
 
 private:
@@ -79,7 +80,7 @@ class Reply : public QModBusReply
 {
     Q_OBJECT
 public:
-    explicit Reply(QObject *parent = 0) : QModBusReply(parent) {}
+    explicit Reply(QObject *parent = 0);
     void read(const QList<QModBusDataUnit> &requests, int slaveId, modbus_t *context);
     void write(const QList<QModBusDataUnit> &requests, int slaveId, modbus_t *context);
 
@@ -93,14 +94,14 @@ Q_SIGNALS:
     void startWrite();
 
 private:
-    void setResults(QByteArray payload);
+    void setResults(const QVector<quint16> &payload);
     void handleError(int errorNumber);
 
     QModBusDevice::ModBusTable table;
     quint16 startAddress;
     QPointer<RequestThread> request;
     QThread thread;
-    QList<quint16> values;
+    QVector<quint16> values;
 };
 
 QT_END_NAMESPACE
