@@ -141,6 +141,12 @@ Reply::Reply(QObject *parent)
     qRegisterMetaType<QVector<quint16> >("QVector<quint16>");
 }
 
+Reply::~Reply()
+{
+    thread.quit();
+    thread.wait();
+}
+
 void Reply::read(const QList<QModBusDataUnit> &requests, int slaveId, modbus_t *context)
 {
     request = new RequestThread();
