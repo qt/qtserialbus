@@ -83,7 +83,7 @@ public:
     explicit Reply(QObject *parent = 0);
     ~Reply();
 
-    void read(const QList<QModBusDataUnit> &requests, int slaveId, modbus_t *context);
+    void read(const QModBusDataUnit &requests, int slaveId, modbus_t *context);
     void write(const QModBusDataUnit &requests, int slaveId, modbus_t *context);
 
 protected:

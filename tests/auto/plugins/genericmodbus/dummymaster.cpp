@@ -71,10 +71,3 @@ QModBusReply* DummyMaster::read(QModBusDataUnit &request, int slaveId)
     Q_UNUSED(slaveId);
     return 0;
 }
-
-QModBusReply* DummyMaster::read(QList<QModBusDataUnit> &requests, int slaveId)
-{
-    Q_UNUSED(requests);
-    Q_UNUSED(slaveId);
-    return 0;
-}

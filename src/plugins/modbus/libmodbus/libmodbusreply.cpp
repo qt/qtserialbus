@@ -147,17 +147,18 @@ Reply::~Reply()
     thread.wait();
 }
 
-void Reply::read(const QList<QModBusDataUnit> &requests, int slaveId, modbus_t *context)
+void Reply::read(const QModBusDataUnit &dataRequest, int slaveId, modbus_t *context)
 {
     request = new RequestThread();
-    request->table = requests.first().registerType();
-    this->table = request->table;
-    request->startAddress = requests.first().startAddress();
-    this->startAddress = requests.first().startAddress();
-    request->size = requests.size();
+    table = dataRequest.registerType();
+    request->table = table;
+    startAddress = dataRequest.startAddress();
+    request->startAddress = startAddress;
+    request->size = dataRequest.valueCount();
     request->slaveId = slaveId;
     request->context = context;
     request->moveToThread(&thread);
+
     connect(this, &Reply::startRead, request.data(), &RequestThread::read);
     connect(&thread, &QThread::finished, request.data(), &QObject::deleteLater);
     connect(request.data(), &RequestThread::readReady, this, &Reply::setResults);

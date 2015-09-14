@@ -81,37 +81,14 @@ QModBusReply* LibModBusMaster::write(const QModBusDataUnit &request, int slaveId
 
 QModBusReply* LibModBusMaster::read(QModBusDataUnit &request, int slaveId)
 {
-    QList<QModBusDataUnit> units;
-    units.append(request);
-    return read(units, slaveId);
-}
-
-QModBusReply* LibModBusMaster::read(QList<QModBusDataUnit> &requests, int slaveId)
-{
-    if (requests.empty()) {
+    // request.values().size() is ignored, the read request will fill it
+    if (!request.valueCount()) {
         setError(tr("Empty read reaquest."), QModBusDevice::ReadError);
         return 0;
     }
 
-    const QModBusDevice::ModBusTable readTable(requests.first().registerType());
-    int address = requests.first().startAddress();
-
-    for (int i = 1; i < requests.size(); i++) {
-        address++;
-        if (requests.at(i).registerType() != readTable) {
-            setError(tr("Data units in write request must be from same table."),
-                     QModBusDevice::ReadError);
-            return 0;
-        }
-        if (requests.at(i).startAddress() != address) {
-            setError(tr("Data units in read request must be adjacent to each other."),
-                     QModBusDevice::ReadError);
-            return 0;
-        }
-    }
-
     Reply *reply = new Reply();
-    reply->read(requests, slaveId, context);
+    reply->read(request, slaveId, context);
     return reply;
 }
 

@@ -48,7 +48,6 @@ public:
 
     QModBusReply *write(const QModBusDataUnit &request, int slaveId) Q_DECL_OVERRIDE;
     QModBusReply *read(QModBusDataUnit &request, int slaveId) Q_DECL_OVERRIDE;
-    QModBusReply *read(QList<QModBusDataUnit> &requests, int slaveId) Q_DECL_OVERRIDE;
 
 protected:
     bool open();

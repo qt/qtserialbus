@@ -88,13 +88,4 @@ QModBusMaster::QModBusMaster(QModBusMasterPrivate &dd, QObject *parent) :
     each slave has unique \a slaveId.
  */
 
-/*!
-    \fn QModBusReply *QModBusMaster::read(QList<QModBusDataUnit> &requests, int slaveId)
-
-    This is an overloaded function.
-
-    Requests multiple data units to be read. The \a requests are used to read the contents of a continuous
-    block from a specific table. Only one continuous block can be read in a single read operation.
- */
-
 QT_END_NAMESPACE

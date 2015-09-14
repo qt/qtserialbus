@@ -105,14 +105,14 @@ void MainWindow::on_readButton_clicked()
     if (!modBusDevice || modBusDevice->state() != QModBusDevice::ConnectedState)
         return;
 
-    QList<QModBusDataUnit> units;
-    const QModBusDevice::ModBusTable table =
+    const QModBusDevice::ModBusTable registerType =
         static_cast<QModBusDevice::ModBusTable> (ui->readTable->currentData().toInt());
-    for (int i = 0; i < ui->readSize->currentText().toInt(); ++i)
-        units.append(QModBusDataUnit(table, ui->readAddress->text().toInt() + i, 0));
+    QModBusDataUnit dataRequest(registerType);
+    dataRequest.setValueCount(ui->readSize->currentText().toInt());
+    dataRequest.setStartAddress(ui->readAddress->text().toInt());
 
     ui->readValue->clear();
-    lastRequest = modBusDevice->read(units, ui->readSlave->text().toInt());
+    lastRequest = modBusDevice->read(dataRequest, ui->readSlave->text().toInt());
     if (lastRequest)
         connect(lastRequest, &QModBusReply::finished, this, &MainWindow::readReady);
     else
