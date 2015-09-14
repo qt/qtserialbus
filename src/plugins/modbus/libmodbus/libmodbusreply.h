@@ -54,7 +54,7 @@ class RequestThread : public QObject
     Q_OBJECT
 public:
     QModBusDevice::ModBusTable table;
-    quint16 startAddress;
+    int startAddress;
     QVector<quint16> values;
     quint16 size;
     int slaveId;
@@ -84,7 +84,7 @@ public:
     ~Reply();
 
     void read(const QList<QModBusDataUnit> &requests, int slaveId, modbus_t *context);
-    void write(const QList<QModBusDataUnit> &requests, int slaveId, modbus_t *context);
+    void write(const QModBusDataUnit &requests, int slaveId, modbus_t *context);
 
 protected:
     void setFinished() Q_DECL_OVERRIDE;
@@ -100,7 +100,7 @@ private:
     void handleError(int errorNumber);
 
     QModBusDevice::ModBusTable table;
-    quint16 startAddress;
+    int startAddress;
     QPointer<RequestThread> request;
     QThread thread;
     QVector<quint16> values;

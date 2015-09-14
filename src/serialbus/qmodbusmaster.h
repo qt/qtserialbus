@@ -58,7 +58,6 @@ public:
     virtual ~QModBusMaster();
 
     virtual QModBusReply *write(const QModBusDataUnit &request, int slaveId = 1) = 0;
-    virtual QModBusReply *write(const QList<QModBusDataUnit> &requests, int slaveId = 1) = 0;
     virtual QModBusReply *read(QModBusDataUnit &request, int slaveId = 1) = 0;
     virtual QModBusReply *read(QList<QModBusDataUnit> &requests, int slaveId = 1) = 0;
 

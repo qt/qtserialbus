@@ -59,44 +59,23 @@ bool LibModBusMaster::setDevice(QIODevice * /*transport*/, ApplicationDataUnit /
 
 QModBusReply* LibModBusMaster::write(const QModBusDataUnit &request, int slaveId)
 {
-    QList<QModBusDataUnit> units;
-    units.append(request);
-    return write(units, slaveId);
-}
-
-QModBusReply* LibModBusMaster::write(const QList<QModBusDataUnit> &requests, int slaveId)
-{
-    if (requests.empty()) {
+    if (request.values().isEmpty() || !request.valueCount()) {
         setError(tr("Empty write request."), QModBusDevice::WriteError);
         return 0;
     }
 
-    const QModBusDevice::ModBusTable writeTable(requests.first().registerType());
-
-    if (writeTable != QModBusDevice::Coils
-        && writeTable != QModBusDevice::HoldingRegisters) {
+    // only write to writable registers
+    switch (request.registerType()) {
+    case QModBusDevice::Coils:
+    case QModBusDevice::HoldingRegisters:
+        break;
+    default:
         setError(tr("Trying to write read only table."), QModBusDevice::WriteError);
         return 0;
     }
 
-    int address = requests.first().startAddress();
-
-    for (int i = 1; i < requests.size(); i++) {
-        address++;
-        if (requests.at(i).registerType() != writeTable) {
-            setError(tr("Data units in write request must be from same table."),
-                     QModBusDevice::WriteError);
-            return 0;
-        }
-
-        if (requests.at(i).startAddress() != writeTable) {
-            setError(tr("Data units in write request must be adjacent to each other."),
-                     QModBusDevice::WriteError);
-            return 0;
-        }
-    }
     Reply *reply = new Reply();
-    reply->write(requests, slaveId, context);
+    reply->write(request, slaveId, context);
     return reply;
 }
 

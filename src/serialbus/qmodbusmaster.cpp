@@ -81,15 +81,6 @@ QModBusMaster::QModBusMaster(QModBusMasterPrivate &dd, QObject *parent) :
  */
 
 /*!
-    \fn QModBusReply *QModBusMaster::write(const QList<QModBusDataUnit> &requests, int slaveId)
-
-    This is an overloaded function.
-
-    Requests multiple data units to be written. The \a requests are used to read the contents of continuous
-    block from a specific table. Only one continuous block can be written in a single write operation.
- */
-
-/*!
     \fn QModBusReply *QModBusMaster::read(QModBusDataUnit &request, int slaveId)
 
     Sends a request to read the contents of the data pointed by \a request. Returns a new QModBusReply object,

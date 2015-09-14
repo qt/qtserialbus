@@ -47,7 +47,6 @@ public:
     bool setDevice(QIODevice *transport, ApplicationDataUnit ADU = NotSpecified);
 
     QModBusReply *write(const QModBusDataUnit &request, int slaveId);
-    QModBusReply *write(const QList<QModBusDataUnit> &requests, int slaveId);
     QModBusReply *read(QModBusDataUnit &request, int slaveId);
     QModBusReply *read(QList<QModBusDataUnit> &requests, int slaveId);
 

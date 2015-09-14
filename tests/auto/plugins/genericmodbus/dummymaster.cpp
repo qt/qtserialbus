@@ -65,13 +65,6 @@ QModBusReply* DummyMaster::write(const QModBusDataUnit &request, int slaveId)
     return 0;
 }
 
-QModBusReply* DummyMaster::write(const QList<QModBusDataUnit> &requests, int slaveId)
-{
-    Q_UNUSED(requests);
-    Q_UNUSED(slaveId);
-    return 0;
-}
-
 QModBusReply* DummyMaster::read(QModBusDataUnit &request, int slaveId)
 {
     Q_UNUSED(request);
