@@ -46,9 +46,9 @@ public:
     explicit DummyMaster(QObject *parent = 0);
     bool setDevice(QIODevice *transport, ApplicationDataUnit ADU = NotSpecified);
 
-    QModBusReply *write(const QModBusDataUnit &request, int slaveId);
-    QModBusReply *read(QModBusDataUnit &request, int slaveId);
-    QModBusReply *read(QList<QModBusDataUnit> &requests, int slaveId);
+    QModBusReply *write(const QModBusDataUnit &request, int slaveId) Q_DECL_OVERRIDE;
+    QModBusReply *read(QModBusDataUnit &request, int slaveId) Q_DECL_OVERRIDE;
+    QModBusReply *read(QList<QModBusDataUnit> &requests, int slaveId) Q_DECL_OVERRIDE;
 
 protected:
     bool open();
