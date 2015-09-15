@@ -74,7 +74,7 @@ public:
 Q_SIGNALS:
     void error(int errorNumber);
     void slaveRead();
-    void slaveWritten(QModBusDevice::ModBusTable table, int address, int size);
+    void slaveWritten(QModBusRegister::RegisterType table, int address, int size);
 };
 
 class LibModBusSlave : public QModBusSlave
@@ -84,14 +84,14 @@ public:
     LibModBusSlave();
     ~LibModBusSlave();
     bool setDevice(QIODevice *, ApplicationDataUnit) Q_DECL_OVERRIDE;
-    bool setMap(QModBusDevice::ModBusTable table, quint16 size) Q_DECL_OVERRIDE;
+    bool setMap(QModBusRegister::RegisterType table, quint16 size) Q_DECL_OVERRIDE;
     bool setMap(const QModBusRegister &) Q_DECL_OVERRIDE;
 
     int slaveId() const Q_DECL_OVERRIDE;
     void setSlaveId(int id) Q_DECL_OVERRIDE;
 
-    bool data(QModBusDevice::ModBusTable table, quint16 address, quint16 *data) Q_DECL_OVERRIDE;
-    bool setData(QModBusDevice::ModBusTable table, quint16 address, quint16 data) Q_DECL_OVERRIDE;
+    bool data(QModBusRegister::RegisterType table, quint16 address, quint16 *data) Q_DECL_OVERRIDE;
+    bool setData(QModBusRegister::RegisterType table, quint16 address, quint16 data) Q_DECL_OVERRIDE;
 
 Q_SIGNALS:
     void operate();
@@ -111,7 +111,7 @@ private:
     modbus_mapping_t *mapping;
     bool connected;
     int slave;
-    QMap<QModBusDevice::ModBusTable, int> mappingTable;
+    QMap<QModBusRegister::RegisterType, int> mappingTable;
 };
 
 QT_END_NAMESPACE

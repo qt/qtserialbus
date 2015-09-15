@@ -37,6 +37,8 @@
 #include "qmodbusdevice.h"
 #include "qmodbusdevice_p.h"
 
+#include <QtSerialBus/qmodbusregister.h>
+
 QT_BEGIN_NAMESPACE
 
 /*!
@@ -54,7 +56,7 @@ QT_BEGIN_NAMESPACE
 QModBusDevice::QModBusDevice(QObject *parent)
  : QObject(*new QModBusDevicePrivate, parent)
 {
-    qRegisterMetaType<QModBusDevice::ModBusTable>();
+    qRegisterMetaType<QModBusRegister::RegisterType>();
 }
 
 /*!
@@ -63,7 +65,7 @@ QModBusDevice::QModBusDevice(QObject *parent)
 QModBusDevice::QModBusDevice(QModBusDevicePrivate &dd, QObject *parent)
  : QObject(dd, parent)
 {
-    qRegisterMetaType<QModBusDevice::ModBusTable>();
+    qRegisterMetaType<QModBusRegister::RegisterType>();
 }
 
 /*!
@@ -92,16 +94,6 @@ QString QModBusDevice::portName() const
     \value NotSpecified         ADU not specified.
     \value RemoteTerminalUnit   Usually used with serial port connection.
     \value TCP                  Usually used with TCP connection.
- */
-
-/*!
-    \enum QModBusDevice::ModBusTable
-    This enum describes different primary tables used in Modbus.
-
-    \value DiscreteInputs       Table with read-only bits.
-    \value Coils                Table with read/write bits.
-    \value InputRegisters       Table with read-only 16 bit words.
-    \value HoldingRegisters     Table with read/write 16 bit words.
  */
 
 /*!

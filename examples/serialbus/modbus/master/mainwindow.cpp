@@ -52,10 +52,10 @@ MainWindow::MainWindow(QWidget *parent)
     , modBusDevice(Q_NULLPTR)
 {
     ui->setupUi(this);
-    ui->readTable->addItem(tr("Coils"), QModBusDevice::Coils);
-    ui->readTable->addItem(tr("Discrete Inputs"), QModBusDevice::DiscreteInputs);
-    ui->readTable->addItem(tr("Input Registers"), QModBusDevice::InputRegisters);
-    ui->readTable->addItem(tr("Holding Registers"), QModBusDevice::HoldingRegisters);
+    ui->readTable->addItem(tr("Coils"), QModBusRegister::Coils);
+    ui->readTable->addItem(tr("Discrete Inputs"), QModBusRegister::DiscreteInputs);
+    ui->readTable->addItem(tr("Input Registers"), QModBusRegister::InputRegisters);
+    ui->readTable->addItem(tr("Holding Registers"), QModBusRegister::HoldingRegisters);
     on_writeTable_currentIndexChanged(ui->writeTable->currentText());
 
     modBusDevice = QModBus::instance()->createMaster("libmodbus");
@@ -105,8 +105,8 @@ void MainWindow::on_readButton_clicked()
     if (!modBusDevice || modBusDevice->state() != QModBusDevice::ConnectedState)
         return;
 
-    const QModBusDevice::ModBusTable registerType =
-        static_cast<QModBusDevice::ModBusTable> (ui->readTable->currentData().toInt());
+    const QModBusRegister::RegisterType registerType =
+        static_cast<QModBusRegister::RegisterType> (ui->readTable->currentData().toInt());
     QModBusDataUnit dataRequest(registerType);
     dataRequest.setValueCount(ui->readSize->currentText().toInt());
     dataRequest.setStartAddress(ui->readAddress->text().toInt());
@@ -125,7 +125,7 @@ void MainWindow::readReady()
     for (int i = 0; i < units.size(); i++) {
         const QString entry = tr("Address: ") + QString::number(units.at(i).startAddress())
             + tr(" Value: ") + QString::number(units.at(i).values().at(0),
-                units.at(i).registerType() <= QModBusDevice::Coils ? 10 : 16);
+                units.at(i).registerType() <= QModBusRegister::Coils ? 10 : 16);
         ui->readValue->addItem(entry);
     }
     lastRequest->deleteLater();
@@ -138,9 +138,9 @@ void MainWindow::on_writeButton_clicked()
     if (!modBusDevice || modBusDevice->state() != QModBusDevice::ConnectedState)
         return;
 
-    QModBusDevice::ModBusTable table = QModBusDevice::HoldingRegisters;
+    QModBusRegister::RegisterType table = QModBusRegister::HoldingRegisters;
     if (ui->writeTable->currentText() == tr("Coils"))
-        table = QModBusDevice::Coils;
+        table = QModBusRegister::Coils;
 
     lastRequest = modBusDevice->write(QModBusDataUnit(table, ui->writeAddress->text().toInt(),
         ui->writeValue->text().toInt(0, 16)), ui->readSlave->text().toInt());

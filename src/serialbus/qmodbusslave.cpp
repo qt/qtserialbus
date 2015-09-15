@@ -76,7 +76,7 @@ QModBusSlave::QModBusSlave(QModBusSlavePrivate &dd, QObject *parent) :
 }
 
 /*!
-    \fn bool QModBusSlave::setMap(QModBusDevice::ModBusTable table, quint16 size)
+    \fn bool QModBusSlave::setMap(QModBusRegister::RegisterType table, quint16 size)
     Sets the \a size for \a table. If a table is not set, it's \a size will be zero (0).
 
     Return \c true on success; otherwise \c false.
@@ -114,24 +114,24 @@ QModBusSlave::QModBusSlave(QModBusSlavePrivate &dd, QObject *parent) :
  */
 
 /*!
-    \fn bool QModBusSlave::data(QModBusDevice::ModBusTable table, quint16 address, quint16 *data)
+    \fn bool QModBusSlave::data(QModBusRegister::RegisterType table, quint16 address, quint16 *data)
 
     Reads data stored in the slave. Slave has four tables (\a table) and each have a unique
     \a address field, which is used to read \a data from the desired field.
-    See QModBusDevice::ModBusTable for more information about the different tables.
+    See QModBusRegister::RegisterType for more information about the different tables.
     Returns \c false if address is outside of the map range.
 
-    \sa QModBusDevice::ModBusTable, setData()
+    \sa QModBusRegister::RegisterType, setData()
  */
 
 /*!
-    \fn bool QModBusSlave::setData(QModBusDevice::ModBusTable table, quint16 address, quint16 data)
+    \fn bool QModBusSlave::setData(QModBusRegister::RegisterType table, quint16 address, quint16 data)
 
     Writes data to the slave. Slave has four tables (\a table) and each have a unique
     \a address field, which is used to write \a data to the desired field.
     Returns \c false if address outside of the map range.
 
-    \sa QModBusDevice::ModBusTable, data()
+    \sa QModBusRegister::RegisterType, data()
  */
 
 /*!
@@ -141,7 +141,7 @@ QModBusSlave::QModBusSlave(QModBusSlavePrivate &dd, QObject *parent) :
  */
 
 /*!
-    \fn void QModBusSlave::slaveWritten(QModBusDevice::ModBusTable table, int address, int size)
+    \fn void QModBusSlave::slaveWritten(QModBusRegister::RegisterType table, int address, int size)
 
     This signal is emitted when master has written one or more fields of data to the slave.
     Signal contains information about the fields that were written:

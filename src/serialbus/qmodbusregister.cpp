@@ -56,13 +56,23 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \fn void QModBusRegister::setRegisterSize(QModBusDevice::ModBusTable type, quint16 size)
+    \enum QModBusRegister::RegisterType
+    This enum describes different registers used in Modbus.
+
+    \value DiscreteInputs       Register with read-only bits.
+    \value Coils                Register with read/write bits.
+    \value InputRegisters       Register with read-only 16 bit words.
+    \value HoldingRegisters     Register with read/write 16 bit words.
+ */
+
+/*!
+    \fn void QModBusRegister::setRegisterSize(QModBusRegister::RegisterType type, quint16 size)
 
     Sets the size of the register with \a type to \a size.
  */
 
 /*!
-    \fn quint16 QModBusRegister::registerSize(QModBusDevice::ModBusTable type) const
+    \fn quint16 QModBusRegister::registerSize(QModBusRegister::RegisterType type) const
 
     Returns the size of the register \a type.
  */

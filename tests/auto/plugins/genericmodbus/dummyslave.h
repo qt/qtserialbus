@@ -47,12 +47,12 @@ class DummySlave : public QModBusSlave
 public:
     explicit DummySlave(QObject *parent = 0);
     bool setDevice(QIODevice *transport, ApplicationDataUnit ADU);
-    bool setMap(QModBusDevice::ModBusTable table, quint16 size);
+    bool setMap(QModBusRegister::RegisterType table, quint16 size);
     bool setMap(const QModBusRegister &) Q_DECL_OVERRIDE;
     void setSlaveId(int id);
     int slaveId() const;
-    bool data(QModBusDevice::ModBusTable table, quint16 address, quint16 *data);
-    bool setData(QModBusDevice::ModBusTable table, quint16 address, quint16 data);
+    bool data(QModBusRegister::RegisterType table, quint16 address, quint16 *data);
+    bool setData(QModBusRegister::RegisterType table, quint16 address, quint16 data);
 
 protected:
     bool open();

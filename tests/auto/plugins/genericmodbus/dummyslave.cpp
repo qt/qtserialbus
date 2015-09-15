@@ -61,7 +61,7 @@ void DummySlave::close()
 
 }
 
-bool DummySlave::setMap(QModBusDevice::ModBusTable table, quint16 size)
+bool DummySlave::setMap(QModBusRegister::RegisterType table, quint16 size)
 {
     Q_UNUSED(table);
     Q_UNUSED(size);
@@ -83,7 +83,7 @@ int DummySlave::slaveId() const
     return 1;
 }
 
-bool DummySlave::data(QModBusDevice::ModBusTable table, quint16 address, quint16 *data)
+bool DummySlave::data(QModBusRegister::RegisterType table, quint16 address, quint16 *data)
 {
     Q_UNUSED(table);
     Q_UNUSED(address);
@@ -91,7 +91,7 @@ bool DummySlave::data(QModBusDevice::ModBusTable table, quint16 address, quint16
     return true;
 }
 
-bool DummySlave::setData(QModBusDevice::ModBusTable table, quint16 address, quint16 data)
+bool DummySlave::setData(QModBusRegister::RegisterType table, quint16 address, quint16 data)
 {
     Q_UNUSED(table);
     Q_UNUSED(address);

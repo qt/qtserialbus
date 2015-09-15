@@ -60,14 +60,6 @@ public:
     };
     Q_ENUM(ApplicationDataUnit)
 
-    enum ModBusTable { // TODO rename ModBusRegisterType
-        DiscreteInputs,
-        Coils,
-        InputRegisters,
-        HoldingRegisters
-    };
-    Q_ENUM(ModBusTable)
-
     enum ModBusError {
         NoError,
         ReadError,
@@ -118,12 +110,9 @@ protected:
 };
 
 Q_DECLARE_TYPEINFO(QModBusDevice::ApplicationDataUnit, Q_PRIMITIVE_TYPE);
-Q_DECLARE_TYPEINFO(QModBusDevice::ModBusTable, Q_PRIMITIVE_TYPE);
 Q_DECLARE_TYPEINFO(QModBusDevice::ModBusError, Q_PRIMITIVE_TYPE);
 Q_DECLARE_TYPEINFO(QModBusDevice::ModBusDeviceState, Q_PRIMITIVE_TYPE);
 
 QT_END_NAMESPACE
-
-Q_DECLARE_METATYPE(QModBusDevice::ModBusTable)
 
 #endif // QMODBUSDEVICE_H

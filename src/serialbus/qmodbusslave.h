@@ -59,19 +59,19 @@ public:
     explicit QModBusSlave(QObject *parent = 0);
     virtual ~QModBusSlave();
 
-    virtual bool setMap(QModBusDevice::ModBusTable table, quint16 size) = 0; //TODO remove
+    virtual bool setMap(QModBusRegister::RegisterType table, quint16 size) = 0; //TODO remove
     virtual bool setMap(const QModBusRegister &newRegister) = 0;
 
     virtual void setSlaveId(int id) = 0;
     virtual int slaveId() const = 0;
 
     //TODO: Review if QModBusMap would be useful. It could replace setMap(), data() and setData()
-    virtual bool data(QModBusDevice::ModBusTable table, quint16 address, quint16 *data) = 0;
-    virtual bool setData(QModBusDevice::ModBusTable table, quint16 address, quint16 data) = 0;
+    virtual bool data(QModBusRegister::RegisterType table, quint16 address, quint16 *data) = 0;
+    virtual bool setData(QModBusRegister::RegisterType table, quint16 address, quint16 data) = 0;
 
 Q_SIGNALS:
     void slaveRead();
-    void slaveWritten(QModBusDevice::ModBusTable table, int address, int size);
+    void slaveWritten(QModBusRegister::RegisterType table, int address, int size);
 
 protected:
     QModBusSlave(QModBusSlavePrivate &dd, QObject *parent = Q_NULLPTR);

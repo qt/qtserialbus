@@ -66,8 +66,8 @@ QModBusReply* LibModBusMaster::write(const QModBusDataUnit &request, int slaveId
 
     // only write to writable registers
     switch (request.registerType()) {
-    case QModBusDevice::Coils:
-    case QModBusDevice::HoldingRegisters:
+    case QModBusRegister::Coils:
+    case QModBusRegister::HoldingRegisters:
         break;
     default:
         setError(tr("Trying to write read only table."), QModBusDevice::WriteError);

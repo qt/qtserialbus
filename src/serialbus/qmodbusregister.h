@@ -47,14 +47,19 @@ class QModBusRegister
 public:
     QModBusRegister() { dataSet.fill(0u, 4); }
 
-    // TODO Move QModBusDevice::ModeBusTable enum here
+    enum RegisterType {
+        DiscreteInputs,
+        Coils,
+        InputRegisters,
+        HoldingRegisters
+    };
 
-    void setRegisterSize(QModBusDevice::ModBusTable registerType, quint16 size)
+    void setRegisterSize(QModBusRegister::RegisterType registerType, quint16 size)
     {
         dataSet[registerType] = size;
     }
 
-    quint16 registerSize(QModBusDevice::ModBusTable registerType) const
+    quint16 registerSize(QModBusRegister::RegisterType registerType) const
     {
         return dataSet[registerType];
     }
@@ -63,8 +68,11 @@ private:
     QVector<quint16> dataSet;
 };
 
+Q_DECLARE_TYPEINFO(QModBusRegister::RegisterType, Q_PRIMITIVE_TYPE);
 Q_DECLARE_TYPEINFO(QModBusRegister, Q_MOVABLE_TYPE);
 
 QT_END_NAMESPACE
+
+Q_DECLARE_METATYPE(QModBusRegister::RegisterType)
 
 #endif // QMODBUSREGISTER_H

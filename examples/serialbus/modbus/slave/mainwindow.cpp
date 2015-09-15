@@ -54,10 +54,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     modBusDevice = QModBus::instance()->createSlave("libmodbus");
     if (modBusDevice) {
-        modBusDevice->setMap(QModBusDevice::Coils, 10);
-        modBusDevice->setMap(QModBusDevice::DiscreteInputs, 10);
-        modBusDevice->setMap(QModBusDevice::InputRegisters, 10);
-        modBusDevice->setMap(QModBusDevice::HoldingRegisters, 10);
+        modBusDevice->setMap(QModBusRegister::Coils, 10);
+        modBusDevice->setMap(QModBusRegister::DiscreteInputs, 10);
+        modBusDevice->setMap(QModBusRegister::InputRegisters, 10);
+        modBusDevice->setMap(QModBusRegister::HoldingRegisters, 10);
 
         connect(modBusDevice, &QModBusSlave::slaveWritten, this, &MainWindow::updateWidgets);
         connect(modBusDevice, &QModBusSlave::stateChanged, this, &MainWindow::onStateChanged);
@@ -106,16 +106,16 @@ void MainWindow::onStateChanged(int state)
 void MainWindow::coilChanged(int id)
 {
     QAbstractButton *button = coilButtons.button(id);
-    bitChanged(id, QModBusDevice::Coils, button->isChecked());
+    bitChanged(id, QModBusRegister::Coils, button->isChecked());
 }
 
 void MainWindow::discreteInputChanged(int id)
 {
     QAbstractButton *button = discreteButtons.button(id);
-    bitChanged(id, QModBusDevice::DiscreteInputs, button->isChecked());
+    bitChanged(id, QModBusRegister::DiscreteInputs, button->isChecked());
 }
 
-void MainWindow::bitChanged(int id, QModBusDevice::ModBusTable table, bool value)
+void MainWindow::bitChanged(int id, QModBusRegister::RegisterType table, bool value)
 {
     if (!modBusDevice || modBusDevice->state() != QModBusDevice::ConnectedState)
         return;
@@ -134,27 +134,27 @@ void MainWindow::setRegister(const QString &value)
         bool ok = true;
         const int id = QObject::sender()->property("ID").toInt();
         if (objectName.startsWith(QStringLiteral("inReg")))
-            ok = modBusDevice->setData(QModBusDevice::InputRegisters, id, value.toInt(&ok, 16));
+            ok = modBusDevice->setData(QModBusRegister::InputRegisters, id, value.toInt(&ok, 16));
         else if (objectName.startsWith(QStringLiteral("holdReg")))
-            ok = modBusDevice->setData(QModBusDevice::HoldingRegisters, id, value.toInt(&ok, 16));
+            ok = modBusDevice->setData(QModBusRegister::HoldingRegisters, id, value.toInt(&ok, 16));
 
         if (!ok)
             ui->errorLabel->setText(tr("Could not set register: ") + modBusDevice->errorString());
     }
 }
 
-void MainWindow::updateWidgets(QModBusDevice::ModBusTable table, int address, int size)
+void MainWindow::updateWidgets(QModBusRegister::RegisterType table, int address, int size)
 {
     for (int i = 0; i < size; ++i) {
         quint16 value;
         QString text;
         switch (table) {
-        case QModBusDevice::Coils:
-            modBusDevice->data(QModBusDevice::Coils, address + i, &value);
+        case QModBusRegister::Coils:
+            modBusDevice->data(QModBusRegister::Coils, address + i, &value);
             coilButtons.button(address + i)->setChecked(value);
             break;
-        case QModBusDevice::HoldingRegisters:
-            modBusDevice->data(QModBusDevice::HoldingRegisters, address + i, &value);
+        case QModBusRegister::HoldingRegisters:
+            modBusDevice->data(QModBusRegister::HoldingRegisters, address + i, &value);
             registers.value(QStringLiteral("holdReg_%1").arg(address + i))->setText(text
                 .setNum(value, 16));
             break;
@@ -172,20 +172,20 @@ void MainWindow::setupDeviceData()
         return;
 
     for (int i = 0; i < coilButtons.buttons().count(); ++i)
-        modBusDevice->setData(QModBusDevice::Coils, i, coilButtons.button(i)->isChecked());
+        modBusDevice->setData(QModBusRegister::Coils, i, coilButtons.button(i)->isChecked());
 
     for (int i = 0; i < discreteButtons.buttons().count(); ++i) {
-        modBusDevice->setData(QModBusDevice::DiscreteInputs, i,
+        modBusDevice->setData(QModBusRegister::DiscreteInputs, i,
             discreteButtons.button(i)->isChecked());
     }
 
     bool ok;
     foreach (QLineEdit *widget, registers) {
         if (widget->objectName().startsWith(QStringLiteral("inReg"))) {
-            modBusDevice->setData(QModBusDevice::InputRegisters, widget->property("ID").toInt(),
+            modBusDevice->setData(QModBusRegister::InputRegisters, widget->property("ID").toInt(),
                 widget->text().toInt(&ok, 16));
         } else if (widget->objectName().startsWith(QStringLiteral("holdReg"))) {
-            modBusDevice->setData(QModBusDevice::HoldingRegisters, widget->property("ID").toInt(),
+            modBusDevice->setData(QModBusRegister::HoldingRegisters, widget->property("ID").toInt(),
                 widget->text().toInt(&ok, 16));
         }
     }

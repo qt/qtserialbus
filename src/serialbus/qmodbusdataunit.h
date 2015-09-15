@@ -37,8 +37,7 @@
 #ifndef QMODBUSDATAUNIT_H
 #define QMODBUSDATAUNIT_H
 
-#include <QtSerialBus/qmodbusdevice.h>
-#include <QtSerialBus/qmodbusdataunit.h>
+#include <QtSerialBus/qmodbusregister.h>
 
 #include <QtCore/qvector.h>
 
@@ -47,7 +46,7 @@ QT_BEGIN_NAMESPACE
 class QModBusDataUnit
 {
 public:
-    QModBusDataUnit(QModBusDevice::ModBusTable regType,
+    QModBusDataUnit(QModBusRegister::RegisterType regType,
                              int dataAddress, quint16 initValue)
         : rType(regType),
           sAddress(dataAddress),
@@ -56,7 +55,7 @@ public:
         dataValue.fill(initValue, 1);
     }
 
-    QModBusDataUnit(QModBusDevice::ModBusTable regType,
+    QModBusDataUnit(QModBusRegister::RegisterType regType,
                              int newStartAddress, const QVector<quint16> &data)
         : rType(regType),
           sAddress(newStartAddress),
@@ -66,15 +65,15 @@ public:
 
     }
 
-    explicit QModBusDataUnit(QModBusDevice::ModBusTable regType)
+    explicit QModBusDataUnit(QModBusRegister::RegisterType regType)
         : rType(regType),
           sAddress(0),
           dataRange(0)
     {
     }
 
-    QModBusDevice::ModBusTable registerType() const { return rType; }
-    void setRegisterType(QModBusDevice::ModBusTable newRegisterType)
+    QModBusRegister::RegisterType registerType() const { return rType; }
+    void setRegisterType(QModBusRegister::RegisterType newRegisterType)
     {
         rType = newRegisterType;
     }
@@ -93,7 +92,7 @@ public:
     inline void setValueCount(int newCount) { dataRange = newCount; }
 
 private:
-    QModBusDevice::ModBusTable rType;
+    QModBusRegister::RegisterType rType;
     int sAddress;
     QVector<quint16> dataValue;
     int dataRange;

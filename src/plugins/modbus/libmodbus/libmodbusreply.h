@@ -53,7 +53,7 @@ class RequestThread : public QObject
 {
     Q_OBJECT
 public:
-    QModBusDevice::ModBusTable table;
+    QModBusRegister::RegisterType table;
     int startAddress;
     QVector<quint16> values;
     quint16 size;
@@ -99,7 +99,7 @@ private:
     void setResults(const QVector<quint16> &payload);
     void handleError(int errorNumber);
 
-    QModBusDevice::ModBusTable table;
+    QModBusRegister::RegisterType table;
     int startAddress;
     QPointer<RequestThread> request;
     QThread thread;

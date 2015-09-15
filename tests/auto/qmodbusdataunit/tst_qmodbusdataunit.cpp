@@ -54,15 +54,15 @@ tst_QModBusDataUnit::tst_QModBusDataUnit()
 
 void tst_QModBusDataUnit::constructors()
 {
-    QModBusDataUnit unit1(QModBusDevice::Coils);
+    QModBusDataUnit unit1(QModBusRegister::Coils);
 
-    QCOMPARE(unit1.registerType(), QModBusDevice::Coils);
+    QCOMPARE(unit1.registerType(), QModBusRegister::Coils);
     QCOMPARE(unit1.startAddress(), 0);
     QCOMPARE(unit1.valueCount(), 0);
     QVERIFY(unit1.values().isEmpty());
 
-    QModBusDataUnit unit2(QModBusDevice::HoldingRegisters, 3, 9);
-    QCOMPARE(unit2.registerType(), QModBusDevice::HoldingRegisters);
+    QModBusDataUnit unit2(QModBusRegister::HoldingRegisters, 3, 9);
+    QCOMPARE(unit2.registerType(), QModBusRegister::HoldingRegisters);
     QCOMPARE(unit2.startAddress(), 3);
     QCOMPARE(unit2.values().size(), 1);
     QCOMPARE(unit2.values().at(0), (quint16) 9);
@@ -73,8 +73,8 @@ void tst_QModBusDataUnit::constructors()
     data.append(6);
     data.append(7);
 
-    QModBusDataUnit unit3(QModBusDevice::InputRegisters, 2, data);
-    QCOMPARE(unit3.registerType(), QModBusDevice::InputRegisters);
+    QModBusDataUnit unit3(QModBusRegister::InputRegisters, 2, data);
+    QCOMPARE(unit3.registerType(), QModBusRegister::InputRegisters);
     QCOMPARE(unit3.startAddress(), 2);
     QCOMPARE(unit3.values().size(), 3);
     QCOMPARE(unit3.values().at(0), (quint16) 5);
@@ -85,17 +85,17 @@ void tst_QModBusDataUnit::constructors()
 
 void tst_QModBusDataUnit::setters()
 {
-    QModBusDataUnit unit(QModBusDevice::HoldingRegisters, 3, 9);
+    QModBusDataUnit unit(QModBusRegister::HoldingRegisters, 3, 9);
     QCOMPARE(unit.valueCount(), 1);
 
-    unit.setRegisterType(QModBusDevice::InputRegisters);
+    unit.setRegisterType(QModBusRegister::InputRegisters);
     unit.setStartAddress(2);
     QVector<quint16> data;
     data.append(9u);
     data.append(5u);
     unit.setValues(data);
 
-    QCOMPARE(unit.registerType(), QModBusDevice::InputRegisters);
+    QCOMPARE(unit.registerType(), QModBusRegister::InputRegisters);
     QCOMPARE(unit.startAddress(), 2);
     QCOMPARE(unit.valueCount(), 2);
     QCOMPARE(unit.values().size(), 2);
