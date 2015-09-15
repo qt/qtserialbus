@@ -70,12 +70,6 @@ LibModBusSlave::~LibModBusSlave()
     mapping = 0;
 }
 
-bool LibModBusSlave::setDevice(QIODevice * /*transport*/, ApplicationDataUnit /*ADU*/)
-{
-    // TODO Remove
-    return true;
-}
-
 bool LibModBusSlave::setMap(QModBusRegister::RegisterType table, quint16 size)
 {
     if (connected) {

@@ -44,7 +44,6 @@ class DummyMaster : public QModBusMaster
     Q_OBJECT
 public:
     explicit DummyMaster(QObject *parent = 0);
-    bool setDevice(QIODevice *transport, ApplicationDataUnit ADU = NotSpecified);
 
     QModBusReply *write(const QModBusDataUnit &request, int slaveId) Q_DECL_OVERRIDE;
     QModBusReply *read(QModBusDataUnit &request, int slaveId) Q_DECL_OVERRIDE;

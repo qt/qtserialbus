@@ -54,7 +54,6 @@ class LibModBusMaster : public QModBusMaster
     Q_OBJECT
 public:
     LibModBusMaster();
-    bool setDevice(QIODevice *, ApplicationDataUnit) Q_DECL_OVERRIDE;
 
     QModBusReply* write(const QModBusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
 

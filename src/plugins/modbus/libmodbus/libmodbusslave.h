@@ -83,7 +83,7 @@ class LibModBusSlave : public QModBusSlave
 public:
     LibModBusSlave();
     ~LibModBusSlave();
-    bool setDevice(QIODevice *, ApplicationDataUnit) Q_DECL_OVERRIDE;
+
     bool setMap(QModBusRegister::RegisterType table, quint16 size) Q_DECL_OVERRIDE;
     bool setMap(const QModBusRegister &) Q_DECL_OVERRIDE;
 

@@ -51,12 +51,6 @@ LibModBusMaster::LibModBusMaster() :
 {
 }
 
-bool LibModBusMaster::setDevice(QIODevice * /*transport*/, ApplicationDataUnit /*ADU*/)
-{
-    //TODO remove
-    return true;
-}
-
 QModBusReply* LibModBusMaster::write(const QModBusDataUnit &request, int slaveId)
 {
     if (request.values().isEmpty() || !request.valueCount()) {

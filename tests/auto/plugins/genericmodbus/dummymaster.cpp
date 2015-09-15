@@ -41,13 +41,6 @@ DummyMaster::DummyMaster(QObject *parent) :
 {
 }
 
-bool DummyMaster::setDevice(QIODevice *transport, ApplicationDataUnit ADU)
-{
-    Q_UNUSED(transport);
-    Q_UNUSED(ADU);
-    return true;
-}
-
 bool DummyMaster::open()
 {
     return true;

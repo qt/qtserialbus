@@ -88,9 +88,6 @@ public:
     bool connectDevice();
     void disconnectDevice();
 
-    // TODO Remove
-    virtual bool setDevice(QIODevice *transport, ApplicationDataUnit ADU = NotSpecified) = 0;
-
     ModBusDeviceState state() const;
 
     ModBusError error() const;

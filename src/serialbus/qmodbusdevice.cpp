@@ -233,16 +233,6 @@ QString QModBusDevice::errorString() const
 }
 
 /*!
-    \fn bool QModBusDevice::setDevice(QIODevice *transport, ApplicationDataUnit ADU = NotSpecified)
-
-    Sets the method of connection to Modbus network. In theory, \a transport can be any kind of connection
-    derived from QIODevice, but implementation is plugin-specific. The mapping of Modbus protocol on specific
-    buses or network can introduce additional fields on the application data unit (\a ADU).
-
-    The function returns \c true if \a transport and \a ADU is supported and accepted; otherwise \c false.
- */
-
-/*!
     \fn bool QModBusDevice::open()
 
     This function is called by connectDevice(). Subclasses must provide

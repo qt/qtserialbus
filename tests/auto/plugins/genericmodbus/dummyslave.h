@@ -46,7 +46,7 @@ class DummySlave : public QModBusSlave
     Q_OBJECT
 public:
     explicit DummySlave(QObject *parent = 0);
-    bool setDevice(QIODevice *transport, ApplicationDataUnit ADU);
+
     bool setMap(QModBusRegister::RegisterType table, quint16 size);
     bool setMap(const QModBusRegister &) Q_DECL_OVERRIDE;
     void setSlaveId(int id);

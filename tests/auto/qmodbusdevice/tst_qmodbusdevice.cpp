@@ -42,14 +42,6 @@ class dummyDevice : public QModBusDevice
 {
 friend class tst_QModBusDevice;
 
-public:
-    bool setDevice(QIODevice *transport, ApplicationDataUnit ADU)
-    {
-        Q_UNUSED(transport);
-        Q_UNUSED(ADU);
-        return true;
-    }
-
 protected:
     bool open() Q_DECL_OVERRIDE { return openState; }
     void close() Q_DECL_OVERRIDE {}

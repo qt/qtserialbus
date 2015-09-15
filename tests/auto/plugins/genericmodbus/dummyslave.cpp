@@ -43,14 +43,6 @@ DummySlave::DummySlave(QObject *parent) :
 {
 }
 
-bool DummySlave::setDevice(QIODevice *transport, ApplicationDataUnit ADU)
-{
-    Q_UNUSED(transport);
-    Q_UNUSED(ADU);
-
-    return true;
-}
-
 bool DummySlave::open()
 {
     return true;
