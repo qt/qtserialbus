@@ -53,13 +53,6 @@ class Q_SERIALBUS_EXPORT QModBusDevice : public QObject
 
 public:
 
-    enum ApplicationDataUnit {
-        NotSpecified,
-        RemoteTerminalUnit,
-        TCP
-    };
-    Q_ENUM(ApplicationDataUnit)
-
     enum ModBusError {
         NoError,
         ReadError,
@@ -106,7 +99,6 @@ protected:
     virtual void close() = 0;
 };
 
-Q_DECLARE_TYPEINFO(QModBusDevice::ApplicationDataUnit, Q_PRIMITIVE_TYPE);
 Q_DECLARE_TYPEINFO(QModBusDevice::ModBusError, Q_PRIMITIVE_TYPE);
 Q_DECLARE_TYPEINFO(QModBusDevice::ModBusDeviceState, Q_PRIMITIVE_TYPE);
 

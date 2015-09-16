@@ -88,15 +88,6 @@ QString QModBusDevice::portName() const
 }
 
 /*!
-    \enum QModBusDevice::ApplicationDataUnit
-    This enum describes different Modbus ADU types.
-
-    \value NotSpecified         ADU not specified.
-    \value RemoteTerminalUnit   Usually used with serial port connection.
-    \value TCP                  Usually used with TCP connection.
- */
-
-/*!
     \enum QModBusDevice::ModBusError
     This enum describes all the possible error conditions.
 
