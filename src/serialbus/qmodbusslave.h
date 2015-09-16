@@ -59,7 +59,6 @@ public:
     explicit QModBusSlave(QObject *parent = 0);
     virtual ~QModBusSlave();
 
-    virtual bool setMap(QModBusRegister::RegisterType table, quint16 size) = 0; //TODO remove
     virtual bool setMap(const QModBusRegister &newRegister) = 0;
 
     virtual void setSlaveId(int id) = 0;

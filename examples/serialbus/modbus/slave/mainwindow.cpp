@@ -54,10 +54,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     modBusDevice = QModBus::instance()->createSlave("libmodbus");
     if (modBusDevice) {
-        modBusDevice->setMap(QModBusRegister::Coils, 10);
-        modBusDevice->setMap(QModBusRegister::DiscreteInputs, 10);
-        modBusDevice->setMap(QModBusRegister::InputRegisters, 10);
-        modBusDevice->setMap(QModBusRegister::HoldingRegisters, 10);
+        QModBusRegister reg;
+        reg.setRegisterSize(QModBusRegister::Coils, 10);
+        reg.setRegisterSize(QModBusRegister::DiscreteInputs, 10);
+        reg.setRegisterSize(QModBusRegister::InputRegisters, 10);
+        reg.setRegisterSize(QModBusRegister::HoldingRegisters, 10);
+
+        modBusDevice->setMap(reg);
 
         connect(modBusDevice, &QModBusSlave::slaveWritten, this, &MainWindow::updateWidgets);
         connect(modBusDevice, &QModBusSlave::stateChanged, this, &MainWindow::onStateChanged);

@@ -70,23 +70,26 @@ LibModBusSlave::~LibModBusSlave()
     mapping = 0;
 }
 
-bool LibModBusSlave::setMap(QModBusRegister::RegisterType table, quint16 size)
+bool LibModBusSlave::setMap(const QModBusRegister & newRegister)
 {
     if (connected) {
+        // TODO this limitation is not required. As long as the slave
+        // is not serving an active request, the mapping can be changed.
         setError(tr("Cannot set maps when slave is connected to the network."),
                  QModBusDevice::WriteError);
         return false;
     }
 
-    mappingTable[table] = size;
+    mappingTable[QModBusRegister::DiscreteInputs]
+            = newRegister.registerSize(QModBusRegister::DiscreteInputs);
+    mappingTable[QModBusRegister::Coils]
+            = newRegister.registerSize(QModBusRegister::Coils);
+    mappingTable[QModBusRegister::InputRegisters]
+            = newRegister.registerSize(QModBusRegister::InputRegisters);
+    mappingTable[QModBusRegister::HoldingRegisters]
+            = newRegister.registerSize(QModBusRegister::HoldingRegisters);
 
     return true;
-}
-
-bool LibModBusSlave::setMap(const QModBusRegister & /*newRegister*/)
-{
-    //TODO
-    return false;
 }
 
 void LibModBusSlave::handleError(int errorNumber)

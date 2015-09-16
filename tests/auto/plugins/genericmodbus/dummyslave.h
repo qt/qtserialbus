@@ -47,7 +47,6 @@ class DummySlave : public QModBusSlave
 public:
     explicit DummySlave(QObject *parent = 0);
 
-    bool setMap(QModBusRegister::RegisterType table, quint16 size);
     bool setMap(const QModBusRegister &) Q_DECL_OVERRIDE;
     void setSlaveId(int id);
     int slaveId() const;

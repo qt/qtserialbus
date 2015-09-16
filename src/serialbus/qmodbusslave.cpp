@@ -76,20 +76,16 @@ QModBusSlave::QModBusSlave(QModBusSlavePrivate &dd, QObject *parent) :
 }
 
 /*!
-    \fn bool QModBusSlave::setMap(QModBusRegister::RegisterType table, quint16 size)
-    Sets the \a size for \a table. If a table is not set, it's \a size will be zero (0).
-
-    Return \c true on success; otherwise \c false.
- */
-
-/*!
     \fn bool QModBusSlave::setMap(const QModBusRegister &newRegister)
 
     Sets the registered map structure for requests from other ModBus masters.
     The register values are initialized with zero. Returns \c true on success;
     otherwise \c false.
 
-    \note Calling this function discards any value that was previously set.
+    If this function is not called before connecting, a default register with zero
+    entries is setup.
+
+    \note Calling this function discards any register value that was previously set.
  */
 
 /*!

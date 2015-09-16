@@ -53,13 +53,6 @@ void DummySlave::close()
 
 }
 
-bool DummySlave::setMap(QModBusRegister::RegisterType table, quint16 size)
-{
-    Q_UNUSED(table);
-    Q_UNUSED(size);
-    return true;
-}
-
 bool DummySlave::setMap(const QModBusRegister &/*newRegister*/)
 {
     return false;

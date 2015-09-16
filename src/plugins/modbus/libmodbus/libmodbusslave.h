@@ -84,8 +84,7 @@ public:
     LibModBusSlave();
     ~LibModBusSlave();
 
-    bool setMap(QModBusRegister::RegisterType table, quint16 size) Q_DECL_OVERRIDE;
-    bool setMap(const QModBusRegister &) Q_DECL_OVERRIDE;
+    bool setMap(const QModBusRegister &newRegister) Q_DECL_OVERRIDE;
 
     int slaveId() const Q_DECL_OVERRIDE;
     void setSlaveId(int id) Q_DECL_OVERRIDE;
