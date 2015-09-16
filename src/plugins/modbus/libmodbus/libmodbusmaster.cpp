@@ -53,8 +53,10 @@ LibModBusMaster::LibModBusMaster() :
 
 QModBusReply* LibModBusMaster::write(const QModBusDataUnit &request, int slaveId)
 {
-    if (request.values().isEmpty() || !request.valueCount()) {
-        setError(tr("Empty write request."), QModBusDevice::WriteError);
+    if (request.values().isEmpty()
+            || request.valueCount() <= 0
+            || request.startAddress() < 0) {
+        setError(tr("Empty or invalid write request."), QModBusDevice::WriteError);
         return 0;
     }
 
@@ -76,8 +78,8 @@ QModBusReply* LibModBusMaster::write(const QModBusDataUnit &request, int slaveId
 QModBusReply* LibModBusMaster::read(QModBusDataUnit &request, int slaveId)
 {
     // request.values().size() is ignored, the read request will fill it
-    if (!request.valueCount()) {
-        setError(tr("Empty read reaquest."), QModBusDevice::ReadError);
+    if (request.valueCount() <= 0 || request.startAddress() < 0) {
+        setError(tr("Empty or invalid read request."), QModBusDevice::ReadError);
         return 0;
     }
 
