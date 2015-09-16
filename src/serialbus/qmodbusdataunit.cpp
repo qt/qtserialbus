@@ -52,9 +52,9 @@ QT_BEGIN_NAMESPACE
     The entries are addressed the starting \l startAddress()
     and the \l {valueCount()}{number} of contiguous entries.
     \l registerType() determines which register is used for the
-    operations. Not that some registers are read-only registers.
+    operations. Note that some registers are read-only registers.
 
-    The actual \l values() are either bit or 16 bit based.
+    The actual \l values() are either single bit or 16 bit based.
     \l{QModBusRegister::}{DiscreteInputs} and \l{QModBusRegister::}{Coils}
     only accept single bits. Therefore 0 is intepreted as \c 0 and
     anything else \c 1.
@@ -142,7 +142,7 @@ QT_BEGIN_NAMESPACE
     This function may contain a count that is larger than \l values() size.
     Since this class is used to request data from the remote data register
     the \l valueCount() can be used to indicate the size of the register's
-    data block. Once the request has returned the \l valueCount() is equal to
+    data block. Once the request has returned, the \l valueCount() is equal to
     the size of \l values().
 
     \sa setValueCount()
