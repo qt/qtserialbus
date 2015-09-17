@@ -58,7 +58,7 @@ QModBusReply* DummyMaster::write(const QModBusDataUnit &request, int slaveId)
     return 0;
 }
 
-QModBusReply* DummyMaster::read(QModBusDataUnit &request, int slaveId)
+QModBusReply* DummyMaster::read(const QModBusDataUnit &request, int slaveId)
 {
     Q_UNUSED(request);
     Q_UNUSED(slaveId);

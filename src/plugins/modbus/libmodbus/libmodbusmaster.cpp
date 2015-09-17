@@ -75,7 +75,7 @@ QModBusReply* LibModBusMaster::write(const QModBusDataUnit &request, int slaveId
     return reply;
 }
 
-QModBusReply* LibModBusMaster::read(QModBusDataUnit &request, int slaveId)
+QModBusReply* LibModBusMaster::read(const QModBusDataUnit &request, int slaveId)
 {
     // request.values().size() is ignored, the read request will fill it
     if (request.valueCount() <= 0 || request.startAddress() < 0) {

@@ -81,7 +81,7 @@ QModBusMaster::QModBusMaster(QModBusMasterPrivate &dd, QObject *parent) :
  */
 
 /*!
-    \fn QModBusReply *QModBusMaster::read(QModBusDataUnit &request, int slaveId)
+    \fn QModBusReply *QModBusMaster::read(const QModBusDataUnit &request, int slaveId)
 
     Sends a request to read the contents of the data pointed by \a request. Returns a new QModBusReply object,
     which emits the finished() signal whenever data arrives. Modbus network may have multiple slaves,

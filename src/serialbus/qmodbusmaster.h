@@ -58,7 +58,7 @@ public:
     virtual ~QModBusMaster();
 
     virtual QModBusReply *write(const QModBusDataUnit &request, int slaveId = 1) = 0;
-    virtual QModBusReply *read(QModBusDataUnit &request, int slaveId = 1) = 0;
+    virtual QModBusReply *read(const QModBusDataUnit &request, int slaveId = 1) = 0;
 
 protected:
     QModBusMaster(QModBusMasterPrivate &dd, QObject *parent = Q_NULLPTR);
