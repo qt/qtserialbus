@@ -22,6 +22,8 @@ tests/auto/qcanbus/tst_qcanbus
 tests/auto/qcanbusdevice/tst_qcanbusdevice
 tests/auto/qcanbusframe/tst_qcanbusframe
 *_resource.rc
+*.exe
+*.ipch
 
 # Visual Studio generated files
 *.ib_pdb_index
