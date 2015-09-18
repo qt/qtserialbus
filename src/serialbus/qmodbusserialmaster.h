@@ -54,6 +54,9 @@ public:
     // TODO find way to pass parity, baud, dataBits, stopBits
     bool connectDevice(const QString& deviceName);
 
+    QModBusReply *write(const QModBusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
+    QModBusReply *read(const QModBusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
+
 protected:
     QModBusSerialMaster(QModBusSerialMasterPrivate &dd,
                         QObject *parent = Q_NULLPTR);

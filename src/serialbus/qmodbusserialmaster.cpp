@@ -64,7 +64,7 @@ bool QModBusSerialMaster::connectDevice(const QString &deviceName)
 
     // TODO Implement QModBusSerialMaster::connectDevice(QString)
 
-    return false;
+    return d->pluginMaster->connectDevice();
 }
 
 QModBusSerialMaster::QModBusSerialMaster(QModBusSerialMasterPrivate &dd,
@@ -77,7 +77,7 @@ QModBusSerialMaster::QModBusSerialMaster(QModBusSerialMasterPrivate &dd,
 
 bool QModBusSerialMaster::open()
 {
-    //TODO Implement QModBusSerialMaster::open()
+    // TODO remove later on
     return false;
 }
 
@@ -88,7 +88,7 @@ void QModBusSerialMaster::close()
     if (!d->pluginMaster)
         return;
 
-    // TODO Implement QModBusSerialMaster::close()
+    d->pluginMaster->disconnectDevice();
 }
 
 // forward the state changes
@@ -104,6 +104,27 @@ void QModBusSerialMasterPrivate::handleErrorOccurred(QModBusDevice::ModBusError 
     Q_Q(QModBusSerialMaster);
     q->setError(pluginMaster ? pluginMaster->errorString() : QString(),
                 error);
+}
+
+QModBusReply *QModBusSerialMaster::write(const QModBusDataUnit &request, int slaveId)
+{
+    Q_D(QModBusSerialMaster);
+
+    if (!d->pluginMaster)
+        return 0;
+
+    return d->pluginMaster->write(request, slaveId);
+}
+
+QModBusReply *QModBusSerialMaster::read(const QModBusDataUnit &request, int slaveId)
+{
+    Q_D(QModBusSerialMaster);
+
+    if (!d->pluginMaster)
+        return 0;
+
+    return d->pluginMaster->read(request, slaveId);
+
 }
 
 #include "moc_qmodbusserialmaster.cpp"

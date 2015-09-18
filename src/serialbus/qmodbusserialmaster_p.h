@@ -42,6 +42,8 @@
 
 #include "qmodbus.h"
 
+#include <QtCore/qdebug.h>
+
 //
 //  W A R N I N G
 //  -------------
