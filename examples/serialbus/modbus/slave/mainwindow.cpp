@@ -52,22 +52,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     setupWidgetContainers();
 
-    modBusDevice = QModBus::instance()->createSlave("libmodbus");
-    if (modBusDevice) {
-        QModBusRegister reg;
-        reg.setRegisterSize(QModBusRegister::Coils, 10);
-        reg.setRegisterSize(QModBusRegister::DiscreteInputs, 10);
-        reg.setRegisterSize(QModBusRegister::InputRegisters, 10);
-        reg.setRegisterSize(QModBusRegister::HoldingRegisters, 10);
-
-        modBusDevice->setMap(reg);
-
-        connect(modBusDevice, &QModBusSlave::slaveWritten, this, &MainWindow::updateWidgets);
-        connect(modBusDevice, &QModBusSlave::stateChanged, this, &MainWindow::onStateChanged);
-    } else {
-        ui->pushButton->setDisabled(true);
-        ui->errorLabel->setText(tr("Could not create modbus slave."));
-    }
+    ui->connectType->setCurrentIndex(0);
+    on_connectType_currentIndexChanged(0);
 }
 
 MainWindow::~MainWindow()
@@ -79,13 +65,48 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_connectType_currentIndexChanged(int index)
 {
-    if (!modBusDevice)
-        return;
+    if (modBusDevice) {
+        modBusDevice->disconnect();
+        delete modBusDevice;
+        modBusDevice = Q_NULLPTR;
+    }
+
+    modBusDevice = QModBus::instance()->createSlave("libmodbus",
+        static_cast<QModBusDevice::ModBusConnection> (index));
+
+    if (!modBusDevice) {
+        ui->connectButton->setDisabled(true);
+        ui->errorLabel->setText(tr("Could not create modbus slave."));
+    } else {
+        connect(modBusDevice, &QModBusMaster::stateChanged,
+                this, &MainWindow::onStateChanged);
+    }
+}
+
+void MainWindow::on_connectButton_clicked()
+{
+    bool intendToConnect = (modBusDevice->state() == QModBusDevice::UnconnectedState);
+
+    if (modBusDevice && intendToConnect) {
+        QModBusRegister reg;
+        reg.setRegisterSize(QModBusRegister::Coils, 10);
+        reg.setRegisterSize(QModBusRegister::DiscreteInputs, 10);
+        reg.setRegisterSize(QModBusRegister::InputRegisters, 10);
+        reg.setRegisterSize(QModBusRegister::HoldingRegisters, 10);
+
+        modBusDevice->setMap(reg);
+
+        connect(modBusDevice, &QModBusSlave::slaveWritten,
+                this, &MainWindow::updateWidgets);
+        connect(modBusDevice, &QModBusSlave::stateChanged,
+                this, &MainWindow::onStateChanged);
+    }
 
     ui->errorLabel->setText(QString());
-    if (modBusDevice->state() != QModBusDevice::ConnectedState) {
+
+    if (intendToConnect) {
         modBusDevice->setPortName(ui->portEdit->text());
         modBusDevice->setSlaveId(ui->slaveEdit->text().toInt());
         if (modBusDevice->connectDevice()) {
@@ -101,9 +122,9 @@ void MainWindow::on_pushButton_clicked()
 void MainWindow::onStateChanged(int state)
 {
     if (state == QModBusDevice::UnconnectedState)
-        ui->pushButton->setText(tr("Connect"));
+        ui->connectButton->setText(tr("Connect"));
     else if (state == QModBusDevice::ConnectedState)
-        ui->pushButton->setText(tr("Disconnect"));
+        ui->connectButton->setText(tr("Disconnect"));
 }
 
 void MainWindow::coilChanged(int id)

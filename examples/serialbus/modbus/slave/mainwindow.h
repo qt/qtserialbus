@@ -64,7 +64,7 @@ public:
     ~MainWindow();
 
 private Q_SLOTS:
-    void on_pushButton_clicked();
+    void on_connectButton_clicked();
     void onStateChanged(int state);
 
     void coilChanged(int id);
@@ -73,6 +73,8 @@ private Q_SLOTS:
 
     void setRegister(const QString &value);
     void updateWidgets(QModBusRegister::RegisterType table, int address, int size);
+
+    void on_connectType_currentIndexChanged(int);
 
 private:
     void setupDeviceData();

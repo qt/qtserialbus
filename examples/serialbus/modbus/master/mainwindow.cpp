@@ -58,13 +58,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->readTable->addItem(tr("Holding Registers"), QModBusRegister::HoldingRegisters);
     on_writeTable_currentIndexChanged(ui->writeTable->currentText());
 
-    modBusDevice = QModBus::instance()->createMaster("libmodbus");
-    if (!modBusDevice) {
-        ui->pushButton->setDisabled(true);
-        ui->errorLabel->setText(tr("Could not create modbus master."));
-    } else {
-        connect(modBusDevice, &QModBusMaster::stateChanged, this, &MainWindow::onStateChanged);
-    }
+    ui->connectType->setCurrentIndex(0);
+    on_connectType_currentIndexChanged(0);
 }
 
 MainWindow::~MainWindow()
@@ -76,7 +71,27 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_connectType_currentIndexChanged(int index)
+{
+    if (modBusDevice) {
+        modBusDevice->disconnectDevice();
+        delete modBusDevice;
+        modBusDevice = Q_NULLPTR;
+    }
+
+    modBusDevice = QModBus::instance()->createMaster("libmodbus",
+        static_cast<QModBusDevice::ModBusConnection> (index));
+
+    if (!modBusDevice) {
+        ui->connectButton->setDisabled(true);
+        ui->errorLabel->setText(tr("Could not create modbus master."));
+    } else {
+        connect(modBusDevice, &QModBusMaster::stateChanged,
+                this, &MainWindow::onStateChanged);
+    }
+}
+
+void MainWindow::on_connectButton_clicked()
 {
     if (!modBusDevice)
         return;
@@ -94,9 +109,9 @@ void MainWindow::on_pushButton_clicked()
 void MainWindow::onStateChanged(int state)
 {
     if (state == QModBusDevice::UnconnectedState)
-        ui->pushButton->setText(tr("Connect"));
+        ui->connectButton->setText(tr("Connect"));
     else if (state == QModBusDevice::ConnectedState)
-        ui->pushButton->setText(tr("Disconnect"));
+        ui->connectButton->setText(tr("Disconnect"));
 }
 
 void MainWindow::on_readButton_clicked()
