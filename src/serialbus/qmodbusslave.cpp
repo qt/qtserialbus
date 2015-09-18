@@ -76,11 +76,10 @@ QModBusSlave::QModBusSlave(QModBusSlavePrivate &dd, QObject *parent) :
 }
 
 /*!
-    \fn bool QModBusSlave::setMap(const QModBusRegister &newRegister)
+    \fn bool QModBusSlave::setMap(const QModBusRegister &newRegister) = 0
 
-    Sets the registered map structure for requests from other ModBus masters.
-    The register values are initialized with zero. Returns \c true on success;
-    otherwise \c false.
+    Sets the registered map structure for requests from other ModBus masters to \a newRegister.
+    The register values are initialized with zero. Returns \c true on success; otherwise \c false.
 
     If this function is not called before connecting, a default register with zero
     entries is setup.

@@ -65,6 +65,9 @@ QModBusMaster::~QModBusMaster()
 {
 }
 
+/*!
+    \internal
+*/
 QModBusMaster::QModBusMaster(QModBusMasterPrivate &dd, QObject *parent) :
     QModBusDevice(dd, parent)
 {

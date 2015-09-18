@@ -72,7 +72,7 @@
     \endcode
 
     The reading can be done using the \l {QCanBusDevice::}{readFrame()} method. The
-    \l {QCanBusDevice::}{frameReceived()} signal is emitted when a new frame is available
+    \l {QCanBusDevice::}{framesReceived()} signal is emitted when a new frame is available
     for reading:
 
     \code

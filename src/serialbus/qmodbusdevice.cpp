@@ -75,12 +75,18 @@ QModBusDevice::~QModBusDevice()
 {
 }
 
+/*!
+    \internal
+*/
 void QModBusDevice::setPortName(const QString &name)
 {
     Q_D(QModBusDevice);
     d->portName = name;
 }
 
+/*!
+    \internal
+*/
 QString QModBusDevice::portName() const
 {
     Q_D(const QModBusDevice);
