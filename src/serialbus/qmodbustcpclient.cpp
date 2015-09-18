@@ -34,45 +34,63 @@
 **
 ****************************************************************************/
 
-#include "libmodbusmaster.h"
-#include "libmodbusslave.h"
-#include "libmodbustcpclient.h"
-#include "libmodbustcpserver.h"
-
-#include <QtSerialBus/qmodbus.h>
-#include <QtSerialBus/qmodbusfactory.h>
-
-#include <QtCore/qfile.h>
-#include <QtCore/qdebug.h>
+#include "qmodbustcpclient.h"
+#include "qmodbustcpclient_p.h"
 
 QT_BEGIN_NAMESPACE
 
-class ModBusPlugin : public QObject, public QModBusFactory
+/*!
+    \class QModBusTcpClient
+    \inmodule QtSerialBus
+    \since 5.6
+
+    \brief The QModBusTcpClient class is the interface class for Modbus TCP client device.
+
+    QModBusTcpClient communicates with the Modbus backend providing users with a convenient API.
+*/
+
+/*!
+    Constructs a QModBusTcpClient with the specified \a parent.
+ */
+QModBusTcpClient::QModBusTcpClient(QObject *parent)
+    : QModBusMaster(*new QModBusTcpClientPrivate, parent)
 {
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QModBusFactory" FILE "plugin.json")
-    Q_INTERFACES(QModBusFactory)
+}
 
-public:
-    QModBusSlave *createSlave(QModBusDevice::ModBusConnection type) const
-    {
-        if (type == QModBusDevice::Serial)
-            return new LibModBusSlave();
-        if (type == QModBusDevice::Tcp)
-            return new LibModBusTcpServer();
-        return Q_NULLPTR;
-    }
+/*!
+    Destroys the QModBusTcpClient instance.
+*/
+QModBusTcpClient::~QModBusTcpClient()
+{
+}
 
-    QModBusMaster *createMaster(QModBusDevice::ModBusConnection type) const
-    {
-        if (type == QModBusDevice::Serial)
-            return new LibModBusMaster();
-        if (type == QModBusDevice::Tcp)
-            return new LibModBusTcpClient();
-        return Q_NULLPTR;
-    }
-};
+/*!
+    \internal
+*/
+QModBusTcpClient::QModBusTcpClient(QModBusTcpClientPrivate &dd, QObject *parent)
+    : QModBusMaster(dd, parent)
+{
+}
+
+/*!
+    \fn void QModBusTcpClient::connectDevice(const QString &hostName, quint16 port = 502)
+
+    Attempts to make a connection to \a hostName on the given \a port. If a connection is
+    established, it emits stateChanged() with ModBusDeviceState::ConnectedState.
+
+    At any point, the class can emit stateChanged() to signal the current device state or emit
+    errorOccurred() to signal that an error occurred.
+
+    \note \a hostName may be an IP address in string form (e.g., "43.195.83.32"), or it may be a
+    host name (e.g., "example.com"). \a port is in native byte order and defaults to number 502.
+*/
+
+/*!
+    \fn void QModBusTcpClient::connectDevice(const QHostAddress &address, quint16 port = 502)
+
+    \overload
+
+    Attempts to make a connection to \a address on port \a port.
+*/
 
 QT_END_NAMESPACE
-
-#include "main.moc"

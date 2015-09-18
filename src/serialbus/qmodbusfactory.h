@@ -49,8 +49,8 @@ QT_BEGIN_NAMESPACE
 class Q_SERIALBUS_EXPORT QModBusFactory
 {
 public:
-    virtual QModBusSlave *createSlave() const = 0;
-    virtual QModBusMaster *createMaster() const = 0;
+    virtual QModBusSlave *createSlave(QModBusDevice::ModBusConnection type) const = 0;
+    virtual QModBusMaster *createMaster(QModBusDevice::ModBusConnection type) const = 0;
 
 protected:
     virtual ~QModBusFactory() {}

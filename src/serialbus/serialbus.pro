@@ -1,6 +1,6 @@
 TARGET = QtSerialBus
 MODULE = serialbus
-QT += core-private
+QT += core-private network
 
 QMAKE_DOCS = $$PWD/doc/qtserialbus.qdocconf
 
@@ -23,14 +23,18 @@ PUBLIC_HEADERS += \
     qmodbusmaster.h \
     qmodbusreply.h \
     qmodbusregister.h \
-    qmodbusserialmaster.h
+    qmodbusserialmaster.h \
+    qmodbustcpclient.h \
+    qmodbustcpserver.h
 
 PRIVATE_HEADERS += \
     qcanbusdevice_p.h \
     qmodbusslave_p.h \
     qmodbusmaster_p.h \
     qmodbusdevice_p.h \
-    qmodbusserialmaster_p.h
+    qmodbusserialmaster_p.h \
+    qmodbustcpclient_p.h \
+    qmodbustcpserver_p.h
 
 SOURCES += \
     qcanbusdevice.cpp \
@@ -44,6 +48,8 @@ SOURCES += \
     qmodbusmaster.cpp \
     qmodbusreply.cpp \
     qmodbusregister.cpp \
-    qmodbusserialmaster.cpp
+    qmodbusserialmaster.cpp \
+    qmodbustcpclient.cpp \
+    qmodbustcpserver.cpp
 
 HEADERS += $$PUBLIC_HEADERS $$PRIVATE_HEADERS

@@ -34,45 +34,42 @@
 **
 ****************************************************************************/
 
-#include "libmodbusmaster.h"
-#include "libmodbusslave.h"
 #include "libmodbustcpclient.h"
-#include "libmodbustcpserver.h"
-
-#include <QtSerialBus/qmodbus.h>
-#include <QtSerialBus/qmodbusfactory.h>
-
-#include <QtCore/qfile.h>
-#include <QtCore/qdebug.h>
 
 QT_BEGIN_NAMESPACE
 
-class ModBusPlugin : public QObject, public QModBusFactory
+LibModBusTcpClient::LibModBusTcpClient()
 {
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QModBusFactory" FILE "plugin.json")
-    Q_INTERFACES(QModBusFactory)
+}
 
-public:
-    QModBusSlave *createSlave(QModBusDevice::ModBusConnection type) const
-    {
-        if (type == QModBusDevice::Serial)
-            return new LibModBusSlave();
-        if (type == QModBusDevice::Tcp)
-            return new LibModBusTcpServer();
-        return Q_NULLPTR;
-    }
+void LibModBusTcpClient::connectDevice(const QString & /*hostName*/, quint16 /*port*/)
+{
+}
 
-    QModBusMaster *createMaster(QModBusDevice::ModBusConnection type) const
-    {
-        if (type == QModBusDevice::Serial)
-            return new LibModBusMaster();
-        if (type == QModBusDevice::Tcp)
-            return new LibModBusTcpClient();
-        return Q_NULLPTR;
-    }
-};
+void LibModBusTcpClient::connectDevice(const QHostAddress & /*address*/, quint16 /*port*/)
+{
+}
+
+QModBusReply* LibModBusTcpClient::read(const QModBusDataUnit & /*request*/, int /*slaveId*/)
+{
+    return Q_NULLPTR;
+}
+
+QModBusReply* LibModBusTcpClient::write(const QModBusDataUnit & /*request*/, int /*slaveId*/)
+{
+    return Q_NULLPTR;
+}
+
+
+// -- private
+
+bool LibModBusTcpClient::open()
+{
+    return false;
+}
+
+void LibModBusTcpClient::close()
+{
+}
 
 QT_END_NAMESPACE
-
-#include "main.moc"

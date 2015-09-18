@@ -53,14 +53,26 @@ class GenericBusPlugin : public QObject, public QModBusFactory
 
 
 public:
-    QModBusSlave *createSlave() const
+    QModBusSlave *createSlave(QModBusDevice::ModBusConnection type) const
     {
-        return new DummySlave();
+        if (type == QModBusDevice::Serial)
+            return new DummySlave();
+        if (type == QModBusDevice::Tcp) {
+            // TODO: implement
+            // return new DummyTcpServer();
+        }
+        return Q_NULLPTR;
     }
 
-    QModBusMaster *createMaster() const
+    QModBusMaster *createMaster(QModBusDevice::ModBusConnection type) const
     {
-        return new DummyMaster();
+        if (type == QModBusDevice::Serial)
+            return new DummyMaster();
+        if (type == QModBusDevice::Tcp) {
+            // TODO: implement
+            // return new DummyTcpClient();
+        }
+        return Q_NULLPTR;
     }
 };
 

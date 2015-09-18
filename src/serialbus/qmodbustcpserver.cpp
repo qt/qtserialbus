@@ -34,45 +34,62 @@
 **
 ****************************************************************************/
 
-#include "libmodbusmaster.h"
-#include "libmodbusslave.h"
-#include "libmodbustcpclient.h"
-#include "libmodbustcpserver.h"
-
-#include <QtSerialBus/qmodbus.h>
-#include <QtSerialBus/qmodbusfactory.h>
-
-#include <QtCore/qfile.h>
-#include <QtCore/qdebug.h>
+#include "qmodbustcpserver.h"
+#include "qmodbustcpserver_p.h"
 
 QT_BEGIN_NAMESPACE
 
-class ModBusPlugin : public QObject, public QModBusFactory
+/*!
+    \class QModBusTcpServer
+    \inmodule QtSerialBus
+    \since 5.6
+
+    \brief The QModBusTcpServer class is the interface class for Modbus TCP sever device.
+
+    Modbus TCP networks can have multiple slaves. Servers are read/written by a client device
+    represented by \l QModBusTcpClient. QModBusTcpServer communicates with a Modbus backend,
+    providing users with a convenient API.
+ */
+
+/*!
+    Constructs a QModBusTcpServer with the specified \a parent.
+ */
+QModBusTcpServer::QModBusTcpServer(QObject *parent) :
+    QModBusSlave(*new QModBusTcpServerPrivate, parent)
 {
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QModBusFactory" FILE "plugin.json")
-    Q_INTERFACES(QModBusFactory)
+}
 
-public:
-    QModBusSlave *createSlave(QModBusDevice::ModBusConnection type) const
-    {
-        if (type == QModBusDevice::Serial)
-            return new LibModBusSlave();
-        if (type == QModBusDevice::Tcp)
-            return new LibModBusTcpServer();
-        return Q_NULLPTR;
-    }
+/*!
+    Destroys the QModBusTcpServer instance.
+*/
+QModBusTcpServer::~QModBusTcpServer()
+{
+}
 
-    QModBusMaster *createMaster(QModBusDevice::ModBusConnection type) const
-    {
-        if (type == QModBusDevice::Serial)
-            return new LibModBusMaster();
-        if (type == QModBusDevice::Tcp)
-            return new LibModBusTcpClient();
-        return Q_NULLPTR;
-    }
-};
+/*!
+    \internal
+ */
+QModBusTcpServer::QModBusTcpServer(QModBusTcpServerPrivate &dd, QObject *parent) :
+    QModBusSlave(dd, parent)
+{
+}
+
+/*!
+    \fn void QModBusTcpServer::listen(const QString &address, quint16 port = 502)
+
+    Tells the server to listen for incoming connections on address \a address and port \a port.
+    If a connection is established, it emits stateChanged() with ModBusDeviceState::ConnectedState.
+
+    At any point, the class can emit stateChanged() to signal the current device state or emit
+    errorOccurred() to signal that an error occurred.
+*/
+
+/*!
+    \fn void QModBusTcpServer::listen(const QHostAddress &address, quint16 port = 502)
+
+    \overload
+
+    Tells the server to listen for incoming connections on address \a address and port \a port.
+*/
 
 QT_END_NAMESPACE
-
-#include "main.moc"

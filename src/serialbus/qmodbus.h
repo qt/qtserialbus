@@ -49,13 +49,15 @@ QT_BEGIN_NAMESPACE
 class Q_SERIALBUS_EXPORT QModBus : public QObject
 {
     Q_OBJECT
+
 public:
     static QModBus *instance();
     QList<QByteArray> plugins() const;
 
-    QModBusSlave *createSlave(const QByteArray &plugin) const;
-
-    QModBusMaster *createMaster(const QByteArray &plugin) const;
+    QModBusSlave *createSlave(const QByteArray &plugin,
+        QModBusDevice::ModBusConnection type = QModBusDevice::Serial) const;
+    QModBusMaster *createMaster(const QByteArray &plugin,
+        QModBusDevice::ModBusConnection type = QModBusDevice::Serial) const;
 
 private:
     QModBus(QObject *parent = 0);

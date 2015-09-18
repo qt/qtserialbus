@@ -34,45 +34,36 @@
 **
 ****************************************************************************/
 
-#include "libmodbusmaster.h"
-#include "libmodbusslave.h"
-#include "libmodbustcpclient.h"
-#include "libmodbustcpserver.h"
+#ifndef QMODBUSTCPCLIENT_P_H
+#define QMODBUSTCPCLIENT_P_H
 
-#include <QtSerialBus/qmodbus.h>
-#include <QtSerialBus/qmodbusfactory.h>
+#include "qmodbusmaster_p.h"
+#include "qmodbustcpclient.h"
 
-#include <QtCore/qfile.h>
-#include <QtCore/qdebug.h>
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qt API. It exists purely as an
+// implementation detail. This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
 
 QT_BEGIN_NAMESPACE
 
-class ModBusPlugin : public QObject, public QModBusFactory
+class QModBusTcpClientPrivate : public QModBusMasterPrivate
 {
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QModBusFactory" FILE "plugin.json")
-    Q_INTERFACES(QModBusFactory)
+    Q_DECLARE_PUBLIC(QModBusTcpClient)
 
 public:
-    QModBusSlave *createSlave(QModBusDevice::ModBusConnection type) const
+    QModBusTcpClientPrivate()
     {
-        if (type == QModBusDevice::Serial)
-            return new LibModBusSlave();
-        if (type == QModBusDevice::Tcp)
-            return new LibModBusTcpServer();
-        return Q_NULLPTR;
-    }
-
-    QModBusMaster *createMaster(QModBusDevice::ModBusConnection type) const
-    {
-        if (type == QModBusDevice::Serial)
-            return new LibModBusMaster();
-        if (type == QModBusDevice::Tcp)
-            return new LibModBusTcpClient();
-        return Q_NULLPTR;
     }
 };
 
 QT_END_NAMESPACE
 
-#include "main.moc"
+#endif // QMODBUSTCPCLIENT_P_H
+

@@ -132,15 +132,15 @@ QModBusPrivate setFactory(const QByteArray &plugin)
     Ownership of the returned backend is transferred to the caller.
     Returns \c null if no suitable device can be found.
  */
-QModBusSlave *QModBus::createSlave(const QByteArray &plugin) const
+QModBusSlave *QModBus::createSlave(const QByteArray &plugin,
+                                   QModBusDevice::ModBusConnection type) const
 {
     if (!qModBusPlugins()->contains(plugin))
         return Q_NULLPTR;
     QModBusPrivate d = setFactory(plugin);
     if (!d.factory)
         return Q_NULLPTR;
-
-    return d.factory->createSlave();
+    return d.factory->createSlave(type);
 }
 
 /*!
@@ -150,15 +150,15 @@ QModBusSlave *QModBus::createSlave(const QByteArray &plugin) const
     Ownership of the returned backend is transferred to the caller.
     Returns \c null if no suitable device can be found.
  */
-QModBusMaster *QModBus::createMaster(const QByteArray &plugin) const
+QModBusMaster *QModBus::createMaster(const QByteArray &plugin,
+                                     QModBusDevice::ModBusConnection type) const
 {
     if (!qModBusPlugins()->contains(plugin))
         return Q_NULLPTR;
     QModBusPrivate d = setFactory(plugin);
     if (!d.factory)
         return Q_NULLPTR;
-
-    return d.factory->createMaster();
+    return d.factory->createMaster(type);
 }
 
 QModBus::QModBus(QObject *parent) :

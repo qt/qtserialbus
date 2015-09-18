@@ -34,45 +34,42 @@
 **
 ****************************************************************************/
 
-#include "libmodbusmaster.h"
-#include "libmodbusslave.h"
-#include "libmodbustcpclient.h"
-#include "libmodbustcpserver.h"
+#ifndef LIBMODBUSTCPSERVER_H
+#define LIBMODBUSTCPSERVER_H
 
-#include <QtSerialBus/qmodbus.h>
-#include <QtSerialBus/qmodbusfactory.h>
+#include <QtSerialBus/qmodbustcpserver.h>
 
-#include <QtCore/qfile.h>
-#include <QtCore/qdebug.h>
+#include <modbus.h>
 
 QT_BEGIN_NAMESPACE
 
-class ModBusPlugin : public QObject, public QModBusFactory
+class LibModBusTcpServer : public QModBusTcpServer
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QModBusFactory" FILE "plugin.json")
-    Q_INTERFACES(QModBusFactory)
+    Q_DISABLE_COPY(LibModBusTcpServer)
 
 public:
-    QModBusSlave *createSlave(QModBusDevice::ModBusConnection type) const
-    {
-        if (type == QModBusDevice::Serial)
-            return new LibModBusSlave();
-        if (type == QModBusDevice::Tcp)
-            return new LibModBusTcpServer();
-        return Q_NULLPTR;
-    }
+    LibModBusTcpServer();
 
-    QModBusMaster *createMaster(QModBusDevice::ModBusConnection type) const
-    {
-        if (type == QModBusDevice::Serial)
-            return new LibModBusMaster();
-        if (type == QModBusDevice::Tcp)
-            return new LibModBusTcpClient();
-        return Q_NULLPTR;
-    }
+    void listen(const QString &address, quint16 port = 502) Q_DECL_OVERRIDE;
+    void listen(const QHostAddress &address, quint16 port = 502) Q_DECL_OVERRIDE;
+
+    bool setMap(const QModBusRegister &newRegister) Q_DECL_OVERRIDE;
+
+    bool data(QModBusRegister::RegisterType table, quint16 address, quint16 *data) Q_DECL_OVERRIDE;
+    bool setData(QModBusRegister::RegisterType table, quint16 address, quint16 data) Q_DECL_OVERRIDE;
+
+private:
+    bool open() Q_DECL_OVERRIDE;
+    void close() Q_DECL_OVERRIDE;
+
+    void setSlaveId(int) Q_DECL_OVERRIDE {} // TODO: remove?
+    int slaveId() const Q_DECL_OVERRIDE { return -1; } // TODO: remove?
+
+private:
+    modbus_t *context;
 };
 
 QT_END_NAMESPACE
 
-#include "main.moc"
+#endif // LIBMODBUSTCPSERVER_H

@@ -34,45 +34,34 @@
 **
 ****************************************************************************/
 
-#include "libmodbusmaster.h"
-#include "libmodbusslave.h"
-#include "libmodbustcpclient.h"
-#include "libmodbustcpserver.h"
+#ifndef QMODBUSTCPSERVER_H
+#define QMODBUSTCPSERVER_H
 
-#include <QtSerialBus/qmodbus.h>
-#include <QtSerialBus/qmodbusfactory.h>
-
-#include <QtCore/qfile.h>
-#include <QtCore/qdebug.h>
+#include <QtNetwork/qhostaddress.h>
+#include <QtSerialBus/qmodbusdataunit.h>
+#include <QtSerialBus/qmodbusregister.h>
+#include <QtSerialBus/qmodbusslave.h>
 
 QT_BEGIN_NAMESPACE
 
-class ModBusPlugin : public QObject, public QModBusFactory
+class QModBusTcpServerPrivate;
+
+class Q_SERIALBUS_EXPORT QModBusTcpServer : public QModBusSlave
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QModBusFactory" FILE "plugin.json")
-    Q_INTERFACES(QModBusFactory)
+    Q_DECLARE_PRIVATE(QModBusTcpServer)
 
 public:
-    QModBusSlave *createSlave(QModBusDevice::ModBusConnection type) const
-    {
-        if (type == QModBusDevice::Serial)
-            return new LibModBusSlave();
-        if (type == QModBusDevice::Tcp)
-            return new LibModBusTcpServer();
-        return Q_NULLPTR;
-    }
+    explicit QModBusTcpServer(QObject *parent = 0);
+    virtual ~QModBusTcpServer();
 
-    QModBusMaster *createMaster(QModBusDevice::ModBusConnection type) const
-    {
-        if (type == QModBusDevice::Serial)
-            return new LibModBusMaster();
-        if (type == QModBusDevice::Tcp)
-            return new LibModBusTcpClient();
-        return Q_NULLPTR;
-    }
+    virtual void listen(const QString &address, quint16 port = 502) = 0;
+    virtual void listen(const QHostAddress &address, quint16 port = 502) = 0;
+
+protected:
+    QModBusTcpServer(QModBusTcpServerPrivate &dd, QObject *parent = Q_NULLPTR);
 };
 
 QT_END_NAMESPACE
 
-#include "main.moc"
+#endif // QMODBUSTCPSERVER_H
