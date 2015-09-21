@@ -86,7 +86,7 @@ public:
         Q_Q(QModBusSerialMaster);
         // forward the error and state changes
         QObject::connect(pluginMaster, SIGNAL(stateChanged(QModBusDevice::ModBusDeviceState)),
-                         q, SIGNAL(handleStateChanged(QModBusDevice::ModBusDeviceState)));
+                         q, SLOT(handleStateChanged(QModBusDevice::ModBusDeviceState)));
         QObject::connect(pluginMaster, SIGNAL(errorOccurred(QModBusDevice::ModBusError)),
                          q, SLOT(handleErrorOccurred(QModBusDevice::ModBusError)));
 
