@@ -78,6 +78,8 @@ QModBusSerialMaster::QModBusSerialMaster(QModBusSerialMasterPrivate &dd,
 bool QModBusSerialMaster::open()
 {
     // TODO remove later on
+    // The function is not needed anymore as connectDevice(QString)
+    // does not rely on it anymore.
     return false;
 }
 

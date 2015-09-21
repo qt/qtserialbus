@@ -43,7 +43,7 @@
 
 #include <QByteArray>
 #include <QModBus>
-#include <QModBusMaster>
+#include <QModBusSerialMaster>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -79,8 +79,13 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
         modBusDevice = Q_NULLPTR;
     }
 
-    modBusDevice = QModBus::instance()->createMaster("libmodbus",
-        static_cast<QModBusDevice::ModBusConnection> (index));
+    QModBusDevice::ModBusConnection type = static_cast<QModBusDevice::ModBusConnection> (index);
+    if (type == QModBusDevice::Serial) {
+        modBusDevice = new QModBusSerialMaster(this);
+    } else if (type == QModBusDevice::Tcp) {
+        modBusDevice = QModBus::instance()->createMaster("libmodbus",
+                           static_cast<QModBusDevice::ModBusConnection> (index));
+    }
 
     if (!modBusDevice) {
         ui->connectButton->setDisabled(true);
@@ -98,8 +103,17 @@ void MainWindow::on_connectButton_clicked()
 
     ui->errorLabel->setText(QString());
     if (modBusDevice->state() != QModBusDevice::ConnectedState) {
-        modBusDevice->setPortName(ui->portEdit->text());
-        if (!modBusDevice->connectDevice())
+        const QString portString = ui->portEdit->text();
+        QModBusSerialMaster *serialMaster = qobject_cast<QModBusSerialMaster *>(modBusDevice);
+        bool connectResult = false;
+
+        if (serialMaster) {
+            connectResult = serialMaster->connectDevice(portString);
+        } else {
+            modBusDevice->setPortName(ui->portEdit->text());
+            connectResult = modBusDevice->connectDevice();
+        }
+        if (!connectResult)
             ui->errorLabel->setText(tr("Connect failed: ") + modBusDevice->errorString());
     } else {
         modBusDevice->disconnectDevice();
