@@ -41,7 +41,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <QModBus>
+#include <QtSerialBus/qmodbus.h>
+#include <QtSerialBus/qmodbusserialslave.h>
 #include <QRegularExpression>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -73,8 +74,12 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
         modBusDevice = Q_NULLPTR;
     }
 
-    modBusDevice = QModBus::instance()->createSlave("libmodbus",
-        static_cast<QModBusDevice::ModBusConnection> (index));
+    QModBusDevice::ModBusConnection type = static_cast<QModBusDevice::ModBusConnection> (index);
+    if (type == QModBusDevice::Serial) {
+        modBusDevice = new QModBusSerialSlave(this);
+    } else if (type == QModBusDevice::Tcp) {
+        modBusDevice = QModBus::instance()->createSlave("libmodbus", type);
+    }
 
     if (!modBusDevice) {
         ui->connectButton->setDisabled(true);
