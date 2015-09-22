@@ -83,7 +83,7 @@ public:
     void setPortName(const QString& name);
     QString portName() const;
 
-    bool connectDevice();
+    virtual bool connectDevice(); //TODO remove virtual, workaround
     void disconnectDevice();
 
     ModBusDeviceState state() const;

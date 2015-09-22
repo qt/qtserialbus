@@ -65,6 +65,7 @@ protected:
     void close() Q_DECL_OVERRIDE;
 
 private:
+    using QModBusDevice::connectDevice;
     Q_PRIVATE_SLOT(d_func(), void handleStateChanged(QModBusDevice::ModBusDeviceState))
     Q_PRIVATE_SLOT(d_func(), void handleErrorOccurred(QModBusDevice::ModBusError))
 };

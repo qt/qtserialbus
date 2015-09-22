@@ -34,35 +34,46 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSTCPCLIENT_H
-#define QMODBUSTCPCLIENT_H
+#ifndef QMODBUSSERIALSLAVE_H
+#define QMODBUSSERIALSLAVE_H
 
-#include <QtNetwork/qhostaddress.h>
-#include <QtSerialBus/qmodbusdataunit.h>
-#include <QtSerialBus/qmodbusmaster.h>
-#include <QtSerialBus/qmodbusreply.h>
+#include <QtSerialBus/qmodbusslave.h>
 
 QT_BEGIN_NAMESPACE
 
-class QModBusTcpClientPrivate;
+class QModBusSerialSlavePrivate;
 
-class Q_SERIALBUS_EXPORT QModBusTcpClient : public QModBusMaster
+class Q_SERIALBUS_EXPORT QModBusSerialSlave : public QModBusSlave
 {
     Q_OBJECT
-    Q_DECLARE_PRIVATE(QModBusTcpClient)
+    Q_DECLARE_PRIVATE(QModBusSerialSlave)
 
 public:
-    explicit QModBusTcpClient(QObject *parent = Q_NULLPTR);
-    virtual ~QModBusTcpClient();
+    explicit QModBusSerialSlave(QObject *parent = Q_NULLPTR);
+    ~QModBusSerialSlave();
 
-    virtual void connectDevice(const QString &hostName, quint16 port = 502) = 0;
-    virtual void connectDevice(const QHostAddress &address, quint16 port = 502) = 0;
+    bool connectDevice() Q_DECL_OVERRIDE;
+
+    bool setMap(const QModBusRegister &newRegister) Q_DECL_OVERRIDE;
+
+    void setSlaveId(int id) Q_DECL_OVERRIDE;
+    int slaveId() const Q_DECL_OVERRIDE;
+
+    bool data(QModBusRegister::RegisterType table, quint16 address, quint16 *data) Q_DECL_OVERRIDE;
+    bool setData(QModBusRegister::RegisterType table, quint16 address, quint16 data) Q_DECL_OVERRIDE;
+
+protected:
+    QModBusSerialSlave(QModBusSerialSlavePrivate &dd,
+                        QObject *parent = Q_NULLPTR);
+
+    bool open() Q_DECL_OVERRIDE;
+    void close() Q_DECL_OVERRIDE;
 
 private:
-    using QModBusDevice::connectDevice;
-    QModBusTcpClient(QModBusTcpClientPrivate &dd, QObject *parent = Q_NULLPTR);
+    Q_PRIVATE_SLOT(d_func(), void handleStateChanged(QModBusDevice::ModBusDeviceState))
+    Q_PRIVATE_SLOT(d_func(), void handleErrorOccurred(QModBusDevice::ModBusError))
 };
 
 QT_END_NAMESPACE
 
-#endif // QMODBUSTCPCLIENT_H
+#endif // QMODBUSSERIALSLAVE_H
