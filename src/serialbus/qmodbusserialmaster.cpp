@@ -41,6 +41,22 @@
 
 QT_BEGIN_NAMESPACE
 
+/*!
+    \class QModBusSerialMaster
+    \inmodule QtSerialBus
+    \since 5.6
+
+    \brief The QModBusSerialMaster class represents a Modbus master/client
+    that uses a serial bus for its communication with the slave/server.
+
+    Communication via Modbus requires the interaction between a single
+    master/client instance and multiple slaves/server. This class
+    provides the master implementation via a serial port.
+*/
+
+/*!
+    Constructs a serial Modbus master with the specified \a parent.
+ */
 QModBusSerialMaster::QModBusSerialMaster(QObject *parent)
     : QModBusMaster(*new QModBusSerialMasterPrivate, parent)
 {
@@ -48,10 +64,21 @@ QModBusSerialMaster::QModBusSerialMaster(QObject *parent)
     d->setupMaster();
 }
 
+/*!
+    \internal
+ */
 QModBusSerialMaster::~QModBusSerialMaster()
 {
 }
 
+/*!
+    Connects the modbus master to a serial port. \a deviceName
+    represents the serial port to which the modbus slaves are connected.
+
+    The function returns \c true on success; otherwise \c false.
+
+    \sa disconnectDevice()
+ */
 bool QModBusSerialMaster::connectDevice(const QString &deviceName)
 {
     Q_D(QModBusSerialMaster);
@@ -67,6 +94,9 @@ bool QModBusSerialMaster::connectDevice(const QString &deviceName)
     return d->pluginMaster->connectDevice();
 }
 
+/*!
+    \internal
+*/
 QModBusSerialMaster::QModBusSerialMaster(QModBusSerialMasterPrivate &dd,
                                          QObject *parent)
     : QModBusMaster(dd, parent)
@@ -75,6 +105,9 @@ QModBusSerialMaster::QModBusSerialMaster(QModBusSerialMasterPrivate &dd,
     d->setupMaster();
 }
 
+/*!
+    \reimp
+ */
 bool QModBusSerialMaster::open()
 {
     // TODO remove later on
@@ -83,6 +116,9 @@ bool QModBusSerialMaster::open()
     return false;
 }
 
+/*!
+    \reimp
+ */
 void QModBusSerialMaster::close()
 {
     Q_D(QModBusSerialMaster);
@@ -108,6 +144,9 @@ void QModBusSerialMasterPrivate::handleErrorOccurred(QModBusDevice::ModBusError 
                 error);
 }
 
+/*!
+    \reimp
+ */
 QModBusReply *QModBusSerialMaster::write(const QModBusDataUnit &request, int slaveId)
 {
     Q_D(QModBusSerialMaster);
@@ -118,6 +157,9 @@ QModBusReply *QModBusSerialMaster::write(const QModBusDataUnit &request, int sla
     return d->pluginMaster->write(request, slaveId);
 }
 
+/*!
+    \reimp
+ */
 QModBusReply *QModBusSerialMaster::read(const QModBusDataUnit &request, int slaveId)
 {
     Q_D(QModBusSerialMaster);

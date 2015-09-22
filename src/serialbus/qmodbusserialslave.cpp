@@ -42,6 +42,25 @@
 
 QT_BEGIN_NAMESPACE
 
+/*!
+    \class QModBusSerialSlave
+    \inmodule QtSerialBus
+    \since 5.6
+
+    \brief The QModBusSerialSlave class represents a Modbus slave/server
+    that uses a serial port for its communication with the master/client.
+
+    Communication via Modbus requires the interaction between a single
+    master/client instance and multiple slaves/server. This class
+    provides the slave implementation via a serial port.
+
+    Since multiple slave instances can interact with a master at the same time
+    (using a serial bus), slaves are identified by their \l slaveId().
+*/
+
+/*!
+    Constructs a serial Modbus slave with the specified \a parent.
+ */
 QModBusSerialSlave::QModBusSerialSlave(QObject *parent)
     : QModBusSlave(*new QModBusSerialSlavePrivate, parent)
 {
@@ -49,6 +68,9 @@ QModBusSerialSlave::QModBusSerialSlave(QObject *parent)
     d->setupMaster();
 }
 
+/*!
+    \internal
+ */
 QModBusSerialSlave::~QModBusSerialSlave()
 {
 }
@@ -71,7 +93,9 @@ bool QModBusSerialSlave::connectDevice()
     return d->pluginMaster->connectDevice();
 }
 
-
+/*!
+    \internal
+ */
 QModBusSerialSlave::QModBusSerialSlave(QModBusSerialSlavePrivate &dd,
                                        QObject *parent)
     : QModBusSlave(dd, parent)
@@ -80,6 +104,10 @@ QModBusSerialSlave::QModBusSerialSlave(QModBusSerialSlavePrivate &dd,
     d->setupMaster();
 }
 
+
+/*!
+    \reimp
+ */
 bool QModBusSerialSlave::setMap(const QModBusRegister &newRegister)
 {
     Q_D(QModBusSerialSlave);
@@ -116,6 +144,9 @@ int QModBusSerialSlave::slaveId() const
     return d->pluginMaster->slaveId();
 }
 
+/*!
+    \reimp
+ */
 bool QModBusSerialSlave::data(QModBusRegister::RegisterType table,
                               quint16 address, quint16 *data)
 {
@@ -127,6 +158,9 @@ bool QModBusSerialSlave::data(QModBusRegister::RegisterType table,
     return d->pluginMaster->data(table, address, data);
 }
 
+/*!
+    \reimp
+ */
 bool QModBusSerialSlave::setData(QModBusRegister::RegisterType table,
                                  quint16 address, quint16 data)
 {
@@ -138,11 +172,17 @@ bool QModBusSerialSlave::setData(QModBusRegister::RegisterType table,
     return d->pluginMaster->setData(table, address, data);
 }
 
+/*!
+    \reimp
+ */
 bool QModBusSerialSlave::open()
 {
     return false;
 }
 
+/*!
+    \reimp
+ */
 void QModBusSerialSlave::close()
 {
     Q_D(QModBusSerialSlave);
