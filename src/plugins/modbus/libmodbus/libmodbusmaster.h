@@ -49,7 +49,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class LibModBusMaster : public QModbusMaster
+class LibModBusMaster : public QModbusClient
 {
     Q_OBJECT
 public:

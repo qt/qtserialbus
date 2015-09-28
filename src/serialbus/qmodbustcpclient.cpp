@@ -53,7 +53,7 @@ QT_BEGIN_NAMESPACE
     Constructs a QModbusTcpClient with the specified \a parent.
  */
 QModbusTcpClient::QModbusTcpClient(QObject *parent)
-    : QModbusMaster(*new QModbusTcpClientPrivate, parent)
+    : QModbusClient(*new QModbusTcpClientPrivate, parent)
 {
 }
 
@@ -68,7 +68,7 @@ QModbusTcpClient::~QModbusTcpClient()
     \internal
 */
 QModbusTcpClient::QModbusTcpClient(QModbusTcpClientPrivate &dd, QObject *parent)
-    : QModbusMaster(dd, parent)
+    : QModbusClient(dd, parent)
 {
 }
 

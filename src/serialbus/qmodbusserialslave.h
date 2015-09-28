@@ -43,7 +43,7 @@ QT_BEGIN_NAMESPACE
 
 class QModbusSerialSlavePrivate;
 
-class Q_SERIALBUS_EXPORT QModbusSerialSlave : public QModbusSlave
+class Q_SERIALBUS_EXPORT QModbusSerialSlave : public QModbusServer
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(QModbusSerialSlave)

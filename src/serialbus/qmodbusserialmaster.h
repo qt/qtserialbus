@@ -42,7 +42,7 @@ QT_BEGIN_NAMESPACE
 
 class QModbusSerialMasterPrivate;
 
-class Q_SERIALBUS_EXPORT QModbusSerialMaster : public QModbusMaster
+class Q_SERIALBUS_EXPORT QModbusSerialMaster : public QModbusClient
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(QModbusSerialMaster)

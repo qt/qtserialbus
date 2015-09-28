@@ -85,7 +85,7 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
         ui->connectButton->setDisabled(true);
         ui->errorLabel->setText(tr("Could not create modbus slave."));
     } else {
-        connect(modbusDevice, &QModbusMaster::stateChanged,
+        connect(modbusDevice, &QModbusClient::stateChanged,
                 this, &MainWindow::onStateChanged);
     }
 }
@@ -103,9 +103,9 @@ void MainWindow::on_connectButton_clicked()
 
         modbusDevice->setMap(reg);
 
-        connect(modbusDevice, &QModbusSlave::slaveWritten,
+        connect(modbusDevice, &QModbusServer::slaveWritten,
                 this, &MainWindow::updateWidgets);
-        connect(modbusDevice, &QModbusSlave::stateChanged,
+        connect(modbusDevice, &QModbusServer::stateChanged,
                 this, &MainWindow::onStateChanged);
     }
 

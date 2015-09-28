@@ -44,7 +44,7 @@ QT_BEGIN_NAMESPACE
     \since 5.6
 
     \brief QModbusRegister is a container class indicating the size of
-    the ModBus register maintained by a QModbusSlave instance.
+    the ModBus register maintained by a QModbusServer instance.
 
  */
 

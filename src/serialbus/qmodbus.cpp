@@ -132,7 +132,7 @@ QModbusPrivate setFactory(const QByteArray &plugin)
     Ownership of the returned backend is transferred to the caller.
     Returns \c null if no suitable device can be found.
  */
-QModbusSlave *QModbus::createSlave(const QByteArray &plugin,
+QModbusServer *QModbus::createSlave(const QByteArray &plugin,
                                    QModbusDevice::ModBusConnection type) const
 {
     if (!qModBusPlugins()->contains(plugin))
@@ -150,7 +150,7 @@ QModbusSlave *QModbus::createSlave(const QByteArray &plugin,
     Ownership of the returned backend is transferred to the caller.
     Returns \c null if no suitable device can be found.
  */
-QModbusMaster *QModbus::createMaster(const QByteArray &plugin,
+QModbusClient *QModbus::createMaster(const QByteArray &plugin,
                                      QModbusDevice::ModBusConnection type) const
 {
     if (!qModBusPlugins()->contains(plugin))

@@ -91,7 +91,7 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
         ui->connectButton->setDisabled(true);
         ui->errorLabel->setText(tr("Could not create modbus master."));
     } else {
-        connect(modbusDevice, &QModbusMaster::stateChanged,
+        connect(modbusDevice, &QModbusClient::stateChanged,
                 this, &MainWindow::onStateChanged);
     }
 }

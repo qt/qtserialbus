@@ -39,7 +39,7 @@
 
 #include <QtSerialBus/qmodbusclient.h>
 
-class DummyMaster : public QModbusMaster
+class DummyMaster : public QModbusClient
 {
     Q_OBJECT
 public:

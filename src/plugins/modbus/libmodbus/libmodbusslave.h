@@ -77,7 +77,7 @@ Q_SIGNALS:
     void slaveWritten(QModbusRegister::RegisterType table, int address, int size);
 };
 
-class LibModBusSlave : public QModbusSlave
+class LibModBusSlave : public QModbusServer
 {
     Q_OBJECT
 public:

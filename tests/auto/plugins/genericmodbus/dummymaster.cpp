@@ -37,7 +37,7 @@
 #include "dummymaster.h"
 
 DummyMaster::DummyMaster(QObject *parent) :
-    QModbusMaster(parent)
+    QModbusClient(parent)
 {
 }
 

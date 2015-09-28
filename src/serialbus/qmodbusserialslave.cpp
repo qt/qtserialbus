@@ -62,7 +62,7 @@ QT_BEGIN_NAMESPACE
     Constructs a serial Modbus slave with the specified \a parent.
  */
 QModbusSerialSlave::QModbusSerialSlave(QObject *parent)
-    : QModbusSlave(*new QModbusSerialSlavePrivate, parent)
+    : QModbusServer(*new QModbusSerialSlavePrivate, parent)
 {
     Q_D(QModbusSerialSlave);
     d->setupMaster();
@@ -98,7 +98,7 @@ bool QModbusSerialSlave::connectDevice()
  */
 QModbusSerialSlave::QModbusSerialSlave(QModbusSerialSlavePrivate &dd,
                                        QObject *parent)
-    : QModbusSlave(dd, parent)
+    : QModbusServer(dd, parent)
 {
     Q_D(QModbusSerialSlave);
     d->setupMaster();

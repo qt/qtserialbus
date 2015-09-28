@@ -39,7 +39,7 @@
 #include <QIODevice>
 
 DummySlave::DummySlave(QObject *parent) :
-    QModbusSlave(parent)
+    QModbusServer(parent)
 {
 }
 

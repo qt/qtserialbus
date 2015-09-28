@@ -44,7 +44,7 @@ QT_BEGIN_NAMESPACE
     \since 5.6
 
     \brief The QCanBusReply class contains the data and address for the request sent with
-    QModbusMaster.
+    QModbusClient.
  */
 
 /*!

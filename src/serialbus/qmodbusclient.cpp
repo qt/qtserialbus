@@ -40,42 +40,42 @@
 QT_BEGIN_NAMESPACE
 
 /*!
-    \class QModbusMaster
+    \class QModbusClient
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QModbusMaster class is the interface class for Modbus master device.
+    \brief The QModbusClient class is the interface class for Modbus master device.
 
-    QModbusMaster communicates with the Modbus backend providing users with a convenient API.
+    QModbusClient communicates with the Modbus backend providing users with a convenient API.
     The Modbus backend must be specified during the object creation.
 */
 
 /*!
     Constructs a Modbus master device with the specified \a parent.
  */
-QModbusMaster::QModbusMaster(QObject *parent)
-    : QModbusDevice(*new QModbusMasterPrivate, parent)
+QModbusClient::QModbusClient(QObject *parent)
+    : QModbusDevice(*new QModbusClientPrivate, parent)
 {
 }
 
 /*!
     \internal
 */
-QModbusMaster::~QModbusMaster()
+QModbusClient::~QModbusClient()
 {
 }
 
 /*!
     \internal
 */
-QModbusMaster::QModbusMaster(QModbusMasterPrivate &dd, QObject *parent) :
+QModbusClient::QModbusClient(QModbusClientPrivate &dd, QObject *parent) :
     QModbusDevice(dd, parent)
 {
 
 }
 
 /*!
-    \fn QModbusReply *QModbusMaster::write(const QModbusDataUnit &request, int slaveId)
+    \fn QModbusReply *QModbusClient::write(const QModbusDataUnit &request, int slaveId)
 
     Sends a request to modify the contents of the data pointed by \a request. Returns a
     new QModbusReply object, which emits the finished() signal whenever a positive response
@@ -84,7 +84,7 @@ QModbusMaster::QModbusMaster(QModbusMasterPrivate &dd, QObject *parent) :
  */
 
 /*!
-    \fn QModbusReply *QModbusMaster::read(const QModbusDataUnit &request, int slaveId)
+    \fn QModbusReply *QModbusClient::read(const QModbusDataUnit &request, int slaveId)
 
     Sends a request to read the contents of the data pointed by \a request. Returns a new QModbusReply object,
     which emits the finished() signal whenever data arrives. Modbus network may have multiple slaves,

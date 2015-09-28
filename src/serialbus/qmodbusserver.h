@@ -47,17 +47,17 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModbusSlavePrivate;
+class QModbusServerPrivate;
 
-class Q_SERIALBUS_EXPORT QModbusSlave : public QModbusDevice
+class Q_SERIALBUS_EXPORT QModbusServer : public QModbusDevice
 {
     Q_OBJECT
-    Q_DECLARE_PRIVATE(QModbusSlave)
+    Q_DECLARE_PRIVATE(QModbusServer)
 
 public:
 
-    explicit QModbusSlave(QObject *parent = 0);
-    virtual ~QModbusSlave();
+    explicit QModbusServer(QObject *parent = 0);
+    virtual ~QModbusServer();
 
     virtual bool setMap(const QModbusRegister &newRegister) = 0;
 
@@ -73,7 +73,7 @@ Q_SIGNALS:
     void slaveWritten(QModbusRegister::RegisterType table, int address, int size);
 
 protected:
-    QModbusSlave(QModbusSlavePrivate &dd, QObject *parent = Q_NULLPTR);
+    QModbusServer(QModbusServerPrivate &dd, QObject *parent = Q_NULLPTR);
 };
 
 QT_END_NAMESPACE

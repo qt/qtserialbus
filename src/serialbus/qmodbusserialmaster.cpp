@@ -58,7 +58,7 @@ QT_BEGIN_NAMESPACE
     Constructs a serial Modbus master with the specified \a parent.
  */
 QModbusSerialMaster::QModbusSerialMaster(QObject *parent)
-    : QModbusMaster(*new QModbusSerialMasterPrivate, parent)
+    : QModbusClient(*new QModbusSerialMasterPrivate, parent)
 {
     Q_D(QModbusSerialMaster);
     d->setupMaster();
@@ -99,7 +99,7 @@ bool QModbusSerialMaster::connectDevice(const QString &deviceName)
 */
 QModbusSerialMaster::QModbusSerialMaster(QModbusSerialMasterPrivate &dd,
                                          QObject *parent)
-    : QModbusMaster(dd, parent)
+    : QModbusClient(dd, parent)
 {
     Q_D(QModbusSerialMaster);
     d->setupMaster();

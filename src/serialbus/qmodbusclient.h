@@ -46,22 +46,22 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModbusMasterPrivate;
+class QModbusClientPrivate;
 
-class Q_SERIALBUS_EXPORT QModbusMaster : public QModbusDevice
+class Q_SERIALBUS_EXPORT QModbusClient : public QModbusDevice
 {
     Q_OBJECT
-    Q_DECLARE_PRIVATE(QModbusMaster)
+    Q_DECLARE_PRIVATE(QModbusClient)
 public:
 
-    explicit QModbusMaster(QObject *parent = 0);
-    virtual ~QModbusMaster();
+    explicit QModbusClient(QObject *parent = 0);
+    virtual ~QModbusClient();
 
     virtual QModbusReply *write(const QModbusDataUnit &request, int slaveId = 1) = 0;
     virtual QModbusReply *read(const QModbusDataUnit &request, int slaveId = 1) = 0;
 
 protected:
-    QModbusMaster(QModbusMasterPrivate &dd, QObject *parent = Q_NULLPTR);
+    QModbusClient(QModbusClientPrivate &dd, QObject *parent = Q_NULLPTR);
 };
 
 QT_END_NAMESPACE

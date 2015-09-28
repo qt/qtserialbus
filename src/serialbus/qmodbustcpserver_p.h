@@ -53,7 +53,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModbusTcpServerPrivate : public QModbusSlavePrivate
+class QModbusTcpServerPrivate : public QModbusServerPrivate
 {
     Q_DECLARE_PUBLIC(QModbusTcpServer)
 

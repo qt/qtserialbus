@@ -46,7 +46,7 @@
 QT_BEGIN_NAMESPACE
 
 LibModBusMaster::LibModBusMaster() :
-    QModbusMaster(),
+    QModbusClient(),
     connected(false)
 {
 }

@@ -46,8 +46,8 @@ QT_BEGIN_NAMESPACE
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QModbusDevice class is the base class for Modbus classes, \l QModbusSlave
-    and \l QModbusMaster.
+    \brief The QModbusDevice class is the base class for Modbus classes, \l QModbusServer
+    and \l QModbusClient.
  */
 
 /*!

@@ -43,7 +43,7 @@
 
 #include <QButtonGroup>
 #include <QMainWindow>
-#include <QModbusSlave>
+#include <QModbusServer>
 
 QT_BEGIN_NAMESPACE
 
@@ -81,7 +81,7 @@ private:
     void setupWidgetContainers();
 
     Ui::MainWindow *ui;
-    QModbusSlave* modbusDevice;
+    QModbusServer* modbusDevice;
 
     QButtonGroup coilButtons;
     QButtonGroup discreteButtons;

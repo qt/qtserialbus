@@ -55,7 +55,7 @@
 QT_BEGIN_NAMESPACE
 
 LibModBusSlave::LibModBusSlave() :
-    QModbusSlave(),
+    QModbusServer(),
     context(0),
     mapping(modbus_mapping_new(0,0,0,0)),
     connected(false),

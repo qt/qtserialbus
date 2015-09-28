@@ -55,7 +55,7 @@ QT_BEGIN_NAMESPACE
     Constructs a QModbusTcpServer with the specified \a parent.
  */
 QModbusTcpServer::QModbusTcpServer(QObject *parent) :
-    QModbusSlave(*new QModbusTcpServerPrivate, parent)
+    QModbusServer(*new QModbusTcpServerPrivate, parent)
 {
 }
 
@@ -70,7 +70,7 @@ QModbusTcpServer::~QModbusTcpServer()
     \internal
  */
 QModbusTcpServer::QModbusTcpServer(QModbusTcpServerPrivate &dd, QObject *parent) :
-    QModbusSlave(dd, parent)
+    QModbusServer(dd, parent)
 {
 }
 

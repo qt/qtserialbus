@@ -57,7 +57,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModbusSerialMasterPrivate : public QModbusMasterPrivate
+class QModbusSerialMasterPrivate : public QModbusClientPrivate
 {
     Q_DECLARE_PUBLIC(QModbusSerialMaster)
 public:
@@ -97,7 +97,7 @@ public:
     void handleStateChanged(QModbusDevice::ModBusDeviceState);
     void handleErrorOccurred(QModbusDevice::ModBusError);
 
-    QModbusMaster* pluginMaster;
+    QModbusClient* pluginMaster;
 };
 
 QT_END_NAMESPACE

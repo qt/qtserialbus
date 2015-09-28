@@ -45,7 +45,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModbusMaster;
+class QModbusClient;
 class QModbusReply;
 
 namespace Ui {
@@ -79,7 +79,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QModbusReply* lastRequest;
-    QModbusMaster* modbusDevice;
+    QModbusClient* modbusDevice;
 };
 
 #endif // MAINWINDOW_H

@@ -41,7 +41,7 @@
 
 QT_FORWARD_DECLARE_CLASS(QIODevice)
 
-class DummySlave : public QModbusSlave
+class DummySlave : public QModbusServer
 {
     Q_OBJECT
 public:
