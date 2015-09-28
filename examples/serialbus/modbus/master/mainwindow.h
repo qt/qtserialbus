@@ -79,7 +79,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QModbusReply* lastRequest;
-    QModbusMaster* modBusDevice;
+    QModbusMaster* modbusDevice;
 };
 
 #endif // MAINWINDOW_H

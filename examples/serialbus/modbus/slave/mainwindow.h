@@ -81,7 +81,7 @@ private:
     void setupWidgetContainers();
 
     Ui::MainWindow *ui;
-    QModbusSlave* modBusDevice;
+    QModbusSlave* modbusDevice;
 
     QButtonGroup coilButtons;
     QButtonGroup discreteButtons;
