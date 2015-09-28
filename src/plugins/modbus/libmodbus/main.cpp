@@ -47,27 +47,27 @@
 
 QT_BEGIN_NAMESPACE
 
-class ModBusPlugin : public QObject, public QModBusFactory
+class ModBusPlugin : public QObject, public QModbusFactory
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QModBusFactory" FILE "plugin.json")
-    Q_INTERFACES(QModBusFactory)
+    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QModbusFactory" FILE "plugin.json")
+    Q_INTERFACES(QModbusFactory)
 
 public:
-    QModBusSlave *createSlave(QModBusDevice::ModBusConnection type) const
+    QModbusSlave *createSlave(QModbusDevice::ModBusConnection type) const
     {
-        if (type == QModBusDevice::Serial)
+        if (type == QModbusDevice::Serial)
             return new LibModBusSlave();
-        if (type == QModBusDevice::Tcp)
+        if (type == QModbusDevice::Tcp)
             return new LibModBusTcpServer();
         return Q_NULLPTR;
     }
 
-    QModBusMaster *createMaster(QModBusDevice::ModBusConnection type) const
+    QModbusMaster *createMaster(QModbusDevice::ModBusConnection type) const
     {
-        if (type == QModBusDevice::Serial)
+        if (type == QModbusDevice::Serial)
             return new LibModBusMaster();
-        if (type == QModBusDevice::Tcp)
+        if (type == QModbusDevice::Tcp)
             return new LibModBusTcpClient();
         return Q_NULLPTR;
     }

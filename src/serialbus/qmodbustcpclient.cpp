@@ -40,40 +40,40 @@
 QT_BEGIN_NAMESPACE
 
 /*!
-    \class QModBusTcpClient
+    \class QModbusTcpClient
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QModBusTcpClient class is the interface class for Modbus TCP client device.
+    \brief The QModbusTcpClient class is the interface class for Modbus TCP client device.
 
-    QModBusTcpClient communicates with the Modbus backend providing users with a convenient API.
+    QModbusTcpClient communicates with the Modbus backend providing users with a convenient API.
 */
 
 /*!
-    Constructs a QModBusTcpClient with the specified \a parent.
+    Constructs a QModbusTcpClient with the specified \a parent.
  */
-QModBusTcpClient::QModBusTcpClient(QObject *parent)
-    : QModBusMaster(*new QModBusTcpClientPrivate, parent)
+QModbusTcpClient::QModbusTcpClient(QObject *parent)
+    : QModbusMaster(*new QModbusTcpClientPrivate, parent)
 {
 }
 
 /*!
-    Destroys the QModBusTcpClient instance.
+    Destroys the QModbusTcpClient instance.
 */
-QModBusTcpClient::~QModBusTcpClient()
+QModbusTcpClient::~QModbusTcpClient()
 {
 }
 
 /*!
     \internal
 */
-QModBusTcpClient::QModBusTcpClient(QModBusTcpClientPrivate &dd, QObject *parent)
-    : QModBusMaster(dd, parent)
+QModbusTcpClient::QModbusTcpClient(QModbusTcpClientPrivate &dd, QObject *parent)
+    : QModbusMaster(dd, parent)
 {
 }
 
 /*!
-    \fn void QModBusTcpClient::connectDevice(const QString &hostName, quint16 port = 502)
+    \fn void QModbusTcpClient::connectDevice(const QString &hostName, quint16 port = 502)
 
     Attempts to make a connection to \a hostName on the given \a port. If a connection is
     established, it emits stateChanged() with ModBusDeviceState::ConnectedState.
@@ -86,7 +86,7 @@ QModBusTcpClient::QModBusTcpClient(QModBusTcpClientPrivate &dd, QObject *parent)
 */
 
 /*!
-    \fn void QModBusTcpClient::connectDevice(const QHostAddress &address, quint16 port = 502)
+    \fn void QModbusTcpClient::connectDevice(const QHostAddress &address, quint16 port = 502)
 
     \overload
 

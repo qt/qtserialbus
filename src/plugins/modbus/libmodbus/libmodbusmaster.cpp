@@ -46,27 +46,27 @@
 QT_BEGIN_NAMESPACE
 
 LibModBusMaster::LibModBusMaster() :
-    QModBusMaster(),
+    QModbusMaster(),
     connected(false)
 {
 }
 
-QModBusReply* LibModBusMaster::write(const QModBusDataUnit &request, int slaveId)
+QModbusReply* LibModBusMaster::write(const QModbusDataUnit &request, int slaveId)
 {
     if (request.values().isEmpty()
             || request.valueCount() <= 0
             || request.startAddress() < 0) {
-        setError(tr("Empty or invalid write request."), QModBusDevice::WriteError);
+        setError(tr("Empty or invalid write request."), QModbusDevice::WriteError);
         return 0;
     }
 
     // only write to writable registers
     switch (request.registerType()) {
-    case QModBusRegister::Coils:
-    case QModBusRegister::HoldingRegisters:
+    case QModbusRegister::Coils:
+    case QModbusRegister::HoldingRegisters:
         break;
     default:
-        setError(tr("Trying to write read only table."), QModBusDevice::WriteError);
+        setError(tr("Trying to write read only table."), QModbusDevice::WriteError);
         return 0;
     }
 
@@ -75,11 +75,11 @@ QModBusReply* LibModBusMaster::write(const QModBusDataUnit &request, int slaveId
     return reply;
 }
 
-QModBusReply* LibModBusMaster::read(const QModBusDataUnit &request, int slaveId)
+QModbusReply* LibModBusMaster::read(const QModbusDataUnit &request, int slaveId)
 {
     // request.values().size() is ignored, the read request will fill it
     if (request.valueCount() <= 0 || request.startAddress() < 0) {
-        setError(tr("Empty or invalid read request."), QModBusDevice::ReadError);
+        setError(tr("Empty or invalid read request."), QModbusDevice::ReadError);
         return 0;
     }
 
@@ -99,7 +99,7 @@ bool LibModBusMaster::open()
 
     if (location.isEmpty()) {
         setError(tr("No portname for serial port specified."),
-                 QModBusDevice::ConnectionError);
+                 QModbusDevice::ConnectionError);
         return false;
     }
 
@@ -112,26 +112,26 @@ bool LibModBusMaster::open()
     context = modbus_new_rtu(location.toLatin1(),
                              baud, parity, dataBits, stopBits);
     if (!context) {
-        setError(qt_error_string(errno), QModBusDevice::ConnectionError);
+        setError(qt_error_string(errno), QModbusDevice::ConnectionError);
         return false;
     }
 
     modbus_set_debug(context, TRUE);
     if (modbus_connect(context) == -1) {
-        setError(qt_error_string(errno), QModBusDevice::ConnectionError);
+        setError(qt_error_string(errno), QModbusDevice::ConnectionError);
         close();
         return false;
     }
 
     connected = true;
-    setState(QModBusDevice::ConnectedState);
+    setState(QModbusDevice::ConnectedState);
     return true;
 }
 
 void LibModBusMaster::close()
 {
     connected = false;
-    setState(QModBusDevice::UnconnectedState);
+    setState(QModbusDevice::UnconnectedState);
 }
 
 QString LibModBusMaster::portNameToSystemLocation(const QString &source) const

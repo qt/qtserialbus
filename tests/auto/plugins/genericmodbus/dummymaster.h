@@ -39,14 +39,14 @@
 
 #include <QtSerialBus/qmodbusmaster.h>
 
-class DummyMaster : public QModBusMaster
+class DummyMaster : public QModbusMaster
 {
     Q_OBJECT
 public:
     explicit DummyMaster(QObject *parent = 0);
 
-    QModBusReply *write(const QModBusDataUnit &request, int slaveId) Q_DECL_OVERRIDE;
-    QModBusReply *read(const QModBusDataUnit &request, int slaveId) Q_DECL_OVERRIDE;
+    QModbusReply *write(const QModbusDataUnit &request, int slaveId) Q_DECL_OVERRIDE;
+    QModbusReply *read(const QModbusDataUnit &request, int slaveId) Q_DECL_OVERRIDE;
 
 protected:
     bool open();

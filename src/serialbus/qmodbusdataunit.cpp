@@ -41,34 +41,34 @@
 QT_BEGIN_NAMESPACE
 
 /*!
-    \class QModBusDataUnit
+    \class QModbusDataUnit
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief QModBusDataUnit is a container class representing
+    \brief QModbusDataUnit is a container class representing
     single bit and 16 bit word entries in the Modbus register.
 
-    \l QModBusDataUnit can be used for read and write operations.
+    \l QModbusDataUnit can be used for read and write operations.
     The entries are addressed the starting \l startAddress()
     and the \l {valueCount()}{number} of contiguous entries.
     \l registerType() determines which register is used for the
     operations. Note that some registers are read-only registers.
 
     The actual \l values() are either single bit or 16 bit based.
-    \l{QModBusRegister::}{DiscreteInputs} and \l{QModBusRegister::}{Coils}
+    \l{QModbusRegister::}{DiscreteInputs} and \l{QModbusRegister::}{Coils}
     only accept single bits. Therefore 0 is intepreted as \c 0 and
     anything else \c 1.
  */
 
 /*!
-    \fn QModBusDataUnit::QModBusDataUnit(QModBusRegister::RegisterType registerType, int dataAddress, quint16 initValue)
+    \fn QModbusDataUnit::QModbusDataUnit(QModbusRegister::RegisterType registerType, int dataAddress, quint16 initValue)
 
     Constructs a unit of data for \a registerType.
     Address of the data is \a dataAddress and value of the data is \a initValue.
  */
 
 /*!
-    \fn QModBusDataUnit::QModBusDataUnit(QModBusRegister::RegisterType registerType, int startAddress, const QVector<quint16> &data)
+    \fn QModbusDataUnit::QModbusDataUnit(QModbusRegister::RegisterType registerType, int startAddress, const QVector<quint16> &data)
 
     Constructs a unit of data for \a registerType. The \a data block is placed
     into the register starting at \a startAddress. \l valueCount() is implied
@@ -76,30 +76,30 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \fn QModBusDataUnit::QModBusDataUnit(QModBusRegister::RegisterType registerType)
+    \fn QModbusDataUnit::QModbusDataUnit(QModbusRegister::RegisterType registerType)
 
     Constructs a unit of data for \a registerType. \l startAddress() is set to \c 0
     and \l values() is empty.
  */
 
 /*!
-    \fn void QModBusDataUnit::setRegisterType(QModBusRegister::RegisterType registerType)
+    \fn void QModbusDataUnit::setRegisterType(QModbusRegister::RegisterType registerType)
 
     Sets the \a registerType.
 
-    \sa registerType(), QModBusRegister::RegisterType
+    \sa registerType(), QModbusRegister::RegisterType
  */
 
 /*!
-    \fn QModBusRegister::RegisterType QModBusDataUnit::registerType() const
+    \fn QModbusRegister::RegisterType QModbusDataUnit::registerType() const
 
     Returns the type of the register.
 
-    \sa setRegisterType(), QModBusRegister::RegisterType
+    \sa setRegisterType(), QModbusRegister::RegisterType
  */
 
 /*!
-    \fn void QModBusDataUnit::setStartAddress(int address)
+    \fn void QModbusDataUnit::setStartAddress(int address)
 
     Sets the \a address of the data unit.
 
@@ -107,7 +107,7 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \fn int QModBusDataUnit::startAddress() const
+    \fn int QModbusDataUnit::startAddress() const
 
     Returns the address of data unit in the register.
 
@@ -115,27 +115,27 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \fn void QModBusDataUnit::setValues(const QVector<quint16> &values)
+    \fn void QModbusDataUnit::setValues(const QVector<quint16> &values)
 
-    Sets the \a values of the data unit. \l{QModBusRegister::}{DiscreteInputs}
-    and \l{QModBusRegister::}{Coils} tables only accept single bit
+    Sets the \a values of the data unit. \l{QModbusRegister::}{DiscreteInputs}
+    and \l{QModbusRegister::}{Coils} tables only accept single bit
     value, so 0 is interpreted as 0 and anything else as 1.
 
     \sa values()
  */
 
 /*!
-    \fn QVector<quint16> QModBusDataUnit::values() const
+    \fn QVector<quint16> QModbusDataUnit::values() const
 
-    Returns the data in the data unit. \l{QModBusRegister::}{DiscreteInputs}
-    and \l{QModBusRegister::}{Coils} tables only accept single bit
+    Returns the data in the data unit. \l{QModbusRegister::}{DiscreteInputs}
+    and \l{QModbusRegister::}{Coils} tables only accept single bit
     value, so 0 is interpreted as 0 and anything else as 1.
 
     \sa setValues()
  */
 
 /*!
-    \fn int QModBusDataUnit::valueCount() const
+    \fn int QModbusDataUnit::valueCount() const
 
     Returns the size of \l values().
 
@@ -149,7 +149,7 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \fn void QModBusDataUnit::setValueCount(int newCount)
+    \fn void QModbusDataUnit::setValueCount(int newCount)
 
     Sets the size of the requested register's data block to \a newCount.
 

@@ -35,27 +35,27 @@
 ****************************************************************************/
 
 #include <QtTest/QtTest>
-#include <QtSerialBus/QModBusReply>
+#include <QtSerialBus/QModbusReply>
 #include <QtCore/qpointer.h>
 
-class dummyReply : public QModBusReply
+class dummyReply : public QModbusReply
 {
-friend class tst_QModBusReply;
+friend class tst_QModbusReply;
 
 protected:
     void setFinished() Q_DECL_OVERRIDE { finish = true; }
-    void setError(QModBusReply::RequestError errorCode, const QString &errorString) Q_DECL_OVERRIDE
+    void setError(QModbusReply::RequestError errorCode, const QString &errorString) Q_DECL_OVERRIDE
     {
         errorType = errorCode;
         errorText = errorString;
     }
 };
 
-class tst_QModBusReply : public QObject
+class tst_QModbusReply : public QObject
 {
     Q_OBJECT
 public:
-    explicit tst_QModBusReply();
+    explicit tst_QModbusReply();
 
 private slots:
     void error();
@@ -67,24 +67,24 @@ private:
     QPointer<dummyReply> reply;
 };
 
-tst_QModBusReply::tst_QModBusReply()
+tst_QModbusReply::tst_QModbusReply()
 {
     reply = new dummyReply();
 }
 
-void tst_QModBusReply::error()
+void tst_QModbusReply::error()
 {
-    QCOMPARE(reply->error(), QModBusReply::NoError);
+    QCOMPARE(reply->error(), QModbusReply::NoError);
 }
 
-void tst_QModBusReply::errorString()
+void tst_QModbusReply::errorString()
 {
     QString error("error string");
-    reply->setError(QModBusReply::IllegalFunction, error);
+    reply->setError(QModbusReply::IllegalFunction, error);
     QCOMPARE(reply->errorString(), error);
 }
 
-void tst_QModBusReply::finished()
+void tst_QModbusReply::finished()
 {
     QVERIFY(!reply->isFinished());
     QVERIFY(reply->isRunning());
@@ -95,12 +95,12 @@ void tst_QModBusReply::finished()
     QVERIFY(!reply->isRunning());
 }
 
-void tst_QModBusReply::result()
+void tst_QModbusReply::result()
 {
-    QList<QModBusDataUnit> units = reply->result();
+    QList<QModbusDataUnit> units = reply->result();
     QVERIFY(units.isEmpty());
 }
 
-QTEST_MAIN(tst_QModBusReply)
+QTEST_MAIN(tst_QModbusReply)
 
 #include "tst_qmodbusreply.moc"

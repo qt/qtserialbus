@@ -35,34 +35,34 @@
 ****************************************************************************/
 
 #include <QtTest/QtTest>
-#include <QtSerialBus/QModBusDataUnit>
+#include <QtSerialBus/QModbusDataUnit>
 
-class tst_QModBusDataUnit : public QObject
+class tst_QModbusDataUnit : public QObject
 {
     Q_OBJECT
 public:
-    explicit tst_QModBusDataUnit();
+    explicit tst_QModbusDataUnit();
 
 private slots:
     void constructors();
     void setters();
 };
 
-tst_QModBusDataUnit::tst_QModBusDataUnit()
+tst_QModbusDataUnit::tst_QModbusDataUnit()
 {
 }
 
-void tst_QModBusDataUnit::constructors()
+void tst_QModbusDataUnit::constructors()
 {
-    QModBusDataUnit unit1(QModBusRegister::Coils);
+    QModbusDataUnit unit1(QModbusRegister::Coils);
 
-    QCOMPARE(unit1.registerType(), QModBusRegister::Coils);
+    QCOMPARE(unit1.registerType(), QModbusRegister::Coils);
     QCOMPARE(unit1.startAddress(), 0);
     QCOMPARE(unit1.valueCount(), 0);
     QVERIFY(unit1.values().isEmpty());
 
-    QModBusDataUnit unit2(QModBusRegister::HoldingRegisters, 3, 9);
-    QCOMPARE(unit2.registerType(), QModBusRegister::HoldingRegisters);
+    QModbusDataUnit unit2(QModbusRegister::HoldingRegisters, 3, 9);
+    QCOMPARE(unit2.registerType(), QModbusRegister::HoldingRegisters);
     QCOMPARE(unit2.startAddress(), 3);
     QCOMPARE(unit2.values().size(), 1);
     QCOMPARE(unit2.values().at(0), (quint16) 9);
@@ -73,8 +73,8 @@ void tst_QModBusDataUnit::constructors()
     data.append(6);
     data.append(7);
 
-    QModBusDataUnit unit3(QModBusRegister::InputRegisters, 2, data);
-    QCOMPARE(unit3.registerType(), QModBusRegister::InputRegisters);
+    QModbusDataUnit unit3(QModbusRegister::InputRegisters, 2, data);
+    QCOMPARE(unit3.registerType(), QModbusRegister::InputRegisters);
     QCOMPARE(unit3.startAddress(), 2);
     QCOMPARE(unit3.values().size(), 3);
     QCOMPARE(unit3.values().at(0), (quint16) 5);
@@ -83,19 +83,19 @@ void tst_QModBusDataUnit::constructors()
     QCOMPARE(unit3.valueCount(), 3);
 }
 
-void tst_QModBusDataUnit::setters()
+void tst_QModbusDataUnit::setters()
 {
-    QModBusDataUnit unit(QModBusRegister::HoldingRegisters, 3, 9);
+    QModbusDataUnit unit(QModbusRegister::HoldingRegisters, 3, 9);
     QCOMPARE(unit.valueCount(), 1);
 
-    unit.setRegisterType(QModBusRegister::InputRegisters);
+    unit.setRegisterType(QModbusRegister::InputRegisters);
     unit.setStartAddress(2);
     QVector<quint16> data;
     data.append(9u);
     data.append(5u);
     unit.setValues(data);
 
-    QCOMPARE(unit.registerType(), QModBusRegister::InputRegisters);
+    QCOMPARE(unit.registerType(), QModbusRegister::InputRegisters);
     QCOMPARE(unit.startAddress(), 2);
     QCOMPARE(unit.valueCount(), 2);
     QCOMPARE(unit.values().size(), 2);
@@ -110,6 +110,6 @@ void tst_QModBusDataUnit::setters()
     QCOMPARE(unit.values().at(1), (quint16) 5);
 }
 
-QTEST_MAIN(tst_QModBusDataUnit)
+QTEST_MAIN(tst_QModbusDataUnit)
 
 #include "tst_qmodbusdataunit.moc"

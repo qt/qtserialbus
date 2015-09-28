@@ -46,7 +46,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class Q_SERIALBUS_EXPORT QModBusReply : public QObject
+class Q_SERIALBUS_EXPORT QModbusReply : public QObject
 {
     Q_OBJECT
 public:
@@ -64,13 +64,13 @@ public:
         InvalidCRC,
         InvalidError
     };
-    explicit QModBusReply(QObject *parent = 0);
+    explicit QModbusReply(QObject *parent = 0);
 
     RequestError error() const;
     QString errorString() const;
     bool isFinished() const;
     bool isRunning() const;
-    QList<QModBusDataUnit> result() const;
+    QList<QModbusDataUnit> result() const;
 
 Q_SIGNALS:
     void errorOccurred(RequestError code);
@@ -82,7 +82,7 @@ protected:
 
     RequestError errorType;
     QString errorText;
-    QList<QModBusDataUnit> payload;
+    QList<QModbusDataUnit> payload;
     bool finish;
 };
 

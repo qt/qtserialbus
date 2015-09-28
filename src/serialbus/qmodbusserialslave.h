@@ -41,37 +41,37 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModBusSerialSlavePrivate;
+class QModbusSerialSlavePrivate;
 
-class Q_SERIALBUS_EXPORT QModBusSerialSlave : public QModBusSlave
+class Q_SERIALBUS_EXPORT QModbusSerialSlave : public QModbusSlave
 {
     Q_OBJECT
-    Q_DECLARE_PRIVATE(QModBusSerialSlave)
+    Q_DECLARE_PRIVATE(QModbusSerialSlave)
 
 public:
-    explicit QModBusSerialSlave(QObject *parent = Q_NULLPTR);
-    ~QModBusSerialSlave();
+    explicit QModbusSerialSlave(QObject *parent = Q_NULLPTR);
+    ~QModbusSerialSlave();
 
     bool connectDevice() Q_DECL_OVERRIDE;
 
-    bool setMap(const QModBusRegister &newRegister) Q_DECL_OVERRIDE;
+    bool setMap(const QModbusRegister &newRegister) Q_DECL_OVERRIDE;
 
     void setSlaveId(int id) Q_DECL_OVERRIDE;
     int slaveId() const Q_DECL_OVERRIDE;
 
-    bool data(QModBusRegister::RegisterType table, quint16 address, quint16 *data) Q_DECL_OVERRIDE;
-    bool setData(QModBusRegister::RegisterType table, quint16 address, quint16 data) Q_DECL_OVERRIDE;
+    bool data(QModbusRegister::RegisterType table, quint16 address, quint16 *data) Q_DECL_OVERRIDE;
+    bool setData(QModbusRegister::RegisterType table, quint16 address, quint16 data) Q_DECL_OVERRIDE;
 
 protected:
-    QModBusSerialSlave(QModBusSerialSlavePrivate &dd,
+    QModbusSerialSlave(QModbusSerialSlavePrivate &dd,
                         QObject *parent = Q_NULLPTR);
 
     bool open() Q_DECL_OVERRIDE;
     void close() Q_DECL_OVERRIDE;
 
 private:
-    Q_PRIVATE_SLOT(d_func(), void handleStateChanged(QModBusDevice::ModBusDeviceState))
-    Q_PRIVATE_SLOT(d_func(), void handleErrorOccurred(QModBusDevice::ModBusError))
+    Q_PRIVATE_SLOT(d_func(), void handleStateChanged(QModbusDevice::ModBusDeviceState))
+    Q_PRIVATE_SLOT(d_func(), void handleErrorOccurred(QModbusDevice::ModBusError))
 };
 
 QT_END_NAMESPACE

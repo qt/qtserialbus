@@ -42,10 +42,10 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModBusRegister
+class QModbusRegister
 {
 public:
-    QModBusRegister() { dataSet.fill(0u, 4); }
+    QModbusRegister() { dataSet.fill(0u, 4); }
 
     enum RegisterType {
         DiscreteInputs,
@@ -54,12 +54,12 @@ public:
         HoldingRegisters
     };
 
-    void setRegisterSize(QModBusRegister::RegisterType registerType, quint16 size)
+    void setRegisterSize(QModbusRegister::RegisterType registerType, quint16 size)
     {
         dataSet[registerType] = size;
     }
 
-    quint16 registerSize(QModBusRegister::RegisterType registerType) const
+    quint16 registerSize(QModbusRegister::RegisterType registerType) const
     {
         return dataSet[registerType];
     }
@@ -68,11 +68,11 @@ private:
     QVector<quint16> dataSet;
 };
 
-Q_DECLARE_TYPEINFO(QModBusRegister::RegisterType, Q_PRIMITIVE_TYPE);
-Q_DECLARE_TYPEINFO(QModBusRegister, Q_MOVABLE_TYPE);
+Q_DECLARE_TYPEINFO(QModbusRegister::RegisterType, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(QModbusRegister, Q_MOVABLE_TYPE);
 
 QT_END_NAMESPACE
 
-Q_DECLARE_METATYPE(QModBusRegister::RegisterType)
+Q_DECLARE_METATYPE(QModbusRegister::RegisterType)
 
 #endif // QMODBUSREGISTER_H

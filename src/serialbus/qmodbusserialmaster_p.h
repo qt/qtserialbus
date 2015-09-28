@@ -57,15 +57,15 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModBusSerialMasterPrivate : public QModBusMasterPrivate
+class QModbusSerialMasterPrivate : public QModbusMasterPrivate
 {
-    Q_DECLARE_PUBLIC(QModBusSerialMaster)
+    Q_DECLARE_PUBLIC(QModbusSerialMaster)
 public:
-    QModBusSerialMasterPrivate()
+    QModbusSerialMasterPrivate()
         : pluginMaster(Q_NULLPTR)
     {
         //hard usage of libmodbus plugin
-        pluginMaster = QModBus::instance()->createMaster(
+        pluginMaster = QModbus::instance()->createMaster(
                             QByteArray("libmodbus"));
         if (!pluginMaster) {
             qWarning() << "Cannot find libmodbus plugin.";
@@ -73,7 +73,7 @@ public:
         }
     }
 
-    ~QModBusSerialMasterPrivate()
+    ~QModbusSerialMasterPrivate()
     {
         delete pluginMaster;
     }
@@ -83,21 +83,21 @@ public:
         if (!pluginMaster)
             return;
 
-        Q_Q(QModBusSerialMaster);
+        Q_Q(QModbusSerialMaster);
         // forward the error and state changes
-        QObject::connect(pluginMaster, SIGNAL(stateChanged(QModBusDevice::ModBusDeviceState)),
-                         q, SLOT(handleStateChanged(QModBusDevice::ModBusDeviceState)));
-        QObject::connect(pluginMaster, SIGNAL(errorOccurred(QModBusDevice::ModBusError)),
-                         q, SLOT(handleErrorOccurred(QModBusDevice::ModBusError)));
+        QObject::connect(pluginMaster, SIGNAL(stateChanged(QModbusDevice::ModBusDeviceState)),
+                         q, SLOT(handleStateChanged(QModbusDevice::ModBusDeviceState)));
+        QObject::connect(pluginMaster, SIGNAL(errorOccurred(QModbusDevice::ModBusError)),
+                         q, SLOT(handleErrorOccurred(QModbusDevice::ModBusError)));
 
         q->setState(pluginMaster->state());
         q->setError(pluginMaster->errorString(), pluginMaster->error());
     }
 
-    void handleStateChanged(QModBusDevice::ModBusDeviceState);
-    void handleErrorOccurred(QModBusDevice::ModBusError);
+    void handleStateChanged(QModbusDevice::ModBusDeviceState);
+    void handleErrorOccurred(QModbusDevice::ModBusError);
 
-    QModBusMaster* pluginMaster;
+    QModbusMaster* pluginMaster;
 };
 
 QT_END_NAMESPACE

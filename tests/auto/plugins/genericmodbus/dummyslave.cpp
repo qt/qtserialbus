@@ -39,7 +39,7 @@
 #include <QIODevice>
 
 DummySlave::DummySlave(QObject *parent) :
-    QModBusSlave(parent)
+    QModbusSlave(parent)
 {
 }
 
@@ -53,7 +53,7 @@ void DummySlave::close()
 
 }
 
-bool DummySlave::setMap(const QModBusRegister &/*newRegister*/)
+bool DummySlave::setMap(const QModbusRegister &/*newRegister*/)
 {
     return false;
 }
@@ -68,7 +68,7 @@ int DummySlave::slaveId() const
     return 1;
 }
 
-bool DummySlave::data(QModBusRegister::RegisterType table, quint16 address, quint16 *data)
+bool DummySlave::data(QModbusRegister::RegisterType table, quint16 address, quint16 *data)
 {
     Q_UNUSED(table);
     Q_UNUSED(address);
@@ -76,7 +76,7 @@ bool DummySlave::data(QModBusRegister::RegisterType table, quint16 address, quin
     return true;
 }
 
-bool DummySlave::setData(QModBusRegister::RegisterType table, quint16 address, quint16 data)
+bool DummySlave::setData(QModbusRegister::RegisterType table, quint16 address, quint16 data)
 {
     Q_UNUSED(table);
     Q_UNUSED(address);

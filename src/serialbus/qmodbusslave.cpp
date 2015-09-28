@@ -40,14 +40,14 @@
 QT_BEGIN_NAMESPACE
 
 /*!
-    \class QModBusSlave
+    \class QModbusSlave
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QModBusSlave class is the interface class for Modbus.
+    \brief The QModbusSlave class is the interface class for Modbus.
 
     Modbus networks can have multiple slaves. Slaves are read/written by a
-    master device represented by \l QModBusMaster. QModBusSlave communicates
+    master device represented by \l QModbusMaster. QModbusSlave communicates
     with a Modbus backend, providing users with a convenient API.
     The Modbus backend must be specified during the object creation.
  */
@@ -55,28 +55,28 @@ QT_BEGIN_NAMESPACE
 /*!
     Constructs a Modbus slave with the specified \a parent.
  */
-QModBusSlave::QModBusSlave(QObject *parent) :
-    QModBusDevice(*new QModBusSlavePrivate, parent)
+QModbusSlave::QModbusSlave(QObject *parent) :
+    QModbusDevice(*new QModbusSlavePrivate, parent)
 {
 }
 
 /*!
     \internal
 */
-QModBusSlave::~QModBusSlave()
+QModbusSlave::~QModbusSlave()
 {
 }
 
 /*!
     \internal
  */
-QModBusSlave::QModBusSlave(QModBusSlavePrivate &dd, QObject *parent) :
-    QModBusDevice(dd, parent)
+QModbusSlave::QModbusSlave(QModbusSlavePrivate &dd, QObject *parent) :
+    QModbusDevice(dd, parent)
 {
 }
 
 /*!
-    \fn bool QModBusSlave::setMap(const QModBusRegister &newRegister) = 0
+    \fn bool QModbusSlave::setMap(const QModbusRegister &newRegister) = 0
 
     Sets the registered map structure for requests from other ModBus masters to \a newRegister.
     The register values are initialized with zero. Returns \c true on success; otherwise \c false.
@@ -88,7 +88,7 @@ QModBusSlave::QModBusSlave(QModBusSlavePrivate &dd, QObject *parent) :
  */
 
 /*!
-    \fn int QModBusSlave::slaveId() const
+    \fn int QModbusSlave::slaveId() const
     Multiple Modbus devices can be connected together on the same physical link.
     Slave id is a unique identifier that each slave must have, and it is used
     to filter out incoming messages.
@@ -99,7 +99,7 @@ QModBusSlave::QModBusSlave(QModBusSlavePrivate &dd, QObject *parent) :
  */
 
 /*!
-    \fn void QModBusSlave::setSlaveId(int id)
+    \fn void QModbusSlave::setSlaveId(int id)
     Multiple Modbus devices can be connected together on the same physical link.
     So it is important that each slave is identified by a unique id.
 
@@ -109,34 +109,34 @@ QModBusSlave::QModBusSlave(QModBusSlavePrivate &dd, QObject *parent) :
  */
 
 /*!
-    \fn bool QModBusSlave::data(QModBusRegister::RegisterType table, quint16 address, quint16 *data)
+    \fn bool QModbusSlave::data(QModbusRegister::RegisterType table, quint16 address, quint16 *data)
 
     Reads data stored in the slave. Slave has four tables (\a table) and each have a unique
     \a address field, which is used to read \a data from the desired field.
-    See QModBusRegister::RegisterType for more information about the different tables.
+    See QModbusRegister::RegisterType for more information about the different tables.
     Returns \c false if address is outside of the map range.
 
-    \sa QModBusRegister::RegisterType, setData()
+    \sa QModbusRegister::RegisterType, setData()
  */
 
 /*!
-    \fn bool QModBusSlave::setData(QModBusRegister::RegisterType table, quint16 address, quint16 data)
+    \fn bool QModbusSlave::setData(QModbusRegister::RegisterType table, quint16 address, quint16 data)
 
     Writes data to the slave. Slave has four tables (\a table) and each have a unique
     \a address field, which is used to write \a data to the desired field.
     Returns \c false if address outside of the map range.
 
-    \sa QModBusRegister::RegisterType, data()
+    \sa QModbusRegister::RegisterType, data()
  */
 
 /*!
-    \fn void QModBusSlave::slaveRead()
+    \fn void QModbusSlave::slaveRead()
 
     This signal is emitted when master has read one or more fields of data from the slave.
  */
 
 /*!
-    \fn void QModBusSlave::slaveWritten(QModBusRegister::RegisterType table, int address, int size)
+    \fn void QModbusSlave::slaveWritten(QModbusRegister::RegisterType table, int address, int size)
 
     This signal is emitted when master has written one or more fields of data to the slave.
     Signal contains information about the fields that were written:

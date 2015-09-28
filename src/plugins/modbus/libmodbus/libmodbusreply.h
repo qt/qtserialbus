@@ -53,7 +53,7 @@ class RequestThread : public QObject
 {
     Q_OBJECT
 public:
-    QModBusRegister::RegisterType table;
+    QModbusRegister::RegisterType table;
     int startAddress;
     QVector<quint16> values;
     quint16 size;
@@ -76,19 +76,19 @@ private:
     void writeBytes();
 };
 
-class Reply : public QModBusReply
+class Reply : public QModbusReply
 {
     Q_OBJECT
 public:
     explicit Reply(QObject *parent = 0);
     ~Reply();
 
-    void read(const QModBusDataUnit &requests, int slaveId, modbus_t *context);
-    void write(const QModBusDataUnit &requests, int slaveId, modbus_t *context);
+    void read(const QModbusDataUnit &requests, int slaveId, modbus_t *context);
+    void write(const QModbusDataUnit &requests, int slaveId, modbus_t *context);
 
 protected:
     void setFinished() Q_DECL_OVERRIDE;
-    void setError(QModBusReply::RequestError errorCode,
+    void setError(QModbusReply::RequestError errorCode,
                   const QString &errorString) Q_DECL_OVERRIDE;
 
 Q_SIGNALS:
@@ -99,7 +99,7 @@ private:
     void setResults(const QVector<quint16> &payload);
     void handleError(int errorNumber);
 
-    QModBusRegister::RegisterType table;
+    QModbusRegister::RegisterType table;
     int startAddress;
     QPointer<RequestThread> request;
     QThread thread;

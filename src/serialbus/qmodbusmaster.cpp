@@ -40,42 +40,42 @@
 QT_BEGIN_NAMESPACE
 
 /*!
-    \class QModBusMaster
+    \class QModbusMaster
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QModBusMaster class is the interface class for Modbus master device.
+    \brief The QModbusMaster class is the interface class for Modbus master device.
 
-    QModBusMaster communicates with the Modbus backend providing users with a convenient API.
+    QModbusMaster communicates with the Modbus backend providing users with a convenient API.
     The Modbus backend must be specified during the object creation.
 */
 
 /*!
     Constructs a Modbus master device with the specified \a parent.
  */
-QModBusMaster::QModBusMaster(QObject *parent)
-    : QModBusDevice(*new QModBusMasterPrivate, parent)
+QModbusMaster::QModbusMaster(QObject *parent)
+    : QModbusDevice(*new QModbusMasterPrivate, parent)
 {
 }
 
 /*!
     \internal
 */
-QModBusMaster::~QModBusMaster()
+QModbusMaster::~QModbusMaster()
 {
 }
 
 /*!
     \internal
 */
-QModBusMaster::QModBusMaster(QModBusMasterPrivate &dd, QObject *parent) :
-    QModBusDevice(dd, parent)
+QModbusMaster::QModbusMaster(QModbusMasterPrivate &dd, QObject *parent) :
+    QModbusDevice(dd, parent)
 {
 
 }
 
 /*!
-    \fn QModBusReply *QModBusMaster::write(const QModBusDataUnit &request, int slaveId)
+    \fn QModbusReply *QModbusMaster::write(const QModbusDataUnit &request, int slaveId)
 
     Sends a request to modify the contents of the data pointed by \a request. Returns a
     new QModbusReply object, which emits the finished() signal whenever a positive response
@@ -84,9 +84,9 @@ QModBusMaster::QModBusMaster(QModBusMasterPrivate &dd, QObject *parent) :
  */
 
 /*!
-    \fn QModBusReply *QModBusMaster::read(const QModBusDataUnit &request, int slaveId)
+    \fn QModbusReply *QModbusMaster::read(const QModbusDataUnit &request, int slaveId)
 
-    Sends a request to read the contents of the data pointed by \a request. Returns a new QModBusReply object,
+    Sends a request to read the contents of the data pointed by \a request. Returns a new QModbusReply object,
     which emits the finished() signal whenever data arrives. Modbus network may have multiple slaves,
     each slave has unique \a slaveId.
  */

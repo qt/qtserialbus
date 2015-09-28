@@ -39,24 +39,24 @@
 QT_BEGIN_NAMESPACE
 
 /*!
-    \class QModBusRegister
+    \class QModbusRegister
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief QModBusRegister is a container class indicating the size of
-    the ModBus register maintained by a QModBusSlave instance.
+    \brief QModbusRegister is a container class indicating the size of
+    the ModBus register maintained by a QModbusSlave instance.
 
  */
 
 /*!
-    \fn QModBusRegister::QModBusRegister()
+    \fn QModbusRegister::QModbusRegister()
 
     Constructs a ModBus register instance. The resulting object
     sets the size of each register type to 0.
  */
 
 /*!
-    \enum QModBusRegister::RegisterType
+    \enum QModbusRegister::RegisterType
     This enum describes different registers used in Modbus.
 
     \value DiscreteInputs       Register with read-only bits.
@@ -66,13 +66,13 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \fn void QModBusRegister::setRegisterSize(QModBusRegister::RegisterType type, quint16 size)
+    \fn void QModbusRegister::setRegisterSize(QModbusRegister::RegisterType type, quint16 size)
 
     Sets the size of the register with \a type to \a size.
  */
 
 /*!
-    \fn quint16 QModBusRegister::registerSize(QModBusRegister::RegisterType type) const
+    \fn quint16 QModbusRegister::registerSize(QModbusRegister::RegisterType type) const
 
     Returns the size of the register \a type.
  */

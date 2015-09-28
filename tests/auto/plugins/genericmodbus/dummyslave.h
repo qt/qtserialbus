@@ -41,17 +41,17 @@
 
 QT_FORWARD_DECLARE_CLASS(QIODevice)
 
-class DummySlave : public QModBusSlave
+class DummySlave : public QModbusSlave
 {
     Q_OBJECT
 public:
     explicit DummySlave(QObject *parent = 0);
 
-    bool setMap(const QModBusRegister &) Q_DECL_OVERRIDE;
+    bool setMap(const QModbusRegister &) Q_DECL_OVERRIDE;
     void setSlaveId(int id);
     int slaveId() const;
-    bool data(QModBusRegister::RegisterType table, quint16 address, quint16 *data);
-    bool setData(QModBusRegister::RegisterType table, quint16 address, quint16 data);
+    bool data(QModbusRegister::RegisterType table, quint16 address, quint16 *data);
+    bool setData(QModbusRegister::RegisterType table, quint16 address, quint16 data);
 
 protected:
     bool open();

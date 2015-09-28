@@ -50,12 +50,12 @@ void LibModBusTcpClient::connectDevice(const QHostAddress & /*address*/, quint16
 {
 }
 
-QModBusReply* LibModBusTcpClient::read(const QModBusDataUnit & /*request*/, int /*slaveId*/)
+QModbusReply* LibModBusTcpClient::read(const QModbusDataUnit & /*request*/, int /*slaveId*/)
 {
     return Q_NULLPTR;
 }
 
-QModBusReply* LibModBusTcpClient::write(const QModBusDataUnit & /*request*/, int /*slaveId*/)
+QModbusReply* LibModBusTcpClient::write(const QModbusDataUnit & /*request*/, int /*slaveId*/)
 {
     return Q_NULLPTR;
 }

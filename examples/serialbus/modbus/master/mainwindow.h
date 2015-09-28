@@ -45,8 +45,8 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModBusMaster;
-class QModBusReply;
+class QModbusMaster;
+class QModbusReply;
 
 namespace Ui {
 class MainWindow;
@@ -78,8 +78,8 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QModBusReply* lastRequest;
-    QModBusMaster* modBusDevice;
+    QModbusReply* lastRequest;
+    QModbusMaster* modBusDevice;
 };
 
 #endif // MAINWINDOW_H

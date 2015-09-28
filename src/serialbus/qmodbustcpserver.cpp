@@ -40,42 +40,42 @@
 QT_BEGIN_NAMESPACE
 
 /*!
-    \class QModBusTcpServer
+    \class QModbusTcpServer
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QModBusTcpServer class is the interface class for Modbus TCP sever device.
+    \brief The QModbusTcpServer class is the interface class for Modbus TCP sever device.
 
     Modbus TCP networks can have multiple slaves. Servers are read/written by a client device
-    represented by \l QModBusTcpClient. QModBusTcpServer communicates with a Modbus backend,
+    represented by \l QModbusTcpClient. QModbusTcpServer communicates with a Modbus backend,
     providing users with a convenient API.
  */
 
 /*!
-    Constructs a QModBusTcpServer with the specified \a parent.
+    Constructs a QModbusTcpServer with the specified \a parent.
  */
-QModBusTcpServer::QModBusTcpServer(QObject *parent) :
-    QModBusSlave(*new QModBusTcpServerPrivate, parent)
+QModbusTcpServer::QModbusTcpServer(QObject *parent) :
+    QModbusSlave(*new QModbusTcpServerPrivate, parent)
 {
 }
 
 /*!
-    Destroys the QModBusTcpServer instance.
+    Destroys the QModbusTcpServer instance.
 */
-QModBusTcpServer::~QModBusTcpServer()
+QModbusTcpServer::~QModbusTcpServer()
 {
 }
 
 /*!
     \internal
  */
-QModBusTcpServer::QModBusTcpServer(QModBusTcpServerPrivate &dd, QObject *parent) :
-    QModBusSlave(dd, parent)
+QModbusTcpServer::QModbusTcpServer(QModbusTcpServerPrivate &dd, QObject *parent) :
+    QModbusSlave(dd, parent)
 {
 }
 
 /*!
-    \fn void QModBusTcpServer::listen(const QString &address, quint16 port = 502)
+    \fn void QModbusTcpServer::listen(const QString &address, quint16 port = 502)
 
     Tells the server to listen for incoming connections on address \a address and port \a port.
     If a connection is established, it emits stateChanged() with ModBusDeviceState::ConnectedState.
@@ -85,7 +85,7 @@ QModBusTcpServer::QModBusTcpServer(QModBusTcpServerPrivate &dd, QObject *parent)
 */
 
 /*!
-    \fn void QModBusTcpServer::listen(const QHostAddress &address, quint16 port = 502)
+    \fn void QModbusTcpServer::listen(const QHostAddress &address, quint16 port = 502)
 
     \overload
 

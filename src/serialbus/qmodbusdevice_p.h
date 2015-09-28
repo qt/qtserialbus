@@ -53,18 +53,18 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModBusDevicePrivate : public QObjectPrivate
+class QModbusDevicePrivate : public QObjectPrivate
 {
-    Q_DECLARE_PUBLIC(QModBusDevice)
+    Q_DECLARE_PUBLIC(QModbusDevice)
 public:
-    QModBusDevicePrivate()
-        : state(QModBusDevice::UnconnectedState),
-          error(QModBusDevice::NoError)
+    QModbusDevicePrivate()
+        : state(QModbusDevice::UnconnectedState),
+          error(QModbusDevice::NoError)
     {
     }
 
-    QModBusDevice::ModBusDeviceState state;
-    QModBusDevice::ModBusError error;
+    QModbusDevice::ModBusDeviceState state;
+    QModbusDevice::ModBusError error;
     QString errorString;
     QString portName;
 };

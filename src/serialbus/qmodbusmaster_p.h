@@ -53,11 +53,11 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModBusMasterPrivate : public QModBusDevicePrivate
+class QModbusMasterPrivate : public QModbusDevicePrivate
 {
-    Q_DECLARE_PUBLIC(QModBusMaster)
+    Q_DECLARE_PUBLIC(QModbusMaster)
 public:
-    QModBusMasterPrivate()
+    QModbusMasterPrivate()
     {
     }
 };

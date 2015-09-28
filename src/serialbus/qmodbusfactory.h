@@ -46,17 +46,17 @@
 
 QT_BEGIN_NAMESPACE
 
-class Q_SERIALBUS_EXPORT QModBusFactory
+class Q_SERIALBUS_EXPORT QModbusFactory
 {
 public:
-    virtual QModBusSlave *createSlave(QModBusDevice::ModBusConnection type) const = 0;
-    virtual QModBusMaster *createMaster(QModBusDevice::ModBusConnection type) const = 0;
+    virtual QModbusSlave *createSlave(QModbusDevice::ModBusConnection type) const = 0;
+    virtual QModbusMaster *createMaster(QModbusDevice::ModBusConnection type) const = 0;
 
 protected:
-    virtual ~QModBusFactory() {}
+    virtual ~QModbusFactory() {}
 };
 
-Q_DECLARE_INTERFACE(QModBusFactory, "org.qt-project.Qt.QModBusFactory")
+Q_DECLARE_INTERFACE(QModbusFactory, "org.qt-project.Qt.QModbusFactory")
 
 QT_END_NAMESPACE
 

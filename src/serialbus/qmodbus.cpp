@@ -43,27 +43,27 @@
 #include <private/qfactoryloader_p.h>
 #include <private/qlibrary_p.h>
 
-#define QModBusFactory_iid "org.qt-project.Qt.QModBusFactory"
+#define QModbusFactory_iid "org.qt-project.Qt.QModbusFactory"
 
 QT_BEGIN_NAMESPACE
 
-struct QModBusPrivate
+struct QModbusPrivate
 {
 public:
-    QModBusPrivate() : factory(Q_NULLPTR), index(-1) { }
+    QModbusPrivate() : factory(Q_NULLPTR), index(-1) { }
 
     QJsonObject meta;
-    QModBusFactory *factory;
+    QModbusFactory *factory;
     int index;
 };
 
 Q_GLOBAL_STATIC_WITH_ARGS(QFactoryLoader, qFactoryLoader,
-    (QModBusFactory_iid, QLatin1String("/modbus")))
+    (QModbusFactory_iid, QLatin1String("/modbus")))
 
-typedef QHash<QByteArray, QModBusPrivate> QModBusPluginStore;
-Q_GLOBAL_STATIC(QModBusPluginStore, qModBusPlugins)
+typedef QHash<QByteArray, QModbusPrivate> QModbusPluginStore;
+Q_GLOBAL_STATIC(QModbusPluginStore, qModBusPlugins)
 
-static QModBus *globalInstance = Q_NULLPTR;
+static QModbus *globalInstance = Q_NULLPTR;
 
 static void loadPlugins()
 {
@@ -73,7 +73,7 @@ static void loadPlugins()
         if (obj.isEmpty())
             continue;
 
-        QModBusPrivate d;
+        QModbusPrivate d;
         d.index = i;
         d.meta = obj;
         qModBusPlugins()->insert(
@@ -82,41 +82,41 @@ static void loadPlugins()
 }
 
 /*!
-    \class QModBus
+    \class QModbus
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QModBus class handles registration and creation of Modbus backends.
+    \brief The QModbus class handles registration and creation of Modbus backends.
 
-    QModBus loads Modbus plugins at runtime. The ownership of serial bus backends is
+    QModbus loads Modbus plugins at runtime. The ownership of serial bus backends is
     transferred to the loader.
 */
 
 /*!
-    Returns a pointer to the QModBus class. The object is loaded if necessary. QModBus
+    Returns a pointer to the QModbus class. The object is loaded if necessary. QModbus
     uses the singleton design pattern.
  */
-QModBus *QModBus::instance()
+QModbus *QModbus::instance()
 {
     if (!globalInstance)
-        globalInstance = new QModBus();
+        globalInstance = new QModbus();
     return globalInstance;
 }
 
 /*!
     Returns a list of identifiers for all loaded plugins.
  */
-QList<QByteArray> QModBus::plugins() const
+QList<QByteArray> QModbus::plugins() const
 {
     return qModBusPlugins()->keys();
 }
 
-QModBusPrivate setFactory(const QByteArray &plugin)
+QModbusPrivate setFactory(const QByteArray &plugin)
 {
-    QModBusPrivate d = qModBusPlugins()->value(plugin);
+    QModbusPrivate d = qModBusPlugins()->value(plugin);
     if (!d.factory) {
         d.factory
-            = qobject_cast<QModBusFactory *>(qFactoryLoader->instance(d.index));
+            = qobject_cast<QModbusFactory *>(qFactoryLoader->instance(d.index));
         if (!d.factory)
             return d;
 
@@ -132,12 +132,12 @@ QModBusPrivate setFactory(const QByteArray &plugin)
     Ownership of the returned backend is transferred to the caller.
     Returns \c null if no suitable device can be found.
  */
-QModBusSlave *QModBus::createSlave(const QByteArray &plugin,
-                                   QModBusDevice::ModBusConnection type) const
+QModbusSlave *QModbus::createSlave(const QByteArray &plugin,
+                                   QModbusDevice::ModBusConnection type) const
 {
     if (!qModBusPlugins()->contains(plugin))
         return Q_NULLPTR;
-    QModBusPrivate d = setFactory(plugin);
+    QModbusPrivate d = setFactory(plugin);
     if (!d.factory)
         return Q_NULLPTR;
     return d.factory->createSlave(type);
@@ -150,18 +150,18 @@ QModBusSlave *QModBus::createSlave(const QByteArray &plugin,
     Ownership of the returned backend is transferred to the caller.
     Returns \c null if no suitable device can be found.
  */
-QModBusMaster *QModBus::createMaster(const QByteArray &plugin,
-                                     QModBusDevice::ModBusConnection type) const
+QModbusMaster *QModbus::createMaster(const QByteArray &plugin,
+                                     QModbusDevice::ModBusConnection type) const
 {
     if (!qModBusPlugins()->contains(plugin))
         return Q_NULLPTR;
-    QModBusPrivate d = setFactory(plugin);
+    QModbusPrivate d = setFactory(plugin);
     if (!d.factory)
         return Q_NULLPTR;
     return d.factory->createMaster(type);
 }
 
-QModBus::QModBus(QObject *parent) :
+QModbus::QModbus(QObject *parent) :
     QObject(parent)
 {
     loadPlugins();

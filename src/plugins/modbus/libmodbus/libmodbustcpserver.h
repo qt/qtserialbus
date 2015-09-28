@@ -43,7 +43,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class LibModBusTcpServer : public QModBusTcpServer
+class LibModBusTcpServer : public QModbusTcpServer
 {
     Q_OBJECT
     Q_DISABLE_COPY(LibModBusTcpServer)
@@ -54,10 +54,10 @@ public:
     void listen(const QString &address, quint16 port = 502) Q_DECL_OVERRIDE;
     void listen(const QHostAddress &address, quint16 port = 502) Q_DECL_OVERRIDE;
 
-    bool setMap(const QModBusRegister &newRegister) Q_DECL_OVERRIDE;
+    bool setMap(const QModbusRegister &newRegister) Q_DECL_OVERRIDE;
 
-    bool data(QModBusRegister::RegisterType table, quint16 address, quint16 *data) Q_DECL_OVERRIDE;
-    bool setData(QModBusRegister::RegisterType table, quint16 address, quint16 data) Q_DECL_OVERRIDE;
+    bool data(QModbusRegister::RegisterType table, quint16 address, quint16 *data) Q_DECL_OVERRIDE;
+    bool setData(QModbusRegister::RegisterType table, quint16 address, quint16 data) Q_DECL_OVERRIDE;
 
 private:
     bool open() Q_DECL_OVERRIDE;

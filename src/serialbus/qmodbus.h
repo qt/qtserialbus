@@ -46,23 +46,23 @@
 
 QT_BEGIN_NAMESPACE
 
-class Q_SERIALBUS_EXPORT QModBus : public QObject
+class Q_SERIALBUS_EXPORT QModbus : public QObject
 {
     Q_OBJECT
 
 public:
-    static QModBus *instance();
+    static QModbus *instance();
     QList<QByteArray> plugins() const;
 
-    QModBusSlave *createSlave(const QByteArray &plugin,
-        QModBusDevice::ModBusConnection type = QModBusDevice::Serial) const;
-    QModBusMaster *createMaster(const QByteArray &plugin,
-        QModBusDevice::ModBusConnection type = QModBusDevice::Serial) const;
+    QModbusSlave *createSlave(const QByteArray &plugin,
+        QModbusDevice::ModBusConnection type = QModbusDevice::Serial) const;
+    QModbusMaster *createMaster(const QByteArray &plugin,
+        QModbusDevice::ModBusConnection type = QModbusDevice::Serial) const;
 
 private:
-    QModBus(QObject *parent = 0);
+    QModbus(QObject *parent = 0);
 
-    Q_DISABLE_COPY(QModBus)
+    Q_DISABLE_COPY(QModbus)
 };
 
 QT_END_NAMESPACE

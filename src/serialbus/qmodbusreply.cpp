@@ -39,18 +39,18 @@
 QT_BEGIN_NAMESPACE
 
 /*!
-    \class QModBusReply
+    \class QModbusReply
     \inmodule QtSerialBus
     \since 5.6
 
     \brief The QCanBusReply class contains the data and address for the request sent with
-    QModBusMaster.
+    QModbusMaster.
  */
 
 /*!
-    Constructs a QModBusReply object with the \a parent.
+    Constructs a QModbusReply object with the \a parent.
  */
-QModBusReply::QModBusReply(QObject *parent) :
+QModbusReply::QModbusReply(QObject *parent) :
     QObject(parent),
     errorType(NoError),
     finish(false)
@@ -59,7 +59,7 @@ QModBusReply::QModBusReply(QObject *parent) :
 }
 
 /*!
-    \enum QModBusReply::RequestError
+    \enum QModbusReply::RequestError
     This enum describes the type of error that has occurred.
 
     \value NoError              No error has occurred.
@@ -81,31 +81,31 @@ QModBusReply::QModBusReply(QObject *parent) :
  */
 
 /*!
-    \fn QModBusReply::errorOccurred(RequestError error)
+    \fn QModbusReply::errorOccurred(RequestError error)
 
     This signal is emitted when a request is aborted and error of the type
     \a error is received.
 
-    \sa QModBusReply::error()
+    \sa QModbusReply::error()
  */
 
 /*!
-    \fn QModBusReply::finished()
+    \fn QModbusReply::finished()
 
     This signal is emitted when a request is successfully completed.
 
-    \sa QModBusReply::isFinished()
+    \sa QModbusReply::isFinished()
  */
 
 /*!
-    \fn void QModBusReply::setFinished()
+    \fn void QModbusReply::setFinished()
 
     Sets the reply as finished.
     After having this set the reply's data must not change.
  */
 
 /*!
-    \fn void QModBusReply::setError(RequestError errorCode, const QString &errorString)
+    \fn void QModbusReply::setError(RequestError errorCode, const QString &errorString)
 
     Sets the error condition to be \a errorCode. The human-readable message is set to \a errorString.
  */
@@ -114,7 +114,7 @@ QModBusReply::QModBusReply(QObject *parent) :
     Returns the \l RequestError that was found while processing of the request.
     If no error was found, returns \l NoError.
  */
-QModBusReply::RequestError QModBusReply::error() const
+QModbusReply::RequestError QModbusReply::error() const
 {
     return errorType;
 }
@@ -125,7 +125,7 @@ QModBusReply::RequestError QModBusReply::error() const
 
     \sa error()
  */
-QString QModBusReply::errorString() const
+QString QModbusReply::errorString() const
 {
     return errorText;
 }
@@ -133,9 +133,9 @@ QString QModBusReply::errorString() const
 /*!
     Returns \c true when the reply has finished or was aborted.
 
-    \sa QModBusReply::finished()
+    \sa QModbusReply::finished()
  */
-bool QModBusReply::isFinished() const
+bool QModbusReply::isFinished() const
 {
     return finish;
 }
@@ -144,16 +144,16 @@ bool QModBusReply::isFinished() const
     Returns \c true if the request is still being processed and the reply
     has not finished or is not aborted yet.
  */
-bool QModBusReply::isRunning() const
+bool QModbusReply::isRunning() const
 {
     return !finish;
 }
 
 /*!
-    Returns data units read/written if QModBusReply is finished.
+    Returns data units read/written if QModbusReply is finished.
     Otherwise returns an empty QVector.
  */
-QList<QModBusDataUnit> QModBusReply::result() const
+QList<QModbusDataUnit> QModbusReply::result() const
 {
     return payload;
 }

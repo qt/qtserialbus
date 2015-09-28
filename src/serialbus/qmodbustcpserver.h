@@ -44,22 +44,22 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModBusTcpServerPrivate;
+class QModbusTcpServerPrivate;
 
-class Q_SERIALBUS_EXPORT QModBusTcpServer : public QModBusSlave
+class Q_SERIALBUS_EXPORT QModbusTcpServer : public QModbusSlave
 {
     Q_OBJECT
-    Q_DECLARE_PRIVATE(QModBusTcpServer)
+    Q_DECLARE_PRIVATE(QModbusTcpServer)
 
 public:
-    explicit QModBusTcpServer(QObject *parent = 0);
-    virtual ~QModBusTcpServer();
+    explicit QModbusTcpServer(QObject *parent = 0);
+    virtual ~QModbusTcpServer();
 
     virtual void listen(const QString &address, quint16 port = 502) = 0;
     virtual void listen(const QHostAddress &address, quint16 port = 502) = 0;
 
 protected:
-    QModBusTcpServer(QModBusTcpServerPrivate &dd, QObject *parent = Q_NULLPTR);
+    QModbusTcpServer(QModbusTcpServerPrivate &dd, QObject *parent = Q_NULLPTR);
 };
 
 QT_END_NAMESPACE

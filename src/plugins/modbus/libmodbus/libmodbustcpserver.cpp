@@ -50,17 +50,17 @@ void LibModBusTcpServer::listen(const QHostAddress & /*address*/, quint16 /*port
 {
 }
 
-bool LibModBusTcpServer::setMap(const QModBusRegister & /*newRegister*/)
+bool LibModBusTcpServer::setMap(const QModbusRegister & /*newRegister*/)
 {
     return false;
 }
 
-bool LibModBusTcpServer::data(QModBusRegister::RegisterType /*table*/, quint16 /*address*/, quint16 * /*data*/)
+bool LibModBusTcpServer::data(QModbusRegister::RegisterType /*table*/, quint16 /*address*/, quint16 * /*data*/)
 {
     return false;
 }
 
-bool LibModBusTcpServer::setData(QModBusRegister::RegisterType /*table*/, quint16 /*address*/, quint16 /*data*/)
+bool LibModBusTcpServer::setData(QModbusRegister::RegisterType /*table*/, quint16 /*address*/, quint16 /*data*/)
 {
     return false;
 }

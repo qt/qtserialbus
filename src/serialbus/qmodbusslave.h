@@ -47,33 +47,33 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModBusSlavePrivate;
+class QModbusSlavePrivate;
 
-class Q_SERIALBUS_EXPORT QModBusSlave : public QModBusDevice
+class Q_SERIALBUS_EXPORT QModbusSlave : public QModbusDevice
 {
     Q_OBJECT
-    Q_DECLARE_PRIVATE(QModBusSlave)
+    Q_DECLARE_PRIVATE(QModbusSlave)
 
 public:
 
-    explicit QModBusSlave(QObject *parent = 0);
-    virtual ~QModBusSlave();
+    explicit QModbusSlave(QObject *parent = 0);
+    virtual ~QModbusSlave();
 
-    virtual bool setMap(const QModBusRegister &newRegister) = 0;
+    virtual bool setMap(const QModbusRegister &newRegister) = 0;
 
     virtual void setSlaveId(int id) = 0;
     virtual int slaveId() const = 0;
 
-    //TODO: Review if QModBusMap would be useful. It could replace setMap(), data() and setData()
-    virtual bool data(QModBusRegister::RegisterType table, quint16 address, quint16 *data) = 0;
-    virtual bool setData(QModBusRegister::RegisterType table, quint16 address, quint16 data) = 0;
+    //TODO: Review if QModbusMap would be useful. It could replace setMap(), data() and setData()
+    virtual bool data(QModbusRegister::RegisterType table, quint16 address, quint16 *data) = 0;
+    virtual bool setData(QModbusRegister::RegisterType table, quint16 address, quint16 data) = 0;
 
 Q_SIGNALS:
     void slaveRead();
-    void slaveWritten(QModBusRegister::RegisterType table, int address, int size);
+    void slaveWritten(QModbusRegister::RegisterType table, int address, int size);
 
 protected:
-    QModBusSlave(QModBusSlavePrivate &dd, QObject *parent = Q_NULLPTR);
+    QModbusSlave(QModbusSlavePrivate &dd, QObject *parent = Q_NULLPTR);
 };
 
 QT_END_NAMESPACE

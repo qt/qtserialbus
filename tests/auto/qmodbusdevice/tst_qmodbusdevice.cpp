@@ -38,9 +38,9 @@
 #include <QtSerialBus/qmodbusdevice.h>
 #include <QtCore/qpointer.h>
 
-class dummyDevice : public QModBusDevice
+class dummyDevice : public QModbusDevice
 {
-friend class tst_QModBusDevice;
+friend class tst_QModbusDevice;
 
 protected:
     bool open() Q_DECL_OVERRIDE { return openState; }
@@ -49,11 +49,11 @@ protected:
     bool openState;
 };
 
-class tst_QModBusDevice : public QObject
+class tst_QModbusDevice : public QObject
 {
     Q_OBJECT
 public:
-    explicit tst_QModBusDevice();
+    explicit tst_QModbusDevice();
 
 private slots:
     void connectDevice();
@@ -65,54 +65,54 @@ private:
     QPointer<dummyDevice> device;
 };
 
-tst_QModBusDevice::tst_QModBusDevice()
+tst_QModbusDevice::tst_QModbusDevice()
 {
     device = new dummyDevice();
-    qRegisterMetaType<QModBusDevice::ModBusDeviceState>("QModBusDevice::ModBusDeviceState");
+    qRegisterMetaType<QModbusDevice::ModBusDeviceState>("QModbusDevice::ModBusDeviceState");
 }
 
-void tst_QModBusDevice::connectDevice()
+void tst_QModbusDevice::connectDevice()
 {
     device->openState = false;
     QVERIFY(!device->connectDevice());
-    QCOMPARE(device->state(), QModBusDevice::UnconnectedState);
+    QCOMPARE(device->state(), QModbusDevice::UnconnectedState);
 
     device->openState = true;
     QVERIFY(device->connectDevice());
-    QCOMPARE(device->state(), QModBusDevice::ConnectingState);
+    QCOMPARE(device->state(), QModbusDevice::ConnectingState);
 
     device->disconnectDevice();
-    QCOMPARE(device->state(), QModBusDevice::ClosingState);
+    QCOMPARE(device->state(), QModbusDevice::ClosingState);
 
-    device->setState(QModBusDevice::ClosingState);
+    device->setState(QModbusDevice::ClosingState);
     QVERIFY(!device->connectDevice());
 }
 
-void tst_QModBusDevice::state()
+void tst_QModbusDevice::state()
 {
-    device->setState(QModBusDevice::ConnectedState);
-    QCOMPARE(device->state(), QModBusDevice::ConnectedState);
-    QSignalSpy spy(device, SIGNAL(stateChanged(QModBusDevice::ModBusDeviceState)));
-    device->setState(QModBusDevice::UnconnectedState);
-    QCOMPARE(device->state(), QModBusDevice::UnconnectedState);
-    device->setState(QModBusDevice::UnconnectedState);
-    QCOMPARE(device->state(), QModBusDevice::UnconnectedState);
+    device->setState(QModbusDevice::ConnectedState);
+    QCOMPARE(device->state(), QModbusDevice::ConnectedState);
+    QSignalSpy spy(device, SIGNAL(stateChanged(QModbusDevice::ModBusDeviceState)));
+    device->setState(QModbusDevice::UnconnectedState);
+    QCOMPARE(device->state(), QModbusDevice::UnconnectedState);
+    device->setState(QModbusDevice::UnconnectedState);
+    QCOMPARE(device->state(), QModbusDevice::UnconnectedState);
 
     QCOMPARE(spy.count(), 1);
 }
 
-void tst_QModBusDevice::error()
+void tst_QModbusDevice::error()
 {
-    QCOMPARE(device->error(), QModBusDevice::NoError);
+    QCOMPARE(device->error(), QModbusDevice::NoError);
     QVERIFY(device->errorString().isEmpty());
 
     QString errorString("error string");
-    device->setError(errorString, QModBusDevice::ConnectionError);
+    device->setError(errorString, QModbusDevice::ConnectionError);
 
-    QCOMPARE(device->error(), QModBusDevice::ConnectionError);
+    QCOMPARE(device->error(), QModbusDevice::ConnectionError);
     QCOMPARE(device->errorString(), errorString);
 }
 
-QTEST_MAIN(tst_QModBusDevice)
+QTEST_MAIN(tst_QModbusDevice)
 
 #include "tst_qmodbusdevice.moc"

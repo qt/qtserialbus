@@ -49,15 +49,15 @@
 
 QT_BEGIN_NAMESPACE
 
-class LibModBusMaster : public QModBusMaster
+class LibModBusMaster : public QModbusMaster
 {
     Q_OBJECT
 public:
     LibModBusMaster();
 
-    QModBusReply* write(const QModBusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
+    QModbusReply* write(const QModbusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
 
-    QModBusReply* read(const QModBusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
+    QModbusReply* read(const QModbusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
 
 protected:
     bool open() Q_DECL_OVERRIDE;

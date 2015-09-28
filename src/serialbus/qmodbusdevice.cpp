@@ -42,59 +42,59 @@
 QT_BEGIN_NAMESPACE
 
 /*!
-    \class QModBusDevice
+    \class QModbusDevice
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QModBusDevice class is the base class for Modbus classes, \l QModBusSlave
-    and \l QModBusMaster.
+    \brief The QModbusDevice class is the base class for Modbus classes, \l QModbusSlave
+    and \l QModbusMaster.
  */
 
 /*!
     Constructs a Modbus device with the specified \a parent.
  */
-QModBusDevice::QModBusDevice(QObject *parent)
- : QObject(*new QModBusDevicePrivate, parent)
+QModbusDevice::QModbusDevice(QObject *parent)
+ : QObject(*new QModbusDevicePrivate, parent)
 {
-    qRegisterMetaType<QModBusRegister::RegisterType>();
+    qRegisterMetaType<QModbusRegister::RegisterType>();
 }
 
 /*!
     \internal
 */
-QModBusDevice::QModBusDevice(QModBusDevicePrivate &dd, QObject *parent)
+QModbusDevice::QModbusDevice(QModbusDevicePrivate &dd, QObject *parent)
  : QObject(dd, parent)
 {
-    qRegisterMetaType<QModBusRegister::RegisterType>();
+    qRegisterMetaType<QModbusRegister::RegisterType>();
 }
 
 /*!
-    Destroys the QModBusDevice instance
+    Destroys the QModbusDevice instance
 */
-QModBusDevice::~QModBusDevice()
+QModbusDevice::~QModbusDevice()
 {
 }
 
 /*!
     \internal
 */
-void QModBusDevice::setPortName(const QString &name)
+void QModbusDevice::setPortName(const QString &name)
 {
-    Q_D(QModBusDevice);
+    Q_D(QModbusDevice);
     d->portName = name;
 }
 
 /*!
     \internal
 */
-QString QModBusDevice::portName() const
+QString QModbusDevice::portName() const
 {
-    Q_D(const QModBusDevice);
+    Q_D(const QModbusDevice);
     return d->portName;
 }
 
 /*!
-    \enum QModBusDevice::ModBusError
+    \enum QModbusDevice::ModBusError
     This enum describes all the possible error conditions.
 
     \value NoError              No errors have occurred.
@@ -107,7 +107,7 @@ QString QModBusDevice::portName() const
  */
 
 /*!
-    \enum QModBusDevice::ModBusDeviceState
+    \enum QModbusDevice::ModBusDeviceState
     This enum describes all possible device states.
 
     \value UnconnectedState The device is disconnected.
@@ -117,13 +117,13 @@ QString QModBusDevice::portName() const
  */
 
 /*!
-    \fn QModBusDevice::errorOccurred(QModBusDevice::ModBusError error)
+    \fn QModbusDevice::errorOccurred(QModbusDevice::ModBusError error)
 
     This signal is emitted when an error of the type, \a error, occurs.
  */
 
 /*!
-    \fn void QModBusDevice::stateChanged(QModBusDevice::ModBusDeviceState state)
+    \fn void QModbusDevice::stateChanged(QModbusDevice::ModBusDeviceState state)
 
     This signal is emitted every time the state of the device changes.
     The new state is represented by \a state.
@@ -137,11 +137,11 @@ QString QModBusDevice::portName() const
 
     This function calls \l open() as part of its implementation.
  */
-bool QModBusDevice::connectDevice()
+bool QModbusDevice::connectDevice()
 {
-    Q_D(QModBusDevice);
+    Q_D(QModbusDevice);
 
-    if (d->state != QModBusDevice::UnconnectedState)
+    if (d->state != QModbusDevice::UnconnectedState)
         return false;
 
     setState(ConnectingState);
@@ -160,9 +160,9 @@ bool QModBusDevice::connectDevice()
 
     This function calls \l close() as part of its implementation.
  */
-void QModBusDevice::disconnectDevice()
+void QModbusDevice::disconnectDevice()
 {
-    setState(QModBusDevice::ClosingState);
+    setState(QModbusDevice::ClosingState);
 
     //Unconnected is set by backend -> might be delayed by event loop
     close();
@@ -172,9 +172,9 @@ void QModBusDevice::disconnectDevice()
     Sets the state of the device to \a newState. Modbus device implementations
     must use this function to update the device state.
  */
-void QModBusDevice::setState(QModBusDevice::ModBusDeviceState newState)
+void QModbusDevice::setState(QModbusDevice::ModBusDeviceState newState)
 {
-    Q_D(QModBusDevice);
+    Q_D(QModbusDevice);
 
     if (newState == d->state)
         return;
@@ -188,7 +188,7 @@ void QModBusDevice::setState(QModBusDevice::ModBusDeviceState newState)
 
     \sa setState(), stateChanged()
  */
-QModBusDevice::ModBusDeviceState QModBusDevice::state() const
+QModbusDevice::ModBusDeviceState QModbusDevice::state() const
 {
     return d_func()->state;
 }
@@ -198,11 +198,11 @@ QModBusDevice::ModBusDeviceState QModBusDevice::state() const
     must use this function in case of an error to set the \a error type and
     a descriptive \a errorText.
 
-    \sa QModBusDevice::ModBusError
+    \sa QModbusDevice::ModBusError
  */
-void QModBusDevice::setError(const QString &errorText, QModBusDevice::ModBusError error)
+void QModbusDevice::setError(const QString &errorText, QModbusDevice::ModBusError error)
 {
-    Q_D(QModBusDevice);
+    Q_D(QModbusDevice);
 
     d->error = error;
     d->errorString = errorText;
@@ -212,9 +212,9 @@ void QModBusDevice::setError(const QString &errorText, QModBusDevice::ModBusErro
 /*!
     Returns the error state of the device.
 
-    \sa QModBusDevice::ModBusError
+    \sa QModbusDevice::ModBusError
  */
-QModBusDevice::ModBusError QModBusDevice::error() const
+QModbusDevice::ModBusError QModbusDevice::error() const
 {
     return d_func()->error;
 }
@@ -222,33 +222,33 @@ QModBusDevice::ModBusError QModBusDevice::error() const
 /*!
     Returns descriptive error text for the device error.
 
-    \sa QModBusDevice::ModBusError
+    \sa QModbusDevice::ModBusError
  */
-QString QModBusDevice::errorString() const
+QString QModbusDevice::errorString() const
 {
     return d_func()->errorString;
 }
 
 /*!
-    \fn bool QModBusDevice::open()
+    \fn bool QModbusDevice::open()
 
     This function is called by connectDevice(). Subclasses must provide
     an implementation that returns \c true on successful Modbus connection
     or \c false otherwise.
 
     The implementation must ensure that the instance's \l state()
-    is set to \l QModBusDevice::ConnectedState upon success; otherwise
-    \l QModBusDevice::UnconnectedState.
+    is set to \l QModbusDevice::ConnectedState upon success; otherwise
+    \l QModbusDevice::UnconnectedState.
 
     \sa connectDevice()
  */
 
 /*!
-    \fn void QModBusDevice::close()
+    \fn void QModbusDevice::close()
 
     This function is responsible for closing the Modbus connection.
     The implementation must ensure that the instance's
-    \l state() is set to \l QModBusDevice::UnconnectedState.
+    \l state() is set to \l QModbusDevice::UnconnectedState.
 
     \sa disconnectDevice()
  */

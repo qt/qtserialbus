@@ -43,11 +43,11 @@
 QT_BEGIN_NAMESPACE
 
 /*!
-    \class QModBusSerialSlave
+    \class QModbusSerialSlave
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QModBusSerialSlave class represents a Modbus slave/server
+    \brief The QModbusSerialSlave class represents a Modbus slave/server
     that uses a serial port for its communication with the master/client.
 
     Communication via Modbus requires the interaction between a single
@@ -61,29 +61,29 @@ QT_BEGIN_NAMESPACE
 /*!
     Constructs a serial Modbus slave with the specified \a parent.
  */
-QModBusSerialSlave::QModBusSerialSlave(QObject *parent)
-    : QModBusSlave(*new QModBusSerialSlavePrivate, parent)
+QModbusSerialSlave::QModbusSerialSlave(QObject *parent)
+    : QModbusSlave(*new QModbusSerialSlavePrivate, parent)
 {
-    Q_D(QModBusSerialSlave);
+    Q_D(QModbusSerialSlave);
     d->setupMaster();
 }
 
 /*!
     \internal
  */
-QModBusSerialSlave::~QModBusSerialSlave()
+QModbusSerialSlave::~QModbusSerialSlave()
 {
 }
 
 /*!
     \reimp
  */
-bool QModBusSerialSlave::connectDevice()
+bool QModbusSerialSlave::connectDevice()
 {
-    // reimp to avoid QModBusDevice implementaion
+    // reimp to avoid QModbusDevice implementaion
     // we want to use a forwarded version.
 
-    Q_D(QModBusSerialSlave);
+    Q_D(QModbusSerialSlave);
 
     if (!d->pluginMaster)
         return false;
@@ -96,11 +96,11 @@ bool QModBusSerialSlave::connectDevice()
 /*!
     \internal
  */
-QModBusSerialSlave::QModBusSerialSlave(QModBusSerialSlavePrivate &dd,
+QModbusSerialSlave::QModbusSerialSlave(QModbusSerialSlavePrivate &dd,
                                        QObject *parent)
-    : QModBusSlave(dd, parent)
+    : QModbusSlave(dd, parent)
 {
-    Q_D(QModBusSerialSlave);
+    Q_D(QModbusSerialSlave);
     d->setupMaster();
 }
 
@@ -108,9 +108,9 @@ QModBusSerialSlave::QModBusSerialSlave(QModBusSerialSlavePrivate &dd,
 /*!
     \reimp
  */
-bool QModBusSerialSlave::setMap(const QModBusRegister &newRegister)
+bool QModbusSerialSlave::setMap(const QModbusRegister &newRegister)
 {
-    Q_D(QModBusSerialSlave);
+    Q_D(QModbusSerialSlave);
 
     if (!d->pluginMaster)
         return false;
@@ -121,9 +121,9 @@ bool QModBusSerialSlave::setMap(const QModBusRegister &newRegister)
 /*!
     \reimp
  */
-void QModBusSerialSlave::setSlaveId(int id)
+void QModbusSerialSlave::setSlaveId(int id)
 {
-    Q_D(QModBusSerialSlave);
+    Q_D(QModbusSerialSlave);
 
     if (!d->pluginMaster)
         return;
@@ -134,9 +134,9 @@ void QModBusSerialSlave::setSlaveId(int id)
 /*!
     \reimp
  */
-int QModBusSerialSlave::slaveId() const
+int QModbusSerialSlave::slaveId() const
 {
-    Q_D(const QModBusSerialSlave);
+    Q_D(const QModbusSerialSlave);
 
     if (!d->pluginMaster)
         return -1;
@@ -147,10 +147,10 @@ int QModBusSerialSlave::slaveId() const
 /*!
     \reimp
  */
-bool QModBusSerialSlave::data(QModBusRegister::RegisterType table,
+bool QModbusSerialSlave::data(QModbusRegister::RegisterType table,
                               quint16 address, quint16 *data)
 {
-    Q_D(QModBusSerialSlave);
+    Q_D(QModbusSerialSlave);
 
     if (!d->pluginMaster)
         return false;
@@ -161,10 +161,10 @@ bool QModBusSerialSlave::data(QModBusRegister::RegisterType table,
 /*!
     \reimp
  */
-bool QModBusSerialSlave::setData(QModBusRegister::RegisterType table,
+bool QModbusSerialSlave::setData(QModbusRegister::RegisterType table,
                                  quint16 address, quint16 data)
 {
-    Q_D(QModBusSerialSlave);
+    Q_D(QModbusSerialSlave);
 
     if (!d->pluginMaster)
         return false;
@@ -175,7 +175,7 @@ bool QModBusSerialSlave::setData(QModBusRegister::RegisterType table,
 /*!
     \reimp
  */
-bool QModBusSerialSlave::open()
+bool QModbusSerialSlave::open()
 {
     return false;
 }
@@ -183,9 +183,9 @@ bool QModBusSerialSlave::open()
 /*!
     \reimp
  */
-void QModBusSerialSlave::close()
+void QModbusSerialSlave::close()
 {
-    Q_D(QModBusSerialSlave);
+    Q_D(QModbusSerialSlave);
 
     if (!d->pluginMaster)
         return;
@@ -194,17 +194,17 @@ void QModBusSerialSlave::close()
 }
 
 
-void QModBusSerialSlavePrivate::handleStateChanged(
-                                    QModBusDevice::ModBusDeviceState state)
+void QModbusSerialSlavePrivate::handleStateChanged(
+                                    QModbusDevice::ModBusDeviceState state)
 {
-    Q_Q(QModBusSerialSlave);
+    Q_Q(QModbusSerialSlave);
     q->setState(state);
 }
 
-void QModBusSerialSlavePrivate::handleErrorOccurred(
-                                    QModBusDevice::ModBusError)
+void QModbusSerialSlavePrivate::handleErrorOccurred(
+                                    QModbusDevice::ModBusError)
 {
-    Q_Q(QModBusSerialSlave);
+    Q_Q(QModbusSerialSlave);
     q->setError(pluginMaster ? pluginMaster->errorString() : QString(),
                 error);
 }

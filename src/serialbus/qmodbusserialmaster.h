@@ -40,34 +40,34 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModBusSerialMasterPrivate;
+class QModbusSerialMasterPrivate;
 
-class Q_SERIALBUS_EXPORT QModBusSerialMaster : public QModBusMaster
+class Q_SERIALBUS_EXPORT QModbusSerialMaster : public QModbusMaster
 {
     Q_OBJECT
-    Q_DECLARE_PRIVATE(QModBusSerialMaster)
+    Q_DECLARE_PRIVATE(QModbusSerialMaster)
 
 public:
-    explicit QModBusSerialMaster(QObject *parent = Q_NULLPTR);
-    ~QModBusSerialMaster();
+    explicit QModbusSerialMaster(QObject *parent = Q_NULLPTR);
+    ~QModbusSerialMaster();
 
     // TODO find way to pass parity, baud, dataBits, stopBits
     bool connectDevice(const QString& deviceName);
 
-    QModBusReply *write(const QModBusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
-    QModBusReply *read(const QModBusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
+    QModbusReply *write(const QModbusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
+    QModbusReply *read(const QModbusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
 
 protected:
-    QModBusSerialMaster(QModBusSerialMasterPrivate &dd,
+    QModbusSerialMaster(QModbusSerialMasterPrivate &dd,
                         QObject *parent = Q_NULLPTR);
 
     bool open() Q_DECL_OVERRIDE;
     void close() Q_DECL_OVERRIDE;
 
 private:
-    using QModBusDevice::connectDevice;
-    Q_PRIVATE_SLOT(d_func(), void handleStateChanged(QModBusDevice::ModBusDeviceState))
-    Q_PRIVATE_SLOT(d_func(), void handleErrorOccurred(QModBusDevice::ModBusError))
+    using QModbusDevice::connectDevice;
+    Q_PRIVATE_SLOT(d_func(), void handleStateChanged(QModbusDevice::ModBusDeviceState))
+    Q_PRIVATE_SLOT(d_func(), void handleErrorOccurred(QModbusDevice::ModBusError))
 };
 
 QT_END_NAMESPACE

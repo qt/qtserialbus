@@ -43,10 +43,10 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModBusDataUnit
+class QModbusDataUnit
 {
 public:
-    QModBusDataUnit(QModBusRegister::RegisterType regType,
+    QModbusDataUnit(QModbusRegister::RegisterType regType,
                              int dataAddress, quint16 initValue)
         : rType(regType),
           sAddress(dataAddress),
@@ -55,7 +55,7 @@ public:
         dataValue.fill(initValue, 1);
     }
 
-    QModBusDataUnit(QModBusRegister::RegisterType regType,
+    QModbusDataUnit(QModbusRegister::RegisterType regType,
                              int newStartAddress, const QVector<quint16> &data)
         : rType(regType),
           sAddress(newStartAddress),
@@ -65,15 +65,15 @@ public:
 
     }
 
-    explicit QModBusDataUnit(QModBusRegister::RegisterType regType)
+    explicit QModbusDataUnit(QModbusRegister::RegisterType regType)
         : rType(regType),
           sAddress(0),
           dataRange(0)
     {
     }
 
-    QModBusRegister::RegisterType registerType() const { return rType; }
-    void setRegisterType(QModBusRegister::RegisterType newRegisterType)
+    QModbusRegister::RegisterType registerType() const { return rType; }
+    void setRegisterType(QModbusRegister::RegisterType newRegisterType)
     {
         rType = newRegisterType;
     }
@@ -92,13 +92,13 @@ public:
     inline void setValueCount(int newCount) { dataRange = newCount; }
 
 private:
-    QModBusRegister::RegisterType rType;
+    QModbusRegister::RegisterType rType;
     int sAddress;
     QVector<quint16> dataValue;
     int dataRange;
 };
 
-Q_DECLARE_TYPEINFO(QModBusDataUnit, Q_MOVABLE_TYPE);
+Q_DECLARE_TYPEINFO(QModbusDataUnit, Q_MOVABLE_TYPE);
 
 QT_END_NAMESPACE
 #endif // QMODBUSDATAUNIT_H

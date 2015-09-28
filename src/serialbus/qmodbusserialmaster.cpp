@@ -42,11 +42,11 @@
 QT_BEGIN_NAMESPACE
 
 /*!
-    \class QModBusSerialMaster
+    \class QModbusSerialMaster
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QModBusSerialMaster class represents a Modbus master/client
+    \brief The QModbusSerialMaster class represents a Modbus master/client
     that uses a serial bus for its communication with the slave/server.
 
     Communication via Modbus requires the interaction between a single
@@ -57,17 +57,17 @@ QT_BEGIN_NAMESPACE
 /*!
     Constructs a serial Modbus master with the specified \a parent.
  */
-QModBusSerialMaster::QModBusSerialMaster(QObject *parent)
-    : QModBusMaster(*new QModBusSerialMasterPrivate, parent)
+QModbusSerialMaster::QModbusSerialMaster(QObject *parent)
+    : QModbusMaster(*new QModbusSerialMasterPrivate, parent)
 {
-    Q_D(QModBusSerialMaster);
+    Q_D(QModbusSerialMaster);
     d->setupMaster();
 }
 
 /*!
     \internal
  */
-QModBusSerialMaster::~QModBusSerialMaster()
+QModbusSerialMaster::~QModbusSerialMaster()
 {
 }
 
@@ -79,9 +79,9 @@ QModBusSerialMaster::~QModBusSerialMaster()
 
     \sa disconnectDevice()
  */
-bool QModBusSerialMaster::connectDevice(const QString &deviceName)
+bool QModbusSerialMaster::connectDevice(const QString &deviceName)
 {
-    Q_D(QModBusSerialMaster);
+    Q_D(QModbusSerialMaster);
 
     if (!d->pluginMaster)
         return false;
@@ -89,7 +89,7 @@ bool QModBusSerialMaster::connectDevice(const QString &deviceName)
     // TODO remove setPortName() usage
     d->pluginMaster->setPortName(deviceName);
 
-    // TODO Implement QModBusSerialMaster::connectDevice(QString)
+    // TODO Implement QModbusSerialMaster::connectDevice(QString)
 
     return d->pluginMaster->connectDevice();
 }
@@ -97,18 +97,18 @@ bool QModBusSerialMaster::connectDevice(const QString &deviceName)
 /*!
     \internal
 */
-QModBusSerialMaster::QModBusSerialMaster(QModBusSerialMasterPrivate &dd,
+QModbusSerialMaster::QModbusSerialMaster(QModbusSerialMasterPrivate &dd,
                                          QObject *parent)
-    : QModBusMaster(dd, parent)
+    : QModbusMaster(dd, parent)
 {
-    Q_D(QModBusSerialMaster);
+    Q_D(QModbusSerialMaster);
     d->setupMaster();
 }
 
 /*!
     \reimp
  */
-bool QModBusSerialMaster::open()
+bool QModbusSerialMaster::open()
 {
     // TODO remove later on
     // The function is not needed anymore as connectDevice(QString)
@@ -119,9 +119,9 @@ bool QModBusSerialMaster::open()
 /*!
     \reimp
  */
-void QModBusSerialMaster::close()
+void QModbusSerialMaster::close()
 {
-    Q_D(QModBusSerialMaster);
+    Q_D(QModbusSerialMaster);
 
     if (!d->pluginMaster)
         return;
@@ -130,16 +130,16 @@ void QModBusSerialMaster::close()
 }
 
 // forward the state changes
-void QModBusSerialMasterPrivate::handleStateChanged(QModBusDevice::ModBusDeviceState state)
+void QModbusSerialMasterPrivate::handleStateChanged(QModbusDevice::ModBusDeviceState state)
 {
-    Q_Q(QModBusSerialMaster);
+    Q_Q(QModbusSerialMaster);
     q->setState(state);
 }
 
 // forward the error changes
-void QModBusSerialMasterPrivate::handleErrorOccurred(QModBusDevice::ModBusError error)
+void QModbusSerialMasterPrivate::handleErrorOccurred(QModbusDevice::ModBusError error)
 {
-    Q_Q(QModBusSerialMaster);
+    Q_Q(QModbusSerialMaster);
     q->setError(pluginMaster ? pluginMaster->errorString() : QString(),
                 error);
 }
@@ -147,9 +147,9 @@ void QModBusSerialMasterPrivate::handleErrorOccurred(QModBusDevice::ModBusError 
 /*!
     \reimp
  */
-QModBusReply *QModBusSerialMaster::write(const QModBusDataUnit &request, int slaveId)
+QModbusReply *QModbusSerialMaster::write(const QModbusDataUnit &request, int slaveId)
 {
-    Q_D(QModBusSerialMaster);
+    Q_D(QModbusSerialMaster);
 
     if (!d->pluginMaster)
         return 0;
@@ -160,9 +160,9 @@ QModBusReply *QModBusSerialMaster::write(const QModBusDataUnit &request, int sla
 /*!
     \reimp
  */
-QModBusReply *QModBusSerialMaster::read(const QModBusDataUnit &request, int slaveId)
+QModbusReply *QModbusSerialMaster::read(const QModbusDataUnit &request, int slaveId)
 {
-    Q_D(QModBusSerialMaster);
+    Q_D(QModbusSerialMaster);
 
     if (!d->pluginMaster)
         return 0;

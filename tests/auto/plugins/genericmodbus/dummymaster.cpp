@@ -37,7 +37,7 @@
 #include "dummymaster.h"
 
 DummyMaster::DummyMaster(QObject *parent) :
-    QModBusMaster(parent)
+    QModbusMaster(parent)
 {
 }
 
@@ -51,14 +51,14 @@ void DummyMaster::close()
 
 }
 
-QModBusReply* DummyMaster::write(const QModBusDataUnit &request, int slaveId)
+QModbusReply* DummyMaster::write(const QModbusDataUnit &request, int slaveId)
 {
     Q_UNUSED(request);
     Q_UNUSED(slaveId);
     return 0;
 }
 
-QModBusReply* DummyMaster::read(const QModBusDataUnit &request, int slaveId)
+QModbusReply* DummyMaster::read(const QModbusDataUnit &request, int slaveId)
 {
     Q_UNUSED(request);
     Q_UNUSED(slaveId);

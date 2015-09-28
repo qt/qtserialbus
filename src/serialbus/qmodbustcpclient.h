@@ -44,23 +44,23 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModBusTcpClientPrivate;
+class QModbusTcpClientPrivate;
 
-class Q_SERIALBUS_EXPORT QModBusTcpClient : public QModBusMaster
+class Q_SERIALBUS_EXPORT QModbusTcpClient : public QModbusMaster
 {
     Q_OBJECT
-    Q_DECLARE_PRIVATE(QModBusTcpClient)
+    Q_DECLARE_PRIVATE(QModbusTcpClient)
 
 public:
-    explicit QModBusTcpClient(QObject *parent = Q_NULLPTR);
-    virtual ~QModBusTcpClient();
+    explicit QModbusTcpClient(QObject *parent = Q_NULLPTR);
+    virtual ~QModbusTcpClient();
 
     virtual void connectDevice(const QString &hostName, quint16 port = 502) = 0;
     virtual void connectDevice(const QHostAddress &address, quint16 port = 502) = 0;
 
 private:
-    using QModBusDevice::connectDevice;
-    QModBusTcpClient(QModBusTcpClientPrivate &dd, QObject *parent = Q_NULLPTR);
+    using QModbusDevice::connectDevice;
+    QModbusTcpClient(QModbusTcpClientPrivate &dd, QObject *parent = Q_NULLPTR);
 };
 
 QT_END_NAMESPACE

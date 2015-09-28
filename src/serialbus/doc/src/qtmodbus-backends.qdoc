@@ -63,11 +63,11 @@
     The Modbus API provides some common API to access the Modbus devices:
 
     \list
-        \li QModBusDevice provides an API for common functionality with master and slave.
-        \li QModBusMaster provides an API for direct access to Modbus master.
-        \li QModBusSlave provides an API for direct access to Modbus slave.
-        \li QModBusDataUnit represents a data value.
-        \li QModBusReply is created by QModBusMaster as a handle for write/read operation.
+        \li QModbusDevice provides an API for common functionality with master and slave.
+        \li QModbusMaster provides an API for direct access to Modbus master.
+        \li QModbusSlave provides an API for direct access to Modbus slave.
+        \li QModbusDataUnit represents a data value.
+        \li QModbusReply is created by QModbusMaster as a handle for write/read operation.
     \endlist
 
     The Modbus plugin supports the following set of backends for various devices:

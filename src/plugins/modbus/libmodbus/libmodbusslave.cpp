@@ -55,7 +55,7 @@
 QT_BEGIN_NAMESPACE
 
 LibModBusSlave::LibModBusSlave() :
-    QModBusSlave(),
+    QModbusSlave(),
     context(0),
     mapping(modbus_mapping_new(0,0,0,0)),
     connected(false),
@@ -70,31 +70,31 @@ LibModBusSlave::~LibModBusSlave()
     mapping = 0;
 }
 
-bool LibModBusSlave::setMap(const QModBusRegister & newRegister)
+bool LibModBusSlave::setMap(const QModbusRegister & newRegister)
 {
     if (connected) {
         // TODO this limitation is not required. As long as the slave
         // is not serving an active request, the mapping can be changed.
         setError(tr("Cannot set maps when slave is connected to the network."),
-                 QModBusDevice::WriteError);
+                 QModbusDevice::WriteError);
         return false;
     }
 
-    mappingTable[QModBusRegister::DiscreteInputs]
-            = newRegister.registerSize(QModBusRegister::DiscreteInputs);
-    mappingTable[QModBusRegister::Coils]
-            = newRegister.registerSize(QModBusRegister::Coils);
-    mappingTable[QModBusRegister::InputRegisters]
-            = newRegister.registerSize(QModBusRegister::InputRegisters);
-    mappingTable[QModBusRegister::HoldingRegisters]
-            = newRegister.registerSize(QModBusRegister::HoldingRegisters);
+    mappingTable[QModbusRegister::DiscreteInputs]
+            = newRegister.registerSize(QModbusRegister::DiscreteInputs);
+    mappingTable[QModbusRegister::Coils]
+            = newRegister.registerSize(QModbusRegister::Coils);
+    mappingTable[QModbusRegister::InputRegisters]
+            = newRegister.registerSize(QModbusRegister::InputRegisters);
+    mappingTable[QModbusRegister::HoldingRegisters]
+            = newRegister.registerSize(QModbusRegister::HoldingRegisters);
 
     return true;
 }
 
 void LibModBusSlave::handleError(int errorNumber)
 {
-    setError(qt_error_string(errorNumber), QModBusDevice::ReadError);
+    setError(qt_error_string(errorNumber), QModbusDevice::ReadError);
     close();
 }
 
@@ -109,7 +109,7 @@ bool LibModBusSlave::open()
 
     if (location.isEmpty()) {
         setError(tr("No portname for serial port specified."),
-                 QModBusDevice::ConnectionError);
+                 QModbusDevice::ConnectionError);
         return false;
     }
 
@@ -122,14 +122,14 @@ bool LibModBusSlave::open()
     context = modbus_new_rtu(location.toLatin1(),
                              baud, parity, dataBits, stopBits);
     if (!context) {
-        setError(qt_error_string(errno), QModBusDevice::ConnectionError);
+        setError(qt_error_string(errno), QModbusDevice::ConnectionError);
         return false;
     }
     modbus_set_slave(context, slave);
 
     modbus_set_debug(context, TRUE);
     if (modbus_connect(context) == -1) {
-        setError(qt_error_string(errno), QModBusDevice::ConnectionError);
+        setError(qt_error_string(errno), QModbusDevice::ConnectionError);
         close();
         return false;
     }
@@ -138,12 +138,12 @@ bool LibModBusSlave::open()
         modbus_mapping_free(mapping);
         mapping = 0;
     }
-    mapping = modbus_mapping_new(mappingTable[QModBusRegister::Coils],
-                                 mappingTable[QModBusRegister::DiscreteInputs],
-                                 mappingTable[QModBusRegister::HoldingRegisters],
-                                 mappingTable[QModBusRegister::InputRegisters]);
+    mapping = modbus_mapping_new(mappingTable[QModbusRegister::Coils],
+                                 mappingTable[QModbusRegister::DiscreteInputs],
+                                 mappingTable[QModbusRegister::HoldingRegisters],
+                                 mappingTable[QModbusRegister::InputRegisters]);
     if (mapping == NULL) {
-        setError(qt_error_string(errno), QModBusDevice::ConnectionError);
+        setError(qt_error_string(errno), QModbusDevice::ConnectionError);
         return false;
     }
 
@@ -159,7 +159,7 @@ bool LibModBusSlave::open()
     thread.start();
     emit operate();
     connected = true;
-    setState(QModBusDevice::ConnectedState);
+    setState(QModbusDevice::ConnectedState);
     return true;
 }
 
@@ -174,7 +174,7 @@ void LibModBusSlave::close()
     modbus_free(context);
     context = 0;
     connected = false;
-    setState(QModBusDevice::UnconnectedState);
+    setState(QModbusDevice::UnconnectedState);
 }
 
 int LibModBusSlave::slaveId() const
@@ -188,53 +188,53 @@ void LibModBusSlave::setSlaveId(int id)
     modbus_set_slave(context, slave);
 }
 
-bool LibModBusSlave::data(QModBusRegister::RegisterType table, quint16 address, quint16 *data)
+bool LibModBusSlave::data(QModbusRegister::RegisterType table, quint16 address, quint16 *data)
 {
     if (!data)
         return false;
 
     if (mappingTable[table] >= address) {
         switch (table) {
-            case QModBusRegister::DiscreteInputs:
+            case QModbusRegister::DiscreteInputs:
                 *data = mapping->tab_input_bits[address];
                 break;
-            case QModBusRegister::Coils:
+            case QModbusRegister::Coils:
                 *data = mapping->tab_bits[address];
                 break;
-            case QModBusRegister::InputRegisters:
+            case QModbusRegister::InputRegisters:
                 *data = mapping->tab_input_registers[address];
                 break;
-            case QModBusRegister::HoldingRegisters:
+            case QModbusRegister::HoldingRegisters:
                 *data = mapping->tab_registers[address];
                 break;
         }
     } else {
-        setError(tr("ReadError: invalid parameters."), QModBusDevice::ReadError);
+        setError(tr("ReadError: invalid parameters."), QModbusDevice::ReadError);
         return false;
     }
 
     return true;
 }
 
-bool LibModBusSlave::setData(QModBusRegister::RegisterType table, quint16 address, quint16 data)
+bool LibModBusSlave::setData(QModbusRegister::RegisterType table, quint16 address, quint16 data)
 {
     if (mappingTable[table] >= address) {
         switch (table) {
-            case QModBusRegister::DiscreteInputs:
+            case QModbusRegister::DiscreteInputs:
                 mapping->tab_input_bits[address] = (uint8_t)data;
                 break;
-            case QModBusRegister::Coils:
+            case QModbusRegister::Coils:
                 mapping->tab_bits[address] = (uint8_t)data;
                 break;
-            case QModBusRegister::InputRegisters:
+            case QModbusRegister::InputRegisters:
                 mapping->tab_input_registers[address] = data;
                 break;
-            case QModBusRegister::HoldingRegisters:
+            case QModbusRegister::HoldingRegisters:
                 mapping->tab_registers[address] = data;
                 break;
         }
     } else {
-        setError(tr("WriteError: invalid parameters."), QModBusDevice::WriteError);
+        setError(tr("WriteError: invalid parameters."), QModbusDevice::WriteError);
         return false;
     }
 
@@ -295,7 +295,7 @@ void ListenThread::doWork()
             const int functionId = query[FUNCTION_ID];
             quint16 startAddress = 0;
             quint16 quantity = 0;
-            QModBusRegister::RegisterType table;
+            QModbusRegister::RegisterType table;
             switch (functionId) {
             case ReadCoils:
             case ReadDiscreteInputs:
@@ -304,30 +304,30 @@ void ListenThread::doWork()
                 emit slaveRead();
                 break;
             case WriteSingleCoil:
-                table = QModBusRegister::Coils;
+                table = QModbusRegister::Coils;
                 startAddress = (query[START_ADDRESS_HI] << 8) + query[START_ADDRESS_LO];
                 emit slaveWritten(table, startAddress, 1);
                 break;
             case WriteMultipleCoils:
-                table = QModBusRegister::Coils;
+                table = QModbusRegister::Coils;
                 startAddress = (query[START_ADDRESS_HI] << 8) + query[START_ADDRESS_LO];
                 quantity = (query[QUANTITY_HI] << 8) + query[QUANTITY_LO];
                 emit slaveWritten(table, startAddress, quantity);
                 break;
             case WriteSingleRegister:
-                table = QModBusRegister::HoldingRegisters;
+                table = QModbusRegister::HoldingRegisters;
                 startAddress = (query[START_ADDRESS_HI] << 8) + query[START_ADDRESS_LO];
                 emit slaveWritten(table, startAddress, 1);
                 break;
             case WriteMultipleRegisters:
-                table = QModBusRegister::HoldingRegisters;
+                table = QModbusRegister::HoldingRegisters;
                 startAddress = (query[START_ADDRESS_HI] << 8) + query[START_ADDRESS_LO];
                 quantity = (query[QUANTITY_HI] << 8) + query[QUANTITY_LO];
                 emit slaveWritten(table, startAddress, quantity);
                 break;
             case ReadWriteRegisters:
                 emit slaveRead();
-                table = QModBusRegister::HoldingRegisters;
+                table = QModbusRegister::HoldingRegisters;
                 startAddress = (query[START_ADDRESS_HI] << 8) + query[START_ADDRESS_LO];
                 quantity = (query[QUANTITY_HI] << 8) + query[QUANTITY_LO];
                 emit slaveWritten(table, startAddress, quantity);
