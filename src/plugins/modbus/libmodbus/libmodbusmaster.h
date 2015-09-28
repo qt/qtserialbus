@@ -39,7 +39,7 @@
 
 #include "libmodbusreply.h"
 
-#include <QtSerialBus/qmodbusmaster.h>
+#include <QtSerialBus/qmodbusclient.h>
 #include <QtSerialBus/qmodbusreply.h>
 #include <QtSerialBus/qmodbusdataunit.h>
 

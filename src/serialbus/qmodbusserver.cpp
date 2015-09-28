@@ -34,8 +34,8 @@
 **
 ****************************************************************************/
 
-#include "qmodbusslave.h"
-#include "qmodbusslave_p.h"
+#include "qmodbusserver.h"
+#include "qmodbusserver_p.h"
 
 QT_BEGIN_NAMESPACE
 

@@ -37,7 +37,7 @@
 #ifndef QMODBUSTCPCLIENT_P_H
 #define QMODBUSTCPCLIENT_P_H
 
-#include "qmodbusmaster_p.h"
+#include "qmodbusclient_p.h"
 #include "qmodbustcpclient.h"
 
 //

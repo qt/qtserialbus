@@ -37,7 +37,7 @@
 #ifndef LIBMODBUSBACKEND_H
 #define LIBMODBUSBACKEND_H
 
-#include <QtSerialBus/qmodbusslave.h>
+#include <QtSerialBus/qmodbusserver.h>
 
 #include <QtCore/qstring.h>
 #include <QtCore/qthread.h>

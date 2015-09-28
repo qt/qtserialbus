@@ -38,8 +38,8 @@
 #define QMODBUS_H
 
 #include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qmodbusslave.h>
-#include <QtSerialBus/qmodbusmaster.h>
+#include <QtSerialBus/qmodbusclient.h>
+#include <QtSerialBus/qmodbusserver.h>
 
 #include <QtCore/qobject.h>
 #include <QtCore/qiodevice.h>

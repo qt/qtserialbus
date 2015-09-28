@@ -40,7 +40,7 @@
 #include <QtNetwork/qhostaddress.h>
 #include <QtSerialBus/qmodbusdataunit.h>
 #include <QtSerialBus/qmodbusregister.h>
-#include <QtSerialBus/qmodbusslave.h>
+#include <QtSerialBus/qmodbusserver.h>
 
 QT_BEGIN_NAMESPACE
 

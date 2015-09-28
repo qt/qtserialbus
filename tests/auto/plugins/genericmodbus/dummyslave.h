@@ -37,7 +37,7 @@
 #ifndef DUMMYSLAVE_H
 #define DUMMYSLAVE_H
 
-#include <QtSerialBus/qmodbusslave.h>
+#include <QtSerialBus/qmodbusserver.h>
 
 QT_FORWARD_DECLARE_CLASS(QIODevice)
 

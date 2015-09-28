@@ -38,7 +38,7 @@
 #define QMODBUSSERIALMASTER_P_H
 
 #include "qmodbusserialmaster.h"
-#include "qmodbusmaster_p.h"
+#include "qmodbusclient_p.h"
 
 #include "qmodbus.h"
 

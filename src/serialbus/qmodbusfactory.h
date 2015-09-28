@@ -38,8 +38,8 @@
 #define QMODBUSFACTORY_H
 
 #include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qmodbusslave.h>
-#include <QtSerialBus/qmodbusmaster.h>
+#include <QtSerialBus/qmodbusserver.h>
+#include <QtSerialBus/qmodbusclient.h>
 
 #include <QtCore/qstringlist.h>
 #include <QtCore/qiodevice.h>

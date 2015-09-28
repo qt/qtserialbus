@@ -36,7 +36,7 @@
 #ifndef QMODBUSSERIALMASTER_H
 #define QMODBUSSERIALMASTER_H
 
-#include <QtSerialBus/qmodbusmaster.h>
+#include <QtSerialBus/qmodbusclient.h>
 
 QT_BEGIN_NAMESPACE
 

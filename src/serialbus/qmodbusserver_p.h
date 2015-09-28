@@ -34,61 +34,35 @@
 **
 ****************************************************************************/
 
-#include "qmodbusmaster.h"
-#include "qmodbusmaster_p.h"
+#ifndef QMODBUSSLAVE_P_H
+#define QMODBUSSLAVE_P_H
+
+#include "qmodbusserver.h"
+#include "qmodbusdevice_p.h"
+
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qt API. It exists purely as an
+// implementation detail. This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
 
 QT_BEGIN_NAMESPACE
 
-/*!
-    \class QModbusMaster
-    \inmodule QtSerialBus
-    \since 5.6
-
-    \brief The QModbusMaster class is the interface class for Modbus master device.
-
-    QModbusMaster communicates with the Modbus backend providing users with a convenient API.
-    The Modbus backend must be specified during the object creation.
-*/
-
-/*!
-    Constructs a Modbus master device with the specified \a parent.
- */
-QModbusMaster::QModbusMaster(QObject *parent)
-    : QModbusDevice(*new QModbusMasterPrivate, parent)
+class QModbusSlavePrivate : public QModbusDevicePrivate
 {
-}
-
-/*!
-    \internal
-*/
-QModbusMaster::~QModbusMaster()
-{
-}
-
-/*!
-    \internal
-*/
-QModbusMaster::QModbusMaster(QModbusMasterPrivate &dd, QObject *parent) :
-    QModbusDevice(dd, parent)
-{
-
-}
-
-/*!
-    \fn QModbusReply *QModbusMaster::write(const QModbusDataUnit &request, int slaveId)
-
-    Sends a request to modify the contents of the data pointed by \a request. Returns a
-    new QModbusReply object, which emits the finished() signal whenever a positive response
-    for the write request is received. Modbus network may have multiple slaves, each slave has
-    a unique \a slaveId.
- */
-
-/*!
-    \fn QModbusReply *QModbusMaster::read(const QModbusDataUnit &request, int slaveId)
-
-    Sends a request to read the contents of the data pointed by \a request. Returns a new QModbusReply object,
-    which emits the finished() signal whenever data arrives. Modbus network may have multiple slaves,
-    each slave has unique \a slaveId.
- */
+    Q_DECLARE_PUBLIC(QModbusSlave)
+public:
+    QModbusSlavePrivate()
+    {
+    }
+};
 
 QT_END_NAMESPACE
+
+#endif // QMODBUSSLAVE_P_H
+

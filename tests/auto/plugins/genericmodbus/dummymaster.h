@@ -37,7 +37,7 @@
 #ifndef DUMMYMASTER_H
 #define DUMMYMASTER_H
 
-#include <QtSerialBus/qmodbusmaster.h>
+#include <QtSerialBus/qmodbusclient.h>
 
 class DummyMaster : public QModbusMaster
 {

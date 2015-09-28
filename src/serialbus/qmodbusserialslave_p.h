@@ -38,7 +38,7 @@
 #define QMODBUSSERIALSLAVE_P_H
 
 #include "qmodbusserialslave.h"
-#include "qmodbusslave_p.h"
+#include "qmodbusserver_p.h"
 
 #include "qmodbus.h"
 

@@ -37,7 +37,7 @@
 #ifndef QMODBUSSERIALSLAVE_H
 #define QMODBUSSERIALSLAVE_H
 
-#include <QtSerialBus/qmodbusslave.h>
+#include <QtSerialBus/qmodbusserver.h>
 
 QT_BEGIN_NAMESPACE
 

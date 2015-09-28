@@ -37,7 +37,7 @@
 #ifndef QMODBUSTCPSERVER_P_H
 #define QMODBUSTCPSERVER_P_H
 
-#include "qmodbusslave_p.h"
+#include "qmodbusserver_p.h"
 #include "qmodbustcpserver.h"
 
 //

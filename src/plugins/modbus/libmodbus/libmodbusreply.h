@@ -43,7 +43,7 @@
 #include <QtCore/qvector.h>
 
 #include <QtSerialBus/qmodbusreply.h>
-#include <QtSerialBus/qmodbusmaster.h>
+#include <QtSerialBus/qmodbusclient.h>
 
 #include <modbus.h>
 
