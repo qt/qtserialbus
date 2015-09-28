@@ -73,8 +73,8 @@ public:
 
 Q_SIGNALS:
     void error(int errorNumber);
-    void slaveRead();
-    void slaveWritten(QModbusRegister::RegisterType table, int address, int size);
+    void dataRead();
+    void dataWritten(QModbusRegister::RegisterType table, int address, int size);
 };
 
 class LibModBusSlave : public QModbusServer

@@ -154,8 +154,8 @@ bool LibModBusSlave::open()
     connect(&thread, &QThread::finished, listener.data(), &QObject::deleteLater);
     connect(this, &LibModBusSlave::operate, listener.data(), &ListenThread::doWork);
     connect(listener.data(), &ListenThread::error, this, &LibModBusSlave::handleError);
-    connect(listener.data(), &ListenThread::slaveRead, this, &LibModBusSlave::slaveRead);
-    connect(listener.data(), &ListenThread::slaveWritten, this, &LibModBusSlave::slaveWritten);
+    connect(listener.data(), &ListenThread::dataRead, this, &LibModBusSlave::dataRead);
+    connect(listener.data(), &ListenThread::dataWritten, this, &LibModBusSlave::dataWritten);
     thread.start();
     emit operate();
     connected = true;
@@ -301,36 +301,36 @@ void ListenThread::doWork()
             case ReadDiscreteInputs:
             case ReadHoldingRegisters:
             case ReadInputRegisters:
-                emit slaveRead();
+                emit dataRead();
                 break;
             case WriteSingleCoil:
                 table = QModbusRegister::Coils;
                 startAddress = (query[START_ADDRESS_HI] << 8) + query[START_ADDRESS_LO];
-                emit slaveWritten(table, startAddress, 1);
+                emit dataWritten(table, startAddress, 1);
                 break;
             case WriteMultipleCoils:
                 table = QModbusRegister::Coils;
                 startAddress = (query[START_ADDRESS_HI] << 8) + query[START_ADDRESS_LO];
                 quantity = (query[QUANTITY_HI] << 8) + query[QUANTITY_LO];
-                emit slaveWritten(table, startAddress, quantity);
+                emit dataWritten(table, startAddress, quantity);
                 break;
             case WriteSingleRegister:
                 table = QModbusRegister::HoldingRegisters;
                 startAddress = (query[START_ADDRESS_HI] << 8) + query[START_ADDRESS_LO];
-                emit slaveWritten(table, startAddress, 1);
+                emit dataWritten(table, startAddress, 1);
                 break;
             case WriteMultipleRegisters:
                 table = QModbusRegister::HoldingRegisters;
                 startAddress = (query[START_ADDRESS_HI] << 8) + query[START_ADDRESS_LO];
                 quantity = (query[QUANTITY_HI] << 8) + query[QUANTITY_LO];
-                emit slaveWritten(table, startAddress, quantity);
+                emit dataWritten(table, startAddress, quantity);
                 break;
             case ReadWriteRegisters:
-                emit slaveRead();
+                emit dataRead();
                 table = QModbusRegister::HoldingRegisters;
                 startAddress = (query[START_ADDRESS_HI] << 8) + query[START_ADDRESS_LO];
                 quantity = (query[QUANTITY_HI] << 8) + query[QUANTITY_LO];
-                emit slaveWritten(table, startAddress, quantity);
+                emit dataWritten(table, startAddress, quantity);
                 break;
             default:
                 break;

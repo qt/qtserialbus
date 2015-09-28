@@ -46,12 +46,12 @@ QT_BEGIN_NAMESPACE
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QModbusSerialMaster class represents a Modbus master/client
-    that uses a serial bus for its communication with the slave/server.
+    \brief The QModbusSerialMaster class represents a Modbus client
+    that uses a serial bus for its communication with the Modbus server.
 
     Communication via Modbus requires the interaction between a single
-    master/client instance and multiple slaves/server. This class
-    provides the master implementation via a serial port.
+    Modbus client instance and multiple Modbus servers. This class
+    provides the server implementation via a serial port.
 */
 
 /*!
@@ -72,8 +72,8 @@ QModbusSerialMaster::~QModbusSerialMaster()
 }
 
 /*!
-    Connects the modbus master to a serial port. \a deviceName
-    represents the serial port to which the modbus slaves are connected.
+    Connects the Modbus master to a serial port. \a deviceName
+    represents the serial port to which the Modbus servers are connected.
 
     The function returns \c true on success; otherwise \c false.
 

@@ -46,7 +46,7 @@ QT_BEGIN_NAMESPACE
 
     \brief The QModbusTcpServer class is the interface class for Modbus TCP sever device.
 
-    Modbus TCP networks can have multiple slaves. Servers are read/written by a client device
+    Modbus TCP networks can have multiple servers. Servers are read/written by a client device
     represented by \l QModbusTcpClient. QModbusTcpServer communicates with a Modbus backend,
     providing users with a convenient API.
  */

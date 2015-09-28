@@ -46,14 +46,14 @@ QT_BEGIN_NAMESPACE
 
     \brief The QModbusServer class is the interface class for Modbus.
 
-    Modbus networks can have multiple slaves. Slaves are read/written by a
-    master device represented by \l QModbusClient. QModbusServer communicates
-    with a Modbus backend, providing users with a convenient API.
+    Modbus networks can have multiple Modbus servers. Modbus Servers are read/written by a
+    Modbus client represented by \l QModbusClient. QModbusServer communicates with a Modbus
+    backend, providing users with a convenient API.
     The Modbus backend must be specified during the object creation.
  */
 
 /*!
-    Constructs a Modbus slave with the specified \a parent.
+    Constructs a Modbus server with the specified \a parent.
  */
 QModbusServer::QModbusServer(QObject *parent) :
     QModbusDevice(*new QModbusServerPrivate, parent)
@@ -78,7 +78,7 @@ QModbusServer::QModbusServer(QModbusServerPrivate &dd, QObject *parent) :
 /*!
     \fn bool QModbusServer::setMap(const QModbusRegister &newRegister) = 0
 
-    Sets the registered map structure for requests from other ModBus masters to \a newRegister.
+    Sets the registered map structure for requests from other ModBus client to \a newRegister.
     The register values are initialized with zero. Returns \c true on success; otherwise \c false.
 
     If this function is not called before connecting, a default register with zero
@@ -90,7 +90,7 @@ QModbusServer::QModbusServer(QModbusServerPrivate &dd, QObject *parent) :
 /*!
     \fn int QModbusServer::slaveId() const
     Multiple Modbus devices can be connected together on the same physical link.
-    Slave id is a unique identifier that each slave must have, and it is used
+    Slave id is a unique identifier that each Modbus server must have, and it is used
     to filter out incoming messages.
 
     Returns slave id.
@@ -101,7 +101,7 @@ QModbusServer::QModbusServer(QModbusServerPrivate &dd, QObject *parent) :
 /*!
     \fn void QModbusServer::setSlaveId(int id)
     Multiple Modbus devices can be connected together on the same physical link.
-    So it is important that each slave is identified by a unique id.
+    So it is important that each server is identified by a unique id.
 
     Sets \a id as slave id.
 
@@ -111,8 +111,8 @@ QModbusServer::QModbusServer(QModbusServerPrivate &dd, QObject *parent) :
 /*!
     \fn bool QModbusServer::data(QModbusRegister::RegisterType table, quint16 address, quint16 *data)
 
-    Reads data stored in the slave. Slave has four tables (\a table) and each have a unique
-    \a address field, which is used to read \a data from the desired field.
+    Reads data stored in the Modbus server. A Modbus server has four tables (\a table) and each
+    have a unique \a address field, which is used to read \a data from the desired field.
     See QModbusRegister::RegisterType for more information about the different tables.
     Returns \c false if address is outside of the map range.
 
@@ -122,24 +122,25 @@ QModbusServer::QModbusServer(QModbusServerPrivate &dd, QObject *parent) :
 /*!
     \fn bool QModbusServer::setData(QModbusRegister::RegisterType table, quint16 address, quint16 data)
 
-    Writes data to the slave. Slave has four tables (\a table) and each have a unique
-    \a address field, which is used to write \a data to the desired field.
+    Writes data to the Modbus server. A Modbus server has four tables (\a table) and each have a
+    unique \a address field, which is used to write \a data to the desired field.
     Returns \c false if address outside of the map range.
 
     \sa QModbusRegister::RegisterType, data()
  */
 
 /*!
-    \fn void QModbusServer::slaveRead()
+    \fn void QModbusServer::dataRead()
 
-    This signal is emitted when master has read one or more fields of data from the slave.
+    This signal is emitted when a Modbus client has read one or more fields of data from the Modbus
+    server.
  */
 
 /*!
-    \fn void QModbusServer::slaveWritten(QModbusRegister::RegisterType table, int address, int size)
+    \fn void QModbusServer::dataWritten(QModbusRegister::RegisterType table, int address, int size)
 
-    This signal is emitted when master has written one or more fields of data to the slave.
-    Signal contains information about the fields that were written:
+    This signal is emitted when a Modbus client has written one or more fields of data to the
+    Modbus server. Signal contains information about the fields that were written:
     \list
      \li \a table that was written,
      \li \a address of the first field that was written,

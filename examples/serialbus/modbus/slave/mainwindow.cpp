@@ -78,12 +78,15 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
     if (type == QModbusDevice::Serial) {
         modbusDevice = new QModbusSerialSlave(this);
     } else if (type == QModbusDevice::Tcp) {
-        modbusDevice = QModbus::instance()->createSlave("libmodbus", type);
+        modbusDevice = QModbus::instance()->createServer("libmodbus", type);
     }
 
     if (!modbusDevice) {
         ui->connectButton->setDisabled(true);
-        ui->errorLabel->setText(tr("Could not create modbus slave."));
+        if (type == QModbusDevice::Serial)
+            ui->errorLabel->setText(tr("Could not create Modbus slave."));
+        else
+            ui->errorLabel->setText(tr("Could not create Modbus server."));
     } else {
         connect(modbusDevice, &QModbusClient::stateChanged,
                 this, &MainWindow::onStateChanged);
@@ -103,7 +106,7 @@ void MainWindow::on_connectButton_clicked()
 
         modbusDevice->setMap(reg);
 
-        connect(modbusDevice, &QModbusServer::slaveWritten,
+        connect(modbusDevice, &QModbusServer::dataWritten,
                 this, &MainWindow::updateWidgets);
         connect(modbusDevice, &QModbusServer::stateChanged,
                 this, &MainWindow::onStateChanged);

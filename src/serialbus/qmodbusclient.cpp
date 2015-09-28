@@ -44,14 +44,14 @@ QT_BEGIN_NAMESPACE
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QModbusClient class is the interface class for Modbus master device.
+    \brief The QModbusClient class is the interface class for Modbus client device.
 
     QModbusClient communicates with the Modbus backend providing users with a convenient API.
     The Modbus backend must be specified during the object creation.
 */
 
 /*!
-    Constructs a Modbus master device with the specified \a parent.
+    Constructs a Modbus client device with the specified \a parent.
  */
 QModbusClient::QModbusClient(QObject *parent)
     : QModbusDevice(*new QModbusClientPrivate, parent)
@@ -79,16 +79,16 @@ QModbusClient::QModbusClient(QModbusClientPrivate &dd, QObject *parent) :
 
     Sends a request to modify the contents of the data pointed by \a request. Returns a
     new QModbusReply object, which emits the finished() signal whenever a positive response
-    for the write request is received. Modbus network may have multiple slaves, each slave has
+    for the write request is received. Modbus network may have multiple servers, each server has
     a unique \a slaveId.
  */
 
 /*!
     \fn QModbusReply *QModbusClient::read(const QModbusDataUnit &request, int slaveId)
 
-    Sends a request to read the contents of the data pointed by \a request. Returns a new QModbusReply object,
-    which emits the finished() signal whenever data arrives. Modbus network may have multiple slaves,
-    each slave has unique \a slaveId.
+    Sends a request to read the contents of the data pointed by \a request. Returns a new
+    QModbusReply object, which emits the finished() signal whenever data arrives. Modbus network
+    may have multiple servers, each server has unique \a slaveId.
  */
 
 QT_END_NAMESPACE

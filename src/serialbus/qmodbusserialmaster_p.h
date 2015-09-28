@@ -65,8 +65,7 @@ public:
         : pluginMaster(Q_NULLPTR)
     {
         //hard usage of libmodbus plugin
-        pluginMaster = QModbus::instance()->createMaster(
-                            QByteArray("libmodbus"));
+        pluginMaster = QModbus::instance()->createClient(QByteArray("libmodbus"));
         if (!pluginMaster) {
             qWarning() << "Cannot find libmodbus plugin.";
             return;

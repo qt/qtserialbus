@@ -69,8 +69,8 @@ public:
     virtual bool setData(QModbusRegister::RegisterType table, quint16 address, quint16 data) = 0;
 
 Q_SIGNALS:
-    void slaveRead();
-    void slaveWritten(QModbusRegister::RegisterType table, int address, int size);
+    void dataRead();
+    void dataWritten(QModbusRegister::RegisterType table, int address, int size);
 
 protected:
     QModbusServer(QModbusServerPrivate &dd, QObject *parent = Q_NULLPTR);

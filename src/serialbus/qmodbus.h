@@ -54,9 +54,9 @@ public:
     static QModbus *instance();
     QList<QByteArray> plugins() const;
 
-    QModbusServer *createSlave(const QByteArray &plugin,
+    QModbusServer *createServer(const QByteArray &plugin,
         QModbusDevice::ModBusConnection type = QModbusDevice::Serial) const;
-    QModbusClient *createMaster(const QByteArray &plugin,
+    QModbusClient *createClient(const QByteArray &plugin,
         QModbusDevice::ModBusConnection type = QModbusDevice::Serial) const;
 
 private:

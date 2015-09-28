@@ -54,7 +54,7 @@ class ModBusPlugin : public QObject, public QModbusFactory
     Q_INTERFACES(QModbusFactory)
 
 public:
-    QModbusServer *createSlave(QModbusDevice::ModBusConnection type) const
+    QModbusServer *createServer(QModbusDevice::ModBusConnection type) const
     {
         if (type == QModbusDevice::Serial)
             return new LibModBusSlave();
@@ -63,7 +63,7 @@ public:
         return Q_NULLPTR;
     }
 
-    QModbusClient *createMaster(QModbusDevice::ModBusConnection type) const
+    QModbusClient *createClient(QModbusDevice::ModBusConnection type) const
     {
         if (type == QModbusDevice::Serial)
             return new LibModBusMaster();

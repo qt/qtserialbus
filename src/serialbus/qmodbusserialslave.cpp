@@ -47,15 +47,14 @@ QT_BEGIN_NAMESPACE
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QModbusSerialSlave class represents a Modbus slave/server
-    that uses a serial port for its communication with the master/client.
+    \brief The QModbusSerialSlave class represents a Modbus server
+    that uses a serial port for its communication with the Modbus client.
 
-    Communication via Modbus requires the interaction between a single
-    master/client instance and multiple slaves/server. This class
-    provides the slave implementation via a serial port.
+    Communication via Modbus requires the interaction between a single Modbus client instance and
+    multiple Modbus server. This class provides the Modbus server implementation via a serial port.
 
-    Since multiple slave instances can interact with a master at the same time
-    (using a serial bus), slaves are identified by their \l slaveId().
+    Since multiple Modbus server instances can interact with a Modbus client at the same time
+    (using a serial bus), servers are identified by their \l slaveId().
 */
 
 /*!
@@ -80,7 +79,7 @@ QModbusSerialSlave::~QModbusSerialSlave()
  */
 bool QModbusSerialSlave::connectDevice()
 {
-    // reimp to avoid QModbusDevice implementaion
+    // reimp to avoid QModbusDevice implementation
     // we want to use a forwarded version.
 
     Q_D(QModbusSerialSlave);

@@ -30,18 +30,18 @@
 
     \brief Implemented Qt Modbus.
 
-    Modbus is a request/reply protocol that has one master in its network and may have many
-    slaves. Slaves can control only their own internal states and master can read and write
+    Modbus is a request/reply protocol that has one Modbus client in its network and may have many
+    Modbus servers. Servers can control only their own internal states and clients can read and write
     data in them. Modbus is not restricted by the network type, in theory it can use any
     QIODevice. However, not every plugin supports all classes derived from QIODevice.
 
-    Each slave has four tables in which it can store data.
+    Each Modbus server has four tables in which it can store data.
 
     \table
         \header
             \li name
             \li data range in one field
-            \li permissions for master
+            \li permissions for client
         \row
             \li Discrete Inputs
             \li 0-1
@@ -63,11 +63,11 @@
     The Modbus API provides some common API to access the Modbus devices:
 
     \list
-        \li QModbusDevice provides an API for common functionality with master and slave.
-        \li QModbusMaster provides an API for direct access to Modbus master.
-        \li QModbusSlave provides an API for direct access to Modbus slave.
+        \li QModbusDevice provides an API for common functionality with client and server.
+        \li QModbusClient provides an API for direct access to Modbus client.
+        \li QModbusServer provides an API for direct access to Modbus server.
         \li QModbusDataUnit represents a data value.
-        \li QModbusReply is created by QModbusMaster as a handle for write/read operation.
+        \li QModbusReply is created by QModbusClient as a handle for write/read operation.
     \endlist
 
     The Modbus plugin supports the following set of backends for various devices:

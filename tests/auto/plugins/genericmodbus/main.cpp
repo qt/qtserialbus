@@ -53,7 +53,7 @@ class GenericBusPlugin : public QObject, public QModbusFactory
 
 
 public:
-    QModbusServer *createSlave(QModbusDevice::ModBusConnection type) const
+    QModbusServer *createServer(QModbusDevice::ModBusConnection type) const
     {
         if (type == QModbusDevice::Serial)
             return new DummySlave();
@@ -64,7 +64,7 @@ public:
         return Q_NULLPTR;
     }
 
-    QModbusClient *createMaster(QModbusDevice::ModBusConnection type) const
+    QModbusClient *createClient(QModbusDevice::ModBusConnection type) const
     {
         if (type == QModbusDevice::Serial)
             return new DummyMaster();

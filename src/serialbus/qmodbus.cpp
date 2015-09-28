@@ -126,13 +126,13 @@ QModbusPrivate setFactory(const QByteArray &plugin)
 }
 
 /*!
-    Creates a Modbus Slave. \a plugin is the name of the plugin as returned by the \l plugins()
+    Creates a Modbus server. \a plugin is the name of the plugin as returned by the \l plugins()
     method.
 
     Ownership of the returned backend is transferred to the caller.
     Returns \c null if no suitable device can be found.
  */
-QModbusServer *QModbus::createSlave(const QByteArray &plugin,
+QModbusServer *QModbus::createServer(const QByteArray &plugin,
                                    QModbusDevice::ModBusConnection type) const
 {
     if (!qModBusPlugins()->contains(plugin))
@@ -140,17 +140,17 @@ QModbusServer *QModbus::createSlave(const QByteArray &plugin,
     QModbusPrivate d = setFactory(plugin);
     if (!d.factory)
         return Q_NULLPTR;
-    return d.factory->createSlave(type);
+    return d.factory->createServer(type);
 }
 
 /*!
-    Creates a Modbus Master. \a plugin is the name of the plugin as returned by the \l plugins()
+    Creates a Modbus client. \a plugin is the name of the plugin as returned by the \l plugins()
     method.
 
     Ownership of the returned backend is transferred to the caller.
     Returns \c null if no suitable device can be found.
  */
-QModbusClient *QModbus::createMaster(const QByteArray &plugin,
+QModbusClient *QModbus::createClient(const QByteArray &plugin,
                                      QModbusDevice::ModBusConnection type) const
 {
     if (!qModBusPlugins()->contains(plugin))
@@ -158,7 +158,7 @@ QModbusClient *QModbus::createMaster(const QByteArray &plugin,
     QModbusPrivate d = setFactory(plugin);
     if (!d.factory)
         return Q_NULLPTR;
-    return d.factory->createMaster(type);
+    return d.factory->createClient(type);
 }
 
 QModbus::QModbus(QObject *parent) :

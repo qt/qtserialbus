@@ -83,13 +83,15 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
     if (type == QModbusDevice::Serial) {
         modbusDevice = new QModbusSerialMaster(this);
     } else if (type == QModbusDevice::Tcp) {
-        modbusDevice = QModbus::instance()->createMaster("libmodbus",
-                           static_cast<QModbusDevice::ModBusConnection> (index));
+        modbusDevice = QModbus::instance()->createClient("libmodbus", type);
     }
 
     if (!modbusDevice) {
         ui->connectButton->setDisabled(true);
-        ui->errorLabel->setText(tr("Could not create modbus master."));
+        if (type == QModbusDevice::Serial)
+            ui->errorLabel->setText(tr("Could not create Modbus master."));
+        else
+            ui->errorLabel->setText(tr("Could not create Modbus client."));
     } else {
         connect(modbusDevice, &QModbusClient::stateChanged,
                 this, &MainWindow::onStateChanged);

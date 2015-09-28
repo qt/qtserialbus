@@ -65,8 +65,7 @@ public:
         : pluginMaster(Q_NULLPTR)
     {
         //hard usage of libmodbus plugin
-        pluginMaster = QModbus::instance()->createSlave(
-                            QByteArray("libmodbus"));
+        pluginMaster = QModbus::instance()->createServer(QByteArray("libmodbus"));
         if (!pluginMaster) {
             qWarning() << "Cannot find libmodbus plugin.";
             return;
@@ -89,10 +88,10 @@ public:
                          q, SLOT(handleStateChanged(QModbusDevice::ModBusDeviceState)));
         QObject::connect(pluginMaster, SIGNAL(errorOccurred(QModbusDevice::ModBusError)),
                          q, SLOT(handleErrorOccurred(QModbusDevice::ModBusError)));
-        QObject::connect(pluginMaster, SIGNAL(slaveWritten(QModbusRegister::RegisterType,int,int)),
-                         q, SIGNAL(slaveWritten(QModbusRegister::RegisterType,int,int)));
-        QObject::connect(pluginMaster, SIGNAL(slaveRead()),
-                         q, SIGNAL(slaveRead()));
+        QObject::connect(pluginMaster, SIGNAL(dataWritten(QModbusRegister::RegisterType,int,int)),
+                         q, SIGNAL(dataWritten(QModbusRegister::RegisterType,int,int)));
+        QObject::connect(pluginMaster, SIGNAL(dataRead()),
+                         q, SIGNAL(dataRead()));
 
         q->setState(pluginMaster->state());
         q->setError(pluginMaster->errorString(), pluginMaster->error());

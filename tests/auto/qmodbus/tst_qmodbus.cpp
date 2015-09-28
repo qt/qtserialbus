@@ -82,11 +82,11 @@ void tst_QModbus::plugins()
 
 void tst_QModbus::createBackend()
 {
-    QVERIFY(bus->createSlave("foo") == Q_NULLPTR);
-    QVERIFY(bus->createMaster("foo") == Q_NULLPTR);
+    QVERIFY(bus->createServer("foo") == Q_NULLPTR);
+    QVERIFY(bus->createClient("foo") == Q_NULLPTR);
 
-    QVERIFY(bus->createSlave("generic") != Q_NULLPTR);
-    QVERIFY(bus->createMaster("generic") != Q_NULLPTR);
+    QVERIFY(bus->createServer("generic") != Q_NULLPTR);
+    QVERIFY(bus->createClient("generic") != Q_NULLPTR);
 }
 
 QTEST_MAIN(tst_QModbus)

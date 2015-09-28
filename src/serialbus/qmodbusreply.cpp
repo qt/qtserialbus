@@ -63,13 +63,13 @@ QModbusReply::QModbusReply(QObject *parent) :
     This enum describes the type of error that has occurred.
 
     \value NoError              No error has occurred.
-    \value IllegalFunction      The received request is not an allowable action for the slave.
-    \value IllegalDataAddress   The received data address in the query is not an allowable address for
-                                the slave.
+    \value IllegalFunction      The received request is not an allowable action for the server.
+    \value IllegalDataAddress   The received data address in the query is not an allowable address
+                                for the Modbus server.
     \value IllegalDataValue     The contained value in the request data field is not an allowable
-                                value for the slave.
-    \value SlaveFailure         An irrecoverable error occurred while the slave was attempting to perform
-                                the requested action.
+                                value for the Modbus server.
+    \value SlaveFailure         An irrecoverable error occurred while the slave was attempting to
+                                perform the requested action.
     \value Acknowledge          Specialized use in conjunction with programming commands.
     \value SlaveBusy            The slave is engaged in processing a long–duration program command.
     \value MemoryParity         Indicates that the extended file area failed to pass a consistency check.
