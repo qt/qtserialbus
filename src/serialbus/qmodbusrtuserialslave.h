@@ -34,23 +34,23 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSSERIALSLAVE_H
-#define QMODBUSSERIALSLAVE_H
+#ifndef QMODBUSRTUSERIALSLAVE_H
+#define QMODBUSRTUSERIALSLAVE_H
 
 #include <QtSerialBus/qmodbusserver.h>
 
 QT_BEGIN_NAMESPACE
 
-class QModbusSerialSlavePrivate;
+class QModbusRtuSerialSlavePrivate;
 
-class Q_SERIALBUS_EXPORT QModbusSerialSlave : public QModbusServer
+class Q_SERIALBUS_EXPORT QModbusRtuSerialSlave : public QModbusServer
 {
     Q_OBJECT
-    Q_DECLARE_PRIVATE(QModbusSerialSlave)
+    Q_DECLARE_PRIVATE(QModbusRtuSerialSlave)
 
 public:
-    explicit QModbusSerialSlave(QObject *parent = Q_NULLPTR);
-    ~QModbusSerialSlave();
+    explicit QModbusRtuSerialSlave(QObject *parent = Q_NULLPTR);
+    ~QModbusRtuSerialSlave();
 
     bool connectDevice() Q_DECL_OVERRIDE;
 
@@ -63,8 +63,7 @@ public:
     bool setData(QModbusRegister::RegisterType table, quint16 address, quint16 data) Q_DECL_OVERRIDE;
 
 protected:
-    QModbusSerialSlave(QModbusSerialSlavePrivate &dd,
-                        QObject *parent = Q_NULLPTR);
+    QModbusRtuSerialSlave(QModbusRtuSerialSlavePrivate &dd, QObject *parent = Q_NULLPTR);
 
     bool open() Q_DECL_OVERRIDE;
     void close() Q_DECL_OVERRIDE;
@@ -76,4 +75,4 @@ private:
 
 QT_END_NAMESPACE
 
-#endif // QMODBUSSERIALSLAVE_H
+#endif // QMODBUSRTUSERIALSLAVE_H

@@ -33,23 +33,23 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef QMODBUSSERIALMASTER_H
-#define QMODBUSSERIALMASTER_H
+#ifndef QMODBUSRTUSERIALMASTER_H
+#define QMODBUSRTUSERIALMASTER_H
 
 #include <QtSerialBus/qmodbusclient.h>
 
 QT_BEGIN_NAMESPACE
 
-class QModbusSerialMasterPrivate;
+class QModbusRtuSerialMasterPrivate;
 
-class Q_SERIALBUS_EXPORT QModbusSerialMaster : public QModbusClient
+class Q_SERIALBUS_EXPORT QModbusRtuSerialMaster : public QModbusClient
 {
     Q_OBJECT
-    Q_DECLARE_PRIVATE(QModbusSerialMaster)
+    Q_DECLARE_PRIVATE(QModbusRtuSerialMaster)
 
 public:
-    explicit QModbusSerialMaster(QObject *parent = Q_NULLPTR);
-    ~QModbusSerialMaster();
+    explicit QModbusRtuSerialMaster(QObject *parent = Q_NULLPTR);
+    ~QModbusRtuSerialMaster();
 
     // TODO find way to pass parity, baud, dataBits, stopBits
     bool connectDevice(const QString& deviceName);
@@ -58,8 +58,7 @@ public:
     QModbusReply *read(const QModbusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
 
 protected:
-    QModbusSerialMaster(QModbusSerialMasterPrivate &dd,
-                        QObject *parent = Q_NULLPTR);
+    QModbusRtuSerialMaster(QModbusRtuSerialMasterPrivate &dd, QObject *parent = Q_NULLPTR);
 
     bool open() Q_DECL_OVERRIDE;
     void close() Q_DECL_OVERRIDE;
@@ -72,4 +71,4 @@ private:
 
 QT_END_NAMESPACE
 
-#endif // QMODBUSSERIALMASTER_H
+#endif // QMODBUSRTUSERIALMASTER_H

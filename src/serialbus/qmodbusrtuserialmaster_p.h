@@ -57,11 +57,12 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModbusSerialMasterPrivate : public QModbusClientPrivate
+class QModbusRtuSerialMasterPrivate : public QModbusClientPrivate
 {
-    Q_DECLARE_PUBLIC(QModbusSerialMaster)
+    Q_DECLARE_PUBLIC(QModbusRtuSerialMaster)
+
 public:
-    QModbusSerialMasterPrivate()
+    QModbusRtuSerialMasterPrivate()
         : pluginMaster(Q_NULLPTR)
     {
         //hard usage of libmodbus plugin
@@ -72,7 +73,7 @@ public:
         }
     }
 
-    ~QModbusSerialMasterPrivate()
+    ~QModbusRtuSerialMasterPrivate()
     {
         delete pluginMaster;
     }
@@ -82,7 +83,7 @@ public:
         if (!pluginMaster)
             return;
 
-        Q_Q(QModbusSerialMaster);
+        Q_Q(QModbusRtuSerialMaster);
         // forward the error and state changes
         QObject::connect(pluginMaster, SIGNAL(stateChanged(QModbusDevice::ModBusDeviceState)),
                          q, SLOT(handleStateChanged(QModbusDevice::ModBusDeviceState)));

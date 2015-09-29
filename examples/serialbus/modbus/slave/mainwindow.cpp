@@ -76,7 +76,7 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
 
     QModbusDevice::ModBusConnection type = static_cast<QModbusDevice::ModBusConnection> (index);
     if (type == QModbusDevice::Serial) {
-        modbusDevice = new QModbusSerialSlave(this);
+        modbusDevice = new QModbusRtuSerialSlave(this);
     } else if (type == QModbusDevice::Tcp) {
         modbusDevice = QModbus::instance()->createServer("libmodbus", type);
     }

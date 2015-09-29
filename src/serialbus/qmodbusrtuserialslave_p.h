@@ -34,8 +34,8 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSSERIALSLAVE_P_H
-#define QMODBUSSERIALSLAVE_P_H
+#ifndef QMODBUSRTUSERIALSLAVE_P_H
+#define QMODBUSRTUSERIALSLAVE_P_H
 
 #include "qmodbusrtuserialslave.h"
 #include "qmodbusserver_p.h"
@@ -57,11 +57,12 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModbusSerialSlavePrivate : public QModbusServerPrivate
+class QModbusRtuSerialSlavePrivate : public QModbusServerPrivate
 {
-    Q_DECLARE_PUBLIC(QModbusSerialSlave)
+    Q_DECLARE_PUBLIC(QModbusRtuSerialSlave)
+
 public:
-    QModbusSerialSlavePrivate()
+    QModbusRtuSerialSlavePrivate()
         : pluginMaster(Q_NULLPTR)
     {
         //hard usage of libmodbus plugin
@@ -72,7 +73,7 @@ public:
         }
     }
 
-    ~QModbusSerialSlavePrivate()
+    ~QModbusRtuSerialSlavePrivate()
     {
         delete pluginMaster;
     }
@@ -82,7 +83,7 @@ public:
         if (!pluginMaster)
             return;
 
-        Q_Q(QModbusSerialSlave);
+        Q_Q(QModbusRtuSerialSlave);
         // forward the error and state changes
         QObject::connect(pluginMaster, SIGNAL(stateChanged(QModbusDevice::ModBusDeviceState)),
                          q, SLOT(handleStateChanged(QModbusDevice::ModBusDeviceState)));
@@ -105,5 +106,5 @@ public:
 
 QT_END_NAMESPACE
 
-#endif // QMODBUSSERIALSLAVE_P_H
+#endif // QMODBUSRTUSERIALSLAVE_P_H
 

@@ -43,7 +43,7 @@
 
 #include <QByteArray>
 #include <QModbus>
-#include <QModbusSerialMaster>
+#include <QModbusRtuSerialMaster>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -81,7 +81,7 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
 
     QModbusDevice::ModBusConnection type = static_cast<QModbusDevice::ModBusConnection> (index);
     if (type == QModbusDevice::Serial) {
-        modbusDevice = new QModbusSerialMaster(this);
+        modbusDevice = new QModbusRtuSerialMaster(this);
     } else if (type == QModbusDevice::Tcp) {
         modbusDevice = QModbus::instance()->createClient("libmodbus", type);
     }
@@ -106,7 +106,7 @@ void MainWindow::on_connectButton_clicked()
     ui->errorLabel->setText(QString());
     if (modbusDevice->state() != QModbusDevice::ConnectedState) {
         const QString portString = ui->portEdit->text();
-        QModbusSerialMaster *serialMaster = qobject_cast<QModbusSerialMaster *>(modbusDevice);
+        QModbusRtuSerialMaster *serialMaster = qobject_cast<QModbusRtuSerialMaster *>(modbusDevice);
         bool connectResult = false;
 
         if (serialMaster) {
