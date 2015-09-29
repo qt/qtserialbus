@@ -253,4 +253,20 @@ QString QModbusDevice::errorString() const
     \sa disconnectDevice()
  */
 
+/*!
+    \internal
+    \fn quint8 QModbusDevicePrivate::calculateLRC(const char *data, qint32 len) const
+
+    Returns the LRC checksum of the first \a len bytes of \a data. The checksum is independent of
+    the byte order (endianness).
+*/
+
+/*!
+    \internal
+    bool QModbusDevicePrivate::checkLRC(const char *data, qint32 len, quint8 lrc) const
+
+    Returns true if the LRC checksum of the first \a len bytes of \a data match the given \a lrc;
+    otherwise returns false.
+*/
+
 QT_END_NAMESPACE

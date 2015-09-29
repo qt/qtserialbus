@@ -63,6 +63,18 @@ public:
     {
     }
 
+    quint8 calculateLRC(const char *data, qint32 len) const
+    {
+        quint32 lrc = 0;
+        while (len--)
+            lrc += *data++;
+        return -(quint8(lrc));
+    }
+    bool checkLRC(const char *data, qint32 len, quint8 lrc) const
+    {
+        return calculateLRC(data, len) == lrc;
+    }
+
     QModbusDevice::ModBusDeviceState state;
     QModbusDevice::ModBusError error;
     QString errorString;

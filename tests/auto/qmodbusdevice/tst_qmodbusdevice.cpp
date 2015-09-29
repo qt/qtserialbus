@@ -36,6 +36,7 @@
 
 #include <QtTest/QtTest>
 #include <QtSerialBus/qmodbusdevice.h>
+#include <QtSerialBus/private/qmodbusdevice_p.h>
 #include <QtCore/qpointer.h>
 
 class dummyDevice : public QModbusDevice
@@ -56,12 +57,25 @@ public:
     explicit tst_QModbusDevice();
 
 private slots:
+    void initTestCase()
+    {
+        dp = new QModbusDevicePrivate;
+    }
+    void cleanupTestCase()
+    {
+        // TODO: it doesn't like the delete
+        // delete dp;
+    }
+
     void connectDevice();
     void state();
     void error();
 
+    void testChecksumLRC_data();
+    void testChecksumLRC();
 
 private:
+    QModbusDevicePrivate *dp;
     QPointer<dummyDevice> device;
 };
 
@@ -111,6 +125,55 @@ void tst_QModbusDevice::error()
 
     QCOMPARE(device->error(), QModbusDevice::ConnectionError);
     QCOMPARE(device->errorString(), errorString);
+}
+
+void tst_QModbusDevice::testChecksumLRC_data()
+{
+    // Modbus ASCII Messages generated with pymodbus message-generator.py
+
+    QTest::addColumn<QByteArray>("pdu");
+    QTest::addColumn<quint8>("lrc");
+
+    QTest::newRow(":0107F8")
+        << QByteArray::fromHex("0107")
+        << quint8(0xF8);
+    QTest::newRow(":010BF4")
+        << QByteArray::fromHex("010B")
+        << quint8(0xF4);
+    QTest::newRow(":010CF3")
+        << QByteArray::fromHex("010C")
+        << quint8(0xF3);
+    QTest::newRow(":0111EE")
+        << QByteArray::fromHex("0111")
+        << quint8(0xEE);
+    QTest::newRow(":011400EB")
+        << QByteArray::fromHex("011400")
+        << quint8(0xEB);
+    QTest::newRow(":011500EA")
+        << QByteArray::fromHex("011500")
+        << quint8(0xEA);
+    QTest::newRow(":1103006B00037E")
+        << QByteArray::fromHex("1103006B0003")
+        << quint8(0x7E);
+    QTest::newRow(":01160012FFFF0000D9")
+        << QByteArray::fromHex("01160012FFFF0000")
+        << quint8(0xD9);
+    QTest::newRow(":0110001200081000010001000100010001000100010001BD")
+        << QByteArray::fromHex("0110001200081000010001000100010001000100010001")
+        << quint8(0xBD);
+    QTest::newRow(":011700120008000000081000010001000100010001000100010001AE")
+        << QByteArray::fromHex("011700120008000000081000010001000100010001000100010001")
+        << quint8(0xAE);
+
+}
+void tst_QModbusDevice::testChecksumLRC()
+{
+    QFETCH(QByteArray, pdu);
+    QFETCH(quint8, lrc);
+
+    QCOMPARE(dp->calculateLRC(pdu.constData(), pdu.size()), lrc);
+    QCOMPARE(dp->checkLRC(pdu.constData(), pdu.size(), lrc), true);
+}
 }
 
 QTEST_MAIN(tst_QModbusDevice)
