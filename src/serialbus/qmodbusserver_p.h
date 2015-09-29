@@ -34,8 +34,8 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSSLAVE_P_H
-#define QMODBUSSLAVE_P_H
+#ifndef QMODBUSERVER_P_H
+#define QMODBUSERVER_P_H
 
 #include "qmodbusserver.h"
 #include "qmodbusdevice_p.h"
@@ -64,5 +64,5 @@ public:
 
 QT_END_NAMESPACE
 
-#endif // QMODBUSSLAVE_P_H
+#endif // QMODBUSERVER_P_H
 

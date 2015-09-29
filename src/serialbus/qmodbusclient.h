@@ -34,8 +34,8 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSMASTER_H
-#define QMODBUSMASTER_H
+#ifndef QMODBUSCLIENT_H
+#define QMODBUSCLIENT_H
 
 #include <QtSerialBus/qserialbusglobal.h>
 #include <QtSerialBus/qmodbusdevice.h>
@@ -65,4 +65,5 @@ protected:
 };
 
 QT_END_NAMESPACE
-#endif // QMODBUSMASTER_H
+
+#endif // QMODBUSCLIENT_H
