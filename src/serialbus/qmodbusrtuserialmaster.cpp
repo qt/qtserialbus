@@ -34,8 +34,8 @@
 **
 ****************************************************************************/
 
-#include "qmodbusserialmaster.h"
-#include "qmodbusserialmaster_p.h"
+#include "qmodbusrtuserialmaster.h"
+#include "qmodbusrtuserialmaster_p.h"
 
 #include <QtSerialBus/qmodbus.h>
 
@@ -171,6 +171,6 @@ QModbusReply *QModbusSerialMaster::read(const QModbusDataUnit &request, int slav
 
 }
 
-#include "moc_qmodbusserialmaster.cpp"
+#include "moc_qmodbusrtuserialmaster.cpp"
 
 QT_END_NAMESPACE

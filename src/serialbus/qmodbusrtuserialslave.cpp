@@ -34,8 +34,8 @@
 **
 ****************************************************************************/
 
-#include "qmodbusserialslave.h"
-#include "qmodbusserialslave_p.h"
+#include "qmodbusrtuserialslave.h"
+#include "qmodbusrtuserialslave_p.h"
 
 #include <QtSerialBus/qmodbus.h>
 
@@ -208,6 +208,6 @@ void QModbusSerialSlavePrivate::handleErrorOccurred(
                 error);
 }
 
-#include "moc_qmodbusserialslave.cpp"
+#include "moc_qmodbusrtuserialslave.cpp"
 
 QT_END_NAMESPACE

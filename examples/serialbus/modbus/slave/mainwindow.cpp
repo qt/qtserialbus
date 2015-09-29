@@ -42,7 +42,7 @@
 #include "ui_mainwindow.h"
 
 #include <QtSerialBus/qmodbus.h>
-#include <QtSerialBus/qmodbusserialslave.h>
+#include <QtSerialBus/qmodbusrtuserialslave.h>
 #include <QRegularExpression>
 
 MainWindow::MainWindow(QWidget *parent)

@@ -23,20 +23,20 @@ PUBLIC_HEADERS += \
     qmodbusclient.h \
     qmodbusreply.h \
     qmodbusregister.h \
-    qmodbusserialmaster.h \
+    qmodbusrtuserialmaster.h \
     qmodbustcpclient.h \
     qmodbustcpserver.h \
-    qmodbusserialslave.h
+    qmodbusrtuserialslave.h
 
 PRIVATE_HEADERS += \
     qcanbusdevice_p.h \
     qmodbusserver_p.h \
     qmodbusclient_p.h \
     qmodbusdevice_p.h \
-    qmodbusserialmaster_p.h \
+    qmodbusrtuserialmaster_p.h \
     qmodbustcpclient_p.h \
     qmodbustcpserver_p.h \
-    qmodbusserialslave_p.h
+    qmodbusrtuserialslave_p.h
 
 SOURCES += \
     qcanbusdevice.cpp \
@@ -50,9 +50,9 @@ SOURCES += \
     qmodbusclient.cpp \
     qmodbusreply.cpp \
     qmodbusregister.cpp \
-    qmodbusserialmaster.cpp \
+    qmodbusrtuserialmaster.cpp \
     qmodbustcpclient.cpp \
     qmodbustcpserver.cpp \
-    qmodbusserialslave.cpp
+    qmodbusrtuserialslave.cpp
 
 HEADERS += $$PUBLIC_HEADERS $$PRIVATE_HEADERS

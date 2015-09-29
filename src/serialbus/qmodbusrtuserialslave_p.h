@@ -34,11 +34,11 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSSERIALMASTER_P_H
-#define QMODBUSSERIALMASTER_P_H
+#ifndef QMODBUSSERIALSLAVE_P_H
+#define QMODBUSSERIALSLAVE_P_H
 
-#include "qmodbusserialmaster.h"
-#include "qmodbusclient_p.h"
+#include "qmodbusrtuserialslave.h"
+#include "qmodbusserver_p.h"
 
 #include "qmodbus.h"
 
@@ -57,22 +57,22 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModbusSerialMasterPrivate : public QModbusClientPrivate
+class QModbusSerialSlavePrivate : public QModbusServerPrivate
 {
-    Q_DECLARE_PUBLIC(QModbusSerialMaster)
+    Q_DECLARE_PUBLIC(QModbusSerialSlave)
 public:
-    QModbusSerialMasterPrivate()
+    QModbusSerialSlavePrivate()
         : pluginMaster(Q_NULLPTR)
     {
         //hard usage of libmodbus plugin
-        pluginMaster = QModbus::instance()->createClient(QByteArray("libmodbus"));
+        pluginMaster = QModbus::instance()->createServer(QByteArray("libmodbus"));
         if (!pluginMaster) {
             qWarning() << "Cannot find libmodbus plugin.";
             return;
         }
     }
 
-    ~QModbusSerialMasterPrivate()
+    ~QModbusSerialSlavePrivate()
     {
         delete pluginMaster;
     }
@@ -82,24 +82,28 @@ public:
         if (!pluginMaster)
             return;
 
-        Q_Q(QModbusSerialMaster);
+        Q_Q(QModbusSerialSlave);
         // forward the error and state changes
         QObject::connect(pluginMaster, SIGNAL(stateChanged(QModbusDevice::ModBusDeviceState)),
                          q, SLOT(handleStateChanged(QModbusDevice::ModBusDeviceState)));
         QObject::connect(pluginMaster, SIGNAL(errorOccurred(QModbusDevice::ModBusError)),
                          q, SLOT(handleErrorOccurred(QModbusDevice::ModBusError)));
+        QObject::connect(pluginMaster, SIGNAL(dataWritten(QModbusRegister::RegisterType,int,int)),
+                         q, SIGNAL(dataWritten(QModbusRegister::RegisterType,int,int)));
+        QObject::connect(pluginMaster, SIGNAL(dataRead()),
+                         q, SIGNAL(dataRead()));
 
         q->setState(pluginMaster->state());
         q->setError(pluginMaster->errorString(), pluginMaster->error());
     }
 
-    void handleStateChanged(QModbusDevice::ModBusDeviceState);
+    void handleStateChanged(QModbusDevice::ModBusDeviceState state);
     void handleErrorOccurred(QModbusDevice::ModBusError);
 
-    QModbusClient* pluginMaster;
+    QModbusServer* pluginMaster;
 };
 
 QT_END_NAMESPACE
 
-#endif // QMODBUSSERIALMASTER_P_H
+#endif // QMODBUSSERIALSLAVE_P_H
 
