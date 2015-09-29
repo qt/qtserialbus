@@ -102,7 +102,6 @@ QModbusRtuSerialSlave::QModbusRtuSerialSlave(QModbusRtuSerialSlavePrivate &dd, Q
     d->setupMaster();
 }
 
-
 /*!
     \reimp
  */
