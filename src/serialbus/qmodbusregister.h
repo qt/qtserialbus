@@ -37,7 +37,7 @@
 #ifndef QMODBUSREGISTER_H
 #define QMODBUSREGISTER_H
 
-#include <QtSerialBus/qmodbusdevice.h>
+#include <QtCore/qmetatype.h>
 #include <QtCore/qvector.h>
 
 QT_BEGIN_NAMESPACE
