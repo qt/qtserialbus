@@ -60,6 +60,8 @@ public:
     QModbusClientPrivate()
     {
     }
+
+    bool processResponse(const QModbusResponse &response, QModbusDataUnit *data);
 };
 
 QT_END_NAMESPACE

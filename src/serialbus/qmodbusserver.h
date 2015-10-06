@@ -40,6 +40,7 @@
 #include <QtSerialBus/qserialbusglobal.h>
 #include <QtSerialBus/qmodbusdevice.h>
 #include <QtSerialBus/qmodbusdataunit.h>
+#include <QtSerialBus/qmodbuspdu.h>
 #include <QtSerialBus/qmodbusregister.h>
 
 #include <QtCore/qobject.h>
@@ -59,7 +60,7 @@ public:
     explicit QModbusServer(QObject *parent = 0);
     virtual ~QModbusServer();
 
-    virtual bool setMap(const QModbusRegister &newRegister) = 0;
+    virtual bool setMap(const QModbusRegister &newRegister);
 
     virtual void setSlaveId(int id) = 0;
     virtual int slaveId() const = 0;
@@ -74,6 +75,10 @@ Q_SIGNALS:
 
 protected:
     QModbusServer(QModbusServerPrivate &dd, QObject *parent = Q_NULLPTR);
+
+    virtual QModbusResponse processRequest(const QModbusPdu &request);
+    virtual QModbusResponse processCustomRequest(const QModbusPdu &request);
+
 };
 
 QT_END_NAMESPACE

@@ -40,7 +40,9 @@
 #include <QtSerialBus/qserialbusglobal.h>
 #include <QtSerialBus/qmodbusdevice.h>
 #include <QtSerialBus/qmodbusdataunit.h>
+#include <QtSerialBus/qmodbuspdu.h>
 #include <QtSerialBus/qmodbusreply.h>
+#include <QtSerialBus/qmodbusreplyex.h>
 
 #include <QtCore/qobject.h>
 
@@ -57,11 +59,21 @@ public:
     explicit QModbusClient(QObject *parent = 0);
     virtual ~QModbusClient();
 
+    virtual QModbusReplyEx *sendRequest(const QModbusDataUnit &request, int slaveId = 1) = 0;
+
+    //TODO to be removed once new setup ready
     virtual QModbusReply *write(const QModbusDataUnit &request, int slaveId = 1) = 0;
     virtual QModbusReply *read(const QModbusDataUnit &request, int slaveId = 1) = 0;
 
+Q_SIGNALS:
+    void requestFinished(QModbusReplyEx *result);
+
 protected:
     QModbusClient(QModbusClientPrivate &dd, QObject *parent = Q_NULLPTR);
+
+    virtual bool processResponse(const QModbusResponse &response, QModbusDataUnit *data);
+    virtual bool processCustomResponse(const QModbusResponse &response, QModbusDataUnit *data);
+
 };
 
 QT_END_NAMESPACE

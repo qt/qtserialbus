@@ -44,12 +44,12 @@ QT_BEGIN_NAMESPACE
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QModbusServer class is the interface class for Modbus.
+    \brief The QModbusServer class is the interface to receive and process Modbus requests.
 
     Modbus networks can have multiple Modbus servers. Modbus Servers are read/written by a
     Modbus client represented by \l QModbusClient. QModbusServer communicates with a Modbus
     backend, providing users with a convenient API.
-    The Modbus backend must be specified during the object creation.
+
  */
 
 /*!
@@ -76,9 +76,7 @@ QModbusServer::QModbusServer(QModbusServerPrivate &dd, QObject *parent) :
 }
 
 /*!
-    \fn bool QModbusServer::setMap(const QModbusRegister &newRegister) = 0
-
-    Sets the registered map structure for requests from other ModBus client to \a newRegister.
+    Sets the registered map structure for requests from other Modbus clients to \a newRegister.
     The register values are initialized with zero. Returns \c true on success; otherwise \c false.
 
     If this function is not called before connecting, a default register with zero
@@ -86,6 +84,11 @@ QModbusServer::QModbusServer(QModbusServerPrivate &dd, QObject *parent) :
 
     \note Calling this function discards any register value that was previously set.
  */
+bool QModbusServer::setMap(const QModbusRegister &newRegister)
+{
+    Q_UNUSED(newRegister)
+    return true;
+}
 
 /*!
     \fn int QModbusServer::slaveId() const
@@ -147,5 +150,55 @@ QModbusServer::QModbusServer(QModbusServerPrivate &dd, QObject *parent) :
      \li and \a size of the consecutive fields that were written starting from \a address.
     \endlist
  */
+
+/*
+    Processes a Modbus client \a request and returns a Modbus response.
+*/
+QModbusResponse QModbusServer::processRequest(const QModbusPdu &request)
+{
+    return d_func()->processRequest(request);
+}
+
+/*
+    To be implemented by custom Modbus server implementation. The default implementation returns
+    a \c QModbusExceptionResponse with the \a request function code and error code set to illegal
+    function.
+*/
+QModbusResponse QModbusServer::processCustomRequest(const QModbusPdu &request)
+{
+    return QModbusExceptionResponse(request.functionCode(),
+        QModbusExceptionResponse::IllegalFunction);
+}
+
+/*
+    TODO: implement
+*/
+QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
+{
+    switch (request.functionCode()) {
+    case QModbusRequest::ReadDiscreteInputs:
+    case QModbusRequest::ReadCoils:
+    case QModbusRequest::WriteSingleCoil:
+    case QModbusRequest::WriteMultipleCoils:
+    case QModbusRequest::ReadInputRegister:
+    case QModbusRequest::ReadHoldingRegisters:
+    case QModbusRequest::WriteSingleRegister:
+    case QModbusRequest::WriteMultipleRegisters:
+    case QModbusRequest::ReadWriteMultipleRegisters:
+    case QModbusRequest::MaskWriteRegister:
+    case QModbusRequest::ReadFIFOQueue:
+    case QModbusRequest::ReadFileRecord:
+    case QModbusRequest::WriteFileRecord:
+    case QModbusRequest::ReadExceptionStatus:
+    case QModbusRequest::Diagnostic:
+    case QModbusRequest::GetComEventCounter:
+    case QModbusRequest::GetComEventLog:
+    case QModbusRequest::ReportServerId:
+    case QModbusRequest::ReadDeviceIdentification:
+    default:
+        break;
+    }
+    return q_func()->processCustomRequest(request);
+}
 
 QT_END_NAMESPACE

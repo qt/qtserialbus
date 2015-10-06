@@ -93,4 +93,14 @@ QModbusTcpClient::QModbusTcpClient(QModbusTcpClientPrivate &dd, QObject *parent)
     Attempts to make a connection to \a address on port \a port.
 */
 
+/*
+    TODO: implement
+*/
+QModbusReplyEx *QModbusTcpClient::sendRequest(const QModbusDataUnit &request, int slaveId)
+{
+    Q_UNUSED(request)
+    Q_UNUSED(slaveId)
+    return Q_NULLPTR;
+}
+
 QT_END_NAMESPACE

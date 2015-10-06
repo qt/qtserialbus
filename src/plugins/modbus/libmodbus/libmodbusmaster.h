@@ -42,6 +42,7 @@
 #include <QtSerialBus/qmodbusclient.h>
 #include <QtSerialBus/qmodbusreply.h>
 #include <QtSerialBus/qmodbusdataunit.h>
+#include <QtSerialBus/qmodbusreplyex.h>
 
 #include <QtCore/qpointer.h>
 
@@ -65,6 +66,8 @@ protected:
 
 private:
     QString portNameToSystemLocation(const QString &source) const;
+    /* TODO: remove */
+    QModbusReplyEx *sendRequest(const QModbusDataUnit &, int) Q_DECL_OVERRIDE { return Q_NULLPTR; }
 
     modbus_t *context;
     bool connected;

@@ -34,38 +34,4 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSERVER_P_H
-#define QMODBUSERVER_P_H
-
-#include "qmodbusserver.h"
-#include "qmodbusdevice_p.h"
-
-//
-//  W A R N I N G
-//  -------------
-//
-// This file is not part of the Qt API. It exists purely as an
-// implementation detail. This header file may change from version to
-// version without notice, or even be removed.
-//
-// We mean it.
-//
-
-QT_BEGIN_NAMESPACE
-
-class QModbusServerPrivate : public QModbusDevicePrivate
-{
-    Q_DECLARE_PUBLIC(QModbusServer)
-
-public:
-    QModbusServerPrivate()
-    {
-    }
-
-    QModbusResponse processRequest(const QModbusPdu &request);
-};
-
-QT_END_NAMESPACE
-
-#endif // QMODBUSERVER_P_H
-
+#include "qmodbusreplyex.h"

@@ -34,38 +34,30 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSERVER_P_H
-#define QMODBUSERVER_P_H
+#ifndef QMODBUSREPLYEX_H
+#define QMODBUSREPLYEX_H
 
-#include "qmodbusserver.h"
-#include "qmodbusdevice_p.h"
-
-//
-//  W A R N I N G
-//  -------------
-//
-// This file is not part of the Qt API. It exists purely as an
-// implementation detail. This header file may change from version to
-// version without notice, or even be removed.
-//
-// We mean it.
-//
+#include <QtSerialBus/qmodbuspdu.h>
+#include <QtSerialBus/qmodbusdataunit.h>
 
 QT_BEGIN_NAMESPACE
 
-class QModbusServerPrivate : public QModbusDevicePrivate
+class Q_SERIALBUS_EXPORT QModbusReplyEx
 {
-    Q_DECLARE_PUBLIC(QModbusServer)
-
 public:
-    QModbusServerPrivate()
-    {
-    }
+    QModbusReplyEx() : mSlaveId(0xff), mFinished(false) {}
 
-    QModbusResponse processRequest(const QModbusPdu &request);
+    QModbusDataUnit result() const { return mUnit; }
+    bool finished() const { return mFinished; }
+    int slaveId() const { return mSlaveId; }
+
+private:
+    QModbusPdu mPdu;
+    QModbusDataUnit mUnit;
+    int mSlaveId;
+    bool mFinished;
 };
 
 QT_END_NAMESPACE
 
-#endif // QMODBUSERVER_P_H
-
+#endif // QMODBUSREPLYEX_H

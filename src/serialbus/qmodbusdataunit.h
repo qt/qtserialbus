@@ -46,6 +46,8 @@ QT_BEGIN_NAMESPACE
 class QModbusDataUnit
 {
 public:
+    QModbusDataUnit() Q_DECL_EQ_DEFAULT;
+
     QModbusDataUnit(QModbusRegister::RegisterType regType,
                              int dataAddress, quint16 initValue)
         : rType(regType),

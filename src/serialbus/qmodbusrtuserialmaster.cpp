@@ -169,6 +169,16 @@ QModbusReply *QModbusRtuSerialMaster::read(const QModbusDataUnit &request, int s
 
 }
 
+/*
+    TODO: implement
+*/
+QModbusReplyEx *QModbusRtuSerialMaster::sendRequest(const QModbusDataUnit &request, int slaveId)
+{
+    Q_UNUSED(request)
+    Q_UNUSED(slaveId)
+    return Q_NULLPTR;
+}
+
 #include "moc_qmodbusrtuserialmaster.cpp"
 
 QT_END_NAMESPACE

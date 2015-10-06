@@ -52,6 +52,14 @@ protected:
     bool open();
     void close();
 
+private:
+    /* TODO: remove */
+    QModbusReplyEx *sendRequest(const QModbusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE
+    {
+        Q_UNUSED(request)
+        Q_UNUSED(slaveId)
+        return Q_NULLPTR;
+    }
 };
 
 #endif // DUMMYMASTER_H

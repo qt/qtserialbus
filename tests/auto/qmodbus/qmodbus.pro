@@ -1,6 +1,6 @@
 QT = core testlib serialbus
 TARGET = tst_qmodbus
-CONFIG += testcase
+CONFIG += testcase c++11
 
 CONFIG -= app_bundle
 
