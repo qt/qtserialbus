@@ -39,6 +39,8 @@
 
 #include "qmodbusserver.h"
 #include "qmodbusdevice_p.h"
+#include "qmodbusdataunit.h"
+#include "qmodbusregister.h"
 
 //
 //  W A R N I N G
@@ -63,6 +65,15 @@ public:
     }
 
     QModbusResponse processRequest(const QModbusPdu &request);
+    QModbusResponse processReadCoilsRequest(const QModbusRequest &request);
+    QModbusResponse processWriteSingleCoilRequest(const QModbusRequest &request);
+    QModbusResponse processWriteMultipleCoilsRequest(const QModbusRequest &request);
+
+private:
+    QModbusDataUnit m_discreteInputs;
+    QModbusDataUnit m_coils;
+    QModbusDataUnit m_inputRegisters;
+    QModbusDataUnit m_holdingRegisters;
 };
 
 QT_END_NAMESPACE

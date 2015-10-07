@@ -37,6 +37,8 @@
 #include "qmodbusclient.h"
 #include "qmodbusclient_p.h"
 
+#include <bitset>
+
 QT_BEGIN_NAMESPACE
 
 /*!
@@ -134,8 +136,11 @@ bool QModbusClientPrivate::processResponse(const QModbusResponse &response, QMod
     switch (response.functionCode()) {
     case QModbusRequest::ReadDiscreteInputs:
     case QModbusRequest::ReadCoils:
+        return processReadCoilsResponse(response, data);
     case QModbusRequest::WriteSingleCoil:
+        return processWriteSingleCoilResponse(response, data);
     case QModbusRequest::WriteMultipleCoils:
+        return processWriteMultipleCoilsResponse(response, data);
     case QModbusRequest::ReadInputRegister:
     case QModbusRequest::ReadHoldingRegisters:
     case QModbusRequest::WriteSingleRegister:
@@ -155,6 +160,91 @@ bool QModbusClientPrivate::processResponse(const QModbusResponse &response, QMod
         break;
     }
     return q_func()->processCustomResponse(response, data);
+}
+
+static bool isValid(const QModbusResponse &response, QModbusResponse::FunctionCode fc)
+{
+    if (!response.isValid())
+        return false;
+    if (response.isException())
+        return false;
+    if (response.functionCode() != fc)
+        return false;
+    return true;
+}
+
+bool QModbusClientPrivate::processReadCoilsResponse(const QModbusResponse &response,
+    QModbusDataUnit *data)
+{
+    if (!isValid(response, QModbusResponse::ReadCoils))
+        return false;
+
+    // we expect at least the byte count
+    const QByteArray payload = response.data();
+    if (payload.size() < 1)
+        return false;
+
+    // byte count needs to match available bytes
+    const quint8 byteCount = payload[0];
+    if ((payload.size() - 1) != byteCount)
+        return false;
+
+    qint32 coil = 0;
+    QVector<quint16> values(byteCount * 8);
+    for (qint32 i = 1; i < payload.size(); ++i) {
+        const std::bitset<8> byte = payload[i];
+        for (qint32 currentBit = 0; currentBit < 8; ++currentBit)
+            values[coil++] = byte[currentBit];
+    }
+
+    if (data) {
+        data->setValues(values);
+        data->setStartAddress(0);
+        data->setValueCount(byteCount * 8);
+        data->setRegisterType(QModbusRegister::Coils);
+    }
+    return true;
+}
+
+bool QModbusClientPrivate::processWriteSingleCoilResponse(const QModbusResponse &response,
+    QModbusDataUnit *data)
+{
+    if (!isValid(response, QModbusResponse::WriteSingleCoil))
+        return false;
+
+    const QByteArray payload = response.data();
+    if (payload.size() < 4)
+        return false;
+
+    quint16 address, value;
+    response.decodeData(&address, &value);
+    if (data) {
+        data->setValueCount(1);
+        data->setStartAddress(address);
+        data->setValues(QVector<quint16>{ value });
+        data->setRegisterType(QModbusRegister::Coils);
+    }
+    return true;
+}
+
+bool QModbusClientPrivate::processWriteMultipleCoilsResponse(const QModbusResponse &response,
+    QModbusDataUnit *data)
+{
+    if (!isValid(response, QModbusResponse::WriteMultipleCoils))
+        return false;
+
+    const QByteArray payload = response.data();
+    if (payload.size() < 4)
+        return false;
+
+    quint16 address, count;
+    response.decodeData(&address, &count);
+    if (data) {
+        data->setValueCount(count);
+        data->setStartAddress(address);
+        data->setRegisterType(QModbusRegister::Coils);
+    }
+    return true;
 }
 
 QT_END_NAMESPACE

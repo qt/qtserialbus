@@ -74,6 +74,8 @@ public:
     {
     }
 
+    bool isValid() const { return sAddress != -1 && dataRange != -1; }
+
     QModbusRegister::RegisterType registerType() const { return rType; }
     void setRegisterType(QModbusRegister::RegisterType newRegisterType)
     {
@@ -95,9 +97,9 @@ public:
 
 private:
     QModbusRegister::RegisterType rType;
-    int sAddress;
+    int sAddress = -1;
     QVector<quint16> dataValue;
-    int dataRange;
+    int dataRange = -1;
 };
 
 Q_DECLARE_TYPEINFO(QModbusDataUnit, Q_MOVABLE_TYPE);
