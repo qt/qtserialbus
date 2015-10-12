@@ -190,13 +190,13 @@ void QModbusRtuSerialSlave::close()
     d->pluginMaster->disconnectDevice();
 }
 
-void QModbusRtuSerialSlavePrivate::handleStateChanged(QModbusDevice::ModBusDeviceState state)
+void QModbusRtuSerialSlavePrivate::handleStateChanged(QModbusDevice::ModbusDeviceState state)
 {
     Q_Q(QModbusRtuSerialSlave);
     q->setState(state);
 }
 
-void QModbusRtuSerialSlavePrivate::handleErrorOccurred(QModbusDevice::ModBusError error)
+void QModbusRtuSerialSlavePrivate::handleErrorOccurred(QModbusDevice::ModbusError error)
 {
     Q_Q(QModbusRtuSerialSlave);
     q->setError(pluginMaster ? pluginMaster->errorString() : QString(), error);

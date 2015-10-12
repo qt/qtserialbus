@@ -69,8 +69,8 @@ protected:
     void close() Q_DECL_OVERRIDE;
 
 private:
-    Q_PRIVATE_SLOT(d_func(), void handleStateChanged(QModbusDevice::ModBusDeviceState))
-    Q_PRIVATE_SLOT(d_func(), void handleErrorOccurred(QModbusDevice::ModBusError))
+    Q_PRIVATE_SLOT(d_func(), void handleStateChanged(QModbusDevice::ModbusDeviceState))
+    Q_PRIVATE_SLOT(d_func(), void handleErrorOccurred(QModbusDevice::ModbusError))
 };
 
 QT_END_NAMESPACE

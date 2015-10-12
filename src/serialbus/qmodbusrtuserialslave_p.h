@@ -83,10 +83,10 @@ public:
 
         Q_Q(QModbusRtuSerialSlave);
         // forward the error and state changes
-        QObject::connect(pluginMaster, SIGNAL(stateChanged(QModbusDevice::ModBusDeviceState)),
-            q, SLOT(handleStateChanged(QModbusDevice::ModBusDeviceState)));
-        QObject::connect(pluginMaster, SIGNAL(errorOccurred(QModbusDevice::ModBusError)),
-            q, SLOT(handleErrorOccurred(QModbusDevice::ModBusError)));
+        QObject::connect(pluginMaster, SIGNAL(stateChanged(QModbusDevice::ModbusDeviceState)),
+            q, SLOT(handleStateChanged(QModbusDevice::ModbusDeviceState)));
+        QObject::connect(pluginMaster, SIGNAL(errorOccurred(QModbusDevice::ModbusError)),
+            q, SLOT(handleErrorOccurred(QModbusDevice::ModbusError)));
         QObject::connect(pluginMaster, SIGNAL(dataWritten(QModbusDataUnit::RegisterType,int,int)),
             q, SIGNAL(dataWritten(QModbusDataUnit::RegisterType,int,int)));
         QObject::connect(pluginMaster, SIGNAL(dataRead()),
@@ -96,8 +96,8 @@ public:
         q->setError(pluginMaster->errorString(), pluginMaster->error());
     }
 
-    void handleStateChanged(QModbusDevice::ModBusDeviceState state);
-    void handleErrorOccurred(QModbusDevice::ModBusError);
+    void handleStateChanged(QModbusDevice::ModbusDeviceState state);
+    void handleErrorOccurred(QModbusDevice::ModbusError);
 
     QModbusServer* pluginMaster;
 };

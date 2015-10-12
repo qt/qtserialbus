@@ -78,7 +78,7 @@ QModbusTcpServer::QModbusTcpServer(QModbusTcpServerPrivate &dd, QObject *parent)
     \fn void QModbusTcpServer::listen(const QString &address, quint16 port = 502)
 
     Tells the server to listen for incoming connections on address \a address and port \a port.
-    If a connection is established, it emits stateChanged() with ModBusDeviceState::ConnectedState.
+    If a connection is established, it emits stateChanged() with ModbusDeviceState::ConnectedState.
 
     At any point, the class can emit stateChanged() to signal the current device state or emit
     errorOccurred() to signal that an error occurred.

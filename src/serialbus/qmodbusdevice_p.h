@@ -102,8 +102,8 @@ public:
         return calculateCRC(data, len) == crc;
     }
 
-    QModbusDevice::ModBusDeviceState state;
-    QModbusDevice::ModBusError error;
+    QModbusDevice::ModbusDeviceState state;
+    QModbusDevice::ModbusError error;
     QString errorString;
     QString portName;
 

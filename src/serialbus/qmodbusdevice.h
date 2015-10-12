@@ -53,12 +53,12 @@ class Q_SERIALBUS_EXPORT QModbusDevice : public QObject
 
 public:
     // TODO: Temporarily added until plugin system removed.
-    enum ModBusConnection {
+    enum ModbusConnection {
         Serial,
         Tcp
     };
 
-    enum ModBusError {
+    enum ModbusError {
         NoError,
         ReadError,
         WriteError,
@@ -66,15 +66,15 @@ public:
         ConfigurationError,
         UnknownError
     };
-    Q_ENUM(ModBusError)
+    Q_ENUM(ModbusError)
 
-    enum ModBusDeviceState {
+    enum ModbusDeviceState {
         UnconnectedState,
         ConnectingState,
         ConnectedState,
         ClosingState
     };
-    Q_ENUM(ModBusDeviceState)
+    Q_ENUM(ModbusDeviceState)
 
     explicit QModbusDevice(QObject *parent = 0);
     virtual ~QModbusDevice();
@@ -86,26 +86,26 @@ public:
     virtual bool connectDevice(); //TODO remove virtual, workaround
     void disconnectDevice();
 
-    ModBusDeviceState state() const;
+    ModbusDeviceState state() const;
 
-    ModBusError error() const;
+    ModbusError error() const;
     QString errorString() const;
 
 Q_SIGNALS:
-    void errorOccurred(QModbusDevice::ModBusError error);
-    void stateChanged(QModbusDevice::ModBusDeviceState state);
+    void errorOccurred(QModbusDevice::ModbusError error);
+    void stateChanged(QModbusDevice::ModbusDeviceState state);
 
 protected:
     QModbusDevice(QModbusDevicePrivate &dd, QObject *parent = Q_NULLPTR);
 
-    void setState(QModbusDevice::ModBusDeviceState newState);
-    void setError(const QString &errorText, QModbusDevice::ModBusError error);
+    void setState(QModbusDevice::ModbusDeviceState newState);
+    void setError(const QString &errorText, QModbusDevice::ModbusError error);
     virtual bool open() = 0;
     virtual void close() = 0;
 };
 
-Q_DECLARE_TYPEINFO(QModbusDevice::ModBusError, Q_PRIMITIVE_TYPE);
-Q_DECLARE_TYPEINFO(QModbusDevice::ModBusDeviceState, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(QModbusDevice::ModbusError, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(QModbusDevice::ModbusDeviceState, Q_PRIMITIVE_TYPE);
 
 QT_END_NAMESPACE
 

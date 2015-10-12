@@ -133,7 +133,7 @@ QModbusPrivate setFactory(const QByteArray &plugin)
     Returns \c null if no suitable device can be found.
  */
 QModbusServer *QModbus::createServer(const QByteArray &plugin,
-                                   QModbusDevice::ModBusConnection type) const
+                                   QModbusDevice::ModbusConnection type) const
 {
     if (!qModBusPlugins()->contains(plugin))
         return Q_NULLPTR;
@@ -151,7 +151,7 @@ QModbusServer *QModbus::createServer(const QByteArray &plugin,
     Returns \c null if no suitable device can be found.
  */
 QModbusClient *QModbus::createClient(const QByteArray &plugin,
-                                     QModbusDevice::ModBusConnection type) const
+                                     QModbusDevice::ModbusConnection type) const
 {
     if (!qModBusPlugins()->contains(plugin))
         return Q_NULLPTR;

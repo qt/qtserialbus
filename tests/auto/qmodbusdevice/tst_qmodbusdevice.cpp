@@ -85,7 +85,7 @@ private:
 tst_QModbusDevice::tst_QModbusDevice()
 {
     device = new dummyDevice();
-    qRegisterMetaType<QModbusDevice::ModBusDeviceState>("QModbusDevice::ModBusDeviceState");
+    qRegisterMetaType<QModbusDevice::ModbusDeviceState>("QModbusDevice::ModbusDeviceState");
 }
 
 void tst_QModbusDevice::connectDevice()
@@ -109,7 +109,7 @@ void tst_QModbusDevice::state()
 {
     device->setState(QModbusDevice::ConnectedState);
     QCOMPARE(device->state(), QModbusDevice::ConnectedState);
-    QSignalSpy spy(device, SIGNAL(stateChanged(QModbusDevice::ModBusDeviceState)));
+    QSignalSpy spy(device, SIGNAL(stateChanged(QModbusDevice::ModbusDeviceState)));
     device->setState(QModbusDevice::UnconnectedState);
     QCOMPARE(device->state(), QModbusDevice::UnconnectedState);
     device->setState(QModbusDevice::UnconnectedState);

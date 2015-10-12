@@ -93,7 +93,7 @@ QString QModbusDevice::portName() const
 }
 
 /*!
-    \enum QModbusDevice::ModBusError
+    \enum QModbusDevice::ModbusError
     This enum describes all the possible error conditions.
 
     \value NoError              No errors have occurred.
@@ -106,7 +106,7 @@ QString QModbusDevice::portName() const
  */
 
 /*!
-    \enum QModbusDevice::ModBusDeviceState
+    \enum QModbusDevice::ModbusDeviceState
     This enum describes all possible device states.
 
     \value UnconnectedState The device is disconnected.
@@ -116,13 +116,13 @@ QString QModbusDevice::portName() const
  */
 
 /*!
-    \fn QModbusDevice::errorOccurred(QModbusDevice::ModBusError error)
+    \fn QModbusDevice::errorOccurred(QModbusDevice::ModbusError error)
 
     This signal is emitted when an error of the type, \a error, occurs.
  */
 
 /*!
-    \fn void QModbusDevice::stateChanged(QModbusDevice::ModBusDeviceState state)
+    \fn void QModbusDevice::stateChanged(QModbusDevice::ModbusDeviceState state)
 
     This signal is emitted every time the state of the device changes.
     The new state is represented by \a state.
@@ -171,7 +171,7 @@ void QModbusDevice::disconnectDevice()
     Sets the state of the device to \a newState. Modbus device implementations
     must use this function to update the device state.
  */
-void QModbusDevice::setState(QModbusDevice::ModBusDeviceState newState)
+void QModbusDevice::setState(QModbusDevice::ModbusDeviceState newState)
 {
     Q_D(QModbusDevice);
 
@@ -187,7 +187,7 @@ void QModbusDevice::setState(QModbusDevice::ModBusDeviceState newState)
 
     \sa setState(), stateChanged()
  */
-QModbusDevice::ModBusDeviceState QModbusDevice::state() const
+QModbusDevice::ModbusDeviceState QModbusDevice::state() const
 {
     return d_func()->state;
 }
@@ -197,9 +197,9 @@ QModbusDevice::ModBusDeviceState QModbusDevice::state() const
     must use this function in case of an error to set the \a error type and
     a descriptive \a errorText.
 
-    \sa QModbusDevice::ModBusError
+    \sa QModbusDevice::ModbusError
  */
-void QModbusDevice::setError(const QString &errorText, QModbusDevice::ModBusError error)
+void QModbusDevice::setError(const QString &errorText, QModbusDevice::ModbusError error)
 {
     Q_D(QModbusDevice);
 
@@ -211,9 +211,9 @@ void QModbusDevice::setError(const QString &errorText, QModbusDevice::ModBusErro
 /*!
     Returns the error state of the device.
 
-    \sa QModbusDevice::ModBusError
+    \sa QModbusDevice::ModbusError
  */
-QModbusDevice::ModBusError QModbusDevice::error() const
+QModbusDevice::ModbusError QModbusDevice::error() const
 {
     return d_func()->error;
 }
@@ -221,7 +221,7 @@ QModbusDevice::ModBusError QModbusDevice::error() const
 /*!
     Returns descriptive error text for the device error.
 
-    \sa QModbusDevice::ModBusError
+    \sa QModbusDevice::ModbusError
  */
 QString QModbusDevice::errorString() const
 {

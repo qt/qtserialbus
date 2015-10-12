@@ -129,14 +129,14 @@ void QModbusRtuSerialMaster::close()
 }
 
 // forward the state changes
-void QModbusRtuSerialMasterPrivate::handleStateChanged(QModbusDevice::ModBusDeviceState state)
+void QModbusRtuSerialMasterPrivate::handleStateChanged(QModbusDevice::ModbusDeviceState state)
 {
     Q_Q(QModbusRtuSerialMaster);
     q->setState(state);
 }
 
 // forward the error changes
-void QModbusRtuSerialMasterPrivate::handleErrorOccurred(QModbusDevice::ModBusError error)
+void QModbusRtuSerialMasterPrivate::handleErrorOccurred(QModbusDevice::ModbusError error)
 {
     Q_Q(QModbusRtuSerialMaster);
     q->setError(pluginMaster ? pluginMaster->errorString() : QString(), error);

@@ -74,7 +74,7 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
         modbusDevice = Q_NULLPTR;
     }
 
-    QModbusDevice::ModBusConnection type = static_cast<QModbusDevice::ModBusConnection> (index);
+    QModbusDevice::ModbusConnection type = static_cast<QModbusDevice::ModbusConnection> (index);
     if (type == QModbusDevice::Serial) {
         modbusDevice = new QModbusRtuSerialSlave(this);
     } else if (type == QModbusDevice::Tcp) {
