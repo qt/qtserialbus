@@ -144,7 +144,7 @@ private:
     template<typename ... Args> void decode(Args ... newData) const {
         Q_CONSTEXPR quint32 argCount = sizeof...(Args);
         if (argCount > 0 && !m_data.isEmpty()) {
-            QDataStream stream(&m_data, QIODevice::ReadOnly);
+            QDataStream stream(m_data);
             char tmp[1024] = { (decode(&stream, newData), void(), '0')... };
             Q_UNUSED(tmp)
         }
@@ -152,7 +152,7 @@ private:
 
 private:
     FunctionCode m_code = Invalid;
-    mutable QByteArray m_data;
+    QByteArray m_data;
 };
 
 class QModbusRequest : public QModbusPdu
