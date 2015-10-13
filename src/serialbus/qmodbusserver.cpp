@@ -238,19 +238,16 @@ QModbusResponse QModbusServerPrivate::processReadCoilsRequest(const QModbusReque
     if ((data.count() % 8) != 0)
         byteCount += 1;
 
-    QByteArray payload(byteCount + 1, Qt::Uninitialized);
-    payload[0] = byteCount;
-
-    quint16 coil = address;
+    QVector<quint8> bytes;
     for (int i = 0; i < byteCount; ++i) {
         std::bitset<8> byte;
         for (int currentBit = 0; currentBit < 8; ++currentBit)
-            byte[currentBit] = data[coil++];
-        payload[i + 1] = static_cast<quint8> (byte.to_ulong());
+            byte[currentBit] = data[address++];
+        bytes.append(static_cast<quint8> (byte.to_ulong()));
     }
 
     // TODO: Increase message counters when they are implemented
-    return QModbusResponse(request.functionCode(), payload);
+    return QModbusResponse(request.functionCode(), byteCount, bytes);
 }
 
 QModbusResponse QModbusServerPrivate::processWriteSingleCoilRequest(const QModbusRequest &request)

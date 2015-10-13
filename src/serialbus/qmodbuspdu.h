@@ -40,6 +40,7 @@
 
 #include <QtCore/qdatastream.h>
 #include <QtCore/qmetatype.h>
+#include <QtCore/qvector.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -132,6 +133,11 @@ private:
     template <typename T> void decode(QDataStream *stream, T &t) const {
         static_assert(std::is_pod<T>::value, "Only POD types supported.");
         (*stream) >> *t;
+    }
+    template <typename T> void encode(QDataStream *stream, const QVector<T> &vector) {
+        static_assert(std::is_pod<T>::value, "Only POD types supported.");
+        for (int i = 0; i < vector.count(); ++i)
+            (*stream) << vector[i];
     }
 
     template<typename ... Args> void encode(Args ... newData) {
