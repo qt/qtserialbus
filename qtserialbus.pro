@@ -1,6 +1,7 @@
 requires(!wince)
 requires(!winrt) # enforced by qtserialport dependency
 requires(!ios)   # enforced by qtserialport dependency
+requires(!win32-msvc2012) # does not support variadic templates
 requires(!win32-msvc2010) # not C++11 capabable -> will be removed from CI soon
 requires(!win32-msvc2008) # not C++11 capabable -> will be removed from CI soon
 
