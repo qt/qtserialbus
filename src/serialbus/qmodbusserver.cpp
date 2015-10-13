@@ -187,27 +187,27 @@ QModbusResponse QModbusServer::processCustomRequest(const QModbusPdu &request)
 QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
 {
     switch (request.functionCode()) {
-    case QModbusRequest::ReadDiscreteInputs:
     case QModbusRequest::ReadCoils:
         return processReadCoilsRequest(request);
+    case QModbusRequest::ReadDiscreteInputs:
+    case QModbusRequest::ReadHoldingRegisters:
+    case QModbusRequest::ReadInputRegisters:
     case QModbusRequest::WriteSingleCoil:
         return processWriteSingleCoilRequest(request);
+    case QModbusRequest::WriteSingleRegister:
+    case QModbusRequest::ReadExceptionStatus:
+    case QModbusRequest::Diagnostics:
+    case QModbusRequest::GetCommEventCounter:
+    case QModbusRequest::GetCommEventLog:
     case QModbusRequest::WriteMultipleCoils:
         return processWriteMultipleCoilsRequest(request);
-    case QModbusRequest::ReadInputRegister:
-    case QModbusRequest::ReadHoldingRegisters:
-    case QModbusRequest::WriteSingleRegister:
     case QModbusRequest::WriteMultipleRegisters:
-    case QModbusRequest::ReadWriteMultipleRegisters:
-    case QModbusRequest::MaskWriteRegister:
-    case QModbusRequest::ReadFifoQueue:
+    case QModbusRequest::ReportServerId:
     case QModbusRequest::ReadFileRecord:
     case QModbusRequest::WriteFileRecord:
-    case QModbusRequest::ReadExceptionStatus:
-    case QModbusRequest::Diagnostic:
-    case QModbusRequest::GetComEventCounter:
-    case QModbusRequest::GetComEventLog:
-    case QModbusRequest::ReportServerId:
+    case QModbusRequest::MaskWriteRegister:
+    case QModbusRequest::ReadWriteMultipleRegisters:
+    case QModbusRequest::ReadFifoQueue:
     case QModbusRequest::EncapsulatedInterfaceTransport:
     default:
         break;
