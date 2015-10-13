@@ -176,17 +176,6 @@ void LibModBusSlave::close()
     setState(QModbusDevice::UnconnectedState);
 }
 
-int LibModBusSlave::slaveId() const
-{
-    return slave;
-}
-
-void LibModBusSlave::setSlaveId(int id)
-{
-    slave = id;
-    modbus_set_slave(context, slave);
-}
-
 QString LibModBusSlave::portNameToSystemLocation(const QString &source)
 {
 #if defined(Q_OS_WINCE)

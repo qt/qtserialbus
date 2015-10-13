@@ -56,9 +56,6 @@ public:
 
     bool setMap(const QModbusDataUnitMap &map) Q_DECL_OVERRIDE;
 
-    void setSlaveId(int id) Q_DECL_OVERRIDE;
-    int slaveId() const Q_DECL_OVERRIDE;
-
 protected:
     QModbusRtuSerialSlave(QModbusRtuSerialSlavePrivate &dd, QObject *parent = Q_NULLPTR);
 

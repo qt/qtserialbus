@@ -118,32 +118,6 @@ bool QModbusRtuSerialSlave::setMap(const QModbusDataUnitMap &map)
 /*!
     \reimp
  */
-void QModbusRtuSerialSlave::setSlaveId(int id)
-{
-    Q_D(QModbusRtuSerialSlave);
-
-    if (!d->pluginMaster)
-        return;
-
-    d->pluginMaster->setSlaveId(id);
-}
-
-/*!
-    \reimp
- */
-int QModbusRtuSerialSlave::slaveId() const
-{
-    Q_D(const QModbusRtuSerialSlave);
-
-    if (!d->pluginMaster)
-        return -1;
-
-    return d->pluginMaster->slaveId();
-}
-
-/*!
-    \reimp
- */
 bool QModbusRtuSerialSlave::open()
 {
     return false;

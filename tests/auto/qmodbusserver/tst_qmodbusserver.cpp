@@ -43,8 +43,6 @@ class TestServer : public QModbusServer
 public:
     TestServer() Q_DECL_EQ_DEFAULT;
 
-    void setSlaveId(int) Q_DECL_OVERRIDE {}
-    int slaveId() const Q_DECL_OVERRIDE { return 0; }
     virtual bool open() Q_DECL_OVERRIDE { return true; }
     virtual void close() Q_DECL_OVERRIDE {}
 
@@ -321,6 +319,14 @@ private slots:
             QCOMPARE(oversizeUnit.valueCount(), uint(MAP_RANGE));
             QCOMPARE(oversizeUnit.values().count(), MAP_RANGE);
         }
+    }
+
+    void tst_slaveId()
+    {
+        server.setSlaveId(56);
+        QCOMPARE(server.slaveId(), 56);
+        server.setSlaveId(1);
+        QCOMPARE(server.slaveId(), 1);
     }
 };
 

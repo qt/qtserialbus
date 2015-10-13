@@ -59,9 +59,7 @@ class QModbusServerPrivate : public QModbusDevicePrivate
     Q_DECLARE_PUBLIC(QModbusServer)
 
 public:
-    QModbusServerPrivate()
-    {
-    }
+    QModbusServerPrivate() Q_DECL_EQ_DEFAULT;
 
     bool setMap(const QModbusDataUnitMap &map);
 
@@ -75,6 +73,8 @@ private:
     QModbusDataUnit m_coils;
     QModbusDataUnit m_inputRegisters;
     QModbusDataUnit m_holdingRegisters;
+
+    int m_slaveId = 0;
 };
 
 QT_END_NAMESPACE

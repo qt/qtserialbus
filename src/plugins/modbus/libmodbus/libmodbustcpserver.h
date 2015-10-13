@@ -60,9 +60,6 @@ private:
     bool open() Q_DECL_OVERRIDE;
     void close() Q_DECL_OVERRIDE;
 
-    void setSlaveId(int) Q_DECL_OVERRIDE {} // TODO: remove?
-    int slaveId() const Q_DECL_OVERRIDE { return -1; } // TODO: remove?
-
 private:
     modbus_t *context;
 };

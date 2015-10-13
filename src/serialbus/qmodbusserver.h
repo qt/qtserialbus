@@ -60,8 +60,8 @@ public:
 
     virtual bool setMap(const QModbusDataUnitMap &map);
 
-    virtual void setSlaveId(int id) = 0;
-    virtual int slaveId() const = 0;
+    void setSlaveId(int id);
+    int slaveId() const;
 
     //TODO: Review if QModbusDataUnitMap would be useful. It could replace setMap(), data() and setData()
     virtual bool data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data) const;

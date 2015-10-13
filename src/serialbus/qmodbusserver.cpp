@@ -91,6 +91,29 @@ bool QModbusServer::setMap(const QModbusDataUnitMap &map)
     return d_func()->setMap(map);
 }
 
+/*!
+    Sets the slave id for this modbus server instance.
+
+    \sa slaveId()
+*/
+void QModbusServer::setSlaveId(int id)
+{
+    Q_D(QModbusServer);
+    d->m_slaveId = id;
+}
+
+/*!
+    Returns the slave id of this modbus server instance.
+
+    The purpose of the slave id is to identify the modbus server
+    that is responsible for a client request.
+*/
+int QModbusServer::slaveId() const
+{
+    Q_D(const QModbusServer);
+
+    return d->m_slaveId;
+}
 
 /*!
     Reads data stored in the Modbus server. A Modbus server has four tables (\a table) and each
