@@ -201,7 +201,7 @@ bool QModbusClientPrivate::processReadCoilsResponse(const QModbusResponse &respo
         data->setValues(values);
         data->setStartAddress(0);
         data->setValueCount(byteCount * 8);
-        data->setRegisterType(QModbusRegister::Coils);
+        data->setRegisterType(QModbusDataUnit::Coils);
     }
     return true;
 }
@@ -222,7 +222,7 @@ bool QModbusClientPrivate::processWriteSingleCoilResponse(const QModbusResponse 
         data->setValueCount(1);
         data->setStartAddress(address);
         data->setValues(QVector<quint16>{ value });
-        data->setRegisterType(QModbusRegister::Coils);
+        data->setRegisterType(QModbusDataUnit::Coils);
     }
     return true;
 }
@@ -242,7 +242,7 @@ bool QModbusClientPrivate::processWriteMultipleCoilsResponse(const QModbusRespon
     if (data) {
         data->setValueCount(count);
         data->setStartAddress(address);
-        data->setRegisterType(QModbusRegister::Coils);
+        data->setRegisterType(QModbusDataUnit::Coils);
     }
     return true;
 }

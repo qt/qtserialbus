@@ -74,7 +74,7 @@ private slots:
         QCOMPARE(unit.startAddress(), 0);
         QCOMPARE(unit.values(),
             QVector<quint16>({ 1,0,1,1,0,0,1,1, 1,1,0,1,0,1,1,0, 1,0,1,0,0,0,0,0 }));
-        QCOMPARE(unit.registerType(), QModbusRegister::Coils);
+        QCOMPARE(unit.registerType(), QModbusDataUnit::Coils);
 
         unit = QModbusDataUnit();
         response = QModbusResponse(QModbusResponse::WriteSingleCoil,
@@ -85,7 +85,7 @@ private slots:
         QCOMPARE(unit.valueCount(), 1);
         QCOMPARE(unit.startAddress(), 172);
         QCOMPARE(unit.values(), QVector<quint16>() << 0xff00);
-        QCOMPARE(unit.registerType(), QModbusRegister::Coils);
+        QCOMPARE(unit.registerType(), QModbusDataUnit::Coils);
 
         unit = QModbusDataUnit();
         response = QModbusResponse(QModbusResponse::WriteMultipleCoils,
@@ -96,7 +96,7 @@ private slots:
         QCOMPARE(unit.valueCount(), 10);
         QCOMPARE(unit.startAddress(), 19);
         QCOMPARE(unit.values(), QVector<quint16>());
-        QCOMPARE(unit.registerType(), QModbusRegister::Coils);
+        QCOMPARE(unit.registerType(), QModbusDataUnit::Coils);
     }
 };
 

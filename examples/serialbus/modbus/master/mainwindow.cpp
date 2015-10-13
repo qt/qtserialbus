@@ -52,10 +52,10 @@ MainWindow::MainWindow(QWidget *parent)
     , modbusDevice(Q_NULLPTR)
 {
     ui->setupUi(this);
-    ui->readTable->addItem(tr("Coils"), QModbusRegister::Coils);
-    ui->readTable->addItem(tr("Discrete Inputs"), QModbusRegister::DiscreteInputs);
-    ui->readTable->addItem(tr("Input Registers"), QModbusRegister::InputRegisters);
-    ui->readTable->addItem(tr("Holding Registers"), QModbusRegister::HoldingRegisters);
+    ui->readTable->addItem(tr("Coils"), QModbusDataUnit::Coils);
+    ui->readTable->addItem(tr("Discrete Inputs"), QModbusDataUnit::DiscreteInputs);
+    ui->readTable->addItem(tr("Input Registers"), QModbusDataUnit::InputRegisters);
+    ui->readTable->addItem(tr("Holding Registers"), QModbusDataUnit::HoldingRegisters);
     on_writeTable_currentIndexChanged(ui->writeTable->currentText());
 
     ui->connectType->setCurrentIndex(0);
@@ -136,8 +136,8 @@ void MainWindow::on_readButton_clicked()
     if (!modbusDevice || modbusDevice->state() != QModbusDevice::ConnectedState)
         return;
 
-    const QModbusRegister::RegisterType registerType =
-        static_cast<QModbusRegister::RegisterType> (ui->readTable->currentData().toInt());
+    const QModbusDataUnit::RegisterType registerType =
+        static_cast<QModbusDataUnit::RegisterType> (ui->readTable->currentData().toInt());
     QModbusDataUnit dataRequest(registerType);
     dataRequest.setValueCount(ui->readSize->currentText().toInt());
     dataRequest.setStartAddress(ui->readAddress->text().toInt());
@@ -156,7 +156,7 @@ void MainWindow::readReady()
     for (int i = 0; i < units.size(); i++) {
         const QString entry = tr("Address: ") + QString::number(units.at(i).startAddress())
             + tr(" Value: ") + QString::number(units.at(i).values().at(0),
-                units.at(i).registerType() <= QModbusRegister::Coils ? 10 : 16);
+                units.at(i).registerType() <= QModbusDataUnit::Coils ? 10 : 16);
         ui->readValue->addItem(entry);
     }
     lastRequest->deleteLater();
@@ -169,9 +169,9 @@ void MainWindow::on_writeButton_clicked()
     if (!modbusDevice || modbusDevice->state() != QModbusDevice::ConnectedState)
         return;
 
-    QModbusRegister::RegisterType table = QModbusRegister::HoldingRegisters;
+    QModbusDataUnit::RegisterType table = QModbusDataUnit::HoldingRegisters;
     if (ui->writeTable->currentText() == tr("Coils"))
-        table = QModbusRegister::Coils;
+        table = QModbusDataUnit::Coils;
 
     lastRequest = modbusDevice->write(QModbusDataUnit(table, ui->writeAddress->text().toInt(),
         ui->writeValue->text().toInt(0, 16)), ui->readSlave->text().toInt());

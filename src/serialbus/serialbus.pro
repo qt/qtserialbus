@@ -23,7 +23,6 @@ PUBLIC_HEADERS += \
     qmodbusdataunit.h \
     qmodbusclient.h \
     qmodbusreply.h \
-    qmodbusregister.h \
     qmodbusrtuserialmaster.h \
     qmodbustcpclient.h \
     qmodbustcpserver.h \
@@ -52,7 +51,6 @@ SOURCES += \
     qmodbusdataunit.cpp \
     qmodbusclient.cpp \
     qmodbusreply.cpp \
-    qmodbusregister.cpp \
     qmodbusrtuserialmaster.cpp \
     qmodbustcpclient.cpp \
     qmodbustcpserver.cpp \

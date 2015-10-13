@@ -54,13 +54,13 @@ public:
 
     bool connectDevice() Q_DECL_OVERRIDE;
 
-    bool setMap(const QModbusRegister &newRegister) Q_DECL_OVERRIDE;
+    bool setMap(const QModbusDataUnitMap &map) Q_DECL_OVERRIDE;
 
     void setSlaveId(int id) Q_DECL_OVERRIDE;
     int slaveId() const Q_DECL_OVERRIDE;
 
-    bool data(QModbusRegister::RegisterType table, quint16 address, quint16 *data) Q_DECL_OVERRIDE;
-    bool setData(QModbusRegister::RegisterType table, quint16 address, quint16 data) Q_DECL_OVERRIDE;
+    bool data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data) Q_DECL_OVERRIDE;
+    bool setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data) Q_DECL_OVERRIDE;
 
 protected:
     QModbusRtuSerialSlave(QModbusRtuSerialSlavePrivate &dd, QObject *parent = Q_NULLPTR);

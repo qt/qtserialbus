@@ -38,13 +38,11 @@
 #define QMODBUSERVER_H
 
 #include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qmodbusdevice.h>
 #include <QtSerialBus/qmodbusdataunit.h>
+#include <QtSerialBus/qmodbusdevice.h>
 #include <QtSerialBus/qmodbuspdu.h>
-#include <QtSerialBus/qmodbusregister.h>
 
 #include <QtCore/qobject.h>
-
 
 QT_BEGIN_NAMESPACE
 
@@ -60,18 +58,18 @@ public:
     explicit QModbusServer(QObject *parent = 0);
     virtual ~QModbusServer();
 
-    virtual bool setMap(const QModbusRegister &newRegister);
+    virtual bool setMap(const QModbusDataUnitMap &map);
 
     virtual void setSlaveId(int id) = 0;
     virtual int slaveId() const = 0;
 
-    //TODO: Review if QModbusMap would be useful. It could replace setMap(), data() and setData()
-    virtual bool data(QModbusRegister::RegisterType table, quint16 address, quint16 *data) = 0;
-    virtual bool setData(QModbusRegister::RegisterType table, quint16 address, quint16 data) = 0;
+    //TODO: Review if QModbusDataUnitMap would be useful. It could replace setMap(), data() and setData()
+    virtual bool data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data) = 0;
+    virtual bool setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data) = 0;
 
 Q_SIGNALS:
     void dataRead();
-    void dataWritten(QModbusRegister::RegisterType table, int address, int size);
+    void dataWritten(QModbusDataUnit::RegisterType table, int address, int size);
 
 protected:
     QModbusServer(QModbusServerPrivate &dd, QObject *parent = Q_NULLPTR);

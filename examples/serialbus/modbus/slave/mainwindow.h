@@ -69,10 +69,10 @@ private Q_SLOTS:
 
     void coilChanged(int id);
     void discreteInputChanged(int id);
-    void bitChanged(int id, QModbusRegister::RegisterType table, bool value);
+    void bitChanged(int id, QModbusDataUnit::RegisterType table, bool value);
 
     void setRegister(const QString &value);
-    void updateWidgets(QModbusRegister::RegisterType table, int address, int size);
+    void updateWidgets(QModbusDataUnit::RegisterType table, int address, int size);
 
     void on_connectType_currentIndexChanged(int);
 

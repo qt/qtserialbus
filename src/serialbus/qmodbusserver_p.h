@@ -40,7 +40,6 @@
 #include "qmodbusserver.h"
 #include "qmodbusdevice_p.h"
 #include "qmodbusdataunit.h"
-#include "qmodbusregister.h"
 
 //
 //  W A R N I N G
@@ -63,6 +62,8 @@ public:
     QModbusServerPrivate()
     {
     }
+
+    bool setMap(const QModbusDataUnitMap &map);
 
     QModbusResponse processRequest(const QModbusPdu &request);
     QModbusResponse processReadCoilsRequest(const QModbusRequest &request);

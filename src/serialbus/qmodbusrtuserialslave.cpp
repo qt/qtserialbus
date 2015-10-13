@@ -105,14 +105,14 @@ QModbusRtuSerialSlave::QModbusRtuSerialSlave(QModbusRtuSerialSlavePrivate &dd, Q
 /*!
     \reimp
  */
-bool QModbusRtuSerialSlave::setMap(const QModbusRegister &newRegister)
+bool QModbusRtuSerialSlave::setMap(const QModbusDataUnitMap &map)
 {
     Q_D(QModbusRtuSerialSlave);
 
     if (!d->pluginMaster)
         return false;
 
-    return d->pluginMaster->setMap(newRegister);
+    return d->pluginMaster->setMap(map);
 }
 
 /*!
@@ -144,7 +144,7 @@ int QModbusRtuSerialSlave::slaveId() const
 /*!
     \reimp
  */
-bool QModbusRtuSerialSlave::data(QModbusRegister::RegisterType table, quint16 address,
+bool QModbusRtuSerialSlave::data(QModbusDataUnit::RegisterType table, quint16 address,
     quint16 *data)
 {
     Q_D(QModbusRtuSerialSlave);
@@ -158,7 +158,7 @@ bool QModbusRtuSerialSlave::data(QModbusRegister::RegisterType table, quint16 ad
 /*!
     \reimp
  */
-bool QModbusRtuSerialSlave::setData(QModbusRegister::RegisterType table, quint16 address,
+bool QModbusRtuSerialSlave::setData(QModbusDataUnit::RegisterType table, quint16 address,
     quint16 data)
 {
     Q_D(QModbusRtuSerialSlave);

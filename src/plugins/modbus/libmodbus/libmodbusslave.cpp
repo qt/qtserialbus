@@ -70,7 +70,7 @@ LibModBusSlave::~LibModBusSlave()
     mapping = 0;
 }
 
-bool LibModBusSlave::setMap(const QModbusRegister & newRegister)
+bool LibModBusSlave::setMap(const QModbusDataUnitMap &map)
 {
     if (connected) {
         // TODO this limitation is not required. As long as the slave
@@ -80,14 +80,14 @@ bool LibModBusSlave::setMap(const QModbusRegister & newRegister)
         return false;
     }
 
-    mappingTable[QModbusRegister::DiscreteInputs]
-            = newRegister.registerSize(QModbusRegister::DiscreteInputs);
-    mappingTable[QModbusRegister::Coils]
-            = newRegister.registerSize(QModbusRegister::Coils);
-    mappingTable[QModbusRegister::InputRegisters]
-            = newRegister.registerSize(QModbusRegister::InputRegisters);
-    mappingTable[QModbusRegister::HoldingRegisters]
-            = newRegister.registerSize(QModbusRegister::HoldingRegisters);
+    mappingTable[QModbusDataUnit::DiscreteInputs]
+            = map.value(QModbusDataUnit::DiscreteInputs).valueCount();
+    mappingTable[QModbusDataUnit::Coils]
+            = map.value(QModbusDataUnit::Coils).valueCount();
+    mappingTable[QModbusDataUnit::InputRegisters]
+            = map.value(QModbusDataUnit::InputRegisters).valueCount();
+    mappingTable[QModbusDataUnit::HoldingRegisters]
+            = map.value(QModbusDataUnit::HoldingRegisters).valueCount();
 
     return true;
 }
@@ -138,10 +138,10 @@ bool LibModBusSlave::open()
         modbus_mapping_free(mapping);
         mapping = 0;
     }
-    mapping = modbus_mapping_new(mappingTable[QModbusRegister::Coils],
-                                 mappingTable[QModbusRegister::DiscreteInputs],
-                                 mappingTable[QModbusRegister::HoldingRegisters],
-                                 mappingTable[QModbusRegister::InputRegisters]);
+    mapping = modbus_mapping_new(mappingTable[QModbusDataUnit::Coils],
+                                 mappingTable[QModbusDataUnit::DiscreteInputs],
+                                 mappingTable[QModbusDataUnit::HoldingRegisters],
+                                 mappingTable[QModbusDataUnit::InputRegisters]);
     if (mapping == NULL) {
         setError(qt_error_string(errno), QModbusDevice::ConnectionError);
         return false;
@@ -188,23 +188,23 @@ void LibModBusSlave::setSlaveId(int id)
     modbus_set_slave(context, slave);
 }
 
-bool LibModBusSlave::data(QModbusRegister::RegisterType table, quint16 address, quint16 *data)
+bool LibModBusSlave::data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data)
 {
     if (!data)
         return false;
 
     if (mappingTable[table] >= address) {
         switch (table) {
-            case QModbusRegister::DiscreteInputs:
+            case QModbusDataUnit::DiscreteInputs:
                 *data = mapping->tab_input_bits[address];
                 break;
-            case QModbusRegister::Coils:
+            case QModbusDataUnit::Coils:
                 *data = mapping->tab_bits[address];
                 break;
-            case QModbusRegister::InputRegisters:
+            case QModbusDataUnit::InputRegisters:
                 *data = mapping->tab_input_registers[address];
                 break;
-            case QModbusRegister::HoldingRegisters:
+            case QModbusDataUnit::HoldingRegisters:
                 *data = mapping->tab_registers[address];
                 break;
         }
@@ -216,20 +216,20 @@ bool LibModBusSlave::data(QModbusRegister::RegisterType table, quint16 address, 
     return true;
 }
 
-bool LibModBusSlave::setData(QModbusRegister::RegisterType table, quint16 address, quint16 data)
+bool LibModBusSlave::setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data)
 {
     if (mappingTable[table] >= address) {
         switch (table) {
-            case QModbusRegister::DiscreteInputs:
+            case QModbusDataUnit::DiscreteInputs:
                 mapping->tab_input_bits[address] = (uint8_t)data;
                 break;
-            case QModbusRegister::Coils:
+            case QModbusDataUnit::Coils:
                 mapping->tab_bits[address] = (uint8_t)data;
                 break;
-            case QModbusRegister::InputRegisters:
+            case QModbusDataUnit::InputRegisters:
                 mapping->tab_input_registers[address] = data;
                 break;
-            case QModbusRegister::HoldingRegisters:
+            case QModbusDataUnit::HoldingRegisters:
                 mapping->tab_registers[address] = data;
                 break;
         }
@@ -295,7 +295,7 @@ void ListenThread::doWork()
             const int functionId = query[FUNCTION_ID];
             quint16 startAddress = 0;
             quint16 quantity = 0;
-            QModbusRegister::RegisterType table;
+            QModbusDataUnit::RegisterType table;
             switch (functionId) {
             case ReadCoils:
             case ReadDiscreteInputs:
@@ -304,30 +304,30 @@ void ListenThread::doWork()
                 emit dataRead();
                 break;
             case WriteSingleCoil:
-                table = QModbusRegister::Coils;
+                table = QModbusDataUnit::Coils;
                 startAddress = (query[START_ADDRESS_HI] << 8) + query[START_ADDRESS_LO];
                 emit dataWritten(table, startAddress, 1);
                 break;
             case WriteMultipleCoils:
-                table = QModbusRegister::Coils;
+                table = QModbusDataUnit::Coils;
                 startAddress = (query[START_ADDRESS_HI] << 8) + query[START_ADDRESS_LO];
                 quantity = (query[QUANTITY_HI] << 8) + query[QUANTITY_LO];
                 emit dataWritten(table, startAddress, quantity);
                 break;
             case WriteSingleRegister:
-                table = QModbusRegister::HoldingRegisters;
+                table = QModbusDataUnit::HoldingRegisters;
                 startAddress = (query[START_ADDRESS_HI] << 8) + query[START_ADDRESS_LO];
                 emit dataWritten(table, startAddress, 1);
                 break;
             case WriteMultipleRegisters:
-                table = QModbusRegister::HoldingRegisters;
+                table = QModbusDataUnit::HoldingRegisters;
                 startAddress = (query[START_ADDRESS_HI] << 8) + query[START_ADDRESS_LO];
                 quantity = (query[QUANTITY_HI] << 8) + query[QUANTITY_LO];
                 emit dataWritten(table, startAddress, quantity);
                 break;
             case ReadWriteRegisters:
                 emit dataRead();
-                table = QModbusRegister::HoldingRegisters;
+                table = QModbusDataUnit::HoldingRegisters;
                 startAddress = (query[START_ADDRESS_HI] << 8) + query[START_ADDRESS_LO];
                 quantity = (query[QUANTITY_HI] << 8) + query[QUANTITY_LO];
                 emit dataWritten(table, startAddress, quantity);

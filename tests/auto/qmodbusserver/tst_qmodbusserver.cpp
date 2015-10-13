@@ -45,8 +45,8 @@ public:
 
     void setSlaveId(int) Q_DECL_OVERRIDE {}
     int slaveId() const Q_DECL_OVERRIDE { return 0; }
-    bool data(QModbusRegister::RegisterType, quint16, quint16 *) Q_DECL_OVERRIDE { return true; }
-    bool setData(QModbusRegister::RegisterType, quint16, quint16) Q_DECL_OVERRIDE { return true; }
+    bool data(QModbusDataUnit::RegisterType, quint16, quint16 *) Q_DECL_OVERRIDE { return true; }
+    bool setData(QModbusDataUnit::RegisterType, quint16, quint16) Q_DECL_OVERRIDE { return true; }
     virtual bool open() Q_DECL_OVERRIDE { return true; }
     virtual void close() Q_DECL_OVERRIDE {}
 
@@ -66,12 +66,12 @@ private:
 private slots:
     void init()
     {
-        QModbusRegister registers;
-        registers.setRegisterSize(QModbusRegister::DiscreteInputs, 500);
-        registers.setRegisterSize(QModbusRegister::Coils, 500);
-        registers.setRegisterSize(QModbusRegister::InputRegisters, 500);
-        registers.setRegisterSize(QModbusRegister::HoldingRegisters, 500);
-        server.setMap(registers);
+        QModbusDataUnitMap map;
+        map.insert(QModbusDataUnit::DiscreteInputs, { QModbusDataUnit::DiscreteInputs, 0, 500 });
+        map.insert(QModbusDataUnit::Coils, { QModbusDataUnit::Coils, 0, 500 });
+        map.insert(QModbusDataUnit::InputRegisters, { QModbusDataUnit::InputRegisters, 0, 500 });
+        map.insert(QModbusDataUnit::HoldingRegisters, { QModbusDataUnit::HoldingRegisters, 0, 500 });
+        server.setMap(map);
     }
 
     void testProcessRequestReadWriteSingleMultipleCoils()

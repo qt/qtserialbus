@@ -54,10 +54,10 @@ public:
     void listen(const QString &address, quint16 port = 502) Q_DECL_OVERRIDE;
     void listen(const QHostAddress &address, quint16 port = 502) Q_DECL_OVERRIDE;
 
-    bool setMap(const QModbusRegister &newRegister) Q_DECL_OVERRIDE;
+    bool setMap(const QModbusDataUnitMap &map) Q_DECL_OVERRIDE;
 
-    bool data(QModbusRegister::RegisterType table, quint16 address, quint16 *data) Q_DECL_OVERRIDE;
-    bool setData(QModbusRegister::RegisterType table, quint16 address, quint16 data) Q_DECL_OVERRIDE;
+    bool data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data) Q_DECL_OVERRIDE;
+    bool setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data) Q_DECL_OVERRIDE;
 
 private:
     bool open() Q_DECL_OVERRIDE;

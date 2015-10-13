@@ -37,8 +37,8 @@
 #ifndef QMODBUSDATAUNIT_H
 #define QMODBUSDATAUNIT_H
 
-#include <QtSerialBus/qmodbusregister.h>
-
+#include <QtCore/qmap.h>
+#include <QtCore/qmetatype.h>
 #include <QtCore/qvector.h>
 
 QT_BEGIN_NAMESPACE
@@ -46,38 +46,33 @@ QT_BEGIN_NAMESPACE
 class QModbusDataUnit
 {
 public:
+    enum RegisterType {
+        Invalid,
+        DiscreteInputs,
+        Coils,
+        InputRegisters,
+        HoldingRegisters
+    };
+
     QModbusDataUnit() Q_DECL_EQ_DEFAULT;
 
-    QModbusDataUnit(QModbusRegister::RegisterType regType,
-                             int dataAddress, quint16 initValue)
-        : rType(regType),
-          sAddress(dataAddress),
-          dataRange(1)
-    {
-        dataValue.fill(initValue, 1);
-    }
+    explicit QModbusDataUnit(RegisterType regType)
+        : QModbusDataUnit(regType, 0, 0)
+    {}
 
-    QModbusDataUnit(QModbusRegister::RegisterType regType,
-                             int newStartAddress, const QVector<quint16> &data)
-        : rType(regType),
-          sAddress(newStartAddress),
-          dataValue(data),
-          dataRange(data.size())
-    {
+    QModbusDataUnit(RegisterType regType, int dataAddress, quint16 initSize)
+        : QModbusDataUnit(regType, dataAddress, QVector<quint16>(initSize))
+    {}
 
-    }
+    QModbusDataUnit(RegisterType regType, int newStartAddress, const QVector<quint16> &newData)
+        : rType(regType)
+        , sAddress(newStartAddress)
+        , dataValue(newData)
+        , dataRange(newData.size())
+    {}
 
-    explicit QModbusDataUnit(QModbusRegister::RegisterType regType)
-        : rType(regType),
-          sAddress(0),
-          dataRange(0)
-    {
-    }
-
-    bool isValid() const { return sAddress != -1 && dataRange != -1; }
-
-    QModbusRegister::RegisterType registerType() const { return rType; }
-    void setRegisterType(QModbusRegister::RegisterType newRegisterType)
+    RegisterType registerType() const { return rType; }
+    void setRegisterType(RegisterType newRegisterType)
     {
         rType = newRegisterType;
     }
@@ -92,17 +87,40 @@ public:
         dataRange = newValue.size();
     }
 
+    // TODO: Maybe introduce Range.
     inline int valueCount() const { return dataRange; }
     inline void setValueCount(int newCount) { dataRange = newCount; }
 
+    inline void setValue(int index, quint16 newValue)
+    {
+        if (dataValue.isEmpty() || index >= dataValue.size())
+            return;
+        dataValue[index] = newValue;
+    }
+    inline quint16 value(int index) const { return dataValue.value(index); }
+
+    // TODO: Do we really need the next two functions and the 'Invalid' enum value.
+    inline void reset() {
+        rType = Invalid;
+        sAddress = -1;
+        dataRange = 0;
+        dataValue = {};
+    }
+    bool isValid() const { return rType != Invalid && sAddress != -1; }
+
 private:
-    QModbusRegister::RegisterType rType;
+    RegisterType rType = Invalid;
     int sAddress = -1;
     QVector<quint16> dataValue;
-    int dataRange = -1;
+    int dataRange = 0;
 };
+typedef QMap<QModbusDataUnit::RegisterType, QModbusDataUnit> QModbusDataUnitMap;
 
 Q_DECLARE_TYPEINFO(QModbusDataUnit, Q_MOVABLE_TYPE);
+Q_DECLARE_TYPEINFO(QModbusDataUnit::RegisterType, Q_PRIMITIVE_TYPE);
 
 QT_END_NAMESPACE
+
+Q_DECLARE_METATYPE(QModbusDataUnit::RegisterType)
+
 #endif // QMODBUSDATAUNIT_H

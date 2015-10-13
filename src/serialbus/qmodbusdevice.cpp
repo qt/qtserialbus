@@ -36,8 +36,7 @@
 
 #include "qmodbusdevice.h"
 #include "qmodbusdevice_p.h"
-
-#include <QtSerialBus/qmodbusregister.h>
+#include "qmodbusdataunit.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -56,7 +55,7 @@ QT_BEGIN_NAMESPACE
 QModbusDevice::QModbusDevice(QObject *parent)
  : QObject(*new QModbusDevicePrivate, parent)
 {
-    qRegisterMetaType<QModbusRegister::RegisterType>();
+    qRegisterMetaType<QModbusDataUnit::RegisterType>();
 }
 
 /*!
@@ -65,7 +64,7 @@ QModbusDevice::QModbusDevice(QObject *parent)
 QModbusDevice::QModbusDevice(QModbusDevicePrivate &dd, QObject *parent)
  : QObject(dd, parent)
 {
-    qRegisterMetaType<QModbusRegister::RegisterType>();
+    qRegisterMetaType<QModbusDataUnit::RegisterType>();
 }
 
 /*!

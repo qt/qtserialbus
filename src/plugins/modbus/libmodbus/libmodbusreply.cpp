@@ -50,10 +50,10 @@ void RequestThread::write()
     modbus_set_slave(context, slaveId);
 
     switch (table) {
-    case QModbusRegister::Coils:
+    case QModbusDataUnit::Coils:
         writeBits();
         break;
-    case QModbusRegister::HoldingRegisters:
+    case QModbusDataUnit::HoldingRegisters:
         writeBytes();
         break;
     default:
@@ -87,12 +87,12 @@ void RequestThread::read()
     modbus_set_slave(context, slaveId);
 
     switch (table) {
-    case QModbusRegister::DiscreteInputs:
-    case QModbusRegister::Coils:
+    case QModbusDataUnit::DiscreteInputs:
+    case QModbusDataUnit::Coils:
             readBits();
         break;
-    case QModbusRegister::InputRegisters:
-    case QModbusRegister::HoldingRegisters:
+    case QModbusDataUnit::InputRegisters:
+    case QModbusDataUnit::HoldingRegisters:
             readBytes();
         break;
     default:
@@ -105,7 +105,7 @@ void RequestThread::readBits()
 {
     int read = -1;
     QVector<quint8> bits(size, 0);
-    if (table == QModbusRegister::DiscreteInputs)
+    if (table == QModbusDataUnit::DiscreteInputs)
         read = modbus_read_input_bits(context, startAddress, size, bits.data());
     else
         read = modbus_read_bits(context, startAddress, size, bits.data());
@@ -124,7 +124,7 @@ void RequestThread::readBytes()
 {
     int read = -1;
     QVector<quint16> bytes(size, 0);
-    if (table == QModbusRegister::InputRegisters)
+    if (table == QModbusDataUnit::InputRegisters)
         read = modbus_read_input_registers(context, startAddress, size, bytes.data());
     else
         read = modbus_read_registers(context, startAddress, size, bytes.data());

@@ -47,11 +47,11 @@ class DummySlave : public QModbusServer
 public:
     explicit DummySlave(QObject *parent = 0);
 
-    bool setMap(const QModbusRegister &) Q_DECL_OVERRIDE;
+    bool setMap(const QModbusDataUnitMap &) Q_DECL_OVERRIDE;
     void setSlaveId(int id);
     int slaveId() const;
-    bool data(QModbusRegister::RegisterType table, quint16 address, quint16 *data);
-    bool setData(QModbusRegister::RegisterType table, quint16 address, quint16 data);
+    bool data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data);
+    bool setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data);
 
 protected:
     bool open();

@@ -74,7 +74,7 @@ public:
 Q_SIGNALS:
     void error(int errorNumber);
     void dataRead();
-    void dataWritten(QModbusRegister::RegisterType table, int address, int size);
+    void dataWritten(QModbusDataUnit::RegisterType table, int address, int size);
 };
 
 class LibModBusSlave : public QModbusServer
@@ -84,13 +84,13 @@ public:
     LibModBusSlave();
     ~LibModBusSlave();
 
-    bool setMap(const QModbusRegister &newRegister) Q_DECL_OVERRIDE;
+    bool setMap(const QModbusDataUnitMap &map) Q_DECL_OVERRIDE;
 
     int slaveId() const Q_DECL_OVERRIDE;
     void setSlaveId(int id) Q_DECL_OVERRIDE;
 
-    bool data(QModbusRegister::RegisterType table, quint16 address, quint16 *data) Q_DECL_OVERRIDE;
-    bool setData(QModbusRegister::RegisterType table, quint16 address, quint16 data) Q_DECL_OVERRIDE;
+    bool data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data) Q_DECL_OVERRIDE;
+    bool setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data) Q_DECL_OVERRIDE;
 
 Q_SIGNALS:
     void operate();
@@ -110,7 +110,7 @@ private:
     modbus_mapping_t *mapping;
     bool connected;
     int slave;
-    QMap<QModbusRegister::RegisterType, int> mappingTable;
+    QMap<QModbusDataUnit::RegisterType, int> mappingTable;
 };
 
 QT_END_NAMESPACE

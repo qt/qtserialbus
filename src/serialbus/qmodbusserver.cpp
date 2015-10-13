@@ -78,7 +78,7 @@ QModbusServer::QModbusServer(QModbusServerPrivate &dd, QObject *parent) :
 }
 
 /*!
-    Sets the registered map structure for requests from other Modbus clients to \a newRegister.
+    Sets the registered map structure for requests from other ModBus clients to \a map.
     The register values are initialized with zero. Returns \c true on success; otherwise \c false.
 
     If this function is not called before connecting, a default register with zero
@@ -86,19 +86,9 @@ QModbusServer::QModbusServer(QModbusServerPrivate &dd, QObject *parent) :
 
     \note Calling this function discards any register value that was previously set.
  */
-bool QModbusServer::setMap(const QModbusRegister &newRegister)
+bool QModbusServer::setMap(const QModbusDataUnitMap &map)
 {
-    // TODO: This doesn't look sane, we should be able to set start address as well.
-    d_func()->m_discreteInputs = QModbusDataUnit(QModbusRegister::DiscreteInputs, 0,
-        QVector<quint16>(newRegister.registerSize(QModbusRegister::DiscreteInputs)));
-    d_func()->m_coils = QModbusDataUnit(QModbusRegister::Coils, 0,
-        QVector<quint16>(newRegister.registerSize(QModbusRegister::Coils)));
-    d_func()->m_inputRegisters = QModbusDataUnit(QModbusRegister::InputRegisters, 0,
-        QVector<quint16>(newRegister.registerSize(QModbusRegister::InputRegisters)));
-    d_func()->m_holdingRegisters = QModbusDataUnit(QModbusRegister::HoldingRegisters, 0,
-        QVector<quint16>(newRegister.registerSize(QModbusRegister::HoldingRegisters)));
-
-    return true;
+    return d_func()->setMap(map);
 }
 
 /*!
@@ -123,24 +113,24 @@ bool QModbusServer::setMap(const QModbusRegister &newRegister)
  */
 
 /*!
-    \fn bool QModbusServer::data(QModbusRegister::RegisterType table, quint16 address, quint16 *data)
+    \fn bool QModbusServer::data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data)
 
     Reads data stored in the Modbus server. A Modbus server has four tables (\a table) and each
     have a unique \a address field, which is used to read \a data from the desired field.
-    See QModbusRegister::RegisterType for more information about the different tables.
+    See QModbusDataUnit::RegisterType for more information about the different tables.
     Returns \c false if address is outside of the map range.
 
-    \sa QModbusRegister::RegisterType, setData()
+    \sa QModbusDataUnit::RegisterType, setData()
  */
 
 /*!
-    \fn bool QModbusServer::setData(QModbusRegister::RegisterType table, quint16 address, quint16 data)
+    \fn bool QModbusServer::setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data)
 
     Writes data to the Modbus server. A Modbus server has four tables (\a table) and each have a
     unique \a address field, which is used to write \a data to the desired field.
     Returns \c false if address outside of the map range.
 
-    \sa QModbusRegister::RegisterType, data()
+    \sa QModbusDataUnit::RegisterType, data()
  */
 
 /*!
@@ -151,7 +141,7 @@ bool QModbusServer::setMap(const QModbusRegister &newRegister)
  */
 
 /*!
-    \fn void QModbusServer::dataWritten(QModbusRegister::RegisterType table, int address, int size)
+    \fn void QModbusServer::dataWritten(QModbusDataUnit::RegisterType table, int address, int size)
 
     This signal is emitted when a Modbus client has written one or more fields of data to the
     Modbus server. Signal contains information about the fields that were written:
@@ -179,6 +169,18 @@ QModbusResponse QModbusServer::processCustomRequest(const QModbusPdu &request)
 {
     return QModbusExceptionResponse(request.functionCode(),
         QModbusExceptionResponse::IllegalFunction);
+}
+
+
+// -- QModbusServerPrivate
+
+bool QModbusServerPrivate::setMap(const QModbusDataUnitMap &map)
+{
+    m_discreteInputs = map.value(QModbusDataUnit::DiscreteInputs);
+    m_coils = map.value(QModbusDataUnit::Coils);
+    m_inputRegisters = map.value(QModbusDataUnit::InputRegisters);
+    m_holdingRegisters = map.value(QModbusDataUnit::HoldingRegisters);
+    return true;
 }
 
 /*
