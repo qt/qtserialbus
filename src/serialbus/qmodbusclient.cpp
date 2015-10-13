@@ -121,7 +121,7 @@ bool QModbusClient::processResponse(const QModbusResponse &response, QModbusData
     To be implemented by custom Modbus client implementation. The default implementation ignores
     \a response and \a data. It always returns false to indicate error.
 */
-bool QModbusClient::processCustomResponse(const QModbusResponse &response, QModbusDataUnit *data)
+bool QModbusClient::processPrivateModbusResponse(const QModbusResponse &response, QModbusDataUnit *data)
 {
     Q_UNUSED(response)
     Q_UNUSED(data)
@@ -159,7 +159,7 @@ bool QModbusClientPrivate::processResponse(const QModbusResponse &response, QMod
     default:
         break;
     }
-    return q_func()->processCustomResponse(response, data);
+    return q_func()->processPrivateModbusResponse(response, data);
 }
 
 static bool isValid(const QModbusResponse &response, QModbusResponse::FunctionCode fc)
