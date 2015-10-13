@@ -1,6 +1,6 @@
 TARGET = QtSerialBus
 MODULE = serialbus
-QT += core-private network
+QT += core-private network serialport
 CONFIG += c++11
 
 QMAKE_DOCS = $$PWD/doc/qtserialbus.qdocconf

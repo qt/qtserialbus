@@ -43,6 +43,7 @@
 #include "qmodbus.h"
 
 #include <QtCore/qdebug.h>
+#include <QtSerialPort/qserialport.h>
 
 //
 //  W A R N I N G
@@ -63,41 +64,58 @@ class QModbusRtuSerialSlavePrivate : public QModbusServerPrivate
 
 public:
     QModbusRtuSerialSlavePrivate()
-        : pluginMaster(Q_NULLPTR)
     {
-        //hard usage of libmodbus plugin
-        pluginMaster = QModbus::instance()->createServer(QByteArray("libmodbus"));
-        if (!pluginMaster)
-            qWarning() << "Cannot find libmodbus plugin.";
     }
 
     ~QModbusRtuSerialSlavePrivate()
     {
-        delete pluginMaster;
     }
 
-    void setupMaster()
+    void setupSerialPort()
     {
-        if (!pluginMaster)
-            return;
-
         Q_Q(QModbusRtuSerialSlave);
-        // forward the error and state changes
-        QObject::connect(pluginMaster, SIGNAL(stateChanged(QModbusDevice::ModbusDeviceState)),
-            q, SLOT(handleStateChanged(QModbusDevice::ModbusDeviceState)));
-        QObject::connect(pluginMaster, SIGNAL(errorOccurred(QModbusDevice::ModbusError)),
-            q, SLOT(handleErrorOccurred(QModbusDevice::ModbusError)));
-        QObject::connect(pluginMaster, SIGNAL(dataWritten(QModbusDataUnit::RegisterType,int,int)),
-            q, SIGNAL(dataWritten(QModbusDataUnit::RegisterType,int,int)));
 
-        q->setState(pluginMaster->state());
-        q->setError(pluginMaster->errorString(), pluginMaster->error());
+        m_serialPort = new QSerialPort(q);
+        m_serialPort->setBaudRate(QSerialPort::Baud9600);
+        m_serialPort->setParity(QSerialPort::NoParity);
+        m_serialPort->setDataBits(QSerialPort::Data8);
+        m_serialPort->setStopBits(QSerialPort::OneStop);
+
+        QObject::connect(m_serialPort, SIGNAL(readyRead()),
+                         q, SLOT(serialPortReadyRead()));
+        QObject::connect(m_serialPort, SIGNAL(error(QSerialPort::SerialPortError)),
+                         q, SLOT(handleErrorOccurred(QSerialPort::SerialPortError)));
     }
 
-    void handleStateChanged(QModbusDevice::ModbusDeviceState state);
-    void handleErrorOccurred(QModbusDevice::ModbusError);
+    quint8 lengthOfFunctionCodeHeader(QModbusPdu::FunctionCode code) const
+    {
+        switch (code) {
+        case QModbusPdu::ReadCoils:
+        case QModbusPdu::ReadDiscreteInputs:
+        case QModbusPdu::ReadHoldingRegisters:
+        case QModbusPdu::ReadInputRegisters:
+        case QModbusPdu::WriteSingleCoil:
+        case QModbusPdu::WriteSingleRegister:
+            return 4;
+        case QModbusPdu::WriteMultipleRegisters:
+        case QModbusPdu::WriteMultipleCoils:
+            return 5;
+        case QModbusPdu::MaskWriteRegister:
+            return 6;
+        case QModbusPdu::ReadWriteMultipleRegisters:
+            return 9;
+        default:
+            qWarning() << "Size for FunctionCode not known" << code;
+            return 0;
+        }
+    }
 
-    QModbusServer* pluginMaster;
+    void handleErrorOccurred(QSerialPort::SerialPortError);
+    void serialPortReadyRead();
+    void aboutToClose();
+
+    QSerialPort *m_serialPort;
+    QByteArray m_pendingBuffer;
 };
 
 QT_END_NAMESPACE

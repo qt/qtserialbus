@@ -37,10 +37,14 @@
 #include "qmodbusrtuserialslave.h"
 #include "qmodbusrtuserialslave_p.h"
 
+#include <QtCore/qloggingcategory.h>
 #include <QtSerialBus/qmodbus.h>
 
 
 QT_BEGIN_NAMESPACE
+
+Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
+Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS_LOW)
 
 /*!
     \class QModbusRtuSerialSlave
@@ -64,7 +68,7 @@ QModbusRtuSerialSlave::QModbusRtuSerialSlave(QObject *parent)
     : QModbusServer(*new QModbusRtuSerialSlavePrivate, parent)
 {
     Q_D(QModbusRtuSerialSlave);
-    d->setupMaster();
+    d->setupSerialPort();
 }
 
 /*!
@@ -74,23 +78,6 @@ QModbusRtuSerialSlave::~QModbusRtuSerialSlave()
 {
 }
 
-/*!
-    \reimp
- */
-bool QModbusRtuSerialSlave::connectDevice()
-{
-    // reimp to avoid QModbusDevice implementation
-    // we want to use a forwarded version.
-
-    Q_D(QModbusRtuSerialSlave);
-
-    if (!d->pluginMaster)
-        return false;
-
-    d->pluginMaster->setPortName(portName());
-
-    return d->pluginMaster->connectDevice();
-}
 
 /*!
     \internal
@@ -99,20 +86,7 @@ QModbusRtuSerialSlave::QModbusRtuSerialSlave(QModbusRtuSerialSlavePrivate &dd, Q
     : QModbusServer(dd, parent)
 {
     Q_D(QModbusRtuSerialSlave);
-    d->setupMaster();
-}
-
-/*!
-    \reimp
- */
-bool QModbusRtuSerialSlave::setMap(const QModbusDataUnitMap &map)
-{
-    Q_D(QModbusRtuSerialSlave);
-
-    if (!d->pluginMaster)
-        return false;
-
-    return d->pluginMaster->setMap(map);
+    d->setupSerialPort();
 }
 
 /*!
@@ -120,7 +94,15 @@ bool QModbusRtuSerialSlave::setMap(const QModbusDataUnitMap &map)
  */
 bool QModbusRtuSerialSlave::open()
 {
-    return false;
+    if (state() == QModbusDevice::ConnectedState)
+        return true;
+
+    Q_D(QModbusRtuSerialSlave);
+    d->m_serialPort->setPortName(portName());
+    if (d->m_serialPort->open(QIODevice::ReadWrite))
+        setState(QModbusDevice::ConnectedState);
+
+    return (state() == QModbusDevice::ConnectedState);
 }
 
 /*!
@@ -130,24 +112,176 @@ void QModbusRtuSerialSlave::close()
 {
     Q_D(QModbusRtuSerialSlave);
 
-    if (!d->pluginMaster)
+    if (d->m_serialPort->isOpen())
+        d->m_serialPort->close();
+
+    d->m_pendingBuffer.clear();
+
+    setState(QModbusDevice::UnconnectedState);
+}
+
+void QModbusRtuSerialSlavePrivate::handleErrorOccurred(
+        QSerialPort::SerialPortError error)
+{
+    if (error == QSerialPort::NoError)
         return;
 
-    d->pluginMaster->disconnectDevice();
+    qCDebug(QT_MODBUS) << "QSerialPort error:" << error
+                       << ((m_serialPort != Q_NULLPTR) ? m_serialPort->errorString() : QString());
+
+    Q_Q(QModbusRtuSerialSlave);
+
+    switch (error) {
+    case QSerialPort::DeviceNotFoundError:
+        q->setError(QModbusDevice::tr("Referenced serial device does not exist."),
+                    QModbusDevice::ConnectionError);
+        break;
+    case QSerialPort::PermissionError:
+        q->setError(QModbusDevice::tr("Cannot open serial device due to permissions."),
+                    QModbusDevice::ConnectionError);
+        break;
+    case QSerialPort::OpenError:
+    case QSerialPort::NotOpenError:
+        q->setError(QModbusDevice::tr("Cannot open serial device."),
+                    QModbusDevice::ConnectionError);
+        break;
+
+    case QSerialPort::ParityError:
+        q->setError(QModbusDevice::tr("Parity error detected."),
+                    QModbusDevice::ConfigurationError);
+        break;
+    case QSerialPort::FramingError:
+        q->setError(QModbusDevice::tr("Framing error detected."),
+                    QModbusDevice::ConfigurationError);
+        break;
+    case QSerialPort::BreakConditionError:
+        q->setError(QModbusDevice::tr("Break condition error detected."),
+                    QModbusDevice::ConnectionError);
+        break;
+    case QSerialPort::WriteError:
+        q->setError(QModbusDevice::tr("Write error."), QModbusDevice::WriteError);
+        break;
+    case QSerialPort::ReadError:
+        q->setError(QModbusDevice::tr("Read error."), QModbusDevice::ReadError);
+        break;
+    case QSerialPort::ResourceError:
+        q->setError(QModbusDevice::tr("Resource error."), QModbusDevice::ConnectionError);
+        break;
+    case QSerialPort::UnsupportedOperationError:
+        q->setError(QModbusDevice::tr("Device operation is not supported error."),
+                    QModbusDevice::ConfigurationError);
+        break;
+    case QSerialPort::TimeoutError:
+        q->setError(QModbusDevice::tr("Timeout error."), QModbusDevice::TimeoutError);
+        break;
+
+    case QSerialPort::UnknownError:
+        q->setError(QModbusDevice::tr("Unknown error."), QModbusDevice::UnknownError);
+        break;
+    default:
+        qCDebug(QT_MODBUS) << "Unhandled QSerialPort error" << error;
+        break;
+    }
 }
 
-void QModbusRtuSerialSlavePrivate::handleStateChanged(QModbusDevice::ModbusDeviceState state)
+void QModbusRtuSerialSlavePrivate::serialPortReadyRead()
 {
     Q_Q(QModbusRtuSerialSlave);
-    q->setState(state);
+
+    int size = m_serialPort->size();
+    m_pendingBuffer.append(m_serialPort->read(size));
+    qCDebug(QT_MODBUS_LOW) << "Received: " << m_pendingBuffer.toHex();
+
+    //d->m_pendingBuffer.append(package);
+
+    // Index -> description
+    // SlaveId      -> 1 byte
+    // FunctionCode -> 1 byte
+    // FunctionCode specific content -> 0-252 bytes
+    // CRC          -> 2 bytes
+
+    QModbusPdu::FunctionCode code = QModbusPdu::Invalid;
+    // function code available?
+    if (m_pendingBuffer.size() >= 2)
+        code = QModbusRequest::FunctionCode(m_pendingBuffer.at(1));
+
+    int aduSize = 1; // slaveId counted
+
+    //some messages have additional data payload
+    int lengthDataField = 0;
+    switch (code) {
+    case QModbusPdu::WriteMultipleCoils:
+    case QModbusPdu::WriteMultipleRegisters:
+    case QModbusPdu::ReadWriteMultipleRegisters:
+        lengthDataField = m_pendingBuffer[lengthOfFunctionCodeHeader(code)+1];
+        break;
+    default:
+        // remaining request types have no data field at the end
+        break;
+    }
+
+    aduSize += 1; //function code counted
+    aduSize += lengthOfFunctionCodeHeader(code);
+    if (lengthDataField > 0) {
+        aduSize += 1; //byte count field
+        aduSize += lengthDataField; // data payload size
+    }
+
+    //obtain CRC which is last 2 bytes
+    quint16 receivedCrc = m_pendingBuffer[aduSize] << 8 | m_pendingBuffer[aduSize+1];
+    aduSize += 2; // crc size
+
+    const QByteArray completeAduFrame = m_pendingBuffer.left(aduSize);
+    if (completeAduFrame.size() < aduSize) {
+        // TODO should such cases wait for next bytes to arrive and keep m_pendingBuffer around
+        qCWarning(QT_MODBUS) << "ADU too short, ignoring pending frame";
+        return;
+    }
+
+    m_pendingBuffer.remove(0, aduSize);
+    qCDebug(QT_MODBUS_LOW) << "Received request (incl ADU)" << completeAduFrame.toHex();
+
+
+    // for this slave id?
+    // TODO deal with broadcast id 0
+    if (q->slaveId() != completeAduFrame.at(0)) {
+        //ignore wrong slaveId
+        qCDebug(QT_MODBUS) << "Wrong slave Id, expected" << q->slaveId() << "got" << (quint8) completeAduFrame.at(0);
+        return;
+    }
+
+    if (checkCRC(completeAduFrame, completeAduFrame.size(), receivedCrc)) {
+        qWarning() << "Ignoring request with wrong crc";
+        return;
+    }
+
+    //remove slave id, fcode & crc
+    QModbusRequest req(code, completeAduFrame.mid(2, completeAduFrame.size()-4));
+    QModbusResponse response = q->processRequest(req);
+
+    qCDebug(QT_MODBUS) << "Response PDU:" << response.functionCode() << response.data().toHex();
+
+    QByteArray result;
+    result.append(completeAduFrame.at(0));
+    result.append(completeAduFrame.at(1));
+    result.append(response.data());
+
+    quint16 resultCrc = calculateCRC(result, result.size());
+    result.append(quint8(resultCrc >> 8));
+    result.append(quint8(resultCrc & 0xff));
+
+    qCDebug(QT_MODBUS_LOW) << "Sending response (incl ADU):" << result.toHex();
+    m_serialPort->write(result);
 }
 
-void QModbusRtuSerialSlavePrivate::handleErrorOccurred(QModbusDevice::ModbusError error)
+void QModbusRtuSerialSlavePrivate::aboutToClose()
 {
     Q_Q(QModbusRtuSerialSlave);
-    q->setError(pluginMaster ? pluginMaster->errorString() : QString(), error);
+    q->close();
 }
 
 #include "moc_qmodbusrtuserialslave.cpp"
 
 QT_END_NAMESPACE
+
+

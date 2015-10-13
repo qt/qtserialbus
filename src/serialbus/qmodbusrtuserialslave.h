@@ -52,10 +52,6 @@ public:
     explicit QModbusRtuSerialSlave(QObject *parent = Q_NULLPTR);
     ~QModbusRtuSerialSlave();
 
-    bool connectDevice() Q_DECL_OVERRIDE;
-
-    bool setMap(const QModbusDataUnitMap &map) Q_DECL_OVERRIDE;
-
 protected:
     QModbusRtuSerialSlave(QModbusRtuSerialSlavePrivate &dd, QObject *parent = Q_NULLPTR);
 
@@ -63,8 +59,9 @@ protected:
     void close() Q_DECL_OVERRIDE;
 
 private:
-    Q_PRIVATE_SLOT(d_func(), void handleStateChanged(QModbusDevice::ModbusDeviceState))
-    Q_PRIVATE_SLOT(d_func(), void handleErrorOccurred(QModbusDevice::ModbusError))
+    Q_PRIVATE_SLOT(d_func(), void handleErrorOccurred(QSerialPort::SerialPortError))
+    Q_PRIVATE_SLOT(d_func(), void serialPortReadyRead())
+    Q_PRIVATE_SLOT(d_func(), void aboutToClose())
 };
 
 QT_END_NAMESPACE

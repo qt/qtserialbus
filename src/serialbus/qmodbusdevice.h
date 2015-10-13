@@ -64,6 +64,7 @@ public:
         WriteError,
         ConnectionError,
         ConfigurationError,
+        TimeoutError,
         UnknownError
     };
     Q_ENUM(ModbusError)

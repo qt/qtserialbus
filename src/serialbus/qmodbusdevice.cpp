@@ -104,6 +104,8 @@ QString QModbusDevice::portName() const
     \value ConnectionError      An error occurred when attempting to open the backend.
     \value ConfigurationError   An error occurred when attempting to set a configuration
                                 parameter.
+    \value TimeoutError         A timeout occurred during I/O. An I/O operation
+                                did not return within the given time frame.
     \value UnknownError         An unknown error occurred.
  */
 
