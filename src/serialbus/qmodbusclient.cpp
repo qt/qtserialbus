@@ -147,7 +147,7 @@ bool QModbusClientPrivate::processResponse(const QModbusResponse &response, QMod
     case QModbusRequest::WriteMultipleRegisters:
     case QModbusRequest::ReadWriteMultipleRegisters:
     case QModbusRequest::MaskWriteRegister:
-    case QModbusRequest::ReadFIFOQueue:
+    case QModbusRequest::ReadFifoQueue:
     case QModbusRequest::ReadFileRecord:
     case QModbusRequest::WriteFileRecord:
     case QModbusRequest::ReadExceptionStatus:
@@ -155,7 +155,7 @@ bool QModbusClientPrivate::processResponse(const QModbusResponse &response, QMod
     case QModbusRequest::GetComEventCounter:
     case QModbusRequest::GetComEventLog:
     case QModbusRequest::ReportServerId:
-    case QModbusRequest::ReadDeviceIdentification:
+    case QModbusRequest::EncapsulatedInterfaceTransport:
     default:
         break;
     }

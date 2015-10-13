@@ -200,7 +200,7 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
     case QModbusRequest::WriteMultipleRegisters:
     case QModbusRequest::ReadWriteMultipleRegisters:
     case QModbusRequest::MaskWriteRegister:
-    case QModbusRequest::ReadFIFOQueue:
+    case QModbusRequest::ReadFifoQueue:
     case QModbusRequest::ReadFileRecord:
     case QModbusRequest::WriteFileRecord:
     case QModbusRequest::ReadExceptionStatus:
@@ -208,7 +208,7 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
     case QModbusRequest::GetComEventCounter:
     case QModbusRequest::GetComEventLog:
     case QModbusRequest::ReportServerId:
-    case QModbusRequest::ReadDeviceIdentification:
+    case QModbusRequest::EncapsulatedInterfaceTransport:
     default:
         break;
     }

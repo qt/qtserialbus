@@ -71,7 +71,7 @@ public:
         WriteMultipleRegisters = 0x10,
         ReadWriteMultipleRegisters = 0x17,
         MaskWriteRegister = 0x16,
-        ReadFIFOQueue = 0x18,
+        ReadFifoQueue = 0x18,
         ReadFileRecord = 0x14,
         WriteFileRecord = 0x15,
         ReadExceptionStatus = 0x07,
@@ -79,7 +79,7 @@ public:
         GetComEventCounter = 0x0B,
         GetComEventLog = 0x0C,
         ReportServerId = 0x11,
-        ReadDeviceIdentification = 0x2B,
+        EncapsulatedInterfaceTransport = 0x2B,
         UndefinedFunctionCode = 0x100
     };
     Q_ENUMS(FunctionCode)
