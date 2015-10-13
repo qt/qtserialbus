@@ -93,8 +93,8 @@ public:
     }
     bool isException() const { return m_code & quint8(0x80); }
 
-    qint32 size() const { return dataSize() + 1; }
-    qint32 dataSize() const { return m_data.size(); }
+    qint16 size() const { return dataSize() + 1; }
+    qint16 dataSize() const { return m_data.size(); }
 
     FunctionCode functionCode() const { return m_code; }
     virtual void setFunctionCode(FunctionCode code) { m_code = code; }
