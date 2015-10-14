@@ -138,6 +138,66 @@ bool QModbusServer::data(QModbusDataUnit::RegisterType table,
 }
 
 /*!
+    Returns the values in the register range given by \a results.
+
+    \a newData must provide a valid register type, start address
+    and valueCount. The returned \a results will contain the register values
+    associated with the given range.
+
+    If \a newData contains a valid register type but a negative start address
+    the entire register map is returned and \a newData appropriately sized.
+ */
+bool QModbusServer::data(QModbusDataUnit *newData) const
+{
+    Q_D(const QModbusServer);
+
+    if (!newData)
+        return false;
+
+    const QModbusDataUnit *current;
+
+    switch (newData->registerType()) {
+    case QModbusDataUnit::Invalid:
+        return false;
+    case QModbusDataUnit::DiscreteInputs:
+        current = &(d->m_discreteInputs);
+        break;
+    case QModbusDataUnit::Coils:
+        current = &(d->m_coils);
+        break;
+    case QModbusDataUnit::InputRegisters:
+        current = &(d->m_inputRegisters);
+        break;
+    case QModbusDataUnit::HoldingRegisters:
+        current = &(d->m_holdingRegisters);
+        break;
+    }
+
+    if (newData->startAddress() < 0) { //return enire map for given type
+        *newData = *current;
+        return true;
+    }
+
+    //check range start is within internal map range
+    int internalRangeEndAddress = current->startAddress() + current->valueCount() - 1;
+    if (newData->startAddress() < current->startAddress()
+        || newData->startAddress() > internalRangeEndAddress) {
+        return false;
+    }
+
+    //check range end is within internal map range
+    int rangeEndAddress = newData->startAddress() + newData->valueCount() - 1;
+    if (rangeEndAddress < current->startAddress()
+        || rangeEndAddress > internalRangeEndAddress) {
+        return false;
+    }
+
+    newData->setValues(current->values().mid(newData->startAddress(),
+                                             newData->valueCount()));
+    return true;
+}
+
+/*!
     Writes data to the Modbus server. A Modbus server has four tables (\a table) and each have a
     unique \a address field, which is used to write \a data to the desired field.
     Returns \c false if address outside of the map range.

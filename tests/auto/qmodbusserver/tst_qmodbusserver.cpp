@@ -157,9 +157,9 @@ private slots:
         QFETCH(QModbusDataUnit::RegisterType, registerType);
         // basic assumption, all registers have start address 0 and size 500
 
-        const bool unitAccessible = (registerType != QModbusDataUnit::Invalid);
+        const bool validDataUnit = (registerType != QModbusDataUnit::Invalid);
         //test initialization of 0
-        if (unitAccessible) {
+        if (validDataUnit) {
             for (int i = 0;  i < MAP_RANGE; i++) {
                 quint16 data = 123;
                 QVERIFY(server.data(registerType, i, &data));
@@ -177,9 +177,9 @@ private slots:
         QVERIFY(!server.data(registerType, 1, 0)); // invalid data pointer
         QCOMPARE(data, quint16(0));
 
-        QCOMPARE(server.setData(registerType, 1, 444), unitAccessible);
-        QCOMPARE(server.data(registerType, 1, &data), unitAccessible);
-        if (unitAccessible)
+        QCOMPARE(server.setData(registerType, 1, 444), validDataUnit);
+        QCOMPARE(server.data(registerType, 1, &data), validDataUnit);
+        if (validDataUnit)
             QCOMPARE(data, quint16(444));
         else
             QCOMPARE(data, quint16(0));
@@ -189,14 +189,16 @@ private slots:
         //testing server.setData(ModbusDataUnit&)
 
         const QVector<quint16> valueVector = { 1, 1, 1, 1, 1};
+        const QVector<quint16> zeroVector = { 0, 0, 0, 0, 0};
         QModbusDataUnit rangeUnit(registerType, 7, valueVector);
         QCOMPARE(rangeUnit.valueCount(), 5);
         QCOMPARE(rangeUnit.values().count(), 5);
         QCOMPARE(rangeUnit.startAddress(), 7);
         QVERIFY(rangeUnit.values() == valueVector);
+        QVERIFY(rangeUnit.registerType() == registerType);
 
-        QVERIFY(server.setData(rangeUnit) == unitAccessible);
-        if (unitAccessible) {
+        QVERIFY(server.setData(rangeUnit) == validDataUnit);
+        if (validDataUnit) {
             for (int i = rangeUnit.startAddress();
                  i < rangeUnit.startAddress() + rangeUnit.valueCount(); i++) {
                 quint16 readData = 0;
@@ -204,6 +206,13 @@ private slots:
                 QCOMPARE(readData, valueVector.at(i-rangeUnit.startAddress()));
             }
         }
+
+        //never fits anywhere
+        QModbusDataUnit oversizeUnit(registerType, 0, MAP_RANGE*2);
+        QCOMPARE(oversizeUnit.valueCount(), uint(MAP_RANGE*2));
+        QCOMPARE(oversizeUnit.values().count(), MAP_RANGE*2);
+        QCOMPARE(oversizeUnit.startAddress(), 0);
+        QCOMPARE(oversizeUnit.registerType(), registerType);
 
         //completely outside of valid range
         rangeUnit.setStartAddress(MAP_RANGE + 1 );
@@ -216,6 +225,63 @@ private slots:
         //slightly outside of valid range in the bottom
         rangeUnit.setStartAddress(-1);
         QVERIFY(!server.setData(rangeUnit));
+
+        //input data unit doesn't fit
+        QVERIFY(!server.setData(oversizeUnit));
+        oversizeUnit.setStartAddress(-1);
+        QVERIFY(!server.setData(oversizeUnit));
+        oversizeUnit.setStartAddress(MAP_RANGE+1);
+        QVERIFY(!server.setData(oversizeUnit));
+        oversizeUnit.setStartAddress(MAP_RANGE-2);
+        QVERIFY(!server.setData(oversizeUnit));
+
+
+        //testing server.data(QModbusDataUnit *)
+        QModbusDataUnit requestUnit(registerType, 7, 5);
+        QCOMPARE(requestUnit.valueCount(), 5u);
+        QCOMPARE(requestUnit.values().count(), 5);
+        QCOMPARE(requestUnit.startAddress(), 7);
+        QVERIFY(requestUnit.registerType() == registerType);
+        QVERIFY(requestUnit.values() != valueVector);
+
+        QVERIFY(server.data(&requestUnit) == validDataUnit);
+        if (validDataUnit) {
+            QVERIFY(requestUnit.values() == valueVector);
+            QCOMPARE(requestUnit.valueCount(), 5u);
+            QCOMPARE(requestUnit.values().count(), 5);
+            QCOMPARE(requestUnit.startAddress(), 7);
+        }
+
+        requestUnit.setValues(zeroVector);
+        QVERIFY(requestUnit.values() != valueVector);
+        QVERIFY(requestUnit.values() == zeroVector);
+
+        requestUnit.setStartAddress(MAP_RANGE + 1);
+        QVERIFY(!server.data(&requestUnit));
+        requestUnit.setStartAddress(MAP_RANGE - 2);
+        QVERIFY(!server.data(&requestUnit));
+
+        // ask for entire map
+        requestUnit.setStartAddress(-1);
+        QVERIFY(server.data(&requestUnit) == validDataUnit);
+        if (validDataUnit) {
+            QCOMPARE(requestUnit.valueCount(), uint(MAP_RANGE));
+            QCOMPARE(requestUnit.values().count(), MAP_RANGE);
+        }
+
+        oversizeUnit.setStartAddress(0);
+        QVERIFY(!server.data(&oversizeUnit));
+        oversizeUnit.setStartAddress(MAP_RANGE+1);
+        QVERIFY(!server.data(&oversizeUnit));
+        oversizeUnit.setStartAddress(MAP_RANGE-2);
+        QVERIFY(!server.data(&oversizeUnit));
+
+        oversizeUnit.setStartAddress(-1);
+        QVERIFY(server.data(&oversizeUnit) == validDataUnit);
+        if (validDataUnit) {
+            QCOMPARE(oversizeUnit.valueCount(), uint(MAP_RANGE));
+            QCOMPARE(oversizeUnit.values().count(), MAP_RANGE);
+        }
     }
 };
 
