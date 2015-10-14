@@ -38,6 +38,8 @@
 #include "qmodbusdevice_p.h"
 #include "qmodbusdataunit.h"
 
+#include <QtCore/qloggingcategory.h>
+
 QT_BEGIN_NAMESPACE
 
 /*!
@@ -286,5 +288,7 @@ QString QModbusDevice::errorString() const
     Returns true if the CRC checksum of the first \a len bytes of \a data match the given \a crc;
     otherwise returns false.
 */
+
+Q_LOGGING_CATEGORY(QT_MODBUS, "qt.modbus")
 
 QT_END_NAMESPACE
