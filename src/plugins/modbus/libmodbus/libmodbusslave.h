@@ -89,9 +89,6 @@ public:
     int slaveId() const Q_DECL_OVERRIDE;
     void setSlaveId(int id) Q_DECL_OVERRIDE;
 
-    bool data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data) Q_DECL_OVERRIDE;
-    bool setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data) Q_DECL_OVERRIDE;
-
 Q_SIGNALS:
     void operate();
 

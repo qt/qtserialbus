@@ -59,9 +59,6 @@ public:
     void setSlaveId(int id) Q_DECL_OVERRIDE;
     int slaveId() const Q_DECL_OVERRIDE;
 
-    bool data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data) Q_DECL_OVERRIDE;
-    bool setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data) Q_DECL_OVERRIDE;
-
 protected:
     QModbusRtuSerialSlave(QModbusRtuSerialSlavePrivate &dd, QObject *parent = Q_NULLPTR);
 

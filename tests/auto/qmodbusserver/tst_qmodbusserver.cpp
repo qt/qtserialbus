@@ -45,8 +45,6 @@ public:
 
     void setSlaveId(int) Q_DECL_OVERRIDE {}
     int slaveId() const Q_DECL_OVERRIDE { return 0; }
-    bool data(QModbusDataUnit::RegisterType, quint16, quint16 *) Q_DECL_OVERRIDE { return true; }
-    bool setData(QModbusDataUnit::RegisterType, quint16, quint16) Q_DECL_OVERRIDE { return true; }
     virtual bool open() Q_DECL_OVERRIDE { return true; }
     virtual void close() Q_DECL_OVERRIDE {}
 
@@ -139,6 +137,52 @@ private slots:
         QCOMPARE(response.isException(), false);
         // response, byte count: 0x02 -> 2, status: 0xcd -> 1100 1101, 0x02 -> 0000 0020
         QCOMPARE(response.data(), QByteArray::fromHex("02cd02"));
+    }
+
+    void tst_dataCalls_data()
+    {
+        QTest::addColumn<QModbusDataUnit::RegisterType>("registerType");
+
+        QTest::newRow("InitCoils") << QModbusDataUnit::Coils;
+        QTest::newRow("InitDiscreteInputs") << QModbusDataUnit::DiscreteInputs;
+        QTest::newRow("InitInputRegisters") << QModbusDataUnit::InputRegisters;
+        QTest::newRow("InitHoldingRegisters") << QModbusDataUnit::HoldingRegisters;
+        QTest::newRow("InitInvalid") << QModbusDataUnit::Invalid;
+    }
+
+    void tst_dataCalls()
+    {
+        QFETCH(QModbusDataUnit::RegisterType, registerType);
+        // basic assumption, all registers have start address 0 and size 500
+
+        const bool unitAccessible = (registerType != QModbusDataUnit::Invalid);
+        //test initialization of 0
+        if (unitAccessible) {
+            for (int i = 0;  i < 500; i++) {
+                quint16 data = 123;
+                QVERIFY(server.data(registerType, i, &data));
+                QCOMPARE(data, quint16(0));
+            }
+        } else {
+            quint16 data = 0;
+            QVERIFY(!server.data(registerType, 0 , &data));
+        }
+
+        quint16 data = 0;
+
+        QVERIFY(!server.data(registerType, 1000, &data)); // out of range
+        QCOMPARE(data, quint16(0));
+        QVERIFY(!server.data(registerType, 1, 0)); // invalid data pointer
+        QCOMPARE(data, quint16(0));
+
+        QCOMPARE(server.setData(registerType, 1, 444), unitAccessible);
+        QCOMPARE(server.data(registerType, 1, &data), unitAccessible);
+        if (unitAccessible)
+            QCOMPARE(data, quint16(444));
+        else
+            QCOMPARE(data, quint16(0));
+
+        QVERIFY(!server.data(registerType, 1, 0)); // out of range although value set
     }
 };
 

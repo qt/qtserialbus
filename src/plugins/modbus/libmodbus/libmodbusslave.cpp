@@ -188,59 +188,6 @@ void LibModBusSlave::setSlaveId(int id)
     modbus_set_slave(context, slave);
 }
 
-bool LibModBusSlave::data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data)
-{
-    if (!data)
-        return false;
-
-    if (mappingTable[table] >= address) {
-        switch (table) {
-            case QModbusDataUnit::DiscreteInputs:
-                *data = mapping->tab_input_bits[address];
-                break;
-            case QModbusDataUnit::Coils:
-                *data = mapping->tab_bits[address];
-                break;
-            case QModbusDataUnit::InputRegisters:
-                *data = mapping->tab_input_registers[address];
-                break;
-            case QModbusDataUnit::HoldingRegisters:
-                *data = mapping->tab_registers[address];
-                break;
-        }
-    } else {
-        setError(tr("ReadError: invalid parameters."), QModbusDevice::ReadError);
-        return false;
-    }
-
-    return true;
-}
-
-bool LibModBusSlave::setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data)
-{
-    if (mappingTable[table] >= address) {
-        switch (table) {
-            case QModbusDataUnit::DiscreteInputs:
-                mapping->tab_input_bits[address] = (uint8_t)data;
-                break;
-            case QModbusDataUnit::Coils:
-                mapping->tab_bits[address] = (uint8_t)data;
-                break;
-            case QModbusDataUnit::InputRegisters:
-                mapping->tab_input_registers[address] = data;
-                break;
-            case QModbusDataUnit::HoldingRegisters:
-                mapping->tab_registers[address] = data;
-                break;
-        }
-    } else {
-        setError(tr("WriteError: invalid parameters."), QModbusDevice::WriteError);
-        return false;
-    }
-
-    return true;
-}
-
 QString LibModBusSlave::portNameToSystemLocation(const QString &source)
 {
 #if defined(Q_OS_WINCE)

@@ -91,6 +91,89 @@ bool QModbusServer::setMap(const QModbusDataUnitMap &map)
     return d_func()->setMap(map);
 }
 
+
+/*!
+    Reads data stored in the Modbus server. A Modbus server has four tables (\a table) and each
+    have a unique \a address field, which is used to read \a data from the desired field.
+    See QModbusDataUnit::RegisterType for more information about the different tables.
+    Returns \c false if address is outside of the map range or the register type is not even defined.
+
+    \sa QModbusDataUnit::RegisterType, setData()
+ */
+bool QModbusServer::data(QModbusDataUnit::RegisterType table,
+                         quint16 address, quint16 *data) const
+{
+    Q_D(const QModbusServer);
+    if (!data)
+        return false;
+
+    const QModbusDataUnit *unit;
+
+    switch (table) {
+    case QModbusDataUnit::Invalid:
+        return false;
+    case QModbusDataUnit::DiscreteInputs:
+        unit = &(d->m_discreteInputs);
+        break;
+    case QModbusDataUnit::Coils:
+        unit = &(d->m_coils);
+        break;
+    case QModbusDataUnit::InputRegisters:
+        unit = &(d->m_inputRegisters);
+        break;
+    case QModbusDataUnit::HoldingRegisters:
+        unit = &(d->m_holdingRegisters);
+        break;
+    }
+
+    if (!unit->isValid() || unit->valueCount() <= address)
+        return false;
+
+    *data = unit->value(address);
+
+    return true;
+}
+
+/*!
+    \fn bool QModbusServer::setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data)
+
+    Writes data to the Modbus server. A Modbus server has four tables (\a table) and each have a
+    unique \a address field, which is used to write \a data to the desired field.
+    Returns \c false if address outside of the map range.
+
+    \sa QModbusDataUnit::RegisterType, data()
+ */
+
+bool QModbusServer::setData(QModbusDataUnit::RegisterType table,
+                            quint16 address, quint16 data)
+{
+    Q_D(QModbusServer);
+    QModbusDataUnit* unit;
+
+    switch (table) {
+    case QModbusDataUnit::Invalid:
+        return false;
+    case QModbusDataUnit::DiscreteInputs:
+        unit = &(d->m_discreteInputs);
+        break;
+    case QModbusDataUnit::Coils:
+        unit = &(d->m_coils);
+        break;
+    case QModbusDataUnit::InputRegisters:
+        unit = &(d->m_inputRegisters);
+        break;
+    case QModbusDataUnit::HoldingRegisters:
+        unit = &(d->m_holdingRegisters);
+        break;
+    }
+
+    if (!unit->isValid() || unit->valueCount() <= address)
+        return false;
+
+    unit->setValue(address, data);
+    return true;
+}
+
 /*!
     \fn int QModbusServer::slaveId() const
     Multiple Modbus devices can be connected together on the same physical link.
@@ -110,27 +193,6 @@ bool QModbusServer::setMap(const QModbusDataUnitMap &map)
     Sets \a id as slave id.
 
     \sa slaveId()
- */
-
-/*!
-    \fn bool QModbusServer::data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data)
-
-    Reads data stored in the Modbus server. A Modbus server has four tables (\a table) and each
-    have a unique \a address field, which is used to read \a data from the desired field.
-    See QModbusDataUnit::RegisterType for more information about the different tables.
-    Returns \c false if address is outside of the map range.
-
-    \sa QModbusDataUnit::RegisterType, setData()
- */
-
-/*!
-    \fn bool QModbusServer::setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data)
-
-    Writes data to the Modbus server. A Modbus server has four tables (\a table) and each have a
-    unique \a address field, which is used to write \a data to the desired field.
-    Returns \c false if address outside of the map range.
-
-    \sa QModbusDataUnit::RegisterType, data()
  */
 
 /*!

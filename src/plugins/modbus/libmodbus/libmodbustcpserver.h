@@ -56,9 +56,6 @@ public:
 
     bool setMap(const QModbusDataUnitMap &map) Q_DECL_OVERRIDE;
 
-    bool data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data) Q_DECL_OVERRIDE;
-    bool setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data) Q_DECL_OVERRIDE;
-
 private:
     bool open() Q_DECL_OVERRIDE;
     void close() Q_DECL_OVERRIDE;

@@ -144,34 +144,6 @@ int QModbusRtuSerialSlave::slaveId() const
 /*!
     \reimp
  */
-bool QModbusRtuSerialSlave::data(QModbusDataUnit::RegisterType table, quint16 address,
-    quint16 *data)
-{
-    Q_D(QModbusRtuSerialSlave);
-
-    if (!d->pluginMaster)
-        return false;
-
-    return d->pluginMaster->data(table, address, data);
-}
-
-/*!
-    \reimp
- */
-bool QModbusRtuSerialSlave::setData(QModbusDataUnit::RegisterType table, quint16 address,
-    quint16 data)
-{
-    Q_D(QModbusRtuSerialSlave);
-
-    if (!d->pluginMaster)
-        return false;
-
-    return d->pluginMaster->setData(table, address, data);
-}
-
-/*!
-    \reimp
- */
 bool QModbusRtuSerialSlave::open()
 {
     return false;
