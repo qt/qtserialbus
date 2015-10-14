@@ -59,7 +59,7 @@ void tst_QModbusDataUnit::constructors()
 
     QCOMPARE(unit1.registerType(), QModbusDataUnit::Coils);
     QCOMPARE(unit1.startAddress(), 0);
-    QCOMPARE(unit1.valueCount(), 0);
+    QCOMPARE(unit1.valueCount(), 0u);
     QVERIFY(unit1.values().isEmpty());
 
     QModbusDataUnit coils(QModbusDataUnit::Coils, 15, 20);
@@ -67,14 +67,14 @@ void tst_QModbusDataUnit::constructors()
     QCOMPARE(coils.startAddress(), 15);
     QCOMPARE(coils.values().size(), 20);
     QCOMPARE(coils.values(), QVector<quint16>(20));
-    QCOMPARE(coils.valueCount(), 20);
+    QCOMPARE(coils.valueCount(), 20u);
 
     QModbusDataUnit unit2(QModbusDataUnit::HoldingRegisters, 3, QVector<quint16>() << 9);
     QCOMPARE(unit2.registerType(), QModbusDataUnit::HoldingRegisters);
     QCOMPARE(unit2.startAddress(), 3);
     QCOMPARE(unit2.values().size(), 1);
     QCOMPARE(unit2.values().at(0), (quint16) 9);
-    QCOMPARE(unit2.valueCount(), 1);
+    QCOMPARE(unit2.valueCount(), 1u);
 
     QVector<quint16> data;
     data.append(5);
@@ -88,13 +88,13 @@ void tst_QModbusDataUnit::constructors()
     QCOMPARE(unit3.values().at(0), (quint16) 5);
     QCOMPARE(unit3.values().at(1), (quint16) 6);
     QCOMPARE(unit3.values().at(2), (quint16) 7);
-    QCOMPARE(unit3.valueCount(), 3);
+    QCOMPARE(unit3.valueCount(), 3u);
 }
 
 void tst_QModbusDataUnit::setters()
 {
     QModbusDataUnit unit(QModbusDataUnit::HoldingRegisters, 3, QVector<quint16>() << 9);
-    QCOMPARE(unit.valueCount(), 1);
+    QCOMPARE(unit.valueCount(), 1u);
 
     unit.setRegisterType(QModbusDataUnit::InputRegisters);
     unit.setStartAddress(2);
@@ -105,14 +105,14 @@ void tst_QModbusDataUnit::setters()
 
     QCOMPARE(unit.registerType(), QModbusDataUnit::InputRegisters);
     QCOMPARE(unit.startAddress(), 2);
-    QCOMPARE(unit.valueCount(), 2);
+    QCOMPARE(unit.valueCount(), 2u);
     QCOMPARE(unit.values().size(), 2);
     QCOMPARE(unit.values().at(0), (quint16) 9);
     QCOMPARE(unit.values().at(1), (quint16) 5);
 
     //valueCount can be adjusted but values() stays the same
     unit.setValueCount(1);
-    QCOMPARE(unit.valueCount(), 1);
+    QCOMPARE(unit.valueCount(), 1u);
     QCOMPARE(unit.values().size(), 2);
     QCOMPARE(unit.values().at(0), (quint16) 9);
     QCOMPARE(unit.values().at(1), (quint16) 5);
@@ -147,9 +147,9 @@ void tst_QModbusDataUnit::testAPI()
     unit.setValues(QVector<quint16> {1, 2, 3, 4});
     QCOMPARE(unit.values(), QVector<quint16>({1, 2, 3, 4}));
 
-    QCOMPARE(unit.valueCount(), 4);
+    QCOMPARE(unit.valueCount(), 4u);
     unit.setValueCount(25);
-    QCOMPARE(unit.valueCount(), 25);
+    QCOMPARE(unit.valueCount(), 25u);
 
     QCOMPARE(unit.value(0), quint16(1));
     unit.setValue(0, 25);
@@ -159,7 +159,7 @@ void tst_QModbusDataUnit::testAPI()
     QCOMPARE(unit.isValid(), false);
     QCOMPARE(unit.registerType(), QModbusDataUnit::Invalid);
     QCOMPARE(unit.startAddress(), -1);
-    QCOMPARE(unit.valueCount(), 0);
+    QCOMPARE(unit.valueCount(), 0u);
     QCOMPARE(unit.values(), QVector<quint16>());
 }
 

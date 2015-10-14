@@ -286,7 +286,7 @@ bool QModbusServer::setData(const QModbusDataUnit &newData)
     }
 
     for (int i = newData.startAddress();
-         i < newData.startAddress() + newData.valueCount(); i++)
+         i < newData.startAddress() + int(newData.valueCount()); i++)
         current->setValue(i, newData.value(i-newData.startAddress()));
 
     return true;

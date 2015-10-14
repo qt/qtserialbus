@@ -191,7 +191,7 @@ private slots:
         const QVector<quint16> valueVector = { 1, 1, 1, 1, 1};
         const QVector<quint16> zeroVector = { 0, 0, 0, 0, 0};
         QModbusDataUnit rangeUnit(registerType, 7, valueVector);
-        QCOMPARE(rangeUnit.valueCount(), 5);
+        QCOMPARE(rangeUnit.valueCount(), 5u);
         QCOMPARE(rangeUnit.values().count(), 5);
         QCOMPARE(rangeUnit.startAddress(), 7);
         QVERIFY(rangeUnit.values() == valueVector);
@@ -200,7 +200,7 @@ private slots:
         QVERIFY(server.setData(rangeUnit) == validDataUnit);
         if (validDataUnit) {
             for (int i = rangeUnit.startAddress();
-                 i < rangeUnit.startAddress() + rangeUnit.valueCount(); i++) {
+                 i < rangeUnit.startAddress() + int(rangeUnit.valueCount()); i++) {
                 quint16 readData = 0;
                 QVERIFY(server.data(registerType, i, &readData));
                 QCOMPARE(readData, valueVector.at(i-rangeUnit.startAddress()));

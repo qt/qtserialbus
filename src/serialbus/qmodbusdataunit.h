@@ -88,8 +88,8 @@ public:
     }
 
     // TODO: Maybe introduce Range.
-    inline int valueCount() const { return dataRange; }
-    inline void setValueCount(int newCount) { dataRange = newCount; }
+    inline uint valueCount() const { return dataRange; }
+    inline void setValueCount(uint newCount) { dataRange = newCount; }
 
     inline void setValue(int index, quint16 newValue)
     {
@@ -112,7 +112,7 @@ private:
     RegisterType rType = Invalid;
     int sAddress = -1;
     QVector<quint16> dataValue;
-    int dataRange = 0;
+    uint dataRange = 0;
 };
 typedef QMap<QModbusDataUnit::RegisterType, QModbusDataUnit> QModbusDataUnitMap;
 
