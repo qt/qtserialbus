@@ -98,6 +98,37 @@ private slots:
         QCOMPARE(unit.values(), QVector<quint16>());
         QCOMPARE(unit.registerType(), QModbusDataUnit::Coils);
     }
+
+    void testProcessReadDiscreteInputsResponse()
+    {
+        TestClient client;
+
+        QModbusDataUnit unit;
+        QModbusResponse response = QModbusResponse(QModbusResponse::ReadDiscreteInputs,
+            QByteArray::fromHex("03cd6b05"));
+        QCOMPARE(client.processResponse(response, &unit), true);
+
+        QCOMPARE(unit.isValid(), true);
+        QCOMPARE(unit.valueCount(), 24);
+        QCOMPARE(unit.startAddress(), 0);
+        QCOMPARE(unit.values(),
+            QVector<quint16>({ 1,0,1,1,0,0,1,1, 1,1,0,1,0,1,1,0, 1,0,1,0,0,0,0,0 }));
+        QCOMPARE(unit.registerType(), QModbusDataUnit::DiscreteInputs);
+
+        response.setFunctionCode(QModbusPdu::FunctionCode(0x82));
+        QCOMPARE(client.processResponse(response, &unit), false);
+
+        response.setFunctionCode(QModbusResponse::ReadDiscreteInputs);
+        response.setData(QByteArray::fromHex("05"));
+        QCOMPARE(client.processResponse(response, &unit), false);
+
+        response.setData(QByteArray::fromHex("03cd6b"));
+        QCOMPARE(client.processResponse(response, &unit), false);
+
+        response.setData(QByteArray::fromHex("03cd6b0517"));
+        QCOMPARE(client.processResponse(response, &unit), false);
+
+    }
 };
 
 QTEST_MAIN(tst_QModbusClient)

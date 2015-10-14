@@ -137,6 +137,7 @@ bool QModbusClientPrivate::processResponse(const QModbusResponse &response, QMod
     case QModbusRequest::ReadCoils:
         return processReadCoilsResponse(response, data);
     case QModbusRequest::ReadDiscreteInputs:
+        return processReadDiscreteInputsResponse(response, data);
     case QModbusRequest::ReadHoldingRegisters:
     case QModbusRequest::ReadInputRegisters:
     case QModbusRequest::WriteSingleCoil:
@@ -202,6 +203,39 @@ bool QModbusClientPrivate::processReadCoilsResponse(const QModbusResponse &respo
         data->setStartAddress(0);
         data->setValueCount(byteCount * 8);
         data->setRegisterType(QModbusDataUnit::Coils);
+    }
+    return true;
+}
+
+bool QModbusClientPrivate::processReadDiscreteInputsResponse(const QModbusResponse &response,
+                                                             QModbusDataUnit *data)
+{
+    if (!isValid(response, QModbusResponse::ReadDiscreteInputs))
+        return false;
+
+    // we expect at least the byte count
+    const QByteArray payload = response.data();
+    if (payload.size() < 1)
+        return false;
+
+    // byte count needs to match available bytes
+    const quint8 byteCount = payload[0];
+    if ((payload.size() - 1) != byteCount)
+        return false;
+
+    qint32 input = 0;
+    QVector<quint16> values(byteCount * 8);
+    for (qint32 i = 1; i < payload.size(); ++i) {
+        const std::bitset<8> byte = payload[i];
+        for (qint32 currentBit = 0; currentBit < 8; ++currentBit)
+            values[input++] = byte[currentBit];
+    }
+
+    if (data) {
+        data->setValues(values);
+        data->setStartAddress(0);
+        data->setValueCount(byteCount * 8);
+        data->setRegisterType(QModbusDataUnit::DiscreteInputs);
     }
     return true;
 }
