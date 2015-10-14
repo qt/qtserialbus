@@ -126,8 +126,11 @@ bool QModbusServer::data(QModbusDataUnit::RegisterType table,
         break;
     }
 
-    if (!unit->isValid() || unit->valueCount() <= address)
+    if (!unit->isValid()
+        || address < unit->startAddress()
+        || address >= (unit->startAddress() + unit->valueCount())) {
         return false;
+    }
 
     *data = unit->value(address);
 
@@ -167,8 +170,11 @@ bool QModbusServer::setData(QModbusDataUnit::RegisterType table,
         break;
     }
 
-    if (!unit->isValid() || unit->valueCount() <= address)
+    if (!unit->isValid()
+        || address < unit->startAddress()
+        || address >= (unit->startAddress() + unit->valueCount())) {
         return false;
+    }
 
     unit->setValue(address, data);
     return true;
