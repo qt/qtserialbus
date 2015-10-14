@@ -89,8 +89,6 @@ public:
             q, SLOT(handleErrorOccurred(QModbusDevice::ModbusError)));
         QObject::connect(pluginMaster, SIGNAL(dataWritten(QModbusDataUnit::RegisterType,int,int)),
             q, SIGNAL(dataWritten(QModbusDataUnit::RegisterType,int,int)));
-        QObject::connect(pluginMaster, SIGNAL(dataRead()),
-            q, SIGNAL(dataRead()));
 
         q->setState(pluginMaster->state());
         q->setError(pluginMaster->errorString(), pluginMaster->error());

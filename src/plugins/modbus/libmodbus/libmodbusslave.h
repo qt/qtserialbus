@@ -73,7 +73,6 @@ public:
 
 Q_SIGNALS:
     void error(int errorNumber);
-    void dataRead();
     void dataWritten(QModbusDataUnit::RegisterType table, int address, int size);
 };
 

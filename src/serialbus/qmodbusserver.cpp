@@ -202,13 +202,6 @@ bool QModbusServer::setData(QModbusDataUnit::RegisterType table,
  */
 
 /*!
-    \fn void QModbusServer::dataRead()
-
-    This signal is emitted when a Modbus client has read one or more fields of data from the Modbus
-    server.
- */
-
-/*!
     \fn void QModbusServer::dataWritten(QModbusDataUnit::RegisterType table, int address, int size)
 
     This signal is emitted when a Modbus client has written one or more fields of data to the

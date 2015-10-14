@@ -68,7 +68,6 @@ public:
     virtual bool setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data);
 
 Q_SIGNALS:
-    void dataRead();
     void dataWritten(QModbusDataUnit::RegisterType table, int address, int size);
 
 protected:

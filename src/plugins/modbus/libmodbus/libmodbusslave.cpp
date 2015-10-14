@@ -154,7 +154,6 @@ bool LibModBusSlave::open()
     connect(&thread, &QThread::finished, listener.data(), &QObject::deleteLater);
     connect(this, &LibModBusSlave::operate, listener.data(), &ListenThread::doWork);
     connect(listener.data(), &ListenThread::error, this, &LibModBusSlave::handleError);
-    connect(listener.data(), &ListenThread::dataRead, this, &LibModBusSlave::dataRead);
     connect(listener.data(), &ListenThread::dataWritten, this, &LibModBusSlave::dataWritten);
     thread.start();
     emit operate();
@@ -248,7 +247,6 @@ void ListenThread::doWork()
             case ReadDiscreteInputs:
             case ReadHoldingRegisters:
             case ReadInputRegisters:
-                emit dataRead();
                 break;
             case WriteSingleCoil:
                 table = QModbusDataUnit::Coils;
@@ -273,7 +271,6 @@ void ListenThread::doWork()
                 emit dataWritten(table, startAddress, quantity);
                 break;
             case ReadWriteRegisters:
-                emit dataRead();
                 table = QModbusDataUnit::HoldingRegisters;
                 startAddress = (query[START_ADDRESS_HI] << 8) + query[START_ADDRESS_LO];
                 quantity = (query[QUANTITY_HI] << 8) + query[QUANTITY_LO];
