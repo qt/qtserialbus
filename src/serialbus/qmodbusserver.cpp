@@ -233,11 +233,19 @@ QModbusResponse QModbusServerPrivate::processReadCoilsRequest(const QModbusReque
             QModbusExceptionResponse::IllegalDataAddress);
     }
 
-    const QVector<quint16> data = m_coils.values();
+    // Get the requested range out of the registers.
+    QVector<quint16> data = m_coils.values().mid(address, numberOfCoils);
     quint8 byteCount = numberOfCoils / 8;
-    if ((data.count() % 8) != 0)
+    if ((data.count() % 8) != 0) {
         byteCount += 1;
+        // If the range is not a multiple of 8, resize.
+        data.resize(byteCount * 8);
+        // According to the spec: If the returned output quantity is not a multiple of
+        // eight, the remaining bits in the final data byte will be padded with zeros.
+        data.insert(numberOfCoils, (byteCount * 8) - numberOfCoils, 0u);
+    }
 
+    address = 0; // The data range now starts with zero.
     QVector<quint8> bytes;
     for (int i = 0; i < byteCount; ++i) {
         std::bitset<8> byte;

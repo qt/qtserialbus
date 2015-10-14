@@ -123,6 +123,22 @@ private slots:
         // response, byte count: 0x03 -> 3
         // status: 0xcd -> 1100 1101, 0x6b -> 0110 1011, 0x05 -> 0000 0101
         QCOMPARE(response.data(), QByteArray::fromHex("03cd6b05"));
+
+        // request write 10 coils, starting at coil 0, address: 0x0000 -> 0, count: 0x000a -> 10
+        // payload bytes: 0x02 -> 2, values: 0xcd -> 1100 1101, 0x02 -> 0000 0010
+        request = QModbusRequest(QModbusRequest::WriteMultipleCoils,
+            QByteArray::fromHex("0000000a02cd02"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, equals request's first 4 bytes
+        QCOMPARE(response.data(), QByteArray::fromHex("0000000a"));
+
+        // request read 10 coils starting at coil 0, address: 0x0000 -> 0, count: 0x000a -> 10
+        request = QModbusRequest(QModbusRequest::ReadCoils, QByteArray::fromHex("0000000a"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, byte count: 0x02 -> 2, status: 0xcd -> 1100 1101, 0x02 -> 0000 0020
+        QCOMPARE(response.data(), QByteArray::fromHex("02cd02"));
     }
 };
 
