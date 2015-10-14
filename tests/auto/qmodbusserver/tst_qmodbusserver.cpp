@@ -54,6 +54,8 @@ public:
     }
 };
 
+#define MAP_RANGE 500
+
 class tst_QModbusServer : public QObject
 {
     Q_OBJECT
@@ -65,10 +67,10 @@ private slots:
     void init()
     {
         QModbusDataUnitMap map;
-        map.insert(QModbusDataUnit::DiscreteInputs, { QModbusDataUnit::DiscreteInputs, 0, 500 });
-        map.insert(QModbusDataUnit::Coils, { QModbusDataUnit::Coils, 0, 500 });
-        map.insert(QModbusDataUnit::InputRegisters, { QModbusDataUnit::InputRegisters, 0, 500 });
-        map.insert(QModbusDataUnit::HoldingRegisters, { QModbusDataUnit::HoldingRegisters, 0, 500 });
+        map.insert(QModbusDataUnit::DiscreteInputs, { QModbusDataUnit::DiscreteInputs, 0, MAP_RANGE });
+        map.insert(QModbusDataUnit::Coils, { QModbusDataUnit::Coils, 0, MAP_RANGE });
+        map.insert(QModbusDataUnit::InputRegisters, { QModbusDataUnit::InputRegisters, 0, MAP_RANGE });
+        map.insert(QModbusDataUnit::HoldingRegisters, { QModbusDataUnit::HoldingRegisters, 0, MAP_RANGE });
         server.setMap(map);
     }
 
@@ -158,7 +160,7 @@ private slots:
         const bool unitAccessible = (registerType != QModbusDataUnit::Invalid);
         //test initialization of 0
         if (unitAccessible) {
-            for (int i = 0;  i < 500; i++) {
+            for (int i = 0;  i < MAP_RANGE; i++) {
                 quint16 data = 123;
                 QVERIFY(server.data(registerType, i, &data));
                 QCOMPARE(data, quint16(0));
@@ -170,7 +172,7 @@ private slots:
 
         quint16 data = 0;
 
-        QVERIFY(!server.data(registerType, 1000, &data)); // out of range
+        QVERIFY(!server.data(registerType, MAP_RANGE+1, &data)); // out of range
         QCOMPARE(data, quint16(0));
         QVERIFY(!server.data(registerType, 1, 0)); // invalid data pointer
         QCOMPARE(data, quint16(0));
@@ -183,6 +185,37 @@ private slots:
             QCOMPARE(data, quint16(0));
 
         QVERIFY(!server.data(registerType, 1, 0)); // out of range although value set
+
+        //testing server.setData(ModbusDataUnit&)
+
+        const QVector<quint16> valueVector = { 1, 1, 1, 1, 1};
+        QModbusDataUnit rangeUnit(registerType, 7, valueVector);
+        QCOMPARE(rangeUnit.valueCount(), 5);
+        QCOMPARE(rangeUnit.values().count(), 5);
+        QCOMPARE(rangeUnit.startAddress(), 7);
+        QVERIFY(rangeUnit.values() == valueVector);
+
+        QVERIFY(server.setData(rangeUnit) == unitAccessible);
+        if (unitAccessible) {
+            for (int i = rangeUnit.startAddress();
+                 i < rangeUnit.startAddress() + rangeUnit.valueCount(); i++) {
+                quint16 readData = 0;
+                QVERIFY(server.data(registerType, i, &readData));
+                QCOMPARE(readData, valueVector.at(i-rangeUnit.startAddress()));
+            }
+        }
+
+        //completely outside of valid range
+        rangeUnit.setStartAddress(MAP_RANGE + 1 );
+        QVERIFY(!server.setData(rangeUnit));
+
+        //slightly outside of valid range
+        rangeUnit.setStartAddress(MAP_RANGE - 2);
+        QVERIFY(!server.setData(rangeUnit));
+
+        //slightly outside of valid range in the bottom
+        rangeUnit.setStartAddress(-1);
+        QVERIFY(!server.setData(rangeUnit));
     }
 };
 

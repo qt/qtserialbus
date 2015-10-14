@@ -138,8 +138,6 @@ bool QModbusServer::data(QModbusDataUnit::RegisterType table,
 }
 
 /*!
-    \fn bool QModbusServer::setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data)
-
     Writes data to the Modbus server. A Modbus server has four tables (\a table) and each have a
     unique \a address field, which is used to write \a data to the desired field.
     Returns \c false if address outside of the map range.
@@ -177,6 +175,60 @@ bool QModbusServer::setData(QModbusDataUnit::RegisterType table,
     }
 
     unit->setValue(address, data);
+    return true;
+}
+
+/*!
+    Writes \a newData to the Modbus server map.
+    Returns \c false if the \a newData range is outside of the map range.
+
+    \sa data()
+ */
+
+bool QModbusServer::setData(const QModbusDataUnit &newData)
+{
+    Q_D(QModbusServer);
+
+    QModbusDataUnit *current = Q_NULLPTR;
+
+    switch (newData.registerType()) {
+    case QModbusDataUnit::Invalid:
+        return false;
+    case QModbusDataUnit::DiscreteInputs:
+        current = &(d->m_discreteInputs);
+        break;
+    case QModbusDataUnit::Coils:
+        current = &(d->m_coils);
+        break;
+    case QModbusDataUnit::InputRegisters:
+        current = &(d->m_inputRegisters);
+        break;
+    case QModbusDataUnit::HoldingRegisters:
+        current = &(d->m_holdingRegisters);
+        break;
+    }
+
+    if (!current->isValid())
+        return false;
+
+    //check range start is within internal map range
+    int internalRangeEndAddress = current->startAddress() + current->valueCount() - 1;
+    if (newData.startAddress() < current->startAddress()
+        || newData.startAddress() > internalRangeEndAddress) {
+        return false;
+    }
+
+    //check range end is within internal map range
+    int rangeEndAddress = newData.startAddress() + newData.valueCount() - 1;
+    if (rangeEndAddress < current->startAddress()
+        || rangeEndAddress > internalRangeEndAddress) {
+        return false;
+    }
+
+    for (int i = newData.startAddress();
+         i < newData.startAddress() + newData.valueCount(); i++)
+        current->setValue(i, newData.value(i-newData.startAddress()));
+
     return true;
 }
 

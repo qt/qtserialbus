@@ -66,6 +66,7 @@ public:
     //TODO: Review if QModbusDataUnitMap would be useful. It could replace setMap(), data() and setData()
     virtual bool data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data) const;
     virtual bool setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data);
+    virtual bool setData(const QModbusDataUnit &unit);
 
 Q_SIGNALS:
     void dataWritten(QModbusDataUnit::RegisterType table, int address, int size);
