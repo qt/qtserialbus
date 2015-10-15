@@ -180,9 +180,9 @@ bool QModbusClientPrivate::processReadCoilsResponse(const QModbusResponse &respo
     if (!isValid(response, QModbusResponse::ReadCoils))
         return false;
 
-    // we expect at least the byte count
+    // we expect at least the byte count and one data byte
     const QByteArray payload = response.data();
-    if (payload.size() < 1)
+    if (payload.size() < 2)
         return false;
 
     // byte count needs to match available bytes
@@ -246,8 +246,9 @@ bool QModbusClientPrivate::processWriteSingleCoilResponse(const QModbusResponse 
     if (!isValid(response, QModbusResponse::WriteSingleCoil))
         return false;
 
+    // payload size must be 4 bytes
     const QByteArray payload = response.data();
-    if (payload.size() < 4)
+    if (payload.size() != 4)
         return false;
 
     quint16 address, value;
@@ -267,8 +268,9 @@ bool QModbusClientPrivate::processWriteMultipleCoilsResponse(const QModbusRespon
     if (!isValid(response, QModbusResponse::WriteMultipleCoils))
         return false;
 
+    // payload size must be 4 bytes
     const QByteArray payload = response.data();
-    if (payload.size() < 4)
+    if (payload.size() != 4)
         return false;
 
     quint16 address, count;

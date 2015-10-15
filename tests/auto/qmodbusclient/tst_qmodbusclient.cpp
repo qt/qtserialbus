@@ -60,7 +60,7 @@ class tst_QModbusClient : public QObject
     Q_OBJECT
 
 private slots:
-    void testProcessResponseReadWriteSingleMultipleCoils()
+    void testProcessReadWriteSingleMultipleCoilsResponse()
     {
         TestClient client;
 
