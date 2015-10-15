@@ -69,6 +69,8 @@ public:
     bool processReadInputRegistersResponse(const QModbusResponse &response, QModbusDataUnit *data);
     bool processWriteSingleCoilResponse(const QModbusResponse &response, QModbusDataUnit *data);
     bool processWriteMultipleCoilsResponse(const QModbusResponse &response, QModbusDataUnit *data);
+    bool processReadWriteMultipleRegistersResponse(const QModbusResponse &response,
+                                                  QModbusDataUnit *data);
 };
 
 QT_END_NAMESPACE

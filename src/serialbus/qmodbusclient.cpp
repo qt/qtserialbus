@@ -157,6 +157,7 @@ bool QModbusClientPrivate::processResponse(const QModbusResponse &response, QMod
     case QModbusRequest::WriteFileRecord:
     case QModbusRequest::MaskWriteRegister:
     case QModbusRequest::ReadWriteMultipleRegisters:
+        return processReadWriteMultipleRegistersResponse(response, data);
     case QModbusRequest::ReadFifoQueue:
     case QModbusRequest::EncapsulatedInterfaceTransport:
     default:
@@ -365,6 +366,46 @@ bool QModbusClientPrivate::processWriteMultipleCoilsResponse(const QModbusRespon
         data->setValueCount(count);
         data->setStartAddress(address);
         data->setRegisterType(QModbusDataUnit::Coils);
+    }
+    return true;
+}
+
+bool QModbusClientPrivate::processReadWriteMultipleRegistersResponse(
+    const QModbusResponse &response, QModbusDataUnit *data)
+{
+    if (!isValid(response, QModbusResponse::ReadWriteMultipleRegisters))
+        return false;
+
+    // payload minimum is 3 bytes
+    const QByteArray payload = response.data();
+    if (payload.size() < 4)
+        return false;
+
+    // byte count needs to match available bytes
+    const quint8 byteCount = payload[0];
+    if ((payload.size() - 1) != byteCount)
+        return false;
+
+    // byte count needs to be odd to match full registers
+    if (byteCount % 2 != 0)
+        return false;
+
+    const quint8 itemCount = byteCount / 2;
+
+    const QByteArray pduData = response.data().remove(0,1);
+    QDataStream stream(pduData);
+
+    QVector<quint16> values;
+    quint16 tmp;
+    for (int i = 0; i < itemCount; i++){
+        stream >> tmp;
+        values.append(tmp);
+    }
+
+    if (data) {
+        data->setValues(values);
+        data->setValueCount(values.count());
+        data->setRegisterType(QModbusDataUnit::HoldingRegisters);
     }
     return true;
 }
