@@ -450,30 +450,28 @@ QModbusResponse QModbusServerPrivate::processReadCoilsRequest(const QModbusReque
             QModbusExceptionResponse::IllegalDataValue);
     }
 
-    if ((m_coils.startAddress() > address)
-        || ((m_coils.startAddress() + m_coils.valueCount()) < (address + numberOfCoils))) {
+    // Get the requested range out of the registers.
+    QModbusDataUnit coils(QModbusDataUnit::Coils, address, numberOfCoils);
+    if (!q_func()->data(&coils)) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataAddress);
     }
 
-    // Get the requested range out of the registers.
-    QVector<quint16> data = m_coils.values().mid(address, numberOfCoils);
     quint8 byteCount = numberOfCoils / 8;
-    if ((data.count() % 8) != 0) {
+    if ((numberOfCoils % 8) != 0) {
         byteCount += 1;
         // If the range is not a multiple of 8, resize.
-        data.resize(byteCount * 8);
-        // According to the spec: If the returned output quantity is not a multiple of
-        // eight, the remaining bits in the final data byte will be padded with zeros.
-        data.insert(numberOfCoils, (byteCount * 8) - numberOfCoils, 0u);
+        coils.setValueCount(byteCount * 8);
     }
 
     address = 0; // The data range now starts with zero.
     QVector<quint8> bytes;
     for (int i = 0; i < byteCount; ++i) {
         std::bitset<8> byte;
+        // According to the spec: If the returned output quantity is not a multiple of
+        // eight, the remaining bits in the final data byte will be padded with zeros.
         for (int currentBit = 0; currentBit < 8; ++currentBit)
-            byte[currentBit] = data[address++];
+            byte[currentBit] = coils.value(address++); // The padding happens inside value().
         bytes.append(static_cast<quint8> (byte.to_ulong()));
     }
 
@@ -491,15 +489,21 @@ QModbusResponse QModbusServerPrivate::processWriteSingleCoilRequest(const QModbu
             QModbusExceptionResponse::IllegalDataValue);
     }
 
-    if ((m_coils.startAddress() > address)
-        || ((m_coils.startAddress() + m_coils.valueCount()) < address)) {
+    // Get the requested register.
+    QModbusDataUnit coils(QModbusDataUnit::Coils, address, 1u);
+    if (!q_func()->data(&coils)) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataAddress);
     }
 
-    QVector<quint16> data = m_coils.values();
-    data[address] = value;
-    m_coils.setValues(data);
+    // Since we picked the coil at address, data range
+    // is now 1 and therefore index needs to be 0.
+    coils.setValue(0, value);
+
+    if (!q_func()->setData(coils)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::ServerDeviceFailure);
+    }
 
     // - TODO: Increase message counters when they are implemented
     return QModbusResponse(request.functionCode(), address, value);
@@ -520,8 +524,9 @@ QModbusResponse QModbusServerPrivate::processWriteMultipleCoilsRequest(const QMo
             QModbusExceptionResponse::IllegalDataValue);
     }
 
-    if ((m_coils.startAddress() > address)
-        || ((m_coils.startAddress() + m_coils.valueCount()) < (address + numberOfCoils))) {
+    // Get the requested range out of the registers.
+    QModbusDataUnit coils(QModbusDataUnit::Coils, address, numberOfCoils);
+    if (!q_func()->data(&coils)) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataAddress);
     }
@@ -531,17 +536,20 @@ QModbusResponse QModbusServerPrivate::processWriteMultipleCoilsRequest(const QMo
     for (qint32 i = payload.size() - 1; i >= 0; --i)
         bytes.append(quint8(payload[i]));
 
-    QVector<quint16> values = m_coils.values();
-
-    quint16 coil = address + numberOfCoils;
+    // Since we picked the coils at start address, data
+    // range is numberOfCoils and therefore index too.
+    quint16 coil = numberOfCoils;
     qint32 currentBit = 8 - ((byteCount * 8) - numberOfCoils);
     foreach (const auto &currentByte, bytes) {
         for (currentBit -= 1; currentBit >= 0; --currentBit)
-            values[--coil] = currentByte[currentBit];
+            coils.setValue(--coil, currentByte[currentBit]);
         currentBit = 8;
     }
 
-    m_coils.setValues(values);
+    if (!q_func()->setData(coils)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::ServerDeviceFailure);
+    }
 
     // - TODO: Increase message counters when they are implemented
     return QModbusResponse(request.functionCode(), address, numberOfCoils);
