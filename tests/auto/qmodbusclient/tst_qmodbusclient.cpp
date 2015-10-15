@@ -109,7 +109,7 @@ private slots:
         QCOMPARE(client.processResponse(response, &unit), true);
 
         QCOMPARE(unit.isValid(), true);
-        QCOMPARE(unit.valueCount(), 24);
+        QCOMPARE(unit.valueCount(), 24u);
         QCOMPARE(unit.startAddress(), 0);
         QCOMPARE(unit.values(),
             QVector<quint16>({ 1,0,1,1,0,0,1,1, 1,1,0,1,0,1,1,0, 1,0,1,0,0,0,0,0 }));
