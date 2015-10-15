@@ -64,6 +64,8 @@ public:
     bool processResponse(const QModbusResponse &response, QModbusDataUnit *data);
     bool processReadCoilsResponse(const QModbusResponse &response, QModbusDataUnit *data);
     bool processReadDiscreteInputsResponse(const QModbusResponse &response, QModbusDataUnit *data);
+    bool processReadHoldingRegistersResponse(const QModbusResponse &response,
+                                             QModbusDataUnit *data);
     bool processWriteSingleCoilResponse(const QModbusResponse &response, QModbusDataUnit *data);
     bool processWriteMultipleCoilsResponse(const QModbusResponse &response, QModbusDataUnit *data);
 };
