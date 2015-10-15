@@ -157,6 +157,37 @@ private slots:
         response.setData(QByteArray::fromHex("04cd6b051755"));
         QCOMPARE(client.processResponse(response, &unit), false);
     }
+
+    void testProcessReadInputRegistersResponse()
+    {
+        TestClient client;
+
+        QModbusDataUnit unit;
+        unit.setStartAddress(100);
+
+        QModbusResponse response = QModbusResponse(QModbusResponse::ReadInputRegisters,
+                                                   QByteArray::fromHex("04cd6b057f"));
+        QCOMPARE(client.processResponse(response, &unit), true);
+
+        QCOMPARE(unit.isValid(), true);
+        QCOMPARE(unit.valueCount(), 2u);
+        QCOMPARE(unit.startAddress(), 100);
+        QCOMPARE(unit.values(), QVector<quint16>({ 52587, 1407 }));
+        QCOMPARE(unit.registerType(), QModbusDataUnit::InputRegisters);
+
+        response.setFunctionCode(QModbusPdu::FunctionCode(0x84));
+        QCOMPARE(client.processResponse(response, &unit), false);
+
+        response.setFunctionCode(QModbusResponse::ReadInputRegisters);
+        response.setData(QByteArray::fromHex("05"));
+        QCOMPARE(client.processResponse(response, &unit), false);
+
+        response.setData(QByteArray::fromHex("04cd6b"));
+        QCOMPARE(client.processResponse(response, &unit), false);
+
+        response.setData(QByteArray::fromHex("04cd6b051755"));
+        QCOMPARE(client.processResponse(response, &unit), false);
+    }
 };
 
 QTEST_MAIN(tst_QModbusClient)

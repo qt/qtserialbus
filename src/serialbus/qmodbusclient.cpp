@@ -141,6 +141,7 @@ bool QModbusClientPrivate::processResponse(const QModbusResponse &response, QMod
     case QModbusRequest::ReadHoldingRegisters:
         return processReadHoldingRegistersResponse(response, data);
     case QModbusRequest::ReadInputRegisters:
+        return processReadInputRegistersResponse(response, data);
     case QModbusRequest::WriteSingleCoil:
         return processWriteSingleCoilResponse(response, data);
     case QModbusRequest::WriteSingleRegister:
@@ -282,6 +283,45 @@ bool QModbusClientPrivate::processReadHoldingRegistersResponse(const QModbusResp
     return true;
 }
 
+bool QModbusClientPrivate::processReadInputRegistersResponse(const QModbusResponse &response,
+                                                             QModbusDataUnit *data)
+{
+    if (!isValid(response, QModbusResponse::ReadInputRegisters))
+        return false;
+
+    // we expect at least the byte count
+    const QByteArray payload = response.data();
+    if (payload.size() < 1)
+        return false;
+
+    // byte count needs to match available bytes
+    const quint8 byteCount = payload[0];
+    if ((payload.size() - 1) != byteCount)
+        return false;
+
+    // byte count needs to be odd to match full registers
+    if (byteCount % 2 != 0)
+        return false;
+
+    const quint8 itemCount = byteCount / 2;
+
+    const QByteArray pduData = response.data().remove(0,1);
+    QDataStream stream(pduData);
+
+    QVector<quint16> values;
+    quint16 tmp;
+    for (int i = 0; i < itemCount; i++){
+        stream >> tmp;
+        values.append(tmp);
+    }
+
+    if (data) {
+        data->setValues(values);
+        data->setValueCount(values.count());
+        data->setRegisterType(QModbusDataUnit::InputRegisters);
+    }
+    return true;
+}
 
 bool QModbusClientPrivate::processWriteSingleCoilResponse(const QModbusResponse &response,
     QModbusDataUnit *data)
