@@ -202,7 +202,11 @@ bool QModbusServer::data(QModbusDataUnit *newData) const
     unique \a address field, which is used to write \a data to the desired field.
     Returns \c false if address outside of the map range.
 
-    \sa QModbusDataUnit::RegisterType, data()
+    If the call was successful the \l dataWritten() signal is emitted. Note that
+    the signal is not emitted when \a data has not changed. Nevertheless this function
+    returns \c true in such cases.
+
+    \sa QModbusDataUnit::RegisterType, data(), dataWritten()
  */
 
 bool QModbusServer::setData(QModbusDataUnit::RegisterType table,
@@ -234,13 +238,22 @@ bool QModbusServer::setData(QModbusDataUnit::RegisterType table,
         return false;
     }
 
-    unit->setValue(address, data);
+    if (unit->value(address) != data) {
+        unit->setValue(address, data);
+        emit dataWritten(table, address, 1);
+    }
+
     return true;
 }
 
 /*!
     Writes \a newData to the Modbus server map.
     Returns \c false if the \a newData range is outside of the map range.
+
+    If the call was successful the \l dataWritten() signal is emitted. Note that
+    the signal is not emitted when the addressed register has not changed. This
+    may happen when \a newData contains exactly the same values as the
+    register already. Nevertheless this function returns \c true in such cases.
 
     \sa data()
  */
@@ -285,9 +298,20 @@ bool QModbusServer::setData(const QModbusDataUnit &newData)
         return false;
     }
 
+    bool changeRequired = false;
     for (int i = newData.startAddress();
-         i < newData.startAddress() + int(newData.valueCount()); i++)
-        current->setValue(i, newData.value(i-newData.startAddress()));
+         i < newData.startAddress() + int(newData.valueCount()); i++) {
+        quint16 newValue = newData.value(i - newData.startAddress());
+        if (current->value(i) != newValue) {
+            current->setValue(i, newValue);
+            changeRequired = true;
+        }
+    }
+
+    if (changeRequired)
+        emit dataWritten(newData.registerType(),
+                         newData.startAddress(),
+                         newData.valueCount());
 
     return true;
 }
@@ -317,12 +341,15 @@ bool QModbusServer::setData(const QModbusDataUnit &newData)
     \fn void QModbusServer::dataWritten(QModbusDataUnit::RegisterType table, int address, int size)
 
     This signal is emitted when a Modbus client has written one or more fields of data to the
-    Modbus server. Signal contains information about the fields that were written:
+    Modbus server. The signal contains information about the fields that were written:
     \list
-     \li \a table that was written,
+     \li \a register type that was written,
      \li \a address of the first field that was written,
-     \li and \a size of the consecutive fields that were written starting from \a address.
+     \li and \a amount of consecutive fields that were written starting from \a address.
     \endlist
+
+    The signal is not emitted when the to-be-written fields have not changed
+    due to no change in value.
  */
 
 /*

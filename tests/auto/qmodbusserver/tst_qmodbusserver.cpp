@@ -171,6 +171,9 @@ private slots:
         }
 
         quint16 data = 0;
+        QSignalSpy writtenSpy(
+                    &server, SIGNAL(dataWritten(QModbusDataUnit::RegisterType,int,int)));
+        QVERIFY(writtenSpy.isEmpty());
 
         QVERIFY(!server.data(registerType, MAP_RANGE+1, &data)); // out of range
         QCOMPARE(data, quint16(0));
@@ -179,12 +182,34 @@ private slots:
 
         QCOMPARE(server.setData(registerType, 1, 444), validDataUnit);
         QCOMPARE(server.data(registerType, 1, &data), validDataUnit);
+        if (validDataUnit) {
+            QCOMPARE(data, quint16(444));
+            QTRY_COMPARE(writtenSpy.count(), 1);
+            QList<QVariant> signalData = writtenSpy.at(0);
+            QCOMPARE(signalData.count(), 3);
+            QCOMPARE(signalData.at(0).value<QModbusDataUnit::RegisterType>(), registerType);
+            QCOMPARE(signalData.at(1).toInt(), 1);
+            QCOMPARE(signalData.at(2).toInt(), 1);
+        } else {
+            QCOMPARE(data, quint16(0));
+            QTRY_VERIFY(writtenSpy.isEmpty());
+        }
+
+        //write 444 again but this time no dataWritten since no value change
+        data = 0;
+        writtenSpy.clear();
+        QCOMPARE(server.setData(registerType, 1, 444), validDataUnit);
+        QCOMPARE(server.data(registerType, 1, &data), validDataUnit);
         if (validDataUnit)
             QCOMPARE(data, quint16(444));
         else
             QCOMPARE(data, quint16(0));
+        QTRY_VERIFY(writtenSpy.isEmpty()); //
 
         QVERIFY(!server.data(registerType, 1, 0)); // out of range although value set
+        QVERIFY(!server.setData(registerType, -1, 1));
+        QVERIFY(!server.setData(registerType, MAP_RANGE+1, 1));
+        QTRY_VERIFY(writtenSpy.isEmpty());
 
         //testing server.setData(ModbusDataUnit&)
 
@@ -197,6 +222,7 @@ private slots:
         QVERIFY(rangeUnit.values() == valueVector);
         QVERIFY(rangeUnit.registerType() == registerType);
 
+        writtenSpy.clear();
         QVERIFY(server.setData(rangeUnit) == validDataUnit);
         if (validDataUnit) {
             for (int i = rangeUnit.startAddress();
@@ -205,7 +231,19 @@ private slots:
                 QVERIFY(server.data(registerType, i, &readData));
                 QCOMPARE(readData, valueVector.at(i-rangeUnit.startAddress()));
             }
+
+            QTRY_COMPARE(writtenSpy.count(), 1);
+            QList<QVariant> signalData = writtenSpy.at(0);
+            QCOMPARE(signalData.count(), 3);
+            QCOMPARE(signalData.at(0).value<QModbusDataUnit::RegisterType>(), registerType);
+            QCOMPARE(signalData.at(1).toInt(), rangeUnit.startAddress());
+            QCOMPARE(signalData.at(2).toUInt(), rangeUnit.valueCount());
         }
+
+        // no writtenData() signal when writing same rangeUnit again
+        writtenSpy.clear();
+        QVERIFY(server.setData(rangeUnit) == validDataUnit);
+        QTRY_VERIFY(writtenSpy.isEmpty());
 
         //never fits anywhere
         QModbusDataUnit oversizeUnit(registerType, 0, MAP_RANGE*2);
@@ -215,6 +253,7 @@ private slots:
         QCOMPARE(oversizeUnit.registerType(), registerType);
 
         //completely outside of valid range
+        writtenSpy.clear();
         rangeUnit.setStartAddress(MAP_RANGE + 1 );
         QVERIFY(!server.setData(rangeUnit));
 
@@ -234,7 +273,7 @@ private slots:
         QVERIFY(!server.setData(oversizeUnit));
         oversizeUnit.setStartAddress(MAP_RANGE-2);
         QVERIFY(!server.setData(oversizeUnit));
-
+        QTRY_VERIFY(writtenSpy.isEmpty());
 
         //testing server.data(QModbusDataUnit *)
         QModbusDataUnit requestUnit(registerType, 7, 5);
