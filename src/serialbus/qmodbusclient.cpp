@@ -253,6 +253,9 @@ bool QModbusClientPrivate::processWriteSingleCoilResponse(const QModbusResponse 
 
     quint16 address, value;
     response.decodeData(&address, &value);
+    if (!( value == 0x0000 || value == 0xFF00))
+        return false;
+
     if (data) {
         data->setValueCount(1);
         data->setStartAddress(address);
