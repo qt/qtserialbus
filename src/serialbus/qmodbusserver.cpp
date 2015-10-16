@@ -415,6 +415,7 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
     case QModbusRequest::ReadCoils:
         return processReadCoilsRequest(request);
     case QModbusRequest::ReadDiscreteInputs:
+        return processReadDiscreteInputsRequest(request);
     case QModbusRequest::ReadHoldingRegisters:
     case QModbusRequest::ReadInputRegisters:
     case QModbusRequest::WriteSingleCoil:
@@ -472,6 +473,46 @@ QModbusResponse QModbusServerPrivate::processReadCoilsRequest(const QModbusReque
         // eight, the remaining bits in the final data byte will be padded with zeros.
         for (int currentBit = 0; currentBit < 8; ++currentBit)
             byte[currentBit] = coils.value(address++); // The padding happens inside value().
+        bytes.append(static_cast<quint8> (byte.to_ulong()));
+    }
+
+    // TODO: Increase message counters when they are implemented
+    return QModbusResponse(request.functionCode(), byteCount, bytes);
+}
+
+QModbusResponse QModbusServerPrivate::processReadDiscreteInputsRequest(
+        const QModbusRequest &request)
+{
+    quint16 address, numberOfInputs;
+    request.decodeData(&address, &numberOfInputs);
+
+    if ((numberOfInputs < 0x0001) || (numberOfInputs > 0x07D0)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataValue);
+    }
+
+    // Get the requested range out of the registers.
+    QModbusDataUnit inputs(QModbusDataUnit::DiscreteInputs, address, numberOfInputs);
+    if (!q_func()->data(&inputs)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataAddress);
+    }
+
+    quint8 byteCount = numberOfInputs / 8;
+    if ((numberOfInputs % 8) != 0) {
+        byteCount += 1;
+        // If the range is not a multiple of 8, resize.
+        inputs.setValueCount(byteCount * 8);
+    }
+
+    address = 0; // The data range now starts with zero.
+    QVector<quint8> bytes;
+    for (int i = 0; i < byteCount; ++i) {
+        std::bitset<8> byte;
+        // According to the spec: If the returned input quantity is not a multiple of
+        // eight, the remaining bits in the final data byte will be padded with zeros.
+        for (int currentBit = 0; currentBit < 8; ++currentBit)
+            byte[currentBit] = inputs.value(address++); // The padding happens inside value().
         bytes.append(static_cast<quint8> (byte.to_ulong()));
     }
 

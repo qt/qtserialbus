@@ -139,6 +139,44 @@ private slots:
         QCOMPARE(response.data(), QByteArray::fromHex("02cd02"));
     }
 
+    void testProcessReadDiscreteInputsRequest()
+    {
+        server.setData(QModbusDataUnit::DiscreteInputs, 172, true);
+        // request read DiscreteInput 173, address: 0x00ac -> 172, count: 0x0001 -> 1
+        QModbusRequest request = QModbusRequest(QModbusRequest::ReadDiscreteInputs,
+                                                QByteArray::fromHex("00ac0001"));
+        QModbusResponse response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, byte count: 0x01 -> 1, status: 0x01 -> 0000 0001
+        QCOMPARE(response.data(), QByteArray::fromHex("0101"));
+
+        server.setData(QModbusDataUnit::DiscreteInputs, 19, quint16(0x0010));
+        // request read 10 inputs starting at input 20, address: 0x0013 -> 19, count: 0x000a -> 10
+        request = QModbusRequest(QModbusRequest::ReadDiscreteInputs, QByteArray::fromHex("0013000a"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, byte count: 0x02 -> 1, status: 0x00 -> 0000 0000, 0x10 -> 0001 0000
+        QCOMPARE(response.data(), QByteArray::fromHex("020100"));
+
+        // request read 10 inputs starting at input 501
+        request = QModbusRequest(QModbusRequest::ReadDiscreteInputs, QByteArray::fromHex("01f5000a"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.data(), QByteArray::fromHex("02"));
+
+        // request read 2001 inputs starting at input 0
+        request = QModbusRequest(QModbusRequest::ReadDiscreteInputs, QByteArray::fromHex("000007d1"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        // request read 0 inputs starting at input 0
+        request = QModbusRequest(QModbusRequest::ReadDiscreteInputs, QByteArray::fromHex("00000000"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+    }
+
     void tst_dataCalls_data()
     {
         QTest::addColumn<QModbusDataUnit::RegisterType>("registerType");
