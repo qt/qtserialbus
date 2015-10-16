@@ -161,10 +161,10 @@ bool QModbusServer::data(QModbusDataUnit::RegisterType table,
 }
 
 /*!
-    Returns the values in the register range given by \a results.
+    Returns the values in the register range given by \a newData.
 
     \a newData must provide a valid register type, start address
-    and valueCount. The returned \a results will contain the register values
+    and valueCount. The returned \a newData will contain the register values
     associated with the given range.
 
     If \a newData contains a valid register type but a negative start address
