@@ -65,13 +65,15 @@ private slots:
         TestClient client;
 
         QModbusDataUnit unit;
+        unit.setStartAddress(100);
+
         QModbusResponse response = QModbusResponse(QModbusResponse::ReadCoils,
             QByteArray::fromHex("03cd6b05"));
         QCOMPARE(client.processResponse(response, &unit), true);
 
         QCOMPARE(unit.isValid(), true);
         QCOMPARE(unit.valueCount(), 24u);
-        QCOMPARE(unit.startAddress(), 0);
+        QCOMPARE(unit.startAddress(), 100);
         QCOMPARE(unit.values(),
             QVector<quint16>({ 1,0,1,1,0,0,1,1, 1,1,0,1,0,1,1,0, 1,0,1,0,0,0,0,0 }));
         QCOMPARE(unit.registerType(), QModbusDataUnit::Coils);
@@ -104,13 +106,14 @@ private slots:
         TestClient client;
 
         QModbusDataUnit unit;
+        unit.setStartAddress(100);
         QModbusResponse response = QModbusResponse(QModbusResponse::ReadDiscreteInputs,
             QByteArray::fromHex("03cd6b05"));
         QCOMPARE(client.processResponse(response, &unit), true);
 
         QCOMPARE(unit.isValid(), true);
         QCOMPARE(unit.valueCount(), 24u);
-        QCOMPARE(unit.startAddress(), 0);
+        QCOMPARE(unit.startAddress(), 100);
         QCOMPARE(unit.values(),
             QVector<quint16>({ 1,0,1,1,0,0,1,1, 1,1,0,1,0,1,1,0, 1,0,1,0,0,0,0,0 }));
         QCOMPARE(unit.registerType(), QModbusDataUnit::DiscreteInputs);

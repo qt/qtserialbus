@@ -203,7 +203,6 @@ bool QModbusClientPrivate::processReadCoilsResponse(const QModbusResponse &respo
 
     if (data) {
         data->setValues(values);
-        data->setStartAddress(0);
         data->setValueCount(byteCount * 8);
         data->setRegisterType(QModbusDataUnit::Coils);
     }
@@ -236,7 +235,6 @@ bool QModbusClientPrivate::processReadDiscreteInputsResponse(const QModbusRespon
 
     if (data) {
         data->setValues(values);
-        data->setStartAddress(0);
         data->setValueCount(byteCount * 8);
         data->setRegisterType(QModbusDataUnit::DiscreteInputs);
     }
