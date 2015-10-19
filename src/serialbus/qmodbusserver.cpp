@@ -421,6 +421,7 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
     case QModbusRequest::WriteSingleCoil:
         return processWriteSingleCoilRequest(request);
     case QModbusRequest::WriteSingleRegister:
+        return processWriteSingleRegisterRequest(request);
     case QModbusRequest::ReadExceptionStatus:
     case QModbusRequest::Diagnostics:
     case QModbusRequest::GetCommEventCounter:
@@ -560,6 +561,36 @@ QModbusResponse QModbusServerPrivate::processWriteSingleCoilRequest(const QModbu
     coils.setValue(0, value);
 
     if (!q_func()->setData(coils)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::ServerDeviceFailure);
+    }
+
+    // - TODO: Increase message counters when they are implemented
+    return QModbusResponse(request.functionCode(), address, value);
+}
+
+QModbusResponse QModbusServerPrivate::processWriteSingleRegisterRequest(const QModbusRequest &request)
+{
+    if (request.dataSize() != 4) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataValue);
+    }
+
+    quint16 address, value;
+    request.decodeData(&address, &value);
+
+    // Get the requested register.
+    QModbusDataUnit registers(QModbusDataUnit::HoldingRegisters, address, 1u);
+    if (!q_func()->data(&registers)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataAddress);
+    }
+
+    // Since we picked the coil at address, data range
+    // is now 1 and therefore index needs to be 0.
+    registers.setValue(0, value);
+
+    if (!q_func()->setData(registers)) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::ServerDeviceFailure);
     }
