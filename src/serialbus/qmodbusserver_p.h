@@ -66,6 +66,7 @@ public:
     QModbusResponse processRequest(const QModbusPdu &request);
     QModbusResponse processReadCoilsRequest(const QModbusRequest &request);
     QModbusResponse processReadDiscreteInputsRequest(const QModbusRequest &request);
+    QModbusResponse processReadInputRegistersRequest(const QModbusRequest &request);
     QModbusResponse processWriteSingleCoilRequest(const QModbusRequest &request);
     QModbusResponse processWriteSingleRegisterRequest(const QModbusRequest &request);
     QModbusResponse processWriteMultipleCoilsRequest(const QModbusRequest &request);

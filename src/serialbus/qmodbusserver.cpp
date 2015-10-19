@@ -418,6 +418,7 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
         return processReadDiscreteInputsRequest(request);
     case QModbusRequest::ReadHoldingRegisters:
     case QModbusRequest::ReadInputRegisters:
+        return processReadInputRegistersRequest(request);
     case QModbusRequest::WriteSingleCoil:
         return processWriteSingleCoilRequest(request);
     case QModbusRequest::WriteSingleRegister:
@@ -531,6 +532,34 @@ QModbusResponse QModbusServerPrivate::processReadDiscreteInputsRequest(
 
     // TODO: Increase message counters when they are implemented
     return QModbusResponse(request.functionCode(), byteCount, bytes);
+}
+
+QModbusResponse QModbusServerPrivate::processReadInputRegistersRequest(
+    const QModbusRequest &request)
+{
+    // request data size corrupt
+    if (request.dataSize() != 4) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataValue);
+    }
+
+    quint16 address, numberOfRegisters;
+    request.decodeData(&address, &numberOfRegisters);
+
+    if ((numberOfRegisters < 0x0001) || (numberOfRegisters > 0x007D)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataValue);
+    }
+
+    // Get the requested range out of the registers.
+    QModbusDataUnit registers(QModbusDataUnit::InputRegisters, address, numberOfRegisters);
+    if (!q_func()->data(&registers)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataAddress);
+    }
+
+    // TODO: Increase message counters when they are implemented
+    return QModbusResponse(request.functionCode(), quint8(numberOfRegisters * 2), registers.values());
 }
 
 QModbusResponse QModbusServerPrivate::processWriteSingleCoilRequest(const QModbusRequest &request)
