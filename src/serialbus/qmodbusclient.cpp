@@ -145,6 +145,7 @@ bool QModbusClientPrivate::processResponse(const QModbusResponse &response, QMod
     case QModbusRequest::WriteSingleCoil:
         return processWriteSingleCoilResponse(response, data);
     case QModbusRequest::WriteSingleRegister:
+        return processWriteSingleRegisterResponse(response, data);
     case QModbusRequest::ReadExceptionStatus:
     case QModbusRequest::Diagnostics:
     case QModbusRequest::GetCommEventCounter:
@@ -343,6 +344,27 @@ bool QModbusClientPrivate::processWriteSingleCoilResponse(const QModbusResponse 
         data->setStartAddress(address);
         data->setValues(QVector<quint16>{ value });
         data->setRegisterType(QModbusDataUnit::Coils);
+    }
+    return true;
+}
+
+bool QModbusClientPrivate::processWriteSingleRegisterResponse(const QModbusResponse &response,
+    QModbusDataUnit *data)
+{
+    if (!isValid(response, QModbusResponse::WriteSingleRegister))
+        return false;
+
+    const QByteArray payload = response.data();
+    if (payload.size() != 4)
+        return false;
+
+    quint16 address, value;
+    response.decodeData(&address, &value);
+    if (data) {
+        data->setValueCount(1);
+        data->setStartAddress(address);
+        data->setValues(QVector<quint16>{ value });
+        data->setRegisterType(QModbusDataUnit::HoldingRegisters);
     }
     return true;
 }

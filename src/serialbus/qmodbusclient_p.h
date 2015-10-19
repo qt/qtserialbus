@@ -68,6 +68,8 @@ public:
                                              QModbusDataUnit *data);
     bool processReadInputRegistersResponse(const QModbusResponse &response, QModbusDataUnit *data);
     bool processWriteSingleCoilResponse(const QModbusResponse &response, QModbusDataUnit *data);
+    bool processWriteSingleRegisterResponse(const QModbusResponse &response,
+                                            QModbusDataUnit *data);
     bool processWriteMultipleCoilsResponse(const QModbusResponse &response, QModbusDataUnit *data);
     bool processReadWriteMultipleRegistersResponse(const QModbusResponse &response,
                                                   QModbusDataUnit *data);

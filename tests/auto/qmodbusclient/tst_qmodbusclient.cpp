@@ -192,6 +192,32 @@ private slots:
         QCOMPARE(client.processResponse(response, &unit), false);
     }
 
+    void testProcessWriteSingleRegisterResponse()
+    {
+        TestClient client;
+
+        QModbusDataUnit unit;
+        QModbusResponse response = QModbusResponse(QModbusResponse::WriteSingleRegister,
+            QByteArray::fromHex("04cd6b05"));
+        QCOMPARE(client.processResponse(response, &unit), true);
+
+        QCOMPARE(unit.isValid(), true);
+        QCOMPARE(unit.valueCount(), 1u);
+        QCOMPARE(unit.startAddress(), 1229);
+        QCOMPARE(unit.values(), QVector<quint16>(1, 27397u));
+        QCOMPARE(unit.registerType(), QModbusDataUnit::HoldingRegisters);
+
+        response.setFunctionCode(QModbusPdu::FunctionCode(0x86));
+        QCOMPARE(client.processResponse(response, &unit), false);
+
+        response.setFunctionCode(QModbusResponse::WriteSingleRegister);
+        response.setData(QByteArray::fromHex("05"));
+        QCOMPARE(client.processResponse(response, &unit), false);
+
+        response.setData(QByteArray::fromHex("04cd6b051755"));
+        QCOMPARE(client.processResponse(response, &unit), false);
+    }
+
     void testProcessReadWriteMultipleRegistersResponse()
     {
         TestClient client;
