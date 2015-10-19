@@ -443,6 +443,12 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
 
 QModbusResponse QModbusServerPrivate::processReadCoilsRequest(const QModbusRequest &request)
 {
+    // request data size corrupt
+    if (request.dataSize() != 4) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataValue);
+    }
+
     quint16 address, numberOfCoils;
     request.decodeData(&address, &numberOfCoils);
 
@@ -483,6 +489,12 @@ QModbusResponse QModbusServerPrivate::processReadCoilsRequest(const QModbusReque
 QModbusResponse QModbusServerPrivate::processReadDiscreteInputsRequest(
         const QModbusRequest &request)
 {
+    // request data size corrupt
+    if (request.dataSize() != 4) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataValue);
+    }
+
     quint16 address, numberOfInputs;
     request.decodeData(&address, &numberOfInputs);
 
@@ -522,6 +534,12 @@ QModbusResponse QModbusServerPrivate::processReadDiscreteInputsRequest(
 
 QModbusResponse QModbusServerPrivate::processWriteSingleCoilRequest(const QModbusRequest &request)
 {
+    // request data size corrupt
+    if (request.dataSize() != 4) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataValue);
+    }
+
     quint16 address, value;
     request.decodeData(&address, &value);
 
@@ -552,9 +570,21 @@ QModbusResponse QModbusServerPrivate::processWriteSingleCoilRequest(const QModbu
 
 QModbusResponse QModbusServerPrivate::processWriteMultipleCoilsRequest(const QModbusRequest &request)
 {
+    // request data size corrupt: 5 header + 1 minimum data byte required
+    if (request.dataSize() < 6) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataValue);
+    }
+
     quint16 address, numberOfCoils;
     quint8 byteCount;
     request.decodeData(&address, &numberOfCoils, &byteCount);
+
+    // byte count does not match number of data bytes following
+    if (byteCount != (request.dataSize() - 5 )) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataValue);
+    }
 
     quint8 expectedBytes = numberOfCoils / 8;
     if ((numberOfCoils % 8) != 0)
