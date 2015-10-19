@@ -76,7 +76,7 @@ protected:
     QModbusServer(QModbusServerPrivate &dd, QObject *parent = Q_NULLPTR);
 
     virtual QModbusResponse processRequest(const QModbusPdu &request);
-    virtual QModbusResponse processCustomRequest(const QModbusPdu &request);
+    virtual QModbusResponse processPrivateModbusRequest(const QModbusPdu &request);
 
 };
 

@@ -388,7 +388,7 @@ QModbusResponse QModbusServer::processRequest(const QModbusPdu &request)
     a \c QModbusExceptionResponse with the \a request function code and error code set to illegal
     function.
 */
-QModbusResponse QModbusServer::processCustomRequest(const QModbusPdu &request)
+QModbusResponse QModbusServer::processPrivateModbusRequest(const QModbusPdu &request)
 {
     return QModbusExceptionResponse(request.functionCode(),
         QModbusExceptionResponse::IllegalFunction);
@@ -438,7 +438,7 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
     default:
         break;
     }
-    return q_func()->processCustomRequest(request);
+    return q_func()->processPrivateModbusRequest(request);
 }
 
 QModbusResponse QModbusServerPrivate::processReadCoilsRequest(const QModbusRequest &request)
