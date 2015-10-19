@@ -245,8 +245,6 @@ void tst_QCanBusFrame::tst_error()
     QCOMPARE(frame.error(), QCanBusFrame::NoError);
 }
 
-Q_DECLARE_METATYPE(QCanBusFrame::FrameType)
-
 QTEST_MAIN(tst_QCanBusFrame)
 
 #include "tst_qcanbusframe.moc"
