@@ -177,6 +177,47 @@ private slots:
         QCOMPARE(response.data(), QByteArray::fromHex("03"));
     }
 
+    void testProcessReadHoldingRegistersRequest()
+    {
+        server.setData(QModbusDataUnit::HoldingRegisters, 172, 1234u);
+        server.setData(QModbusDataUnit::HoldingRegisters, 173, 4321u);
+
+        // request read holding registers 173, address: 0x00ac -> 172, count: 0x0001 -> 1
+        QModbusRequest request = QModbusRequest(QModbusRequest::ReadHoldingRegisters,
+                                                QByteArray::fromHex("00ac0001"));
+        QModbusResponse response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, byte count: 0x02 -> 2, value: 1234u -> 04d2
+        QCOMPARE(response.data(), QByteArray::fromHex("0204d2"));
+
+        // request read 2 registers starting at 172
+        request = QModbusRequest(QModbusRequest::ReadHoldingRegisters,
+                                 QByteArray::fromHex("00ac0002"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, byte count: 0x04 -> 4, status: 1234u = 04d2, 4321u =10e1
+        QCOMPARE(response.data(), QByteArray::fromHex("0404d210e1"));
+
+        // request read 10 registers starting at offset 501
+        request = QModbusRequest(QModbusRequest::ReadHoldingRegisters,
+                                 QByteArray::fromHex("01f5000a"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.data(), QByteArray::fromHex("02"));
+
+        // request read 126 registers starting at offset 0
+        request = QModbusRequest(QModbusRequest::ReadHoldingRegisters, QByteArray::fromHex("0000007e"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        // request read 0 registers starting at offset 0
+        request = QModbusRequest(QModbusRequest::ReadHoldingRegisters, QByteArray::fromHex("00000000"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+    }
+
     void testProcessReadInputRegistersRequest()
     {
         server.setData(QModbusDataUnit::InputRegisters, 172, 1234u);
