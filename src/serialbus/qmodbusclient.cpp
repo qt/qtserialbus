@@ -153,6 +153,7 @@ bool QModbusClientPrivate::processResponse(const QModbusResponse &response, QMod
     case QModbusRequest::WriteMultipleCoils:
         return processWriteMultipleCoilsResponse(response, data);
     case QModbusRequest::WriteMultipleRegisters:
+        return processWriteMultipleRegistersResponse(response, data);
     case QModbusRequest::ReportServerId:
     case QModbusRequest::ReadFileRecord:
     case QModbusRequest::WriteFileRecord:
@@ -386,6 +387,31 @@ bool QModbusClientPrivate::processWriteMultipleCoilsResponse(const QModbusRespon
         data->setValueCount(count);
         data->setStartAddress(address);
         data->setRegisterType(QModbusDataUnit::Coils);
+    }
+    return true;
+}
+
+bool QModbusClientPrivate::processWriteMultipleRegistersResponse(const QModbusResponse &response,
+    QModbusDataUnit *data)
+{
+    if (!isValid(response, QModbusResponse::WriteMultipleRegisters))
+        return false;
+
+    // we expect exactly 4 bytes for the starting address and register count
+    const QByteArray payload = response.data();
+    if (payload.size() != 4)
+        return false;
+
+    quint16 address, count;
+    response.decodeData(&address, &count);
+
+    // number of registers to write is 1-123 per request
+    if (count < 1 || count > 123)
+        return false;
+    if (data) {
+        data->setStartAddress(address);
+        data->setValueCount(count);
+        data->setRegisterType(QModbusDataUnit::HoldingRegisters);
     }
     return true;
 }

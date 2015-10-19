@@ -71,6 +71,8 @@ public:
     bool processWriteSingleRegisterResponse(const QModbusResponse &response,
                                             QModbusDataUnit *data);
     bool processWriteMultipleCoilsResponse(const QModbusResponse &response, QModbusDataUnit *data);
+    bool processWriteMultipleRegistersResponse(const QModbusResponse &response,
+                                               QModbusDataUnit *data);
     bool processReadWriteMultipleRegistersResponse(const QModbusResponse &response,
                                                   QModbusDataUnit *data);
 };
