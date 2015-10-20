@@ -36,6 +36,8 @@
 
 #include "qmodbuspdu.h"
 
+#include <QtCore/qdebug.h>
+
 QT_BEGIN_NAMESPACE
 
 /*!
@@ -202,6 +204,17 @@ QDataStream &operator>>(QDataStream &stream, QModbusPdu &pdu)
     pdu.setData(data);
 
     return stream;
+}
+
+/*!
+    Writes the Modbus \a pdu to the \a debug stream.
+*/
+QDebug operator<<(QDebug debug, const QModbusPdu &pdu)
+{
+    QDebugStateSaver _(debug);
+    debug.nospace().noquote() << "0x" << QByteArray(1, pdu.functionCode()).toHex() << pdu.data()
+        .toHex();
+    return debug;
 }
 
 /*!

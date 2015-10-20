@@ -213,6 +213,8 @@ public:
 Q_SERIALBUS_EXPORT QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu);
 Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &stream, QModbusPdu &pdu);
 
+Q_SERIALBUS_EXPORT QDebug operator<<(QDebug debug, const QModbusPdu &pdu);
+
 Q_DECLARE_TYPEINFO(QModbusPdu, Q_MOVABLE_TYPE);
 Q_DECLARE_TYPEINFO(QModbusPdu::ExceptionCode, Q_PRIMITIVE_TYPE);
 Q_DECLARE_TYPEINFO(QModbusPdu::FunctionCode, Q_PRIMITIVE_TYPE);

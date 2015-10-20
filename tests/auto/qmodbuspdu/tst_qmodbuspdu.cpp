@@ -34,9 +34,28 @@
 **
 ****************************************************************************/
 
+#include <QtCore/qdebug.h>
 #include <QtSerialBus/qmodbuspdu.h>
 
 #include <QtTest/QtTest>
+
+static QString s_msg;
+static void myMessageHandler(QtMsgType, const QMessageLogContext &, const QString &msg)
+{
+    s_msg = msg;
+}
+
+class DebugHandler
+{
+public:
+    DebugHandler(QtMessageHandler newMessageHandler)
+        : oldMessageHandler(qInstallMessageHandler(newMessageHandler)) {}
+    ~DebugHandler() {
+        qInstallMessageHandler(oldMessageHandler);
+    }
+private:
+    QtMessageHandler oldMessageHandler;
+};
 
 class tst_QModbusPdu : public QObject
 {
@@ -206,6 +225,38 @@ private slots:
         QModbusExceptionResponse exception3 = pdu;
         QCOMPARE(exception3.isException(), true);
         QCOMPARE(exception3.functionCode(), QModbusExceptionResponse::FunctionCode(0x81));
+    }
+
+    void testQDebugStreamOperator()
+    {
+        DebugHandler mhs(myMessageHandler);
+        {
+            QDebug d = qDebug();
+            d << QModbusPdu();
+            d << QModbusRequest();
+            d << QModbusResponse();
+            d << QModbusExceptionResponse();
+        }
+        QCOMPARE(s_msg, QString::fromLatin1("0x00 0x00 0x00 0x00"));
+
+        {
+            QDebug d = qDebug();
+            d << QModbusRequest(QModbusRequest::ReadCoils, quint16(19), quint16(19));
+        }
+        QCOMPARE(s_msg, QString::fromLatin1("0x0100130013"));
+
+        {
+            QDebug d = qDebug();
+            d << QModbusResponse(QModbusResponse::ReadCoils, QByteArray::fromHex("03cd6b05"));
+        }
+        QCOMPARE(s_msg, QString::fromLatin1("0x0103cd6b05"));
+
+        {
+            QDebug d = qDebug();
+            d << QModbusExceptionResponse(QModbusExceptionResponse::ReadCoils,
+                QModbusExceptionResponse::IllegalDataAddress);
+        }
+        QCOMPARE(s_msg, QString::fromLatin1("0x8102"));
     }
 };
 
