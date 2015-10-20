@@ -196,7 +196,7 @@ bool QModbusServer::data(QModbusDataUnit *newData) const
         break;
     }
 
-    if (newData->startAddress() < 0) { //return enire map for given type
+    if (newData->startAddress() < 0) { //return entire map for given type
         *newData = *current;
         return true;
     }
