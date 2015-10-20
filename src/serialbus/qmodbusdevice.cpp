@@ -290,5 +290,6 @@ QString QModbusDevice::errorString() const
 */
 
 Q_LOGGING_CATEGORY(QT_MODBUS, "qt.modbus")
+Q_LOGGING_CATEGORY(QT_MODBUS_LOW, "qt.modbus.lowlevel")
 
 QT_END_NAMESPACE
