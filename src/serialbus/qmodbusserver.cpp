@@ -437,6 +437,7 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
     case QModbusRequest::WriteFileRecord:
     case QModbusRequest::MaskWriteRegister:
     case QModbusRequest::ReadWriteMultipleRegisters:
+        return processReadWriteMultipleRegistersRequest(request);
     case QModbusRequest::ReadFifoQueue:
     case QModbusRequest::EncapsulatedInterfaceTransport:
     default:
@@ -715,10 +716,11 @@ QModbusResponse QModbusServerPrivate::processWriteMultipleCoilsRequest(const QMo
     return QModbusResponse(request.functionCode(), address, numberOfCoils);
 }
 
-QModbusResponse QModbusServerPrivate::processWriteMultipleRegistersRequest(const QModbusRequest &request)
+QModbusResponse QModbusServerPrivate::processWriteMultipleRegistersRequest(
+    const QModbusRequest &request)
 {
-    // request data size corrupt: 5 header + 1 minimum data byte required
-    if (request.dataSize() < 6) {
+    // request data size corrupt: 5 header + 2 minimum data byte required
+    if (request.dataSize() < 7) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataValue);
     }
@@ -764,6 +766,71 @@ QModbusResponse QModbusServerPrivate::processWriteMultipleRegistersRequest(const
 
     // - TODO: Increase message counters when they are implemented
     return QModbusResponse(request.functionCode(), address, numberOfRegisters);
+}
+
+QModbusResponse QModbusServerPrivate::processReadWriteMultipleRegistersRequest(
+    const QModbusRequest &request)
+{
+    // request data size corrupt: 9 header + 2 minimum data byte required
+    if (request.dataSize() < 11) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataValue);
+    }
+
+    quint16 readStartAddress, readQuantity, writeStartAddress, writeQuantity;
+    quint8 byteCount;
+    request.decodeData(&readStartAddress, &readQuantity,
+                       &writeStartAddress, &writeQuantity, &byteCount);
+
+    // byte count does not match number of data bytes following or register count
+    if ((byteCount != (request.dataSize() - 9 )) || (byteCount != (writeQuantity * 2))) {
+        return QModbusExceptionResponse(request.functionCode(),
+                                        QModbusExceptionResponse::IllegalDataValue);
+    }
+
+    if ((readQuantity < 0x0001) || (readQuantity > 0x007B)
+            || (writeQuantity < 0x0001) || (writeQuantity > 0x0079)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataValue);
+    }
+
+    // According to spec, write operation is executed before the read operation
+    // Get the requested range out of the registers.
+    QModbusDataUnit writeRegisters(QModbusDataUnit::HoldingRegisters, writeStartAddress,
+                                   writeQuantity);
+    if (!q_func()->data(&writeRegisters)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataAddress);
+    }
+
+    const QByteArray pduData = request.data().remove(0,9);
+    QDataStream stream(pduData);
+
+    QVector<quint16> values;
+    quint16 tmp;
+    for (int i = 0; i < writeQuantity; i++) {
+        stream >> tmp;
+        values.append(tmp);
+    }
+
+    writeRegisters.setValues(values);
+
+    if (!q_func()->setData(writeRegisters)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::ServerDeviceFailure);
+    }
+
+    // Get the requested range out of the registers.
+    QModbusDataUnit readRegisters(QModbusDataUnit::HoldingRegisters, readStartAddress,
+                                  readQuantity);
+    if (!q_func()->data(&readRegisters)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataAddress);
+    }
+
+    // - TODO: Increase message counters when they are implemented
+    return QModbusResponse(request.functionCode(), quint8(readQuantity * 2),
+                           readRegisters.values());
 }
 
 QT_END_NAMESPACE

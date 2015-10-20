@@ -72,6 +72,7 @@ public:
     QModbusResponse processWriteSingleRegisterRequest(const QModbusRequest &request);
     QModbusResponse processWriteMultipleCoilsRequest(const QModbusRequest &request);
     QModbusResponse processWriteMultipleRegistersRequest(const QModbusRequest &request);
+    QModbusResponse processReadWriteMultipleRegistersRequest(const QModbusRequest &request);
 
 private:
     QModbusDataUnit m_discreteInputs;

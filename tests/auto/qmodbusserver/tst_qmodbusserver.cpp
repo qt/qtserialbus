@@ -316,6 +316,36 @@ private slots:
         QCOMPARE(response.data(), QByteArray::fromHex("03"));
     }
 
+    void testProcessReadWriteMultipleRegistersRequest()
+    {
+        server.setData(QModbusDataUnit::HoldingRegisters, 172, 1234u);
+        server.setData(QModbusDataUnit::HoldingRegisters, 173, 1235u);
+        server.setData(QModbusDataUnit::HoldingRegisters, 174, 1236u);
+
+        // request read 3 registers at register 173, address: 0x00ac -> 172,
+        //         write 3 registers at register 173: 1237u, 1238u, 1239u
+        QModbusRequest request = QModbusRequest(QModbusRequest::ReadWriteMultipleRegisters,
+            QByteArray::fromHex("00ac000300ac00030604d504d604d7"));
+        QModbusResponse response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("0604d504d604d7"));
+
+        // request write register at offset 501
+        request = QModbusRequest(QModbusRequest::ReadWriteMultipleRegisters,
+                                 QByteArray::fromHex("00ac000301f500010200ff"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.data(), QByteArray::fromHex("02"));
+
+        // request write 3 registers at offset 173 value only 5 bytes
+        request = QModbusRequest(QModbusRequest::ReadWriteMultipleRegisters,
+                                 QByteArray::fromHex("00ac000300ac00030604d504d604"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+    }
+
     void tst_dataCalls_data()
     {
         QTest::addColumn<QModbusDataUnit::RegisterType>("registerType");
