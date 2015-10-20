@@ -58,7 +58,12 @@ public:
     virtual void connectDevice(const QString &hostName, quint16 port = 502) = 0;
     virtual void connectDevice(const QHostAddress &address, quint16 port = 502) = 0;
 
-    QModbusReplyEx *sendRequest(const QModbusDataUnit &request, int slaveId) Q_DECL_OVERRIDE;
+    virtual QModbusReplyEx *sendReadRequest(const QModbusDataUnit &read,
+                                            int slaveId) Q_DECL_OVERRIDE;
+    virtual QModbusReplyEx *sendWriteRequest(const QModbusDataUnit &write,
+                                             int slaveId) Q_DECL_OVERRIDE;
+    virtual QModbusReplyEx *sendReadWriteRequest(const QModbusDataUnit &read,
+                                        const QModbusDataUnit &write, int slaveId) Q_DECL_OVERRIDE;
 
 private:
     using QModbusDevice::connectDevice;

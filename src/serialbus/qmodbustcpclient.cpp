@@ -96,9 +96,25 @@ QModbusTcpClient::QModbusTcpClient(QModbusTcpClientPrivate &dd, QObject *parent)
 /*
     TODO: implement
 */
-QModbusReplyEx *QModbusTcpClient::sendRequest(const QModbusDataUnit &request, int slaveId)
+QModbusReplyEx *QModbusTcpClient::sendReadRequest(const QModbusDataUnit &read, int slaveId)
 {
-    Q_UNUSED(request)
+    Q_UNUSED(read)
+    Q_UNUSED(slaveId)
+    return Q_NULLPTR;
+}
+
+QModbusReplyEx *QModbusTcpClient::sendWriteRequest(const QModbusDataUnit &write, int slaveId)
+{
+    Q_UNUSED(write)
+    Q_UNUSED(slaveId)
+    return Q_NULLPTR;
+}
+
+QModbusReplyEx *QModbusTcpClient::sendReadWriteRequest(const QModbusDataUnit &read,
+                                                       const QModbusDataUnit &write, int slaveId)
+{
+    Q_UNUSED(read)
+    Q_UNUSED(write)
     Q_UNUSED(slaveId)
     return Q_NULLPTR;
 }

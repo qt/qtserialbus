@@ -92,21 +92,33 @@ QModbusClient::QModbusClient(QModbusClientPrivate &dd, QObject *parent) :
 }
 
 /*!
-    \fn QModbusReply *QModbusClient::write(const QModbusDataUnit &request, int slaveId)
+    \fn QModbusReplyEx *QModbusClient::sendReadRequest(const QModbusDataUnit &read, int slaveId) = 0
 
-    Sends a request to modify the contents of the data pointed by \a request. Returns a
-    new QModbusReply object, which emits the finished() signal whenever a positive response
-    for the write request is received. Modbus network may have multiple servers, each server has
-    a unique \a slaveId.
- */
+    Sends a request to read the contents of the data pointed by \a read. Returns a new valid
+    QModbusReplyEx object if it did send the request, otherwise Q_NULLPTR. Modbus network may
+    have multiple servers, each server has unique \a slaveId.
+*/
 
 /*!
-    \fn QModbusReply *QModbusClient::read(const QModbusDataUnit &request, int slaveId)
+    \fn QModbusReplyEx *QModbusClient::sendWriteRequest(const QModbusDataUnit &write, int slaveId) = 0
 
-    Sends a request to read the contents of the data pointed by \a request. Returns a new
-    QModbusReply object, which emits the finished() signal whenever data arrives. Modbus network
-    may have multiple servers, each server has unique \a slaveId.
- */
+    Sends a request to modify the contents of the data pointed by \a write. Returns a new valid
+    QModbusReplyEx object if it did send the request, otherwise Q_NULLPTR. Modbus network may
+    have multiple servers, each server has a unique \a slaveId.
+*/
+
+/*!
+    \fn QModbusReplyEx *QModbusClient::sendReadWriteRequest(const QModbusDataUnit &read,
+                                                     const QModbusDataUnit &write, int slaveId) = 0
+
+    Sends a request to read the contents of the data pointed by \a read. In addition, sends a
+    request to modify the contents of the data pointed by \a write. Returns a new valid
+    QModbusReplyEx object if it did send the request, otherwise Q_NULLPTR. Modbus network may
+    have multiple servers, each server has a unique \a slaveId.
+
+    \note: Sending this kind of request is only valid of both \a read and \a write are of type
+        QModbusDataUnit::HoldingRegisters.
+*/
 
 /*
     Processes a Modbus server \a response and stores the decoded information in \a data. Returns

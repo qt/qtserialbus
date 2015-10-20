@@ -66,8 +66,13 @@ protected:
 
 private:
     QString portNameToSystemLocation(const QString &source) const;
-    /* TODO: remove */
-    QModbusReplyEx *sendRequest(const QModbusDataUnit &, int) Q_DECL_OVERRIDE { return Q_NULLPTR; }
+
+    // TODO: Remove!
+    QModbusReplyEx *sendReadRequest(const QModbusDataUnit &, int) { return Q_NULLPTR; }
+    QModbusReplyEx *sendWriteRequest(const QModbusDataUnit &, int) { return Q_NULLPTR; }
+    QModbusReplyEx *sendReadWriteRequest(const QModbusDataUnit &, const QModbusDataUnit &, int) {
+        return Q_NULLPTR;
+    }
 
     modbus_t *context;
     bool connected;

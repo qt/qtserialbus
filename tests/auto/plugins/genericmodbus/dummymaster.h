@@ -53,11 +53,10 @@ protected:
     void close();
 
 private:
-    /* TODO: remove */
-    QModbusReplyEx *sendRequest(const QModbusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE
-    {
-        Q_UNUSED(request)
-        Q_UNUSED(slaveId)
+    // TODO: Remove!
+    QModbusReplyEx *sendReadRequest(const QModbusDataUnit &, int) { return Q_NULLPTR; }
+    QModbusReplyEx *sendWriteRequest(const QModbusDataUnit &, int) { return Q_NULLPTR; }
+    QModbusReplyEx *sendReadWriteRequest(const QModbusDataUnit &, const QModbusDataUnit &, int) {
         return Q_NULLPTR;
     }
 };

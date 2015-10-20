@@ -54,12 +54,15 @@ class Q_SERIALBUS_EXPORT QModbusClient : public QModbusDevice
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(QModbusClient)
-public:
 
+public:
     explicit QModbusClient(QObject *parent = 0);
     virtual ~QModbusClient();
 
-    virtual QModbusReplyEx *sendRequest(const QModbusDataUnit &request, int slaveId = 1) = 0;
+    virtual QModbusReplyEx *sendReadRequest(const QModbusDataUnit &read, int slaveId) = 0;
+    virtual QModbusReplyEx *sendWriteRequest(const QModbusDataUnit &write, int slaveId) = 0;
+    virtual QModbusReplyEx *sendReadWriteRequest(const QModbusDataUnit &read,
+                                                 const QModbusDataUnit &write, int slaveId) = 0;
 
     //TODO to be removed once new setup ready
     virtual QModbusReply *write(const QModbusDataUnit &request, int slaveId = 1) = 0;
@@ -73,7 +76,6 @@ protected:
 
     virtual bool processResponse(const QModbusResponse &response, QModbusDataUnit *data);
     virtual bool processPrivateModbusResponse(const QModbusResponse &response, QModbusDataUnit *data);
-
 };
 
 QT_END_NAMESPACE

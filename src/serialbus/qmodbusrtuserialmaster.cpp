@@ -172,9 +172,25 @@ QModbusReply *QModbusRtuSerialMaster::read(const QModbusDataUnit &request, int s
 /*
     TODO: implement
 */
-QModbusReplyEx *QModbusRtuSerialMaster::sendRequest(const QModbusDataUnit &request, int slaveId)
+QModbusReplyEx *QModbusRtuSerialMaster::sendReadRequest(const QModbusDataUnit &read, int slaveId)
 {
-    Q_UNUSED(request)
+    Q_UNUSED(read)
+    Q_UNUSED(slaveId)
+    return Q_NULLPTR;
+}
+
+QModbusReplyEx *QModbusRtuSerialMaster::sendWriteRequest(const QModbusDataUnit &write, int slaveId)
+{
+    Q_UNUSED(write)
+    Q_UNUSED(slaveId)
+    return Q_NULLPTR;
+}
+
+QModbusReplyEx *QModbusRtuSerialMaster::sendReadWriteRequest(const QModbusDataUnit &read,
+                                                         const QModbusDataUnit &write, int slaveId)
+{
+    Q_UNUSED(read)
+    Q_UNUSED(write)
     Q_UNUSED(slaveId)
     return Q_NULLPTR;
 }

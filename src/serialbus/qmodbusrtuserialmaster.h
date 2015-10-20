@@ -53,8 +53,14 @@ public:
 
     // TODO find way to pass parity, baud, dataBits, stopBits
     bool connectDevice(const QString& deviceName);
-    QModbusReplyEx *sendRequest(const QModbusDataUnit &request, int slaveId) Q_DECL_OVERRIDE;
+    virtual QModbusReplyEx *sendReadRequest(const QModbusDataUnit &read,
+                                            int slaveId) Q_DECL_OVERRIDE;
+    virtual QModbusReplyEx *sendWriteRequest(const QModbusDataUnit &write,
+                                             int slaveId) Q_DECL_OVERRIDE;
+    virtual QModbusReplyEx *sendReadWriteRequest(const QModbusDataUnit &read,
+                                        const QModbusDataUnit &write, int slaveId) Q_DECL_OVERRIDE;
 
+    // TODO: Remove!
     QModbusReply *write(const QModbusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
     QModbusReply *read(const QModbusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
 
