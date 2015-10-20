@@ -234,7 +234,7 @@ void MainWindow::setupWidgetContainers()
         coilButtons.addButton(cbx, regexp.match(cbx->objectName()).captured("ID").toInt());
     connect(&coilButtons, SIGNAL(buttonClicked(int)), this, SLOT(coilChanged(int)));
 
-    regexp.setPattern(QStringLiteral("discs_(?<ID>\\d+)"));
+    regexp.setPattern(QStringLiteral("disc_(?<ID>\\d+)"));
     const QList<QCheckBox*> discs = findChildren<QCheckBox*>(regexp);
     foreach (QCheckBox *cbx, discs)
         discreteButtons.addButton(cbx, regexp.match(cbx->objectName()).captured("ID").toInt());
