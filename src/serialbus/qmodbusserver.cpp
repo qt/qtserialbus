@@ -431,6 +431,7 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
     case QModbusRequest::WriteMultipleCoils:
         return processWriteMultipleCoilsRequest(request);
     case QModbusRequest::WriteMultipleRegisters:
+        return processWriteMultipleRegistersRequest(request);
     case QModbusRequest::ReportServerId:
     case QModbusRequest::ReadFileRecord:
     case QModbusRequest::WriteFileRecord:
@@ -712,6 +713,57 @@ QModbusResponse QModbusServerPrivate::processWriteMultipleCoilsRequest(const QMo
 
     // - TODO: Increase message counters when they are implemented
     return QModbusResponse(request.functionCode(), address, numberOfCoils);
+}
+
+QModbusResponse QModbusServerPrivate::processWriteMultipleRegistersRequest(const QModbusRequest &request)
+{
+    // request data size corrupt: 5 header + 1 minimum data byte required
+    if (request.dataSize() < 6) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataValue);
+    }
+
+    quint16 address, numberOfRegisters;
+    quint8 byteCount;
+    request.decodeData(&address, &numberOfRegisters, &byteCount);
+
+    // byte count does not match number of data bytes following or register count
+    if ((byteCount != (request.dataSize() - 5 )) || (byteCount != (numberOfRegisters * 2))) {
+        return QModbusExceptionResponse(request.functionCode(),
+                                        QModbusExceptionResponse::IllegalDataValue);
+    }
+
+    if ((numberOfRegisters < 0x0001) || (numberOfRegisters > 0x007B)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataValue);
+    }
+
+    // Get the requested range out of the registers.
+    QModbusDataUnit registers(QModbusDataUnit::HoldingRegisters, address, numberOfRegisters);
+    if (!q_func()->data(&registers)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataAddress);
+    }
+
+    const QByteArray pduData = request.data().remove(0,5);
+    QDataStream stream(pduData);
+
+    QVector<quint16> values;
+    quint16 tmp;
+    for (int i = 0; i < numberOfRegisters; i++) {
+        stream >> tmp;
+        values.append(tmp);
+    }
+
+    registers.setValues(values);
+
+    if (!q_func()->setData(registers)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::ServerDeviceFailure);
+    }
+
+    // - TODO: Increase message counters when they are implemented
+    return QModbusResponse(request.functionCode(), address, numberOfRegisters);
 }
 
 QT_END_NAMESPACE

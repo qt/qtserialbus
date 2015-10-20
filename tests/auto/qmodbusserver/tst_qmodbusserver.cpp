@@ -291,6 +291,31 @@ private slots:
         QCOMPARE(response.data(), QByteArray::fromHex("03"));
     }
 
+    void testProcessWriteMultipleRegistersRequest()
+    {
+        // request write at register 173, address: 0x00ac -> 172, value: 0x00ff 0x1234
+        QModbusRequest request = QModbusRequest(QModbusRequest::WriteMultipleRegisters,
+            QByteArray::fromHex("00ac00020400ff1234"));
+        QModbusResponse response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("00ac0002"));
+
+        // request write register at offset 501
+        request = QModbusRequest(QModbusRequest::WriteMultipleRegisters,
+                                 QByteArray::fromHex("01f500010200ff"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.data(), QByteArray::fromHex("02"));
+
+        // request write 1 register at offset 0 value only 1 byte
+        request = QModbusRequest(QModbusRequest::WriteMultipleRegisters,
+                                 QByteArray::fromHex("000000010200"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+    }
+
     void tst_dataCalls_data()
     {
         QTest::addColumn<QModbusDataUnit::RegisterType>("registerType");
