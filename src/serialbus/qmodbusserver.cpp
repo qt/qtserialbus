@@ -643,7 +643,7 @@ QModbusResponse QModbusServerPrivate::processWriteSingleRegisterRequest(const QM
             QModbusExceptionResponse::IllegalDataAddress);
     }
 
-    // Since we picked the coil at address, data range
+    // Since we picked the holding register at address, data range
     // is now 1 and therefore index needs to be 0.
     registers.setValue(0, value);
 
