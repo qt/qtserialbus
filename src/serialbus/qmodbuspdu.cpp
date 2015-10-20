@@ -40,6 +40,57 @@
 
 QT_BEGIN_NAMESPACE
 
+namespace Private {
+
+enum struct Type {
+    Request,
+    Response
+};
+
+static quint8 minimumDataSize(QModbusPdu::FunctionCode code, Type type)
+{
+    switch (code) {
+    case QModbusPdu::ReadCoils:
+    case QModbusPdu::ReadDiscreteInputs:
+        return type == Type::Request ? 4u : 2u;
+    case QModbusPdu::WriteSingleCoil:
+    case QModbusPdu::WriteSingleRegister:
+        return 4u;
+    case QModbusPdu::ReadHoldingRegisters:
+    case QModbusPdu::ReadInputRegisters:
+        return type == Type::Request ? 4u : 3u;
+    case QModbusPdu::ReadExceptionStatus:
+        return type == Type::Request ? 0u : 1u;
+    case QModbusPdu::Diagnostics:
+        return 4u;
+    case QModbusPdu::GetCommEventCounter:
+        return type == Type::Request ? 0u : 4u;
+    case QModbusPdu::GetCommEventLog:
+        return type == Type::Request ? 0u : 8u;
+    case QModbusPdu::WriteMultipleCoils:
+        return type == Type::Request ? 6u : 4u;
+    case QModbusPdu::WriteMultipleRegisters:
+        return type == Type::Request ? 7u : 4u;
+    case QModbusPdu::ReportServerId:
+        return type == Type::Request ? 0u : 4u;   // TODO: The spec is not really clear here.
+    case QModbusPdu::ReadFileRecord:
+        return type == Type::Request ? 8u : 5u;
+    case QModbusPdu::WriteFileRecord:
+        return 10u;
+    case QModbusPdu::MaskWriteRegister:
+        return 6u;
+    case QModbusPdu::ReadWriteMultipleRegisters:
+        return type == Type::Request ? 11u : 3u;
+    case QModbusPdu::ReadFifoQueue:
+        return type == Type::Request ? 2u : 6u;
+    case QModbusPdu::EncapsulatedInterfaceTransport:
+        break; // TODO: The spec is not really clear here.
+    }
+    return 0u;
+}
+
+}   // namespace Private
+
 /*!
     \class QModbusPdu
     \inmodule QtSerialBus
@@ -269,6 +320,14 @@ QDebug operator<<(QDebug debug, const QModbusPdu &pdu)
 */
 
 /*!
+    Returns the minimum data size for a request, based on the function \a code.
+*/
+quint8 QModbusRequest::minimumDataSize(FunctionCode code)
+{
+    return Private::minimumDataSize(code, Private::Type::Request);
+}
+
+/*!
     \class QModbusResponse
     \inmodule QtSerialBus
     \since 5.6
@@ -320,6 +379,16 @@ QDebug operator<<(QDebug debug, const QModbusPdu &pdu)
     Constructs a QModbusResponse with function code set to \a code and payload set to \a data.
     The data is expected to be stored in big-endian byte order already.
 */
+
+/*!
+    Returns the minimum data size for a response, based on the function \a code.
+*/
+quint8 QModbusResponse::minimumDataSize(FunctionCode code)
+{
+    if (code & quint8(0x80))
+        return 1u;
+    return Private::minimumDataSize(code, Private::Type::Response);
+}
 
 /*!
     \class QModbusPdu

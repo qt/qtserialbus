@@ -57,6 +57,48 @@ private:
     QtMessageHandler oldMessageHandler;
 };
 
+static quint8 minimumDataSize(QModbusPdu::FunctionCode code, bool request)
+{
+    switch (code) {
+    case QModbusPdu::ReadCoils:
+    case QModbusPdu::ReadDiscreteInputs:
+        return request ? 4u : 2u;
+    case QModbusPdu::WriteSingleCoil:
+    case QModbusPdu::WriteSingleRegister:
+        return 4u;
+    case QModbusPdu::ReadHoldingRegisters:
+    case QModbusPdu::ReadInputRegisters:
+        return request ? 4u : 3u;
+    case QModbusPdu::ReadExceptionStatus:
+        return request ? 0u : 1u;
+    case QModbusPdu::Diagnostics:
+        return 4u;
+    case QModbusPdu::GetCommEventCounter:
+        return request ? 0u : 4u;
+    case QModbusPdu::GetCommEventLog:
+        return request ? 0u : 8u;
+    case QModbusPdu::WriteMultipleCoils:
+        return request ? 6u : 4u;
+    case QModbusPdu::WriteMultipleRegisters:
+        return request ? 7u : 4u;
+    case QModbusPdu::ReportServerId:
+        return request ? 0u : 4u;   // TODO: The spec is not really clear here.
+    case QModbusPdu::ReadFileRecord:
+        return request ? 8u : 5u;
+    case QModbusPdu::WriteFileRecord:
+        return 10u;
+    case QModbusPdu::MaskWriteRegister:
+        return 6u;
+    case QModbusPdu::ReadWriteMultipleRegisters:
+        return request ? 11u : 3u;
+    case QModbusPdu::ReadFifoQueue:
+        return request ? 2u : 6u;
+    case QModbusPdu::EncapsulatedInterfaceTransport:
+        break; // TODO: The spec is not really clear here.
+    }
+    return 0u;
+}
+
 class tst_QModbusPdu : public QObject
 {
     Q_OBJECT
@@ -257,6 +299,89 @@ private slots:
                 QModbusExceptionResponse::IllegalDataAddress);
         }
         QCOMPARE(s_msg, QString::fromLatin1("0x8102"));
+    }
+
+    void testMinimumDataSize()
+    {
+        bool request = true;
+        QCOMPARE(minimumDataSize(QModbusPdu::ReadCoils, request),
+            QModbusRequest::minimumDataSize(QModbusRequest::ReadCoils));
+        QCOMPARE(minimumDataSize(QModbusPdu::ReadDiscreteInputs, request),
+            QModbusRequest::minimumDataSize(QModbusRequest::ReadDiscreteInputs));
+        QCOMPARE(minimumDataSize(QModbusPdu::WriteSingleCoil, request),
+            QModbusRequest::minimumDataSize(QModbusRequest::WriteSingleCoil));
+        QCOMPARE(minimumDataSize(QModbusPdu::ReadHoldingRegisters, request),
+            QModbusRequest::minimumDataSize(QModbusRequest::ReadHoldingRegisters));
+        QCOMPARE(minimumDataSize(QModbusPdu::ReadInputRegisters, request),
+            QModbusRequest::minimumDataSize(QModbusRequest::ReadInputRegisters));
+        QCOMPARE(minimumDataSize(QModbusPdu::WriteSingleRegister, request),
+            QModbusRequest::minimumDataSize(QModbusRequest::WriteSingleRegister));
+        QCOMPARE(minimumDataSize(QModbusPdu::ReadExceptionStatus, request),
+            QModbusRequest::minimumDataSize(QModbusRequest::ReadExceptionStatus));
+        QCOMPARE(minimumDataSize(QModbusPdu::Diagnostics, request),
+            QModbusRequest::minimumDataSize(QModbusRequest::Diagnostics));
+        QCOMPARE(minimumDataSize(QModbusPdu::GetCommEventCounter, request),
+            QModbusRequest::minimumDataSize(QModbusRequest::GetCommEventCounter));
+        QCOMPARE(minimumDataSize(QModbusPdu::GetCommEventLog, request),
+            QModbusRequest::minimumDataSize(QModbusRequest::GetCommEventLog));
+        QCOMPARE(minimumDataSize(QModbusPdu::WriteMultipleCoils, request),
+            QModbusRequest::minimumDataSize(QModbusRequest::WriteMultipleCoils));
+        QCOMPARE(minimumDataSize(QModbusPdu::WriteMultipleRegisters, request),
+            QModbusRequest::minimumDataSize(QModbusRequest::WriteMultipleRegisters));
+        QCOMPARE(minimumDataSize(QModbusPdu::ReportServerId, request),
+            QModbusRequest::minimumDataSize(QModbusRequest::ReportServerId));
+        QCOMPARE(minimumDataSize(QModbusPdu::ReadFileRecord, request),
+            QModbusRequest::minimumDataSize(QModbusRequest::ReadFileRecord));
+        QCOMPARE(minimumDataSize(QModbusPdu::WriteFileRecord, request),
+            QModbusRequest::minimumDataSize(QModbusRequest::WriteFileRecord));
+        QCOMPARE(minimumDataSize(QModbusPdu::MaskWriteRegister, request),
+            QModbusRequest::minimumDataSize(QModbusRequest::MaskWriteRegister));
+        QCOMPARE(minimumDataSize(QModbusPdu::ReadWriteMultipleRegisters, request),
+            QModbusRequest::minimumDataSize(QModbusRequest::ReadWriteMultipleRegisters));
+        QCOMPARE(minimumDataSize(QModbusPdu::ReadFifoQueue, request),
+            QModbusRequest::minimumDataSize(QModbusRequest::ReadFifoQueue));
+        QCOMPARE(minimumDataSize(QModbusPdu::EncapsulatedInterfaceTransport, request),
+            QModbusRequest::minimumDataSize(QModbusRequest::EncapsulatedInterfaceTransport));
+
+        request = false;
+        QCOMPARE(minimumDataSize(QModbusPdu::ReadCoils, request),
+            QModbusResponse::minimumDataSize(QModbusResponse::ReadCoils));
+        QCOMPARE(minimumDataSize(QModbusPdu::ReadDiscreteInputs, request),
+            QModbusResponse::minimumDataSize(QModbusResponse::ReadDiscreteInputs));
+        QCOMPARE(minimumDataSize(QModbusPdu::WriteSingleCoil, request),
+            QModbusResponse::minimumDataSize(QModbusResponse::WriteSingleCoil));
+        QCOMPARE(minimumDataSize(QModbusPdu::ReadHoldingRegisters, request),
+            QModbusResponse::minimumDataSize(QModbusResponse::ReadHoldingRegisters));
+        QCOMPARE(minimumDataSize(QModbusPdu::ReadInputRegisters, request),
+            QModbusResponse::minimumDataSize(QModbusResponse::ReadInputRegisters));
+        QCOMPARE(minimumDataSize(QModbusPdu::WriteSingleRegister, request),
+            QModbusResponse::minimumDataSize(QModbusResponse::WriteSingleRegister));
+        QCOMPARE(minimumDataSize(QModbusPdu::ReadExceptionStatus, request),
+            QModbusResponse::minimumDataSize(QModbusResponse::ReadExceptionStatus));
+        QCOMPARE(minimumDataSize(QModbusPdu::Diagnostics, request),
+            QModbusResponse::minimumDataSize(QModbusResponse::Diagnostics));
+        QCOMPARE(minimumDataSize(QModbusPdu::GetCommEventCounter, request),
+            QModbusResponse::minimumDataSize(QModbusResponse::GetCommEventCounter));
+        QCOMPARE(minimumDataSize(QModbusPdu::GetCommEventLog, request),
+            QModbusResponse::minimumDataSize(QModbusResponse::GetCommEventLog));
+        QCOMPARE(minimumDataSize(QModbusPdu::WriteMultipleCoils, request),
+            QModbusResponse::minimumDataSize(QModbusResponse::WriteMultipleCoils));
+        QCOMPARE(minimumDataSize(QModbusPdu::WriteMultipleRegisters, request),
+            QModbusResponse::minimumDataSize(QModbusResponse::WriteMultipleRegisters));
+        QCOMPARE(minimumDataSize(QModbusPdu::ReportServerId, request),
+            QModbusResponse::minimumDataSize(QModbusResponse::ReportServerId));
+        QCOMPARE(minimumDataSize(QModbusPdu::ReadFileRecord, request),
+            QModbusResponse::minimumDataSize(QModbusResponse::ReadFileRecord));
+        QCOMPARE(minimumDataSize(QModbusPdu::WriteFileRecord, request),
+            QModbusResponse::minimumDataSize(QModbusResponse::WriteFileRecord));
+        QCOMPARE(minimumDataSize(QModbusPdu::MaskWriteRegister, request),
+            QModbusResponse::minimumDataSize(QModbusResponse::MaskWriteRegister));
+        QCOMPARE(minimumDataSize(QModbusPdu::ReadWriteMultipleRegisters, request),
+            QModbusResponse::minimumDataSize(QModbusResponse::ReadWriteMultipleRegisters));
+        QCOMPARE(minimumDataSize(QModbusPdu::ReadFifoQueue, request),
+            QModbusResponse::minimumDataSize(QModbusResponse::ReadFifoQueue));
+        QCOMPARE(minimumDataSize(QModbusPdu::EncapsulatedInterfaceTransport, request),
+            QModbusResponse::minimumDataSize(QModbusResponse::EncapsulatedInterfaceTransport));
     }
 };
 

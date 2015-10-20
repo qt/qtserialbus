@@ -175,6 +175,8 @@ public:
     QModbusRequest(FunctionCode code, const QByteArray &newData = QByteArray())
         : QModbusPdu(code, newData)
     {}
+
+    Q_SERIALBUS_EXPORT static quint8 minimumDataSize(FunctionCode code);
 };
 
 class QModbusResponse : public QModbusPdu
@@ -191,6 +193,8 @@ public:
     QModbusResponse(FunctionCode code, const QByteArray &newData = QByteArray())
         : QModbusPdu(code, newData)
     {}
+
+    Q_SERIALBUS_EXPORT static quint8 minimumDataSize(FunctionCode code);
 };
 
 class QModbusExceptionResponse : public QModbusResponse
