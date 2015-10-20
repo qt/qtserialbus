@@ -291,6 +291,337 @@ private slots:
         QCOMPARE(response.data(), QByteArray::fromHex("03"));
     }
 
+    void testProcessDiagnosticsRequest()
+    {
+        // subfunction 00
+        QModbusRequest request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("000000ffabcd"));
+        QModbusResponse response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("000000ffabcd"));
+
+
+        //subfunction 01
+        //TODO: impossible due to connectDevice() asking open() which is pure virtual
+        //validate this in qmodbustcpserver and qmodbusrtuslave
+//        request = QModbusRequest(QModbusRequest::Diagnostics,
+//            QByteArray::fromHex("00010000"));
+//        response = server.processRequest(request);
+//        QCOMPARE(response.isException(), false);
+//        // response, equals request
+//        QCOMPARE(response.data(), QByteArray::fromHex("00010000"));
+
+//        request = QModbusRequest(QModbusRequest::Diagnostics,
+//            QByteArray::fromHex("0001ff00"));
+//        response = server.processRequest(request);
+//        QCOMPARE(response.isException(), false);
+//        // response, equals request
+//        QCOMPARE(response.data(), QByteArray::fromHex("0001ff00"));
+
+        // invalidate
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("0001ff01"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        // subfunction 02
+        // validate
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+                                 QByteArray::fromHex("00020000"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("00020000"));
+
+        // invalidate
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("00020001"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("0002000001"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        // subfunction 03
+        // validate
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+                                 QByteArray::fromHex("00030a00"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("00030a00"));
+
+        // invalidate
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("00030a01"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("00030a0101"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        // subfunction 04
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+                                 QByteArray::fromHex("00040000"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("00040000"));
+
+        // invalidate
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("00040001"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("0004000001"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        // subfunction 10: counter value is 0
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+                                 QByteArray::fromHex("000a0000"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("000a0000"));
+
+        // invalidate
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("000a0001"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("000a000001"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        // subfunction 11: counter value is 0
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+                                 QByteArray::fromHex("000b0000"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("000b0000"));
+
+        // invalidate
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("000b0001"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("000b000001"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        // subfunction 12: counter value is 0
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+                                 QByteArray::fromHex("000c0000"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("000c0000"));
+
+        // invalidate
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("000c0001"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("000c000001"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        // subfunction 13: counter value is 0
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+                                 QByteArray::fromHex("000d0000"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("000d0000"));
+
+        // invalidate
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("000d0001"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("000d000001"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        // subfunction 14: counter value is 0
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+                                 QByteArray::fromHex("000e0000"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("000e0000"));
+
+        // invalidate
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("000e0001"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("000e000001"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        // subfunction 15: counter value is 0
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+                                 QByteArray::fromHex("000f0000"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("000f0000"));
+
+        // invalidate
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("000f0001"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("000f000001"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        // subfunction 16: counter value is 0
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+                                 QByteArray::fromHex("00100000"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("00100000"));
+
+        // invalidate
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("00100001"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("0010000001"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        // subfunction 17: counter value is 0
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+                                 QByteArray::fromHex("00110000"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("00110000"));
+
+        // invalidate
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("00110001"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("0011000001"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        // subfunction 18: counter value is 0
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+                                 QByteArray::fromHex("00120000"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("00120000"));
+
+        // invalidate
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("00120001"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("0012000001"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        // subfunction > 4 < 10
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("0005ff01"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("01"));
+
+        // subfunction > 18
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("00130000"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("01"));
+    }
+
     void testProcessWriteMultipleRegistersRequest()
     {
         // request write at register 173, address: 0x00ac -> 172, value: 0x00ff 0x1234
@@ -535,6 +866,23 @@ private slots:
         server.setSlaveAddress(1);
         QCOMPARE(server.slaveAddress(), 1);
     }
+
+    void tst_diagnosticRegister()
+    {
+        server.setDiagnosticRegister(56u);
+        QCOMPARE(server.diagnosticRegister(), quint16(56));
+        server.setDiagnosticRegister(1u);
+        QCOMPARE(server.diagnosticRegister(), quint16(1));
+    }
+
+    void tst_continueOnError()
+    {
+        server.setContinueOnError(true);
+        QCOMPARE(server.continueOnError(), true);
+        server.setContinueOnError(false);
+        QCOMPARE(server.continueOnError(), false);
+    }
+
 };
 
 QTEST_MAIN(tst_QModbusServer)

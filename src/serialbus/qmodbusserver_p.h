@@ -70,17 +70,42 @@ public:
     QModbusResponse processReadInputRegistersRequest(const QModbusRequest &request);
     QModbusResponse processWriteSingleCoilRequest(const QModbusRequest &request);
     QModbusResponse processWriteSingleRegisterRequest(const QModbusRequest &request);
+    QModbusResponse processDiagnostics(const QModbusRequest &request);
     QModbusResponse processWriteMultipleCoilsRequest(const QModbusRequest &request);
     QModbusResponse processWriteMultipleRegistersRequest(const QModbusRequest &request);
     QModbusResponse processReadWriteMultipleRegistersRequest(const QModbusRequest &request);
 
 private:
+    bool restartCommunicationsOption(bool clearLog);
+    void resetCommunicationCounters();
+    void storeEvent(quint8 eventByte);
+
+    // Device specific fields to be moved later
     QModbusDataUnit m_discreteInputs;
     QModbusDataUnit m_coils;
     QModbusDataUnit m_inputRegisters;
     QModbusDataUnit m_holdingRegisters;
 
+    quint16 m_diagnosticRegister = 0;
+
     int m_slaveAddress = 0;
+
+    // Modbus Communication fields to stay
+    bool m_listenOnly = false; //TODO not enforced yet
+    bool m_continueOnError = true; //TODO hook into server implementations
+    bool m_deviceBusy = false; //TODO required?
+    uchar m_asciiInputDelimiter; // TODO not taken into account yet
+    quint16 m_commEventCounter = 0;
+    QByteArray m_commEventLog;
+
+    quint16 m_busMessageCounter = 0;
+    quint16 m_crcErrorCounter = 0;
+    quint16 m_exceptionErrorCounter = 0;
+    quint16 m_serverMessageCounter = 0;
+    quint16 m_serverNoResponseCounter = 0;
+    quint16 m_serverNAKCounter = 0;
+    quint16 m_serverDeviceBusyCounter = 0;
+    quint16 m_serverCharacterOverrunCounter = 0;
 };
 
 QT_END_NAMESPACE

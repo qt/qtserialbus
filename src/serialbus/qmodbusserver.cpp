@@ -38,9 +38,12 @@
 #include "qmodbusserver_p.h"
 #include "qmodbus_symbols_p.h"
 
+#include <QtCore/qloggingcategory.h>
 #include <bitset>
 
 QT_BEGIN_NAMESPACE
+
+Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
 
 /*!
     \class QModbusServer
@@ -114,6 +117,74 @@ int QModbusServer::slaveAddress() const
     Q_D(const QModbusServer);
 
     return d->m_slaveAddress;
+}
+
+/*!
+    Sets the diagnostic register value of the server in a device specific
+    encoding. The bit values of the register need device specific documentation.
+
+    \sa diagnosticRegister()
+*/
+void QModbusServer::setDiagnosticRegister(quint16 value)
+{
+    Q_D(QModbusServer);
+    d->m_diagnosticRegister = value;
+}
+
+/*!
+    Returns the diagnostic register value of the server.
+
+    The diagnostic register contains device-specific contents where each bit
+    has a specific meaning.
+
+    \sa setDiagnosticRegister()
+**/
+quint16 QModbusServer::diagnosticRegister() const
+{
+    Q_D(const QModbusServer);
+
+    return d->m_diagnosticRegister;
+}
+
+/*!
+    Sets the continue on error flag of the server according to \a value.
+    If \a value is \c true, the server keeps answering requests even if
+    communication errors have been detected, otherwise stops responding to
+    requests. The flag can be reset externally using a diagnostics function code
+    (0x08) request with subfunction code 01, Restart Communications Option, where
+    the data field corresponds to:
+
+    \list
+    \li 0x0000 = Continue on error set to \c true
+    \li 0xFF00 = Continue on error set to \c false (equals stop on error)
+    \endlist
+
+    By default the continue on error flag is set to \c true.
+
+    \sa continueOnError()
+*/
+void QModbusServer::setContinueOnError(bool value)
+{
+    Q_D(QModbusServer);
+    d->m_continueOnError = value;
+}
+
+/*!
+    Returns the continue on error flag of the server.
+
+    If the returned value is \c true, communication requests are responded to even
+    if errors in the communication handling were detected. If \c false is returned,
+    the server is in stop on error mode and does not answer client requests.
+
+    The default value of the continue on error flag is set to true.
+
+    \sa setContinueOnError()
+*/
+bool QModbusServer::continueOnError()
+{
+    Q_D(const QModbusServer);
+
+    return d->m_continueOnError;
 }
 
 /*!
@@ -427,6 +498,7 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
         return processWriteSingleRegisterRequest(request);
     case QModbusRequest::ReadExceptionStatus:
     case QModbusRequest::Diagnostics:
+        return processDiagnostics(request);
     case QModbusRequest::GetCommEventCounter:
     case QModbusRequest::GetCommEventLog:
     case QModbusRequest::WriteMultipleCoils:
@@ -659,6 +731,109 @@ QModbusResponse QModbusServerPrivate::processWriteSingleRegisterRequest(const QM
     return QModbusResponse(request.functionCode(), address, value);
 }
 
+QModbusResponse QModbusServerPrivate::processDiagnostics(const QModbusRequest &request)
+{
+    quint16 subFunctionCode;
+    request.decodeData(&subFunctionCode);
+
+    if ((subFunctionCode > Diagnostics::ForceListenOnlyMode
+         && subFunctionCode < Diagnostics::ClearCountersAndDiagnosticRegister)
+         || (subFunctionCode > Diagnostics::ReturnBusCharacterOverrunCount)) {
+        return q_func()->processPrivateModbusRequest(request);
+    }
+
+    if (subFunctionCode == Diagnostics::ReturnQueryData) {
+        // note: we return an echo even if the data is empty as there is no minimum required
+        return QModbusResponse(request.functionCode(), request.data());
+    }
+
+    // all other sub-functions have two byte sub-function + 2 byte data
+    if (request.dataSize() != 4) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataValue);
+    }
+
+    if (subFunctionCode == Diagnostics::RestartCommunicationsOption) {
+        quint16 clearLog;
+        request.decodeData(&subFunctionCode, &clearLog);
+        if ((clearLog != 0xFF00) && (clearLog != 0x0000)) {
+            return QModbusExceptionResponse(request.functionCode(),
+                QModbusExceptionResponse::IllegalDataValue);
+        }
+        if (!restartCommunicationsOption(clearLog == 0xFF00)) {
+            qCWarning(QT_MODBUS) << "Cannot restart server communication";
+            return QModbusExceptionResponse(request.functionCode(),
+                                            QModbusExceptionResponse::ServerDeviceFailure);
+        }
+        return QModbusResponse(request.functionCode(), request.data());
+    }
+
+    if (subFunctionCode == Diagnostics::ChangeAsciiInputDelimiter) {
+        const QByteArray data = request.data().mid(2, 2);
+        if (!data[1] == 0x00) {
+            return QModbusExceptionResponse(request.functionCode(),
+                QModbusExceptionResponse::IllegalDataValue);
+        }
+        // TODO: this changes the variable asciiInputDelimiter only for now.
+        // cite PI-MBUS-300.pdf:
+        // The character ‘CHAR’ passed in the query data field becomes the end of message
+        // delimiter for future messages (replacing the default LF character). This function is
+        // useful in cases where a Line Feed is not wanted at the end of ASCII messages.
+        m_asciiInputDelimiter = data[0];
+        return QModbusResponse(request.functionCode(), request.data());
+    }
+
+    // all other subfunctions require data = 0x0000
+    quint16 nullData;
+    request.decodeData(&subFunctionCode, &nullData);
+    if (nullData != 0x0000) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataValue);
+    }
+
+    switch (subFunctionCode) {
+    case Diagnostics::ReturnDiagnosticRegister:
+        return QModbusResponse(request.functionCode(), subFunctionCode,
+                               q_func()->diagnosticRegister());
+    case Diagnostics::ForceListenOnlyMode:
+        m_listenOnly = true;
+        // TODO: this is a simple way of encoding the event byte. As we currently
+        // have no methods for the four types of event bytes to store, use this as
+        // a temporary way.
+        storeEvent(4u);
+        // TODO: this is only a dummy response. The response should not leave the server
+        // after setting the server into listen only mode (as with all responses
+        // when listenOnly == true)
+        return QModbusResponse(request.functionCode(), request.data());
+    case Diagnostics::ClearCountersAndDiagnosticRegister:
+        resetCommunicationCounters();
+        // TODO: according to PI_MBUS_300 specification, the clearing of the diagnostic
+        // register is dependent on the device model. For legacy support to fullfill
+        // this requirement, a server configuration variable could be added to check
+        // if the diagnostic register should be cleared or not.
+        q_func()->setDiagnosticRegister(0u);
+        return QModbusResponse(request.functionCode(), request.data());
+    case Diagnostics::ReturnBusMessageCount:
+        return QModbusResponse(request.functionCode(), subFunctionCode, m_busMessageCounter);
+    case Diagnostics::ReturnBusCommunicationErrorCount:
+        return QModbusResponse(request.functionCode(), subFunctionCode, m_crcErrorCounter);
+    case Diagnostics::ReturnBusExceptionErrorCount:
+        return QModbusResponse(request.functionCode(), subFunctionCode, m_exceptionErrorCounter);
+    case Diagnostics::ReturnServerMessageCount:
+        return QModbusResponse(request.functionCode(), subFunctionCode, m_serverMessageCounter);
+    case Diagnostics::ReturnServerNoResponseCount:
+        return QModbusResponse(request.functionCode(), subFunctionCode, m_serverNoResponseCounter);
+    case Diagnostics::ReturnServerNAKCount:
+        return QModbusResponse(request.functionCode(), subFunctionCode, m_serverNAKCounter);
+    case Diagnostics::ReturnServerBusyCount:
+        return QModbusResponse(request.functionCode(), subFunctionCode, m_serverDeviceBusyCounter);
+    case Diagnostics::ReturnBusCharacterOverrunCount:
+        return QModbusResponse(request.functionCode(), subFunctionCode, m_serverCharacterOverrunCounter);
+    default:
+        return q_func()->processPrivateModbusRequest(request);
+    }
+}
+
 QModbusResponse QModbusServerPrivate::processWriteMultipleCoilsRequest(const QModbusRequest &request)
 {
     // request data size corrupt: 5 header + 1 minimum data byte required
@@ -832,6 +1007,71 @@ QModbusResponse QModbusServerPrivate::processReadWriteMultipleRegistersRequest(
     // - TODO: Increase message counters when they are implemented
     return QModbusResponse(request.functionCode(), quint8(readQuantity * 2),
                            readRegisters.values());
+}
+
+/*!
+    \internal
+    Access function of the device for Modbus Diagnostic Function Code 0x08, Subcode 01
+    (0x08, 0x0001 hex)
+
+    Restarts the communication by closing the connection and re-opening. After closing,
+    all communication event counters are cleared and the listen only mode set to false.
+    If \a clearEventLog is set to true, the event log history gets cleared also.
+
+    \sa forceListenOnlyMode(), getCommEventLog()
+ */
+bool QModbusServerPrivate::restartCommunicationsOption(bool clearLog)
+{
+    q_func()->disconnectDevice();
+    m_listenOnly = false;
+    if (clearLog)
+        m_commEventLog.clear();
+
+    resetCommunicationCounters();
+    storeEvent(0u);
+    return q_func()->connectDevice();
+}
+
+/*!
+    \internal
+    Resets all communication event counters of the Modbus server to zero.
+*/
+void QModbusServerPrivate::resetCommunicationCounters()
+{
+    m_commEventCounter = 0;
+    m_busMessageCounter = 0;
+    m_crcErrorCounter = 0;
+    m_exceptionErrorCounter = 0;
+    m_serverCharacterOverrunCounter = 0;
+    m_serverDeviceBusyCounter = 0;
+    m_serverMessageCounter = 0;
+    m_serverNAKCounter = 0;
+    m_serverNoResponseCounter = 0;
+}
+
+/*!
+    \internal
+    Stores an event byte into the Modbus event log history table (0-64 bytes) at
+    the first position (byte 0) and pushes all other events back. The communication
+    event counter is increased for each event stored in the event log.
+
+    A communication event is encoded into one byte with the four types:
+    \list
+     \li Remote Device Modbus Receive Event
+     \li Remote Device Modbus Send Event
+     \li Remote Device Entered Listen Only Mode
+     \li Remote Device Initiated Communication Restart
+    \endlist
+
+    \sa getCommEventLog(), restartCommunicationsOption()
+*/
+void QModbusServerPrivate::storeEvent(quint8 eventByte)
+{
+    if (m_commEventLog.size() == 64)
+        m_commEventLog.resize(63);
+
+    m_commEventLog.prepend(eventByte);
+    m_commEventCounter += 1;
 }
 
 QT_END_NAMESPACE
