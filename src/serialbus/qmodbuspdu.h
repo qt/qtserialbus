@@ -126,16 +126,24 @@ protected:
     QModbusPdu &operator=(const QModbusPdu &) Q_DECL_EQ_DEFAULT;
 
 private:
+    template <typename T, typename ... Ts> struct IsType { enum { value = false }; };
+    template <typename T, typename T1, typename ... Ts> struct IsType<T, T1, Ts...> {
+        enum { value = std::is_same<T, T1>::value || IsType<T, Ts...>::value };
+    };
+
     template <typename T> void encode(QDataStream *stream, const T &t) {
         static_assert(std::is_pod<T>::value, "Only POD types supported.");
+        static_assert(IsType<T, quint8, quint16>::value, "Only quint8 and quint16 supported.");
         (*stream) << t;
     }
     template <typename T> void decode(QDataStream *stream, T &t) const {
         static_assert(std::is_pod<T>::value, "Only POD types supported.");
+        static_assert(IsType<T, quint8*, quint16*>::value, "Only quint8* and quint16* supported.");
         (*stream) >> *t;
     }
     template <typename T> void encode(QDataStream *stream, const QVector<T> &vector) {
         static_assert(std::is_pod<T>::value, "Only POD types supported.");
+        static_assert(IsType<T, quint8, quint16>::value, "Only quint8 and quint16 supported.");
         for (int i = 0; i < vector.count(); ++i)
             (*stream) << vector[i];
     }
