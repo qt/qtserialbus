@@ -18,13 +18,11 @@ config_libmodbus_systemlib {
 }
 
 HEADERS += \
-    libmodbusslave.h \
     libmodbusmaster.h \
     libmodbusreply.h \
     libmodbustcpclient.h
 
 SOURCES += main.cpp \
-    libmodbusslave.cpp \
     libmodbusmaster.cpp \
     libmodbusreply.cpp \
     libmodbustcpclient.cpp

@@ -35,7 +35,6 @@
 ****************************************************************************/
 
 #include "libmodbusmaster.h"
-#include "libmodbusslave.h"
 #include "libmodbustcpclient.h"
 
 #include <QtSerialBus/qmodbus.h>
@@ -53,10 +52,8 @@ class ModBusPlugin : public QObject, public QModbusFactory
     Q_INTERFACES(QModbusFactory)
 
 public:
-    QModbusServer *createServer(QModbusDevice::ModbusConnection type) const
+    QModbusServer *createServer(QModbusDevice::ModbusConnection /*type*/) const
     {
-        if (type == QModbusDevice::Serial)
-            return new LibModBusSlave();
         return Q_NULLPTR;
     }
 
