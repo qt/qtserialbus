@@ -87,35 +87,11 @@ public:
                          q, SLOT(handleErrorOccurred(QSerialPort::SerialPortError)));
     }
 
-    quint8 lengthOfFunctionCodeHeader(QModbusPdu::FunctionCode code) const
-    {
-        switch (code) {
-        case QModbusPdu::ReadCoils:
-        case QModbusPdu::ReadDiscreteInputs:
-        case QModbusPdu::ReadHoldingRegisters:
-        case QModbusPdu::ReadInputRegisters:
-        case QModbusPdu::WriteSingleCoil:
-        case QModbusPdu::WriteSingleRegister:
-            return 4;
-        case QModbusPdu::WriteMultipleRegisters:
-        case QModbusPdu::WriteMultipleCoils:
-            return 5;
-        case QModbusPdu::MaskWriteRegister:
-            return 6;
-        case QModbusPdu::ReadWriteMultipleRegisters:
-            return 9;
-        default:
-            qWarning() << "Size for FunctionCode not known" << code;
-            return 0;
-        }
-    }
-
     void handleErrorOccurred(QSerialPort::SerialPortError);
     void serialPortReadyRead();
     void aboutToClose();
 
     QSerialPort *m_serialPort;
-    QByteArray m_pendingBuffer;
 };
 
 QT_END_NAMESPACE

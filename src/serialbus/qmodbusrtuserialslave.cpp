@@ -115,13 +115,10 @@ void QModbusRtuSerialSlave::close()
     if (d->m_serialPort->isOpen())
         d->m_serialPort->close();
 
-    d->m_pendingBuffer.clear();
-
     setState(QModbusDevice::UnconnectedState);
 }
 
-void QModbusRtuSerialSlavePrivate::handleErrorOccurred(
-        QSerialPort::SerialPortError error)
+void QModbusRtuSerialSlavePrivate::handleErrorOccurred(QSerialPort::SerialPortError error)
 {
     if (error == QSerialPort::NoError)
         return;
@@ -188,58 +185,50 @@ void QModbusRtuSerialSlavePrivate::serialPortReadyRead()
 {
     Q_Q(QModbusRtuSerialSlave);
 
-    int size = m_serialPort->size();
-    m_pendingBuffer.append(m_serialPort->read(size));
-    qCDebug(QT_MODBUS_LOW) << "Received: " << m_pendingBuffer.toHex();
+    const int size = m_serialPort->size();
+    const QByteArray pendingBuffer = m_serialPort->read(size);
 
-    //d->m_pendingBuffer.append(package);
-
-    // Index -> description
-    // SlaveId      -> 1 byte
-    // FunctionCode -> 1 byte
+    // Index                         -> description
+    // SlaveId                       -> 1 byte
+    // FunctionCode                  -> 1 byte
     // FunctionCode specific content -> 0-252 bytes
-    // CRC          -> 2 bytes
+    // CRC                           -> 2 bytes
 
     QModbusPdu::FunctionCode code = QModbusPdu::Invalid;
     // function code available?
-    if (m_pendingBuffer.size() >= 2)
-        code = QModbusRequest::FunctionCode(m_pendingBuffer.at(1));
-
-    int aduSize = 1; // slaveId counted
-
-    //some messages have additional data payload
-    int lengthDataField = 0;
-    switch (code) {
-    case QModbusPdu::WriteMultipleCoils:
-    case QModbusPdu::WriteMultipleRegisters:
-    case QModbusPdu::ReadWriteMultipleRegisters:
-        lengthDataField = m_pendingBuffer[lengthOfFunctionCodeHeader(code)+1];
-        break;
-    default:
-        // remaining request types have no data field at the end
-        break;
+    if (pendingBuffer.size() >= 2) {
+        code = QModbusRequest::FunctionCode(pendingBuffer.at(1));
+    } else {
+        qCWarning(QT_MODBUS) << "Invalid modbus PDU received";
+        return;
     }
 
-    aduSize += 1; //function code counted
-    aduSize += lengthOfFunctionCodeHeader(code);
-    if (lengthDataField > 0) {
-        aduSize += 1; //byte count field
-        aduSize += lengthDataField; // data payload size
+    int aduSize = 2; //slaveId & function code counted
+    int pduSize_without_fcode = QModbusRequest::calculateDataSize(code, pendingBuffer.mid(2));
+    if (pduSize_without_fcode < 0) {
+        qCWarning(QT_MODBUS) << "Cannot calculate PDU size for fcode" << code;
+        return;
     }
-
+    aduSize += pduSize_without_fcode;
     //obtain CRC which is last 2 bytes
-    quint16 receivedCrc = m_pendingBuffer[aduSize] << 8 | m_pendingBuffer[aduSize+1];
+    quint16 receivedCrc = pendingBuffer[aduSize] << 8 | pendingBuffer[aduSize+1];
     aduSize += 2; // crc size
 
-    const QByteArray completeAduFrame = m_pendingBuffer.left(aduSize);
+    const QByteArray completeAduFrame = pendingBuffer.left(aduSize);
     if (completeAduFrame.size() < aduSize) {
         // TODO should such cases wait for next bytes to arrive and keep m_pendingBuffer around
         qCWarning(QT_MODBUS) << "ADU too short, ignoring pending frame";
         return;
     }
 
-    m_pendingBuffer.remove(0, aduSize);
+    if (aduSize > size)
+        qCWarning(QT_MODBUS) << "Ignoring remaining data beyond expected ADU size";
+
     qCDebug(QT_MODBUS_LOW) << "Received request (incl ADU)" << completeAduFrame.toHex();
+    if (QT_MODBUS().isDebugEnabled() && (aduSize > size)) {
+        qCDebug(QT_MODBUS_LOW) << "Pending buffer:" << pendingBuffer.toHex();
+        qCDebug(QT_MODBUS) << "Ignoring remaining data beyond expected ADU size";
+    }
 
 
     // for this slave id?
@@ -251,24 +240,24 @@ void QModbusRtuSerialSlavePrivate::serialPortReadyRead()
     }
 
     if (checkCRC(completeAduFrame, completeAduFrame.size(), receivedCrc)) {
-        qWarning() << "Ignoring request with wrong crc";
+        qCWarning(QT_MODBUS) << "Ignoring request with wrong crc";
         return;
     }
 
     //remove slave id, fcode & crc
     QModbusRequest req(code, completeAduFrame.mid(2, completeAduFrame.size()-4));
+    qCDebug(QT_MODBUS) << "Request PDU" << req;
     QModbusResponse response = q->processRequest(req);
 
-    qCDebug(QT_MODBUS) << "Response PDU:" << response.functionCode() << response.data().toHex();
+    qCDebug(QT_MODBUS) << "Response PDU:" << response;
 
     QByteArray result;
-    result.append(completeAduFrame.at(0));
-    result.append(completeAduFrame.at(1));
-    result.append(response.data());
+    QDataStream out(&result, QIODevice::WriteOnly);
+    out << (quint8) q->slaveId();
+    out << response;
 
     quint16 resultCrc = calculateCRC(result, result.size());
-    result.append(quint8(resultCrc >> 8));
-    result.append(quint8(resultCrc & 0xff));
+    out << resultCrc;
 
     qCDebug(QT_MODBUS_LOW) << "Sending response (incl ADU):" << result.toHex();
     m_serialPort->write(result);
