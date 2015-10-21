@@ -449,7 +449,7 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
 QModbusResponse QModbusServerPrivate::processReadCoilsRequest(const QModbusRequest &request)
 {
     // request data size corrupt
-    if (request.dataSize() != 4) {
+    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataValue);
     }
@@ -495,7 +495,7 @@ QModbusResponse QModbusServerPrivate::processReadDiscreteInputsRequest(
         const QModbusRequest &request)
 {
     // request data size corrupt
-    if (request.dataSize() != 4) {
+    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataValue);
     }
@@ -540,7 +540,7 @@ QModbusResponse QModbusServerPrivate::processReadDiscreteInputsRequest(
 QModbusResponse QModbusServerPrivate::processReadHoldingRegistersRequest(const QModbusRequest &request)
 {
     // request data size corrupt
-    if (request.dataSize() != 4) {
+    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataValue);
     }
@@ -568,7 +568,7 @@ QModbusResponse QModbusServerPrivate::processReadInputRegistersRequest(
     const QModbusRequest &request)
 {
     // request data size corrupt
-    if (request.dataSize() != 4) {
+    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataValue);
     }
@@ -595,7 +595,7 @@ QModbusResponse QModbusServerPrivate::processReadInputRegistersRequest(
 QModbusResponse QModbusServerPrivate::processWriteSingleCoilRequest(const QModbusRequest &request)
 {
     // request data size corrupt
-    if (request.dataSize() != 4) {
+    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataValue);
     }
@@ -630,7 +630,7 @@ QModbusResponse QModbusServerPrivate::processWriteSingleCoilRequest(const QModbu
 
 QModbusResponse QModbusServerPrivate::processWriteSingleRegisterRequest(const QModbusRequest &request)
 {
-    if (request.dataSize() != 4) {
+    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataValue);
     }
@@ -661,7 +661,7 @@ QModbusResponse QModbusServerPrivate::processWriteSingleRegisterRequest(const QM
 QModbusResponse QModbusServerPrivate::processWriteMultipleCoilsRequest(const QModbusRequest &request)
 {
     // request data size corrupt: 5 header + 1 minimum data byte required
-    if (request.dataSize() < 6) {
+    if (request.dataSize() < QModbusRequest::minimumDataSize(request.functionCode())) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataValue);
     }
@@ -720,7 +720,7 @@ QModbusResponse QModbusServerPrivate::processWriteMultipleRegistersRequest(
     const QModbusRequest &request)
 {
     // request data size corrupt: 5 header + 2 minimum data byte required
-    if (request.dataSize() < 7) {
+    if (request.dataSize() < QModbusRequest::minimumDataSize(request.functionCode())) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataValue);
     }
@@ -772,7 +772,7 @@ QModbusResponse QModbusServerPrivate::processReadWriteMultipleRegistersRequest(
     const QModbusRequest &request)
 {
     // request data size corrupt: 9 header + 2 minimum data byte required
-    if (request.dataSize() < 11) {
+    if (request.dataSize() < QModbusRequest::minimumDataSize(request.functionCode())) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataValue);
     }

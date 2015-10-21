@@ -197,11 +197,10 @@ bool QModbusClientPrivate::processReadCoilsResponse(const QModbusResponse &respo
     if (!isValid(response, QModbusResponse::ReadCoils))
         return false;
 
-    // we expect at least the byte count and one data byte
-    const QByteArray payload = response.data();
-    if (payload.size() < 2)
+    if (response.dataSize() < QModbusResponse::minimumDataSize(response.functionCode()))
         return false;
 
+    const QByteArray payload = response.data();
     // byte count needs to match available bytes
     const quint8 byteCount = payload[0];
     if ((payload.size() - 1) != byteCount)
@@ -229,11 +228,10 @@ bool QModbusClientPrivate::processReadDiscreteInputsResponse(const QModbusRespon
     if (!isValid(response, QModbusResponse::ReadDiscreteInputs))
         return false;
 
-    // we expect at least the byte count
-    const QByteArray payload = response.data();
-    if (payload.size() < 1)
+    if (response.dataSize() < QModbusResponse::minimumDataSize(response.functionCode()))
         return false;
 
+    const QByteArray payload = response.data();
     // byte count needs to match available bytes
     const quint8 byteCount = payload[0];
     if ((payload.size() - 1) != byteCount)
@@ -261,14 +259,12 @@ bool QModbusClientPrivate::processReadHoldingRegistersResponse(const QModbusResp
     if (!isValid(response, QModbusResponse::ReadHoldingRegisters))
         return false;
 
-    // we expect at least the byte count
-    const QByteArray payload = response.data();
-    if (payload.size() < 1)
+    if (response.dataSize() < QModbusResponse::minimumDataSize(response.functionCode()))
         return false;
 
     // byte count needs to match available bytes
-    const quint8 byteCount = payload[0];
-    if ((payload.size() - 1) != byteCount)
+    const quint8 byteCount = response.data()[0];
+    if ((response.dataSize() - 1) != byteCount)
         return false;
 
     // byte count needs to be odd to match full registers
@@ -302,14 +298,12 @@ bool QModbusClientPrivate::processReadInputRegistersResponse(const QModbusRespon
     if (!isValid(response, QModbusResponse::ReadInputRegisters))
         return false;
 
-    // we expect at least the byte count
-    const QByteArray payload = response.data();
-    if (payload.size() < 1)
+    if (response.dataSize() < QModbusResponse::minimumDataSize(response.functionCode()))
         return false;
 
     // byte count needs to match available bytes
-    const quint8 byteCount = payload[0];
-    if ((payload.size() - 1) != byteCount)
+    const quint8 byteCount = response.data()[0];
+    if ((response.dataSize() - 1) != byteCount)
         return false;
 
     // byte count needs to be odd to match full registers
@@ -342,9 +336,7 @@ bool QModbusClientPrivate::processWriteSingleCoilResponse(const QModbusResponse 
     if (!isValid(response, QModbusResponse::WriteSingleCoil))
         return false;
 
-    // payload size must be 4 bytes
-    const QByteArray payload = response.data();
-    if (payload.size() != 4)
+    if (response.dataSize() != QModbusResponse::minimumDataSize(response.functionCode()))
         return false;
 
     quint16 address, value;
@@ -367,8 +359,7 @@ bool QModbusClientPrivate::processWriteSingleRegisterResponse(const QModbusRespo
     if (!isValid(response, QModbusResponse::WriteSingleRegister))
         return false;
 
-    const QByteArray payload = response.data();
-    if (payload.size() != 4)
+    if (response.dataSize() != QModbusResponse::minimumDataSize(response.functionCode()))
         return false;
 
     quint16 address, value;
@@ -388,9 +379,7 @@ bool QModbusClientPrivate::processWriteMultipleCoilsResponse(const QModbusRespon
     if (!isValid(response, QModbusResponse::WriteMultipleCoils))
         return false;
 
-    // payload size must be 4 bytes
-    const QByteArray payload = response.data();
-    if (payload.size() != 4)
+    if (response.dataSize() != QModbusResponse::minimumDataSize(response.functionCode()))
         return false;
 
     quint16 address, count;
@@ -409,9 +398,7 @@ bool QModbusClientPrivate::processWriteMultipleRegistersResponse(const QModbusRe
     if (!isValid(response, QModbusResponse::WriteMultipleRegisters))
         return false;
 
-    // we expect exactly 4 bytes for the starting address and register count
-    const QByteArray payload = response.data();
-    if (payload.size() != 4)
+    if (response.dataSize() != QModbusResponse::minimumDataSize(response.functionCode()))
         return false;
 
     quint16 address, count;
@@ -434,11 +421,10 @@ bool QModbusClientPrivate::processReadWriteMultipleRegistersResponse(
     if (!isValid(response, QModbusResponse::ReadWriteMultipleRegisters))
         return false;
 
-    // payload minimum is 3 bytes
-    const QByteArray payload = response.data();
-    if (payload.size() < 4)
+    if (response.dataSize() < QModbusResponse::minimumDataSize(response.functionCode()))
         return false;
 
+    const QByteArray payload = response.data();
     // byte count needs to match available bytes
     const quint8 byteCount = payload[0];
     if ((payload.size() - 1) != byteCount)
