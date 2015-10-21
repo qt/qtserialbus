@@ -160,6 +160,8 @@ private:
     FunctionCode m_code = Invalid;
     QByteArray m_data;
 };
+Q_SERIALBUS_EXPORT QDebug operator<<(QDebug debug, const QModbusPdu &pdu);
+Q_SERIALBUS_EXPORT QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu);
 
 class QModbusRequest : public QModbusPdu
 {
@@ -178,6 +180,7 @@ public:
 
     Q_SERIALBUS_EXPORT static quint8 minimumDataSize(FunctionCode code);
 };
+Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu);
 
 class QModbusResponse : public QModbusPdu
 {
@@ -213,11 +216,7 @@ public:
     }
     void setExeceptionCode(ExceptionCode ec) { QModbusPdu::encodeData(quint8(ec)); }
 };
-
-Q_SERIALBUS_EXPORT QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu);
-Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &stream, QModbusPdu &pdu);
-
-Q_SERIALBUS_EXPORT QDebug operator<<(QDebug debug, const QModbusPdu &pdu);
+Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &stream, QModbusResponse &pdu);
 
 Q_DECLARE_TYPEINFO(QModbusPdu, Q_MOVABLE_TYPE);
 Q_DECLARE_TYPEINFO(QModbusPdu::ExceptionCode, Q_PRIMITIVE_TYPE);

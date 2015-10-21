@@ -383,6 +383,143 @@ private slots:
         QCOMPARE(minimumDataSize(QModbusPdu::EncapsulatedInterfaceTransport, request),
             QModbusResponse::minimumDataSize(QModbusResponse::EncapsulatedInterfaceTransport));
     }
+
+    void testQModbusRequestStreamOperator_data()
+    {
+        QTest::addColumn<QModbusPdu::FunctionCode>("fc");
+        QTest::addColumn<QByteArray>("data");
+        QTest::addColumn<QByteArray>("pdu");
+
+        QTest::newRow("ReadCoils") << QModbusRequest::ReadCoils << QByteArray::fromHex("00130013")
+            << QByteArray::fromHex("0100130013");
+        QTest::newRow("ReadDiscreteInputs") << QModbusRequest::ReadDiscreteInputs
+            << QByteArray::fromHex("00c40016") << QByteArray::fromHex("0200c40016");
+        QTest::newRow("ReadHoldingRegisters") << QModbusRequest::ReadHoldingRegisters
+            << QByteArray::fromHex("006b0003") << QByteArray::fromHex("03006b0003");
+        QTest::newRow("ReadInputRegisters") << QModbusRequest::ReadInputRegisters
+            << QByteArray::fromHex("00080001") << QByteArray::fromHex("0400080001");
+        QTest::newRow("WriteSingleCoil") << QModbusRequest::WriteSingleCoil
+            << QByteArray::fromHex("00acff00") << QByteArray::fromHex("0500acff00");
+        QTest::newRow("WriteSingleRegister") << QModbusRequest::WriteSingleRegister
+            << QByteArray::fromHex("00010003") << QByteArray::fromHex("0600010003");
+        QTest::newRow("ReadExceptionStatus") << QModbusRequest::ReadExceptionStatus
+            << QByteArray() << QByteArray::fromHex("07");
+
+        // TODO: Implement QModbusRequest::Diagnostics!
+
+        QTest::newRow("GetCommEventCounter") << QModbusRequest::GetCommEventCounter
+            << QByteArray() << QByteArray::fromHex("0b");
+        QTest::newRow("GetCommEventLog") << QModbusRequest::GetCommEventLog
+            << QByteArray() << QByteArray::fromHex("0c");
+        QTest::newRow("WriteMultipleCoils") << QModbusRequest::WriteMultipleCoils
+            << QByteArray::fromHex("0013000a02cd01") << QByteArray::fromHex("0f0013000a02cd01");
+        QTest::newRow("WriteMultipleRegisters") << QModbusRequest::WriteMultipleRegisters
+            << QByteArray::fromHex("0001000204000a0102") << QByteArray::fromHex("100001000204000a0102");
+        QTest::newRow("ReportServerId") << QModbusRequest::ReportServerId
+            << QByteArray() << QByteArray::fromHex("11");
+        QTest::newRow("ReadFileRecord") << QModbusRequest::ReadFileRecord
+            << QByteArray::fromHex("0e0600040001000206000300090002")
+            << QByteArray::fromHex("140e0600040001000206000300090002");
+        QTest::newRow("WriteFileRecord") << QModbusRequest::WriteFileRecord
+            << QByteArray::fromHex("0d0600040007000306af04be100d")
+            << QByteArray::fromHex("150d0600040007000306af04be100d");
+        QTest::newRow("MaskWriteRegister") << QModbusRequest::MaskWriteRegister
+            << QByteArray::fromHex("000400f20025") << QByteArray::fromHex("16000400f20025");
+        QTest::newRow("ReadWriteMultipleRegisters") << QModbusRequest::ReadWriteMultipleRegisters
+            << QByteArray::fromHex("00030006000e00030600ff00ff00ff")
+            << QByteArray::fromHex("1700030006000e00030600ff00ff00ff");
+        QTest::newRow("ReadFifoQueue") << QModbusRequest::ReadFifoQueue
+            << QByteArray::fromHex("04de") << QByteArray::fromHex("1804de");
+
+        // TODO: Implement QModbusRequest::EncapsulatedInterfaceTransport!
+    }
+
+    void testQModbusRequestStreamOperator()
+    {
+        QFETCH(QModbusPdu::FunctionCode, fc);
+        QFETCH(QByteArray, data);
+        QFETCH(QByteArray, pdu);
+
+        QByteArray ba;
+        QDataStream output(&ba, QIODevice::WriteOnly);
+        output << QModbusRequest(fc, data);
+        QCOMPARE(ba, pdu);
+
+        QModbusRequest request;
+        QDataStream input(pdu);
+        input >> request;
+        QCOMPARE(request.functionCode(), fc);
+        QCOMPARE(request.data(), data);
+    }
+
+    void testQModbusResponseStreamOperator_data()
+    {
+        QTest::addColumn<QModbusPdu::FunctionCode>("fc");
+        QTest::addColumn<QByteArray>("data");
+        QTest::addColumn<QByteArray>("pdu");
+
+        QTest::newRow("ReadCoils") << QModbusResponse::ReadCoils << QByteArray::fromHex("03cd6b05")
+            << QByteArray::fromHex("0103cd6b05");
+        QTest::newRow("ReadDiscreteInputs") << QModbusResponse::ReadDiscreteInputs
+            << QByteArray::fromHex("03acdb35") << QByteArray::fromHex("0203acdb35");
+        QTest::newRow("ReadHoldingRegisters") << QModbusResponse::ReadHoldingRegisters
+            << QByteArray::fromHex("06022b00000064") << QByteArray::fromHex("0306022b00000064");
+        QTest::newRow("ReadInputRegisters") << QModbusResponse::ReadInputRegisters
+            << QByteArray::fromHex("02000a") << QByteArray::fromHex("0402000a");
+        QTest::newRow("WriteSingleCoil") << QModbusResponse::WriteSingleCoil
+            << QByteArray::fromHex("00acff00") << QByteArray::fromHex("0500acff00");
+        QTest::newRow("WriteSingleRegister") << QModbusResponse::WriteSingleRegister
+            << QByteArray::fromHex("00010003") << QByteArray::fromHex("0600010003");
+        QTest::newRow("ReadExceptionStatus") << QModbusResponse::ReadExceptionStatus
+            << QByteArray::fromHex("6d") << QByteArray::fromHex("076d");
+
+        // TODO: Implement QModbusResponse::Diagnostics!
+
+        QTest::newRow("GetCommEventCounter") << QModbusResponse::GetCommEventCounter
+            << QByteArray::fromHex("ffff0108") << QByteArray::fromHex("0bffff0108");
+        QTest::newRow("GetCommEventLog") << QModbusResponse::GetCommEventLog
+            << QByteArray::fromHex("080000010801212000") << QByteArray::fromHex("0c080000010801212000");
+        QTest::newRow("WriteMultipleCoils") << QModbusResponse::WriteMultipleCoils
+            << QByteArray::fromHex("0013000a") << QByteArray::fromHex("0f0013000a");
+        QTest::newRow("WriteMultipleRegisters") << QModbusResponse::WriteMultipleRegisters
+            << QByteArray::fromHex("00010002") << QByteArray::fromHex("1000010002");
+
+        // TODO: Implement ReportServerId!
+
+        QTest::newRow("ReadFileRecord") << QModbusResponse::ReadFileRecord
+            << QByteArray::fromHex("0c05060dfe0020050633cd0040")
+            << QByteArray::fromHex("140c05060dfe0020050633cd0040");
+        QTest::newRow("WriteFileRecord") << QModbusResponse::WriteFileRecord
+            << QByteArray::fromHex("0d0600040007000306af04be100d")
+            << QByteArray::fromHex("150d0600040007000306af04be100d");
+        QTest::newRow("MaskWriteRegister") << QModbusResponse::MaskWriteRegister
+            << QByteArray::fromHex("000400f20025") << QByteArray::fromHex("16000400f20025");
+        QTest::newRow("ReadWriteMultipleRegisters") << QModbusResponse::ReadWriteMultipleRegisters
+            << QByteArray::fromHex("0c00fe0acd00010003000d00ff")
+            << QByteArray::fromHex("170c00fe0acd00010003000d00ff");
+        QTest::newRow("ReadFifoQueue") << QModbusResponse::ReadFifoQueue
+            << QByteArray::fromHex("0006000201b81284") << QByteArray::fromHex("180006000201b81284");
+
+        // TODO: Implement QModbusResponse::EncapsulatedInterfaceTransport!
+    }
+
+    void testQModbusResponseStreamOperator()
+    {
+        QFETCH(QModbusPdu::FunctionCode, fc);
+        QFETCH(QByteArray, data);
+        QFETCH(QByteArray, pdu);
+
+        QByteArray ba;
+        QDataStream output(&ba, QIODevice::WriteOnly);
+        output << QModbusResponse(fc, data);
+        QCOMPARE(ba, pdu);
+
+        QModbusResponse response;
+        QDataStream input(pdu);
+        input >> response;
+        QCOMPARE(response.functionCode(), fc);
+        QCOMPARE(response.data(), data);
+    }
 };
 
 QTEST_MAIN(tst_QModbusPdu)

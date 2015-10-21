@@ -226,6 +226,17 @@ static quint8 minimumDataSize(QModbusPdu::FunctionCode code, Type type)
 */
 
 /*!
+    Writes the Modbus \a pdu to the \a debug stream.
+*/
+QDebug operator<<(QDebug debug, const QModbusPdu &pdu)
+{
+    QDebugStateSaver _(debug);
+    debug.nospace().noquote() << "0x" << QByteArray(1, pdu.functionCode()).toHex() << pdu.data()
+        .toHex();
+    return debug;
+}
+
+/*!
     \relates QModbusPdu
 
     Writes a \a pdu to the stream \a out and returns a reference to the stream.
@@ -239,34 +250,6 @@ QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu)
     return stream;
 }
 
-/*!
-    \relates QModbusPdu
-
-    Reads a \a pdu from the stream \a in and returns a reference to the stream.
-*/
-QDataStream &operator>>(QDataStream &stream, QModbusPdu &pdu)
-{
-    quint8 code;
-    stream >> code;
-    pdu.setFunctionCode(static_cast<QModbusPdu::FunctionCode> (code));
-
-    QByteArray data(252, Qt::Uninitialized);
-    stream.readRawData(data.data(), 252);
-    pdu.setData(data);
-
-    return stream;
-}
-
-/*!
-    Writes the Modbus \a pdu to the \a debug stream.
-*/
-QDebug operator<<(QDebug debug, const QModbusPdu &pdu)
-{
-    QDebugStateSaver _(debug);
-    debug.nospace().noquote() << "0x" << QByteArray(1, pdu.functionCode()).toHex() << pdu.data()
-        .toHex();
-    return debug;
-}
 
 /*!
     \class QModbusRequest
@@ -328,6 +311,50 @@ quint8 QModbusRequest::minimumDataSize(FunctionCode code)
 }
 
 /*!
+    \relates QModbusRequest
+
+    Reads a \a pdu from the stream \a in and returns a reference to the stream.
+*/
+QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu)
+{
+    quint8 code;
+    stream >> code;
+    pdu.setFunctionCode(static_cast<QModbusPdu::FunctionCode> (code));
+
+    quint16 size = Private::minimumDataSize(pdu.functionCode(), Private::Type::Request);
+    if (size == 0u)
+        return stream;
+
+    QByteArray data(size, Qt::Uninitialized);
+    stream.device()->peek(data.data(), data.size());
+
+    switch (pdu.functionCode()) {
+    case QModbusPdu::WriteMultipleCoils:
+        size += data[data.size() - 2 /*byte count*/] - 1 /*first byte*/;
+        break;
+    case QModbusPdu::WriteMultipleRegisters:
+    case QModbusPdu::ReadWriteMultipleRegisters:
+        size += data[data.size() - 3 /*byte count*/] - 2 /*first 2 bytes*/;
+        break;
+    case QModbusPdu::ReadFileRecord:
+    case QModbusPdu::WriteFileRecord:
+        size = 1 /*byte count*/ + data[0] /*actual bytes*/;
+        break;
+    case QModbusPdu::Diagnostics:
+    case QModbusPdu::EncapsulatedInterfaceTransport:
+        size = 252; // TODO: Implement!
+        break;
+    }
+
+    data.resize(size);
+    stream.readRawData(data.data(), data.size());
+    pdu.setData(data);
+
+    return stream;
+}
+
+
+/*!
     \class QModbusResponse
     \inmodule QtSerialBus
     \since 5.6
@@ -348,7 +375,6 @@ quint8 QModbusRequest::minimumDataSize(FunctionCode code)
         QModbusResponse response(QModbusResponse::ReadCoils, payloadInBytes, outputHigh, outputLow);
     \endcode
 */
-
 
 /*!
     \fn QModbusResponse::QModbusResponse()
@@ -391,7 +417,53 @@ quint8 QModbusResponse::minimumDataSize(FunctionCode code)
 }
 
 /*!
-    \class QModbusPdu
+    \relates QModbusResponse
+
+    Reads a \a pdu from the stream \a in and returns a reference to the stream.
+*/
+QDataStream &operator>>(QDataStream &stream, QModbusResponse &pdu)
+{
+    quint8 code;
+    stream >> code;
+    pdu.setFunctionCode(static_cast<QModbusPdu::FunctionCode> (code));
+
+    quint16 size = Private::minimumDataSize(pdu.functionCode(), Private::Type::Response);
+
+    QByteArray data(size, Qt::Uninitialized);
+    stream.device()->peek(data.data(), data.size());
+
+    switch (pdu.functionCode()) {
+    case QModbusResponse::ReadCoils:
+    case QModbusResponse::ReadDiscreteInputs:
+    case QModbusResponse::ReadHoldingRegisters:
+    case QModbusResponse::ReadInputRegisters:
+    case QModbusResponse::GetCommEventLog:
+    case QModbusResponse::ReadFileRecord:
+    case QModbusResponse::WriteFileRecord:
+    case QModbusResponse::ReadWriteMultipleRegisters:
+        size = 1 /*byte count*/ + data[0] /*actual bytes*/;
+        break;
+    case QModbusResponse::ReadFifoQueue: {
+        QDataStream rawSize(data);
+        rawSize >> size; size += 2; // 2 bytes size info
+    }   break;
+    case QModbusPdu::Diagnostics:
+    case QModbusResponse::ReportServerId:
+    case QModbusPdu::EncapsulatedInterfaceTransport:
+        size = 252; // TODO: Implement!
+        break;
+    }
+
+    data.resize(size);
+    stream.readRawData(data.data(), data.size());
+    pdu.setData(data);
+
+    return stream;
+}
+
+
+/*!
+    \class QModbusExceptionResponse
     \inmodule QtSerialBus
     \since 5.6
 
