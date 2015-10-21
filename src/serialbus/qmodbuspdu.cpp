@@ -311,6 +311,44 @@ quint8 QModbusRequest::minimumDataSize(FunctionCode code)
 }
 
 /*!
+    Calculates the expected data size for a request, based on the function \a code.
+    The \a data byte array is expected to be the part directly following the function
+    code. Returns the full size of the PDU's data part; -1 if the size could not be
+    properly calculated.
+*/
+int QModbusRequest::calculateDataSize(FunctionCode code, const QByteArray &data)
+{
+    int size = -1;
+    int minimum = Private::minimumDataSize(code, Private::Type::Request);
+    switch (code) {
+    case QModbusPdu::WriteMultipleCoils:
+        minimum -= 1; // first payload payload byte
+        if (data.size() >= minimum)
+            size = minimum + data[minimum - 1] /*byte count*/;
+        break;
+    case QModbusPdu::WriteMultipleRegisters:
+    case QModbusPdu::ReadWriteMultipleRegisters:
+        minimum -= 2; // first 2 payload payload bytes
+        if (data.size() >= minimum)
+            size = minimum + data[minimum - 1] /*byte count*/;
+        break;
+    case QModbusPdu::ReadFileRecord:
+    case QModbusPdu::WriteFileRecord:
+        if (data.size() >= 1)
+            size = 1 /*byte count*/ + data[0] /*actual bytes*/;
+        break;
+    case QModbusPdu::Diagnostics:
+    case QModbusPdu::EncapsulatedInterfaceTransport:
+        size = 252; // TODO: Implement!
+        break;
+    default:
+        size = minimum;
+        break;
+    }
+    return size;
+}
+
+/*!
     \relates QModbusRequest
 
     Reads a \a pdu from the stream \a in and returns a reference to the stream.
@@ -327,28 +365,15 @@ QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu)
 
     QByteArray data(size, Qt::Uninitialized);
     stream.device()->peek(data.data(), data.size());
+    size = QModbusRequest::calculateDataSize(pdu.functionCode(), data);
 
-    switch (pdu.functionCode()) {
-    case QModbusPdu::WriteMultipleCoils:
-        size += data[data.size() - 2 /*byte count*/] - 1 /*first byte*/;
-        break;
-    case QModbusPdu::WriteMultipleRegisters:
-    case QModbusPdu::ReadWriteMultipleRegisters:
-        size += data[data.size() - 3 /*byte count*/] - 2 /*first 2 bytes*/;
-        break;
-    case QModbusPdu::ReadFileRecord:
-    case QModbusPdu::WriteFileRecord:
-        size = 1 /*byte count*/ + data[0] /*actual bytes*/;
-        break;
-    case QModbusPdu::Diagnostics:
-    case QModbusPdu::EncapsulatedInterfaceTransport:
-        size = 252; // TODO: Implement!
-        break;
+    if (size >= 0) {
+        data.resize(size);
+        stream.readRawData(data.data(), data.size());
+        pdu.setData(data);
+    } else {
+        pdu.setFunctionCode(QModbusRequest::Invalid);
     }
-
-    data.resize(size);
-    stream.readRawData(data.data(), data.size());
-    pdu.setData(data);
 
     return stream;
 }
@@ -417,6 +442,50 @@ quint8 QModbusResponse::minimumDataSize(FunctionCode code)
 }
 
 /*!
+    Calculates the expected data size for a response, based on the function \a code.
+    The \a data byte array is expected to be the part directly following the function
+    code. Returns the full size of the PDU's data part; -1 if the size could not be
+    properly calculated.
+*/
+int QModbusResponse::calculateDataSize(FunctionCode code, const QByteArray &data)
+{
+    if (code & quint8(0x80))
+        return 1;
+
+    int size = -1;
+    switch (code) {
+    case QModbusResponse::ReadCoils:
+    case QModbusResponse::ReadDiscreteInputs:
+    case QModbusResponse::ReadHoldingRegisters:
+    case QModbusResponse::ReadInputRegisters:
+    case QModbusResponse::GetCommEventLog:
+    case QModbusResponse::ReadFileRecord:
+    case QModbusResponse::WriteFileRecord:
+    case QModbusResponse::ReadWriteMultipleRegisters:
+        if (data.size() >= 1)
+            size = 1 /*byte count*/ + data[0] /*actual bytes*/;
+        break;
+    case QModbusResponse::ReadFifoQueue: {
+        if (data.size() >= 2) {
+            quint16 tmp;
+            QDataStream rawSize(data);
+            rawSize >> tmp;
+            size = tmp + 2; // 2 bytes size info
+        }
+    }   break;
+    case QModbusPdu::Diagnostics:
+    case QModbusResponse::ReportServerId:
+    case QModbusPdu::EncapsulatedInterfaceTransport:
+        size = 252; // TODO: Implement!
+        break;
+    default:
+        size = QModbusResponse::minimumDataSize(code);
+        break;
+    }
+    return size;
+}
+
+/*!
     \relates QModbusResponse
 
     Reads a \a pdu from the stream \a in and returns a reference to the stream.
@@ -431,32 +500,15 @@ QDataStream &operator>>(QDataStream &stream, QModbusResponse &pdu)
 
     QByteArray data(size, Qt::Uninitialized);
     stream.device()->peek(data.data(), data.size());
+    size = QModbusResponse::calculateDataSize(pdu.functionCode(), data);
 
-    switch (pdu.functionCode()) {
-    case QModbusResponse::ReadCoils:
-    case QModbusResponse::ReadDiscreteInputs:
-    case QModbusResponse::ReadHoldingRegisters:
-    case QModbusResponse::ReadInputRegisters:
-    case QModbusResponse::GetCommEventLog:
-    case QModbusResponse::ReadFileRecord:
-    case QModbusResponse::WriteFileRecord:
-    case QModbusResponse::ReadWriteMultipleRegisters:
-        size = 1 /*byte count*/ + data[0] /*actual bytes*/;
-        break;
-    case QModbusResponse::ReadFifoQueue: {
-        QDataStream rawSize(data);
-        rawSize >> size; size += 2; // 2 bytes size info
-    }   break;
-    case QModbusPdu::Diagnostics:
-    case QModbusResponse::ReportServerId:
-    case QModbusPdu::EncapsulatedInterfaceTransport:
-        size = 252; // TODO: Implement!
-        break;
+    if (size >= 0) {
+        data.resize(size);
+        stream.readRawData(data.data(), data.size());
+        pdu.setData(data);
+    } else {
+        pdu.setFunctionCode(QModbusResponse::Invalid);
     }
-
-    data.resize(size);
-    stream.readRawData(data.data(), data.size());
-    pdu.setData(data);
 
     return stream;
 }

@@ -179,6 +179,7 @@ public:
     {}
 
     Q_SERIALBUS_EXPORT static quint8 minimumDataSize(FunctionCode code);
+    Q_SERIALBUS_EXPORT static int calculateDataSize(FunctionCode code, const QByteArray &data);
 };
 Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu);
 
@@ -198,6 +199,7 @@ public:
     {}
 
     Q_SERIALBUS_EXPORT static quint8 minimumDataSize(FunctionCode code);
+    Q_SERIALBUS_EXPORT static int calculateDataSize(FunctionCode code, const QByteArray &data);
 };
 
 class QModbusExceptionResponse : public QModbusResponse
