@@ -54,8 +54,8 @@ QT_BEGIN_NAMESPACE
 /*!
     Constructs a QModbusTcpServer with the specified \a parent.
  */
-QModbusTcpServer::QModbusTcpServer(QObject *parent) :
-    QModbusServer(*new QModbusTcpServerPrivate, parent)
+QModbusTcpServer::QModbusTcpServer(QObject *parent)
+    : QModbusServer(*new QModbusTcpServerPrivate, parent)
 {
 }
 
@@ -69,27 +69,59 @@ QModbusTcpServer::~QModbusTcpServer()
 /*!
     \internal
  */
-QModbusTcpServer::QModbusTcpServer(QModbusTcpServerPrivate &dd, QObject *parent) :
-    QModbusServer(dd, parent)
+QModbusTcpServer::QModbusTcpServer(QModbusTcpServerPrivate &dd, QObject *parent)
+    : QModbusServer(dd, parent)
 {
 }
 
 /*!
-    \fn void QModbusTcpServer::listen(const QString &address, quint16 port = 502)
-
-    Tells the server to listen for incoming connections on address \a address and port \a port.
-    If a connection is established, it emits stateChanged() with ModbusDeviceState::ConnectedState.
-
-    At any point, the class can emit stateChanged() to signal the current device state or emit
-    errorOccurred() to signal that an error occurred.
+    \reimp
 */
+QModbusResponse QModbusTcpServer::processRequest(const QModbusPdu &request)
+{
+    return QModbusServer::processRequest(request);
+}
 
 /*!
-    \fn void QModbusTcpServer::listen(const QHostAddress &address, quint16 port = 502)
-
-    \overload
-
-    Tells the server to listen for incoming connections on address \a address and port \a port.
+    \reimp
 */
+bool QModbusTcpServer::open()
+{
+    if (state() == QModbusDevice::ConnectedState)
+        return true;
+
+    const QStringList parts =  portName().split(QLatin1Char(':'), QString::SkipEmptyParts);
+    if (parts.count() < 1) {
+        setError(tr("Invalid host and port for TCP communication specified."),
+            QModbusDevice::ConnectionError);
+        return false;
+    }
+
+    bool ok = false;
+    const quint16 port = parts.value(1).toInt(&ok);
+    if (!ok) {
+        setError(tr("Invalid port for TCP communication specified."),
+            QModbusDevice::ConnectionError);
+        return false;
+    }
+    if (d_func()->m_server.listen(QHostAddress(parts.value(0)), port)) {
+        setState(QModbusDevice::ConnectedState);
+        d_func()->m_server.requestHandler = this;
+    }
+    return state() == QModbusDevice::ConnectedState;
+}
+
+/*!
+    \reimp
+*/
+void QModbusTcpServer::close()
+{
+    Q_D(QModbusTcpServer);
+    if (d->m_server.isListening()) {
+        d->m_server.disconnect();
+        d->m_server.close();
+    }
+    setState(QModbusDevice::UnconnectedState);
+}
 
 QT_END_NAMESPACE

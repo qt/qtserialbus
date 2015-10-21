@@ -21,14 +21,12 @@ HEADERS += \
     libmodbusslave.h \
     libmodbusmaster.h \
     libmodbusreply.h \
-    libmodbustcpserver.h \
     libmodbustcpclient.h
 
 SOURCES += main.cpp \
     libmodbusslave.cpp \
     libmodbusmaster.cpp \
     libmodbusreply.cpp \
-    libmodbustcpserver.cpp \
     libmodbustcpclient.cpp
 
 OTHER_FILES = plugin.json

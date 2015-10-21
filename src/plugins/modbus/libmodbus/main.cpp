@@ -37,7 +37,6 @@
 #include "libmodbusmaster.h"
 #include "libmodbusslave.h"
 #include "libmodbustcpclient.h"
-#include "libmodbustcpserver.h"
 
 #include <QtSerialBus/qmodbus.h>
 #include <QtSerialBus/qmodbusfactory.h>
@@ -58,8 +57,6 @@ public:
     {
         if (type == QModbusDevice::Serial)
             return new LibModBusSlave();
-        if (type == QModbusDevice::Tcp)
-            return new LibModBusTcpServer();
         return Q_NULLPTR;
     }
 

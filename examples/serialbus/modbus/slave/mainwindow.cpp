@@ -43,6 +43,7 @@
 
 #include <QtSerialBus/qmodbus.h>
 #include <QtSerialBus/qmodbusrtuserialslave.h>
+#include <QtSerialBus/qmodbustcpserver.h>
 #include <QRegularExpression>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -78,7 +79,9 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
     if (type == QModbusDevice::Serial) {
         modbusDevice = new QModbusRtuSerialSlave(this);
     } else if (type == QModbusDevice::Tcp) {
-        modbusDevice = QModbus::instance()->createServer("libmodbus", type);
+        modbusDevice = new QModbusTcpServer(this);
+        if (ui->portEdit->text().isEmpty())
+            ui->portEdit->setText(QLatin1Literal("127.0.0.1:502"));
     }
 
     if (!modbusDevice) {

@@ -37,8 +37,7 @@
 #ifndef QMODBUSTCPSERVER_H
 #define QMODBUSTCPSERVER_H
 
-#include <QtNetwork/qhostaddress.h>
-#include <QtSerialBus/qmodbusdataunit.h>
+#include <QtSerialBus/qmodbuspdu.h>
 #include <QtSerialBus/qmodbusserver.h>
 
 QT_BEGIN_NAMESPACE
@@ -52,13 +51,16 @@ class Q_SERIALBUS_EXPORT QModbusTcpServer : public QModbusServer
 
 public:
     explicit QModbusTcpServer(QObject *parent = 0);
-    virtual ~QModbusTcpServer();
+    ~QModbusTcpServer();
 
-    virtual void listen(const QString &address, quint16 port = 502) = 0;
-    virtual void listen(const QHostAddress &address, quint16 port = 502) = 0;
+    // TODO: Should probably be protected?
+    QModbusResponse processRequest(const QModbusPdu &request) Q_DECL_OVERRIDE;
 
-protected:
+private:
     QModbusTcpServer(QModbusTcpServerPrivate &dd, QObject *parent = Q_NULLPTR);
+
+    bool open() Q_DECL_OVERRIDE;
+    void close() Q_DECL_OVERRIDE;
 };
 
 QT_END_NAMESPACE
