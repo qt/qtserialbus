@@ -39,6 +39,7 @@
 
 #include "qmodbusclient.h"
 #include "qmodbusdevice_p.h"
+#include "qmodbuspdu.h"
 
 //
 //  W A R N I N G
@@ -53,13 +54,17 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModbusClientPrivate : public QModbusDevicePrivate
+class Q_AUTOTEST_EXPORT QModbusClientPrivate : public QModbusDevicePrivate
 {
     Q_DECLARE_PUBLIC(QModbusClient)
 public:
     QModbusClientPrivate()
     {
     }
+
+    QModbusRequest createReadRequest(const QModbusDataUnit &data) const;
+    QModbusRequest createWriteRequest(const QModbusDataUnit &data) const;
+    QModbusRequest createRWRequest(const QModbusDataUnit &read, const QModbusDataUnit &write) const;
 
     bool processResponse(const QModbusResponse &response, QModbusDataUnit *data);
     bool processReadCoilsResponse(const QModbusResponse &response, QModbusDataUnit *data);

@@ -35,6 +35,7 @@
 ****************************************************************************/
 
 #include <QtSerialBus/qmodbusclient.h>
+#include <QtSerialBus/private/qmodbusclient_p.h>
 #include <QtSerialBus/private/qmodbus_symbols_p.h>
 
 #include <QtTest/QtTest>
@@ -288,6 +289,132 @@ private slots:
 
         response.setData(QByteArray::fromHex("04cd6b051755"));
         QCOMPARE(client.processResponse(response, &unit), false);
+    }
+
+    void testPrivateCreateReadRequest_data()
+    {
+        QTest::addColumn<QModbusDataUnit::RegisterType>("rc");
+        QTest::addColumn<int>("address");
+        QTest::addColumn<int>("count");
+        QTest::addColumn<QModbusPdu::FunctionCode>("fc");
+        QTest::addColumn<QByteArray>("data");
+        QTest::addColumn<bool>("isValid");
+
+        QTest::newRow("QModbusDataUnit::Invalid") << QModbusDataUnit::Invalid << 19 << 19
+            << QModbusRequest::Invalid << QByteArray() << false;
+        QTest::newRow("QModbusDataUnit::Coils") << QModbusDataUnit::Coils << 19 << 19
+            << QModbusRequest::ReadCoils << QByteArray::fromHex("00130013") << true;
+        QTest::newRow("QModbusDataUnit::DiscreteInputs") << QModbusDataUnit::DiscreteInputs << 19
+            << 19 << QModbusRequest::ReadDiscreteInputs << QByteArray::fromHex("00130013") << true;
+        QTest::newRow("QModbusDataUnit::InputRegisters") << QModbusDataUnit::InputRegisters << 19
+            << 19 << QModbusRequest::ReadInputRegisters << QByteArray::fromHex("00130013") << true;
+        QTest::newRow("QModbusDataUnit::HoldingRegisters") << QModbusDataUnit::HoldingRegisters
+            << 19 << 19 << QModbusRequest::ReadHoldingRegisters << QByteArray::fromHex("00130013")
+            << true;
+    }
+
+    void testPrivateCreateReadRequest()
+    {
+        QFETCH(QModbusDataUnit::RegisterType, rc);
+        QFETCH(int, address);
+        QFETCH(int, count);
+
+        // we leak it for now, can't call delete without crash
+        QModbusClientPrivate *client = new QModbusClientPrivate;
+
+        QModbusDataUnit read(rc, address, count);
+        QModbusRequest request = client->createReadRequest(read);
+        QTEST(request.functionCode(), "fc");
+        QTEST(request.data(), "data");
+        QTEST(request.isValid(), "isValid");
+    }
+
+    void testPrivateCreateWriteRequest_data()
+    {
+        QTest::addColumn<QModbusDataUnit::RegisterType>("rc");
+        QTest::addColumn<int>("address");
+        QTest::addColumn<QVector<quint16>>("values");
+        QTest::addColumn<QModbusPdu::FunctionCode>("fc");
+        QTest::addColumn<QByteArray>("data");
+        QTest::addColumn<bool>("isValid");
+
+        QTest::newRow("QModbusDataUnit::Invalid") << QModbusDataUnit::Invalid << 19
+            << (QVector<quint16>() << 1) << QModbusRequest::Invalid << QByteArray() << false;
+        QTest::newRow("QModbusDataUnit::DiscreteInputs") << QModbusDataUnit::DiscreteInputs << 19
+            << (QVector<quint16>() << 1) << QModbusRequest::Invalid << QByteArray() << false;
+        QTest::newRow("QModbusDataUnit::InputRegisters") << QModbusDataUnit::InputRegisters << 19
+            << (QVector<quint16>() << 1) << QModbusRequest::Invalid << QByteArray() << false;
+
+        QTest::newRow("QModbusDataUnit::Coils{Single}") << QModbusDataUnit::Coils << 172
+            << (QVector<quint16>() << 1) << QModbusRequest::WriteSingleCoil
+            << QByteArray::fromHex("00acff00") << true;
+        QTest::newRow("QModbusDataUnit::Coils{Multiple}") << QModbusDataUnit::Coils << 19
+            << (QVector<quint16>({ 1,0,1,1,0,0,1,1, 1,0 /* 6 times padding */ }))
+            << QModbusRequest::WriteMultipleCoils << QByteArray::fromHex("0013000a02cd01")
+            << true;
+        QTest::newRow("QModbusDataUnit::HoldingRegisters{Single}")
+            << QModbusDataUnit::HoldingRegisters << 1229 << (QVector<quint16>() << 27397u)
+            << QModbusRequest::WriteSingleRegister << QByteArray::fromHex("04cd6b05") << true;
+        QTest::newRow("QModbusDataUnit::HoldingRegisters{Multiple}")
+            << QModbusDataUnit::HoldingRegisters << 1 << (QVector<quint16>() << 27397u << 27397u)
+            << QModbusRequest::WriteMultipleRegisters << QByteArray::fromHex("00010002046b056b05")
+            << true;
+    }
+
+    void testPrivateCreateWriteRequest()
+    {
+        QFETCH(QModbusDataUnit::RegisterType, rc);
+        QFETCH(int, address);
+        QFETCH(QVector<quint16>, values);
+
+        // we leak it for now, can't call delete without crash
+        QModbusClientPrivate *client = new QModbusClientPrivate;
+
+        QModbusDataUnit write(rc, address, values);
+        QModbusRequest request = client->createWriteRequest(write);
+        QTEST(request.functionCode(), "fc");
+        QTEST(request.data(), "data");
+        QTEST(request.isValid(), "isValid");
+    }
+
+    void testPrivatecreateRWRequest_data()
+    {
+        QTest::addColumn<QModbusDataUnit::RegisterType>("rc");
+        QTest::addColumn<int>("address");
+        QTest::addColumn<QVector<quint16>>("values");
+        QTest::addColumn<QModbusPdu::FunctionCode>("fc");
+        QTest::addColumn<QByteArray>("data");
+        QTest::addColumn<bool>("isValid");
+
+        QTest::newRow("QModbusDataUnit::Invalid") << QModbusDataUnit::Invalid << 19
+            << (QVector<quint16>() << 1) << QModbusRequest::Invalid << QByteArray() << false;
+        QTest::newRow("QModbusDataUnit::Coils") << QModbusDataUnit::Invalid << 172
+            << (QVector<quint16>() << 1) << QModbusRequest::Invalid << QByteArray() << false;
+        QTest::newRow("QModbusDataUnit::DiscreteInputs") << QModbusDataUnit::DiscreteInputs << 19
+            << (QVector<quint16>() << 1) << QModbusRequest::Invalid << QByteArray() << false;
+        QTest::newRow("QModbusDataUnit::InputRegisters") << QModbusDataUnit::InputRegisters << 19
+            << (QVector<quint16>() << 1) << QModbusRequest::Invalid << QByteArray() << false;
+        QTest::newRow("QModbusDataUnit::HoldingRegisters{Read|Write}")
+            << QModbusDataUnit::HoldingRegisters << 1 << (QVector<quint16>() << 27397u << 27397u)
+            << QModbusRequest::ReadWriteMultipleRegisters
+            << QByteArray::fromHex("0001000200010002046b056b05") << true;
+    }
+
+    void testPrivatecreateRWRequest()
+    {
+        QFETCH(QModbusDataUnit::RegisterType, rc);
+        QFETCH(int, address);
+        QFETCH(QVector<quint16>, values);
+
+        // we leak it for now, can't call delete without crash
+        QModbusClientPrivate *client = new QModbusClientPrivate;
+
+        QModbusDataUnit read(rc, address, values.count());
+        QModbusDataUnit write(rc, address, values);
+        QModbusRequest request = client->createRWRequest(read, write);
+        QTEST(request.functionCode(), "fc");
+        QTEST(request.data(), "data");
+        QTEST(request.isValid(), "isValid");
     }
 };
 
