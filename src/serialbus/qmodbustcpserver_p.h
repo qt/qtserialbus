@@ -64,133 +64,6 @@ QT_BEGIN_NAMESPACE
 Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
 Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS_LOW)
 
-class TcpConnection : public QTcpSocket
-{
-    Q_OBJECT
-    Q_DISABLE_COPY(TcpConnection)
-
-public:
-    enum ReadState {
-        ReadMbpa,
-        ReadPdu
-    };
-
-    TcpConnection(QModbusTcpServer *handler, QObject *parent = Q_NULLPTR)
-        : QTcpSocket(parent)
-        , requestHandler(handler)
-    {
-        connect(this, &QTcpSocket::readyRead, this, &TcpConnection::processReadyRead);
-    }
-
-private Q_SLOTS:
-    void processReadyRead()
-    {
-        buffer += readAll();
-
-        if (buffer.size() > maxBytesModbusADU) {
-            abort();
-            return;
-        }
-        qCDebug(QT_MODBUS_LOW).noquote() << "Read buffer: 0x" + buffer.toHex();
-
-        if (readState == ReadState::ReadMbpa) {
-            if (buffer.size() < mbpaHeaderSize)
-                return;
-
-            QDataStream input(buffer);
-            input >> transactionId >> protocolId >> bytesPdu >> unitId;
-
-            qCDebug(QT_MODBUS) << "Request MBPA:" << "Transaction Id:" << transactionId
-                << "Protocol Id:" << protocolId << "Number of following bytes:" << bytesPdu
-                << "Unit Id:" << unitId;
-
-            // The length field is the byte count of the following fields, including the Unit
-            // Identifier and the PDU, so we remove on byte.
-            bytesPdu--;
-            readState = ReadPdu;
-        }
-
-        if (readState == ReadState::ReadPdu) {
-            if (buffer.size() < mbpaHeaderSize + bytesPdu)
-                return;
-
-            QDataStream input(buffer.mid(mbpaHeaderSize));
-            QModbusRequest request;
-            input >> request;
-
-            qCDebug(QT_MODBUS_LOW) << "Request PDU:" << request;
-            qCDebug(QT_MODBUS).noquote() << "Request PDU, Function code: 0x" + QByteArray(1,
-                request.functionCode()).toHex() << "Data: 0x" + request.data().toHex();
-
-            const QModbusResponse response = requestHandler->processRequest(request);
-
-            qCDebug(QT_MODBUS_LOW) << "Response PDU:" << response;
-            qCDebug(QT_MODBUS).noquote() << "Response PDU, Function code: 0x" + QByteArray(1,
-                request.functionCode()).toHex() << "Data: 0x" + response.data().toHex();
-
-            QDataStream output(this);
-            // The length field is the byte count of the following fields, including the Unit
-            // Identifier and PDU fields, so we add one byte to the response size.
-            output << transactionId << protocolId << quint16(response.size() + 1)
-                    << unitId << response;
-
-            qCDebug(QT_MODBUS) << "Response MBPA:" << "Transaction Id:" << transactionId <<
-                "Protocol Id:" << protocolId << "Number of following bytes:" << quint16(response
-                .size() + 1) << "Unit Id:" << unitId;
-
-            buffer.clear();
-            readState = ReadMbpa;
-        }
-    }
-
-private:
-    quint8 unitId;
-    quint16 transactionId;
-    quint16 bytesPdu;
-    quint16 protocolId;
-
-    QByteArray buffer;
-    ReadState readState = ReadMbpa;
-    static const qint8 mbpaHeaderSize = 7;
-    static const qint16 maxBytesModbusADU = 260;
-    QModbusTcpServer *requestHandler = Q_NULLPTR;
-};
-
-class TcpServer : public QTcpServer
-{
-    Q_OBJECT
-    Q_DISABLE_COPY(TcpServer)
-
-public:
-    TcpServer() Q_DECL_EQ_DEFAULT;
-    ~TcpServer() { shutdown = true; }
-
-    void disconnect()
-    {
-        foreach (TcpConnection *connection, connections)
-            connection->disconnectFromHost();
-        connections.clear();
-    }
-
-    void incomingConnection(qintptr socketDescriptor) Q_DECL_OVERRIDE
-    {
-        if (!shutdown) {
-            TcpConnection *connection = new TcpConnection(requestHandler, this);
-            connections.append(connection);
-            connection->setSocketDescriptor(socketDescriptor);
-
-            connect(connection, &TcpConnection::disconnected, [this]() {
-                if (TcpConnection *connection = qobject_cast<TcpConnection *> (sender()))
-                    connection->deleteLater();
-            });
-        }
-    }
-
-    bool shutdown = false;
-    QList<TcpConnection*> connections;
-    QModbusTcpServer *requestHandler = Q_NULLPTR;
-};
-
 class QModbusTcpServerPrivate : public QModbusServerPrivate
 {
     Q_DECLARE_PUBLIC(QModbusTcpServer)
@@ -200,7 +73,127 @@ public:
     {
     }
 
-    TcpServer m_server;
+    /*!
+        This function is a workaround since 2nd level lambda below cannot
+        call protected QModbusTcpServer::processRequest(..) function on VS2013.
+     */
+    QModbusResponse forwardProcessRequest(const QModbusRequest &r)
+    {
+        Q_Q(QModbusTcpServer);
+        return q->processRequest(r);
+    }
+
+    /*!
+        This function is a workaround since 2nd level lambda below cannot
+        call protected QModbusDevice::setError(..) function on VS2013.
+     */
+    void forwardError(const QString &errorText, QModbusDevice::ModbusError error)
+    {
+        Q_Q(QModbusTcpServer);
+        q->setError(errorText, error);
+    }
+
+    void setupTcpServer()
+    {
+        Q_Q(QModbusTcpServer);
+        m_tcpServer = new QTcpServer(q);
+        QObject::connect(m_tcpServer, &QTcpServer::newConnection, [this]() {
+            auto *socket = m_tcpServer->nextPendingConnection();
+            if (!socket)
+                return;
+
+            qCDebug(QT_MODBUS) << "Incoming socket from" << socket->peerAddress()
+                               << socket->peerName() << socket->peerPort();
+
+            connections.append(socket);
+
+            QByteArray *buffer = new QByteArray();
+
+            QObject::connect(socket, &QObject::destroyed, [buffer]() {
+                // cleanup buffer
+                delete buffer;
+            });
+            QObject::connect(socket, &QTcpSocket::disconnected, [socket, this]() {
+                connections.removeAll(socket);
+                socket->deleteLater();
+            });
+            QObject::connect(socket, &QTcpSocket::readyRead, [buffer, socket, this]() {
+                if (!socket)
+                    return;
+
+                buffer->append(socket->readAll());
+                while (!buffer->isEmpty()) {
+                    qCDebug(QT_MODBUS_LOW).noquote() << "Read buffer: 0x" + buffer->toHex();
+
+                    if (buffer->size() < mbpaHeaderSize) {
+                        qCDebug(QT_MODBUS) << "ADU too short. Waiting for more data.";
+                        return;
+                    }
+
+                    quint8 unitId;
+                    quint16 transactionId, bytesPdu, protocolId;
+                    QDataStream input(*buffer);
+                    input >> transactionId >> protocolId >> bytesPdu >> unitId;
+
+                    qCDebug(QT_MODBUS_LOW) << "Request MBPA:" << "Transaction Id:" << transactionId
+                                           << "Protocol Id:" << protocolId << "PDU bytes:" << bytesPdu
+                                           << "Unit Id:" << unitId;
+
+                    // The length field is the byte count of the following fields, including the Unit
+                    // Identifier and the PDU, so we remove on byte.
+                    bytesPdu--;
+
+                    if (buffer->size() < mbpaHeaderSize + bytesPdu) {
+                        qCDebug(QT_MODBUS) << "PDU too short. Waiting for more data";
+                        return;
+                    }
+
+                    QModbusRequest request;
+                    input >> request;
+
+                    qCDebug(QT_MODBUS) << "Request PDU:" << request;
+                    const QModbusResponse response = forwardProcessRequest(request);
+                    qCDebug(QT_MODBUS) << "Response PDU:" << response;
+
+                    buffer->remove(0, mbpaHeaderSize + bytesPdu);
+
+                    QByteArray result;
+                    QDataStream output(&result, QIODevice::WriteOnly);
+                    // The length field is the byte count of the following fields, including the Unit
+                    // Identifier and PDU fields, so we add one byte to the response size.
+                    output << transactionId << protocolId << quint16(response.size() + 1)
+                           << unitId << response;
+
+                    if (!socket->isOpen()) {
+                        qCDebug(QT_MODBUS) << "Requesting socket has closed.";
+                        forwardError(QModbusTcpServer::tr("Requesting socket is closed"),
+                                     QModbusDevice::WriteError);
+                        return;
+                    }
+
+                    int writtenBytes = socket->write(result);
+                    if (writtenBytes == -1 || writtenBytes < result.size()) {
+                        qCDebug(QT_MODBUS) << "Cannot write requested response to socket.";
+                        forwardError(QModbusTcpServer::tr("Could not write response to client"),
+                                     QModbusDevice::WriteError);
+                    }
+                }
+            });
+        });
+        QObject::connect(m_tcpServer, &QTcpServer::acceptError,
+                         [this](QAbstractSocket::SocketError /*sError*/) {
+            Q_Q(QModbusTcpServer);
+
+            qCWarning(QT_MODBUS) << "Server accept error";
+            q->setError(m_tcpServer->errorString(), QModbusDevice::ConnectionError);
+        });
+    }
+
+    QTcpServer *m_tcpServer;
+    QVector<QTcpSocket *> connections;
+
+    static const qint8 mbpaHeaderSize = 7;
+    static const qint16 maxBytesModbusADU = 260;
 };
 
 QT_END_NAMESPACE

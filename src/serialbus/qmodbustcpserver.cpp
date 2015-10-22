@@ -57,6 +57,8 @@ QT_BEGIN_NAMESPACE
 QModbusTcpServer::QModbusTcpServer(QObject *parent)
     : QModbusServer(*new QModbusTcpServerPrivate, parent)
 {
+    Q_D(QModbusTcpServer);
+    d->setupTcpServer();
 }
 
 /*!
@@ -72,6 +74,8 @@ QModbusTcpServer::~QModbusTcpServer()
 QModbusTcpServer::QModbusTcpServer(QModbusTcpServerPrivate &dd, QObject *parent)
     : QModbusServer(dd, parent)
 {
+    Q_D(QModbusTcpServer);
+    d->setupTcpServer();
 }
 
 /*!
@@ -104,10 +108,13 @@ bool QModbusTcpServer::open()
             QModbusDevice::ConnectionError);
         return false;
     }
-    if (d_func()->m_server.listen(QHostAddress(parts.value(0)), port)) {
+
+    Q_D(QModbusTcpServer);
+    if (d->m_tcpServer->listen(QHostAddress(parts.value(0)), port))
         setState(QModbusDevice::ConnectedState);
-        d_func()->m_server.requestHandler = this;
-    }
+    else
+        setError(d->m_tcpServer->errorString(), QModbusDevice::ConnectionError);
+
     return state() == QModbusDevice::ConnectedState;
 }
 
@@ -117,10 +124,13 @@ bool QModbusTcpServer::open()
 void QModbusTcpServer::close()
 {
     Q_D(QModbusTcpServer);
-    if (d->m_server.isListening()) {
-        d->m_server.disconnect();
-        d->m_server.close();
-    }
+
+    if (d->m_tcpServer->isListening())
+        d->m_tcpServer->close();
+
+    foreach (auto socket, d->connections)
+        socket->disconnectFromHost();
+
     setState(QModbusDevice::UnconnectedState);
 }
 
