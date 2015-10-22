@@ -35,6 +35,7 @@
 ****************************************************************************/
 
 #include <QtSerialBus/qmodbusclient.h>
+#include <QtSerialBus/private/qmodbus_symbols_p.h>
 
 #include <QtTest/QtTest>
 
@@ -94,7 +95,7 @@ private slots:
         QCOMPARE(unit.isValid(), true);
         QCOMPARE(unit.valueCount(), 1u);
         QCOMPARE(unit.startAddress(), 172);
-        QCOMPARE(unit.values(), QVector<quint16>() << 0xff00);
+        QCOMPARE(unit.values(), QVector<quint16>() << Coil::On);
         QCOMPARE(unit.registerType(), QModbusDataUnit::Coils);
 
         unit = QModbusDataUnit();

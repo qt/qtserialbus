@@ -36,6 +36,7 @@
 
 #include "qmodbusserver.h"
 #include "qmodbusserver_p.h"
+#include "qmodbus_symbols_p.h"
 
 #include <bitset>
 
@@ -603,7 +604,7 @@ QModbusResponse QModbusServerPrivate::processWriteSingleCoilRequest(const QModbu
     quint16 address, value;
     request.decodeData(&address, &value);
 
-    if ((value != 0x0000) && (value != 0xFF00)) {
+    if ((value != Coil::Off) && (value != Coil::On)) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataValue);
     }
