@@ -93,7 +93,17 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
     } else {
         connect(modbusDevice, &QModbusClient::stateChanged,
                 this, &MainWindow::onStateChanged);
+        connect(modbusDevice, &QModbusServer::errorOccurred,
+                this, &MainWindow::handleDeviceError);
     }
+}
+
+void MainWindow::handleDeviceError(QModbusDevice::ModbusError newError)
+{
+    if (newError == QModbusDevice::NoError || !modbusDevice)
+        return;
+
+    ui->errorLabel->setText(modbusDevice->errorString());
 }
 
 void MainWindow::on_connectButton_clicked()
