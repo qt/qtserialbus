@@ -60,6 +60,9 @@ private:
 static quint8 minimumDataSize(QModbusPdu::FunctionCode code, bool request)
 {
     switch (code) {
+    case QModbusPdu::Invalid:
+    case QModbusPdu::UndefinedFunctionCode:
+        return 0u;
     case QModbusPdu::ReadCoils:
     case QModbusPdu::ReadDiscreteInputs:
         return request ? 4u : 2u;
@@ -342,6 +345,10 @@ private slots:
             QModbusRequest::minimumDataSize(QModbusRequest::ReadFifoQueue));
         QCOMPARE(minimumDataSize(QModbusPdu::EncapsulatedInterfaceTransport, request),
             QModbusRequest::minimumDataSize(QModbusRequest::EncapsulatedInterfaceTransport));
+        QCOMPARE(minimumDataSize(QModbusPdu::Invalid, request),
+            QModbusRequest::minimumDataSize(QModbusRequest::Invalid));
+        QCOMPARE(minimumDataSize(QModbusPdu::UndefinedFunctionCode, request),
+            QModbusRequest::minimumDataSize(QModbusRequest::Invalid));
 
         request = false;
         QCOMPARE(minimumDataSize(QModbusPdu::ReadCoils, request),
@@ -382,6 +389,10 @@ private slots:
             QModbusResponse::minimumDataSize(QModbusResponse::ReadFifoQueue));
         QCOMPARE(minimumDataSize(QModbusPdu::EncapsulatedInterfaceTransport, request),
             QModbusResponse::minimumDataSize(QModbusResponse::EncapsulatedInterfaceTransport));
+        QCOMPARE(minimumDataSize(QModbusPdu::Invalid, request),
+            QModbusRequest::minimumDataSize(QModbusRequest::Invalid));
+        QCOMPARE(minimumDataSize(QModbusPdu::UndefinedFunctionCode, request),
+            QModbusRequest::minimumDataSize(QModbusRequest::Invalid));
     }
 
     void testQModbusRequestStreamOperator_data()
