@@ -53,9 +53,6 @@ public:
     explicit QModbusTcpServer(QObject *parent = 0);
     ~QModbusTcpServer();
 
-    // TODO: Should probably be protected?
-    QModbusResponse processRequest(const QModbusPdu &request) Q_DECL_OVERRIDE;
-
 private:
     QModbusTcpServer(QModbusTcpServerPrivate &dd, QObject *parent = Q_NULLPTR);
 

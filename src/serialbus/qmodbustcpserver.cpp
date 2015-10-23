@@ -81,14 +81,6 @@ QModbusTcpServer::QModbusTcpServer(QModbusTcpServerPrivate &dd, QObject *parent)
 /*!
     \reimp
 */
-QModbusResponse QModbusTcpServer::processRequest(const QModbusPdu &request)
-{
-    return QModbusServer::processRequest(request);
-}
-
-/*!
-    \reimp
-*/
 bool QModbusTcpServer::open()
 {
     if (state() == QModbusDevice::ConnectedState)
