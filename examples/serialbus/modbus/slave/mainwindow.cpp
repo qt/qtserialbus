@@ -91,10 +91,22 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
         else
             ui->errorLabel->setText(tr("Could not create Modbus server."));
     } else {
+        QModbusDataUnitMap reg;
+        reg.insert(QModbusDataUnit::Coils, { QModbusDataUnit::Coils, 0, 10 });
+        reg.insert(QModbusDataUnit::DiscreteInputs, { QModbusDataUnit::DiscreteInputs, 0, 10 });
+        reg.insert(QModbusDataUnit::InputRegisters, { QModbusDataUnit::InputRegisters, 0, 10 });
+        reg.insert(QModbusDataUnit::HoldingRegisters, { QModbusDataUnit::HoldingRegisters, 0, 10 });
+
+        modbusDevice->setMap(reg);
+
+        connect(modbusDevice, &QModbusServer::dataWritten,
+                this, &MainWindow::updateWidgets);
         connect(modbusDevice, &QModbusClient::stateChanged,
                 this, &MainWindow::onStateChanged);
         connect(modbusDevice, &QModbusServer::errorOccurred,
                 this, &MainWindow::handleDeviceError);
+
+        setupDeviceData();
     }
 }
 
@@ -110,31 +122,13 @@ void MainWindow::on_connectButton_clicked()
 {
     bool intendToConnect = (modbusDevice->state() == QModbusDevice::UnconnectedState);
 
-    if (modbusDevice && intendToConnect) {
-        QModbusDataUnitMap reg;
-        reg.insert(QModbusDataUnit::Coils, { QModbusDataUnit::Coils, 0, 10 });
-        reg.insert(QModbusDataUnit::DiscreteInputs, { QModbusDataUnit::DiscreteInputs, 0, 10 });
-        reg.insert(QModbusDataUnit::InputRegisters, { QModbusDataUnit::InputRegisters, 0, 10 });
-        reg.insert(QModbusDataUnit::HoldingRegisters, { QModbusDataUnit::HoldingRegisters, 0, 10 });
-
-        modbusDevice->setMap(reg);
-
-        connect(modbusDevice, &QModbusServer::dataWritten,
-                this, &MainWindow::updateWidgets);
-        connect(modbusDevice, &QModbusServer::stateChanged,
-                this, &MainWindow::onStateChanged);
-    }
-
     ui->errorLabel->setText(QString());
 
     if (intendToConnect) {
         modbusDevice->setPortName(ui->portEdit->text());
         modbusDevice->setSlaveId(ui->slaveEdit->text().toInt());
-        if (modbusDevice->connectDevice()) {
-            setupDeviceData();
-        } else {
+        if (!modbusDevice->connectDevice())
             ui->errorLabel->setText(tr("Connect failed: ") + modbusDevice->errorString());
-        }
     } else {
         modbusDevice->disconnectDevice();
     }
