@@ -85,6 +85,9 @@ static quint8 minimumDataSize(QModbusPdu::FunctionCode code, Type type)
         return type == Type::Request ? 2u : 6u;
     case QModbusPdu::EncapsulatedInterfaceTransport:
         break; // TODO: The spec is not really clear here.
+    case QModbusPdu::Invalid:
+    case QModbusPdu::UndefinedFunctionCode:
+        return 0u;
     }
     return 0u;
 }
@@ -359,7 +362,7 @@ QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu)
     stream >> code;
     pdu.setFunctionCode(static_cast<QModbusPdu::FunctionCode> (code));
 
-    quint16 size = Private::minimumDataSize(pdu.functionCode(), Private::Type::Request);
+    int size = Private::minimumDataSize(pdu.functionCode(), Private::Type::Request);
     if (size == 0u)
         return stream;
 
@@ -496,7 +499,7 @@ QDataStream &operator>>(QDataStream &stream, QModbusResponse &pdu)
     stream >> code;
     pdu.setFunctionCode(static_cast<QModbusPdu::FunctionCode> (code));
 
-    quint16 size = Private::minimumDataSize(pdu.functionCode(), Private::Type::Response);
+    int size = Private::minimumDataSize(pdu.functionCode(), Private::Type::Response);
 
     QByteArray data(size, Qt::Uninitialized);
     stream.device()->peek(data.data(), data.size());
