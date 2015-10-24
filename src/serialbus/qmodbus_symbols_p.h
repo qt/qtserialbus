@@ -76,4 +76,13 @@ enum SubFunctionCode {
 
 }
 
+namespace EncapsulatedInterfaceTransport {
+
+enum SubFunctionCode {
+    CanOpenGeneralReference = 0x0D,
+    ReadDeviceIdentification = 0x0E
+};
+
+}
+
 #endif // QMODBUS_SYMBOLS_P_H
