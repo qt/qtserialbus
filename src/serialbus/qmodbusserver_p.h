@@ -70,6 +70,7 @@ public:
     QModbusResponse processReadInputRegistersRequest(const QModbusRequest &request);
     QModbusResponse processWriteSingleCoilRequest(const QModbusRequest &request);
     QModbusResponse processWriteSingleRegisterRequest(const QModbusRequest &request);
+    QModbusResponse processReadExceptionStatus(const QModbusRequest &request);
     QModbusResponse processDiagnostics(const QModbusRequest &request);
     QModbusResponse processWriteMultipleCoilsRequest(const QModbusRequest &request);
     QModbusResponse processWriteMultipleRegistersRequest(const QModbusRequest &request);
@@ -106,6 +107,8 @@ private:
     quint16 m_serverNAKCounter = 0;
     quint16 m_serverDeviceBusyCounter = 0;
     quint16 m_serverCharacterOverrunCounter = 0;
+
+    quint16 m_exceptionStatusOffset = 0;
 };
 
 QT_END_NAMESPACE

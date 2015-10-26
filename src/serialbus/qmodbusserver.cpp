@@ -188,6 +188,42 @@ bool QModbusServer::continueOnError()
 }
 
 /*!
+    Sets the exception status byte offset of the server to \a offsetAddress
+    which is the absolute offset address in the coils (0x register) Modbus
+    register table starting with 0x0000h. The default value preset is 0,
+    using the exception status coils similar to Modicon 984 CPUs (coils 1-8).
+
+    The function returns \c true if the coils register contains the 8 bits
+    required for storing and retrieving the status coils, otherwise \c false.
+
+    \sa exceptionStatusOffset()
+*/
+bool QModbusServer::setExceptionStatusOffset(quint16 offsetAddress)
+{
+    Q_D(QModbusServer);
+
+    QModbusDataUnit coils(QModbusDataUnit::Coils, offsetAddress, 8);
+    if (!data(&coils))
+        return false;
+
+    d->m_exceptionStatusOffset = offsetAddress;
+    return true;
+}
+
+/*!
+    Returns the offset address of the exception status byte location in the coils
+    register.
+
+    \sa setExceptionStatusOffset()
+*/
+quint16 QModbusServer::exceptionStatusOffset()
+{
+    Q_D(const QModbusServer);
+
+    return d->m_exceptionStatusOffset;
+}
+
+/*!
     Reads data stored in the Modbus server. A Modbus server has four tables (\a table) and each
     have a unique \a address field, which is used to read \a data from the desired field.
     See QModbusDataUnit::RegisterType for more information about the different tables.
@@ -497,6 +533,7 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
     case QModbusRequest::WriteSingleRegister:
         return processWriteSingleRegisterRequest(request);
     case QModbusRequest::ReadExceptionStatus:
+        return processReadExceptionStatus(request);
     case QModbusRequest::Diagnostics:
         return processDiagnostics(request);
     case QModbusRequest::GetCommEventCounter:
@@ -729,6 +766,31 @@ QModbusResponse QModbusServerPrivate::processWriteSingleRegisterRequest(const QM
 
     // - TODO: Increase message counters when they are implemented
     return QModbusResponse(request.functionCode(), address, value);
+}
+
+QModbusResponse QModbusServerPrivate::processReadExceptionStatus(const QModbusRequest &request)
+{
+    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
+        return QModbusExceptionResponse(request.functionCode(),
+                                        QModbusExceptionResponse::IllegalDataValue);
+    }
+
+    // Get the requested range out of the registers.
+    QModbusDataUnit coils(QModbusDataUnit::Coils, m_exceptionStatusOffset, 8);
+    if (!q_func()->data(&coils)) {
+        return QModbusExceptionResponse(request.functionCode(),
+                                        QModbusExceptionResponse::IllegalDataAddress);
+    }
+
+    quint16 address = 0;
+    QVector<quint8> bytes;
+    std::bitset<8> byte;
+    for (int currentBit = 0; currentBit < 8; ++currentBit)
+        byte[currentBit] = coils.value(address++); // The padding happens inside value().
+    bytes.append(static_cast<quint8> (byte.to_ulong()));
+
+    // TODO: Increase message counters when they are implemented
+    return QModbusResponse(request.functionCode(), bytes);
 }
 
 QModbusResponse QModbusServerPrivate::processDiagnostics(const QModbusRequest &request)

@@ -291,6 +291,34 @@ private slots:
         QCOMPARE(response.data(), QByteArray::fromHex("03"));
     }
 
+    void testProcessReadExceptionStatus()
+    {
+         // simulate Modicon 484 (start at coil 257 up to 264)
+        server.setExceptionStatusOffset(256u);
+        // set the exception status byte to 0000 0011 simulating two bits set
+        // request write Coil 257, address: 0x0100 -> 256, value: 0xff00 -> ON
+        QModbusRequest request = QModbusRequest(QModbusRequest::WriteSingleCoil,
+            QByteArray::fromHex("0100ff00"));
+        QModbusResponse response = server.processRequest(request);
+        // request write Coil 258, address: 0x0101 -> 257, value: 0xff00 -> ON
+        request = QModbusRequest(QModbusRequest::WriteSingleCoil,
+            QByteArray::fromHex("0101ff00"));
+        response = server.processRequest(request);
+
+        request = QModbusRequest(QModbusRequest::ReadExceptionStatus);
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        // invalid request test
+        request = QModbusRequest(QModbusRequest::ReadExceptionStatus,
+                                 QByteArray::fromHex("007d"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+    }
+
     void testProcessDiagnosticsRequest()
     {
         // subfunction 00
@@ -883,6 +911,13 @@ private slots:
         QCOMPARE(server.continueOnError(), false);
     }
 
+    void tst_exceptionStatusOffset()
+    {
+       server.setExceptionStatusOffset(256u);
+       QCOMPARE(server.exceptionStatusOffset(), quint16(256));
+       server.setExceptionStatusOffset(0);
+       QCOMPARE(server.exceptionStatusOffset(), quint16(0));
+    }
 };
 
 QTEST_MAIN(tst_QModbusServer)
