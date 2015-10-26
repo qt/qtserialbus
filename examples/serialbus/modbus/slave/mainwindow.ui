@@ -81,7 +81,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Slave Id:</string>
+         <string>Slave Address:</string>
         </property>
        </widget>
       </item>

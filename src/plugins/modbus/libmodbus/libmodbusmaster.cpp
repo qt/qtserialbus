@@ -51,7 +51,7 @@ LibModBusMaster::LibModBusMaster() :
 {
 }
 
-QModbusReply* LibModBusMaster::write(const QModbusDataUnit &request, int slaveId)
+QModbusReply* LibModBusMaster::write(const QModbusDataUnit &request, int slaveAddress)
 {
     if (request.values().isEmpty()
             || request.valueCount() <= 0
@@ -71,11 +71,11 @@ QModbusReply* LibModBusMaster::write(const QModbusDataUnit &request, int slaveId
     }
 
     Reply *reply = new Reply();
-    reply->write(request, slaveId, context);
+    reply->write(request, slaveAddress, context);
     return reply;
 }
 
-QModbusReply* LibModBusMaster::read(const QModbusDataUnit &request, int slaveId)
+QModbusReply* LibModBusMaster::read(const QModbusDataUnit &request, int slaveAddress)
 {
     // request.values().size() is ignored, the read request will fill it
     if (request.valueCount() <= 0 || request.startAddress() < 0) {
@@ -84,7 +84,7 @@ QModbusReply* LibModBusMaster::read(const QModbusDataUnit &request, int slaveId)
     }
 
     Reply *reply = new Reply();
-    reply->read(request, slaveId, context);
+    reply->read(request, slaveAddress, context);
     return reply;
 }
 

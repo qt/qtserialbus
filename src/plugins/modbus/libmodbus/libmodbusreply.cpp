@@ -47,7 +47,7 @@ QT_BEGIN_NAMESPACE
 
 void RequestThread::write()
 {
-    modbus_set_slave(context, slaveId);
+    modbus_set_slave(context, slaveAddress);
 
     switch (table) {
     case QModbusDataUnit::Coils:
@@ -84,7 +84,7 @@ void RequestThread::writeBytes()
 
 void RequestThread::read()
 {
-    modbus_set_slave(context, slaveId);
+    modbus_set_slave(context, slaveAddress);
 
     switch (table) {
     case QModbusDataUnit::DiscreteInputs:
@@ -147,7 +147,7 @@ Reply::~Reply()
     thread.wait();
 }
 
-void Reply::read(const QModbusDataUnit &dataRequest, int slaveId, modbus_t *context)
+void Reply::read(const QModbusDataUnit &dataRequest, int slaveAddress, modbus_t *context)
 {
     request = new RequestThread();
     table = dataRequest.registerType();
@@ -155,7 +155,7 @@ void Reply::read(const QModbusDataUnit &dataRequest, int slaveId, modbus_t *cont
     startAddress = dataRequest.startAddress();
     request->startAddress = startAddress;
     request->size = dataRequest.valueCount();
-    request->slaveId = slaveId;
+    request->slaveAddress = slaveAddress;
     request->context = context;
     request->moveToThread(&thread);
 
@@ -167,7 +167,7 @@ void Reply::read(const QModbusDataUnit &dataRequest, int slaveId, modbus_t *cont
     emit startRead();
 }
 
-void Reply::write(const QModbusDataUnit &dataRequest, int slaveId, modbus_t *context)
+void Reply::write(const QModbusDataUnit &dataRequest, int slaveAddress, modbus_t *context)
 {
     request = new RequestThread();
     request->values = dataRequest.values();
@@ -175,7 +175,7 @@ void Reply::write(const QModbusDataUnit &dataRequest, int slaveId, modbus_t *con
     request->table = table;
     startAddress = dataRequest.startAddress();
     request->startAddress = startAddress;
-    request->slaveId = slaveId;
+    request->slaveAddress = slaveAddress;
     request->context = context;
     request->moveToThread(&thread);
 

@@ -58,7 +58,7 @@ Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS_LOW)
     multiple Modbus server. This class provides the Modbus server implementation via a serial port.
 
     Since multiple Modbus server instances can interact with a Modbus client at the same time
-    (using a serial bus), servers are identified by their \l slaveId().
+    (using a serial bus), servers are identified by their \l slaveAddress().
 */
 
 /*!
@@ -231,11 +231,11 @@ void QModbusRtuSerialSlavePrivate::serialPortReadyRead()
     }
 
 
-    // for this slave id?
+    // for this slave address ?
     // TODO deal with broadcast id 0
-    if (q->slaveId() != completeAduFrame.at(0)) {
+    if (q->slaveAddress() != completeAduFrame.at(0)) {
         //ignore wrong slaveId
-        qCDebug(QT_MODBUS) << "Wrong slave Id, expected" << q->slaveId() << "got" << (quint8) completeAduFrame.at(0);
+        qCDebug(QT_MODBUS) << "Wrong slave address, expected" << q->slaveAddress() << "got" << (quint8) completeAduFrame.at(0);
         return;
     }
 
@@ -244,7 +244,7 @@ void QModbusRtuSerialSlavePrivate::serialPortReadyRead()
         return;
     }
 
-    //remove slave id, fcode & crc
+    //remove slave address, fcode & crc
     QModbusRequest req(code, completeAduFrame.mid(2, completeAduFrame.size()-4));
     qCDebug(QT_MODBUS) << "Request PDU" << req;
     QModbusResponse response = q->processRequest(req);
@@ -253,7 +253,7 @@ void QModbusRtuSerialSlavePrivate::serialPortReadyRead()
 
     QByteArray result;
     QDataStream out(&result, QIODevice::WriteOnly);
-    out << (quint8) q->slaveId();
+    out << (quint8) q->slaveAddress();
     out << response;
 
     quint16 resultCrc = calculateCRC(result, result.size());

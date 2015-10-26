@@ -528,12 +528,12 @@ private slots:
         }
     }
 
-    void tst_slaveId()
+    void tst_slaveAddress()
     {
-        server.setSlaveId(56);
-        QCOMPARE(server.slaveId(), 56);
-        server.setSlaveId(1);
-        QCOMPARE(server.slaveId(), 1);
+        server.setSlaveAddress(56);
+        QCOMPARE(server.slaveAddress(), 56);
+        server.setSlaveAddress(1);
+        QCOMPARE(server.slaveAddress(), 1);
     }
 };
 

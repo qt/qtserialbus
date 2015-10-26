@@ -57,7 +57,7 @@ public:
     int startAddress;
     QVector<quint16> values;
     quint16 size;
-    int slaveId;
+    int slaveAddress;
     modbus_t *context;
 
 public Q_SLOTS:
@@ -83,8 +83,8 @@ public:
     explicit Reply(QObject *parent = 0);
     ~Reply();
 
-    void read(const QModbusDataUnit &requests, int slaveId, modbus_t *context);
-    void write(const QModbusDataUnit &requests, int slaveId, modbus_t *context);
+    void read(const QModbusDataUnit &requests, int slaveAddress, modbus_t *context);
+    void write(const QModbusDataUnit &requests, int slaveAddress, modbus_t *context);
 
 protected:
     void setFinished() Q_DECL_OVERRIDE;

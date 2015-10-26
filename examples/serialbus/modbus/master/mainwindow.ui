@@ -222,7 +222,7 @@
            <item row="0" column="0">
             <widget class="QLabel" name="label_10">
              <property name="text">
-              <string>Slave Id:</string>
+              <string>Slave Address:</string>
              </property>
             </widget>
            </item>
@@ -342,7 +342,7 @@
            <item row="0" column="0">
             <widget class="QLabel" name="label_11">
              <property name="text">
-              <string>Slave Id:</string>
+              <string>Slave Address:</string>
              </property>
             </widget>
            </item>

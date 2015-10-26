@@ -48,8 +48,8 @@ public:
     explicit DummySlave(QObject *parent = 0);
 
     bool setMap(const QModbusDataUnitMap &) Q_DECL_OVERRIDE;
-    void setSlaveId(int id);
-    int slaveId() const;
+    void setSlaveAddress(int id);
+    int slaveAddress() const;
     bool data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data);
     bool setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data);
 

@@ -80,7 +80,7 @@ private:
     QModbusDataUnit m_inputRegisters;
     QModbusDataUnit m_holdingRegisters;
 
-    int m_slaveId = 0;
+    int m_slaveAddress = 0;
 };
 
 QT_END_NAMESPACE

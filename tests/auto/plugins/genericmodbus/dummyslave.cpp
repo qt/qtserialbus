@@ -58,12 +58,12 @@ bool DummySlave::setMap(const QModbusDataUnitMap & /*map*/)
     return false;
 }
 
-void DummySlave::setSlaveId(int id)
+void DummySlave::setSlaveAddress(int id)
 {
     Q_UNUSED(id);
 }
 
-int DummySlave::slaveId() const
+int DummySlave::slaveAddress() const
 {
     return 1;
 }

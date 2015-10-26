@@ -45,16 +45,16 @@ QT_BEGIN_NAMESPACE
 class Q_SERIALBUS_EXPORT QModbusReplyEx
 {
 public:
-    QModbusReplyEx() : mSlaveId(0xff), mFinished(false) {}
+    QModbusReplyEx() : mSlaveAddress(0xff), mFinished(false) {}
 
     QModbusDataUnit result() const { return mUnit; }
     bool finished() const { return mFinished; }
-    int slaveId() const { return mSlaveId; }
+    int slaveAddress() const { return mSlaveAddress; }
 
 private:
     QModbusPdu mPdu;
     QModbusDataUnit mUnit;
-    int mSlaveId;
+    int mSlaveAddress;
     bool mFinished;
 };
 

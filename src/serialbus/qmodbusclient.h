@@ -59,14 +59,14 @@ public:
     explicit QModbusClient(QObject *parent = 0);
     virtual ~QModbusClient();
 
-    virtual QModbusReplyEx *sendReadRequest(const QModbusDataUnit &read, int slaveId) = 0;
-    virtual QModbusReplyEx *sendWriteRequest(const QModbusDataUnit &write, int slaveId) = 0;
+    virtual QModbusReplyEx *sendReadRequest(const QModbusDataUnit &read, int slaveAddress) = 0;
+    virtual QModbusReplyEx *sendWriteRequest(const QModbusDataUnit &write, int slaveAddress) = 0;
     virtual QModbusReplyEx *sendReadWriteRequest(const QModbusDataUnit &read,
-                                                 const QModbusDataUnit &write, int slaveId) = 0;
+                                                 const QModbusDataUnit &write, int slaveAddress) = 0;
 
     //TODO to be removed once new setup ready
-    virtual QModbusReply *write(const QModbusDataUnit &request, int slaveId = 1) = 0;
-    virtual QModbusReply *read(const QModbusDataUnit &request, int slaveId = 1) = 0;
+    virtual QModbusReply *write(const QModbusDataUnit &request, int slaveAddress = 1) = 0;
+    virtual QModbusReply *read(const QModbusDataUnit &request, int slaveAddress = 1) = 0;
 
 Q_SIGNALS:
     void requestFinished(QModbusReplyEx *result);

@@ -93,27 +93,27 @@ bool QModbusServer::setMap(const QModbusDataUnitMap &map)
 }
 
 /*!
-    Sets the slave id for this modbus server instance.
+    Sets the slave address for this modbus server instance.
 
-    \sa slaveId()
+    \sa slaveAddress()
 */
-void QModbusServer::setSlaveId(int id)
+void QModbusServer::setSlaveAddress(int slaveAddress)
 {
     Q_D(QModbusServer);
-    d->m_slaveId = id;
+    d->m_slaveAddress = slaveAddress;
 }
 
 /*!
-    Returns the slave id of this modbus server instance.
+    Returns the slave address of this modbus server instance.
 
-    The purpose of the slave id is to identify the modbus server
+    The purpose of the slave address is to identify the modbus server
     that is responsible for a client request.
 */
-int QModbusServer::slaveId() const
+int QModbusServer::slaveAddress() const
 {
     Q_D(const QModbusServer);
 
-    return d->m_slaveId;
+    return d->m_slaveAddress;
 }
 
 /*!
@@ -341,24 +341,24 @@ bool QModbusServer::setData(const QModbusDataUnit &newData)
 }
 
 /*!
-    \fn int QModbusServer::slaveId() const
+    \fn int QModbusServer::slaveAddress() const
     Multiple Modbus devices can be connected together on the same physical link.
-    Slave id is a unique identifier that each Modbus server must have, and it is used
+    Slave address is a unique identifier that each Modbus server must have, and it is used
     to filter out incoming messages.
 
-    Returns slave id.
+    Returns slave address.
 
-    \sa setSlaveId()
+    \sa setSlaveAddress()
  */
 
 /*!
-    \fn void QModbusServer::setSlaveId(int id)
+    \fn void QModbusServer::setSlaveAddress(int slaveAddress)
     Multiple Modbus devices can be connected together on the same physical link.
     So it is important that each server is identified by a unique id.
 
-    Sets \a id as slave id.
+    Sets \a slaveAddress as slave address.
 
-    \sa slaveId()
+    \sa slaveAddress()
  */
 
 /*!

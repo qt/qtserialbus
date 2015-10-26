@@ -126,7 +126,7 @@ void MainWindow::on_connectButton_clicked()
 
     if (intendToConnect) {
         modbusDevice->setPortName(ui->portEdit->text());
-        modbusDevice->setSlaveId(ui->slaveEdit->text().toInt());
+        modbusDevice->setSlaveAddress(ui->slaveEdit->text().toInt());
         if (!modbusDevice->connectDevice())
             ui->errorLabel->setText(tr("Connect failed: ") + modbusDevice->errorString());
     } else {
