@@ -54,6 +54,7 @@ class Q_SERIALBUS_EXPORT QModbusClient : public QModbusDevice
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(QModbusClient)
+    Q_PROPERTY(int timeout READ timeout WRITE setTimeout NOTIFY timeoutChanged)
 
 public:
     explicit QModbusClient(QObject *parent = 0);
@@ -68,8 +69,12 @@ public:
     virtual QModbusReply *write(const QModbusDataUnit &request, int slaveAddress = 1) = 0;
     virtual QModbusReply *read(const QModbusDataUnit &request, int slaveAddress = 1) = 0;
 
+    int timeout() const;
+    void setTimeout(int newTimeout);
+
 Q_SIGNALS:
     void requestFinished(QModbusReplyEx *result);
+    void timeoutChanged();
 
 protected:
     QModbusClient(QModbusClientPrivate &dd, QObject *parent = Q_NULLPTR);

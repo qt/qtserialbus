@@ -58,7 +58,7 @@ class Q_AUTOTEST_EXPORT QModbusClientPrivate : public QModbusDevicePrivate
 {
     Q_DECLARE_PUBLIC(QModbusClient)
 public:
-    QModbusClientPrivate()
+    QModbusClientPrivate() : timeout(200)
     {
     }
 
@@ -80,6 +80,8 @@ public:
                                                QModbusDataUnit *data);
     bool processReadWriteMultipleRegistersResponse(const QModbusResponse &response,
                                                   QModbusDataUnit *data);
+
+    int timeout;
 };
 
 QT_END_NAMESPACE

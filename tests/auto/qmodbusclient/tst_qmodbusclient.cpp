@@ -70,6 +70,18 @@ class tst_QModbusClient : public QObject
     Q_OBJECT
 
 private slots:
+    void testTimeout()
+    {
+        TestClient client;
+        QCOMPARE(client.timeout(), 200); //default value test
+
+        client.setTimeout(300);
+        QCOMPARE(client.timeout(), 300);
+        client.setTimeout(-1); // disables timeout
+        QCOMPARE(client.timeout(), -1);;
+
+    }
+
     void testProcessReadWriteSingleMultipleCoilsResponse()
     {
         TestClient client;

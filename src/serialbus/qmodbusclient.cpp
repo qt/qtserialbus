@@ -84,6 +84,44 @@ QModbusClient::~QModbusClient()
 }
 
 /*!
+    Returns the timeout value used by this QModbusClient instance in ms.
+    A timeout is indicated by a \l TimeoutError. The default value is 200 ms.
+
+    \sa setTimeout
+*/
+int QModbusClient::timeout() const
+{
+    Q_D(const QModbusClient);
+    return d->timeout;
+}
+
+/*!
+    \fn void QModbusClient::timeoutChanged()
+
+    This signal is emitted
+ */
+
+/*!
+    Sets the \a newTimout for this QModbusClient instance.
+
+    The timeout is used by the client to determine how long it waits for
+    a response from the server. If the response is not received within the
+    required timeout, the \l TimeOutError is sert.
+
+    Setting the timeout to a negative value disables timeouts.
+
+    \sa timeout
+ */
+void QModbusClient::setTimeout(int newTimeout)
+{
+    Q_D(QModbusClient);
+    if (d->timeout != newTimeout) {
+        d->timeout = newTimeout;
+        emit timeoutChanged();
+    }
+}
+
+/*!
     \internal
 */
 QModbusClient::QModbusClient(QModbusClientPrivate &dd, QObject *parent) :
