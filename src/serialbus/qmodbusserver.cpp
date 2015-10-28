@@ -39,6 +39,7 @@
 #include "qmodbus_symbols_p.h"
 
 #include <QtCore/qloggingcategory.h>
+
 #include <bitset>
 
 QT_BEGIN_NAMESPACE
@@ -55,7 +56,6 @@ Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
     Modbus networks can have multiple Modbus servers. Modbus Servers are read/written by a
     Modbus client represented by \l QModbusClient. QModbusServer communicates with a Modbus
     backend, providing users with a convenient API.
-
  */
 
 /*!
@@ -75,7 +75,7 @@ QModbusServer::~QModbusServer()
 
 /*!
     \internal
- */
+*/
 QModbusServer::QModbusServer(QModbusServerPrivate &dd, QObject *parent) :
     QModbusDevice(dd, parent)
 {
@@ -89,7 +89,7 @@ QModbusServer::QModbusServer(QModbusServerPrivate &dd, QObject *parent) :
     entries is setup.
 
     \note Calling this function discards any register value that was previously set.
- */
+*/
 bool QModbusServer::setMap(const QModbusDataUnitMap &map)
 {
     return d_func()->setMap(map);
@@ -138,7 +138,7 @@ void QModbusServer::setDiagnosticRegister(quint16 value)
     has a specific meaning.
 
     \sa setDiagnosticRegister()
-**/
+*/
 quint16 QModbusServer::diagnosticRegister() const
 {
     Q_D(const QModbusServer);
@@ -230,9 +230,8 @@ quint16 QModbusServer::exceptionStatusOffset()
     Returns \c false if address is outside of the map range or the register type is not even defined.
 
     \sa QModbusDataUnit::RegisterType, setData()
- */
-bool QModbusServer::data(QModbusDataUnit::RegisterType table,
-                         quint16 address, quint16 *data) const
+*/
+bool QModbusServer::data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data) const
 {
     Q_D(const QModbusServer);
     if (!data)
@@ -277,7 +276,7 @@ bool QModbusServer::data(QModbusDataUnit::RegisterType table,
 
     If \a newData contains a valid register type but a negative start address
     the entire register map is returned and \a newData appropriately sized.
- */
+*/
 bool QModbusServer::data(QModbusDataUnit *newData) const
 {
     Q_D(const QModbusServer);
@@ -338,10 +337,8 @@ bool QModbusServer::data(QModbusDataUnit *newData) const
     returns \c true in such cases.
 
     \sa QModbusDataUnit::RegisterType, data(), dataWritten()
- */
-
-bool QModbusServer::setData(QModbusDataUnit::RegisterType table,
-                            quint16 address, quint16 data)
+*/
+bool QModbusServer::setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data)
 {
     Q_D(QModbusServer);
     QModbusDataUnit* unit;
@@ -387,8 +384,7 @@ bool QModbusServer::setData(QModbusDataUnit::RegisterType table,
     register already. Nevertheless this function returns \c true in such cases.
 
     \sa data()
- */
-
+*/
 bool QModbusServer::setData(const QModbusDataUnit &newData)
 {
     Q_D(QModbusServer);
@@ -440,10 +436,7 @@ bool QModbusServer::setData(const QModbusDataUnit &newData)
     }
 
     if (changeRequired)
-        emit dataWritten(newData.registerType(),
-                         newData.startAddress(),
-                         newData.valueCount());
-
+        emit dataWritten(newData.registerType(), newData.startAddress(), newData.valueCount());
     return true;
 }
 
@@ -456,7 +449,7 @@ bool QModbusServer::setData(const QModbusDataUnit &newData)
     Returns slave address.
 
     \sa setSlaveAddress()
- */
+*/
 
 /*!
     \fn void QModbusServer::setSlaveAddress(int slaveAddress)
@@ -466,7 +459,7 @@ bool QModbusServer::setData(const QModbusDataUnit &newData)
     Sets \a slaveAddress as slave address.
 
     \sa slaveAddress()
- */
+*/
 
 /*!
     \fn void QModbusServer::dataWritten(QModbusDataUnit::RegisterType table, int address, int size)
@@ -481,7 +474,7 @@ bool QModbusServer::setData(const QModbusDataUnit &newData)
 
     The signal is not emitted when the to-be-written fields have not changed
     due to no change in value.
- */
+*/
 
 /*
     Processes a Modbus client \a request and returns a Modbus response.
@@ -1073,6 +1066,7 @@ QModbusResponse QModbusServerPrivate::processReadWriteMultipleRegistersRequest(
 
 /*!
     \internal
+
     Access function of the device for Modbus Diagnostic Function Code 0x08, Subcode 01
     (0x08, 0x0001 hex)
 
@@ -1081,7 +1075,7 @@ QModbusResponse QModbusServerPrivate::processReadWriteMultipleRegistersRequest(
     If \a clearEventLog is set to true, the event log history gets cleared also.
 
     \sa forceListenOnlyMode(), getCommEventLog()
- */
+*/
 bool QModbusServerPrivate::restartCommunicationsOption(bool clearLog)
 {
     q_func()->disconnectDevice();
@@ -1096,6 +1090,7 @@ bool QModbusServerPrivate::restartCommunicationsOption(bool clearLog)
 
 /*!
     \internal
+
     Resets all communication event counters of the Modbus server to zero.
 */
 void QModbusServerPrivate::resetCommunicationCounters()
@@ -1113,6 +1108,7 @@ void QModbusServerPrivate::resetCommunicationCounters()
 
 /*!
     \internal
+
     Stores an event byte into the Modbus event log history table (0-64 bytes) at
     the first position (byte 0) and pushes all other events back. The communication
     event counter is increased for each event stored in the event log.
