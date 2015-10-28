@@ -73,12 +73,19 @@ public:
     bool setMap(const QModbusDataUnitMap &map);
 
     QModbusResponse processRequest(const QModbusPdu &request);
+
     QModbusResponse processReadCoilsRequest(const QModbusRequest &request);
     QModbusResponse processReadDiscreteInputsRequest(const QModbusRequest &request);
+    QModbusResponse readBits(const QModbusPdu &request, QModbusDataUnit::RegisterType unitType);
+
     QModbusResponse processReadHoldingRegistersRequest(const QModbusRequest &request);
     QModbusResponse processReadInputRegistersRequest(const QModbusRequest &request);
+    QModbusResponse readBytes(const QModbusPdu &request, QModbusDataUnit::RegisterType unitType);
+
     QModbusResponse processWriteSingleCoilRequest(const QModbusRequest &request);
     QModbusResponse processWriteSingleRegisterRequest(const QModbusRequest &request);
+    QModbusResponse writeSingle(const QModbusPdu &request, QModbusDataUnit::RegisterType unitType);
+
     QModbusResponse processReadExceptionStatus(const QModbusRequest &request);
     QModbusResponse processDiagnostics(const QModbusRequest &request);
     QModbusResponse processWriteMultipleCoilsRequest(const QModbusRequest &request);

@@ -524,42 +524,53 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
 
 QModbusResponse QModbusServerPrivate::processReadCoilsRequest(const QModbusRequest &request)
 {
+    return readBits(request, QModbusDataUnit::Coils);
+}
+
+QModbusResponse QModbusServerPrivate::processReadDiscreteInputsRequest(const QModbusRequest &rqst)
+{
+    return readBits(rqst, QModbusDataUnit::DiscreteInputs);
+}
+
+QModbusResponse QModbusServerPrivate::readBits(const QModbusPdu &request,
+                                               QModbusDataUnit::RegisterType unitType)
+{
     // request data size corrupt
     if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataValue);
     }
 
-    quint16 address, numberOfCoils;
-    request.decodeData(&address, &numberOfCoils);
+    quint16 address, count;
+    request.decodeData(&address, &count);
 
-    if ((numberOfCoils < 0x0001) || (numberOfCoils > 0x07D0)) {
+    if ((count < 0x0001) || (count > 0x07D0)) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataValue);
     }
 
     // Get the requested range out of the registers.
-    QModbusDataUnit coils(QModbusDataUnit::Coils, address, numberOfCoils);
-    if (!q_func()->data(&coils)) {
+    QModbusDataUnit unit(unitType, address, count);
+    if (!q_func()->data(&unit)) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataAddress);
     }
 
-    quint8 byteCount = numberOfCoils / 8;
-    if ((numberOfCoils % 8) != 0) {
+    quint8 byteCount = count / 8;
+    if ((count % 8) != 0) {
         byteCount += 1;
         // If the range is not a multiple of 8, resize.
-        coils.setValueCount(byteCount * 8);
+        unit.setValueCount(byteCount * 8);
     }
 
     address = 0; // The data range now starts with zero.
     QVector<quint8> bytes;
     for (int i = 0; i < byteCount; ++i) {
         std::bitset<8> byte;
-        // According to the spec: If the returned output quantity is not a multiple of
-        // eight, the remaining bits in the final data byte will be padded with zeros.
+        // According to the spec: If the returned quantity is not a multiple of eight,
+        // the remaining bits in the final data byte will be padded with zeros.
         for (int currentBit = 0; currentBit < 8; ++currentBit)
-            byte[currentBit] = coils.value(address++); // The padding happens inside value().
+            byte[currentBit] = unit.value(address++); // The padding happens inside value().
         bytes.append(static_cast<quint8> (byte.to_ulong()));
     }
 
@@ -567,81 +578,18 @@ QModbusResponse QModbusServerPrivate::processReadCoilsRequest(const QModbusReque
     return QModbusResponse(request.functionCode(), byteCount, bytes);
 }
 
-QModbusResponse QModbusServerPrivate::processReadDiscreteInputsRequest(
-        const QModbusRequest &request)
+QModbusResponse QModbusServerPrivate::processReadHoldingRegistersRequest(const QModbusRequest &rqst)
 {
-    // request data size corrupt
-    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
-
-    quint16 address, numberOfInputs;
-    request.decodeData(&address, &numberOfInputs);
-
-    if ((numberOfInputs < 0x0001) || (numberOfInputs > 0x07D0)) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
-
-    // Get the requested range out of the registers.
-    QModbusDataUnit inputs(QModbusDataUnit::DiscreteInputs, address, numberOfInputs);
-    if (!q_func()->data(&inputs)) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataAddress);
-    }
-
-    quint8 byteCount = numberOfInputs / 8;
-    if ((numberOfInputs % 8) != 0) {
-        byteCount += 1;
-        // If the range is not a multiple of 8, resize.
-        inputs.setValueCount(byteCount * 8);
-    }
-
-    address = 0; // The data range now starts with zero.
-    QVector<quint8> bytes;
-    for (int i = 0; i < byteCount; ++i) {
-        std::bitset<8> byte;
-        // According to the spec: If the returned input quantity is not a multiple of
-        // eight, the remaining bits in the final data byte will be padded with zeros.
-        for (int currentBit = 0; currentBit < 8; ++currentBit)
-            byte[currentBit] = inputs.value(address++); // The padding happens inside value().
-        bytes.append(static_cast<quint8> (byte.to_ulong()));
-    }
-
-    // TODO: Increase message counters when they are implemented
-    return QModbusResponse(request.functionCode(), byteCount, bytes);
+    return readBytes(rqst, QModbusDataUnit::HoldingRegisters);
 }
 
-QModbusResponse QModbusServerPrivate::processReadHoldingRegistersRequest(const QModbusRequest &request)
+QModbusResponse QModbusServerPrivate::processReadInputRegistersRequest(const QModbusRequest &rqst)
 {
-    // request data size corrupt
-    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
-
-    quint16 address, numberOfRegisters;
-    request.decodeData(&address, &numberOfRegisters);
-
-    if ((numberOfRegisters < 0x0001) || (numberOfRegisters > 0x007D)) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
-
-    // Get the requested range out of the registers.
-    QModbusDataUnit registers(QModbusDataUnit::HoldingRegisters, address, numberOfRegisters);
-    if (!q_func()->data(&registers)) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataAddress);
-    }
-
-    // TODO: Increase message counters when they are implemented
-    return QModbusResponse(request.functionCode(), quint8(numberOfRegisters * 2), registers.values());
+    return readBytes(rqst, QModbusDataUnit::InputRegisters);
 }
 
-QModbusResponse QModbusServerPrivate::processReadInputRegistersRequest(
-    const QModbusRequest &request)
+QModbusResponse QModbusServerPrivate::readBytes(const QModbusPdu &request,
+                                                QModbusDataUnit::RegisterType unitType)
 {
     // request data size corrupt
     if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
@@ -649,27 +597,38 @@ QModbusResponse QModbusServerPrivate::processReadInputRegistersRequest(
             QModbusExceptionResponse::IllegalDataValue);
     }
 
-    quint16 address, numberOfRegisters;
-    request.decodeData(&address, &numberOfRegisters);
+    quint16 address, count;
+    request.decodeData(&address, &count);
 
-    if ((numberOfRegisters < 0x0001) || (numberOfRegisters > 0x007D)) {
+    if ((count < 0x0001) || (count > 0x007D)) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataValue);
     }
 
     // Get the requested range out of the registers.
-    QModbusDataUnit registers(QModbusDataUnit::InputRegisters, address, numberOfRegisters);
-    if (!q_func()->data(&registers)) {
+    QModbusDataUnit unit(unitType, address, count);
+    if (!q_func()->data(&unit)) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataAddress);
     }
 
     // TODO: Increase message counters when they are implemented
-    return QModbusResponse(request.functionCode(), quint8(numberOfRegisters * 2), registers.values());
+    return QModbusResponse(request.functionCode(), quint8(count * 2), unit.values());
 }
 
 QModbusResponse QModbusServerPrivate::processWriteSingleCoilRequest(const QModbusRequest &request)
 {
+    return writeSingle(request, QModbusDataUnit::Coils);
+}
+
+QModbusResponse QModbusServerPrivate::processWriteSingleRegisterRequest(const QModbusRequest &rqst)
+{
+    return writeSingle(rqst, QModbusDataUnit::HoldingRegisters);
+}
+
+QModbusResponse QModbusServerPrivate::writeSingle(const QModbusPdu &request,
+                                                  QModbusDataUnit::RegisterType unitType)
+{
     // request data size corrupt
     if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
         return QModbusExceptionResponse(request.functionCode(),
@@ -679,53 +638,23 @@ QModbusResponse QModbusServerPrivate::processWriteSingleCoilRequest(const QModbu
     quint16 address, value;
     request.decodeData(&address, &value);
 
-    if ((value != Coil::Off) && (value != Coil::On)) {
+    if ((unitType == QModbusDataUnit::Coils) && ((value != Coil::Off) && (value != Coil::On))) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataValue);
     }
 
     // Get the requested register.
-    QModbusDataUnit coils(QModbusDataUnit::Coils, address, 1u);
-    if (!q_func()->data(&coils)) {
+    QModbusDataUnit unit(unitType, address, 1u);
+    if (!q_func()->data(&unit)) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataAddress);
     }
 
-    // Since we picked the coil at address, data range
+    // Since we picked the unit at address, data range
     // is now 1 and therefore index needs to be 0.
-    coils.setValue(0, value);
+    unit.setValue(0, value);
 
-    if (!q_func()->setData(coils)) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::ServerDeviceFailure);
-    }
-
-    // - TODO: Increase message counters when they are implemented
-    return QModbusResponse(request.functionCode(), address, value);
-}
-
-QModbusResponse QModbusServerPrivate::processWriteSingleRegisterRequest(const QModbusRequest &request)
-{
-    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
-
-    quint16 address, value;
-    request.decodeData(&address, &value);
-
-    // Get the requested register.
-    QModbusDataUnit registers(QModbusDataUnit::HoldingRegisters, address, 1u);
-    if (!q_func()->data(&registers)) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataAddress);
-    }
-
-    // Since we picked the holding register at address, data range
-    // is now 1 and therefore index needs to be 0.
-    registers.setValue(0, value);
-
-    if (!q_func()->setData(registers)) {
+    if (!q_func()->setData(unit)) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::ServerDeviceFailure);
     }
