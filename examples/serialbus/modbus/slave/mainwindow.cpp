@@ -100,7 +100,7 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
 
         connect(modbusDevice, &QModbusServer::dataWritten,
                 this, &MainWindow::updateWidgets);
-        connect(modbusDevice, &QModbusClient::stateChanged,
+        connect(modbusDevice, &QModbusServer::stateChanged,
                 this, &MainWindow::onStateChanged);
         connect(modbusDevice, &QModbusServer::errorOccurred,
                 this, &MainWindow::handleDeviceError);
