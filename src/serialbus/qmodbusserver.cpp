@@ -1125,9 +1125,6 @@ void QModbusServerPrivate::resetCommunicationCounters()
 */
 void QModbusServerPrivate::storeEvent(quint8 eventByte)
 {
-    if (m_commEventLog.size() == 64)
-        m_commEventLog.resize(63);
-
     m_commEventLog.prepend(eventByte);
     m_commEventCounter += 1;
 }

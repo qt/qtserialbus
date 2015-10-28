@@ -41,6 +41,8 @@
 #include "qmodbusdevice_p.h"
 #include "qmodbusdataunit.h"
 
+#include <QtCore/qcontiguouscache.h>
+
 //
 //  W A R N I N G
 //  -------------
@@ -59,7 +61,9 @@ class QModbusServerPrivate : public QModbusDevicePrivate
     Q_DECLARE_PUBLIC(QModbusServer)
 
 public:
-    QModbusServerPrivate() Q_DECL_EQ_DEFAULT;
+    QModbusServerPrivate()
+        : m_commEventLog(64)
+    {}
 
     bool setMap(const QModbusDataUnitMap &map);
 
@@ -97,7 +101,7 @@ private:
     bool m_deviceBusy = false; //TODO required?
     uchar m_asciiInputDelimiter; // TODO not taken into account yet
     quint16 m_commEventCounter = 0;
-    QByteArray m_commEventLog;
+    QContiguousCache<quint8> m_commEventLog;
 
     quint16 m_busMessageCounter = 0;
     quint16 m_crcErrorCounter = 0;
