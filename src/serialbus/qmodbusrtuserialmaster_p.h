@@ -34,42 +34,71 @@
 **
 ****************************************************************************/
 
-#ifndef LIBMODBUSTCPSERVER_H
-#define LIBMODBUSTCPSERVER_H
+#ifndef QMODBUSSERIALMASTER_P_H
+#define QMODBUSSERIALMASTER_P_H
 
-#include <QtSerialBus/qmodbustcpserver.h>
+#include "qmodbusrtuserialmaster.h"
+#include "qmodbusclient_p.h"
 
-#include <modbus.h>
+#include "qmodbus.h"
+
+#include <QtCore/qdebug.h>
+
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qt API. It exists purely as an
+// implementation detail. This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
 
 QT_BEGIN_NAMESPACE
 
-class LibModBusTcpServer : public QModBusTcpServer
+class QModbusRtuSerialMasterPrivate : public QModbusClientPrivate
 {
-    Q_OBJECT
-    Q_DISABLE_COPY(LibModBusTcpServer)
+    Q_DECLARE_PUBLIC(QModbusRtuSerialMaster)
 
 public:
-    LibModBusTcpServer();
+    QModbusRtuSerialMasterPrivate()
+        : pluginMaster(Q_NULLPTR)
+    {
+        //hard usage of libmodbus plugin
+        pluginMaster = QModbus::instance()->createClient(QByteArray("libmodbus"));
+        if (!pluginMaster)
+            qWarning() << "Cannot find libmodbus plugin.";
+    }
 
-    void listen(const QString &address, quint16 port = 502) Q_DECL_OVERRIDE;
-    void listen(const QHostAddress &address, quint16 port = 502) Q_DECL_OVERRIDE;
+    ~QModbusRtuSerialMasterPrivate()
+    {
+        delete pluginMaster;
+    }
 
-    bool setMap(const QModBusRegister &newRegister) Q_DECL_OVERRIDE;
+    void setupMaster()
+    {
+        if (!pluginMaster)
+            return;
 
-    bool data(QModBusRegister::RegisterType table, quint16 address, quint16 *data) Q_DECL_OVERRIDE;
-    bool setData(QModBusRegister::RegisterType table, quint16 address, quint16 data) Q_DECL_OVERRIDE;
+        Q_Q(QModbusRtuSerialMaster);
+        // forward the error and state changes
+        QObject::connect(pluginMaster, SIGNAL(stateChanged(QModbusDevice::ModbusDeviceState)),
+            q, SLOT(handleStateChanged(QModbusDevice::ModbusDeviceState)));
+        QObject::connect(pluginMaster, SIGNAL(errorOccurred(QModbusDevice::ModbusError)),
+            q, SLOT(handleErrorOccurred(QModbusDevice::ModbusError)));
 
-private:
-    bool open() Q_DECL_OVERRIDE;
-    void close() Q_DECL_OVERRIDE;
+        q->setState(pluginMaster->state());
+        q->setError(pluginMaster->errorString(), pluginMaster->error());
+    }
 
-    void setSlaveId(int) Q_DECL_OVERRIDE {} // TODO: remove?
-    int slaveId() const Q_DECL_OVERRIDE { return -1; } // TODO: remove?
+    void handleStateChanged(QModbusDevice::ModbusDeviceState);
+    void handleErrorOccurred(QModbusDevice::ModbusError);
 
-private:
-    modbus_t *context;
+    QModbusClient* pluginMaster;
 };
 
 QT_END_NAMESPACE
 
-#endif // LIBMODBUSTCPSERVER_H
+#endif // QMODBUSSERIALMASTER_P_H
+

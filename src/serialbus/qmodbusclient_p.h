@@ -34,11 +34,12 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSMASTER_P_H
-#define QMODBUSMASTER_P_H
+#ifndef QMODBUSCLIENT_P_H
+#define QMODBUSCLIENT_P_H
 
-#include "qmodbusmaster.h"
+#include "qmodbusclient.h"
 #include "qmodbusdevice_p.h"
+#include "qmodbuspdu.h"
 
 //
 //  W A R N I N G
@@ -53,16 +54,37 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModBusMasterPrivate : public QModBusDevicePrivate
+class Q_AUTOTEST_EXPORT QModbusClientPrivate : public QModbusDevicePrivate
 {
-    Q_DECLARE_PUBLIC(QModBusMaster)
+    Q_DECLARE_PUBLIC(QModbusClient)
 public:
-    QModBusMasterPrivate()
+    QModbusClientPrivate() : timeout(200)
     {
     }
+
+    QModbusRequest createReadRequest(const QModbusDataUnit &data) const;
+    QModbusRequest createWriteRequest(const QModbusDataUnit &data) const;
+    QModbusRequest createRWRequest(const QModbusDataUnit &read, const QModbusDataUnit &write) const;
+
+    bool processResponse(const QModbusResponse &response, QModbusDataUnit *data);
+    bool processReadCoilsResponse(const QModbusResponse &response, QModbusDataUnit *data);
+    bool processReadDiscreteInputsResponse(const QModbusResponse &response, QModbusDataUnit *data);
+    bool processReadHoldingRegistersResponse(const QModbusResponse &response,
+                                             QModbusDataUnit *data);
+    bool processReadInputRegistersResponse(const QModbusResponse &response, QModbusDataUnit *data);
+    bool processWriteSingleCoilResponse(const QModbusResponse &response, QModbusDataUnit *data);
+    bool processWriteSingleRegisterResponse(const QModbusResponse &response,
+                                            QModbusDataUnit *data);
+    bool processWriteMultipleCoilsResponse(const QModbusResponse &response, QModbusDataUnit *data);
+    bool processWriteMultipleRegistersResponse(const QModbusResponse &response,
+                                               QModbusDataUnit *data);
+    bool processReadWriteMultipleRegistersResponse(const QModbusResponse &response,
+                                                  QModbusDataUnit *data);
+
+    int timeout;
 };
 
 QT_END_NAMESPACE
 
-#endif // QMODBUSMASTER_P_H
+#endif // QMODBUSCLIENT_P_H
 

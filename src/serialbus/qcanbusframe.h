@@ -39,6 +39,7 @@
 
 #include <QtSerialBus/qserialbusglobal.h>
 
+#include <QtCore/qmetatype.h>
 #include <QtCore/qobject.h>
 
 QT_BEGIN_NAMESPACE
@@ -212,6 +213,7 @@ Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &, QCanBusFrame &);
 
 QT_END_NAMESPACE
 
+Q_DECLARE_METATYPE(QCanBusFrame::FrameType)
 Q_DECLARE_METATYPE(QCanBusFrame::FrameErrors)
 
 #endif // QCANBUSFRAME_H

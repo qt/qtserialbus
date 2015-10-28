@@ -38,25 +38,25 @@
 
 #include <QtTest/QtTest>
 
-class tst_QModBus : public QObject
+class tst_QModbus : public QObject
 {
     Q_OBJECT
 public:
-    tst_QModBus();
+    tst_QModbus();
 
 private slots:
     void initTestCase();
     void plugins();
     void createBackend();
 private:
-    QModBus *bus;
+    QModbus *bus;
 };
 
-tst_QModBus::tst_QModBus() : bus(0)
+tst_QModbus::tst_QModbus() : bus(0)
 {
 }
 
-void tst_QModBus::initTestCase()
+void tst_QModbus::initTestCase()
 {
     /*
      * Set custom path since CI doesn't install test plugins
@@ -67,28 +67,28 @@ void tst_QModBus::initTestCase()
     QCoreApplication::addLibraryPath(QCoreApplication::applicationDirPath()
                                      + QStringLiteral("/../../../../plugins"));
 #endif
-    bus = QModBus::instance();
+    bus = QModbus::instance();
     QVERIFY(bus != 0);
-    QModBus *sameInstance;
-    sameInstance = QModBus::instance();
+    QModbus *sameInstance;
+    sameInstance = QModbus::instance();
     QCOMPARE(bus, sameInstance);
 }
 
-void tst_QModBus::plugins()
+void tst_QModbus::plugins()
 {
     QCOMPARE(bus->plugins().isEmpty(), false);
     QCOMPARE(bus->plugins().contains("generic"), true);
 }
 
-void tst_QModBus::createBackend()
+void tst_QModbus::createBackend()
 {
-    QVERIFY(bus->createSlave("foo") == Q_NULLPTR);
-    QVERIFY(bus->createMaster("foo") == Q_NULLPTR);
+    QVERIFY(bus->createServer("foo") == Q_NULLPTR);
+    QVERIFY(bus->createClient("foo") == Q_NULLPTR);
 
-    QVERIFY(bus->createSlave("generic") != Q_NULLPTR);
-    QVERIFY(bus->createMaster("generic") != Q_NULLPTR);
+    QVERIFY(bus->createServer("generic") != Q_NULLPTR);
+    QVERIFY(bus->createClient("generic") != Q_NULLPTR);
 }
 
-QTEST_MAIN(tst_QModBus)
+QTEST_MAIN(tst_QModbus)
 
 #include "tst_qmodbus.moc"

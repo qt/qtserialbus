@@ -43,69 +43,70 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModBusDevicePrivate;
+class QModbusDevicePrivate;
 
 
-class Q_SERIALBUS_EXPORT QModBusDevice : public QObject
+class Q_SERIALBUS_EXPORT QModbusDevice : public QObject
 {
     Q_OBJECT
-    Q_DECLARE_PRIVATE(QModBusDevice)
+    Q_DECLARE_PRIVATE(QModbusDevice)
 
 public:
     // TODO: Temporarily added until plugin system removed.
-    enum ModBusConnection {
+    enum ModbusConnection {
         Serial,
         Tcp
     };
 
-    enum ModBusError {
+    enum ModbusError {
         NoError,
         ReadError,
         WriteError,
         ConnectionError,
         ConfigurationError,
+        TimeoutError,
         UnknownError
     };
-    Q_ENUM(ModBusError)
+    Q_ENUM(ModbusError)
 
-    enum ModBusDeviceState {
+    enum ModbusDeviceState {
         UnconnectedState,
         ConnectingState,
         ConnectedState,
         ClosingState
     };
-    Q_ENUM(ModBusDeviceState)
+    Q_ENUM(ModbusDeviceState)
 
-    explicit QModBusDevice(QObject *parent = 0);
-    virtual ~QModBusDevice();
+    explicit QModbusDevice(QObject *parent = 0);
+    virtual ~QModbusDevice();
 
     //TODO should become part of connect call in RTS specific sub class
     void setPortName(const QString& name);
     QString portName() const;
 
-    bool connectDevice();
+    virtual bool connectDevice(); //TODO remove virtual, workaround
     void disconnectDevice();
 
-    ModBusDeviceState state() const;
+    ModbusDeviceState state() const;
 
-    ModBusError error() const;
+    ModbusError error() const;
     QString errorString() const;
 
 Q_SIGNALS:
-    void errorOccurred(QModBusDevice::ModBusError error);
-    void stateChanged(QModBusDevice::ModBusDeviceState state);
+    void errorOccurred(QModbusDevice::ModbusError error);
+    void stateChanged(QModbusDevice::ModbusDeviceState state);
 
 protected:
-    QModBusDevice(QModBusDevicePrivate &dd, QObject *parent = Q_NULLPTR);
+    QModbusDevice(QModbusDevicePrivate &dd, QObject *parent = Q_NULLPTR);
 
-    void setState(QModBusDevice::ModBusDeviceState newState);
-    void setError(const QString &errorText, QModBusDevice::ModBusError error);
+    void setState(QModbusDevice::ModbusDeviceState newState);
+    void setError(const QString &errorText, QModbusDevice::ModbusError error);
     virtual bool open() = 0;
     virtual void close() = 0;
 };
 
-Q_DECLARE_TYPEINFO(QModBusDevice::ModBusError, Q_PRIMITIVE_TYPE);
-Q_DECLARE_TYPEINFO(QModBusDevice::ModBusDeviceState, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(QModbusDevice::ModbusError, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(QModbusDevice::ModbusDeviceState, Q_PRIMITIVE_TYPE);
 
 QT_END_NAMESPACE
 

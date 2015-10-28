@@ -47,13 +47,13 @@ QT_BEGIN_NAMESPACE
 
 void RequestThread::write()
 {
-    modbus_set_slave(context, slaveId);
+    modbus_set_slave(context, slaveAddress);
 
     switch (table) {
-    case QModBusRegister::Coils:
+    case QModbusDataUnit::Coils:
         writeBits();
         break;
-    case QModBusRegister::HoldingRegisters:
+    case QModbusDataUnit::HoldingRegisters:
         writeBytes();
         break;
     default:
@@ -84,15 +84,15 @@ void RequestThread::writeBytes()
 
 void RequestThread::read()
 {
-    modbus_set_slave(context, slaveId);
+    modbus_set_slave(context, slaveAddress);
 
     switch (table) {
-    case QModBusRegister::DiscreteInputs:
-    case QModBusRegister::Coils:
+    case QModbusDataUnit::DiscreteInputs:
+    case QModbusDataUnit::Coils:
             readBits();
         break;
-    case QModBusRegister::InputRegisters:
-    case QModBusRegister::HoldingRegisters:
+    case QModbusDataUnit::InputRegisters:
+    case QModbusDataUnit::HoldingRegisters:
             readBytes();
         break;
     default:
@@ -105,7 +105,7 @@ void RequestThread::readBits()
 {
     int read = -1;
     QVector<quint8> bits(size, 0);
-    if (table == QModBusRegister::DiscreteInputs)
+    if (table == QModbusDataUnit::DiscreteInputs)
         read = modbus_read_input_bits(context, startAddress, size, bits.data());
     else
         read = modbus_read_bits(context, startAddress, size, bits.data());
@@ -124,7 +124,7 @@ void RequestThread::readBytes()
 {
     int read = -1;
     QVector<quint16> bytes(size, 0);
-    if (table == QModBusRegister::InputRegisters)
+    if (table == QModbusDataUnit::InputRegisters)
         read = modbus_read_input_registers(context, startAddress, size, bytes.data());
     else
         read = modbus_read_registers(context, startAddress, size, bytes.data());
@@ -136,7 +136,7 @@ void RequestThread::readBytes()
 }
 
 Reply::Reply(QObject *parent)
-    : QModBusReply(parent)
+    : QModbusReply(parent)
 {
     qRegisterMetaType<QVector<quint16> >("QVector<quint16>");
 }
@@ -147,7 +147,7 @@ Reply::~Reply()
     thread.wait();
 }
 
-void Reply::read(const QModBusDataUnit &dataRequest, int slaveId, modbus_t *context)
+void Reply::read(const QModbusDataUnit &dataRequest, int slaveAddress, modbus_t *context)
 {
     request = new RequestThread();
     table = dataRequest.registerType();
@@ -155,7 +155,7 @@ void Reply::read(const QModBusDataUnit &dataRequest, int slaveId, modbus_t *cont
     startAddress = dataRequest.startAddress();
     request->startAddress = startAddress;
     request->size = dataRequest.valueCount();
-    request->slaveId = slaveId;
+    request->slaveAddress = slaveAddress;
     request->context = context;
     request->moveToThread(&thread);
 
@@ -167,7 +167,7 @@ void Reply::read(const QModBusDataUnit &dataRequest, int slaveId, modbus_t *cont
     emit startRead();
 }
 
-void Reply::write(const QModBusDataUnit &dataRequest, int slaveId, modbus_t *context)
+void Reply::write(const QModbusDataUnit &dataRequest, int slaveAddress, modbus_t *context)
 {
     request = new RequestThread();
     request->values = dataRequest.values();
@@ -175,7 +175,7 @@ void Reply::write(const QModBusDataUnit &dataRequest, int slaveId, modbus_t *con
     request->table = table;
     startAddress = dataRequest.startAddress();
     request->startAddress = startAddress;
-    request->slaveId = slaveId;
+    request->slaveAddress = slaveAddress;
     request->context = context;
     request->moveToThread(&thread);
 
@@ -190,14 +190,14 @@ void Reply::write(const QModBusDataUnit &dataRequest, int slaveId, modbus_t *con
 void Reply::setFinished()
 {
     for (int i = 0; i < values.size(); i++) {
-        QModBusDataUnit unit(table, startAddress + i, values.at(i));
+        QModbusDataUnit unit(table, startAddress + i, values.at(i));
         payload.append(unit);
     }
     finish = true;
     emit finished();
 }
 
-void Reply::setError(QModBusReply::RequestError errorCode, const QString &errorString)
+void Reply::setError(QModbusReply::RequestError errorCode, const QString &errorString)
 {
     payload.clear();
     errorType = errorCode;
@@ -216,47 +216,47 @@ void Reply::setResults(const QVector<quint16> &payload)
 void Reply::handleError(int errorNumber)
 {
     QString errorText;
-    QModBusReply::RequestError error;
+    QModbusReply::RequestError error;
     // defined in libmodbus
     switch (errorNumber) {
     case EMBXILFUN:
-        error = QModBusReply::IllegalFunction;
+        error = QModbusReply::IllegalFunction;
         errorText = modbus_strerror(errorNumber);
         break;
     case EMBXILADD:
-        error = QModBusReply::IllegalDataAddress;
+        error = QModbusReply::IllegalDataAddress;
         errorText = modbus_strerror(errorNumber);
         break;
     case EMBXILVAL:
-        error = QModBusReply::IllegalDataValue;
+        error = QModbusReply::IllegalDataValue;
         errorText = modbus_strerror(errorNumber);
         break;
     case EMBXSFAIL:
-        error = QModBusReply::SlaveFailure;
+        error = QModbusReply::SlaveFailure;
         errorText = modbus_strerror(errorNumber);
         break;
     case EMBXACK:
-        error = QModBusReply::Acknowledge;
+        error = QModbusReply::Acknowledge;
         errorText = modbus_strerror(errorNumber);
         break;
     case EMBXSBUSY:
-        error = QModBusReply::SlaveBusy;
+        error = QModbusReply::SlaveBusy;
         errorText = modbus_strerror(errorNumber);
         break;
     case EMBXMEMPAR:
-        error = QModBusReply::MemoryParity;
+        error = QModbusReply::MemoryParity;
         errorText = modbus_strerror(errorNumber);
         break;
     case EMBXGPATH:
-        error = QModBusReply::GatewayUnavailable;
+        error = QModbusReply::GatewayUnavailable;
         errorText = modbus_strerror(errorNumber);
         break;
     case EMBXGTAR:
-        error = QModBusReply::NoResponse;
+        error = QModbusReply::NoResponse;
         errorText = modbus_strerror(errorNumber);
         break;
     case EMBBADCRC:
-        error = QModBusReply::InvalidCRC;
+        error = QModbusReply::InvalidCRC;
         errorText = modbus_strerror(errorNumber);
         break;
     case EMBXNACK:
@@ -264,11 +264,11 @@ void Reply::handleError(int errorNumber)
     case EMBBADEXC:
     case EMBUNKEXC:
     case EMBMDATA:
-        error = QModBusReply::InvalidError;
+        error = QModbusReply::InvalidError;
         errorText = modbus_strerror(errorNumber);
         break;
     default:
-        error = QModBusReply::InvalidError;
+        error = QModbusReply::InvalidError;
         errorText = qt_error_string(errorNumber);
         break;
     }

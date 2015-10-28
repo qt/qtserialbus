@@ -37,21 +37,21 @@
 #ifndef DUMMYSLAVE_H
 #define DUMMYSLAVE_H
 
-#include <QtSerialBus/qmodbusslave.h>
+#include <QtSerialBus/qmodbusserver.h>
 
 QT_FORWARD_DECLARE_CLASS(QIODevice)
 
-class DummySlave : public QModBusSlave
+class DummySlave : public QModbusServer
 {
     Q_OBJECT
 public:
     explicit DummySlave(QObject *parent = 0);
 
-    bool setMap(const QModBusRegister &) Q_DECL_OVERRIDE;
-    void setSlaveId(int id);
-    int slaveId() const;
-    bool data(QModBusRegister::RegisterType table, quint16 address, quint16 *data);
-    bool setData(QModBusRegister::RegisterType table, quint16 address, quint16 data);
+    bool setMap(const QModbusDataUnitMap &) Q_DECL_OVERRIDE;
+    void setSlaveAddress(int id);
+    int slaveAddress() const;
+    bool data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data);
+    bool setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data);
 
 protected:
     bool open();

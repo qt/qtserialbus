@@ -38,25 +38,25 @@
 #define QMODBUSFACTORY_H
 
 #include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qmodbusslave.h>
-#include <QtSerialBus/qmodbusmaster.h>
+#include <QtSerialBus/qmodbusserver.h>
+#include <QtSerialBus/qmodbusclient.h>
 
 #include <QtCore/qstringlist.h>
 #include <QtCore/qiodevice.h>
 
 QT_BEGIN_NAMESPACE
 
-class Q_SERIALBUS_EXPORT QModBusFactory
+class Q_SERIALBUS_EXPORT QModbusFactory
 {
 public:
-    virtual QModBusSlave *createSlave(QModBusDevice::ModBusConnection type) const = 0;
-    virtual QModBusMaster *createMaster(QModBusDevice::ModBusConnection type) const = 0;
+    virtual QModbusServer *createServer(QModbusDevice::ModbusConnection type) const = 0;
+    virtual QModbusClient *createClient(QModbusDevice::ModbusConnection type) const = 0;
 
 protected:
-    virtual ~QModBusFactory() {}
+    virtual ~QModbusFactory() {}
 };
 
-Q_DECLARE_INTERFACE(QModBusFactory, "org.qt-project.Qt.QModBusFactory")
+Q_DECLARE_INTERFACE(QModbusFactory, "org.qt-project.Qt.QModbusFactory")
 
 QT_END_NAMESPACE
 

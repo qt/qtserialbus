@@ -37,21 +37,28 @@
 #ifndef DUMMYMASTER_H
 #define DUMMYMASTER_H
 
-#include <QtSerialBus/qmodbusmaster.h>
+#include <QtSerialBus/qmodbusclient.h>
 
-class DummyMaster : public QModBusMaster
+class DummyMaster : public QModbusClient
 {
     Q_OBJECT
 public:
     explicit DummyMaster(QObject *parent = 0);
 
-    QModBusReply *write(const QModBusDataUnit &request, int slaveId) Q_DECL_OVERRIDE;
-    QModBusReply *read(const QModBusDataUnit &request, int slaveId) Q_DECL_OVERRIDE;
+    QModbusReply *write(const QModbusDataUnit &request, int slaveId) Q_DECL_OVERRIDE;
+    QModbusReply *read(const QModbusDataUnit &request, int slaveId) Q_DECL_OVERRIDE;
 
 protected:
     bool open();
     void close();
 
+private:
+    // TODO: Remove!
+    QModbusReplyEx *sendReadRequest(const QModbusDataUnit &, int) { return Q_NULLPTR; }
+    QModbusReplyEx *sendWriteRequest(const QModbusDataUnit &, int) { return Q_NULLPTR; }
+    QModbusReplyEx *sendReadWriteRequest(const QModbusDataUnit &, const QModbusDataUnit &, int) {
+        return Q_NULLPTR;
+    }
 };
 
 #endif // DUMMYMASTER_H

@@ -33,86 +33,49 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+#ifndef QMODBUSRTUSERIALMASTER_H
+#define QMODBUSRTUSERIALMASTER_H
 
-#ifndef LIBMODBUSBACKEND_H
-#define LIBMODBUSBACKEND_H
-
-#include <QtSerialBus/qmodbusslave.h>
-
-#include <QtCore/qstring.h>
-#include <QtCore/qthread.h>
-#include <QtCore/qpointer.h>
-#include <QtCore/qmap.h>
-
-#include <modbus.h>
+#include <QtSerialBus/qmodbusclient.h>
 
 QT_BEGIN_NAMESPACE
 
-class ListenThread : public QObject
+class QModbusRtuSerialMasterPrivate;
+
+class Q_SERIALBUS_EXPORT QModbusRtuSerialMaster : public QModbusClient
 {
     Q_OBJECT
-
-    enum FunctionId {
-        ReadCoils = 1,
-        ReadDiscreteInputs = 2,
-        ReadHoldingRegisters = 3,
-        ReadInputRegisters = 4,
-        WriteSingleCoil = 5,
-        WriteSingleRegister = 6,
-        WriteMultipleCoils = 15,
-        WriteMultipleRegisters = 16,
-        ReadWriteRegisters = 23
-    };
-
-public slots:
-    void doWork();
+    Q_DECLARE_PRIVATE(QModbusRtuSerialMaster)
 
 public:
-    modbus_t *context;
-    modbus_mapping_t *mapping;
+    explicit QModbusRtuSerialMaster(QObject *parent = Q_NULLPTR);
+    ~QModbusRtuSerialMaster();
 
-Q_SIGNALS:
-    void error(int errorNumber);
-    void slaveRead();
-    void slaveWritten(QModBusRegister::RegisterType table, int address, int size);
-};
+    // TODO find way to pass parity, baud, dataBits, stopBits
+    bool connectDevice(const QString& deviceName);
+    virtual QModbusReplyEx *sendReadRequest(const QModbusDataUnit &read,
+                                            int slaveAddress) Q_DECL_OVERRIDE;
+    virtual QModbusReplyEx *sendWriteRequest(const QModbusDataUnit &write,
+                                             int slaveAddress) Q_DECL_OVERRIDE;
+    virtual QModbusReplyEx *sendReadWriteRequest(const QModbusDataUnit &read,
+                                        const QModbusDataUnit &write, int slaveAddress) Q_DECL_OVERRIDE;
 
-class LibModBusSlave : public QModBusSlave
-{
-    Q_OBJECT
-public:
-    LibModBusSlave();
-    ~LibModBusSlave();
+    // TODO: Remove!
+    QModbusReply *write(const QModbusDataUnit &request, int slaveAddress = 1) Q_DECL_OVERRIDE;
+    QModbusReply *read(const QModbusDataUnit &request, int slaveAddress = 1) Q_DECL_OVERRIDE;
 
-    bool setMap(const QModBusRegister &newRegister) Q_DECL_OVERRIDE;
+protected:
+    QModbusRtuSerialMaster(QModbusRtuSerialMasterPrivate &dd, QObject *parent = Q_NULLPTR);
 
-    int slaveId() const Q_DECL_OVERRIDE;
-    void setSlaveId(int id) Q_DECL_OVERRIDE;
-
-    bool data(QModBusRegister::RegisterType table, quint16 address, quint16 *data) Q_DECL_OVERRIDE;
-    bool setData(QModBusRegister::RegisterType table, quint16 address, quint16 data) Q_DECL_OVERRIDE;
-
-Q_SIGNALS:
-    void operate();
-
-private Q_SLOTS:
-    void handleError(int errorNumber);
-
-private:
     bool open() Q_DECL_OVERRIDE;
     void close() Q_DECL_OVERRIDE;
-    static QString portNameToSystemLocation(const QString &source);
 
 private:
-    QPointer<ListenThread> listener;
-    QThread thread;
-    modbus_t *context;
-    modbus_mapping_t *mapping;
-    bool connected;
-    int slave;
-    QMap<QModBusRegister::RegisterType, int> mappingTable;
+    using QModbusDevice::connectDevice;
+    Q_PRIVATE_SLOT(d_func(), void handleStateChanged(QModbusDevice::ModbusDeviceState))
+    Q_PRIVATE_SLOT(d_func(), void handleErrorOccurred(QModbusDevice::ModbusError))
 };
 
 QT_END_NAMESPACE
 
-#endif // LIBMODBUSBACKEND_H
+#endif // QMODBUSRTUSERIALMASTER_H

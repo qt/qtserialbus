@@ -35,9 +35,7 @@
 ****************************************************************************/
 
 #include "libmodbusmaster.h"
-#include "libmodbusslave.h"
 #include "libmodbustcpclient.h"
-#include "libmodbustcpserver.h"
 
 #include <QtSerialBus/qmodbus.h>
 #include <QtSerialBus/qmodbusfactory.h>
@@ -47,27 +45,23 @@
 
 QT_BEGIN_NAMESPACE
 
-class ModBusPlugin : public QObject, public QModBusFactory
+class ModBusPlugin : public QObject, public QModbusFactory
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QModBusFactory" FILE "plugin.json")
-    Q_INTERFACES(QModBusFactory)
+    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QModbusFactory" FILE "plugin.json")
+    Q_INTERFACES(QModbusFactory)
 
 public:
-    QModBusSlave *createSlave(QModBusDevice::ModBusConnection type) const
+    QModbusServer *createServer(QModbusDevice::ModbusConnection /*type*/) const
     {
-        if (type == QModBusDevice::Serial)
-            return new LibModBusSlave();
-        if (type == QModBusDevice::Tcp)
-            return new LibModBusTcpServer();
         return Q_NULLPTR;
     }
 
-    QModBusMaster *createMaster(QModBusDevice::ModBusConnection type) const
+    QModbusClient *createClient(QModbusDevice::ModbusConnection type) const
     {
-        if (type == QModBusDevice::Serial)
+        if (type == QModbusDevice::Serial)
             return new LibModBusMaster();
-        if (type == QModBusDevice::Tcp)
+        if (type == QModbusDevice::Tcp)
             return new LibModBusTcpClient();
         return Q_NULLPTR;
     }

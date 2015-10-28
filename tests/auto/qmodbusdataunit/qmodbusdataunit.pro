@@ -1,5 +1,5 @@
 QT = core testlib serialbus
 TARGET = tst_qmodbusdataunit
-CONFIG += testcase
+CONFIG += testcase c++11
 
 SOURCES += tst_qmodbusdataunit.cpp

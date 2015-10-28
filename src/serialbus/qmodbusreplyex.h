@@ -33,42 +33,31 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef QMODBUSSERIALMASTER_H
-#define QMODBUSSERIALMASTER_H
 
-#include <QtSerialBus/qmodbusmaster.h>
+#ifndef QMODBUSREPLYEX_H
+#define QMODBUSREPLYEX_H
+
+#include <QtSerialBus/qmodbuspdu.h>
+#include <QtSerialBus/qmodbusdataunit.h>
 
 QT_BEGIN_NAMESPACE
 
-class QModBusSerialMasterPrivate;
-
-class Q_SERIALBUS_EXPORT QModBusSerialMaster : public QModBusMaster
+class Q_SERIALBUS_EXPORT QModbusReplyEx
 {
-    Q_OBJECT
-    Q_DECLARE_PRIVATE(QModBusSerialMaster)
-
 public:
-    explicit QModBusSerialMaster(QObject *parent = Q_NULLPTR);
-    ~QModBusSerialMaster();
+    QModbusReplyEx() : mSlaveAddress(0xff), mFinished(false) {}
 
-    // TODO find way to pass parity, baud, dataBits, stopBits
-    bool connectDevice(const QString& deviceName);
-
-    QModBusReply *write(const QModBusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
-    QModBusReply *read(const QModBusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
-
-protected:
-    QModBusSerialMaster(QModBusSerialMasterPrivate &dd,
-                        QObject *parent = Q_NULLPTR);
-
-    bool open() Q_DECL_OVERRIDE;
-    void close() Q_DECL_OVERRIDE;
+    QModbusDataUnit result() const { return mUnit; }
+    bool finished() const { return mFinished; }
+    int slaveAddress() const { return mSlaveAddress; }
 
 private:
-    Q_PRIVATE_SLOT(d_func(), void handleStateChanged(QModBusDevice::ModBusDeviceState))
-    Q_PRIVATE_SLOT(d_func(), void handleErrorOccurred(QModBusDevice::ModBusError))
+    QModbusPdu mPdu;
+    QModbusDataUnit mUnit;
+    int mSlaveAddress;
+    bool mFinished;
 };
 
 QT_END_NAMESPACE
 
-#endif // QMODBUSSERIALMASTER_H
+#endif // QMODBUSREPLYEX_H

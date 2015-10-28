@@ -34,45 +34,55 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSREGISTER_H
-#define QMODBUSREGISTER_H
+#ifndef QMODBUSCLIENT_H
+#define QMODBUSCLIENT_H
 
+#include <QtSerialBus/qserialbusglobal.h>
 #include <QtSerialBus/qmodbusdevice.h>
-#include <QtCore/qvector.h>
+#include <QtSerialBus/qmodbusdataunit.h>
+#include <QtSerialBus/qmodbuspdu.h>
+#include <QtSerialBus/qmodbusreply.h>
+#include <QtSerialBus/qmodbusreplyex.h>
+
+#include <QtCore/qobject.h>
 
 QT_BEGIN_NAMESPACE
 
-class QModBusRegister
+class QModbusClientPrivate;
+
+class Q_SERIALBUS_EXPORT QModbusClient : public QModbusDevice
 {
+    Q_OBJECT
+    Q_DECLARE_PRIVATE(QModbusClient)
+    Q_PROPERTY(int timeout READ timeout WRITE setTimeout NOTIFY timeoutChanged)
+
 public:
-    QModBusRegister() { dataSet.fill(0u, 4); }
+    explicit QModbusClient(QObject *parent = 0);
+    virtual ~QModbusClient();
 
-    enum RegisterType {
-        DiscreteInputs,
-        Coils,
-        InputRegisters,
-        HoldingRegisters
-    };
+    virtual QModbusReplyEx *sendReadRequest(const QModbusDataUnit &read, int slaveAddress) = 0;
+    virtual QModbusReplyEx *sendWriteRequest(const QModbusDataUnit &write, int slaveAddress) = 0;
+    virtual QModbusReplyEx *sendReadWriteRequest(const QModbusDataUnit &read,
+                                                 const QModbusDataUnit &write, int slaveAddress) = 0;
 
-    void setRegisterSize(QModBusRegister::RegisterType registerType, quint16 size)
-    {
-        dataSet[registerType] = size;
-    }
+    //TODO to be removed once new setup ready
+    virtual QModbusReply *write(const QModbusDataUnit &request, int slaveAddress = 1) = 0;
+    virtual QModbusReply *read(const QModbusDataUnit &request, int slaveAddress = 1) = 0;
 
-    quint16 registerSize(QModBusRegister::RegisterType registerType) const
-    {
-        return dataSet[registerType];
-    }
+    int timeout() const;
+    void setTimeout(int newTimeout);
 
-private:
-    QVector<quint16> dataSet;
+Q_SIGNALS:
+    void requestFinished(QModbusReplyEx *result);
+    void timeoutChanged();
+
+protected:
+    QModbusClient(QModbusClientPrivate &dd, QObject *parent = Q_NULLPTR);
+
+    virtual bool processResponse(const QModbusResponse &response, QModbusDataUnit *data);
+    virtual bool processPrivateModbusResponse(const QModbusResponse &response, QModbusDataUnit *data);
 };
-
-Q_DECLARE_TYPEINFO(QModBusRegister::RegisterType, Q_PRIMITIVE_TYPE);
-Q_DECLARE_TYPEINFO(QModBusRegister, Q_MOVABLE_TYPE);
 
 QT_END_NAMESPACE
 
-Q_DECLARE_METATYPE(QModBusRegister::RegisterType)
-
-#endif // QMODBUSREGISTER_H
+#endif // QMODBUSCLIENT_H

@@ -38,31 +38,31 @@
 #define QMODBUS_H
 
 #include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qmodbusslave.h>
-#include <QtSerialBus/qmodbusmaster.h>
+#include <QtSerialBus/qmodbusclient.h>
+#include <QtSerialBus/qmodbusserver.h>
 
 #include <QtCore/qobject.h>
 #include <QtCore/qiodevice.h>
 
 QT_BEGIN_NAMESPACE
 
-class Q_SERIALBUS_EXPORT QModBus : public QObject
+class Q_SERIALBUS_EXPORT QModbus : public QObject
 {
     Q_OBJECT
 
 public:
-    static QModBus *instance();
+    static QModbus *instance();
     QList<QByteArray> plugins() const;
 
-    QModBusSlave *createSlave(const QByteArray &plugin,
-        QModBusDevice::ModBusConnection type = QModBusDevice::Serial) const;
-    QModBusMaster *createMaster(const QByteArray &plugin,
-        QModBusDevice::ModBusConnection type = QModBusDevice::Serial) const;
+    QModbusServer *createServer(const QByteArray &plugin,
+        QModbusDevice::ModbusConnection type = QModbusDevice::Serial) const;
+    QModbusClient *createClient(const QByteArray &plugin,
+        QModbusDevice::ModbusConnection type = QModbusDevice::Serial) const;
 
 private:
-    QModBus(QObject *parent = 0);
+    QModbus(QObject *parent = 0);
 
-    Q_DISABLE_COPY(QModBus)
+    Q_DISABLE_COPY(QModbus)
 };
 
 QT_END_NAMESPACE

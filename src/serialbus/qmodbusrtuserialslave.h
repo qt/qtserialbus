@@ -34,47 +34,36 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSSLAVE_H
-#define QMODBUSSLAVE_H
+#ifndef QMODBUSRTUSERIALSLAVE_H
+#define QMODBUSRTUSERIALSLAVE_H
 
-#include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qmodbusdevice.h>
-#include <QtSerialBus/qmodbusdataunit.h>
-#include <QtSerialBus/qmodbusregister.h>
-
-#include <QtCore/qobject.h>
-
+#include <QtSerialBus/qmodbusserver.h>
 
 QT_BEGIN_NAMESPACE
 
-class QModBusSlavePrivate;
+class QModbusRtuSerialSlavePrivate;
 
-class Q_SERIALBUS_EXPORT QModBusSlave : public QModBusDevice
+class Q_SERIALBUS_EXPORT QModbusRtuSerialSlave : public QModbusServer
 {
     Q_OBJECT
-    Q_DECLARE_PRIVATE(QModBusSlave)
+    Q_DECLARE_PRIVATE(QModbusRtuSerialSlave)
 
 public:
-
-    explicit QModBusSlave(QObject *parent = 0);
-    virtual ~QModBusSlave();
-
-    virtual bool setMap(const QModBusRegister &newRegister) = 0;
-
-    virtual void setSlaveId(int id) = 0;
-    virtual int slaveId() const = 0;
-
-    //TODO: Review if QModBusMap would be useful. It could replace setMap(), data() and setData()
-    virtual bool data(QModBusRegister::RegisterType table, quint16 address, quint16 *data) = 0;
-    virtual bool setData(QModBusRegister::RegisterType table, quint16 address, quint16 data) = 0;
-
-Q_SIGNALS:
-    void slaveRead();
-    void slaveWritten(QModBusRegister::RegisterType table, int address, int size);
+    explicit QModbusRtuSerialSlave(QObject *parent = Q_NULLPTR);
+    ~QModbusRtuSerialSlave();
 
 protected:
-    QModBusSlave(QModBusSlavePrivate &dd, QObject *parent = Q_NULLPTR);
+    QModbusRtuSerialSlave(QModbusRtuSerialSlavePrivate &dd, QObject *parent = Q_NULLPTR);
+
+    bool open() Q_DECL_OVERRIDE;
+    void close() Q_DECL_OVERRIDE;
+
+private:
+    Q_PRIVATE_SLOT(d_func(), void handleErrorOccurred(QSerialPort::SerialPortError))
+    Q_PRIVATE_SLOT(d_func(), void serialPortReadyRead())
+    Q_PRIVATE_SLOT(d_func(), void aboutToClose())
 };
 
 QT_END_NAMESPACE
-#endif // QMODBUSSLAVE_H
+
+#endif // QMODBUSRTUSERIALSLAVE_H

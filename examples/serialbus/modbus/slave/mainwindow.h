@@ -43,7 +43,7 @@
 
 #include <QButtonGroup>
 #include <QMainWindow>
-#include <QModBusSlave>
+#include <QModbusServer>
 
 QT_BEGIN_NAMESPACE
 
@@ -64,22 +64,26 @@ public:
     ~MainWindow();
 
 private Q_SLOTS:
-    void on_pushButton_clicked();
+    void on_connectButton_clicked();
     void onStateChanged(int state);
 
     void coilChanged(int id);
     void discreteInputChanged(int id);
-    void bitChanged(int id, QModBusRegister::RegisterType table, bool value);
+    void bitChanged(int id, QModbusDataUnit::RegisterType table, bool value);
 
     void setRegister(const QString &value);
-    void updateWidgets(QModBusRegister::RegisterType table, int address, int size);
+    void updateWidgets(QModbusDataUnit::RegisterType table, int address, int size);
+
+    void on_connectType_currentIndexChanged(int);
+
+    void handleDeviceError(QModbusDevice::ModbusError newError);
 
 private:
     void setupDeviceData();
     void setupWidgetContainers();
 
     Ui::MainWindow *ui;
-    QModBusSlave* modBusDevice;
+    QModbusServer* modbusDevice;
 
     QButtonGroup coilButtons;
     QButtonGroup discreteButtons;

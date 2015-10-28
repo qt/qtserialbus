@@ -38,28 +38,36 @@
 #define QMODBUSTCPCLIENT_H
 
 #include <QtNetwork/qhostaddress.h>
+#include <QtSerialBus/qmodbusclient.h>
 #include <QtSerialBus/qmodbusdataunit.h>
-#include <QtSerialBus/qmodbusmaster.h>
 #include <QtSerialBus/qmodbusreply.h>
 
 QT_BEGIN_NAMESPACE
 
-class QModBusTcpClientPrivate;
+class QModbusTcpClientPrivate;
 
-class Q_SERIALBUS_EXPORT QModBusTcpClient : public QModBusMaster
+class Q_SERIALBUS_EXPORT QModbusTcpClient : public QModbusClient
 {
     Q_OBJECT
-    Q_DECLARE_PRIVATE(QModBusTcpClient)
+    Q_DECLARE_PRIVATE(QModbusTcpClient)
 
 public:
-    explicit QModBusTcpClient(QObject *parent = Q_NULLPTR);
-    virtual ~QModBusTcpClient();
+    explicit QModbusTcpClient(QObject *parent = Q_NULLPTR);
+    virtual ~QModbusTcpClient();
 
     virtual void connectDevice(const QString &hostName, quint16 port = 502) = 0;
     virtual void connectDevice(const QHostAddress &address, quint16 port = 502) = 0;
 
+    virtual QModbusReplyEx *sendReadRequest(const QModbusDataUnit &read,
+                                            int slaveAddress) Q_DECL_OVERRIDE;
+    virtual QModbusReplyEx *sendWriteRequest(const QModbusDataUnit &write,
+                                             int slaveAddress) Q_DECL_OVERRIDE;
+    virtual QModbusReplyEx *sendReadWriteRequest(const QModbusDataUnit &read,
+                                        const QModbusDataUnit &write, int slaveAddress) Q_DECL_OVERRIDE;
+
 private:
-    QModBusTcpClient(QModBusTcpClientPrivate &dd, QObject *parent = Q_NULLPTR);
+    using QModbusDevice::connectDevice;
+    QModbusTcpClient(QModbusTcpClientPrivate &dd, QObject *parent = Q_NULLPTR);
 };
 
 QT_END_NAMESPACE

@@ -43,7 +43,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class LibModBusTcpClient : public QModBusTcpClient
+class LibModBusTcpClient : public QModbusTcpClient
 {
     Q_OBJECT
     Q_DISABLE_COPY(LibModBusTcpClient)
@@ -54,8 +54,8 @@ public:
     void connectDevice(const QString &hostName, quint16 port = 502) Q_DECL_OVERRIDE;
     void connectDevice(const QHostAddress &address, quint16 port = 502) Q_DECL_OVERRIDE;
 
-    QModBusReply *read(const QModBusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
-    QModBusReply *write(const QModBusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
+    QModbusReply *read(const QModbusDataUnit &request, int slaveAddress = 1) Q_DECL_OVERRIDE;
+    QModbusReply *write(const QModbusDataUnit &request, int slaveAddress = 1) Q_DECL_OVERRIDE;
 
 private:
     bool open() Q_DECL_OVERRIDE;

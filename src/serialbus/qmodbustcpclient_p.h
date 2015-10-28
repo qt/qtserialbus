@@ -37,7 +37,7 @@
 #ifndef QMODBUSTCPCLIENT_P_H
 #define QMODBUSTCPCLIENT_P_H
 
-#include "qmodbusmaster_p.h"
+#include "qmodbusclient_p.h"
 #include "qmodbustcpclient.h"
 
 //
@@ -53,12 +53,12 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModBusTcpClientPrivate : public QModBusMasterPrivate
+class QModbusTcpClientPrivate : public QModbusClientPrivate
 {
-    Q_DECLARE_PUBLIC(QModBusTcpClient)
+    Q_DECLARE_PUBLIC(QModbusTcpClient)
 
 public:
-    QModBusTcpClientPrivate()
+    QModbusTcpClientPrivate()
     {
     }
 };

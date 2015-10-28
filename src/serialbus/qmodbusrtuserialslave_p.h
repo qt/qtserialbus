@@ -34,35 +34,67 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSMASTER_H
-#define QMODBUSMASTER_H
+#ifndef QMODBUSRTUSERIALSLAVE_P_H
+#define QMODBUSRTUSERIALSLAVE_P_H
 
-#include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qmodbusdevice.h>
-#include <QtSerialBus/qmodbusdataunit.h>
-#include <QtSerialBus/qmodbusreply.h>
+#include "qmodbusrtuserialslave.h"
+#include "qmodbusserver_p.h"
 
-#include <QtCore/qobject.h>
+#include "qmodbus.h"
+
+#include <QtCore/qdebug.h>
+#include <QtSerialPort/qserialport.h>
+
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qt API. It exists purely as an
+// implementation detail. This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
 
 QT_BEGIN_NAMESPACE
 
-class QModBusMasterPrivate;
-
-class Q_SERIALBUS_EXPORT QModBusMaster : public QModBusDevice
+class QModbusRtuSerialSlavePrivate : public QModbusServerPrivate
 {
-    Q_OBJECT
-    Q_DECLARE_PRIVATE(QModBusMaster)
+    Q_DECLARE_PUBLIC(QModbusRtuSerialSlave)
+
 public:
+    QModbusRtuSerialSlavePrivate()
+    {
+    }
 
-    explicit QModBusMaster(QObject *parent = 0);
-    virtual ~QModBusMaster();
+    ~QModbusRtuSerialSlavePrivate()
+    {
+    }
 
-    virtual QModBusReply *write(const QModBusDataUnit &request, int slaveId = 1) = 0;
-    virtual QModBusReply *read(const QModBusDataUnit &request, int slaveId = 1) = 0;
+    void setupSerialPort()
+    {
+        Q_Q(QModbusRtuSerialSlave);
 
-protected:
-    QModBusMaster(QModBusMasterPrivate &dd, QObject *parent = Q_NULLPTR);
+        m_serialPort = new QSerialPort(q);
+        m_serialPort->setBaudRate(QSerialPort::Baud9600);
+        m_serialPort->setParity(QSerialPort::NoParity);
+        m_serialPort->setDataBits(QSerialPort::Data8);
+        m_serialPort->setStopBits(QSerialPort::OneStop);
+
+        QObject::connect(m_serialPort, SIGNAL(readyRead()),
+                         q, SLOT(serialPortReadyRead()));
+        QObject::connect(m_serialPort, SIGNAL(error(QSerialPort::SerialPortError)),
+                         q, SLOT(handleErrorOccurred(QSerialPort::SerialPortError)));
+    }
+
+    void handleErrorOccurred(QSerialPort::SerialPortError);
+    void serialPortReadyRead();
+    void aboutToClose();
+
+    QSerialPort *m_serialPort;
 };
 
 QT_END_NAMESPACE
-#endif // QMODBUSMASTER_H
+
+#endif // QMODBUSRTUSERIALSLAVE_P_H
+

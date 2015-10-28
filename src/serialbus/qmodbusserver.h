@@ -34,61 +34,58 @@
 **
 ****************************************************************************/
 
-#include "qmodbusmaster.h"
-#include "qmodbusmaster_p.h"
+#ifndef QMODBUSERVER_H
+#define QMODBUSERVER_H
+
+#include <QtSerialBus/qserialbusglobal.h>
+#include <QtSerialBus/qmodbusdataunit.h>
+#include <QtSerialBus/qmodbusdevice.h>
+#include <QtSerialBus/qmodbuspdu.h>
+
+#include <QtCore/qobject.h>
 
 QT_BEGIN_NAMESPACE
 
-/*!
-    \class QModBusMaster
-    \inmodule QtSerialBus
-    \since 5.6
+class QModbusServerPrivate;
 
-    \brief The QModBusMaster class is the interface class for Modbus master device.
-
-    QModBusMaster communicates with the Modbus backend providing users with a convenient API.
-    The Modbus backend must be specified during the object creation.
-*/
-
-/*!
-    Constructs a Modbus master device with the specified \a parent.
- */
-QModBusMaster::QModBusMaster(QObject *parent)
-    : QModBusDevice(*new QModBusMasterPrivate, parent)
+class Q_SERIALBUS_EXPORT QModbusServer : public QModbusDevice
 {
-}
+    Q_OBJECT
+    Q_DECLARE_PRIVATE(QModbusServer)
 
-/*!
-    \internal
-*/
-QModBusMaster::~QModBusMaster()
-{
-}
+public:
 
-/*!
-    \internal
-*/
-QModBusMaster::QModBusMaster(QModBusMasterPrivate &dd, QObject *parent) :
-    QModBusDevice(dd, parent)
-{
+    explicit QModbusServer(QObject *parent = 0);
+    virtual ~QModbusServer();
 
-}
+    virtual bool setMap(const QModbusDataUnitMap &map);
 
-/*!
-    \fn QModBusReply *QModBusMaster::write(const QModBusDataUnit &request, int slaveId)
+    void setSlaveAddress(int slaveAddress);
+    int slaveAddress() const;
 
-    Sends a request to modify the contents of the data pointed by \a request. Returns a
-    new QModbusReply object, which emits the finished() signal whenever a positive response
-    for the write request is received. Modbus network may have multiple slaves, each slave has
-    a unique \a slaveId.
- */
+    void setDiagnosticRegister(quint16 value);
+    quint16 diagnosticRegister() const;
 
-/*!
-    \fn QModBusReply *QModBusMaster::read(const QModBusDataUnit &request, int slaveId)
+    void setContinueOnError(bool value);
+    bool continueOnError();
 
-    Sends a request to read the contents of the data pointed by \a request. Returns a new QModBusReply object,
-    which emits the finished() signal whenever data arrives. Modbus network may have multiple slaves,
-    each slave has unique \a slaveId.
- */
+    //TODO: Review if QModbusDataUnitMap would be useful. It could replace setMap(), data() and setData()
+    virtual bool data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data) const;
+    virtual bool data(QModbusDataUnit *newData) const;
+    virtual bool setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data);
+    virtual bool setData(const QModbusDataUnit &unit);
+
+Q_SIGNALS:
+    void dataWritten(QModbusDataUnit::RegisterType table, int address, int size);
+
+protected:
+    QModbusServer(QModbusServerPrivate &dd, QObject *parent = Q_NULLPTR);
+
+    virtual QModbusResponse processRequest(const QModbusPdu &request);
+    virtual QModbusResponse processPrivateModbusRequest(const QModbusPdu &request);
+
+};
 
 QT_END_NAMESPACE
+
+#endif // QMODBUSERVER_H

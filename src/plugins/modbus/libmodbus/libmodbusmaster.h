@@ -39,9 +39,10 @@
 
 #include "libmodbusreply.h"
 
-#include <QtSerialBus/qmodbusmaster.h>
+#include <QtSerialBus/qmodbusclient.h>
 #include <QtSerialBus/qmodbusreply.h>
 #include <QtSerialBus/qmodbusdataunit.h>
+#include <QtSerialBus/qmodbusreplyex.h>
 
 #include <QtCore/qpointer.h>
 
@@ -49,15 +50,15 @@
 
 QT_BEGIN_NAMESPACE
 
-class LibModBusMaster : public QModBusMaster
+class LibModBusMaster : public QModbusClient
 {
     Q_OBJECT
 public:
     LibModBusMaster();
 
-    QModBusReply* write(const QModBusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
+    QModbusReply* write(const QModbusDataUnit &request, int slaveAddress = 1) Q_DECL_OVERRIDE;
 
-    QModBusReply* read(const QModBusDataUnit &request, int slaveId = 1) Q_DECL_OVERRIDE;
+    QModbusReply* read(const QModbusDataUnit &request, int slaveAddress = 1) Q_DECL_OVERRIDE;
 
 protected:
     bool open() Q_DECL_OVERRIDE;
@@ -65,6 +66,13 @@ protected:
 
 private:
     QString portNameToSystemLocation(const QString &source) const;
+
+    // TODO: Remove!
+    QModbusReplyEx *sendReadRequest(const QModbusDataUnit &, int) { return Q_NULLPTR; }
+    QModbusReplyEx *sendWriteRequest(const QModbusDataUnit &, int) { return Q_NULLPTR; }
+    QModbusReplyEx *sendReadWriteRequest(const QModbusDataUnit &, const QModbusDataUnit &, int) {
+        return Q_NULLPTR;
+    }
 
     modbus_t *context;
     bool connected;

@@ -1,5 +1,6 @@
 /****************************************************************************
 **
+** Copyright (C) 2015 Denis Shienkov <denis.shienkov@gmail.com>
 ** Copyright (C) 2015 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
@@ -34,47 +35,54 @@
 **
 ****************************************************************************/
 
-#include "qmodbusregister.h"
+#ifndef QMODBUS_SYMBOLS_P_H
+#define QMODBUS_SYMBOLS_P_H
 
-QT_BEGIN_NAMESPACE
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qt API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
 
-/*!
-    \class QModBusRegister
-    \inmodule QtSerialBus
-    \since 5.6
+enum Coil {
+    On = 0xff00,
+    Off = 0x0000
+};
 
-    \brief QModBusRegister is a container class indicating the size of
-    the ModBus register maintained by a QModBusSlave instance.
+namespace Diagnostics {
 
- */
+enum SubFunctionCode {
+    ReturnQueryData = 0x0000,
+    RestartCommunicationsOption = 0x0001,
+    ReturnDiagnosticRegister = 0x0002,
+    ChangeAsciiInputDelimiter = 0x0003,
+    ForceListenOnlyMode = 0x0004,
+    ClearCountersAndDiagnosticRegister = 0x000a,
+    ReturnBusMessageCount = 0x000b,
+    ReturnBusCommunicationErrorCount = 0x000c,
+    ReturnBusExceptionErrorCount = 0x000d,
+    ReturnServerMessageCount = 0x000e,
+    ReturnServerNoResponseCount = 0x000f,
+    ReturnServerNAKCount = 0x0010,
+    ReturnServerBusyCount = 0x0011,
+    ReturnBusCharacterOverrunCount = 0x0012,
+    ClearOverrunCounterAndFlag = 0x0014
+};
 
-/*!
-    \fn QModBusRegister::QModBusRegister()
+}
 
-    Constructs a ModBus register instance. The resulting object
-    sets the size of each register type to 0.
- */
+namespace EncapsulatedInterfaceTransport {
 
-/*!
-    \enum QModBusRegister::RegisterType
-    This enum describes different registers used in Modbus.
+enum SubFunctionCode {
+    CanOpenGeneralReference = 0x0D,
+    ReadDeviceIdentification = 0x0E
+};
 
-    \value DiscreteInputs       Register with read-only bits.
-    \value Coils                Register with read/write bits.
-    \value InputRegisters       Register with read-only 16 bit words.
-    \value HoldingRegisters     Register with read/write 16 bit words.
- */
+}
 
-/*!
-    \fn void QModBusRegister::setRegisterSize(QModBusRegister::RegisterType type, quint16 size)
-
-    Sets the size of the register with \a type to \a size.
- */
-
-/*!
-    \fn quint16 QModBusRegister::registerSize(QModBusRegister::RegisterType type) const
-
-    Returns the size of the register \a type.
- */
-
-QT_END_NAMESPACE
+#endif // QMODBUS_SYMBOLS_P_H

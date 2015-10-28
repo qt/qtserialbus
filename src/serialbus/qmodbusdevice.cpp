@@ -36,65 +36,66 @@
 
 #include "qmodbusdevice.h"
 #include "qmodbusdevice_p.h"
+#include "qmodbusdataunit.h"
 
-#include <QtSerialBus/qmodbusregister.h>
+#include <QtCore/qloggingcategory.h>
 
 QT_BEGIN_NAMESPACE
 
 /*!
-    \class QModBusDevice
+    \class QModbusDevice
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QModBusDevice class is the base class for Modbus classes, \l QModBusSlave
-    and \l QModBusMaster.
+    \brief The QModbusDevice class is the base class for Modbus classes, \l QModbusServer
+    and \l QModbusClient.
  */
 
 /*!
     Constructs a Modbus device with the specified \a parent.
  */
-QModBusDevice::QModBusDevice(QObject *parent)
- : QObject(*new QModBusDevicePrivate, parent)
+QModbusDevice::QModbusDevice(QObject *parent)
+ : QObject(*new QModbusDevicePrivate, parent)
 {
-    qRegisterMetaType<QModBusRegister::RegisterType>();
+    qRegisterMetaType<QModbusDataUnit::RegisterType>();
 }
 
 /*!
     \internal
 */
-QModBusDevice::QModBusDevice(QModBusDevicePrivate &dd, QObject *parent)
+QModbusDevice::QModbusDevice(QModbusDevicePrivate &dd, QObject *parent)
  : QObject(dd, parent)
 {
-    qRegisterMetaType<QModBusRegister::RegisterType>();
+    qRegisterMetaType<QModbusDataUnit::RegisterType>();
 }
 
 /*!
-    Destroys the QModBusDevice instance
+    Destroys the QModbusDevice instance
 */
-QModBusDevice::~QModBusDevice()
+QModbusDevice::~QModbusDevice()
 {
 }
 
 /*!
     \internal
 */
-void QModBusDevice::setPortName(const QString &name)
+void QModbusDevice::setPortName(const QString &name)
 {
-    Q_D(QModBusDevice);
+    Q_D(QModbusDevice);
     d->portName = name;
 }
 
 /*!
     \internal
 */
-QString QModBusDevice::portName() const
+QString QModbusDevice::portName() const
 {
-    Q_D(const QModBusDevice);
+    Q_D(const QModbusDevice);
     return d->portName;
 }
 
 /*!
-    \enum QModBusDevice::ModBusError
+    \enum QModbusDevice::ModbusError
     This enum describes all the possible error conditions.
 
     \value NoError              No errors have occurred.
@@ -103,11 +104,13 @@ QString QModBusDevice::portName() const
     \value ConnectionError      An error occurred when attempting to open the backend.
     \value ConfigurationError   An error occurred when attempting to set a configuration
                                 parameter.
+    \value TimeoutError         A timeout occurred during I/O. An I/O operation
+                                did not return within the given time frame.
     \value UnknownError         An unknown error occurred.
  */
 
 /*!
-    \enum QModBusDevice::ModBusDeviceState
+    \enum QModbusDevice::ModbusDeviceState
     This enum describes all possible device states.
 
     \value UnconnectedState The device is disconnected.
@@ -117,13 +120,13 @@ QString QModBusDevice::portName() const
  */
 
 /*!
-    \fn QModBusDevice::errorOccurred(QModBusDevice::ModBusError error)
+    \fn QModbusDevice::errorOccurred(QModbusDevice::ModbusError error)
 
     This signal is emitted when an error of the type, \a error, occurs.
  */
 
 /*!
-    \fn void QModBusDevice::stateChanged(QModBusDevice::ModBusDeviceState state)
+    \fn void QModbusDevice::stateChanged(QModbusDevice::ModbusDeviceState state)
 
     This signal is emitted every time the state of the device changes.
     The new state is represented by \a state.
@@ -137,11 +140,11 @@ QString QModBusDevice::portName() const
 
     This function calls \l open() as part of its implementation.
  */
-bool QModBusDevice::connectDevice()
+bool QModbusDevice::connectDevice()
 {
-    Q_D(QModBusDevice);
+    Q_D(QModbusDevice);
 
-    if (d->state != QModBusDevice::UnconnectedState)
+    if (d->state != QModbusDevice::UnconnectedState)
         return false;
 
     setState(ConnectingState);
@@ -160,9 +163,9 @@ bool QModBusDevice::connectDevice()
 
     This function calls \l close() as part of its implementation.
  */
-void QModBusDevice::disconnectDevice()
+void QModbusDevice::disconnectDevice()
 {
-    setState(QModBusDevice::ClosingState);
+    setState(QModbusDevice::ClosingState);
 
     //Unconnected is set by backend -> might be delayed by event loop
     close();
@@ -172,9 +175,9 @@ void QModBusDevice::disconnectDevice()
     Sets the state of the device to \a newState. Modbus device implementations
     must use this function to update the device state.
  */
-void QModBusDevice::setState(QModBusDevice::ModBusDeviceState newState)
+void QModbusDevice::setState(QModbusDevice::ModbusDeviceState newState)
 {
-    Q_D(QModBusDevice);
+    Q_D(QModbusDevice);
 
     if (newState == d->state)
         return;
@@ -188,7 +191,7 @@ void QModBusDevice::setState(QModBusDevice::ModBusDeviceState newState)
 
     \sa setState(), stateChanged()
  */
-QModBusDevice::ModBusDeviceState QModBusDevice::state() const
+QModbusDevice::ModbusDeviceState QModbusDevice::state() const
 {
     return d_func()->state;
 }
@@ -198,11 +201,11 @@ QModBusDevice::ModBusDeviceState QModBusDevice::state() const
     must use this function in case of an error to set the \a error type and
     a descriptive \a errorText.
 
-    \sa QModBusDevice::ModBusError
+    \sa QModbusDevice::ModbusError
  */
-void QModBusDevice::setError(const QString &errorText, QModBusDevice::ModBusError error)
+void QModbusDevice::setError(const QString &errorText, QModbusDevice::ModbusError error)
 {
-    Q_D(QModBusDevice);
+    Q_D(QModbusDevice);
 
     d->error = error;
     d->errorString = errorText;
@@ -212,9 +215,9 @@ void QModBusDevice::setError(const QString &errorText, QModBusDevice::ModBusErro
 /*!
     Returns the error state of the device.
 
-    \sa QModBusDevice::ModBusError
+    \sa QModbusDevice::ModbusError
  */
-QModBusDevice::ModBusError QModBusDevice::error() const
+QModbusDevice::ModbusError QModbusDevice::error() const
 {
     return d_func()->error;
 }
@@ -222,35 +225,73 @@ QModBusDevice::ModBusError QModBusDevice::error() const
 /*!
     Returns descriptive error text for the device error.
 
-    \sa QModBusDevice::ModBusError
+    \sa QModbusDevice::ModbusError
  */
-QString QModBusDevice::errorString() const
+QString QModbusDevice::errorString() const
 {
     return d_func()->errorString;
 }
 
 /*!
-    \fn bool QModBusDevice::open()
+    \fn bool QModbusDevice::open()
 
     This function is called by connectDevice(). Subclasses must provide
     an implementation that returns \c true on successful Modbus connection
     or \c false otherwise.
 
     The implementation must ensure that the instance's \l state()
-    is set to \l QModBusDevice::ConnectedState upon success; otherwise
-    \l QModBusDevice::UnconnectedState.
+    is set to \l QModbusDevice::ConnectedState upon success; otherwise
+    \l QModbusDevice::UnconnectedState.
 
     \sa connectDevice()
  */
 
 /*!
-    \fn void QModBusDevice::close()
+    \fn void QModbusDevice::close()
 
     This function is responsible for closing the Modbus connection.
     The implementation must ensure that the instance's
-    \l state() is set to \l QModBusDevice::UnconnectedState.
+    \l state() is set to \l QModbusDevice::UnconnectedState.
 
     \sa disconnectDevice()
  */
+
+/*!
+    \internal
+    \fn quint8 QModbusDevicePrivate::calculateLRC(const char *data, qint32 len) const
+
+    Returns the LRC checksum of the first \a len bytes of \a data. The checksum is independent of
+    the byte order (endianness).
+*/
+
+/*!
+    \internal
+    bool QModbusDevicePrivate::checkLRC(const char *data, qint32 len, quint8 lrc) const
+
+    Returns true if the LRC checksum of the first \a len bytes of \a data match the given \a lrc;
+    otherwise returns false.
+*/
+
+/*!
+    \internal
+    \fn quint8 QModbusDevicePrivate::calculateCRC(const char *data, qint32 len) const
+
+    Returns the CRC checksum of the first \a len bytes of \a data.
+
+    \note The code used by the function was generated with pycrc. There is no copyright assigned
+    to the generated code, however, the author of the script requests to show the line stating
+    that the code was generated by pycrc (see implementation).
+*/
+
+/*!
+    \internal
+    bool QModbusDevicePrivate::checkCRC(const char *data, qint32 len, quint8 crc) const
+
+    Returns true if the CRC checksum of the first \a len bytes of \a data match the given \a crc;
+    otherwise returns false.
+*/
+
+Q_LOGGING_CATEGORY(QT_MODBUS, "qt.modbus")
+Q_LOGGING_CATEGORY(QT_MODBUS_LOW, "qt.modbus.lowlevel")
 
 QT_END_NAMESPACE

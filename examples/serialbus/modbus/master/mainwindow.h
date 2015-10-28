@@ -45,8 +45,8 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModBusMaster;
-class QModBusReply;
+class QModbusClient;
+class QModbusReply;
 
 namespace Ui {
 class MainWindow;
@@ -63,7 +63,7 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_pushButton_clicked();
+    void on_connectButton_clicked();
     void onStateChanged(int state);
 
     void on_readButton_clicked();
@@ -74,10 +74,12 @@ private slots:
 
     void on_writeTable_currentIndexChanged(const QString &arg1);
 
+    void on_connectType_currentIndexChanged(int);
+
 private:
     Ui::MainWindow *ui;
-    QModBusReply* lastRequest;
-    QModBusMaster* modBusDevice;
+    QModbusReply* lastRequest;
+    QModbusClient* modbusDevice;
 };
 
 #endif // MAINWINDOW_H

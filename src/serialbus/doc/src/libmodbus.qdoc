@@ -35,7 +35,7 @@
 
     \section1 Creating Modbus Devices
 
-    At first it is necessary to check that QModBus provides the desired backend:
+    At first it is necessary to check that QModbus provides the desired backend:
 
     \code
         foreach (const QByteArray &backend, QCanBus::instance()->plugins()) {
@@ -48,55 +48,55 @@
 
     Where, \e libmodbus is the backend name.
 
-    Further, it is necessary to request from QModBus the device with the active libmodbus
+    Further, it is necessary to request from QModbus the device with the active libmodbus
     interface.
-    As libmodbus device may be either master or slave device, you have to choose between
-    QModBus::createSlave() and QModBus::createMaster() as appropriate:
+    As libmodbus device may be either client or server device, you have to choose between
+    QModbus::createServer() and QModbus::createClient() as appropriate:
 
     \code
-        QModBusSlave *slave = QModBus::createSlave("libmodbus");
+        QModbusServer *server = QModbus::createServer("libmodbus");
     \endcode
 
     or
 
     \code
-        QModBusMaster *master = QModBus::createMaster("libmodbus");
+        QModbusClient *client = QModbus::createClient("libmodbus");
     \endcode
 
-    For every slave, tables must be initialized before connecting it to the network.
+    For every server, tables must be initialized before connecting it to the network.
     Next example will set up every table to be size of ten values. Maps can also
     be not set at all, in that case they will be size zero. Value of every field is
     initialized to zero.
 
     \code
-        modBusSlave->setMap(QModBusDevice::DiscreteInputs, 10);
-        modBusSlave->setMap(QModBusDevice::Coils, 10);
-        modBusSlave->setMap(QModBusDevice::InputRegisters, 10);
-        modBusSlave->setMap(QModBusDevice::HoldingRegisters, 10);
+        modbusServer->setMap(QModbusDevice::DiscreteInputs, 10);
+        modbusServer->setMap(QModbusDevice::Coils, 10);
+        modbusServer->setMap(QModbusDevice::InputRegisters, 10);
+        modbusServer->setMap(QModbusDevice::HoldingRegisters, 10);
     \endcode
 
     Before connection each device must also be given a connection to the network.
     Remember that libmodbus only supports serial port and tcp. Application data unit (ADU)
     is the package type specified for the connection type. Generally serial port uses
-    QModBusDevice::RemoteTerminalUnit adu and tcp uses QModBusDevice::TCP adu.
+    QModbusDevice::RemoteTerminalUnit adu and tcp uses QModbusDevice::TCP adu.
 
     \code
         QSerialPort *serialPort = new QSerialPort("ttyS0");
-        modBusSlave->setDevice(serialPort, QModBusDevice::RemoteTerminalUnit)
-        modBusSlave->setSlaveId(1);
-        modBusSlave->connectDevice();
+        modbusServer->setDevice(serialPort, QModbusDevice::RemoteTerminalUnit)
+        modbusServer->setSlaveId(1);
+        modbusServer->connectDevice();
     \endcode
 
-    Reading and writing with master device can be done either with single field at once
-    or by bigger block of adjacent fields. If you try to read/write a list of QModBusDataUnits
+    Reading and writing with a client device can be done either with single field at once
+    or by bigger block of adjacent fields. If you try to read/write a list of QModbusDataUnits
     that are not adjacent to each other read/write will be unsuccessful.
 
     \code
-        QList<QModBusDataUnit> units;
-        units.append(QModBusDataUnit(QModBusDevice::HoldingRegisters, 3, 0x1af5));
-        units.append(QModBusDataUnit(QModBusDevice::HoldingRegisters, 4, 0x1001));
-        units.append(QModBusDataUnit(QModBusDevice::HoldingRegisters, 5, 0xff34));
-        modBusMaster->write(units);
+        QList<QModbusDataUnit> units;
+        units.append(QModbusDataUnit(QModbusDevice::HoldingRegisters, 3, 0x1af5));
+        units.append(QModbusDataUnit(QModbusDevice::HoldingRegisters, 4, 0x1001));
+        units.append(QModbusDataUnit(QModbusDevice::HoldingRegisters, 5, 0xff34));
+        modbusClient->write(units);
     \endcode
 
 

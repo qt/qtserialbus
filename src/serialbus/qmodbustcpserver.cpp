@@ -40,56 +40,90 @@
 QT_BEGIN_NAMESPACE
 
 /*!
-    \class QModBusTcpServer
+    \class QModbusTcpServer
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QModBusTcpServer class is the interface class for Modbus TCP sever device.
+    \brief The QModbusTcpServer class is the interface class for Modbus TCP sever device.
 
-    Modbus TCP networks can have multiple slaves. Servers are read/written by a client device
-    represented by \l QModBusTcpClient. QModBusTcpServer communicates with a Modbus backend,
+    Modbus TCP networks can have multiple servers. Servers are read/written by a client device
+    represented by \l QModbusTcpClient. QModbusTcpServer communicates with a Modbus backend,
     providing users with a convenient API.
  */
 
 /*!
-    Constructs a QModBusTcpServer with the specified \a parent.
+    Constructs a QModbusTcpServer with the specified \a parent.
  */
-QModBusTcpServer::QModBusTcpServer(QObject *parent) :
-    QModBusSlave(*new QModBusTcpServerPrivate, parent)
+QModbusTcpServer::QModbusTcpServer(QObject *parent)
+    : QModbusServer(*new QModbusTcpServerPrivate, parent)
 {
+    Q_D(QModbusTcpServer);
+    d->setupTcpServer();
 }
 
 /*!
-    Destroys the QModBusTcpServer instance.
+    Destroys the QModbusTcpServer instance.
 */
-QModBusTcpServer::~QModBusTcpServer()
+QModbusTcpServer::~QModbusTcpServer()
 {
 }
 
 /*!
     \internal
  */
-QModBusTcpServer::QModBusTcpServer(QModBusTcpServerPrivate &dd, QObject *parent) :
-    QModBusSlave(dd, parent)
+QModbusTcpServer::QModbusTcpServer(QModbusTcpServerPrivate &dd, QObject *parent)
+    : QModbusServer(dd, parent)
 {
+    Q_D(QModbusTcpServer);
+    d->setupTcpServer();
 }
 
 /*!
-    \fn void QModBusTcpServer::listen(const QString &address, quint16 port = 502)
-
-    Tells the server to listen for incoming connections on address \a address and port \a port.
-    If a connection is established, it emits stateChanged() with ModBusDeviceState::ConnectedState.
-
-    At any point, the class can emit stateChanged() to signal the current device state or emit
-    errorOccurred() to signal that an error occurred.
+    \reimp
 */
+bool QModbusTcpServer::open()
+{
+    if (state() == QModbusDevice::ConnectedState)
+        return true;
+
+    const QStringList parts =  portName().split(QLatin1Char(':'), QString::SkipEmptyParts);
+    if (parts.count() < 1) {
+        setError(tr("Invalid host and port for TCP communication specified."),
+            QModbusDevice::ConnectionError);
+        return false;
+    }
+
+    bool ok = false;
+    const quint16 port = parts.value(1).toInt(&ok);
+    if (!ok) {
+        setError(tr("Invalid port for TCP communication specified."),
+            QModbusDevice::ConnectionError);
+        return false;
+    }
+
+    Q_D(QModbusTcpServer);
+    if (d->m_tcpServer->listen(QHostAddress(parts.value(0)), port))
+        setState(QModbusDevice::ConnectedState);
+    else
+        setError(d->m_tcpServer->errorString(), QModbusDevice::ConnectionError);
+
+    return state() == QModbusDevice::ConnectedState;
+}
 
 /*!
-    \fn void QModBusTcpServer::listen(const QHostAddress &address, quint16 port = 502)
-
-    \overload
-
-    Tells the server to listen for incoming connections on address \a address and port \a port.
+    \reimp
 */
+void QModbusTcpServer::close()
+{
+    Q_D(QModbusTcpServer);
+
+    if (d->m_tcpServer->isListening())
+        d->m_tcpServer->close();
+
+    foreach (auto socket, d->connections)
+        socket->disconnectFromHost();
+
+    setState(QModbusDevice::UnconnectedState);
+}
 
 QT_END_NAMESPACE

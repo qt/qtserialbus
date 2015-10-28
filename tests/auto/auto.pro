@@ -6,7 +6,10 @@ SUBDIRS += cmake \
            qmodbusdataunit \
            qmodbusreply \
            qmodbusdevice \
-           qmodbus
+           qmodbus \
+           qmodbuspdu \
+           qmodbusclient \
+           qmodbusserver \
 
 qcanbus.depends += plugins
 qcanbusdevice.depends += plugins
