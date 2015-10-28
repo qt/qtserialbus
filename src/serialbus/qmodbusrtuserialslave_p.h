@@ -83,7 +83,7 @@ public:
         m_serialPort->setDataBits(QSerialPort::Data8);
         m_serialPort->setStopBits(QSerialPort::OneStop);
 
-        QObject::connect(m_serialPort, &QSerialPort::readyRead,[this]() {
+        QObject::connect(m_serialPort, &QSerialPort::readyRead, [this]() {
             Q_Q(QModbusRtuSerialSlave);
 
             const int size = m_serialPort->size();
@@ -97,27 +97,27 @@ public:
 
             QModbusPdu::FunctionCode code = QModbusPdu::Invalid;
             // function code available?
-            if (pendingBuffer.size() >= 2) {
-                code = QModbusRequest::FunctionCode(pendingBuffer.at(1));
-            } else {
+            if (pendingBuffer.size() < 2) {
                 qCWarning(QT_MODBUS) << "Invalid modbus PDU received";
                 return;
             }
+            code = QModbusRequest::FunctionCode(pendingBuffer.at(1));
 
             int aduSize = 2; //slaveId & function code counted
-            int pduSize_without_fcode = QModbusRequest::calculateDataSize(code, pendingBuffer.mid(2));
-            if (pduSize_without_fcode < 0) {
+            int pduSizeWithoutFcode = QModbusRequest::calculateDataSize(code, pendingBuffer.mid(2));
+            if (pduSizeWithoutFcode < 0) {
                 qCWarning(QT_MODBUS) << "Cannot calculate PDU size for fcode" << code;
                 return;
             }
-            aduSize += pduSize_without_fcode;
+            aduSize += pduSizeWithoutFcode;
             //obtain CRC which is last 2 bytes
-            quint16 receivedCrc = pendingBuffer[aduSize] << 8 | pendingBuffer[aduSize+1];
-            aduSize += 2; // crc size
+            quint16 receivedCrc = pendingBuffer[aduSize] << 8 | pendingBuffer[aduSize + 1];
+            aduSize += 2; // CRC size
 
             const QByteArray completeAduFrame = pendingBuffer.left(aduSize);
             if (completeAduFrame.size() < aduSize) {
-                // TODO should such cases wait for next bytes to arrive and keep m_pendingBuffer around
+                // TODO: should such cases wait for next bytes to arrive and keep m_pendingBuffer
+                // around
                 qCWarning(QT_MODBUS) << "ADU too short, ignoring pending frame";
                 return;
             }
@@ -131,34 +131,32 @@ public:
                 qCDebug(QT_MODBUS) << "Ignoring remaining data beyond expected ADU size";
             }
 
-
             // for this slave address ?
             // TODO deal with broadcast id 0
             if (q->slaveAddress() != completeAduFrame.at(0)) {
                 //ignore wrong slaveId
-                qCDebug(QT_MODBUS) << "Wrong slave address, expected" << q->slaveAddress() << "got" << (quint8) completeAduFrame.at(0);
+                qCDebug(QT_MODBUS) << "Wrong slave address, expected" << q->slaveAddress() << "got"
+                    << quint8(completeAduFrame.at(0));
                 return;
             }
 
             if (checkCRC(completeAduFrame, completeAduFrame.size(), receivedCrc)) {
-                qCWarning(QT_MODBUS) << "Ignoring request with wrong crc";
+                qCWarning(QT_MODBUS) << "Ignoring request with wrong CRC";
                 return;
             }
 
-            //remove slave address, fcode & crc
-            QModbusRequest req(code, completeAduFrame.mid(2, completeAduFrame.size()-4));
+            //remove slave address, fcode & CRC
+            const QModbusRequest req(code, completeAduFrame.mid(2, completeAduFrame.size() - 4));
             qCDebug(QT_MODBUS) << "Request PDU" << req;
-            QModbusResponse response = q->processRequest(req);
+            const QModbusResponse response = q->processRequest(req);
 
             qCDebug(QT_MODBUS) << "Response PDU:" << response;
 
             QByteArray result;
             QDataStream out(&result, QIODevice::WriteOnly);
-            out << (quint8) q->slaveAddress();
+            out << quint8(q->slaveAddress());
             out << response;
-
-            quint16 resultCrc = calculateCRC(result, result.size());
-            out << resultCrc;
+            out << calculateCRC(result, result.size());
 
             qCDebug(QT_MODBUS_LOW) << "Sending response (incl ADU):" << result.toHex();
 
@@ -170,20 +168,21 @@ public:
             }
 
             int writtenBytes = m_serialPort->write(result);
-            if (writtenBytes == -1 || writtenBytes < result.size()) {
+            if ((writtenBytes == -1) || (writtenBytes < result.size())) {
                 qCDebug(QT_MODBUS) << "Cannot write requested response to serial socket.";
                 q->setError(QModbusRtuSerialSlave::tr("Could not write response to client"),
                             QModbusDevice::WriteError);
             }
         });
 
-        QObject::connect(m_serialPort, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error),
+        using TypeId = void (QSerialPort::*)(QSerialPort::SerialPortError);
+        QObject::connect(m_serialPort, static_cast<TypeId>(&QSerialPort::error),
                          [this](QSerialPort::SerialPortError error) {
             if (error == QSerialPort::NoError)
                 return;
 
             qCDebug(QT_MODBUS) << "QSerialPort error:" << error
-                               << ((m_serialPort != Q_NULLPTR) ? m_serialPort->errorString() : QString());
+                               << (m_serialPort ? m_serialPort->errorString() : QString());
 
             Q_Q(QModbusRtuSerialSlave);
 
