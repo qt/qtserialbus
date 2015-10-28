@@ -72,27 +72,6 @@ QModbusTcpClient::QModbusTcpClient(QModbusTcpClientPrivate &dd, QObject *parent)
 {
 }
 
-/*!
-    \fn void QModbusTcpClient::connectDevice(const QString &hostName, quint16 port = 502)
-
-    Attempts to make a connection to \a hostName on the given \a port. If a connection is
-    established, it emits stateChanged() with ModbusDeviceState::ConnectedState.
-
-    At any point, the class can emit stateChanged() to signal the current device state or emit
-    errorOccurred() to signal that an error occurred.
-
-    \note \a hostName may be an IP address in string form (e.g., "43.195.83.32"), or it may be a
-    host name (e.g., "example.com"). \a port is in native byte order and defaults to number 502.
-*/
-
-/*!
-    \fn void QModbusTcpClient::connectDevice(const QHostAddress &address, quint16 port = 502)
-
-    \overload
-
-    Attempts to make a connection to \a address on port \a port.
-*/
-
 /*
     TODO: implement
 */

@@ -65,10 +65,6 @@ public:
     virtual QModbusReplyEx *sendReadWriteRequest(const QModbusDataUnit &read,
                                                  const QModbusDataUnit &write, int slaveAddress) = 0;
 
-    //TODO to be removed once new setup ready
-    virtual QModbusReply *write(const QModbusDataUnit &request, int slaveAddress = 1) = 0;
-    virtual QModbusReply *read(const QModbusDataUnit &request, int slaveAddress = 1) = 0;
-
     int timeout() const;
     void setTimeout(int newTimeout);
 

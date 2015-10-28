@@ -38,7 +38,6 @@
 #include "qmodbusrtuserialslave_p.h"
 
 #include <QtCore/qloggingcategory.h>
-#include <QtSerialBus/qmodbus.h>
 
 
 QT_BEGIN_NAMESPACE

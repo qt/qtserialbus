@@ -33,10 +33,13 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+
 #ifndef QMODBUSRTUSERIALMASTER_H
 #define QMODBUSRTUSERIALMASTER_H
 
 #include <QtSerialBus/qmodbusclient.h>
+#include <QtSerialBus/qmodbusdataunit.h>
+#include <QtSerialBus/qmodbusreplyex.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -51,29 +54,18 @@ public:
     explicit QModbusRtuSerialMaster(QObject *parent = Q_NULLPTR);
     ~QModbusRtuSerialMaster();
 
-    // TODO find way to pass parity, baud, dataBits, stopBits
-    bool connectDevice(const QString& deviceName);
     virtual QModbusReplyEx *sendReadRequest(const QModbusDataUnit &read,
                                             int slaveAddress) Q_DECL_OVERRIDE;
     virtual QModbusReplyEx *sendWriteRequest(const QModbusDataUnit &write,
                                              int slaveAddress) Q_DECL_OVERRIDE;
     virtual QModbusReplyEx *sendReadWriteRequest(const QModbusDataUnit &read,
-                                        const QModbusDataUnit &write, int slaveAddress) Q_DECL_OVERRIDE;
-
-    // TODO: Remove!
-    QModbusReply *write(const QModbusDataUnit &request, int slaveAddress = 1) Q_DECL_OVERRIDE;
-    QModbusReply *read(const QModbusDataUnit &request, int slaveAddress = 1) Q_DECL_OVERRIDE;
+                                   const QModbusDataUnit &write, int slaveAddress) Q_DECL_OVERRIDE;
 
 protected:
     QModbusRtuSerialMaster(QModbusRtuSerialMasterPrivate &dd, QObject *parent = Q_NULLPTR);
 
-    bool open() Q_DECL_OVERRIDE;
-    void close() Q_DECL_OVERRIDE;
-
-private:
-    using QModbusDevice::connectDevice;
-    Q_PRIVATE_SLOT(d_func(), void handleStateChanged(QModbusDevice::ModbusDeviceState))
-    Q_PRIVATE_SLOT(d_func(), void handleErrorOccurred(QModbusDevice::ModbusError))
+    void close() Q_DECL_OVERRIDE { /* TODO: Implement! */ }
+    bool open() Q_DECL_OVERRIDE { /* TODO: Implement! */ return false; }
 };
 
 QT_END_NAMESPACE

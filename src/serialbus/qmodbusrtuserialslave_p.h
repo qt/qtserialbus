@@ -40,8 +40,6 @@
 #include "qmodbusrtuserialslave.h"
 #include "qmodbusserver_p.h"
 
-#include "qmodbus.h"
-
 #include <QtCore/qdebug.h>
 #include <QtSerialPort/qserialport.h>
 

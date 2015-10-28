@@ -37,10 +37,9 @@
 #ifndef QMODBUSTCPCLIENT_H
 #define QMODBUSTCPCLIENT_H
 
-#include <QtNetwork/qhostaddress.h>
 #include <QtSerialBus/qmodbusclient.h>
 #include <QtSerialBus/qmodbusdataunit.h>
-#include <QtSerialBus/qmodbusreply.h>
+#include <QtSerialBus/qmodbusreplyex.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -53,21 +52,20 @@ class Q_SERIALBUS_EXPORT QModbusTcpClient : public QModbusClient
 
 public:
     explicit QModbusTcpClient(QObject *parent = Q_NULLPTR);
-    virtual ~QModbusTcpClient();
-
-    virtual void connectDevice(const QString &hostName, quint16 port = 502) = 0;
-    virtual void connectDevice(const QHostAddress &address, quint16 port = 502) = 0;
+    ~QModbusTcpClient();
 
     virtual QModbusReplyEx *sendReadRequest(const QModbusDataUnit &read,
                                             int slaveAddress) Q_DECL_OVERRIDE;
     virtual QModbusReplyEx *sendWriteRequest(const QModbusDataUnit &write,
                                              int slaveAddress) Q_DECL_OVERRIDE;
     virtual QModbusReplyEx *sendReadWriteRequest(const QModbusDataUnit &read,
-                                        const QModbusDataUnit &write, int slaveAddress) Q_DECL_OVERRIDE;
+                                   const QModbusDataUnit &write, int slaveAddress) Q_DECL_OVERRIDE;
 
-private:
-    using QModbusDevice::connectDevice;
+protected:
     QModbusTcpClient(QModbusTcpClientPrivate &dd, QObject *parent = Q_NULLPTR);
+
+    void close() Q_DECL_OVERRIDE { /* TODO: Implement! */ }
+    bool open() Q_DECL_OVERRIDE { /* TODO: Implement! */ return false; }
 };
 
 QT_END_NAMESPACE

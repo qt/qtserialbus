@@ -41,7 +41,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <QtSerialBus/qmodbus.h>
 #include <QtSerialBus/qmodbusrtuserialslave.h>
 #include <QtSerialBus/qmodbustcpserver.h>
 #include <QRegularExpression>

@@ -40,10 +40,6 @@
 #include "qmodbusrtuserialmaster.h"
 #include "qmodbusclient_p.h"
 
-#include "qmodbus.h"
-
-#include <QtCore/qdebug.h>
-
 //
 //  W A R N I N G
 //  -------------
@@ -63,39 +59,8 @@ class QModbusRtuSerialMasterPrivate : public QModbusClientPrivate
 
 public:
     QModbusRtuSerialMasterPrivate()
-        : pluginMaster(Q_NULLPTR)
     {
-        //hard usage of libmodbus plugin
-        pluginMaster = QModbus::instance()->createClient(QByteArray("libmodbus"));
-        if (!pluginMaster)
-            qWarning() << "Cannot find libmodbus plugin.";
     }
-
-    ~QModbusRtuSerialMasterPrivate()
-    {
-        delete pluginMaster;
-    }
-
-    void setupMaster()
-    {
-        if (!pluginMaster)
-            return;
-
-        Q_Q(QModbusRtuSerialMaster);
-        // forward the error and state changes
-        QObject::connect(pluginMaster, SIGNAL(stateChanged(QModbusDevice::ModbusDeviceState)),
-            q, SLOT(handleStateChanged(QModbusDevice::ModbusDeviceState)));
-        QObject::connect(pluginMaster, SIGNAL(errorOccurred(QModbusDevice::ModbusError)),
-            q, SLOT(handleErrorOccurred(QModbusDevice::ModbusError)));
-
-        q->setState(pluginMaster->state());
-        q->setError(pluginMaster->errorString(), pluginMaster->error());
-    }
-
-    void handleStateChanged(QModbusDevice::ModbusDeviceState);
-    void handleErrorOccurred(QModbusDevice::ModbusError);
-
-    QModbusClient* pluginMaster;
 };
 
 QT_END_NAMESPACE

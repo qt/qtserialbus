@@ -1,13 +1,8 @@
 TEMPLATE = subdirs
 
-SUBDIRS += thirdparty
-thirdparty.subdir = 3rdparty
-thirdparty.target = sub-3rdparty
-
 SUBDIRS += serialbus
 serialbus.subdir = serialbus
 serialbus.target = sub-serialbus
-serialbus.depends = thirdparty
 
 SUBDIRS += plugins
 plugins.subdir = plugins

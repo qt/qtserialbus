@@ -54,8 +54,6 @@ public:
     QModbusReplyEx *sendReadWriteRequest(const QModbusDataUnit &, const QModbusDataUnit &, int) {
         return Q_NULLPTR;
     }
-    QModbusReply *read(const QModbusDataUnit &, int) Q_DECL_OVERRIDE { return Q_NULLPTR; }
-    QModbusReply *write(const QModbusDataUnit &, int) Q_DECL_OVERRIDE { return Q_NULLPTR; }
     virtual bool open() Q_DECL_OVERRIDE { return true; }
     virtual void close() Q_DECL_OVERRIDE {}
 

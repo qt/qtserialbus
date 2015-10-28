@@ -15,8 +15,6 @@ PUBLIC_HEADERS += \
     qcanbusframe.h \
     qcanbus.h \
     qserialbusglobal.h \
-    qcanbusfactory.h \
-    qmodbus.h \
     qmodbusserver.h \
     qmodbusfactory.h \
     qmodbusdevice.h \
@@ -46,7 +44,6 @@ SOURCES += \
     qcanbus.cpp \
     qcanbusfactory.cpp \
     qcanbusframe.cpp \
-    qmodbus.cpp \
     qmodbusserver.cpp \
     qmodbusdevice.cpp \
     qmodbusdataunit.cpp \

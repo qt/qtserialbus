@@ -6,7 +6,6 @@ SUBDIRS += cmake \
            qmodbusdataunit \
            qmodbusreply \
            qmodbusdevice \
-           qmodbus \
            qmodbuspdu \
            qmodbusclient \
            qmodbusserver \
