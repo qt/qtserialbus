@@ -42,7 +42,6 @@
 #include <QtSerialBus/qmodbusdataunit.h>
 #include <QtSerialBus/qmodbuspdu.h>
 #include <QtSerialBus/qmodbusreply.h>
-#include <QtSerialBus/qmodbusreplyex.h>
 
 #include <QtCore/qobject.h>
 
@@ -60,16 +59,16 @@ public:
     explicit QModbusClient(QObject *parent = 0);
     virtual ~QModbusClient();
 
-    virtual QModbusReplyEx *sendReadRequest(const QModbusDataUnit &read, int slaveAddress) = 0;
-    virtual QModbusReplyEx *sendWriteRequest(const QModbusDataUnit &write, int slaveAddress) = 0;
-    virtual QModbusReplyEx *sendReadWriteRequest(const QModbusDataUnit &read,
-                                                 const QModbusDataUnit &write, int slaveAddress) = 0;
+    virtual QModbusReply *sendReadRequest(const QModbusDataUnit &read, int slaveAddress) = 0;
+    virtual QModbusReply *sendWriteRequest(const QModbusDataUnit &write, int slaveAddress) = 0;
+    virtual QModbusReply *sendReadWriteRequest(const QModbusDataUnit &read,
+                                               const QModbusDataUnit &write, int slaveAddress) = 0;
 
     int timeout() const;
     void setTimeout(int newTimeout);
 
 Q_SIGNALS:
-    void requestFinished(QModbusReplyEx *result);
+    void requestFinished(QModbusReply *result);
     void timeoutChanged();
 
 protected:

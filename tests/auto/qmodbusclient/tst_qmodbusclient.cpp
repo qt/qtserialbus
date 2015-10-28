@@ -45,13 +45,13 @@ class TestClient : public QModbusClient
 public:
     TestClient() Q_DECL_EQ_DEFAULT;
 
-    QModbusReplyEx *sendReadRequest(const QModbusDataUnit &, int) Q_DECL_OVERRIDE {
+    QModbusReply *sendReadRequest(const QModbusDataUnit &, int) Q_DECL_OVERRIDE {
         return Q_NULLPTR;
     }
-    QModbusReplyEx *sendWriteRequest(const QModbusDataUnit &, int) Q_DECL_OVERRIDE {
+    QModbusReply *sendWriteRequest(const QModbusDataUnit &, int) Q_DECL_OVERRIDE {
         return Q_NULLPTR;
     }
-    QModbusReplyEx *sendReadWriteRequest(const QModbusDataUnit &, const QModbusDataUnit &, int) {
+    QModbusReply *sendReadWriteRequest(const QModbusDataUnit &, const QModbusDataUnit &, int) {
         return Q_NULLPTR;
     }
     virtual bool open() Q_DECL_OVERRIDE { return true; }

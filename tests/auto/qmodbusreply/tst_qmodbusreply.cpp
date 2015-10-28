@@ -36,70 +36,17 @@
 
 #include <QtTest/QtTest>
 #include <QtSerialBus/QModbusReply>
-#include <QtCore/qpointer.h>
-
-class dummyReply : public QModbusReply
-{
-friend class tst_QModbusReply;
-
-protected:
-    void setFinished() Q_DECL_OVERRIDE { finish = true; }
-    void setError(QModbusReply::RequestError errorCode, const QString &errorString) Q_DECL_OVERRIDE
-    {
-        errorType = errorCode;
-        errorText = errorString;
-    }
-};
 
 class tst_QModbusReply : public QObject
 {
     Q_OBJECT
-public:
-    explicit tst_QModbusReply();
 
 private slots:
-    void error();
-    void errorString();
-    void finished();
-    void result();
-
-private:
-    QPointer<dummyReply> reply;
+    void initTestCase()
+    {
+        // TODO: Implement some tests.
+    }
 };
-
-tst_QModbusReply::tst_QModbusReply()
-{
-    reply = new dummyReply();
-}
-
-void tst_QModbusReply::error()
-{
-    QCOMPARE(reply->error(), QModbusReply::NoError);
-}
-
-void tst_QModbusReply::errorString()
-{
-    QString error("error string");
-    reply->setError(QModbusReply::IllegalFunction, error);
-    QCOMPARE(reply->errorString(), error);
-}
-
-void tst_QModbusReply::finished()
-{
-    QVERIFY(!reply->isFinished());
-    QVERIFY(reply->isRunning());
-
-    reply->setFinished();
-
-    QVERIFY(reply->isFinished());
-    QVERIFY(!reply->isRunning());
-}
-
-void tst_QModbusReply::result()
-{
-    QList<QModbusDataUnit> units = reply->result();
-    QVERIFY(units.isEmpty());
-}
 
 QTEST_MAIN(tst_QModbusReply)
 

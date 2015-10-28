@@ -39,51 +39,24 @@
 
 #include <QtSerialBus/qserialbusglobal.h>
 #include <QtSerialBus/qmodbusdataunit.h>
-
-#include <QtCore/qobject.h>
-#include <QtCore/qiodevice.h>
-
+#include <QtSerialBus/qmodbuspdu.h>
 
 QT_BEGIN_NAMESPACE
 
-class Q_SERIALBUS_EXPORT QModbusReply : public QObject
+class Q_SERIALBUS_EXPORT QModbusReply
 {
-    Q_OBJECT
 public:
-    enum RequestError {
-        NoError,
-        IllegalFunction,
-        IllegalDataAddress,
-        IllegalDataValue,
-        SlaveFailure,
-        Acknowledge,
-        SlaveBusy,
-        MemoryParity,
-        GatewayUnavailable,
-        NoResponse,
-        InvalidCRC,
-        InvalidError
-    };
-    explicit QModbusReply(QObject *parent = 0);
+    QModbusReply() Q_DECL_EQ_DEFAULT;
 
-    RequestError error() const;
-    QString errorString() const;
-    bool isFinished() const;
-    bool isRunning() const;
-    QList<QModbusDataUnit> result() const;
+    bool finished() const { return m_finished; }
+    QModbusDataUnit result() const { return m_unit; }
+    int slaveAddress() const { return m_slaveAddress; }
 
-Q_SIGNALS:
-    void errorOccurred(RequestError code);
-    void finished();
-
-protected:
-    virtual void setFinished() = 0;
-    virtual void setError(RequestError errorCode, const QString &errorString) = 0;
-
-    RequestError errorType;
-    QString errorText;
-    QList<QModbusDataUnit> payload;
-    bool finish;
+private:
+    QModbusPdu m_pdu;
+    QModbusDataUnit m_unit;
+    int m_slaveAddress = 0xff;
+    bool m_finished = false;
 };
 
 QT_END_NAMESPACE

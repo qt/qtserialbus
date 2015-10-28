@@ -57,10 +57,10 @@ QT_BEGIN_NAMESPACE
     The returned object is used to obtain any data returned in response to the corresponding request.
 
     QModbusClient has an asynchronous API. When the finished slot is called, the parameter
-    it takes is the QModbusReplyEx object containing the PDU as well as meta-data (Addressing, etc.).
+    it takes is the QModbusReply object containing the PDU as well as meta-data (Addressing, etc.).
 
     Note: After the request has finished, it is the responsibility of the user to delete the
-    QModbusReplyEx object at an appropriate time. Do not directly delete it inside the slot connected
+    QModbusReply object at an appropriate time. Do not directly delete it inside the slot connected
     to requestFinished(). You can use the deleteLater() function.
 
     Note: QModbusClient queues the requests it receives. The number of requests executed in
@@ -131,28 +131,28 @@ QModbusClient::QModbusClient(QModbusClientPrivate &dd, QObject *parent) :
 }
 
 /*!
-    \fn QModbusReplyEx *QModbusClient::sendReadRequest(const QModbusDataUnit &read, int slaveId) = 0
+    \fn QModbusReply *QModbusClient::sendReadRequest(const QModbusDataUnit &read, int slaveId) = 0
 
     Sends a request to read the contents of the data pointed by \a read. Returns a new valid
-    QModbusReplyEx object if it did send the request, otherwise Q_NULLPTR. Modbus network may
+    QModbusReply object if it did send the request, otherwise Q_NULLPTR. Modbus network may
     have multiple servers, each server has unique \a slaveId.
 */
 
 /*!
-    \fn QModbusReplyEx *QModbusClient::sendWriteRequest(const QModbusDataUnit &write, int slaveId) = 0
+    \fn QModbusReply *QModbusClient::sendWriteRequest(const QModbusDataUnit &write, int slaveId) = 0
 
     Sends a request to modify the contents of the data pointed by \a write. Returns a new valid
-    QModbusReplyEx object if it did send the request, otherwise Q_NULLPTR. Modbus network may
+    QModbusReply object if it did send the request, otherwise Q_NULLPTR. Modbus network may
     have multiple servers, each server has a unique \a slaveId.
 */
 
 /*!
-    \fn QModbusReplyEx *QModbusClient::sendReadWriteRequest(const QModbusDataUnit &read,
+    \fn QModbusReply *QModbusClient::sendReadWriteRequest(const QModbusDataUnit &read,
                                                      const QModbusDataUnit &write, int slaveId) = 0
 
     Sends a request to read the contents of the data pointed by \a read. In addition, sends a
     request to modify the contents of the data pointed by \a write. Returns a new valid
-    QModbusReplyEx object if it did send the request, otherwise Q_NULLPTR. Modbus network may
+    QModbusReply object if it did send the request, otherwise Q_NULLPTR. Modbus network may
     have multiple servers, each server has a unique \a slaveId.
 
     \note: Sending this kind of request is only valid of both \a read and \a write are of type

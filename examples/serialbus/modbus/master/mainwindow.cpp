@@ -146,14 +146,16 @@ void MainWindow::on_readButton_clicked()
 
 void MainWindow::readReady()
 {
-    const QList<QModbusDataUnit> units = lastRequest->result();
-    for (int i = 0; i < units.size(); i++) {
-        const QString entry = tr("Address: ") + QString::number(units.at(i).startAddress())
-            + tr(" Value: ") + QString::number(units.at(i).values().at(0),
-                units.at(i).registerType() <= QModbusDataUnit::Coils ? 10 : 16);
-        ui->readValue->addItem(entry);
-    }
-    lastRequest->deleteLater();
+    // TODO: Implement!
+
+    //const QList<QModbusDataUnit> units = lastRequest->result();
+    //for (int i = 0; i < units.size(); i++) {
+    //    const QString entry = tr("Address: ") + QString::number(units.at(i).startAddress())
+    //        + tr(" Value: ") + QString::number(units.at(i).values().at(0),
+    //            units.at(i).registerType() <= QModbusDataUnit::Coils ? 10 : 16);
+    //    ui->readValue->addItem(entry);
+    //}
+    //lastRequest->deleteLater();
     lastRequest = Q_NULLPTR;
 }
 
@@ -179,7 +181,7 @@ void MainWindow::on_writeButton_clicked()
 
 void MainWindow::writeReady()
 {
-    lastRequest->deleteLater();
+    delete lastRequest;
     lastRequest = Q_NULLPTR;
 }
 

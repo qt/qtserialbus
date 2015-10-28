@@ -39,7 +39,7 @@
 
 #include <QtSerialBus/qmodbusclient.h>
 #include <QtSerialBus/qmodbusdataunit.h>
-#include <QtSerialBus/qmodbusreplyex.h>
+#include <QtSerialBus/qmodbusreply.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -54,11 +54,11 @@ public:
     explicit QModbusRtuSerialMaster(QObject *parent = Q_NULLPTR);
     ~QModbusRtuSerialMaster();
 
-    virtual QModbusReplyEx *sendReadRequest(const QModbusDataUnit &read,
-                                            int slaveAddress) Q_DECL_OVERRIDE;
-    virtual QModbusReplyEx *sendWriteRequest(const QModbusDataUnit &write,
-                                             int slaveAddress) Q_DECL_OVERRIDE;
-    virtual QModbusReplyEx *sendReadWriteRequest(const QModbusDataUnit &read,
+    virtual QModbusReply *sendReadRequest(const QModbusDataUnit &read,
+                                          int slaveAddress) Q_DECL_OVERRIDE;
+    virtual QModbusReply *sendWriteRequest(const QModbusDataUnit &write,
+                                           int slaveAddress) Q_DECL_OVERRIDE;
+    virtual QModbusReply *sendReadWriteRequest(const QModbusDataUnit &read,
                                    const QModbusDataUnit &write, int slaveAddress) Q_DECL_OVERRIDE;
 
 protected:

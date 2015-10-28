@@ -43,119 +43,31 @@ QT_BEGIN_NAMESPACE
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QCanBusReply class contains the data and address for the request sent with
-    QModbusClient.
+    \brief TODO - Add some documentation.
  */
 
 /*!
-    Constructs a QModbusReply object with the \a parent.
- */
-QModbusReply::QModbusReply(QObject *parent) :
-    QObject(parent),
-    errorType(NoError),
-    finish(false)
-{
+    \fn QModbusReply::QModbusReply()
 
-}
-
-/*!
-    \enum QModbusReply::RequestError
-    This enum describes the type of error that has occurred.
-
-    \value NoError              No error has occurred.
-    \value IllegalFunction      The received request is not an allowable action for the server.
-    \value IllegalDataAddress   The received data address in the query is not an allowable address
-                                for the Modbus server.
-    \value IllegalDataValue     The contained value in the request data field is not an allowable
-                                value for the Modbus server.
-    \value SlaveFailure         An irrecoverable error occurred while the slave was attempting to
-                                perform the requested action.
-    \value Acknowledge          Specialized use in conjunction with programming commands.
-    \value SlaveBusy            The slave is engaged in processing a long–duration program command.
-    \value MemoryParity         Indicates that the extended file area failed to pass a consistency check.
-    \value GatewayUnavailable   Indicates that the gateway was unable to allocate an internal communication
-                                path from the input port to the output port for processing the request.
-    \value NoResponse           Indicates that no response was obtained from the target device.
-    \value InvalidCRC           CRC error occurred.
-    \value InvalidError         An unknown error occurred.
- */
-
-/*!
-    \fn QModbusReply::errorOccurred(RequestError error)
-
-    This signal is emitted when a request is aborted and error of the type
-    \a error is received.
-
-    \sa QModbusReply::error()
+    Constructs a QModbusReply object.
  */
 
 /*!
     \fn QModbusReply::finished()
 
-    This signal is emitted when a request is successfully completed.
-
-    \sa QModbusReply::isFinished()
+    TODO: Add some documentation.
  */
 
 /*!
-    \fn void QModbusReply::setFinished()
+    \fn QModbusDataUnit QModbusReply::result() const
 
-    Sets the reply as finished.
-    After having this set the reply's data must not change.
- */
-
-/*!
-    \fn void QModbusReply::setError(RequestError errorCode, const QString &errorString)
-
-    Sets the error condition to be \a errorCode. The human-readable message is set to \a errorString.
- */
+    TODO: Add some documentation.
+*/
 
 /*!
-    Returns the \l RequestError that was found while processing of the request.
-    If no error was found, returns \l NoError.
- */
-QModbusReply::RequestError QModbusReply::error() const
-{
-    return errorType;
-}
+    \fn int QModbusReply::slaveAddress() const
 
-/*!
-    Returns a human-readable description of the error that occurred. Returns empty string
-    if no error has occurred.
-
-    \sa error()
- */
-QString QModbusReply::errorString() const
-{
-    return errorText;
-}
-
-/*!
-    Returns \c true when the reply has finished or was aborted.
-
-    \sa QModbusReply::finished()
- */
-bool QModbusReply::isFinished() const
-{
-    return finish;
-}
-
-/*!
-    Returns \c true if the request is still being processed and the reply
-    has not finished or is not aborted yet.
- */
-bool QModbusReply::isRunning() const
-{
-    return !finish;
-}
-
-/*!
-    Returns data units read/written if QModbusReply is finished.
-    Otherwise returns an empty QVector.
- */
-QList<QModbusDataUnit> QModbusReply::result() const
-{
-    return payload;
-}
+    TODO: Add some documentation.
+*/
 
 QT_END_NAMESPACE
