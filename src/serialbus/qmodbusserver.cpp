@@ -770,7 +770,7 @@ QModbusResponse QModbusServerPrivate::processDiagnostics(const QModbusRequest &r
 
     if (subFunctionCode == Diagnostics::ChangeAsciiInputDelimiter) {
         const QByteArray data = request.data().mid(2, 2);
-        if (!data[1] == 0x00) {
+        if (data[1] != 0x00) {
             return QModbusExceptionResponse(request.functionCode(),
                 QModbusExceptionResponse::IllegalDataValue);
         }
