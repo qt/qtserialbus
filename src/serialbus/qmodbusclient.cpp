@@ -408,7 +408,6 @@ bool QModbusClientPrivate::processReadHoldingRegistersResponse(const QModbusResp
 
     if (data) {
         data->setValues(values);
-        data->setStartAddress(0);
         data->setValueCount(values.count());
         data->setRegisterType(QModbusDataUnit::HoldingRegisters);
     }
