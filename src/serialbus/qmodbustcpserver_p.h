@@ -73,20 +73,20 @@ public:
     {
     }
 
-    /*!
+    /*
         This function is a workaround since 2nd level lambda below cannot
         call protected QModbusTcpServer::processRequest(..) function on VS2013.
-     */
+    */
     QModbusResponse forwardProcessRequest(const QModbusRequest &r)
     {
         Q_Q(QModbusTcpServer);
         return q->processRequest(r);
     }
 
-    /*!
+    /*
         This function is a workaround since 2nd level lambda below cannot
         call protected QModbusDevice::setError(..) function on VS2013.
-     */
+    */
     void forwardError(const QString &errorText, QModbusDevice::ModbusError error)
     {
         Q_Q(QModbusTcpServer);

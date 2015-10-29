@@ -54,7 +54,7 @@ QT_BEGIN_NAMESPACE
 
 /*!
     Constructs a serial Modbus master with the specified \a parent.
- */
+*/
 QModbusRtuSerialMaster::QModbusRtuSerialMaster(QObject *parent)
     : QModbusClient(*new QModbusRtuSerialMasterPrivate, parent)
 {
@@ -63,7 +63,7 @@ QModbusRtuSerialMaster::QModbusRtuSerialMaster(QObject *parent)
 
 /*!
     \internal
- */
+*/
 QModbusRtuSerialMaster::~QModbusRtuSerialMaster()
 {
 }

@@ -56,11 +56,11 @@ Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
     Modbus networks can have multiple Modbus servers. Modbus Servers are read/written by a
     Modbus client represented by \l QModbusClient. QModbusServer communicates with a Modbus
     backend, providing users with a convenient API.
- */
+*/
 
 /*!
     Constructs a Modbus server with the specified \a parent.
- */
+*/
 QModbusServer::QModbusServer(QObject *parent) :
     QModbusDevice(*new QModbusServerPrivate, parent)
 {

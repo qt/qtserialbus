@@ -51,7 +51,7 @@ QT_BEGIN_NAMESPACE
 
 /*!
     Constructs a QModbusTcpClient with the specified \a parent.
- */
+*/
 QModbusTcpClient::QModbusTcpClient(QObject *parent)
     : QModbusClient(*new QModbusTcpClientPrivate, parent)
 {

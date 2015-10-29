@@ -54,7 +54,6 @@ class Q_SERIALBUS_EXPORT QModbusServer : public QModbusDevice
     Q_DECLARE_PRIVATE(QModbusServer)
 
 public:
-
     explicit QModbusServer(QObject *parent = 0);
     virtual ~QModbusServer();
 
@@ -86,7 +85,6 @@ protected:
 
     virtual QModbusResponse processRequest(const QModbusPdu &request);
     virtual QModbusResponse processPrivateModbusRequest(const QModbusPdu &request);
-
 };
 
 QT_END_NAMESPACE

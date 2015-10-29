@@ -101,7 +101,7 @@ static quint8 minimumDataSize(QModbusPdu::FunctionCode code, Type type)
 
     \brief QModbusPdu is a abstract container class containing the function code and
         payload that is stored inside a Modbus ADU.
- */
+*/
 
 /*!
     \enum QModbusPdu::ExceptionCode

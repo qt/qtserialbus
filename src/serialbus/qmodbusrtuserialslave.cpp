@@ -58,7 +58,7 @@ QT_BEGIN_NAMESPACE
 
 /*!
     Constructs a serial Modbus slave with the specified \a parent.
- */
+*/
 QModbusRtuSerialSlave::QModbusRtuSerialSlave(QObject *parent)
     : QModbusServer(*new QModbusRtuSerialSlavePrivate, parent)
 {
@@ -68,7 +68,7 @@ QModbusRtuSerialSlave::QModbusRtuSerialSlave(QObject *parent)
 
 /*!
     \internal
- */
+*/
 QModbusRtuSerialSlave::~QModbusRtuSerialSlave()
 {
 }
@@ -76,7 +76,7 @@ QModbusRtuSerialSlave::~QModbusRtuSerialSlave()
 
 /*!
     \internal
- */
+*/
 QModbusRtuSerialSlave::QModbusRtuSerialSlave(QModbusRtuSerialSlavePrivate &dd, QObject *parent)
     : QModbusServer(dd, parent)
 {
@@ -86,7 +86,7 @@ QModbusRtuSerialSlave::QModbusRtuSerialSlave(QModbusRtuSerialSlavePrivate &dd, Q
 
 /*!
     \reimp
- */
+*/
 bool QModbusRtuSerialSlave::open()
 {
     if (state() == QModbusDevice::ConnectedState)
@@ -102,7 +102,7 @@ bool QModbusRtuSerialSlave::open()
 
 /*!
     \reimp
- */
+*/
 void QModbusRtuSerialSlave::close()
 {
     Q_D(QModbusRtuSerialSlave);

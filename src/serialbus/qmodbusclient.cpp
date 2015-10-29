@@ -72,11 +72,11 @@ QT_BEGIN_NAMESPACE
     \fn void QModbusClient::requestFinished(QModbusReply *result)
 
     This signal is emitted with the already processed result of a Modbus server response.
- */
+*/
 
 /*!
     Constructs a Modbus client device with the specified \a parent.
- */
+*/
 QModbusClient::QModbusClient(QObject *parent)
     : QModbusDevice(*new QModbusClientPrivate, parent)
 {
@@ -108,7 +108,7 @@ int QModbusClient::timeout() const
     \fn void QModbusClient::timeoutChanged()
 
     This signal is emitted if the response is not received within the required timeout.
- */
+*/
 
 /*!
     Sets the \a newTimeout for this QModbusClient instance.
@@ -120,7 +120,7 @@ int QModbusClient::timeout() const
     Setting the timeout to a negative value disables timeouts.
 
     \sa timeout
- */
+*/
 void QModbusClient::setTimeout(int newTimeout)
 {
     Q_D(QModbusClient);

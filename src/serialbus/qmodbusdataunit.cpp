@@ -58,7 +58,7 @@ QT_BEGIN_NAMESPACE
     \l{QModbusDataUnit::}{DiscreteInputs} and \l{QModbusDataUnit::}{Coils}
     only accept single bits. Therefore 0 is intepreted as \c 0 and
     anything else \c 1.
- */
+*/
 
 /*!
     \enum QModbusDataUnit::RegisterType
@@ -107,7 +107,7 @@ QT_BEGIN_NAMESPACE
     Sets the \a registerType.
 
     \sa registerType(), QModbusDataUnit::RegisterType
- */
+*/
 
 /*!
     \fn QModbusDataUnit::RegisterType QModbusDataUnit::registerType() const
@@ -115,7 +115,7 @@ QT_BEGIN_NAMESPACE
     Returns the type of the register.
 
     \sa setRegisterType(), QModbusDataUnit::RegisterType
- */
+*/
 
 /*!
     \fn void QModbusDataUnit::setStartAddress(int address)
@@ -123,7 +123,7 @@ QT_BEGIN_NAMESPACE
     Sets the \a address of the data unit.
 
     \sa startAddress()
- */
+*/
 
 /*!
     \fn int QModbusDataUnit::startAddress() const
@@ -131,7 +131,7 @@ QT_BEGIN_NAMESPACE
     Returns the address of data unit in the register.
 
     \sa setStartAddress()
- */
+*/
 
 /*!
     \fn void QModbusDataUnit::setValues(const QVector<quint16> &values)
@@ -141,7 +141,7 @@ QT_BEGIN_NAMESPACE
     value, so 0 is interpreted as 0 and anything else as 1.
 
     \sa values()
- */
+*/
 
 /*!
     \fn QVector<quint16> QModbusDataUnit::values() const
@@ -151,7 +151,7 @@ QT_BEGIN_NAMESPACE
     value, so 0 is interpreted as 0 and anything else as 1.
 
     \sa setValues()
- */
+*/
 
 /*!
     \fn int QModbusDataUnit::valueCount() const
@@ -165,7 +165,7 @@ QT_BEGIN_NAMESPACE
     valueCount() is supposed to equal the size of \l values().
 
     \sa setValueCount()
- */
+*/
 
 /*!
     \fn void QModbusDataUnit::setValueCount(uint newCount)
@@ -175,7 +175,7 @@ QT_BEGIN_NAMESPACE
     This may be different from \l values() size as this function is used
     to indicated the size of a data request. Only once the data request
     has been processed \l valueCount() is equal to the size of \l values().
- */
+*/
 
 /*!
     \fn void QModbusDataUnit::setValue(int index, quint16 value)

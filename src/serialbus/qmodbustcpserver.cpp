@@ -49,11 +49,11 @@ QT_BEGIN_NAMESPACE
     Modbus TCP networks can have multiple servers. Servers are read/written by a client device
     represented by \l QModbusTcpClient. QModbusTcpServer communicates with a Modbus backend,
     providing users with a convenient API.
- */
+*/
 
 /*!
     Constructs a QModbusTcpServer with the specified \a parent.
- */
+*/
 QModbusTcpServer::QModbusTcpServer(QObject *parent)
     : QModbusServer(*new QModbusTcpServerPrivate, parent)
 {
@@ -70,7 +70,7 @@ QModbusTcpServer::~QModbusTcpServer()
 
 /*!
     \internal
- */
+*/
 QModbusTcpServer::QModbusTcpServer(QModbusTcpServerPrivate &dd, QObject *parent)
     : QModbusServer(dd, parent)
 {

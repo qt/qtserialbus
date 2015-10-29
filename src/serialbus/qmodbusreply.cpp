@@ -44,19 +44,19 @@ QT_BEGIN_NAMESPACE
     \since 5.6
 
     \brief TODO - Add some documentation.
- */
+*/
 
 /*!
     \fn QModbusReply::QModbusReply()
 
     Constructs a QModbusReply object.
- */
+*/
 
 /*!
     \fn QModbusReply::finished()
 
     TODO: Add some documentation.
- */
+*/
 
 /*!
     \fn QModbusDataUnit QModbusReply::result() const
