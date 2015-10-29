@@ -70,37 +70,36 @@ QT_BEGIN_NAMESPACE
     \value Coils                This type of data can be alterable by an application program.
     \value InputRegisters       This type of data can be provided by an I/O system.
     \value HoldingRegisters     This type of data can be alterable by an application program.
-
-    RegisterType
 */
 
 /*!
     \fn QModbusDataUnit::QModbusDataUnit()
 
-    Constructs an empty, invalid QModbusDataUnit.
+    Constructs an empty, invalid QModbusDataUnit. Start address is set to \c -1, data range and
+    data values are empty.
 */
 
 /*!
-    \fn QModbusDataUnit::QModbusDataUnit(QModbusDataUnit::RegisterType registerType, int dataAddress, quint16 size)
+    \fn QModbusDataUnit::QModbusDataUnit(RegisterType registerType)
 
-    Constructs a unit of data for \a registerType.
-    Address of the data is \a dataAddress and the size of the unit is \a size.
- */
-
-/*!
-    \fn QModbusDataUnit::QModbusDataUnit(QModbusDataUnit::RegisterType registerType, int startAddress, const QVector<quint16> &data)
-
-    Constructs a unit of data for \a registerType. The \a data block is placed
-    into the register starting at \a startAddress. \l valueCount() is implied
-    by the size of \a data.
- */
+    Constructs a unit of data for \a registerType. Start address is set to \c -1, data range and
+    data values are empty.
+*/
 
 /*!
-    \fn QModbusDataUnit::QModbusDataUnit(QModbusDataUnit::RegisterType registerType)
+    \fn QModbusDataUnit::QModbusDataUnit(RegisterType registerType, int address, quint16 size)
 
-    Constructs a unit of data for \a registerType. \l startAddress() is set to \c 0
-    and \l values() is empty.
- */
+    Constructs a unit of data for \a registerType. Start address of the data is set to \a address
+    and the size of the unit to \a size.
+*/
+
+/*!
+    \fn QModbusDataUnit::QModbusDataUnit(RegisterType registerType, int address,
+                                         const QVector<quint16> &data)
+
+    Constructs a unit of data for \a registerType. Start address of the data is set to \a address
+    and the unit's values to \a data. The value count is implied by the \a data size.
+*/
 
 /*!
     \fn void QModbusDataUnit::setRegisterType(QModbusDataUnit::RegisterType registerType)
@@ -160,7 +159,7 @@ QT_BEGIN_NAMESPACE
     Returns the size of the requested register's data block or the size of data read from the
     device.
 
-    This function may not always return a count that queals \l values() size. Since this class
+    This function may not always return a count that equals \l values() size. Since this class
     is used to request data from the remote data register, the \l valueCount() can be used to
     indicate the size of the register's data block. Once the request has been processed, the \l
     valueCount() is supposed to equal the size of \l values().
@@ -169,7 +168,7 @@ QT_BEGIN_NAMESPACE
  */
 
 /*!
-    \fn void QModbusDataUnit::setValueCount(int newCount)
+    \fn void QModbusDataUnit::setValueCount(uint newCount)
 
     Sets the size of the requested register's data block to \a newCount.
 
@@ -201,7 +200,7 @@ QT_BEGIN_NAMESPACE
 
     Returns true if the \c QModbusDataUnit is valid; otherwise false. A \c QModbusDataUnit is
     considered valid if the registerType() is not QModbusDataUnit::Invalid and the startAddress()
-    is greather than \c 0.
+    is greater than \c 0.
 */
 
 /*!

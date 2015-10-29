@@ -96,7 +96,7 @@ bool QModbusServer::setMap(const QModbusDataUnitMap &map)
 }
 
 /*!
-    Sets the slave address for this modbus server instance.
+    Sets the slave address for this Modbus server instance to \a slaveAddress.
 
     \sa slaveAddress()
 */
@@ -107,10 +107,9 @@ void QModbusServer::setSlaveAddress(int slaveAddress)
 }
 
 /*!
-    Returns the slave address of this modbus server instance.
+    Returns the slave address of this Mobus server instance.
 
-    The purpose of the slave address is to identify the modbus server
-    that is responsible for a client request.
+    \sa setSlaveAddress()
 */
 int QModbusServer::slaveAddress() const
 {
@@ -120,8 +119,8 @@ int QModbusServer::slaveAddress() const
 }
 
 /*!
-    Sets the diagnostic register value of the server in a device specific
-    encoding. The bit values of the register need device specific documentation.
+    Sets the diagnostic register of the server in a device specific encoding to \a value. The bit
+    values of the register need device specific documentation.
 
     \sa diagnosticRegister()
 */
@@ -132,10 +131,8 @@ void QModbusServer::setDiagnosticRegister(quint16 value)
 }
 
 /*!
-    Returns the diagnostic register value of the server.
-
-    The diagnostic register contains device-specific contents where each bit
-    has a specific meaning.
+    Returns the diagnostic register value of the server. The diagnostic register contains device
+    specific contents where each bit has a specific meaning.
 
     \sa setDiagnosticRegister()
 */
@@ -180,7 +177,7 @@ void QModbusServer::setContinueOnError(bool value)
 
     \sa setContinueOnError()
 */
-bool QModbusServer::continueOnError()
+bool QModbusServer::continueOnError() const
 {
     Q_D(const QModbusServer);
 
@@ -216,7 +213,7 @@ bool QModbusServer::setExceptionStatusOffset(quint16 offsetAddress)
 
     \sa setExceptionStatusOffset()
 */
-quint16 QModbusServer::exceptionStatusOffset()
+quint16 QModbusServer::exceptionStatusOffset() const
 {
     Q_D(const QModbusServer);
 
@@ -441,42 +438,21 @@ bool QModbusServer::setData(const QModbusDataUnit &newData)
 }
 
 /*!
-    \fn int QModbusServer::slaveAddress() const
-    Multiple Modbus devices can be connected together on the same physical link.
-    Slave address is a unique identifier that each Modbus server must have, and it is used
-    to filter out incoming messages.
-
-    Returns slave address.
-
-    \sa setSlaveAddress()
-*/
-
-/*!
-    \fn void QModbusServer::setSlaveAddress(int slaveAddress)
-    Multiple Modbus devices can be connected together on the same physical link.
-    So it is important that each server is identified by a unique id.
-
-    Sets \a slaveAddress as slave address.
-
-    \sa slaveAddress()
-*/
-
-/*!
-    \fn void QModbusServer::dataWritten(QModbusDataUnit::RegisterType table, int address, int size)
+    \fn void QModbusServer::dataWritten(QModbusDataUnit::RegisterType register, int address, int size)
 
     This signal is emitted when a Modbus client has written one or more fields of data to the
     Modbus server. The signal contains information about the fields that were written:
     \list
-     \li \a register type that was written,
-     \li \a address of the first field that was written,
-     \li and \a amount of consecutive fields that were written starting from \a address.
+        \li \a register type that was written,
+        \li \a address of the first field that was written,
+        \li and \a size of consecutive fields that were written starting from \a address.
     \endlist
 
     The signal is not emitted when the to-be-written fields have not changed
     due to no change in value.
 */
 
-/*
+/*!
     Processes a Modbus client \a request and returns a Modbus response.
 */
 QModbusResponse QModbusServer::processRequest(const QModbusPdu &request)
@@ -484,7 +460,7 @@ QModbusResponse QModbusServer::processRequest(const QModbusPdu &request)
     return d_func()->processRequest(request);
 }
 
-/*
+/*!
     To be implemented by custom Modbus server implementation. The default implementation returns
     a \c QModbusExceptionResponse with the \a request function code and error code set to illegal
     function.

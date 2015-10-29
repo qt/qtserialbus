@@ -60,17 +60,17 @@ public:
 
     virtual bool setMap(const QModbusDataUnitMap &map);
 
-    void setSlaveAddress(int slaveAddress);
     int slaveAddress() const;
+    void setSlaveAddress(int slaveAddress);
 
-    void setDiagnosticRegister(quint16 value);
     quint16 diagnosticRegister() const;
+    void setDiagnosticRegister(quint16 value);
 
+    bool continueOnError() const;
     void setContinueOnError(bool value);
-    bool continueOnError();
 
+    quint16 exceptionStatusOffset() const;
     bool setExceptionStatusOffset(quint16 offsetAddress);
-    quint16 exceptionStatusOffset();
 
     //TODO: Review if QModbusDataUnitMap would be useful. It could replace setMap(), data() and setData()
     virtual bool data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data) const;

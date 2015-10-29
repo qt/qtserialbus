@@ -69,6 +69,12 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
+    \fn void QModbusClient::requestFinished(QModbusReply *result)
+
+    This signal is emitted with the already processed result of a Modbus server response.
+ */
+
+/*!
     Constructs a Modbus client device with the specified \a parent.
  */
 QModbusClient::QModbusClient(QObject *parent)
@@ -84,6 +90,9 @@ QModbusClient::~QModbusClient()
 }
 
 /*!
+    \property QModbusClient::timeout
+    \brief the timeout value this client
+
     Returns the timeout value used by this QModbusClient instance in ms.
     A timeout is indicated by a \l TimeoutError. The default value is 200 ms.
 
@@ -98,11 +107,11 @@ int QModbusClient::timeout() const
 /*!
     \fn void QModbusClient::timeoutChanged()
 
-    This signal is emitted
+    This signal is emitted if the response is not received within the required timeout.
  */
 
 /*!
-    Sets the \a newTimout for this QModbusClient instance.
+    Sets the \a newTimeout for this QModbusClient instance.
 
     The timeout is used by the client to determine how long it waits for
     a response from the server. If the response is not received within the
@@ -159,7 +168,7 @@ QModbusClient::QModbusClient(QModbusClientPrivate &dd, QObject *parent) :
         QModbusDataUnit::HoldingRegisters.
 */
 
-/*
+/*!
     Processes a Modbus server \a response and stores the decoded information in \a data. Returns
     true on success; otherwise false.
 */
@@ -168,7 +177,7 @@ bool QModbusClient::processResponse(const QModbusResponse &response, QModbusData
     return d_func()->processResponse(response, data);
 }
 
-/*
+/*!
     To be implemented by custom Modbus client implementation. The default implementation ignores
     \a response and \a data. It always returns false to indicate error.
 */

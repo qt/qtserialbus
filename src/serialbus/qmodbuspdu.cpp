@@ -137,9 +137,59 @@ static quint8 minimumDataSize(QModbusPdu::FunctionCode code, Type type)
 */
 
 /*!
+    \enum QModbusPdu::FunctionCode
+
+    Defines the function code and the implicit type of action required by the slave. Not all
+    Modbus devices can handle the same set of function codes.
+
+    \value Invalid                          Set by the default constructor, do not use.
+    \value ReadCoils                        Requests the status of one or more coils from a device.
+    \value ReadDiscreteInputs               Requests the status of one or more input registers from
+                                            a device.
+    \value ReadHoldingRegisters             Requests the status of one or more holding register
+                                            values from a device.
+    \value ReadInputRegisters               Requests the status of one or more input register
+                                            values from a device.
+    \value WriteSingleCoil                  Requests to write a single coil on a device.
+    \value WriteSingleRegister              Requests to write a single holding register on a device.
+    \value ReadExceptionStatus              Requests the status of the eight Exception Status
+                                            outputs on a device.
+    \value Diagnostics                      Used to provide a series of tests for checking the
+                                            client server communication system, or checking internal
+    \value GetCommEventCounter              Requests a status word and an event count from the
+                                            device's communication event counter.
+    \value GetCommEventLog                  Requests a status word, event count, message count,
+                                            and a field of event bytes from a device.
+    \value WriteMultipleCoils               Requests to write one or more coils on a device.
+    \value WriteMultipleRegisters           Requests to write one or more holding registers on a
+                                            device.
+    \value ReportServerId                   Requests the description of the type, the current
+                                            status, and other information specific to a device.
+    \value ReadFileRecord                   Requests a file record read.
+    \value WriteFileRecord                  Requests a file record write.
+    \value MaskWriteRegister                Requests to modify the contents of a specified holding
+                                            register using a combination of an AND or OR mask, and
+                                            the register's current contents.
+    \value ReadWriteMultipleRegisters       Requests the status of one or more holding register and
+                                            at the same time to write one or more holding registers
+                                            on a device.
+    \value ReadFifoQueue                    Requests to read the contents of a First-In-First-Out
+                                            (FIFO) queue of register in a remote device.
+    \value EncapsulatedInterfaceTransport   Please refer to Annex A of the Modbus specification.
+    \value UndefinedFunctionCode            Do not use.
+*/
+
+
+/*!
     \fn QModbusPdu::QModbusPdu()
 
     Constructs an invalid QModbusPdu.
+*/
+
+/*!
+    \fn QModbusPdu::~QModbusPdu()
+
+    Destroys a QModbusPdu.
 */
 
 /*!
@@ -172,25 +222,43 @@ static quint8 minimumDataSize(QModbusPdu::FunctionCode code, Type type)
 */
 
 /*!
+    \fn bool QModbusPdu::isException() const
+
+    Returns true if the PDU contains an exception code; otherwise false.
+*/
+
+/*!
+    \fn qint16 QModbusPdu::size() const
+
+    Returns the PDU's full size, including function code and data size.
+*/
+
+/*!
+    \fn qint16 QModbusPdu::dataSize() const
+
+    Returns the PDU's data size, excluding the function code.
+*/
+
+/*!
     \fn FunctionCode QModbusPdu::functionCode() const
 
     Returns the PDU's function code.
 */
 
 /*!
-    void QModbusPdu::setFunctionCode(FunctionCode code)
+    \fn void QModbusPdu::setFunctionCode(FunctionCode code)
 
     Sets the PDU's function code to \a code.
 */
 
 /*!
-    QByteArray QModbusPdu::data() const
+    \fn QByteArray QModbusPdu::data() const
 
     Returns the PDU's payload. The payload is stored in big-endian byte order.
 */
 
 /*!
-    void QModbusPdu::setData(const QByteArray &data)
+    \fn void QModbusPdu::setData(const QByteArray &data)
 
     Sets the PDU's function payload to \a data. The data is expected to be stored in big-endian
     byte order already.
@@ -289,6 +357,12 @@ QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu)
 */
 
 /*!
+    \fn QModbusRequest::QModbusRequest(const QModbusPdu &pdu)
+
+    Constructs a copy of \a pdu.
+*/
+
+/*!
     \fn QModbusRequest::QModbusRequest(FunctionCode code, Args... data)
 
     Constructs a QModbusRequest with function code set to \a code and payload set to \a data.
@@ -299,7 +373,7 @@ QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu)
 */
 
 /*!
-    \fn QModbusRequest::QModbusRequest(FunctionCode code, const QByteArray &data = QByteArray)
+    \fn QModbusRequest::QModbusRequest(FunctionCode code, const QByteArray &data = QByteArray())
 
     Constructs a QModbusResponse with function code set to \a code and payload set to \a data.
     The data is expected to be stored in big-endian byte order already.
@@ -411,6 +485,12 @@ QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu)
 */
 
 /*!
+    \fn QModbusResponse::QModbusResponse(const QModbusPdu &pdu)
+
+    Constructs a copy of \a pdu.
+*/
+
+/*!
     \fn QModbusResponse::QModbusResponse(FunctionCode code, Args... data)
 
     Constructs a QModbusResponse with function code set to \a code and payload set to \a data.
@@ -421,14 +501,7 @@ QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu)
 */
 
 /*!
-    \fn QModbusResponse::QModbusResponse(FunctionCode code, Args... data)
-
-    Constructs a QModbusResponse with function code set to \a code and exception error
-    code set to \ec.
-*/
-
-/*!
-    \fn QModbusResponse::QModbusResponse(FunctionCode code, const QByteArray &data = QByteArray)
+    \fn QModbusResponse::QModbusResponse(FunctionCode code, const QByteArray &data = QByteArray())
 
     Constructs a QModbusResponse with function code set to \a code and payload set to \a data.
     The data is expected to be stored in big-endian byte order already.
@@ -491,7 +564,7 @@ int QModbusResponse::calculateDataSize(FunctionCode code, const QByteArray &data
 /*!
     \relates QModbusResponse
 
-    Reads a \a pdu from the stream \a in and returns a reference to the stream.
+    Reads a \a pdu from the stream \a stream and returns a reference to the stream.
 */
 QDataStream &operator>>(QDataStream &stream, QModbusResponse &pdu)
 {
@@ -533,22 +606,34 @@ QDataStream &operator>>(QDataStream &stream, QModbusResponse &pdu)
 */
 
 /*!
+    \fn QModbusExceptionResponse::QModbusExceptionResponse()
+
+    Constructs an invalid QModbusExceptionResponse.
+*/
+
+/*!
+    \fn QModbusExceptionResponse::QModbusExceptionResponse(const QModbusPdu &pdu)
+
+    Constructs a copy of \a pdu.
+*/
+
+/*!
     \fn QModbusExceptionResponse::QModbusExceptionResponse(FunctionCode code, ExceptionCode ec)
 
     Constructs a QModbusExceptionResponse with function code set to \a code and exception error
-    code set to \ec.
+    code set to \a ec.
 */
 
 /*!
-    void QModbusExceptionResponse::setFunctionCode(FunctionCode c)
+    \fn void QModbusExceptionResponse::setFunctionCode(FunctionCode c)
 
-    Sets the response's function code to \c.
+    Sets the response's function code to \a c.
 */
 
 /*!
-    void QModbusExceptionResponse::setExeceptionCode(ExceptionCode ec)
+    \fn void QModbusExceptionResponse::setExeceptionCode(ExceptionCode ec)
 
-    Sets the response's exception code to \ec.
+    Sets the response's exception code to \a ec.
 */
 
 QT_END_NAMESPACE

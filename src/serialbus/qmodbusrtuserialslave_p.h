@@ -98,7 +98,7 @@ public:
             QModbusPdu::FunctionCode code = QModbusPdu::Invalid;
             // function code available?
             if (pendingBuffer.size() < 2) {
-                qCWarning(QT_MODBUS) << "Invalid modbus PDU received";
+                qCWarning(QT_MODBUS) << "Invalid Modbus PDU received";
                 return;
             }
             code = QModbusRequest::FunctionCode(pendingBuffer.at(1));

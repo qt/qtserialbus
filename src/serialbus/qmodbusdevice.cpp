@@ -266,7 +266,7 @@ QString QModbusDevice::errorString() const
 
 /*!
     \internal
-    bool QModbusDevicePrivate::checkLRC(const char *data, qint32 len, quint8 lrc) const
+    \fn bool QModbusDevicePrivate::checkLRC(const char *data, qint32 len, quint8 lrc) const
 
     Returns true if the LRC checksum of the first \a len bytes of \a data match the given \a lrc;
     otherwise returns false.
@@ -274,7 +274,7 @@ QString QModbusDevice::errorString() const
 
 /*!
     \internal
-    \fn quint8 QModbusDevicePrivate::calculateCRC(const char *data, qint32 len) const
+    \fn quint16 QModbusDevicePrivate::calculateCRC(const char *data, qint32 len) const
 
     Returns the CRC checksum of the first \a len bytes of \a data.
 
@@ -285,7 +285,7 @@ QString QModbusDevice::errorString() const
 
 /*!
     \internal
-    bool QModbusDevicePrivate::checkCRC(const char *data, qint32 len, quint8 crc) const
+    \fn bool QModbusDevicePrivate::checkCRC(const char *data, qint32 len, quint16 crc) const
 
     Returns true if the CRC checksum of the first \a len bytes of \a data match the given \a crc;
     otherwise returns false.
