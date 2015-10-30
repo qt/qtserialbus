@@ -43,20 +43,38 @@
 
 QT_BEGIN_NAMESPACE
 
-class Q_SERIALBUS_EXPORT QModbusReply
+class QModbusReplyPrivate;
+
+class Q_SERIALBUS_EXPORT QModbusReply : public QObject
 {
+    Q_OBJECT
+    Q_DECLARE_PRIVATE(QModbusReply)
+
 public:
-    QModbusReply() Q_DECL_EQ_DEFAULT;
+    QModbusReply(int slaveAddress, QObject *parent = Q_NULLPTR);
 
-    bool finished() const { return m_finished; }
-    QModbusDataUnit result() const { return m_unit; }
-    int slaveAddress() const { return m_slaveAddress; }
+    bool isFinished() const;
+    QModbusDataUnit result() const;
+    int slaveAddress() const;
 
-private:
-    QModbusPdu m_pdu;
-    QModbusDataUnit m_unit;
-    int m_slaveAddress = 0xff;
-    bool m_finished = false;
+    QModbusPdu::ExceptionCode error() const;
+    QString errorText() const;
+
+Q_SIGNALS:
+    void finished();
+    void errorOccurred(QModbusPdu::ExceptionCode);
+
+protected:
+    void setResult(const QModbusDataUnit &unit);
+    void setFinished(bool isFinished);
+    void setError(QModbusPdu::ExceptionCode error, const QString &errorText);
+
+    //TODO once we have queue in server we can shift it there
+    // for now we use it to keep read request details for this reply around
+    QModbusDataUnit readRequestDetails;
+
+    friend class QModbusRtuSerialMaster;
+    friend class QModbusRtuSerialMasterPrivate;
 };
 
 QT_END_NAMESPACE
