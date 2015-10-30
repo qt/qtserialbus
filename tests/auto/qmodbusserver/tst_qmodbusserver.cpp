@@ -750,6 +750,41 @@ private slots:
         QCOMPARE(response.data(), QByteArray::fromHex("03"));
     }
 
+    void testProcessReadFifoQueue()
+    {
+        // prepare a fifo with two object values, pointer address is 172 with value 2 items
+        server.setData(QModbusDataUnit::HoldingRegisters, 172, 2u);
+        server.setData(QModbusDataUnit::HoldingRegisters, 173, 1235u);
+        server.setData(QModbusDataUnit::HoldingRegisters, 174, 1236u);
+        // request read fifo queue at fifo pointer address 172
+        QModbusRequest request = QModbusRequest(QModbusRequest::ReadFifoQueue,
+                                                QByteArray::fromHex("00ac"));
+        QModbusResponse response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        QCOMPARE(response.data(), QByteArray::fromHex("0006000204d304d4"));
+        // invalidate tests
+        // invalid offset address (501)
+        request = QModbusRequest(QModbusRequest::ReadFifoQueue,
+                                 QByteArray::fromHex("01f5"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.data(), QByteArray::fromHex("02"));
+        // invalid fifo count > 31
+        server.setData(QModbusDataUnit::HoldingRegisters, 172, 32u);
+        request = QModbusRequest(QModbusRequest::ReadFifoQueue,
+                                 QByteArray::fromHex("00ac"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+        // invalid fifo data address beyond 500, fifo values 3 (500-502)
+        server.setData(QModbusDataUnit::HoldingRegisters, 499, 3u);
+        request = QModbusRequest(QModbusRequest::ReadFifoQueue,
+                                 QByteArray::fromHex("01f3"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.data(), QByteArray::fromHex("02"));
+    }
+
     void tst_dataCalls_data()
     {
         QTest::addColumn<QModbusDataUnit::RegisterType>("registerType");

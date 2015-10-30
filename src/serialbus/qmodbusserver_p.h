@@ -92,6 +92,7 @@ public:
     QModbusResponse processWriteMultipleRegistersRequest(const QModbusRequest &request);
     QModbusResponse processMaskWriteRegister(const QModbusRequest &request);
     QModbusResponse processReadWriteMultipleRegistersRequest(const QModbusRequest &request);
+    QModbusResponse processReadFifoQueue(const QModbusRequest &request);
 
 private:
     bool restartCommunicationsOption(bool clearLog);

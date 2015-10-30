@@ -466,6 +466,7 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
     case QModbusRequest::ReadWriteMultipleRegisters:
         return processReadWriteMultipleRegistersRequest(request);
     case QModbusRequest::ReadFifoQueue:
+        return processReadFifoQueue(request);
     case QModbusRequest::EncapsulatedInterfaceTransport:
     default:
         break;
@@ -930,6 +931,36 @@ QModbusResponse QModbusServerPrivate::processReadWriteMultipleRegistersRequest(
     // - TODO: Increase message counters when they are implemented
     return QModbusResponse(request.functionCode(), quint8(readQuantity * 2),
                            readRegisters.values());
+}
+
+QModbusResponse QModbusServerPrivate::processReadFifoQueue(const QModbusRequest &request)
+{
+    if (request.dataSize() < QModbusRequest::minimumDataSize(request.functionCode())) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataValue);
+    }
+    quint16 address;
+    request.decodeData(&address);
+
+    quint16 fifoCount;
+    if (!q_func()->data(QModbusDataUnit::HoldingRegisters, address, &fifoCount)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataAddress);
+    }
+
+    if (fifoCount > 31u) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataValue);
+    }
+
+    QModbusDataUnit fifoRegisters(QModbusDataUnit::HoldingRegisters, address + 1u, fifoCount);
+    if (!q_func()->data(&fifoRegisters)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataAddress);
+    }
+
+    return QModbusResponse(request.functionCode(), quint16((fifoCount * 2) + 2u), fifoCount,
+                           fifoRegisters.values());
 }
 
 /*!
