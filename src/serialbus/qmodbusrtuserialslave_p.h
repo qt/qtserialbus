@@ -236,7 +236,9 @@ public:
 
         QObject::connect(m_serialPort, &QSerialPort::aboutToClose, [this]() {
             Q_Q(QModbusRtuSerialSlave);
-            q->close();
+            // update state if socket closure was caused by remote side
+            if (q->state() != QModbusDevice::ClosingState)
+                q->setState(QModbusDevice::UnconnectedState);
         });
     }
 
