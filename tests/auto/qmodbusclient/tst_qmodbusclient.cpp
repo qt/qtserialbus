@@ -84,8 +84,7 @@ private slots:
     {
         TestClient client;
 
-        QModbusDataUnit unit;
-        unit.setStartAddress(100);
+        QModbusDataUnit unit(QModbusDataUnit::Coils, 100, 24);
         QModbusResponse response = QModbusResponse(QModbusResponse::ReadCoils,
             QByteArray::fromHex("03cd6b05"));
         QCOMPARE(client.processResponse(response, &unit), true);
@@ -124,8 +123,7 @@ private slots:
     {
         TestClient client;
 
-        QModbusDataUnit unit;
-        unit.setStartAddress(100);
+        QModbusDataUnit unit(QModbusDataUnit::DiscreteInputs, 100, 24);
         QModbusResponse response = QModbusResponse(QModbusResponse::ReadDiscreteInputs,
             QByteArray::fromHex("03cd6b05"));
         QCOMPARE(client.processResponse(response, &unit), true);
