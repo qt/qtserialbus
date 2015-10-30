@@ -106,7 +106,6 @@ void MainWindow::on_connectButton_clicked()
     ui->errorLabel->setText(QString());
     if (modbusDevice->state() != QModbusDevice::ConnectedState) {
         modbusDevice->setPortName(ui->portEdit->text());
-        const QString portString = ui->portEdit->text();
         if (!modbusDevice->connectDevice())
             ui->errorLabel->setText(tr("Connect failed: ") + modbusDevice->errorString());
     } else {
