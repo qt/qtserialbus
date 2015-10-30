@@ -173,28 +173,44 @@ void MainWindow::readReady()
 
 void MainWindow::on_writeButton_clicked()
 {
-    // TODO: Implement!
+    if (!modbusDevice || modbusDevice->state() != QModbusDevice::ConnectedState)
+        return;
 
-    //delete lastRequest;
-    //if (!modbusDevice || modbusDevice->state() != QModbusDevice::ConnectedState)
-    //    return;
+    QModbusDataUnit::RegisterType table = QModbusDataUnit::HoldingRegisters;
+    if (ui->writeTable->currentText() == tr("Coils"))
+        table = QModbusDataUnit::Coils;
 
-    //QModbusDataUnit::RegisterType table = QModbusDataUnit::HoldingRegisters;
-    //if (ui->writeTable->currentText() == tr("Coils"))
-    //    table = QModbusDataUnit::Coils;
+    QModbusDataUnit unit(table, ui->writeAddress->text().toInt(), 1u);
+    unit.setValue(0, ui->writeValue->text().toInt(0, 16));
 
-    //lastRequest = modbusDevice->write(QModbusDataUnit(table, ui->writeAddress->text().toInt(),
-    //    ui->writeValue->text().toInt(0, 16)), ui->readSlave->text().toInt());
-    //if (lastRequest)
-    //    connect(lastRequest, &QModbusReply::finished, this, &MainWindow::writeReady);
-    //else
-    //    ui->errorLabel->setText(tr("Write error: ") + modbusDevice->errorString());
+    // TODO extend to test write of single coil and holding register
+    // Write Multiple coils and registers as well as R/W MultipleRegisters is missing
+    QModbusReply *reply = modbusDevice->sendWriteRequest(unit, ui->writeSlave->text().toInt());
+
+    // broadcast replies return immediately
+    if (reply && reply->isFinished()) {
+        delete reply;
+        return;
+    }
+
+    if (reply)
+        connect(reply, &QModbusReply::finished, this, &MainWindow::writeReady);
+    else
+        ui->errorLabel->setText(tr("Write error: ") + modbusDevice->errorString());
 }
 
 void MainWindow::writeReady()
 {
-    delete lastRequest;
-    lastRequest = Q_NULLPTR;
+    QModbusReply *reply = qobject_cast<QModbusReply *>(sender());
+    if (!reply)
+        return;
+
+    if (reply->error() != QModbusPdu::NoError) {
+        ui->errorLabel->setText(tr("Write response error: ") + reply->errorText()
+                                + tr("code: ") + reply->error());
+    }
+
+    reply->deleteLater();
 }
 
 void MainWindow::on_writeTable_currentIndexChanged(const QString &text)
