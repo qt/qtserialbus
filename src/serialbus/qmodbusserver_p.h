@@ -90,6 +90,7 @@ public:
     QModbusResponse processDiagnostics(const QModbusRequest &request);
     QModbusResponse processWriteMultipleCoilsRequest(const QModbusRequest &request);
     QModbusResponse processWriteMultipleRegistersRequest(const QModbusRequest &request);
+    QModbusResponse processMaskWriteRegister(const QModbusRequest &request);
     QModbusResponse processReadWriteMultipleRegistersRequest(const QModbusRequest &request);
 
 private:

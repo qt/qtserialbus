@@ -462,6 +462,7 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
     case QModbusRequest::ReadFileRecord:
     case QModbusRequest::WriteFileRecord:
     case QModbusRequest::MaskWriteRegister:
+        return processMaskWriteRegister(request);
     case QModbusRequest::ReadWriteMultipleRegisters:
         return processReadWriteMultipleRegistersRequest(request);
     case QModbusRequest::ReadFifoQueue:
@@ -840,6 +841,30 @@ QModbusResponse QModbusServerPrivate::processWriteMultipleRegistersRequest(
 
     // - TODO: Increase message counters when they are implemented
     return QModbusResponse(request.functionCode(), address, numberOfRegisters);
+}
+
+QModbusResponse QModbusServerPrivate::processMaskWriteRegister(const QModbusRequest &request)
+{
+    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataValue);
+    }
+
+    quint16 address, andMask, orMask;
+    request.decodeData(&address, &andMask, &orMask);
+
+    quint16 reg;
+    if (!q_func()->data(QModbusDataUnit::HoldingRegisters, address, &reg)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataAddress);
+    }
+
+    const quint16 result = (reg & andMask) | (orMask & (~ andMask));
+    if (!q_func()->setData(QModbusDataUnit::HoldingRegisters, address, result)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::ServerDeviceFailure);
+    }
+    return QModbusResponse(request.functionCode(), request.data());
 }
 
 QModbusResponse QModbusServerPrivate::processReadWriteMultipleRegistersRequest(

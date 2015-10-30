@@ -682,6 +682,44 @@ private slots:
         QCOMPARE(response.data(), QByteArray::fromHex("03"));
     }
 
+    void testMaskWriteRegister()
+    {
+        // preset register 172 with value 18 (0x0012h)
+        server.setData(QModbusDataUnit::HoldingRegisters, 172, 18u);
+        //mask request register 172 with andMask: 242 (0x00f2)
+        //                               orMask:   37 (0x0025)
+        //                               result:   23 (0x0017)
+        QModbusRequest request = QModbusRequest(QModbusRequest::MaskWriteRegister,
+            QByteArray::fromHex("00ac00f20025"));
+        QModbusResponse response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("00ac00f20025"));
+        // validate contents after masking
+        quint16 data;
+        QVERIFY(server.data(QModbusDataUnit::HoldingRegisters, 172, &data));
+        QCOMPARE(data, quint16(23));
+
+        // invalidate use register 501:
+        request = QModbusRequest(QModbusRequest::MaskWriteRegister,
+                    QByteArray::fromHex("01f500f20025"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.data(), QByteArray::fromHex("02"));
+        // invalidate with one bytes less data:
+        request = QModbusRequest(QModbusRequest::MaskWriteRegister,
+                    QByteArray::fromHex("00ac00f200"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+        // invalidate with one bytes more data:
+        request = QModbusRequest(QModbusRequest::MaskWriteRegister,
+                    QByteArray::fromHex("00ac00f2002500"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+    }
+
     void testProcessReadWriteMultipleRegistersRequest()
     {
         server.setData(QModbusDataUnit::HoldingRegisters, 172, 1234u);
