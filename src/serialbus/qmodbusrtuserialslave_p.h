@@ -122,9 +122,6 @@ public:
                 return;
             }
 
-            if (aduSize > size)
-                qCWarning(QT_MODBUS) << "Ignoring remaining data beyond expected ADU size";
-
             qCDebug(QT_MODBUS_LOW) << "Received request (incl ADU)" << completeAduFrame.toHex();
             if (QT_MODBUS().isDebugEnabled() && (aduSize > size)) {
                 qCDebug(QT_MODBUS_LOW) << "Pending buffer:" << pendingBuffer.toHex();
