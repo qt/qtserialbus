@@ -59,19 +59,9 @@ QT_BEGIN_NAMESPACE
     QModbusClient has an asynchronous API. When the finished slot is called, the parameter
     it takes is the QModbusReply object containing the PDU as well as meta-data (Addressing, etc.).
 
-    Note: After the request has finished, it is the responsibility of the user to delete the
-    QModbusReply object at an appropriate time. Do not directly delete it inside the slot connected
-    to requestFinished(). You can use the deleteLater() function.
-
     Note: QModbusClient queues the requests it receives. The number of requests executed in
     parallel is dependent on the protocol. For example, the HTTP protocol on desktop platforms
     issues 6 requests in parallel for one host/port combination.
-*/
-
-/*!
-    \fn void QModbusClient::requestFinished(QModbusReply *result)
-
-    This signal is emitted with the already processed result of a Modbus server response.
 */
 
 /*!

@@ -68,7 +68,6 @@ public:
     void setTimeout(int newTimeout);
 
 Q_SIGNALS:
-    void requestFinished(QModbusReply *result);
     void timeoutChanged();
 
 protected:
