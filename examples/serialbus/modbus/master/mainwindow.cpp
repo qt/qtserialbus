@@ -123,39 +123,52 @@ void MainWindow::onStateChanged(int state)
 
 void MainWindow::on_readButton_clicked()
 {
-    // TODO: Implement!
+    if (!modbusDevice || modbusDevice->state() != QModbusDevice::ConnectedState)
+        return;
 
-    //delete lastRequest;
-    //if (!modbusDevice || modbusDevice->state() != QModbusDevice::ConnectedState)
-    //    return;
+    const QModbusDataUnit::RegisterType registerType =
+        static_cast<QModbusDataUnit::RegisterType> (ui->readTable->currentData().toInt());
+    QModbusDataUnit dataRequest(registerType);
+    dataRequest.setValueCount(ui->readSize->currentText().toInt());
+    dataRequest.setStartAddress(ui->readAddress->text().toInt());
 
-    //const QModbusDataUnit::RegisterType registerType =
-    //    static_cast<QModbusDataUnit::RegisterType> (ui->readTable->currentData().toInt());
-    //QModbusDataUnit dataRequest(registerType);
-    //dataRequest.setValueCount(ui->readSize->currentText().toInt());
-    //dataRequest.setStartAddress(ui->readAddress->text().toInt());
+    ui->readValue->clear();
 
-    //ui->readValue->clear();
-    //lastRequest = modbusDevice->read(dataRequest, ui->readSlave->text().toInt());
-    //if (lastRequest)
-    //    connect(lastRequest, &QModbusReply::finished, this, &MainWindow::readReady);
-    //else
-    //    ui->errorLabel->setText(tr("Read error: ") + modbusDevice->errorString());
+    QModbusReply *reply = modbusDevice->sendReadRequest(dataRequest,
+                                                        ui->readSlave->text().toInt());
+    // broadcast replies return immediately
+    if (reply && reply->isFinished()) {
+        delete reply;
+        return;
+    }
+
+    if (reply)
+        connect(reply, &QModbusReply::finished, this, &MainWindow::readReady);
+    else
+        ui->errorLabel->setText(tr("Read error: ") + modbusDevice->errorString());
 }
 
 void MainWindow::readReady()
 {
-    // TODO: Implement!
+    QModbusReply *reply = qobject_cast<QModbusReply *>(sender());
+    if (!reply)
+        return;
 
-    //const QList<QModbusDataUnit> units = lastRequest->result();
-    //for (int i = 0; i < units.size(); i++) {
-    //    const QString entry = tr("Address: ") + QString::number(units.at(i).startAddress())
-    //        + tr(" Value: ") + QString::number(units.at(i).values().at(0),
-    //            units.at(i).registerType() <= QModbusDataUnit::Coils ? 10 : 16);
-    //    ui->readValue->addItem(entry);
-    //}
-    //lastRequest->deleteLater();
-    lastRequest = Q_NULLPTR;
+    if (reply->error() == QModbusPdu::NoError) {
+        const QModbusDataUnit unit = reply->result();
+        for (uint i = 0; i < unit.valueCount(); i++) {
+            const QString entry = tr("Address: %1, Value: %2").arg(unit.startAddress())
+                                     .arg(QString::number(unit.value(i),
+                                          unit.registerType() <= QModbusDataUnit::Coils ? 10 : 16));
+            ui->readValue->addItem(entry);
+        }
+    } else {
+        ui->errorLabel->setText(tr("Response error: ") + reply->errorText()
+                                + tr("code: ") + reply->error());
+        return;
+    }
+
+    reply->deleteLater();
 }
 
 void MainWindow::on_writeButton_clicked()
