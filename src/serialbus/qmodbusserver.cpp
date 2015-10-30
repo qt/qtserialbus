@@ -126,8 +126,7 @@ int QModbusServer::slaveAddress() const
 */
 void QModbusServer::setDiagnosticRegister(quint16 value)
 {
-    Q_D(QModbusServer);
-    d->m_diagnosticRegister = value;
+    d_func()->m_diagnostics[Diagnostics::ReturnDiagnosticRegister] = value;
 }
 
 /*!
@@ -138,9 +137,7 @@ void QModbusServer::setDiagnosticRegister(quint16 value)
 */
 quint16 QModbusServer::diagnosticRegister() const
 {
-    Q_D(const QModbusServer);
-
-    return d->m_diagnosticRegister;
+    return d_func()->m_diagnostics[Diagnostics::ReturnDiagnosticRegister];
 }
 
 /*!
@@ -823,11 +820,8 @@ QModbusResponse QModbusServerPrivate::processDiagnostics(const QModbusRequest &r
     }
 
     switch (subFunctionCode) {
-    case Diagnostics::ReturnDiagnosticRegister:
-        return QModbusResponse(request.functionCode(), subFunctionCode,
-                               q_func()->diagnosticRegister());
     case Diagnostics::ForceListenOnlyMode:
-        m_listenOnly = true;
+        m_diagnostics[Diagnostics::ForceListenOnlyMode] = true;
         // TODO: this is a simple way of encoding the event byte. As we currently
         // have no methods for the four types of event bytes to store, use this as
         // a temporary way.
@@ -835,31 +829,25 @@ QModbusResponse QModbusServerPrivate::processDiagnostics(const QModbusRequest &r
         // TODO: this is only a dummy response. The response should not leave the server
         // after setting the server into listen only mode (as with all responses
         // when listenOnly == true)
-        return QModbusResponse(request.functionCode(), request.data());
+        return QModbusResponse();
     case Diagnostics::ClearCountersAndDiagnosticRegister:
         resetCommunicationCounters();
         // TODO: according to PI_MBUS_300 specification, the clearing of the diagnostic
         // register is dependent on the device model. For legacy support to fullfill
         // this requirement, a server configuration variable could be added to check
         // if the diagnostic register should be cleared or not.
-        q_func()->setDiagnosticRegister(0u);
+        m_diagnostics[Diagnostics::ReturnDiagnosticRegister] = 0u;
         return QModbusResponse(request.functionCode(), request.data());
+    case Diagnostics::ReturnDiagnosticRegister:
     case Diagnostics::ReturnBusMessageCount:
-        return QModbusResponse(request.functionCode(), subFunctionCode, m_busMessageCounter);
     case Diagnostics::ReturnBusCommunicationErrorCount:
-        return QModbusResponse(request.functionCode(), subFunctionCode, m_crcErrorCounter);
     case Diagnostics::ReturnBusExceptionErrorCount:
-        return QModbusResponse(request.functionCode(), subFunctionCode, m_exceptionErrorCounter);
     case Diagnostics::ReturnServerMessageCount:
-        return QModbusResponse(request.functionCode(), subFunctionCode, m_serverMessageCounter);
     case Diagnostics::ReturnServerNoResponseCount:
-        return QModbusResponse(request.functionCode(), subFunctionCode, m_serverNoResponseCounter);
     case Diagnostics::ReturnServerNAKCount:
-        return QModbusResponse(request.functionCode(), subFunctionCode, m_serverNAKCounter);
     case Diagnostics::ReturnServerBusyCount:
-        return QModbusResponse(request.functionCode(), subFunctionCode, m_serverDeviceBusyCounter);
     case Diagnostics::ReturnBusCharacterOverrunCount:
-        return QModbusResponse(request.functionCode(), subFunctionCode, m_serverCharacterOverrunCounter);
+        return QModbusResponse(request.functionCode(), subFunctionCode, m_diagnostics[subFunctionCode]);
     default:
         return q_func()->processPrivateModbusRequest(request);
     }
@@ -1055,11 +1043,12 @@ QModbusResponse QModbusServerPrivate::processReadWriteMultipleRegistersRequest(
 bool QModbusServerPrivate::restartCommunicationsOption(bool clearLog)
 {
     q_func()->disconnectDevice();
-    m_listenOnly = false;
     if (clearLog)
         m_commEventLog.clear();
 
     resetCommunicationCounters();
+    m_diagnostics[Diagnostics::ForceListenOnlyMode] = false;
+
     storeEvent(0u);
     return q_func()->connectDevice();
 }
@@ -1072,14 +1061,14 @@ bool QModbusServerPrivate::restartCommunicationsOption(bool clearLog)
 void QModbusServerPrivate::resetCommunicationCounters()
 {
     m_commEventCounter = 0;
-    m_busMessageCounter = 0;
-    m_crcErrorCounter = 0;
-    m_exceptionErrorCounter = 0;
-    m_serverCharacterOverrunCounter = 0;
-    m_serverDeviceBusyCounter = 0;
-    m_serverMessageCounter = 0;
-    m_serverNAKCounter = 0;
-    m_serverNoResponseCounter = 0;
+    m_diagnostics[Diagnostics::ReturnBusMessageCount] = 0u;
+    m_diagnostics[Diagnostics::ReturnBusCommunicationErrorCount] = 0u;
+    m_diagnostics[Diagnostics::ReturnBusExceptionErrorCount] = 0u;
+    m_diagnostics[Diagnostics::ReturnServerMessageCount] = 0u;
+    m_diagnostics[Diagnostics::ReturnServerNoResponseCount] = 0u;
+    m_diagnostics[Diagnostics::ReturnServerNAKCount] = 0u;
+    m_diagnostics[Diagnostics::ReturnServerBusyCount] = 0u;
+    m_diagnostics[Diagnostics::ReturnBusCharacterOverrunCount] = 0u;
 }
 
 /*!

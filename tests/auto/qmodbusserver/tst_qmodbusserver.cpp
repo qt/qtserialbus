@@ -407,9 +407,10 @@ private slots:
         request = QModbusRequest(QModbusRequest::Diagnostics,
                                  QByteArray::fromHex("00040000"));
         response = server.processRequest(request);
+        QCOMPARE(response.isValid(), false);
         QCOMPARE(response.isException(), false);
-        // response, equals request
-        QCOMPARE(response.data(), QByteArray::fromHex("00040000"));
+        QCOMPARE(response.data(), QByteArray());
+        QCOMPARE(response.functionCode(), QModbusResponse::Invalid);
 
         // invalidate
         request = QModbusRequest(QModbusRequest::Diagnostics,

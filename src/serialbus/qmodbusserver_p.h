@@ -40,6 +40,9 @@
 #include "qmodbusserver.h"
 #include "qmodbusdevice_p.h"
 #include "qmodbusdataunit.h"
+#include "qmodbus_symbols_p.h"
+
+#include <QtCore/qvector.h>
 
 #include <QtCore/qcontiguouscache.h>
 
@@ -63,7 +66,9 @@ class QModbusServerPrivate : public QModbusDevicePrivate
 public:
     QModbusServerPrivate()
         : m_commEventLog(64)
-    {}
+        , m_diagnostics(25, 0u)
+    {
+    }
 
     bool setMap(const QModbusDataUnitMap &map);
 
@@ -91,31 +96,19 @@ private:
     QModbusDataUnit m_inputRegisters;
     QModbusDataUnit m_holdingRegisters;
 
-    quint16 m_diagnosticRegister = 0;
-
     int m_slaveAddress = 0;
 
     // Modbus Communication fields to stay
-    bool m_listenOnly = false; //TODO not enforced yet
     bool m_continueOnError = true; //TODO hook into server implementations
     bool m_deviceBusy = false; //TODO required?
     uchar m_asciiInputDelimiter; // TODO not taken into account yet
-    quint16 m_commEventCounter = 0;
-    QContiguousCache<quint8> m_commEventLog;
-
-    quint16 m_busMessageCounter = 0;
-    quint16 m_crcErrorCounter = 0;
-    quint16 m_exceptionErrorCounter = 0;
-    quint16 m_serverMessageCounter = 0;
-    quint16 m_serverNoResponseCounter = 0;
-    quint16 m_serverNAKCounter = 0;
-    quint16 m_serverDeviceBusyCounter = 0;
-    quint16 m_serverCharacterOverrunCounter = 0;
+    quint16 m_commEventCounter = 0; // TODO not taken into account yet
+    QContiguousCache<quint8> m_commEventLog; // TODO not taken into account yet
 
     quint16 m_exceptionStatusOffset = 0;
+    QVector<quint16> m_diagnostics;
 };
 
 QT_END_NAMESPACE
 
 #endif // QMODBUSERVER_P_H
-
