@@ -110,6 +110,7 @@ static quint8 minimumDataSize(QModbusPdu::FunctionCode code, Type type)
     They are set by the server after checking the appropriate error conditions in the reply to a
     request and must be decoded by the client to operate on the exception code.
 
+    \value NoError                              No error has occurred.
     \value IllegalFunction                      Function code is not supported by device.
     \value IllegalDataAddress                   The received data address in the query is not an
                                                 allowable address for the Modbus server.
@@ -134,6 +135,11 @@ static quint8 minimumDataSize(QModbusPdu::FunctionCode code, Type type)
                                                 target device behind a gateway.
                                                 Usually this means the target device is not online
                                                 on the network.
+    \value TimeoutError                         Indicates that a timeout has occurred.
+    \value ReplyAbortedError                    The pending QModbusReply was aborted. This may happen
+                                                when the Modbus client/master disconnects from the
+                                                transport layer.
+    \value UnknownError                         An unknown error has occurred.
 */
 
 /*!
@@ -634,6 +640,12 @@ QDataStream &operator>>(QDataStream &stream, QModbusResponse &pdu)
     \fn void QModbusExceptionResponse::setExceptionCode(ExceptionCode ec)
 
     Sets the response's exception code to \a ec.
+*/
+
+/*!
+    ExceptionCode QModbusExceptionResponse::execeptionCode() const
+
+    Returns the response's exception code.
 */
 
 QT_END_NAMESPACE

@@ -48,6 +48,7 @@ class QModbusPdu
 {
 public:
     enum ExceptionCode {
+        NoError = 0x0,
         IllegalFunction = 0x01,
         IllegalDataAddress = 0x02,
         IllegalDataValue = 0x03,
@@ -56,7 +57,10 @@ public:
         ServerDeviceBusy = 0x06,
         MemoryParityError = 0x08,
         GatewayPathUnavailable = 0x0A,
-        GatewayTargetDeviceFailedToRespond = 0x0B
+        GatewayTargetDeviceFailedToRespond = 0x0B,
+        TimeoutError = 0x100,
+        ReplyAbortedError = 0x101,
+        UnknownError = 0x102
     };
     Q_ENUMS(ExceptionCode)
 
@@ -225,6 +229,12 @@ public:
         QModbusPdu::setFunctionCode(FunctionCode(quint8(c) | quint8(0x80)));
     }
     void setExceptionCode(ExceptionCode ec) { QModbusPdu::encodeData(quint8(ec)); }
+    ExceptionCode exceptionCode() const {
+        if (!dataSize())
+            return UnknownError;
+
+        return static_cast<ExceptionCode>(data().at(0));
+    }
 };
 Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &stream, QModbusResponse &pdu);
 
