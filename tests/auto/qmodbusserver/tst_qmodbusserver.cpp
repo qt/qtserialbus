@@ -36,6 +36,7 @@
 
 #include <QtSerialBus/qmodbusserver.h>
 
+#include <QtCore/qdebug.h>
 #include <QtTest/QtTest>
 
 class TestServer : public QModbusServer
@@ -53,6 +54,11 @@ public:
 };
 
 #define MAP_RANGE 500
+static QString s_msg;
+static void myMessageHandler(QtMsgType, const QMessageLogContext &, const QString &msg)
+{
+    s_msg = msg;
+}
 
 class tst_QModbusServer : public QObject
 {
@@ -918,6 +924,58 @@ private slots:
        QCOMPARE(server.exceptionStatusOffset(), quint16(256));
        server.setExceptionStatusOffset(0);
        QCOMPARE(server.exceptionStatusOffset(), quint16(0));
+    }
+
+    void tst_readWriteDataInheritance()
+    {
+        class DebugHandler
+        {
+        public:
+            DebugHandler(QtMessageHandler newMessageHandler)
+                : oldMessageHandler(qInstallMessageHandler(newMessageHandler)) {}
+            ~DebugHandler() {
+                qInstallMessageHandler(oldMessageHandler);
+            }
+        private:
+            QtMessageHandler oldMessageHandler;
+        };
+
+        class InheritanceTestServer : public QModbusServer
+        {
+        public:
+            InheritanceTestServer() Q_DECL_EQ_DEFAULT;
+            void close() Q_DECL_OVERRIDE {}
+            bool open() Q_DECL_OVERRIDE { return true; }
+
+            bool readData(QModbusDataUnit *) const Q_DECL_OVERRIDE {
+                qDebug() << "QModbusServer::data() call did end in the expected OVERRIDE.";
+                return false;
+            }
+            bool writeData(const QModbusDataUnit &) Q_DECL_OVERRIDE {
+                qDebug() << "QModbusServer::setData() call did end in the expected OVERRIDE.";
+                return false;
+            }
+        };
+
+        InheritanceTestServer s;
+        DebugHandler mhs(myMessageHandler);
+        {
+            QModbusDataUnit unit;
+            s.data(&unit);
+        }
+        QCOMPARE(s_msg, QString("QModbusServer::data() call did end in the expected OVERRIDE."));
+        {
+            s.data(QModbusDataUnit::Coils, 0u, Q_NULLPTR);
+        }
+        QCOMPARE(s_msg, QString("QModbusServer::data() call did end in the expected OVERRIDE."));
+        {
+            s.setData(QModbusDataUnit());
+        }
+        QCOMPARE(s_msg, QString("QModbusServer::setData() call did end in the expected OVERRIDE."));
+        {
+            s.setData(QModbusDataUnit::Coils, 0u, 0u);
+        }
+        QCOMPARE(s_msg, QString("QModbusServer::setData() call did end in the expected OVERRIDE."));
     }
 };
 

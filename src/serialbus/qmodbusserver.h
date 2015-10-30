@@ -71,17 +71,20 @@ public:
     quint16 exceptionStatusOffset() const;
     bool setExceptionStatusOffset(quint16 offsetAddress);
 
-    //TODO: Review if QModbusDataUnitMap would be useful. It could replace setMap(), data() and setData()
-    virtual bool data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data) const;
-    virtual bool data(QModbusDataUnit *newData) const;
-    virtual bool setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data);
-    virtual bool setData(const QModbusDataUnit &unit);
+    bool data(QModbusDataUnit *newData) const;
+    bool setData(const QModbusDataUnit &unit);
+
+    bool setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data);
+    bool data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data) const;
 
 Q_SIGNALS:
     void dataWritten(QModbusDataUnit::RegisterType table, int address, int size);
 
 protected:
     QModbusServer(QModbusServerPrivate &dd, QObject *parent = Q_NULLPTR);
+
+    virtual bool writeData(const QModbusDataUnit &unit);
+    virtual bool readData(QModbusDataUnit *newData) const;
 
     virtual QModbusResponse processRequest(const QModbusPdu &request);
     virtual QModbusResponse processPrivateModbusRequest(const QModbusPdu &request);

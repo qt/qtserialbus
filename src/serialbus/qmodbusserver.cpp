@@ -227,38 +227,12 @@ quint16 QModbusServer::exceptionStatusOffset() const
 */
 bool QModbusServer::data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data) const
 {
-    Q_D(const QModbusServer);
-    if (!data)
-        return false;
-
-    const QModbusDataUnit *unit;
-
-    switch (table) {
-    case QModbusDataUnit::Invalid:
-        return false;
-    case QModbusDataUnit::DiscreteInputs:
-        unit = &(d->m_discreteInputs);
-        break;
-    case QModbusDataUnit::Coils:
-        unit = &(d->m_coils);
-        break;
-    case QModbusDataUnit::InputRegisters:
-        unit = &(d->m_inputRegisters);
-        break;
-    case QModbusDataUnit::HoldingRegisters:
-        unit = &(d->m_holdingRegisters);
-        break;
+    QModbusDataUnit unit(table, address, 1u);
+    if (data && readData(&unit)) {
+        *data = unit.value(0);
+        return true;
     }
-
-    if (!unit->isValid()
-        || address < unit->startAddress()
-        || address >= (unit->startAddress() + unit->valueCount())) {
-        return false;
-    }
-
-    *data = unit->value(address);
-
-    return true;
+    return false;
 }
 
 /*!
@@ -273,52 +247,7 @@ bool QModbusServer::data(QModbusDataUnit::RegisterType table, quint16 address, q
 */
 bool QModbusServer::data(QModbusDataUnit *newData) const
 {
-    Q_D(const QModbusServer);
-
-    if (!newData)
-        return false;
-
-    const QModbusDataUnit *current;
-
-    switch (newData->registerType()) {
-    case QModbusDataUnit::Invalid:
-        return false;
-    case QModbusDataUnit::DiscreteInputs:
-        current = &(d->m_discreteInputs);
-        break;
-    case QModbusDataUnit::Coils:
-        current = &(d->m_coils);
-        break;
-    case QModbusDataUnit::InputRegisters:
-        current = &(d->m_inputRegisters);
-        break;
-    case QModbusDataUnit::HoldingRegisters:
-        current = &(d->m_holdingRegisters);
-        break;
-    }
-
-    if (newData->startAddress() < 0) { //return entire map for given type
-        *newData = *current;
-        return true;
-    }
-
-    //check range start is within internal map range
-    int internalRangeEndAddress = current->startAddress() + current->valueCount() - 1;
-    if (newData->startAddress() < current->startAddress()
-        || newData->startAddress() > internalRangeEndAddress) {
-        return false;
-    }
-
-    //check range end is within internal map range
-    int rangeEndAddress = newData->startAddress() + newData->valueCount() - 1;
-    if (rangeEndAddress < current->startAddress()
-        || rangeEndAddress > internalRangeEndAddress) {
-        return false;
-    }
-
-    newData->setValues(current->values().mid(newData->startAddress(),
-                                             newData->valueCount()));
-    return true;
+    return readData(newData);
 }
 
 /*!
@@ -334,38 +263,7 @@ bool QModbusServer::data(QModbusDataUnit *newData) const
 */
 bool QModbusServer::setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data)
 {
-    Q_D(QModbusServer);
-    QModbusDataUnit* unit;
-
-    switch (table) {
-    case QModbusDataUnit::Invalid:
-        return false;
-    case QModbusDataUnit::DiscreteInputs:
-        unit = &(d->m_discreteInputs);
-        break;
-    case QModbusDataUnit::Coils:
-        unit = &(d->m_coils);
-        break;
-    case QModbusDataUnit::InputRegisters:
-        unit = &(d->m_inputRegisters);
-        break;
-    case QModbusDataUnit::HoldingRegisters:
-        unit = &(d->m_holdingRegisters);
-        break;
-    }
-
-    if (!unit->isValid()
-        || address < unit->startAddress()
-        || address >= (unit->startAddress() + unit->valueCount())) {
-        return false;
-    }
-
-    if (unit->value(address) != data) {
-        unit->setValue(address, data);
-        emit dataWritten(table, address, 1);
-    }
-
-    return true;
+    return writeData(QModbusDataUnit(table, address, QVector<quint16>() << data));
 }
 
 /*!
@@ -380,6 +278,11 @@ bool QModbusServer::setData(QModbusDataUnit::RegisterType table, quint16 address
     \sa data()
 */
 bool QModbusServer::setData(const QModbusDataUnit &newData)
+{
+    return writeData(newData);
+}
+
+bool QModbusServer::writeData(const QModbusDataUnit &newData)
 {
     Q_D(QModbusServer);
 
@@ -431,6 +334,53 @@ bool QModbusServer::setData(const QModbusDataUnit &newData)
 
     if (changeRequired)
         emit dataWritten(newData.registerType(), newData.startAddress(), newData.valueCount());
+    return true;
+}
+
+bool QModbusServer::readData(QModbusDataUnit *newData) const
+{
+    Q_D(const QModbusServer);
+
+    if (!newData)
+        return false;
+
+    const QModbusDataUnit *current;
+
+    switch (newData->registerType()) {
+    case QModbusDataUnit::Invalid:
+        return false;
+    case QModbusDataUnit::DiscreteInputs:
+        current = &(d->m_discreteInputs);
+        break;
+    case QModbusDataUnit::Coils:
+        current = &(d->m_coils);
+        break;
+    case QModbusDataUnit::InputRegisters:
+        current = &(d->m_inputRegisters);
+        break;
+    case QModbusDataUnit::HoldingRegisters:
+        current = &(d->m_holdingRegisters);
+        break;
+    }
+
+    if (newData->startAddress() < 0) { //return entire map for given type
+        *newData = *current;
+        return true;
+    }
+
+    //check range start is within internal map range
+    int internalRangeEndAddress = current->startAddress() + current->valueCount() - 1;
+    if (newData->startAddress() < current->startAddress()
+        || newData->startAddress() > internalRangeEndAddress) {
+        return false;
+    }
+
+    //check range end is within internal map range
+    const int rangeEndAddress = newData->startAddress() + newData->valueCount() - 1;
+    if (rangeEndAddress < current->startAddress() || rangeEndAddress > internalRangeEndAddress)
+        return false;
+
+    newData->setValues(current->values().mid(newData->startAddress(), newData->valueCount()));
     return true;
 }
 
