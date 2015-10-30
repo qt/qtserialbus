@@ -64,8 +64,8 @@ public:
 protected:
     QModbusRtuSerialMaster(QModbusRtuSerialMasterPrivate &dd, QObject *parent = Q_NULLPTR);
 
-    void close() Q_DECL_OVERRIDE { /* TODO: Implement! */ }
-    bool open() Q_DECL_OVERRIDE { /* TODO: Implement! */ return false; }
+    void close() Q_DECL_OVERRIDE;
+    bool open() Q_DECL_OVERRIDE;
 };
 
 QT_END_NAMESPACE
