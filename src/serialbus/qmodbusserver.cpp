@@ -595,18 +595,13 @@ QModbusResponse QModbusServerPrivate::writeSingle(const QModbusPdu &request,
             QModbusExceptionResponse::IllegalDataValue);
     }
 
-    // Get the requested register.
-    QModbusDataUnit unit(unitType, address, 1u);
-    if (!q_func()->data(&unit)) {
+    quint16 reg;   // Get the requested register, but deliberately ignore.
+    if (!q_func()->data(unitType, address, &reg)) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataAddress);
     }
 
-    // Since we picked the unit at address, data range
-    // is now 1 and therefore index needs to be 0.
-    unit.setValue(0, value);
-
-    if (!q_func()->setData(unit)) {
+    if (!q_func()->setData(unitType, address, value)) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::ServerDeviceFailure);
     }
