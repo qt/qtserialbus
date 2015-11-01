@@ -224,7 +224,7 @@ public:
     void setFunctionCode(FunctionCode c) {
         QModbusPdu::setFunctionCode(FunctionCode(quint8(c) | quint8(0x80)));
     }
-    void setExeceptionCode(ExceptionCode ec) { QModbusPdu::encodeData(quint8(ec)); }
+    void setExceptionCode(ExceptionCode ec) { QModbusPdu::encodeData(quint8(ec)); }
 };
 Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &stream, QModbusResponse &pdu);
 

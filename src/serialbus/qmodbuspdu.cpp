@@ -631,7 +631,7 @@ QDataStream &operator>>(QDataStream &stream, QModbusResponse &pdu)
 */
 
 /*!
-    \fn void QModbusExceptionResponse::setExeceptionCode(ExceptionCode ec)
+    \fn void QModbusExceptionResponse::setExceptionCode(ExceptionCode ec)
 
     Sets the response's exception code to \a ec.
 */

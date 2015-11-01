@@ -252,7 +252,7 @@ private slots:
         QCOMPARE(response.functionCode(), QModbusExceptionResponse::Invalid);
 
         response.setFunctionCode(QModbusExceptionResponse::ReportServerId);
-        response.setExeceptionCode(QModbusExceptionResponse::ServerDeviceFailure);
+        response.setExceptionCode(QModbusExceptionResponse::ServerDeviceFailure);
         QCOMPARE(response.isValid(), true);
         QCOMPARE(response.isException(), true);
         QCOMPARE(response.functionCode(), QModbusExceptionResponse::FunctionCode(0x91));
