@@ -97,6 +97,12 @@ public:
                 && (m_data.size() < 253);
     }
     bool isException() const { return m_code & quint8(0x80); }
+    ExceptionCode exceptionCode() const {
+        if (!dataSize() || !isException())
+            return UnknownError;
+
+        return static_cast<ExceptionCode>(data().at(0));
+    }
 
     qint16 size() const { return dataSize() + 1; }
     qint16 dataSize() const { return m_data.size(); }
@@ -229,12 +235,6 @@ public:
         QModbusPdu::setFunctionCode(FunctionCode(quint8(c) | quint8(0x80)));
     }
     void setExceptionCode(ExceptionCode ec) { QModbusPdu::encodeData(quint8(ec)); }
-    ExceptionCode exceptionCode() const {
-        if (!dataSize())
-            return UnknownError;
-
-        return static_cast<ExceptionCode>(data().at(0));
-    }
 };
 Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &stream, QModbusResponse &pdu);
 

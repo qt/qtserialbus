@@ -113,17 +113,20 @@ private slots:
         QCOMPARE(request.isValid(), false);
         QCOMPARE(request.isException(), false);
         QCOMPARE(request.functionCode(), QModbusRequest::FunctionCode(0x00));
+        QCOMPARE(request.exceptionCode(), QModbusPdu::UnknownError);
         QCOMPARE(request.data().toHex(), QByteArray());
 
         QModbusResponse response;
         QCOMPARE(response.isValid(), false);
         QCOMPARE(response.isException(), false);
         QCOMPARE(response.functionCode(), QModbusResponse::FunctionCode(0x00));
+        QCOMPARE(response.exceptionCode(), QModbusPdu::UnknownError);
         QCOMPARE(response.data().toHex(), QByteArray());
 
         QModbusExceptionResponse exception;
         QCOMPARE(exception.isValid(), false);
         QCOMPARE(exception.isException(), false);
+        QCOMPARE(exception.exceptionCode(), QModbusPdu::UnknownError);
         QCOMPARE(exception.functionCode(), QModbusExceptionResponse::FunctionCode(0x00));
         QCOMPARE(exception.data().toHex(), QByteArray());
     }
@@ -134,6 +137,7 @@ private slots:
         QCOMPARE(request.isValid(), true);
         QCOMPARE(request.isException(), false);
         QCOMPARE(request.functionCode(), QModbusRequest::ReportServerId);
+        QCOMPARE(request.exceptionCode(), QModbusPdu::UnknownError);
         QCOMPARE(request.data().toHex(), QByteArray());
 
         // Byte Count, Server ID, Run Indicator Status
@@ -142,6 +146,7 @@ private slots:
         QCOMPARE(response.isValid(), true);
         QCOMPARE(response.isException(), false);
         QCOMPARE(response.functionCode(), QModbusResponse::ReportServerId);
+        QCOMPARE(response.exceptionCode(), QModbusPdu::UnknownError);
         QCOMPARE(response.data().toHex(), QByteArray("0201ff"));
     }
 

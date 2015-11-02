@@ -234,6 +234,12 @@ static quint8 minimumDataSize(QModbusPdu::FunctionCode code, Type type)
 */
 
 /*!
+    ExceptionCode QModbusExceptionResponse::execeptionCode() const
+
+    Returns the response's exception code.
+*/
+
+/*!
     \fn qint16 QModbusPdu::size() const
 
     Returns the PDU's full size, including function code and data size.
@@ -640,12 +646,6 @@ QDataStream &operator>>(QDataStream &stream, QModbusResponse &pdu)
     \fn void QModbusExceptionResponse::setExceptionCode(ExceptionCode ec)
 
     Sets the response's exception code to \a ec.
-*/
-
-/*!
-    ExceptionCode QModbusExceptionResponse::execeptionCode() const
-
-    Returns the response's exception code.
 */
 
 QT_END_NAMESPACE

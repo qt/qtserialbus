@@ -146,8 +146,7 @@ public:
                             QModbusRtuSerialMaster::tr("An invalid response has been received."));
                 }
             } else {
-                QModbusExceptionResponse exception(response);
-                m_pendingReply->setError(exception.exceptionCode(), QString());
+                m_pendingReply->setError(response.exceptionCode(), QString());
             }
 
             m_pendingReply->setFinished(true);
