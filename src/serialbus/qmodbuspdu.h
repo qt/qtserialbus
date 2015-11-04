@@ -48,7 +48,6 @@ class QModbusPdu
 {
 public:
     enum ExceptionCode {
-        NoError = 0x0,
         IllegalFunction = 0x01,
         IllegalDataAddress = 0x02,
         IllegalDataValue = 0x03,
@@ -58,10 +57,7 @@ public:
         MemoryParityError = 0x08,
         GatewayPathUnavailable = 0x0A,
         GatewayTargetDeviceFailedToRespond = 0x0B,
-        TimeoutError = 0x100,
-        ReplyAbortedError = 0x101,
-        UnknownError = 0x102,
-        WriteError = 0x103
+        ExtendedException = 0xFF,
     };
     Q_ENUMS(ExceptionCode)
 
@@ -100,7 +96,7 @@ public:
     bool isException() const { return m_code & quint8(0x80); }
     ExceptionCode exceptionCode() const {
         if (!dataSize() || !isException())
-            return UnknownError;
+            return ExtendedException;
 
         return static_cast<ExceptionCode>(data().at(0));
     }

@@ -51,23 +51,36 @@ class Q_SERIALBUS_EXPORT QModbusReply : public QObject
     Q_DECLARE_PRIVATE(QModbusReply)
 
 public:
+    enum ReplyError {
+        NoError =               0x00,
+        ProtocolError =         0x01,
+        TimeoutError =          0x02,
+        ReplyAbortedError =     0x03,
+        UnknownError =          0x04,
+        WriteError =            0x05
+    };
+    Q_ENUMS(ReplyError)
+
+
     QModbusReply(int slaveAddress, QObject *parent = Q_NULLPTR);
 
     bool isFinished() const;
     QModbusDataUnit result() const;
     int slaveAddress() const;
 
-    QModbusPdu::ExceptionCode error() const;
+    ReplyError error() const;
+    QModbusPdu::ExceptionCode protocolError() const;
     QString errorText() const;
 
 Q_SIGNALS:
     void finished();
-    void errorOccurred(QModbusPdu::ExceptionCode);
+    void errorOccurred(QModbusReply::ReplyError error);
 
 protected:
     void setResult(const QModbusDataUnit &unit);
     void setFinished(bool isFinished);
-    void setError(QModbusPdu::ExceptionCode error, const QString &errorText);
+    void setProtocolError(QModbusPdu::ExceptionCode error, const QString &errorText);
+    void setError(QModbusReply::ReplyError error, const QString &errorText);
 
     //TODO once we have queue in server we can shift it there
     // for now we use it to keep read request details for this reply around
@@ -77,6 +90,11 @@ protected:
     friend class QModbusRtuSerialMasterPrivate;
 };
 
+Q_DECLARE_TYPEINFO(QModbusReply::ReplyError, Q_PRIMITIVE_TYPE);
+
 QT_END_NAMESPACE
+
+
+Q_DECLARE_METATYPE(QModbusReply::ReplyError)
 
 #endif // QMODBUSREPLY_H

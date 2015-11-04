@@ -120,7 +120,7 @@ void QModbusRtuSerialMaster::close()
         // Finish each open reply and forget them
         QModbusRtuSerialMasterPrivate::QueueElement elem = d->m_queue.dequeue();
         if (!elem.reply.isNull()) {
-            elem.reply->setError(QModbusPdu::ReplyAbortedError,
+            elem.reply->setError(QModbusReply::ReplyAbortedError,
                                  tr("Reply aborted due to connection closure."));
             elem.reply->setFinished(true);
         }

@@ -50,7 +50,8 @@ public:
     QModbusDataUnit m_unit;
     int m_slaveAddress = 0xff;
     bool m_finished = false;
-    QModbusPdu::ExceptionCode m_error = QModbusPdu::NoError;
+    QModbusPdu::ExceptionCode m_protocolError = QModbusPdu::ExtendedException;
+    QModbusReply::ReplyError m_error = QModbusReply::NoError;
     QString m_errorText;
 };
 
@@ -62,6 +63,24 @@ public:
     \brief The QModbusReply class contains the data for a request sent with
     a \l QModbusClient derived class.
  */
+
+/*!
+    \enum QModbusPdu::ReplyError
+
+    This enum describes all the possible error conditions.
+
+    \value NoError                              No error has occurred.
+    \value ProtocolError                        The request was answered with a Modbus exception.
+                                                The exact Modbus exception code can be retrieved
+                                                using \l protocolError().
+    \value TimeoutError                         The Modbus request was not answered within the given
+                                                \l QModbusClient::timeout().
+    \value ReplyAbortedError                    The reply was aborted due to a disconnection of
+                                                the \l QModbusClient.
+    \value UnknownError                         An unknown error has occurred.
+    \value WriteError                           The request could not be written/sent to the remote party.
+*/
+
 
 /*!
     Constructs a QModbusReply object with the specified \a parent.
@@ -153,13 +172,28 @@ int QModbusReply::slaveAddress() const
 }
 
 /*!
-    \fn void QModbusReply::errorOccurred(QModbusPdu::ExceptionCode error)
+    Returns the Modbus exception code that this reply ended up with. It implies
+    that the reply finished with a \l ProtocolError.
+
+    \note This function always returns \l QModbusPdu::ExtendedException if \l error()
+    is not set to \l ProtocolError.
+*/
+QModbusPdu::ExceptionCode QModbusReply::protocolError() const
+{
+    Q_D(const QModbusReply);
+    return d->m_protocolError;
+}
+
+/*!
+    \fn void QModbusReply::errorOccurred(QModbusReply::ReplyError error)
 
     This signal is emitted when an error has been detected in the processing of this reply.
     The \l finished() signal will probably follow.
 
     The error will be described by the error code \a error. If errorString is not empty
-    it will contain a textual description of the error.
+    it will contain a textual description of the error. In case of a \l ProtocolError
+    the \l protocolError() function can be used to obtain the exact type of Modbus exception
+    as defined by the Modbus specification.
 
     Note: Do not delete this reply object in the slot connected to this signal.
     Use \l deleteLater() instead.
@@ -168,20 +202,37 @@ int QModbusReply::slaveAddress() const
 /*!
     Returns the error state of this reply.
 */
-QModbusPdu::ExceptionCode QModbusReply::error() const
+QModbusReply::ReplyError QModbusReply::error() const
 {
     Q_D(const QModbusReply);
     return d->m_error;
 }
 
 /*!
+    Sets the Modbus exception error state of this reply to \a error and the textual representation of
+    the error to \a errorText. This function implicitly sets \l error() to \l ProtocolError.
+
+    This causes the \l errorOccurred() and \l finished() signals to be emitted,
+    in that order.
+*/
+void QModbusReply::setProtocolError(QModbusPdu::ExceptionCode error, const QString &errorText)
+{
+    Q_D(QModbusReply);
+    d->m_error = ProtocolError;
+    d->m_protocolError = error;
+    d->m_errorText = errorText;
+    emit errorOccurred(ProtocolError);
+    setFinished(true);
+}
+
+/*!
     Sets the error state of this reply to \a error and the textual representation of
-    the error to \a errorString.
+    the error to \a errorText.
 
     This will also cause the \l errorOccurred() and \l finished() signals to be emitted,
     in that order.
 */
-void QModbusReply::setError(QModbusPdu::ExceptionCode error, const QString &errorText)
+void QModbusReply::setError(QModbusReply::ReplyError error, const QString &errorText)
 {
     Q_D(QModbusReply);
     d->m_error = error;

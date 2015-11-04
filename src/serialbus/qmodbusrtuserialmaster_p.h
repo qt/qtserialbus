@@ -139,11 +139,11 @@ public:
                     headOfQueue.reply->setResult(unit);
                 } else {
                     headOfQueue.reply->setError(
-                            QModbusPdu::UnknownError,
+                            QModbusReply::UnknownError,
                             QModbusRtuSerialMaster::tr("An invalid response has been received."));
                 }
             } else {
-               headOfQueue.reply->setError(response.exceptionCode(), QString());
+               headOfQueue.reply->setProtocolError(response.exceptionCode(), QString());
             }
 
             headOfQueue.reply->setFinished(true);
@@ -205,7 +205,7 @@ public:
         if (!success) {
             QueueElement elem = m_queue.dequeue();
 
-            elem.reply->setError(QModbusPdu::WriteError,
+            elem.reply->setError(QModbusReply::WriteError,
                                  QModbusRtuSerialMaster::tr("Could not write message to serial bus."));
             elem.reply->setFinished(true);
 

@@ -159,7 +159,7 @@ void MainWindow::readReady()
     if (!reply)
         return;
 
-    if (reply->error() == QModbusPdu::NoError) {
+    if (reply->error() == QModbusReply::NoError) {
         const QModbusDataUnit unit = reply->result();
         for (uint i = 0; i < unit.valueCount(); i++) {
             const QString entry = tr("Address: %1, Value: %2").arg(unit.startAddress())
@@ -209,7 +209,7 @@ void MainWindow::writeReady()
     if (!reply)
         return;
 
-    if (reply->error() != QModbusPdu::NoError) {
+    if (reply->error() != QModbusReply::NoError) {
         ui->errorLabel->setText(tr("Write response error: %1 (code: 0x%2)").
                                         arg(reply->errorText()).arg(reply->error(), -1, 16));
     }
