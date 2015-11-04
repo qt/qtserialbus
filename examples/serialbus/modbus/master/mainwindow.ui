@@ -153,11 +153,23 @@
            </item>
            <item row="0" column="1">
             <widget class="QSpinBox" name="writeSlave">
+             <property name="readOnly">
+              <bool>false</bool>
+             </property>
+             <property name="specialValueText">
+              <string>broadcast</string>
+             </property>
+             <property name="accelerated">
+              <bool>true</bool>
+             </property>
              <property name="minimum">
-              <number>1</number>
+              <number>0</number>
              </property>
              <property name="maximum">
               <number>255</number>
+             </property>
+             <property name="value">
+              <number>1</number>
              </property>
             </widget>
            </item>
@@ -358,11 +370,23 @@
            </item>
            <item row="0" column="1">
             <widget class="QSpinBox" name="readSlave">
+             <property name="readOnly">
+              <bool>false</bool>
+             </property>
+             <property name="specialValueText">
+              <string>broadcast</string>
+             </property>
+             <property name="accelerated">
+              <bool>true</bool>
+             </property>
              <property name="minimum">
-              <number>1</number>
+              <number>0</number>
              </property>
              <property name="maximum">
               <number>255</number>
+             </property>
+             <property name="value">
+              <number>1</number>
              </property>
             </widget>
            </item>
