@@ -16,7 +16,6 @@ PUBLIC_HEADERS += \
     qcanbus.h \
     qserialbusglobal.h \
     qmodbusserver.h \
-    qmodbusfactory.h \
     qmodbusdevice.h \
     qmodbusdataunit.h \
     qmodbusclient.h \
