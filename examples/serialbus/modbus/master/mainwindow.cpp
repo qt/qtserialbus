@@ -163,8 +163,8 @@ void MainWindow::readReady()
             ui->readValue->addItem(entry);
         }
     } else {
-        ui->errorLabel->setText(tr("Response error: ") + reply->errorText()
-                                + tr("code: ") + reply->error());
+        ui->errorLabel->setText(tr("Read response error: %1 (code: 0x%2)").
+                                        arg(reply->errorText()).arg(reply->error(), -1, 16));
         return;
     }
 
@@ -206,8 +206,8 @@ void MainWindow::writeReady()
         return;
 
     if (reply->error() != QModbusPdu::NoError) {
-        ui->errorLabel->setText(tr("Write response error: ") + reply->errorText()
-                                + tr("code: ") + reply->error());
+        ui->errorLabel->setText(tr("Write response error: %1 (code: 0x%2)").
+                                        arg(reply->errorText()).arg(reply->error(), -1, 16));
     }
 
     reply->deleteLater();
