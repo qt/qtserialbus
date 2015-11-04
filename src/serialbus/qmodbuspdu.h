@@ -60,7 +60,8 @@ public:
         GatewayTargetDeviceFailedToRespond = 0x0B,
         TimeoutError = 0x100,
         ReplyAbortedError = 0x101,
-        UnknownError = 0x102
+        UnknownError = 0x102,
+        WriteError = 0x103
     };
     Q_ENUMS(ExceptionCode)
 

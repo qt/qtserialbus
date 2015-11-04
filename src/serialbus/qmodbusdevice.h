@@ -58,7 +58,7 @@ public:
         Tcp
     };
 
-    enum ModbusError {
+    enum ModbusError { //TODO review -> some values are reported via QModbusReply (e.g. WriteError)
         NoError,
         ReadError,
         WriteError,

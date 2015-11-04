@@ -114,27 +114,27 @@ void QModbusRtuSerialMaster::close()
     if (d->m_serialPort->isOpen())
         d->m_serialPort->close();
 
-    if (!d->m_pendingReply.isNull()) {
-        d->m_pendingReply->setError(QModbusPdu::ReplyAbortedError,
-                                  tr("Reply aborted due to connection closure."));
-        d->m_pendingReply->setFinished(true);
-        d->m_pendingReply.clear();
+    qCDebug(QT_MODBUS_LOW) << "Aborted replies:" << d->m_queue.count();
+
+    while (!d->m_queue.isEmpty()) {
+        // Finish each open reply and forget them
+        QModbusRtuSerialMasterPrivate::QueueElement elem = d->m_queue.dequeue();
+        if (!elem.reply.isNull()) {
+            elem.reply->setError(QModbusPdu::ReplyAbortedError,
+                                 tr("Reply aborted due to connection closure."));
+            elem.reply->setFinished(true);
+        }
     }
 
     setState(QModbusDevice::UnconnectedState);
 }
 
 
-QModbusReply *QModbusRtuSerialMaster::sendReadRequest(const QModbusDataUnit &read, int slaveId)
+QModbusReply *QModbusRtuSerialMaster::sendReadRequest(const QModbusDataUnit &read, int slaveAddress)
 {
     Q_D(QModbusRtuSerialMaster);
 
-    //TODO consider changing this to a queue
     //TODO implement timeout behavior
-    if (!d->m_pendingReply.isNull()) {
-        qCDebug(QT_MODBUS) << "Cannot process request due to pending modbus reply";
-        return Q_NULLPTR;
-    }
 
     if (!d->m_serialPort->isOpen() || state() != QModbusDevice::ConnectedState) {
         setError(tr("Device not connected."), QModbusDevice::ConnectionError);
@@ -146,32 +146,14 @@ QModbusReply *QModbusRtuSerialMaster::sendReadRequest(const QModbusDataUnit &rea
     if (!request.isValid())
         return Q_NULLPTR;
 
-    const QByteArray adu = d->wrapInADU(request, slaveId);
-    int writtenBytes = d->m_serialPort->write(adu);
-    if (writtenBytes == -1 || writtenBytes < adu.size()) {
-        qCDebug(QT_MODBUS) << "Cannot write request to serial port.";
-        setError(QModbusRtuSerialMaster::tr("Could not write request to serial bus"),
-                 QModbusDevice::WriteError);
-        return Q_NULLPTR;
-    }
-
-    QModbusReply *reply = new QModbusReply(slaveId, this);
-    reply->readRequestDetails = read;
-    d->m_pendingReply = reply;
-
-    return reply;
+    return d->enqueueRequest(request, slaveAddress, read);
 }
 
-QModbusReply *QModbusRtuSerialMaster::sendWriteRequest(const QModbusDataUnit &write, int slaveId)
+QModbusReply *QModbusRtuSerialMaster::sendWriteRequest(const QModbusDataUnit &write, int slaveAddress)
 {
     Q_D(QModbusRtuSerialMaster);
 
-    //TODO consider changing this to a queue
     //TODO implement timeout behavior
-    if (!d->m_pendingReply.isNull()) {
-        qCDebug(QT_MODBUS) << "Cannot process request due to pending modbus reply";
-        return Q_NULLPTR;
-    }
 
     if (!d->m_serialPort->isOpen() || state() != QModbusDevice::ConnectedState) {
         setError(tr("Device not connected."), QModbusDevice::ConnectionError);
@@ -183,36 +165,16 @@ QModbusReply *QModbusRtuSerialMaster::sendWriteRequest(const QModbusDataUnit &wr
     if (!request.isValid())
         return Q_NULLPTR;
 
-    const QByteArray adu = d->wrapInADU(request, slaveId);
-    int writtenBytes = d->m_serialPort->write(adu);
-    if (writtenBytes == -1 || writtenBytes < adu.size()) {
-        qCDebug(QT_MODBUS) << "Cannot write request to serial port.";
-        setError(QModbusRtuSerialMaster::tr("Could not write request to serial bus"),
-                 QModbusDevice::WriteError);
-        return Q_NULLPTR;
-    }
-
-    QModbusReply *reply = new QModbusReply(slaveId, this);
-    if (!slaveId) // broadcast returns immediately
-        reply->setFinished(true);
-    else
-        d->m_pendingReply = reply;
-
-    return reply;
+    return d->enqueueRequest(request, slaveAddress, write);
 }
 
 QModbusReply *QModbusRtuSerialMaster::sendReadWriteRequest(const QModbusDataUnit &read,
                                                            const QModbusDataUnit &write,
-                                                           int slaveId)
+                                                           int slaveAddress)
 {
     Q_D(QModbusRtuSerialMaster);
 
-    //TODO consider changing this to a queue
     //TODO implement timeout behavior
-    if (!d->m_pendingReply.isNull()) {
-        qCDebug(QT_MODBUS) << "Cannot process request due to pending modbus reply";
-        return Q_NULLPTR;
-    }
 
     if (!d->m_serialPort->isOpen() || state() != QModbusDevice::ConnectedState) {
         setError(tr("Device not connected."), QModbusDevice::ConnectionError);
@@ -224,23 +186,7 @@ QModbusReply *QModbusRtuSerialMaster::sendReadWriteRequest(const QModbusDataUnit
     if (!request.isValid())
         return Q_NULLPTR;
 
-    const QByteArray adu = d->wrapInADU(request, slaveId);
-    int writtenBytes = d->m_serialPort->write(adu);
-    if (writtenBytes == -1 || writtenBytes < adu.size()) {
-        qCDebug(QT_MODBUS) << "Cannot write request to serial port.";
-        setError(QModbusRtuSerialMaster::tr("Could not write request to serial bus"),
-                 QModbusDevice::WriteError);
-        return Q_NULLPTR;
-    }
-
-    QModbusReply *reply = new QModbusReply(slaveId, this);
-    reply->readRequestDetails = read;
-    if (!slaveId) // broadcast returns immediately
-        reply->setFinished(true);
-    else
-        d->m_pendingReply = reply;
-
-    return reply;
+    return d->enqueueRequest(request, slaveAddress, read); // only need to remember read
 }
 
 QT_END_NAMESPACE

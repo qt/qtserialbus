@@ -41,6 +41,9 @@
 #include "qmodbusclient_p.h"
 
 #include <QtCore/qloggingcategory.h>
+#include <QtCore/qpointer.h>
+#include <QtCore/qqueue.h>
+#include <QtCore/qtimer.h>
 #include <QtSerialPort/qserialport.h>
 
 //
@@ -120,37 +123,32 @@ public:
                 return;
             }
 
-            if (m_pendingReply.isNull()) {
-                qCWarning(QT_MODBUS) << "Cannot associate response with QModbusReply. "
+            const QModbusResponse response(fcode,
+                                           completeAduFrame.mid(2, completeAduFrame.size() - 4));
+
+            if (!canMatchRequestAndResponse(response, completeAduFrame.at(0))) {
+                qCWarning(QT_MODBUS) << "Cannot match response with open request. "
                                         "Ignoring response.";
                 return;
             }
 
-            // match slave address
-            if (completeAduFrame.at(0) != m_pendingReply->slaveAddress()) {
-                qCWarning(QT_MODBUS) << "Cannot match response with open request due to slave"
-                                        " address mismatch" << hex << m_pendingReply->slaveAddress()
-                                     << completeAduFrame.at(0);
-                return;
-            }
-
-            const QModbusResponse response(fcode,
-                                           completeAduFrame.mid(2, completeAduFrame.size() - 4));
+            QueueElement headOfQueue = m_queue.dequeue();
             if (!response.isException()) {
-                QModbusDataUnit unit = m_pendingReply->readRequestDetails;
+                QModbusDataUnit unit = headOfQueue.unit;
                 if (processResponse(response, &unit)) {
-                    m_pendingReply->setResult(unit);
+                    headOfQueue.reply->setResult(unit);
                 } else {
-                    m_pendingReply->setError(
+                    headOfQueue.reply->setError(
                             QModbusPdu::UnknownError,
                             QModbusRtuSerialMaster::tr("An invalid response has been received."));
                 }
             } else {
-                m_pendingReply->setError(response.exceptionCode(), QString());
+               headOfQueue.reply->setError(response.exceptionCode(), QString());
             }
 
-            m_pendingReply->setFinished(true);
-            m_pendingReply.clear();
+            headOfQueue.reply->setFinished(true);
+
+            sendNextRequest(); // go to next request
         });
 
         QObject::connect(m_serialPort, &QSerialPort::aboutToClose, [this]() {
@@ -162,8 +160,6 @@ public:
 
     QByteArray wrapInADU(const QModbusRequest &request, int slaveAddress) const
     {
-        //Q_Q(QModbusRtuSerialMaster);
-
         QByteArray result;
         QDataStream out(&result, QIODevice::WriteOnly);
         out << quint8(slaveAddress);
@@ -173,9 +169,104 @@ public:
         return result;
     }
 
+    bool sendNextAdu(const QModbusRequest &request, int slaveAddress)
+    {
+        Q_Q(QModbusRtuSerialMaster);
+
+        const QByteArray adu = wrapInADU(request, slaveAddress);
+        int writtenBytes = m_serialPort->write(adu);
+        if (writtenBytes == -1 || writtenBytes < adu.size()) {
+            qCDebug(QT_MODBUS) << "Cannot write request to serial port. Failed ADU"
+                               << adu;
+            q->setError(QModbusRtuSerialMaster::tr("Could not write request to serial bus"),
+                        QModbusDevice::WriteError);
+            return false;
+        } else {
+            qCDebug(QT_MODBUS)<< "Sent request (incl ADU)" << adu.toHex();
+        }
+
+        return true;
+
+    }
+
+    void sendNextRequest()
+    {
+        if (m_queue.isEmpty())
+            return;
+
+        if (m_queue.head().reply.isNull()) { // reply deleted, skip it
+            m_queue.dequeue();
+            sendNextRequest();
+            return;
+        }
+
+        bool success = sendNextAdu(m_queue.head().requestPdu,
+                                   m_queue.head().reply->slaveAddress());
+        if (!success) {
+            QueueElement elem = m_queue.dequeue();
+
+            elem.reply->setError(QModbusPdu::WriteError,
+                                 QModbusRtuSerialMaster::tr("Could not write message to serial bus."));
+            elem.reply->setFinished(true);
+
+            sendNextRequest();
+            return;
+        }
+
+        if (!m_queue.head().reply->slaveAddress()) {
+            // broadcasts return immediately but we delay a bit to avoid spaming of bus
+            QueueElement elem = m_queue.dequeue();
+            elem.reply->setFinished(true);
+
+            QTimer::singleShot(0, [this]() { sendNextRequest(); });
+            return;
+        }
+
+        // regular send -> keep in queue
+    }
+
+    QModbusReply *enqueueRequest(const QModbusRequest &request, int slaveAddress,
+                                       const QModbusDataUnit unit)
+    {
+        Q_Q(QModbusRtuSerialMaster);
+
+        QModbusReply *reply = new QModbusReply(slaveAddress, q);
+        QueueElement elem = { reply, request, unit };
+        m_queue.enqueue(elem);
+        sendNextRequest();
+
+        return reply;
+    }
+
+    bool canMatchRequestAndResponse(const QModbusResponse &response, int sendingSlave) const
+    {
+        if (m_queue.isEmpty()) // nothing pending
+            return false;
+
+        const QueueElement &head = m_queue.head(); // reply deleted
+        if (head.reply.isNull())
+            return false;
+
+        if (head.reply->slaveAddress() != sendingSlave) // slave mismatch
+            return false;
+
+        // request for different fcode
+        if (head.requestPdu.functionCode() != response.functionCode())
+            return false;
+
+        return true;
+    }
+
     QSerialPort *m_serialPort;
-    QPointer<QModbusReply> m_pendingReply;
     QByteArray responseBuffer;
+
+    struct QueueElement {
+        QPointer<QModbusReply> reply;
+        QModbusRequest requestPdu;
+        QModbusDataUnit unit;
+    };
+
+    QQueue<QueueElement> m_queue;
 };
 
 QT_END_NAMESPACE

@@ -140,6 +140,7 @@ static quint8 minimumDataSize(QModbusPdu::FunctionCode code, Type type)
                                                 when the Modbus client/master disconnects from the
                                                 transport layer.
     \value UnknownError                         An unknown error has occurred.
+    \value WriteError                           The request could not be written/sent to the remote party.
 */
 
 /*!
