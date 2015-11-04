@@ -165,7 +165,6 @@ void MainWindow::readReady()
     } else {
         ui->errorLabel->setText(tr("Read response error: %1 (code: 0x%2)").
                                         arg(reply->errorText()).arg(reply->error(), -1, 16));
-        return;
     }
 
     reply->deleteLater();
