@@ -52,12 +52,6 @@ class Q_SERIALBUS_EXPORT QModbusDevice : public QObject
     Q_DECLARE_PRIVATE(QModbusDevice)
 
 public:
-    // TODO: Temporarily added until plugin system removed.
-    enum ModbusConnection {
-        Serial,
-        Tcp
-    };
-
     enum ModbusError { //TODO review -> some values are reported via QModbusReply (e.g. WriteError)
         NoError,
         ReadError,

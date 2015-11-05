@@ -45,6 +45,11 @@
 #include <QModbusTcpClient>
 #include <QModbusRtuSerialMaster>
 
+enum ModbusConnection {
+    Serial,
+    Tcp
+};
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -79,16 +84,16 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
         modbusDevice = Q_NULLPTR;
     }
 
-    QModbusDevice::ModbusConnection type = static_cast<QModbusDevice::ModbusConnection> (index);
-    if (type == QModbusDevice::Serial) {
+    ModbusConnection type = static_cast<ModbusConnection> (index);
+    if (type == Serial) {
         modbusDevice = new QModbusRtuSerialMaster(this);
-    } else if (type == QModbusDevice::Tcp) {
+    } else if (type == Tcp) {
         modbusDevice = new QModbusTcpClient(this);
     }
 
     if (!modbusDevice) {
         ui->connectButton->setDisabled(true);
-        if (type == QModbusDevice::Serial)
+        if (type == Serial)
             ui->errorLabel->setText(tr("Could not create Modbus master."));
         else
             ui->errorLabel->setText(tr("Could not create Modbus client."));

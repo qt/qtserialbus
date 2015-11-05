@@ -45,6 +45,11 @@
 #include <QtSerialBus/qmodbustcpserver.h>
 #include <QRegularExpression>
 
+enum ModbusConnection {
+    Serial,
+    Tcp
+};
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -74,10 +79,10 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
         modbusDevice = Q_NULLPTR;
     }
 
-    QModbusDevice::ModbusConnection type = static_cast<QModbusDevice::ModbusConnection> (index);
-    if (type == QModbusDevice::Serial) {
+    ModbusConnection type = static_cast<ModbusConnection> (index);
+    if (type == Serial) {
         modbusDevice = new QModbusRtuSerialSlave(this);
-    } else if (type == QModbusDevice::Tcp) {
+    } else if (type == Tcp) {
         modbusDevice = new QModbusTcpServer(this);
         if (ui->portEdit->text().isEmpty())
             ui->portEdit->setText(QLatin1Literal("127.0.0.1:502"));
@@ -85,7 +90,7 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
 
     if (!modbusDevice) {
         ui->connectButton->setDisabled(true);
-        if (type == QModbusDevice::Serial)
+        if (type == Serial)
             ui->errorLabel->setText(tr("Could not create Modbus slave."));
         else
             ui->errorLabel->setText(tr("Could not create Modbus server."));
