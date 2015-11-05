@@ -120,8 +120,13 @@ static quint8 minimumDataSize(QModbusPdu::FunctionCode code, Type type)
                                                 was attempting to perform the requested action.
     \value Acknowledge                          Specialized use in conjunction with programming
                                                 commands.
-    \value ServerDeviceBusy                     The slave is engaged in processing a long–duration
+    \value ServerDeviceBusy                     The slave is engaged in processing a long duration
                                                 program command.
+    \value NegativeAcknowledge                  The server cannot perform the program
+                                                function received in the query. This
+                                                code is returned for an unsuccessful
+                                                programming request. The client should request
+                                                diagnostic or error information from the server.
     \value MemoryParityError                    Indicates that the extended file area failed to
                                                 pass a consistency check. Used in conjunction with
                                                 function codes 20 and 21. The exception code does
