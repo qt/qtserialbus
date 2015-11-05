@@ -82,10 +82,6 @@ protected:
     void setProtocolError(QModbusPdu::ExceptionCode error, const QString &errorText);
     void setError(QModbusReply::ReplyError error, const QString &errorText);
 
-    //TODO once we have queue in server we can shift it there
-    // for now we use it to keep read request details for this reply around
-    QModbusDataUnit readRequestDetails;
-
     friend class QModbusRtuSerialMaster;
     friend class QModbusRtuSerialMasterPrivate;
 };
