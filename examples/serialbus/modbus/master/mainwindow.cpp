@@ -128,7 +128,7 @@ void MainWindow::onStateChanged(int state)
 
 void MainWindow::on_readButton_clicked()
 {
-    if (!modbusDevice || modbusDevice->state() != QModbusDevice::ConnectedState)
+    if (!modbusDevice)
         return;
 
     const QModbusDataUnit::RegisterType registerType =
@@ -177,7 +177,7 @@ void MainWindow::readReady()
 
 void MainWindow::on_writeButton_clicked()
 {
-    if (!modbusDevice || modbusDevice->state() != QModbusDevice::ConnectedState)
+    if (!modbusDevice)
         return;
 
     QModbusDataUnit::RegisterType table = QModbusDataUnit::HoldingRegisters;
