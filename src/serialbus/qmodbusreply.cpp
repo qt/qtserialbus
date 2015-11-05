@@ -81,7 +81,6 @@ public:
     \value WriteError                           The request could not be written/sent to the remote party.
 */
 
-
 /*!
     Constructs a QModbusReply object with the specified \a parent.
 
@@ -119,7 +118,6 @@ void QModbusReply::setFinished(bool isFinished)
     if (isFinished)
         emit finished();
 }
-
 
 /*!
     \fn void QModbusReply::finished()
@@ -160,7 +158,6 @@ void QModbusReply::setResult(const QModbusDataUnit &unit)
     Q_D(QModbusReply);
     d->m_unit = unit;
 }
-
 
 /*!
     Returns the slave address that this reply object targets.

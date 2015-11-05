@@ -418,7 +418,6 @@ QModbusResponse QModbusServer::processPrivateModbusRequest(const QModbusPdu &req
         QModbusExceptionResponse::IllegalFunction);
 }
 
-
 // -- QModbusServerPrivate
 
 bool QModbusServerPrivate::setMap(const QModbusDataUnitMap &map)

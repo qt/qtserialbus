@@ -45,7 +45,6 @@ QT_BEGIN_NAMESPACE
 
 class QModbusDevicePrivate;
 
-
 class Q_SERIALBUS_EXPORT QModbusDevice : public QObject
 {
     Q_OBJECT

@@ -76,7 +76,6 @@ private slots:
     void tst_setResult();
 };
 
-
 void tst_QModbusReply::tst_ctor()
 {
     QModbusReply r(1, this);
@@ -143,8 +142,6 @@ void tst_QModbusReply::tst_setError_data()
     QTest::newRow("NoError-empty") << QModbusReply::NoError << QString();
     QTest::newRow("TimeoutError") << QModbusReply::TimeoutError << QString("TimeoutError");
     QTest::newRow("ReplyAbortedError") << QModbusReply::ReplyAbortedError << QString("AbortedError");
-
-
 }
 
 void tst_QModbusReply::tst_setError()

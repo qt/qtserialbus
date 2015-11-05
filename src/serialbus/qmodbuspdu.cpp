@@ -192,7 +192,6 @@ static quint8 minimumDataSize(QModbusPdu::FunctionCode code, Type type)
     \value UndefinedFunctionCode            Do not use.
 */
 
-
 /*!
     \fn QModbusPdu::QModbusPdu()
 
@@ -340,7 +339,6 @@ QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu)
     return stream;
 }
 
-
 /*!
     \class QModbusRequest
     \inmodule QtSerialBus
@@ -474,7 +472,6 @@ QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu)
     return stream;
 }
 
-
 /*!
     \class QModbusResponse
     \inmodule QtSerialBus
@@ -607,7 +604,6 @@ QDataStream &operator>>(QDataStream &stream, QModbusResponse &pdu)
 
     return stream;
 }
-
 
 /*!
     \class QModbusExceptionResponse

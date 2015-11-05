@@ -73,7 +73,6 @@ QModbusRtuSerialSlave::~QModbusRtuSerialSlave()
 {
 }
 
-
 /*!
     \internal
 */
@@ -116,5 +115,3 @@ void QModbusRtuSerialSlave::close()
 #include "moc_qmodbusrtuserialslave.cpp"
 
 QT_END_NAMESPACE
-
-

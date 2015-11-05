@@ -61,7 +61,6 @@ public:
     };
     Q_ENUMS(ReplyError)
 
-
     QModbusReply(int slaveAddress, QObject *parent = Q_NULLPTR);
 
     bool isFinished() const;
@@ -89,7 +88,6 @@ protected:
 Q_DECLARE_TYPEINFO(QModbusReply::ReplyError, Q_PRIMITIVE_TYPE);
 
 QT_END_NAMESPACE
-
 
 Q_DECLARE_METATYPE(QModbusReply::ReplyError)
 

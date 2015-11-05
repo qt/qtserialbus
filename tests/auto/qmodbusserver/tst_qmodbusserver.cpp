@@ -335,7 +335,6 @@ private slots:
         // response, equals request
         QCOMPARE(response.data(), QByteArray::fromHex("000000ffabcd"));
 
-
         //subfunction 01
         //TODO: impossible due to connectDevice() asking open() which is pure virtual
         //validate this in qmodbustcpserver and qmodbusrtuslave

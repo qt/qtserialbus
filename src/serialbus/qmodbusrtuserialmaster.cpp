@@ -129,7 +129,6 @@ void QModbusRtuSerialMaster::close()
     setState(QModbusDevice::UnconnectedState);
 }
 
-
 QModbusReply *QModbusRtuSerialMaster::sendReadRequest(const QModbusDataUnit &read, int slaveAddress)
 {
     Q_D(QModbusRtuSerialMaster);
