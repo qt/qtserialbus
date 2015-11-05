@@ -40,10 +40,18 @@
 
 #include <QtTest/QtTest>
 
+class TestClientPrivate : public QModbusClientPrivate {};
+
 class TestClient : public QModbusClient
 {
+    Q_OBJECT
+    Q_DECLARE_PRIVATE(TestClient)
+    friend class tst_QModbusClient;
+
 public:
-    TestClient() Q_DECL_EQ_DEFAULT;
+    TestClient(QObject *parent = Q_NULLPTR)
+        : QModbusClient(*new TestClientPrivate, parent)
+    {}
 
     QModbusReply *sendReadRequest(const QModbusDataUnit &, int) Q_DECL_OVERRIDE {
         return Q_NULLPTR;
@@ -326,11 +334,9 @@ private slots:
         QFETCH(int, address);
         QFETCH(int, count);
 
-        // we leak it for now, can't call delete without crash
-        QModbusClientPrivate *client = new QModbusClientPrivate;
-
+        TestClient client;
         QModbusDataUnit read(rc, address, count);
-        QModbusRequest request = client->createReadRequest(read);
+        QModbusRequest request = client.d_func()->createReadRequest(read);
         QTEST(request.functionCode(), "fc");
         QTEST(request.data(), "data");
         QTEST(request.isValid(), "isValid");
@@ -374,11 +380,9 @@ private slots:
         QFETCH(int, address);
         QFETCH(QVector<quint16>, values);
 
-        // we leak it for now, can't call delete without crash
-        QModbusClientPrivate *client = new QModbusClientPrivate;
-
+        TestClient client;
         QModbusDataUnit write(rc, address, values);
-        QModbusRequest request = client->createWriteRequest(write);
+        QModbusRequest request = client.d_func()->createWriteRequest(write);
         QTEST(request.functionCode(), "fc");
         QTEST(request.data(), "data");
         QTEST(request.isValid(), "isValid");
@@ -413,12 +417,10 @@ private slots:
         QFETCH(int, address);
         QFETCH(QVector<quint16>, values);
 
-        // we leak it for now, can't call delete without crash
-        QModbusClientPrivate *client = new QModbusClientPrivate;
-
+        TestClient client;
         QModbusDataUnit read(rc, address, values.count());
         QModbusDataUnit write(rc, address, values);
-        QModbusRequest request = client->createRWRequest(read, write);
+        QModbusRequest request = client.d_func()->createRWRequest(read, write);
         QTEST(request.functionCode(), "fc");
         QTEST(request.data(), "data");
         QTEST(request.isValid(), "isValid");

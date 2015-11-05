@@ -37,35 +37,35 @@
 #include <QtTest/QtTest>
 #include <QtSerialBus/qmodbusdevice.h>
 #include <QtSerialBus/private/qmodbusdevice_p.h>
-#include <QtCore/qpointer.h>
 
-class dummyDevice : public QModbusDevice
+class DummyDevicePrivate : public QModbusDevicePrivate {};
+
+class DummyDevice : public QModbusDevice
 {
-friend class tst_QModbusDevice;
+    Q_OBJECT
+    Q_DECLARE_PRIVATE(DummyDevice)
+    friend class tst_QModbusDevice;
+
+public:
+    DummyDevice(QObject *parent = Q_NULLPTR)
+        : QModbusDevice(*new DummyDevicePrivate, parent)
+    {
+        qRegisterMetaType<QModbusDevice::ModbusDeviceState>("QModbusDevice::ModbusDeviceState");
+    }
 
 protected:
     bool open() Q_DECL_OVERRIDE { return openState; }
     void close() Q_DECL_OVERRIDE {}
 
-    bool openState;
+    bool openState = false;
 };
 
 class tst_QModbusDevice : public QObject
 {
     Q_OBJECT
-public:
-    explicit tst_QModbusDevice();
-
 private slots:
-    void initTestCase()
-    {
-        dp = new QModbusDevicePrivate;
-    }
-    void cleanupTestCase()
-    {
-        // TODO: it doesn't like the delete
-        // delete dp;
-    }
+    void initTestCase();
+    void cleanupTestCase();
 
     void connectDevice();
     void state();
@@ -79,13 +79,17 @@ private slots:
 
 private:
     QModbusDevicePrivate *dp;
-    QPointer<dummyDevice> device;
+    DummyDevice *device;
 };
 
-tst_QModbusDevice::tst_QModbusDevice()
+void tst_QModbusDevice::initTestCase()
 {
-    device = new dummyDevice();
-    qRegisterMetaType<QModbusDevice::ModbusDeviceState>("QModbusDevice::ModbusDeviceState");
+    device = new DummyDevice();
+}
+
+void tst_QModbusDevice::cleanupTestCase()
+{
+    delete device;
 }
 
 void tst_QModbusDevice::connectDevice()
@@ -174,8 +178,8 @@ void tst_QModbusDevice::testChecksumLRC()
     QFETCH(QByteArray, pdu);
     QFETCH(quint8, lrc);
 
-    QCOMPARE(dp->calculateLRC(pdu.constData(), pdu.size()), lrc);
-    QCOMPARE(dp->checkLRC(pdu.constData(), pdu.size(), lrc), true);
+    QCOMPARE(device->d_func()->calculateLRC(pdu.constData(), pdu.size()), lrc);
+    QCOMPARE(device->d_func()->checkLRC(pdu.constData(), pdu.size(), lrc), true);
 }
 
 void tst_QModbusDevice::testChecksumCRC_data()
@@ -233,8 +237,8 @@ void tst_QModbusDevice::testChecksumCRC()
     QFETCH(QByteArray, pdu);
     QFETCH(quint16, crc);
 
-    QCOMPARE(dp->calculateCRC(pdu.constData(), pdu.size()), crc);
-    QCOMPARE(dp->checkCRC(pdu.constData(), pdu.size(), crc), true);
+    QCOMPARE(device->d_func()->calculateCRC(pdu.constData(), pdu.size()), crc);
+    QCOMPARE(device->d_func()->checkCRC(pdu.constData(), pdu.size(), crc), true);
 }
 
 QTEST_MAIN(tst_QModbusDevice)
