@@ -41,6 +41,9 @@
 #include "qmodbusdevice_p.h"
 #include "qmodbuspdu.h"
 
+#include <QtCore/qtimer.h>
+#include <QtCore/qdebug.h>
+
 //
 //  W A R N I N G
 //  -------------
@@ -58,7 +61,7 @@ class Q_AUTOTEST_EXPORT QModbusClientPrivate : public QModbusDevicePrivate
 {
     Q_DECLARE_PUBLIC(QModbusClient)
 public:
-    QModbusClientPrivate() : timeout(200)
+    QModbusClientPrivate() : m_responseTimeoutDuration(200), m_responseTimer(Q_NULLPTR)
     {
     }
 
@@ -81,7 +84,13 @@ public:
     bool processReadWriteMultipleRegistersResponse(const QModbusResponse &response,
                                                   QModbusDataUnit *data);
 
-    int timeout;
+    void startResponseTimer();
+    void stopResponseTimer();
+
+    virtual void handleResponseTimeout() {}
+
+    int m_responseTimeoutDuration;
+    QTimer *m_responseTimer;
 };
 
 QT_END_NAMESPACE
