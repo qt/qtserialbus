@@ -88,6 +88,8 @@ public:
 
     QModbusResponse processReadExceptionStatus(const QModbusRequest &request);
     QModbusResponse processDiagnostics(const QModbusRequest &request);
+    QModbusResponse processGetCommEventCounter(const QModbusRequest &request);
+    QModbusResponse processGetCommEventLog(const QModbusRequest &request);
     QModbusResponse processWriteMultipleCoilsRequest(const QModbusRequest &request);
     QModbusResponse processWriteMultipleRegistersRequest(const QModbusRequest &request);
     QModbusResponse processMaskWriteRegister(const QModbusRequest &request);
@@ -109,7 +111,7 @@ private:
 
     // Modbus Communication fields to stay
     bool m_continueOnError = true; //TODO hook into server implementations
-    bool m_deviceBusy = false; //TODO required?
+    quint16 m_deviceBusy = 0x0000; // TODO not taken into account yet
     uchar m_asciiInputDelimiter; // TODO not taken into account yet
     quint16 m_commEventCounter = 0; // TODO not taken into account yet
     QContiguousCache<quint8> m_commEventLog; // TODO not taken into account yet

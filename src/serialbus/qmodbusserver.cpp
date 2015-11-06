@@ -464,7 +464,9 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
     case QModbusRequest::Diagnostics:
         return processDiagnostics(request);
     case QModbusRequest::GetCommEventCounter:
+        return processGetCommEventCounter(request);
     case QModbusRequest::GetCommEventLog:
+        return processGetCommEventLog(request);
     case QModbusRequest::WriteMultipleCoils:
         return processWriteMultipleCoilsRequest(request);
     case QModbusRequest::WriteMultipleRegisters:
@@ -738,6 +740,33 @@ QModbusResponse QModbusServerPrivate::processDiagnostics(const QModbusRequest &r
     default:
         return q_func()->processPrivateModbusRequest(request);
     }
+}
+
+QModbusResponse QModbusServerPrivate::processGetCommEventCounter(const QModbusRequest &request)
+{
+    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
+        return QModbusExceptionResponse(request.functionCode(),
+                                        QModbusExceptionResponse::IllegalDataValue);
+    }
+    return QModbusResponse(request.functionCode(), m_deviceBusy, m_commEventCounter);
+}
+
+QModbusResponse QModbusServerPrivate::processGetCommEventLog(const QModbusRequest &request)
+{
+    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
+        return QModbusExceptionResponse(request.functionCode(),
+                                        QModbusExceptionResponse::IllegalDataValue);
+    }
+
+    m_commEventLog.normalizeIndexes();
+    QVector<quint16> eventLog(m_commEventLog.count());
+    for (int i = 0; i < m_commEventLog.count(); ++i)
+        eventLog[i] = m_commEventLog[i];
+
+    // 6 -> 3 x 2 Bytes (Status, Event Count and Message Count)
+    return QModbusResponse(request.functionCode(), quint8(m_commEventLog.count() + 6),
+                           m_deviceBusy, m_commEventCounter,
+                           m_diagnostics[Diagnostics::ReturnServerMessageCount], eventLog);
 }
 
 QModbusResponse QModbusServerPrivate::processWriteMultipleCoilsRequest(const QModbusRequest &request)
@@ -1032,6 +1061,8 @@ void QModbusServerPrivate::resetCommunicationCounters()
 void QModbusServerPrivate::storeEvent(quint8 eventByte)
 {
     m_commEventLog.prepend(eventByte);
+    // TODO: The definition of commEventCounter says that it only stores successful
+    // message completion. Add a check once we implement event counting.
     m_commEventCounter += 1;
 }
 

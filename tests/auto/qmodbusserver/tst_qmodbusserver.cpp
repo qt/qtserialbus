@@ -656,6 +656,39 @@ private slots:
         QCOMPARE(response.data(), QByteArray::fromHex("01"));
     }
 
+    void testProcessGetCommEventCounter()
+    {
+         TestServer local; // Used later to control the correct event amount.
+
+        QModbusRequest request = QModbusRequest(QModbusRequest::GetCommEventCounter);
+        QModbusResponse response = local.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        QCOMPARE(response.data(), QByteArray::fromHex("00000000"));
+
+        // TODO: Add more tests once event handling is implemented.
+
+        request = QModbusRequest(QModbusRequest::GetCommEventCounter, quint8(10));
+        response = local.processRequest(request);
+        QCOMPARE(response.isException(), true);
+
+    }
+
+    void testProcessGetCommEventLogRequest()
+    {
+        TestServer local; // Used later to control the correct event amount.
+
+        QModbusRequest request = QModbusRequest(QModbusRequest::GetCommEventLog);
+        QModbusResponse response = local.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        QCOMPARE(response.data(), QByteArray::fromHex("06000000000000"));
+
+        // TODO: Add more tests once event handling is implemented.
+
+        request = QModbusRequest(QModbusRequest::GetCommEventLog, quint8(10));
+        response = local.processRequest(request);
+        QCOMPARE(response.isException(), true);
+    }
+
     void testProcessWriteMultipleRegistersRequest()
     {
         // request write at register 173, address: 0x00ac -> 172, value: 0x00ff 0x1234
