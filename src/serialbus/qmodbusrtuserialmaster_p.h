@@ -110,6 +110,8 @@ public:
             const QByteArray completeAduFrame = responseBuffer.left(aduSize);
             responseBuffer.remove(0, aduSize);
 
+            stopResponseTimer();
+
             qCDebug(QT_MODBUS)<< "Received response (incl ADU)" << completeAduFrame.toHex();
             if (QT_MODBUS().isDebugEnabled() && !responseBuffer.isEmpty())
                 qCDebug(QT_MODBUS_LOW) << "Pending buffer:" << responseBuffer.toHex();
@@ -122,6 +124,7 @@ public:
                                      << calculateCRC(completeAduFrame, completeAduFrame.size());
                 return;
             }
+
 
             const QModbusResponse response(fcode,
                                            completeAduFrame.mid(2, completeAduFrame.size() - 4));
@@ -223,6 +226,7 @@ public:
         }
 
         // regular send -> keep in queue
+        startResponseTimer();
     }
 
     QModbusReply *enqueueRequest(const QModbusRequest &request, int slaveAddress,
@@ -255,6 +259,24 @@ public:
             return false;
 
         return true;
+    }
+
+    void handleResponseTimeout()
+    {
+        qCDebug(QT_MODBUS) << "Timeout of last request";
+
+        if (m_queue.isEmpty())
+            return;
+
+        QueueElement elem = m_queue.dequeue();
+        if (elem.reply.isNull()) {
+            // reply deleted while waiting for response which timed out
+            // nothing really to do here
+            return;
+        }
+
+        elem.reply->setError(QModbusReply::TimeoutError,
+                             QModbusRtuSerialMaster::tr("Request timeout."));
     }
 
     QSerialPort *m_serialPort;
