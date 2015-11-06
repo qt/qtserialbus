@@ -72,30 +72,60 @@ QModbusTcpClient::QModbusTcpClient(QModbusTcpClientPrivate &dd, QObject *parent)
 {
 }
 
-/*
-    TODO: implement
+/*!
+    \reimp
 */
 QModbusReply *QModbusTcpClient::sendReadRequest(const QModbusDataUnit &read, int slaveAddress)
 {
+    // TODO: Implement!
+
     Q_UNUSED(read)
     Q_UNUSED(slaveAddress)
     return Q_NULLPTR;
 }
 
+/*!
+    \reimp
+*/
 QModbusReply *QModbusTcpClient::sendWriteRequest(const QModbusDataUnit &write, int slaveAddress)
 {
+    // TODO: Implement!
+
     Q_UNUSED(write)
     Q_UNUSED(slaveAddress)
     return Q_NULLPTR;
 }
 
+/*!
+    \reimp
+*/
 QModbusReply *QModbusTcpClient::sendReadWriteRequest(const QModbusDataUnit &read,
                                                      const QModbusDataUnit &write, int slaveAddress)
 {
+    // TODO: Implement!
+
     Q_UNUSED(read)
     Q_UNUSED(write)
     Q_UNUSED(slaveAddress)
     return Q_NULLPTR;
+}
+
+/*!
+     \reimp
+*/
+bool QModbusTcpClient::open()
+{
+    // TODO: Implement!
+
+    return true;
+}
+
+/*!
+     \reimp
+*/
+void QModbusTcpClient::close()
+{
+    // TODO: Implement!
 }
 
 QT_END_NAMESPACE

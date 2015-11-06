@@ -105,7 +105,7 @@ int QModbusClient::timeout() const
 
     The timeout is used by the client to determine how long it waits for
     a response from the server. If the response is not received within the
-    required timeout, the \l TimeOutError is sert.
+    required timeout, the \l TimeoutError is set.
 
     Setting the timeout to a negative value disables timeouts.
 

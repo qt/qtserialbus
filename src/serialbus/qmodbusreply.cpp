@@ -62,10 +62,10 @@ public:
 
     \brief The QModbusReply class contains the data for a request sent with
     a \l QModbusClient derived class.
- */
+*/
 
 /*!
-    \enum QModbusPdu::ReplyError
+    \enum QModbusReply::ReplyError
 
     This enum describes all the possible error conditions.
 
@@ -86,7 +86,7 @@ public:
 
     The reply will be send to the Modbus client represented by
     \a slaveAddress.
- */
+*/
 QModbusReply::QModbusReply(int slaveAddress, QObject *parent) :
     QObject(*new QModbusReplyPrivate, parent)
 {
@@ -106,7 +106,7 @@ bool QModbusReply::isFinished() const
 /*!
     Sets whether or not this reply has finished to \a isFinished.
 
-    If \a isFinished is \a true, this will cause the \l finished() signal to be emitted.
+    If \a isFinished is \c true, this will cause the \l finished() signal to be emitted.
 
     If the operation completed successfully, \l setResult() should be called before
     this function. If an error occurred, \l setError() should be used instead.
@@ -133,17 +133,17 @@ void QModbusReply::setFinished(bool isFinished)
     you receive the \l finished() signal.
 
     \sa isFinished(), error()
- */
+*/
 
 /*!
     Returns the result of a standard register read request.
 
     Combined read/write requests send via \l QModbusClient::sendReadWriteRequest()
-    contain the values read from the server/slave instance.
+    contain the values read from the server instance.
 
     If the request has not finished, has failed with an error or
     was a write request then the returned \l QModbusDataUnit instance is invalid.
- */
+*/
 QModbusDataUnit QModbusReply::result() const
 {
     Q_D(const QModbusReply);
@@ -151,8 +151,8 @@ QModbusDataUnit QModbusReply::result() const
 }
 
 /*!
-    Sets the results of a read/write request to a Modbus register.
-  */
+    Sets the results of a read/write request to a Modbus register data \a unit.
+*/
 void QModbusReply::setResult(const QModbusDataUnit &unit)
 {
     Q_D(QModbusReply);

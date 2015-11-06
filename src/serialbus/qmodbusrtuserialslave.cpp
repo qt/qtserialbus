@@ -93,7 +93,7 @@ bool QModbusRtuSerialSlave::processesBroadcast() const
 
 /*!
     \reimp
- */
+*/
 bool QModbusRtuSerialSlave::open()
 {
     if (state() == QModbusDevice::ConnectedState)

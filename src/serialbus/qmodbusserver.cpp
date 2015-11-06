@@ -227,7 +227,7 @@ quint16 QModbusServer::exceptionStatusOffset() const
     \note The return value of this function only makes sense from within processRequest() or
     processPrivateModbusRequest(), otherwise it can only tell that the last request processed
     was a broadcast request.
-}
+*/
 
 /*!
     Reads data stored in the Modbus server. A Modbus server has four tables (\a table) and each
@@ -294,6 +294,16 @@ bool QModbusServer::setData(const QModbusDataUnit &newData)
     return writeData(newData);
 }
 
+/*!
+    Writes \a newData to the Modbus server map.
+    Returns \c false if the \a newData range is outside of the map range.
+
+    \note Sub-classes that implement writing to a different backing store then default one, also
+    need to implement setMap() and readData(). The dataWritten() signal needs to be emitted from
+    within the functions implementation as well.
+
+    \sa setMap(), readData(), dataWritten()
+*/
 bool QModbusServer::writeData(const QModbusDataUnit &newData)
 {
     Q_D(QModbusServer);
@@ -349,6 +359,14 @@ bool QModbusServer::writeData(const QModbusDataUnit &newData)
     return true;
 }
 
+/*!
+    Returns the values in the register range given by \a newData.
+
+    \note Sub-classes that implement reading from a different backing store then default one, also
+    need to implement setMap() and writeData().
+
+    \sa setMap(), writeData()
+*/
 bool QModbusServer::readData(QModbusDataUnit *newData) const
 {
     Q_D(const QModbusServer);

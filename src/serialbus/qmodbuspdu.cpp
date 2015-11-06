@@ -110,7 +110,6 @@ static quint8 minimumDataSize(QModbusPdu::FunctionCode code, Type type)
     They are set by the server after checking the appropriate error conditions in the reply to a
     request and must be decoded by the client to operate on the exception code.
 
-    \value NoError                              No error has occurred.
     \value IllegalFunction                      Function code is not supported by device.
     \value IllegalDataAddress                   The received data address in the query is not an
                                                 allowable address for the Modbus server.
@@ -120,13 +119,13 @@ static quint8 minimumDataSize(QModbusPdu::FunctionCode code, Type type)
                                                 was attempting to perform the requested action.
     \value Acknowledge                          Specialized use in conjunction with programming
                                                 commands.
-    \value ServerDeviceBusy                     The slave is engaged in processing a long duration
+    \value ServerDeviceBusy                     The server is engaged in processing a long duration
                                                 program command.
-    \value NegativeAcknowledge                  The server cannot perform the program
-                                                function received in the query. This
-                                                code is returned for an unsuccessful
-                                                programming request. The client should request
-                                                diagnostic or error information from the server.
+    \value NegativeAcknowledge                  The server cannot perform the program function
+                                                received in the query. This code is returned for an
+                                                unsuccessful programming request. The client should
+                                                request diagnostic or error information from the
+                                                server.
     \value MemoryParityError                    Indicates that the extended file area failed to
                                                 pass a consistency check. Used in conjunction with
                                                 function codes 20 and 21. The exception code does
@@ -140,19 +139,16 @@ static quint8 minimumDataSize(QModbusPdu::FunctionCode code, Type type)
                                                 target device behind a gateway.
                                                 Usually this means the target device is not online
                                                 on the network.
-    \value TimeoutError                         Indicates that a timeout has occurred.
-    \value ReplyAbortedError                    The pending QModbusReply was aborted. This may happen
-                                                when the Modbus client/master disconnects from the
-                                                transport layer.
-    \value ExtendedException                    This is an extended exception as per Modbus specification.
-                                                Generally this code is used to describe an exception that
-                                                is otherwise further described.
+    \value ExtendedException                    This is an extended exception as per Modbus
+                                                specification. Generally this code is used to
+                                                describe an exception that is otherwise further
+                                                described.
 */
 
 /*!
     \enum QModbusPdu::FunctionCode
 
-    Defines the function code and the implicit type of action required by the slave. Not all
+    Defines the function code and the implicit type of action required by the server. Not all
     Modbus devices can handle the same set of function codes.
 
     \value Invalid                          Set by the default constructor, do not use.
@@ -240,7 +236,7 @@ static quint8 minimumDataSize(QModbusPdu::FunctionCode code, Type type)
 */
 
 /*!
-    ExceptionCode QModbusExceptionResponse::execeptionCode() const
+    \fn QModbusPdu::ExceptionCode QModbusPdu::exceptionCode() const
 
     Returns the response's exception code.
 */

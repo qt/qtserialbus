@@ -47,7 +47,7 @@ QT_BEGIN_NAMESPACE
     plugin interface for CAN bus plugins.
 
     All plugins must implement the functions provided by this factory class.
- */
+*/
 
 /*!
     \fn QCanBusDevice *QCanBusFactory::createDevice(const QString &interfaceName) const

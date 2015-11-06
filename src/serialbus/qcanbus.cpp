@@ -99,7 +99,7 @@ static void loadPlugins()
 /*!
     Returns a pointer to the QCanBus class. The object is loaded if necessary. QCanBus
     uses the singleton design pattern.
- */
+*/
 QCanBus *QCanBus::instance()
 {
     if (!globalInstance)
@@ -109,7 +109,7 @@ QCanBus *QCanBus::instance()
 
 /*!
     Returns a list of identifiers for all loaded plugins.
- */
+*/
 QList<QByteArray> QCanBus::plugins() const
 {
     return qCanBusPlugins()->keys();
@@ -121,7 +121,7 @@ QList<QByteArray> QCanBus::plugins() const
 
     Ownership of the returned backend is transferred to the caller.
     Returns \c null if no suitable device can be found.
- */
+*/
 QCanBusDevice *QCanBus::createDevice(const QByteArray &plugin,
                                      const QString &interfaceName) const
 {

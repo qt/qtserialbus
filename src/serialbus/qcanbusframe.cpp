@@ -51,25 +51,25 @@ QT_BEGIN_NAMESPACE
     identifier and the data payload. QCanBusFrame contains the timestamp of the moment it was read.
 
     \sa QCanBusFrame::TimeStamp
- */
+*/
 
 /*!
     \fn QCanBusFrame::QCanBusFrame(QCanBusFrame::FrameType type)
 
     Constructs a CAN frame of the specified \a type.
- */
+*/
 
 /*!
     \fn QCanBusFrame::QCanBusFrame(quint32 identifier, const QByteArray &data)
 
     Constructs a CAN frame using \a identifier as the frame identifier and \a data as the payload.
- */
+*/
 
 /*!
     \fn bool QCanBusFrame::isValid() const
 
     Returns \c true if the \l frameType() is \l InvalidFrame; otherwise \c false.
- */
+*/
 
 /*!
     \fn QCanBusFrame::setFrameId(quint32 newFrameId)
@@ -79,7 +79,7 @@ QT_BEGIN_NAMESPACE
     format}.
 
     \sa frameId()
- */
+*/
 
 /*!
     \fn QCanBusFrame::setPayload(const QByteArray &data)
@@ -88,7 +88,7 @@ QT_BEGIN_NAMESPACE
     be extended up to 64 bytes by supporting \e {Flexible Data-Rate}.
 
     \sa payload()
- */
+*/
 
 /*!
     \fn QCanBusFrame::setTimeStamp(const TimeStamp &ts)
@@ -97,7 +97,7 @@ QT_BEGIN_NAMESPACE
     timestamp is created during the read operation and not needed during the write operation.
 
     \sa QCanBusFrame::TimeStamp
- */
+*/
 
 /*!
     \fn quint32 QCanBusFrame::frameId() const
@@ -109,7 +109,7 @@ QT_BEGIN_NAMESPACE
     If the frame is of \l ErrorFrame type, this ID is always 0.
 
     \sa setFrameId(), hasExtendedFrameFormat()
- */
+*/
 
 /*!
     \fn bool QCanBusFrame::hasExtendedFrameFormat() const
@@ -118,7 +118,7 @@ QT_BEGIN_NAMESPACE
     otherwise \c false, implying an 11bit identifier.
 
     \sa setExtendedFrameFormat(), frameId()
- */
+*/
 
 /*!
     \fn  void QCanBusFrame::setExtendedFrameFormat(bool isExtended)
@@ -126,7 +126,7 @@ QT_BEGIN_NAMESPACE
     Sets the extended frame format flag to \a isExtended.
 
     \sa hasExtendedFrameFormat()
- */
+*/
 
 /*!
     \enum QCanBusFrame::FrameType
@@ -141,7 +141,7 @@ QT_BEGIN_NAMESPACE
                                 This type is used for error reporting.
 
     \sa setFrameType()
- */
+*/
 
 /*!
     \enum QCanBusFrame::FrameError
@@ -162,7 +162,7 @@ QT_BEGIN_NAMESPACE
     \value ControllerRestartError       The controller restarted.
     \value UnknownError                 An unknown error has occurred.
     \value AnyError                     Matches every other error type.
- */
+*/
 
 /*!
     \fn FrameType QCanBusFrame::frameType() const
@@ -170,7 +170,7 @@ QT_BEGIN_NAMESPACE
     Returns the type of the frame.
 
     \sa setFrameType()
- */
+*/
 
 /*!
     \fn void QCanBusFrame::setFrameType(FrameType newType)
@@ -178,7 +178,7 @@ QT_BEGIN_NAMESPACE
     Sets the type of the frame to \a newType.
 
     \sa frameType()
- */
+*/
 
 /*!
     \fn QByteArray QCanBusFrame::payload() const
@@ -186,7 +186,7 @@ QT_BEGIN_NAMESPACE
     Returns the data payload of the frame.
 
     \sa setPayload()
- */
+*/
 
 /*!
     \fn TimeStamp QCanBusFrame::timeStamp() const
@@ -194,7 +194,7 @@ QT_BEGIN_NAMESPACE
     Returns the timestamp of the frame.
 
     \sa QCanBusFrame::TimeStamp, QCanBusFrame::setTimeStamp()
- */
+*/
 
 /*!
     \fn FrameErrors QCanBusFrame::error() const
@@ -203,7 +203,7 @@ QT_BEGIN_NAMESPACE
     is not an \l ErrorFrame, this function returns \l NoError.
 
     \sa setError()
- */
+*/
 
 /*!
     \fn void QCanBusFrame::setError(FrameErrors error)
@@ -212,7 +212,7 @@ QT_BEGIN_NAMESPACE
     \l frameType() is not an \l ErrorFrame.
 
     \sa error()
- */
+*/
 
 /*!
     \class QCanBusFrame::TimeStamp
@@ -220,13 +220,13 @@ QT_BEGIN_NAMESPACE
     \since 5.6
 
     \brief The TimeStamp class provides timestamp information with microsecond precision.
- */
+*/
 
 /*!
     \fn TimeStamp::TimeStamp(qint64 s, qint64 usec)
 
     Constructs a TimeStamp in seconds, \a s, and microseconds, \a usec.
- */
+*/
 
 /*!
     \fn qint64 TimeStamp::seconds() const
@@ -234,7 +234,7 @@ QT_BEGIN_NAMESPACE
     Returns the seconds of the timestamp.
 
     \sa TimeStamp::setSeconds()
- */
+*/
 
 /*!
     \fn qint64 TimeStamp::microSeconds() const
@@ -242,7 +242,7 @@ QT_BEGIN_NAMESPACE
     Returns the microseconds of the timestamp.
 
     \sa TimeStamp::setMicroSeconds
- */
+*/
 
 /*!
     \fn TimeStamp::setSeconds(qint64 s)
@@ -250,7 +250,7 @@ QT_BEGIN_NAMESPACE
     Sets the seconds in the timestamp type to \a s.
 
     \sa TimeStamp::seconds()
- */
+*/
 
 /*!
     \fn TimeStamp::setMicroSeconds(qint64 usec)
@@ -258,7 +258,7 @@ QT_BEGIN_NAMESPACE
     Sets the microseconds in the timestamp type to \a usec.
 
     \sa TimeStamp::microSeconds
- */
+*/
 
 #ifndef QT_NO_DATASTREAM
 

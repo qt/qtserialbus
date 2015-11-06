@@ -87,7 +87,7 @@ QModbusRtuSerialMaster::QModbusRtuSerialMaster(QModbusRtuSerialMasterPrivate &dd
 
 /*!
      \reimp
- */
+*/
 bool QModbusRtuSerialMaster::open()
 {
     if (state() == QModbusDevice::ConnectedState)
@@ -106,7 +106,7 @@ bool QModbusRtuSerialMaster::open()
 
 /*!
      \reimp
- */
+*/
 void QModbusRtuSerialMaster::close()
 {
     Q_D(QModbusRtuSerialMaster);
@@ -129,6 +129,9 @@ void QModbusRtuSerialMaster::close()
     setState(QModbusDevice::UnconnectedState);
 }
 
+/*!
+     \reimp
+*/
 QModbusReply *QModbusRtuSerialMaster::sendReadRequest(const QModbusDataUnit &read, int slaveAddress)
 {
     Q_D(QModbusRtuSerialMaster);
@@ -148,6 +151,9 @@ QModbusReply *QModbusRtuSerialMaster::sendReadRequest(const QModbusDataUnit &rea
     return d->enqueueRequest(request, slaveAddress, read);
 }
 
+/*!
+     \reimp
+*/
 QModbusReply *QModbusRtuSerialMaster::sendWriteRequest(const QModbusDataUnit &write, int slaveAddress)
 {
     Q_D(QModbusRtuSerialMaster);
@@ -167,6 +173,9 @@ QModbusReply *QModbusRtuSerialMaster::sendWriteRequest(const QModbusDataUnit &wr
     return d->enqueueRequest(request, slaveAddress, write);
 }
 
+/*!
+     \reimp
+*/
 QModbusReply *QModbusRtuSerialMaster::sendReadWriteRequest(const QModbusDataUnit &read,
                                                            const QModbusDataUnit &write,
                                                            int slaveAddress)
