@@ -167,9 +167,14 @@ void MainWindow::readReady()
                                           unit.registerType() <= QModbusDataUnit::Coils ? 10 : 16));
             ui->readValue->addItem(entry);
         }
+    } else if (reply->error() == QModbusReply::ProtocolError) {
+        ui->errorLabel->setText(tr("Write response error: %1 (Mobus exception: 0x%2)").
+                                    arg(reply->errorText()).
+                                    arg(reply->protocolError(), -1, 16));
     } else {
-        ui->errorLabel->setText(tr("Read response error: %1 (code: 0x%2)").
-                                        arg(reply->errorText()).arg(reply->error(), -1, 16));
+        ui->errorLabel->setText(tr("Write response error: %1 (code: 0x%2)").
+                                    arg(reply->errorText()).
+                                    arg(reply->error(), -1, 16));
     }
 
     reply->deleteLater();
@@ -209,9 +214,14 @@ void MainWindow::writeReady()
     if (!reply)
         return;
 
-    if (reply->error() != QModbusReply::NoError) {
+    if (reply->error() == QModbusReply::ProtocolError) {
+        ui->errorLabel->setText(tr("Write response error: %1 (Mobus exception: 0x%2)").
+                                    arg(reply->errorText()).
+                                    arg(reply->protocolError(), -1, 16));
+    } else if (reply->error() != QModbusReply::NoError) {
         ui->errorLabel->setText(tr("Write response error: %1 (code: 0x%2)").
-                                        arg(reply->errorText()).arg(reply->error(), -1, 16));
+                                    arg(reply->errorText()).
+                                    arg(reply->error(), -1, 16));
     }
 
     reply->deleteLater();
