@@ -52,6 +52,8 @@ public:
     explicit QModbusRtuSerialSlave(QObject *parent = Q_NULLPTR);
     ~QModbusRtuSerialSlave();
 
+    bool processesBroadcast() const Q_DECL_OVERRIDE;
+
 protected:
     QModbusRtuSerialSlave(QModbusRtuSerialSlavePrivate &dd, QObject *parent = Q_NULLPTR);
 

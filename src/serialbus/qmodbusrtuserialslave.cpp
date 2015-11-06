@@ -86,6 +86,14 @@ QModbusRtuSerialSlave::QModbusRtuSerialSlave(QModbusRtuSerialSlavePrivate &dd, Q
 /*!
     \reimp
 */
+bool QModbusRtuSerialSlave::processesBroadcast() const
+{
+    return d_func()->m_processesBroadcast;
+}
+
+/*!
+    \reimp
+ */
 bool QModbusRtuSerialSlave::open()
 {
     if (state() == QModbusDevice::ConnectedState)

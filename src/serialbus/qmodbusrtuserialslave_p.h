@@ -101,6 +101,7 @@ public:
                 qCWarning(QT_MODBUS) << "Invalid Modbus PDU received";
                 return;
             }
+            m_processesBroadcast = (pendingBuffer.at(0) == 0);
             code = QModbusRequest::FunctionCode(pendingBuffer.at(1));
 
             int aduSize = 2; //slaveId & function code counted
@@ -128,14 +129,16 @@ public:
                 qCDebug(QT_MODBUS) << "Ignoring remaining data beyond expected ADU size";
             }
 
-            // for this slave address ?
-            // TODO deal with broadcast id 0
-            if (q->slaveAddress() != completeAduFrame.at(0)) {
-                //ignore wrong slaveId
-                qCDebug(QT_MODBUS) << "Wrong slave address, expected" << q->slaveAddress() << "got"
-                    << quint8(completeAduFrame.at(0));
-                return;
-            }
+            // If we do not process a Broadcast ...
+            if (!q->processesBroadcast()) {
+                // check if the slave address matches ...
+                if (q->slaveAddress() != completeAduFrame.at(0)) {
+                    // no, not our address! Ignore!
+                    qCDebug(QT_MODBUS) << "Wrong slave address, expected" << q->slaveAddress()
+                                       << "got" << quint8(completeAduFrame.at(0));
+                    return;
+                }
+            } // else { Broadcast -> Slave Id will never match, deliberately ignore }
 
             if (checkCRC(completeAduFrame, completeAduFrame.size(), receivedCrc)) {
                 qCWarning(QT_MODBUS) << "Ignoring request with wrong CRC";
@@ -146,6 +149,8 @@ public:
             const QModbusRequest req(code, completeAduFrame.mid(2, completeAduFrame.size() - 4));
             qCDebug(QT_MODBUS) << "Request PDU" << req;
             const QModbusResponse response = q->processRequest(req);
+            if (q->processesBroadcast())
+                return;
 
             qCDebug(QT_MODBUS) << "Response PDU:" << response;
 
@@ -247,6 +252,7 @@ public:
     void aboutToClose();
 
     QSerialPort *m_serialPort;
+    bool m_processesBroadcast = false;
 };
 
 QT_END_NAMESPACE

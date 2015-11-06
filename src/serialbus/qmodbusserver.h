@@ -58,6 +58,7 @@ public:
     virtual ~QModbusServer();
 
     virtual bool setMap(const QModbusDataUnitMap &map);
+    virtual bool processesBroadcast() const { return false; }
 
     int slaveAddress() const;
     void setSlaveAddress(int slaveAddress);

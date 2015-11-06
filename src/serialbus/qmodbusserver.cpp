@@ -218,6 +218,18 @@ quint16 QModbusServer::exceptionStatusOffset() const
 }
 
 /*!
+    \fn bool QModbusServer::processesBroadcast() const
+
+    Subclasses should implement this function if the transport layer shall handle broadcasts.
+    The implementation then should return \c true if the currently processed request is a
+    broadcast request; otherwise \c false. The default implementation returns always \c false.
+
+    \note The return value of this function only makes sense from within processRequest() or
+    processPrivateModbusRequest(), otherwise it can only tell that the last request processed
+    was a broadcast request.
+}
+
+/*!
     Reads data stored in the Modbus server. A Modbus server has four tables (\a table) and each
     have a unique \a address field, which is used to read \a data from the desired field.
     See QModbusDataUnit::RegisterType for more information about the different tables.
