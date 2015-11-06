@@ -138,6 +138,7 @@ void MainWindow::on_readButton_clicked()
     dataRequest.setStartAddress(ui->readAddress->text().toInt());
 
     ui->readValue->clear();
+    ui->errorLabel->setText(QString());
 
     QModbusReply *reply = modbusDevice->sendReadRequest(dataRequest,
                                                         ui->readSlave->text().toInt());
@@ -191,6 +192,8 @@ void MainWindow::on_writeButton_clicked()
 
     QModbusDataUnit unit(table, ui->writeAddress->text().toInt(), 1u);
     unit.setValue(0, ui->writeValue->text().toInt(0, 16));
+
+    ui->errorLabel->setText(QString());
 
     // TODO extend to test write of single coil and holding register
     // Write Multiple coils and registers as well as R/W MultipleRegisters is missing
