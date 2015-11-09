@@ -1,6 +1,5 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 Denis Shienkov <denis.shienkov@gmail.com>
 ** Copyright (C) 2015 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
