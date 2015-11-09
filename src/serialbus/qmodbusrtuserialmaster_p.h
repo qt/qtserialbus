@@ -130,7 +130,7 @@ public:
             const QModbusResponse response(fcode,
                                            completeAduFrame.mid(2, completeAduFrame.size() - 4));
 
-            if (!canMatchRequestAndResponse(response, completeAduFrame.at(0))) {
+            if (!canMatchRequestAndResponse(response, quint8(completeAduFrame.at(0)))) {
                 qCWarning(QT_MODBUS) << "Cannot match response with open request. "
                                         "Ignoring response.";
                 return;

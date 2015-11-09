@@ -143,7 +143,7 @@ public:
             // If we do not process a Broadcast ...
             if (!q->processesBroadcast()) {
                 // check if the slave address matches ...
-                if (q->slaveAddress() != buffer.at(0)) {
+                if (q->slaveAddress() != quint8(buffer.at(0))) {
                     // no, not our address! Ignore!
                     qCDebug(QT_MODBUS) << "Wrong slave address, expected" << q->slaveAddress()
                                        << "got" << quint8(buffer.at(0));
