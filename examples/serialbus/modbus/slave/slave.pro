@@ -1,4 +1,4 @@
-QT       += core gui serialbus widgets
+QT += serialbus widgets
 
 TARGET = modbusslave
 TEMPLATE = app
