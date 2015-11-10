@@ -1,4 +1,4 @@
-QT = core testlib serialbus
+QT = core testlib serialbus serialbus-private
 TARGET = tst_qmodbuscommevent
 CONFIG += testcase c++11
 

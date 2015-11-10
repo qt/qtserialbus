@@ -35,8 +35,8 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSCOMMEVENT_H
-#define QMODBUSCOMMEVENT_H
+#ifndef QMODBUSCOMMEVENT_P_H
+#define QMODBUSCOMMEVENT_P_H
 
 #include <QtSerialBus/qserialbusglobal.h>
 
@@ -119,4 +119,4 @@ inline QModbusCommEvent::EventByte operator|(QModbusCommEvent::ReceiveFlag rf,
 
 QT_END_NAMESPACE
 
-#endif // QMODBUSCOMMEVENT_H
+#endif // QMODBUSCOMMEVENT_P_H

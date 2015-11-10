@@ -34,7 +34,7 @@
 **
 ****************************************************************************/
 
-#include <QtSerialBus/qmodbuscommevent.h>
+#include <QtSerialBus/private/qmodbuscommevent_p.h>
 
 #include <QtTest/QtTest>
 
