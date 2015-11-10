@@ -126,7 +126,7 @@ int QModbusServer::slaveAddress() const
 */
 void QModbusServer::setDiagnosticRegister(quint16 value)
 {
-    d_func()->m_diagnostics[Diagnostics::ReturnDiagnosticRegister] = value;
+    d_func()->m_diagnosticRegister = value;
 }
 
 /*!
@@ -137,7 +137,7 @@ void QModbusServer::setDiagnosticRegister(quint16 value)
 */
 quint16 QModbusServer::diagnosticRegister() const
 {
-    return d_func()->m_diagnostics[Diagnostics::ReturnDiagnosticRegister];
+    return d_func()->m_diagnosticRegister;
 }
 
 /*!
@@ -728,7 +728,7 @@ QModbusResponse QModbusServerPrivate::processDiagnostics(const QModbusRequest &r
 
     switch (subFunctionCode) {
     case Diagnostics::ForceListenOnlyMode:
-        m_diagnostics[Diagnostics::ForceListenOnlyMode] = true;
+        m_forceListenOnlyMode = true;
         // TODO: this is a simple way of encoding the event byte. As we currently
         // have no methods for the four types of event bytes to store, use this as
         // a temporary way.
@@ -739,11 +739,11 @@ QModbusResponse QModbusServerPrivate::processDiagnostics(const QModbusRequest &r
         return QModbusResponse();
     case Diagnostics::ClearCountersAndDiagnosticRegister:
         resetCommunicationCounters();
+        m_diagnosticRegister = 0x0000;
         // TODO: according to PI_MBUS_300 specification, the clearing of the diagnostic
         // register is dependent on the device model. For legacy support to fullfill
         // this requirement, a server configuration variable could be added to check
         // if the diagnostic register should be cleared or not.
-        m_diagnostics[Diagnostics::ReturnDiagnosticRegister] = 0u;
         return QModbusResponse(request.functionCode(), request.data());
     case Diagnostics::ReturnDiagnosticRegister:
     case Diagnostics::ReturnBusMessageCount:
@@ -754,7 +754,8 @@ QModbusResponse QModbusServerPrivate::processDiagnostics(const QModbusRequest &r
     case Diagnostics::ReturnServerNAKCount:
     case Diagnostics::ReturnServerBusyCount:
     case Diagnostics::ReturnBusCharacterOverrunCount:
-        return QModbusResponse(request.functionCode(), subFunctionCode, m_diagnostics[subFunctionCode]);
+        return QModbusResponse(request.functionCode(), subFunctionCode,
+                               m_counters[static_cast<Counter> (subFunctionCode)]);
     default:
         return q_func()->processPrivateModbusRequest(request);
     }
@@ -766,7 +767,7 @@ QModbusResponse QModbusServerPrivate::processGetCommEventCounter(const QModbusRe
         return QModbusExceptionResponse(request.functionCode(),
                                         QModbusExceptionResponse::IllegalDataValue);
     }
-    return QModbusResponse(request.functionCode(), m_deviceBusy, m_commEventCounter);
+    return QModbusResponse(request.functionCode(), m_deviceBusy, m_counters[Counter::CommEvent]);
 }
 
 QModbusResponse QModbusServerPrivate::processGetCommEventLog(const QModbusRequest &request)
@@ -783,8 +784,8 @@ QModbusResponse QModbusServerPrivate::processGetCommEventLog(const QModbusReques
 
     // 6 -> 3 x 2 Bytes (Status, Event Count and Message Count)
     return QModbusResponse(request.functionCode(), quint8(m_commEventLog.count() + 6),
-                           m_deviceBusy, m_commEventCounter,
-                           m_diagnostics[Diagnostics::ReturnServerMessageCount], eventLog);
+                           m_deviceBusy, m_counters[Counter::CommEvent],
+                           m_counters[Counter::BusMessage], eventLog);
 }
 
 QModbusResponse QModbusServerPrivate::processWriteMultipleCoilsRequest(const QModbusRequest &request)
@@ -1035,28 +1036,10 @@ bool QModbusServerPrivate::restartCommunicationsOption(bool clearLog)
         m_commEventLog.clear();
 
     resetCommunicationCounters();
-    m_diagnostics[Diagnostics::ForceListenOnlyMode] = false;
+    m_forceListenOnlyMode = false;
 
     storeEvent(0u);
     return q_func()->connectDevice();
-}
-
-/*!
-    \internal
-
-    Resets all communication event counters of the Modbus server to zero.
-*/
-void QModbusServerPrivate::resetCommunicationCounters()
-{
-    m_commEventCounter = 0;
-    m_diagnostics[Diagnostics::ReturnBusMessageCount] = 0u;
-    m_diagnostics[Diagnostics::ReturnBusCommunicationErrorCount] = 0u;
-    m_diagnostics[Diagnostics::ReturnBusExceptionErrorCount] = 0u;
-    m_diagnostics[Diagnostics::ReturnServerMessageCount] = 0u;
-    m_diagnostics[Diagnostics::ReturnServerNoResponseCount] = 0u;
-    m_diagnostics[Diagnostics::ReturnServerNAKCount] = 0u;
-    m_diagnostics[Diagnostics::ReturnServerBusyCount] = 0u;
-    m_diagnostics[Diagnostics::ReturnBusCharacterOverrunCount] = 0u;
 }
 
 /*!
@@ -1081,7 +1064,7 @@ void QModbusServerPrivate::storeEvent(quint8 eventByte)
     m_commEventLog.prepend(eventByte);
     // TODO: The definition of commEventCounter says that it only stores successful
     // message completion. Add a check once we implement event counting.
-    m_commEventCounter += 1;
+    m_counters[Counter::CommEvent]++;
 }
 
 QT_END_NAMESPACE

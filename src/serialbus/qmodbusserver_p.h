@@ -64,13 +64,28 @@ class QModbusServerPrivate : public QModbusDevicePrivate
     Q_DECLARE_PUBLIC(QModbusServer)
 
 public:
+    enum Counter {
+        CommEvent = 0x0001,
+        BusMessage = Diagnostics::ReturnBusMessageCount,
+        BusCommunicationError = Diagnostics::ReturnBusCommunicationErrorCount,
+        BusExceptionError = Diagnostics::ReturnBusExceptionErrorCount,
+        ServerMessage = Diagnostics::ReturnServerMessageCount,
+        ServerNoResponse = Diagnostics::ReturnServerNoResponseCount,
+        ServerNAK = Diagnostics::ReturnServerNAKCount,
+        ServerBusy = Diagnostics::ReturnServerBusyCount,
+        BusCharacterOverrun = Diagnostics::ReturnBusCharacterOverrunCount
+    };
+
     QModbusServerPrivate()
         : m_commEventLog(64)
-        , m_diagnostics(25, 0u)
+        , m_counters(20, 0u)
     {
     }
 
     bool setMap(const QModbusDataUnitMap &map);
+
+    void resetCommunicationCounters() { m_counters.fill(0u, m_counters.size()); }
+    void incrementCounter(QModbusServerPrivate::Counter counter) { m_counters[counter]++; }
 
     QModbusResponse processRequest(const QModbusPdu &request);
 
@@ -98,7 +113,6 @@ public:
 
 private:
     bool restartCommunicationsOption(bool clearLog);
-    void resetCommunicationCounters();
     void storeEvent(quint8 eventByte);
 
     // Device specific fields to be moved later
@@ -113,11 +127,12 @@ private:
     bool m_continueOnError = true; //TODO hook into server implementations
     quint16 m_deviceBusy = 0x0000; // TODO not taken into account yet
     uchar m_asciiInputDelimiter; // TODO not taken into account yet
-    quint16 m_commEventCounter = 0; // TODO not taken into account yet
     QContiguousCache<quint8> m_commEventLog; // TODO not taken into account yet
 
-    quint16 m_exceptionStatusOffset = 0;
-    QVector<quint16> m_diagnostics;
+    QVector<quint16> m_counters;
+    bool m_forceListenOnlyMode = false;
+    quint16 m_diagnosticRegister = 0x0000;
+    quint16 m_exceptionStatusOffset = 0x0000;
 };
 
 QT_END_NAMESPACE

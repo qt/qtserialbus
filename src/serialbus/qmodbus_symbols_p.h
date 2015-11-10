@@ -63,7 +63,7 @@ enum SubFunctionCode {
     ForceListenOnlyMode = 0x0004,
     ClearCountersAndDiagnosticRegister = 0x000a,
     ReturnBusMessageCount = 0x000b,
-    ReturnBusCommunicationErrorCount = 0x000c,
+    ReturnBusCommunicationErrorCount = 0x000c,  // CRC error counter
     ReturnBusExceptionErrorCount = 0x000d,
     ReturnServerMessageCount = 0x000e,
     ReturnServerNoResponseCount = 0x000f,
