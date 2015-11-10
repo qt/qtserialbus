@@ -122,7 +122,6 @@ void QModbusRtuSerialMaster::close()
         if (!elem.reply.isNull()) {
             elem.reply->setError(QModbusReply::ReplyAbortedError,
                                  tr("Reply aborted due to connection closure."));
-            elem.reply->setFinished(true);
         }
     }
 

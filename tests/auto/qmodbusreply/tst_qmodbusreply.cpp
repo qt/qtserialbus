@@ -163,6 +163,11 @@ void tst_QModbusReply::tst_setError()
     QCOMPARE(replyTest.error(), error);
     QCOMPARE(replyTest.errorText(), errorText);
     QCOMPARE(errorSpy.at(0).at(0).value<QModbusReply::ReplyError>(), error);
+
+    replyTest.setError(error, errorText);
+    replyTest.setFinished(true);
+    QCOMPARE(finishedSpy.count(), 3); //setError() implies call to setFinished()
+    QCOMPARE(errorSpy.count(), 2);
 }
 
 void tst_QModbusReply::tst_setProtocolError_data()
@@ -194,6 +199,11 @@ void tst_QModbusReply::tst_setProtocolError()
     QCOMPARE(replyTest.error(), QModbusReply::ProtocolError);
     QCOMPARE(replyTest.errorText(), errorText);
     QCOMPARE(errorSpy.at(0).at(0).value<QModbusReply::ReplyError>(), QModbusReply::ProtocolError);
+
+    replyTest.setProtocolError(error, errorText);
+    replyTest.setFinished(true);
+    QCOMPARE(finishedSpy.count(), 3); //setError() implies call to setFinished()
+    QCOMPARE(errorSpy.count(), 2);
 }
 
 void tst_QModbusReply::tst_setResult()

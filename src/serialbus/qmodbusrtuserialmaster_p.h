@@ -141,6 +141,7 @@ public:
                 QModbusDataUnit unit = headOfQueue.unit;
                 if (processResponse(response, &unit)) {
                     headOfQueue.reply->setResult(unit);
+                    headOfQueue.reply->setFinished(true);
                 } else {
                     headOfQueue.reply->setError(
                             QModbusReply::UnknownError,
@@ -149,8 +150,6 @@ public:
             } else {
                headOfQueue.reply->setProtocolError(response.exceptionCode(), QString());
             }
-
-            headOfQueue.reply->setFinished(true);
 
             sendNextRequest(); // go to next request
         });
@@ -211,7 +210,6 @@ public:
 
             elem.reply->setError(QModbusReply::WriteError,
                                  QModbusRtuSerialMaster::tr("Could not write message to serial bus."));
-            elem.reply->setFinished(true);
 
             sendNextRequest();
             return;
