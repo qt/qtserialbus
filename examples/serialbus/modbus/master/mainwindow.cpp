@@ -40,6 +40,7 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "settingsdialog.h"
 
 #include <QtSerialBus/qmodbustcpclient.h>
 #include <QtSerialBus/qmodbusrtuserialmaster.h>
@@ -58,6 +59,11 @@ MainWindow::MainWindow(QWidget *parent)
     , modbusDevice(Q_NULLPTR)
 {
     ui->setupUi(this);
+
+    m_settingsDialog = new SettingsDialog(this);
+
+    initActions();
+
     ui->readTable->addItem(tr("Coils"), QModbusDataUnit::Coils);
     ui->readTable->addItem(tr("Discrete Inputs"), QModbusDataUnit::DiscreteInputs);
     ui->readTable->addItem(tr("Input Registers"), QModbusDataUnit::InputRegisters);
@@ -75,6 +81,22 @@ MainWindow::~MainWindow()
     delete modbusDevice;
 
     delete ui;
+}
+
+void MainWindow::initActions()
+{
+    ui->actionConnect->setEnabled(true);
+    ui->actionDisconnect->setEnabled(false);
+    ui->actionExit->setEnabled(true);
+    ui->actionOptions->setEnabled(true);
+
+    connect(ui->actionConnect, &QAction::triggered,
+            this, &MainWindow::on_connectButton_clicked);
+    connect(ui->actionDisconnect, &QAction::triggered,
+            this, &MainWindow::on_connectButton_clicked);
+
+    connect(ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
+    connect(ui->actionOptions, &QAction::triggered, m_settingsDialog, &QDialog::show);
 }
 
 void MainWindow::on_connectType_currentIndexChanged(int index)
@@ -112,15 +134,26 @@ void MainWindow::on_connectButton_clicked()
     statusBar()->clearMessage();
     if (modbusDevice->state() != QModbusDevice::ConnectedState) {
         modbusDevice->setPortName(ui->portEdit->text());
-        if (!modbusDevice->connectDevice())
+        modbusDevice->setTimeout(m_settingsDialog->settings().responseTime);
+        if (!modbusDevice->connectDevice()) {
             statusBar()->showMessage(tr("Connect failed: ") + modbusDevice->errorString(), 5000);
+        } else {
+            ui->actionConnect->setEnabled(false);
+            ui->actionDisconnect->setEnabled(true);
+        }
     } else {
         modbusDevice->disconnectDevice();
+        ui->actionConnect->setEnabled(true);
+        ui->actionDisconnect->setEnabled(false);
     }
 }
 
 void MainWindow::onStateChanged(int state)
 {
+    bool connected = (state != QModbusDevice::UnconnectedState);
+    ui->actionConnect->setEnabled(!connected);
+    ui->actionDisconnect->setEnabled(connected);
+
     if (state == QModbusDevice::UnconnectedState)
         ui->connectButton->setText(tr("Connect"));
     else if (state == QModbusDevice::ConnectedState)

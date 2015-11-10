@@ -38,55 +38,37 @@
 **
 ****************************************************************************/
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef SETTINGSDIALOG_H
+#define SETTINGSDIALOG_H
 
-#include <QMainWindow>
+#include <QDialog>
 
 QT_BEGIN_NAMESPACE
 
-class QModbusClient;
-class QModbusReply;
-
 namespace Ui {
-class MainWindow;
 class SettingsDialog;
 }
 
 QT_END_NAMESPACE
 
-class SettingsDialog;
-
-class MainWindow : public QMainWindow
+class SettingsDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    struct Settings {
+        int responseTime;
+    };
+
+    explicit SettingsDialog(QWidget *parent = 0);
+    ~SettingsDialog();
+
+    void updateSettings();
+    Settings settings() const;
 
 private:
-    void initActions();
-
-private slots:
-    void on_connectButton_clicked();
-    void onStateChanged(int state);
-
-    void on_readButton_clicked();
-    void readReady();
-
-    void on_writeButton_clicked();
-    void writeReady();
-
-    void on_writeTable_currentIndexChanged(const QString &arg1);
-
-    void on_connectType_currentIndexChanged(int);
-
-private:
-    Ui::MainWindow *ui;
-    QModbusReply* lastRequest;
-    QModbusClient* modbusDevice;
-    SettingsDialog *m_settingsDialog;
+    Settings m_settings;
+    Ui::SettingsDialog *ui;
 };
 
-#endif // MAINWINDOW_H
+#endif // SETTINGSDIALOG_H

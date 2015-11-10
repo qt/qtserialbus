@@ -38,55 +38,34 @@
 **
 ****************************************************************************/
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#include "settingsdialog.h"
+#include "ui_settingsdialog.h"
 
-#include <QMainWindow>
+SettingsDialog::SettingsDialog(QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::SettingsDialog)
+{
+    ui->setupUi(this);
 
-QT_BEGIN_NAMESPACE
+    m_settings.responseTime = 200;
 
-class QModbusClient;
-class QModbusReply;
-
-namespace Ui {
-class MainWindow;
-class SettingsDialog;
+    connect(ui->applyButton, &QPushButton::clicked, [this]() {
+        updateSettings();
+        hide();
+    });
 }
 
-QT_END_NAMESPACE
-
-class SettingsDialog;
-
-class MainWindow : public QMainWindow
+SettingsDialog::~SettingsDialog()
 {
-    Q_OBJECT
+    delete ui;
+}
 
-public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+void SettingsDialog::updateSettings()
+{
+    m_settings.responseTime = ui->timeoutSpinner->value();
+}
 
-private:
-    void initActions();
-
-private slots:
-    void on_connectButton_clicked();
-    void onStateChanged(int state);
-
-    void on_readButton_clicked();
-    void readReady();
-
-    void on_writeButton_clicked();
-    void writeReady();
-
-    void on_writeTable_currentIndexChanged(const QString &arg1);
-
-    void on_connectType_currentIndexChanged(int);
-
-private:
-    Ui::MainWindow *ui;
-    QModbusReply* lastRequest;
-    QModbusClient* modbusDevice;
-    SettingsDialog *m_settingsDialog;
-};
-
-#endif // MAINWINDOW_H
+SettingsDialog::Settings SettingsDialog::settings() const
+{
+    return m_settings;
+}
