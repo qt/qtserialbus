@@ -132,32 +132,41 @@ QModbusClient::QModbusClient(QModbusClientPrivate &dd, QObject *parent) :
 }
 
 /*!
-    \fn QModbusReply *QModbusClient::sendReadRequest(const QModbusDataUnit &read, int slaveId) = 0
+    \fn QModbusReply *QModbusClient::sendReadRequest(const QModbusDataUnit &read,
+                                                     int slaveAddress) = 0
 
     Sends a request to read the contents of the data pointed by \a read. Returns a new valid
     QModbusReply object if it did send the request, otherwise Q_NULLPTR. Modbus network may
-    have multiple servers, each server has unique \a slaveId.
+    have multiple servers, each server has unique \a slaveAddress.
 */
 
 /*!
-    \fn QModbusReply *QModbusClient::sendWriteRequest(const QModbusDataUnit &write, int slaveId) = 0
+    \fn QModbusReply *QModbusClient::sendWriteRequest(const QModbusDataUnit &write,
+                                                      int slaveAddress) = 0
 
     Sends a request to modify the contents of the data pointed by \a write. Returns a new valid
     QModbusReply object if it did send the request, otherwise Q_NULLPTR. Modbus network may
-    have multiple servers, each server has a unique \a slaveId.
+    have multiple servers, each server has a unique \a slaveAddress.
 */
 
 /*!
     \fn QModbusReply *QModbusClient::sendReadWriteRequest(const QModbusDataUnit &read,
-                                                     const QModbusDataUnit &write, int slaveId) = 0
+                                                          const QModbusDataUnit &write,
+                                                          int slaveAddress) = 0
 
-    Sends a request to read the contents of the data pointed by \a read. In addition, sends a
-    request to modify the contents of the data pointed by \a write. Returns a new valid
+    Sends a request to read the contents of the data pointed by \a read and to modify the contents
+    of the data pointed by \a write using Modbus Function Code 23. Returns a new valid
     QModbusReply object if it did send the request, otherwise Q_NULLPTR. Modbus network may
-    have multiple servers, each server has a unique \a slaveId.
+    have multiple servers, each server has a unique \a slaveAddress.
 
     \note: Sending this kind of request is only valid of both \a read and \a write are of type
-        QModbusDataUnit::HoldingRegisters.
+    QModbusDataUnit::HoldingRegisters. If the remote device is not be able to process Modbus
+    Function Code 23 , the request cannot be performed and is usually answered with a Modbus
+    Exception Response. Also, on overlapping data areas of \a read and \a write
+    the behavior of the remote device determines the result. The Modbus Application Protocol
+    defines that the write operation is handled before the read operation. Particular devices
+    such as the Schneider Electric Premium PLC platform behave differently and perform the read
+    operation before the write operation.
 */
 
 /*!
