@@ -41,9 +41,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <QByteArray>
-#include <QModbusTcpClient>
-#include <QModbusRtuSerialMaster>
+#include <QtSerialBus/qmodbustcpclient.h>
+#include <QtSerialBus/qmodbusrtuserialmaster.h>
+#include <QtCore/qbytearray.h>
+#include <QtWidgets/qstatusbar.h>
 
 enum ModbusConnection {
     Serial,
@@ -94,9 +95,9 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
     if (!modbusDevice) {
         ui->connectButton->setDisabled(true);
         if (type == Serial)
-            ui->errorLabel->setText(tr("Could not create Modbus master."));
+            statusBar()->showMessage(tr("Could not create Modbus master."), 5000);
         else
-            ui->errorLabel->setText(tr("Could not create Modbus client."));
+            statusBar()->showMessage(tr("Could not create Modbus client."), 5000);
     } else {
         connect(modbusDevice, &QModbusClient::stateChanged,
                 this, &MainWindow::onStateChanged);
@@ -108,11 +109,11 @@ void MainWindow::on_connectButton_clicked()
     if (!modbusDevice)
         return;
 
-    ui->errorLabel->setText(QString());
+    statusBar()->clearMessage();
     if (modbusDevice->state() != QModbusDevice::ConnectedState) {
         modbusDevice->setPortName(ui->portEdit->text());
         if (!modbusDevice->connectDevice())
-            ui->errorLabel->setText(tr("Connect failed: ") + modbusDevice->errorString());
+            statusBar()->showMessage(tr("Connect failed: ") + modbusDevice->errorString(), 5000);
     } else {
         modbusDevice->disconnectDevice();
     }
@@ -138,7 +139,7 @@ void MainWindow::on_readButton_clicked()
     dataRequest.setStartAddress(ui->readAddress->text().toInt());
 
     ui->readValue->clear();
-    ui->errorLabel->setText(QString());
+    statusBar()->clearMessage();
 
     QModbusReply *reply = modbusDevice->sendReadRequest(dataRequest,
                                                         ui->readSlave->text().toInt());
@@ -151,7 +152,7 @@ void MainWindow::on_readButton_clicked()
     if (reply)
         connect(reply, &QModbusReply::finished, this, &MainWindow::readReady);
     else
-        ui->errorLabel->setText(tr("Read error: ") + modbusDevice->errorString());
+        statusBar()->showMessage(tr("Read error: ") + modbusDevice->errorString(), 5000);
 }
 
 void MainWindow::readReady()
@@ -169,13 +170,13 @@ void MainWindow::readReady()
             ui->readValue->addItem(entry);
         }
     } else if (reply->error() == QModbusReply::ProtocolError) {
-        ui->errorLabel->setText(tr("Write response error: %1 (Mobus exception: 0x%2)").
+        statusBar()->showMessage(tr("Write response error: %1 (Mobus exception: 0x%2)").
                                     arg(reply->errorText()).
-                                    arg(reply->protocolError(), -1, 16));
+                                    arg(reply->protocolError(), -1, 16), 5000);
     } else {
-        ui->errorLabel->setText(tr("Write response error: %1 (code: 0x%2)").
+        statusBar()->showMessage(tr("Write response error: %1 (code: 0x%2)").
                                     arg(reply->errorText()).
-                                    arg(reply->error(), -1, 16));
+                                    arg(reply->error(), -1, 16), 5000);
     }
 
     reply->deleteLater();
@@ -193,7 +194,7 @@ void MainWindow::on_writeButton_clicked()
     QModbusDataUnit unit(table, ui->writeAddress->text().toInt(), 1u);
     unit.setValue(0, ui->writeValue->text().toInt(0, 16));
 
-    ui->errorLabel->setText(QString());
+    statusBar()->clearMessage();
 
     // TODO extend to test write of single coil and holding register
     // Write Multiple coils and registers as well as R/W MultipleRegisters is missing
@@ -208,7 +209,7 @@ void MainWindow::on_writeButton_clicked()
     if (reply)
         connect(reply, &QModbusReply::finished, this, &MainWindow::writeReady);
     else
-        ui->errorLabel->setText(tr("Write error: ") + modbusDevice->errorString());
+       statusBar()->showMessage(tr("Write error: ") + modbusDevice->errorString(), 5000);
 }
 
 void MainWindow::writeReady()
@@ -218,13 +219,13 @@ void MainWindow::writeReady()
         return;
 
     if (reply->error() == QModbusReply::ProtocolError) {
-        ui->errorLabel->setText(tr("Write response error: %1 (Mobus exception: 0x%2)").
+        statusBar()->showMessage(tr("Write response error: %1 (Mobus exception: 0x%2)").
                                     arg(reply->errorText()).
-                                    arg(reply->protocolError(), -1, 16));
+                                    arg(reply->protocolError(), -1, 16), 5000);
     } else if (reply->error() != QModbusReply::NoError) {
-        ui->errorLabel->setText(tr("Write response error: %1 (code: 0x%2)").
+        statusBar()->showMessage(tr("Write response error: %1 (code: 0x%2)").
                                     arg(reply->errorText()).
-                                    arg(reply->error(), -1, 16));
+                                    arg(reply->error(), -1, 16), 5000);
     }
 
     reply->deleteLater();
