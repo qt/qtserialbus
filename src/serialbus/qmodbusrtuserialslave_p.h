@@ -89,6 +89,8 @@ public:
             const int size = m_serialPort->size();
             const QByteArray buffer = m_serialPort->read(size);
 
+            qCDebug(QT_MODBUS_LOW) << "Received buffer (incl ADU):" << buffer.toHex();
+
             // Index                         -> description
             // SlaveId                       -> 1 byte
             // FunctionCode                  -> 1 byte
@@ -121,8 +123,9 @@ public:
                 return;
             }
 
-            const quint16 receivedCrc = buffer[buffer.size() - 2] << 8 | buffer[buffer.size() -1];
-            if (!checkCRC(buffer, buffer.size() - 2, receivedCrc)) {
+            const quint16 receivedCrc = quint8(buffer[buffer.size() - 2]) << 8
+                                        | quint8(buffer[buffer.size() -1]);
+            if (!matchingCRC(buffer.constData(), buffer.size() - 2, receivedCrc)) {
                 qCWarning(QT_MODBUS) << "Ignoring request with wrong CRC";
                 // The quantity of CRC errors encountered by the remote device since its last
                 // restart, clear counters operation, or power–up.

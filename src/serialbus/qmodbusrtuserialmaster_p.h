@@ -117,8 +117,9 @@ public:
                 qCDebug(QT_MODBUS_LOW) << "Pending buffer:" << responseBuffer.toHex();
 
             // check CRC
-            quint16 receivedCrc = completeAduFrame[aduSize - 2] << 8 | completeAduFrame[aduSize - 1];
-            if (checkCRC(completeAduFrame, completeAduFrame.size(), receivedCrc)) {
+            quint16 receivedCrc = quint8(completeAduFrame[aduSize - 2]) << 8
+                                  | quint8(completeAduFrame[aduSize - 1]);
+            if (!matchingCRC(completeAduFrame, completeAduFrame.size() - 2, receivedCrc)) {
                 qCWarning(QT_MODBUS) << "Discarding request with wrong CRC, received:"
                                      << receivedCrc << "got:"
                                      << calculateCRC(completeAduFrame, completeAduFrame.size());

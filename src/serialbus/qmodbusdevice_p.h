@@ -97,7 +97,7 @@ public:
         crc = crc_reflect(crc & 0xFFFF, 16) ^ 0x0000;
         return (crc >> 8) | (crc << 8); // swap bytes
     }
-    bool checkCRC(const char *data, qint32 len, quint16 crc) const
+    bool matchingCRC(const char *data, qint32 len, quint16 crc) const
     {
         return calculateCRC(data, len) == crc;
     }

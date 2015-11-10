@@ -238,7 +238,7 @@ void tst_QModbusDevice::testChecksumCRC()
     QFETCH(quint16, crc);
 
     QCOMPARE(device->d_func()->calculateCRC(pdu.constData(), pdu.size()), crc);
-    QCOMPARE(device->d_func()->checkCRC(pdu.constData(), pdu.size(), crc), true);
+    QCOMPARE(device->d_func()->matchingCRC(pdu.constData(), pdu.size(), crc), true);
 }
 
 QTEST_MAIN(tst_QModbusDevice)
