@@ -136,8 +136,6 @@ QModbusReply *QModbusRtuSerialMaster::sendReadRequest(const QModbusDataUnit &rea
 {
     Q_D(QModbusRtuSerialMaster);
 
-    //TODO implement timeout behavior
-
     if (!d->m_serialPort->isOpen() || state() != QModbusDevice::ConnectedState) {
         setError(tr("Device not connected."), QModbusDevice::ConnectionError);
         qCWarning(QT_MODBUS) << "RTU master is not connected";
@@ -157,8 +155,6 @@ QModbusReply *QModbusRtuSerialMaster::sendReadRequest(const QModbusDataUnit &rea
 QModbusReply *QModbusRtuSerialMaster::sendWriteRequest(const QModbusDataUnit &write, int slaveAddress)
 {
     Q_D(QModbusRtuSerialMaster);
-
-    //TODO implement timeout behavior
 
     if (!d->m_serialPort->isOpen() || state() != QModbusDevice::ConnectedState) {
         setError(tr("Device not connected."), QModbusDevice::ConnectionError);
@@ -181,8 +177,6 @@ QModbusReply *QModbusRtuSerialMaster::sendReadWriteRequest(const QModbusDataUnit
                                                            int slaveAddress)
 {
     Q_D(QModbusRtuSerialMaster);
-
-    //TODO implement timeout behavior
 
     if (!d->m_serialPort->isOpen() || state() != QModbusDevice::ConnectedState) {
         setError(tr("Device not connected."), QModbusDevice::ConnectionError);
