@@ -668,66 +668,45 @@ QModbusResponse QModbusServerPrivate::processReadExceptionStatus(const QModbusRe
 
 QModbusResponse QModbusServerPrivate::processDiagnostics(const QModbusRequest &request)
 {
-    quint16 subFunctionCode;
-    request.decodeData(&subFunctionCode);
+#define CHECK_SIZE_AND_CONDITION(req, condition) \
+    CHECK_SIZE_EQUALS(req); \
+    do { \
+        if ((condition)) { \
+            return QModbusExceptionResponse(req.functionCode(), \
+                                            QModbusExceptionResponse::IllegalDataValue); \
+        } \
+    } while (0)
 
-    if ((subFunctionCode > Diagnostics::ForceListenOnlyMode
-         && subFunctionCode < Diagnostics::ClearCountersAndDiagnosticRegister)
-         || (subFunctionCode > Diagnostics::ReturnBusCharacterOverrunCount)) {
-        return q_func()->processPrivateModbusRequest(request);
-    }
+    quint16 subFunctionCode, data = 0xffff;
+    request.decodeData(&subFunctionCode, &data);
 
-    if (subFunctionCode == Diagnostics::ReturnQueryData) {
-        // note: we return an echo even if the data is empty as there is no minimum required
+    switch (subFunctionCode) {
+    case Diagnostics::ReturnQueryData:
         return QModbusResponse(request.functionCode(), request.data());
-    }
 
-    // all other sub-functions have two byte sub-function + 2 byte data
-    if (request.dataSize() != 4) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
-
-    if (subFunctionCode == Diagnostics::RestartCommunicationsOption) {
-        quint16 clearLog;
-        request.decodeData(&subFunctionCode, &clearLog);
-        if ((clearLog != 0xFF00) && (clearLog != 0x0000)) {
-            return QModbusExceptionResponse(request.functionCode(),
-                QModbusExceptionResponse::IllegalDataValue);
-        }
-        if (!restartCommunicationsOption(clearLog == 0xFF00)) {
+    case Diagnostics::RestartCommunicationsOption: {
+        CHECK_SIZE_AND_CONDITION(request, ((data != 0xff00) && (data != 0x0000)));
+        if (!restartCommunicationsOption(data == 0xff00)) {
             qCWarning(QT_MODBUS) << "Cannot restart server communication";
             return QModbusExceptionResponse(request.functionCode(),
                                             QModbusExceptionResponse::ServerDeviceFailure);
         }
         return QModbusResponse(request.functionCode(), request.data());
-    }
+    }   break;
 
-    if (subFunctionCode == Diagnostics::ChangeAsciiInputDelimiter) {
+    case Diagnostics::ChangeAsciiInputDelimiter: {
         const QByteArray data = request.data().mid(2, 2);
-        if (data[1] != 0x00) {
-            return QModbusExceptionResponse(request.functionCode(),
-                QModbusExceptionResponse::IllegalDataValue);
-        }
-        // TODO: this changes the variable asciiInputDelimiter only for now.
-        // cite PI-MBUS-300.pdf:
-        // The character ‘CHAR’ passed in the query data field becomes the end of message
-        // delimiter for future messages (replacing the default LF character). This function is
-        // useful in cases where a Line Feed is not wanted at the end of ASCII messages.
+        CHECK_SIZE_AND_CONDITION(request, (data[1] != 0x00));
+        // TODO: This changes the variable m_asciiInputDelimiter only for now.
+        // Cite PI-MBUS-300.pdf: The character 'CHAR' passed in the query data field becomes the
+        // end of message delimiter for future messages (replacing the default LF character). This
+        // function is useful in cases where a Line Feed is not wanted at the end of ASCII messages.
         m_asciiInputDelimiter = data[0];
         return QModbusResponse(request.functionCode(), request.data());
-    }
+    }   break;
 
-    // all other subfunctions require data = 0x0000
-    quint16 nullData;
-    request.decodeData(&subFunctionCode, &nullData);
-    if (nullData != 0x0000) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
-
-    switch (subFunctionCode) {
     case Diagnostics::ForceListenOnlyMode:
+        CHECK_SIZE_AND_CONDITION(request, (data != 0x0000));
         m_forceListenOnlyMode = true;
         // TODO: this is a simple way of encoding the event byte. As we currently
         // have no methods for the four types of event bytes to store, use this as
@@ -737,14 +716,17 @@ QModbusResponse QModbusServerPrivate::processDiagnostics(const QModbusRequest &r
         // after setting the server into listen only mode (as with all responses
         // when listenOnly == true)
         return QModbusResponse();
+
     case Diagnostics::ClearCountersAndDiagnosticRegister:
+        CHECK_SIZE_AND_CONDITION(request, (data != 0x0000));
+        // TODO: According to PI_MBUS_300 specification, the clearing of the diagnostic
+        // register is dependent on the device model. For legacy support to fulfill this
+        // requirement, a server configuration variable could be added to check if the
+        // diagnostic register should be cleared or not.
         resetCommunicationCounters();
         m_diagnosticRegister = 0x0000;
-        // TODO: according to PI_MBUS_300 specification, the clearing of the diagnostic
-        // register is dependent on the device model. For legacy support to fullfill
-        // this requirement, a server configuration variable could be added to check
-        // if the diagnostic register should be cleared or not.
         return QModbusResponse(request.functionCode(), request.data());
+
     case Diagnostics::ReturnDiagnosticRegister:
     case Diagnostics::ReturnBusMessageCount:
     case Diagnostics::ReturnBusCommunicationErrorCount:
@@ -754,11 +736,16 @@ QModbusResponse QModbusServerPrivate::processDiagnostics(const QModbusRequest &r
     case Diagnostics::ReturnServerNAKCount:
     case Diagnostics::ReturnServerBusyCount:
     case Diagnostics::ReturnBusCharacterOverrunCount:
+        CHECK_SIZE_AND_CONDITION(request, (data != 0x0000));
         return QModbusResponse(request.functionCode(), subFunctionCode,
                                m_counters[static_cast<Counter> (subFunctionCode)]);
-    default:
-        return q_func()->processPrivateModbusRequest(request);
+
+    case Diagnostics::ClearOverrunCounterAndFlag:
+        break; // Modicon 884 PLC specific, deliberately ignore
     }
+    return q_func()->processPrivateModbusRequest(request);
+
+#undef CHECK_SIZE_AND_CONDITION
 }
 
 QModbusResponse QModbusServerPrivate::processGetCommEventCounter(const QModbusRequest &request)
