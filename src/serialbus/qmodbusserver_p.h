@@ -116,10 +116,7 @@ private:
     void storeEvent(quint8 eventByte);
 
     // Device specific fields to be moved later
-    QModbusDataUnit m_discreteInputs;
-    QModbusDataUnit m_coils;
-    QModbusDataUnit m_inputRegisters;
-    QModbusDataUnit m_holdingRegisters;
+    QModbusDataUnitMap m_modbusDataUnitMap;
 
     int m_slaveAddress = 0;
 

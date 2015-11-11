@@ -1082,6 +1082,22 @@ private slots:
         }
         QCOMPARE(s_msg, QString("QModbusServer::setData() call did end in the expected OVERRIDE."));
     }
+
+    void testReadWriteDataMissingOrInvalidRegister()
+    {
+        TestServer local;
+        local.setMap({ { QModbusDataUnit::Invalid, QModbusDataUnit() },
+            { QModbusDataUnit::Coils, QModbusDataUnit(QModbusDataUnit::Coils) },
+            { QModbusDataUnit::DiscreteInputs, QModbusDataUnit(QModbusDataUnit::DiscreteInputs) }});
+
+        QModbusDataUnit invalid;
+        QCOMPARE(local.data(&invalid), false);
+        QCOMPARE(local.setData(invalid), false);
+
+        QModbusDataUnit missing(QModbusDataUnit::HoldingRegisters);
+        QCOMPARE(local.data(&missing), false);
+        QCOMPARE(local.setData(missing), false);
+    }
 };
 
 QTEST_MAIN(tst_QModbusServer)

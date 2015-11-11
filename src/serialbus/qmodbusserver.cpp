@@ -296,63 +296,44 @@ bool QModbusServer::setData(const QModbusDataUnit &newData)
 }
 
 /*!
-    Writes \a newData to the Modbus server map.
-    Returns \c false if the \a newData range is outside of the map range.
+    Writes \a newData to the Modbus server map. Returns \c true on success,
+    or \c false if the \a newData range is outside of the map range or the
+    registerType() does not exist.
 
-    \note Sub-classes that implement writing to a different backing store then default one, also
-    need to implement setMap() and readData(). The dataWritten() signal needs to be emitted from
-    within the functions implementation as well.
+    \note Sub-classes that implement writing to a different backing store
+    then default one, also need to implement setMap() and readData(). The
+    dataWritten() signal needs to be emitted from within the functions
+    implementation as well.
 
     \sa setMap(), readData(), dataWritten()
 */
 bool QModbusServer::writeData(const QModbusDataUnit &newData)
 {
     Q_D(QModbusServer);
-
-    QModbusDataUnit *current = Q_NULLPTR;
-
-    switch (newData.registerType()) {
-    case QModbusDataUnit::Invalid:
-        return false;
-    case QModbusDataUnit::DiscreteInputs:
-        current = &(d->m_discreteInputs);
-        break;
-    case QModbusDataUnit::Coils:
-        current = &(d->m_coils);
-        break;
-    case QModbusDataUnit::InputRegisters:
-        current = &(d->m_inputRegisters);
-        break;
-    case QModbusDataUnit::HoldingRegisters:
-        current = &(d->m_holdingRegisters);
-        break;
-    }
-
-    if (!current->isValid())
+    if (!d->m_modbusDataUnitMap.contains(newData.registerType()))
         return false;
 
-    //check range start is within internal map range
-    int internalRangeEndAddress = current->startAddress() + current->valueCount() - 1;
-    if (newData.startAddress() < current->startAddress()
+    QModbusDataUnit &current = d->m_modbusDataUnitMap[newData.registerType()];
+    if (!current.isValid())
+        return false;
+
+    // check range start is within internal map range
+    int internalRangeEndAddress = current.startAddress() + current.valueCount() - 1;
+    if (newData.startAddress() < current.startAddress()
         || newData.startAddress() > internalRangeEndAddress) {
         return false;
     }
 
-    //check range end is within internal map range
+    // check range end is within internal map range
     int rangeEndAddress = newData.startAddress() + newData.valueCount() - 1;
-    if (rangeEndAddress < current->startAddress()
-        || rangeEndAddress > internalRangeEndAddress) {
+    if (rangeEndAddress < current.startAddress() || rangeEndAddress > internalRangeEndAddress)
         return false;
-    }
 
     bool changeRequired = false;
-    for (int i = newData.startAddress();
-         i < newData.startAddress() + int(newData.valueCount()); i++) {
+    for (int i = newData.startAddress(); i <= rangeEndAddress; i++) {
         quint16 newValue = newData.value(i - newData.startAddress());
-        if (current->value(i) != newValue) {
-            current->setValue(i, newValue);
-            changeRequired = true;
-        }
+        changeRequired |= (current.value(i) != newValue);
+        current.setValue(i, newValue);
     }
 
     if (changeRequired)
@@ -361,10 +342,13 @@ bool QModbusServer::writeData(const QModbusDataUnit &newData)
 }
 
 /*!
-    Returns the values in the register range given by \a newData.
+    Reads the values in the register range given by \a newData and writes the
+    data back to \a newData. Returns \c true on success or \c false if
+    \a newData is \c 0, the \a newData range is outside of the map range or the
+    registerType() does not exist.
 
-    \note Sub-classes that implement reading from a different backing store then default one, also
-    need to implement setMap() and writeData().
+    \note Sub-classes that implement reading from a different backing store
+    then default one, also need to implement setMap() and writeData().
 
     \sa setMap(), writeData()
 */
@@ -372,46 +356,32 @@ bool QModbusServer::readData(QModbusDataUnit *newData) const
 {
     Q_D(const QModbusServer);
 
-    if (!newData)
+    if ((!newData) || (!d->m_modbusDataUnitMap.contains(newData->registerType())))
         return false;
 
-    const QModbusDataUnit *current;
-
-    switch (newData->registerType()) {
-    case QModbusDataUnit::DiscreteInputs:
-        current = &(d->m_discreteInputs);
-        break;
-    case QModbusDataUnit::Coils:
-        current = &(d->m_coils);
-        break;
-    case QModbusDataUnit::InputRegisters:
-        current = &(d->m_inputRegisters);
-        break;
-    case QModbusDataUnit::HoldingRegisters:
-        current = &(d->m_holdingRegisters);
-        break;
-    default:
+    const QModbusDataUnit &current = d->m_modbusDataUnitMap.value(newData->registerType());
+    if (!current.isValid())
         return false;
-    }
 
-    if (newData->startAddress() < 0) { //return entire map for given type
-        *newData = *current;
+     // return entire map for given type
+    if (newData->startAddress() < 0) {
+        *newData = current;
         return true;
     }
 
-    //check range start is within internal map range
-    int internalRangeEndAddress = current->startAddress() + current->valueCount() - 1;
-    if (newData->startAddress() < current->startAddress()
+    // check range start is within internal map range
+    int internalRangeEndAddress = current.startAddress() + current.valueCount() - 1;
+    if (newData->startAddress() < current.startAddress()
         || newData->startAddress() > internalRangeEndAddress) {
         return false;
     }
 
-    //check range end is within internal map range
+    // check range end is within internal map range
     const int rangeEndAddress = newData->startAddress() + newData->valueCount() - 1;
-    if (rangeEndAddress < current->startAddress() || rangeEndAddress > internalRangeEndAddress)
+    if (rangeEndAddress < current.startAddress() || rangeEndAddress > internalRangeEndAddress)
         return false;
 
-    newData->setValues(current->values().mid(newData->startAddress(), newData->valueCount()));
+    newData->setValues(current.values().mid(newData->startAddress(), newData->valueCount()));
     return true;
 }
 
@@ -453,10 +423,7 @@ QModbusResponse QModbusServer::processPrivateModbusRequest(const QModbusPdu &req
 
 bool QModbusServerPrivate::setMap(const QModbusDataUnitMap &map)
 {
-    m_discreteInputs = map.value(QModbusDataUnit::DiscreteInputs);
-    m_coils = map.value(QModbusDataUnit::Coils);
-    m_inputRegisters = map.value(QModbusDataUnit::InputRegisters);
-    m_holdingRegisters = map.value(QModbusDataUnit::HoldingRegisters);
+    m_modbusDataUnitMap = map;
     return true;
 }
 
