@@ -37,8 +37,8 @@
 #ifndef QMODBUSSERIALMASTER_P_H
 #define QMODBUSSERIALMASTER_P_H
 
-#include "qmodbusrtuserialmaster.h"
-#include "qmodbusclient_p.h"
+#include <QtSerialBus/qmodbusrtuserialmaster.h>
+#include <QtSerialBus/private/qmodbusclient_p.h>
 
 #include <QtCore/qloggingcategory.h>
 #include <QtCore/qpointer.h>

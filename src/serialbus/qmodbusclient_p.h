@@ -37,9 +37,9 @@
 #ifndef QMODBUSCLIENT_P_H
 #define QMODBUSCLIENT_P_H
 
-#include "qmodbusclient.h"
-#include "qmodbusdevice_p.h"
-#include "qmodbuspdu.h"
+#include <QtSerialBus/qmodbusclient.h>
+#include <QtSerialBus/private/qmodbusdevice_p.h>
+#include <QtSerialBus/qmodbuspdu.h>
 
 #include <QtCore/qtimer.h>
 #include <QtCore/qdebug.h>

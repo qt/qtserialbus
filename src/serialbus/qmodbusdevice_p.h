@@ -37,8 +37,8 @@
 #ifndef QMODBUSDEVICE_P_H
 #define QMODBUSDEVICE_P_H
 
-#include "qmodbusdevice.h"
-#include "QtCore/private/qobject_p.h"
+#include <QtSerialBus/qmodbusdevice.h>
+#include <QtCore/private/qobject_p.h>
 
 //
 //  W A R N I N G

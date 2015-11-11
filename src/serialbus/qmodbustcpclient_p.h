@@ -37,8 +37,8 @@
 #ifndef QMODBUSTCPCLIENT_P_H
 #define QMODBUSTCPCLIENT_P_H
 
-#include "qmodbusclient_p.h"
-#include "qmodbustcpclient.h"
+#include <QtSerialBus/private/qmodbusclient_p.h>
+#include <QtSerialBus/qmodbustcpclient.h>
 
 //
 //  W A R N I N G

@@ -37,10 +37,10 @@
 #ifndef QMODBUSERVER_P_H
 #define QMODBUSERVER_P_H
 
-#include "qmodbusserver.h"
-#include "qmodbusdevice_p.h"
-#include "qmodbusdataunit.h"
-#include "qmodbus_symbols_p.h"
+#include <QtSerialBus/qmodbusserver.h>
+#include <QtSerialBus/private/qmodbusdevice_p.h>
+#include <QtSerialBus/qmodbusdataunit.h>
+#include <QtSerialBus/private/qmodbus_symbols_p.h>
 
 #include <QtCore/qvector.h>
 
