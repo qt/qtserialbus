@@ -47,49 +47,49 @@ enum struct Type {
     Response
 };
 
-static quint8 minimumDataSize(QModbusPdu::FunctionCode code, Type type)
+static int minimumDataSize(QModbusPdu::FunctionCode code, Type type)
 {
     switch (code) {
     case QModbusPdu::ReadCoils:
     case QModbusPdu::ReadDiscreteInputs:
-        return type == Type::Request ? 4u : 2u;
+        return type == Type::Request ? 4 : 2;
     case QModbusPdu::WriteSingleCoil:
     case QModbusPdu::WriteSingleRegister:
-        return 4u;
+        return 4;
     case QModbusPdu::ReadHoldingRegisters:
     case QModbusPdu::ReadInputRegisters:
-        return type == Type::Request ? 4u : 3u;
+        return type == Type::Request ? 4 : 3;
     case QModbusPdu::ReadExceptionStatus:
-        return type == Type::Request ? 0u : 1u;
+        return type == Type::Request ? 0 : 1;
     case QModbusPdu::Diagnostics:
-        return 4u;
+        return 4;
     case QModbusPdu::GetCommEventCounter:
-        return type == Type::Request ? 0u : 4u;
+        return type == Type::Request ? 0 : 4;
     case QModbusPdu::GetCommEventLog:
-        return type == Type::Request ? 0u : 8u;
+        return type == Type::Request ? 0 : 8;
     case QModbusPdu::WriteMultipleCoils:
-        return type == Type::Request ? 6u : 4u;
+        return type == Type::Request ? 6 : 4;
     case QModbusPdu::WriteMultipleRegisters:
-        return type == Type::Request ? 7u : 4u;
+        return type == Type::Request ? 7 : 4;
     case QModbusPdu::ReportServerId:
-        return type == Type::Request ? 0u : 4u;   // TODO: The spec is not really clear here.
+        return type == Type::Request ? 0 : 4;
     case QModbusPdu::ReadFileRecord:
-        return type == Type::Request ? 8u : 5u;
+        return type == Type::Request ? 8 : 5;
     case QModbusPdu::WriteFileRecord:
-        return 10u;
+        return 10;
     case QModbusPdu::MaskWriteRegister:
-        return 6u;
+        return 6;
     case QModbusPdu::ReadWriteMultipleRegisters:
-        return type == Type::Request ? 11u : 3u;
+        return type == Type::Request ? 11 : 3;
     case QModbusPdu::ReadFifoQueue:
-        return type == Type::Request ? 2u : 6u;
+        return type == Type::Request ? 2 : 6;
     case QModbusPdu::EncapsulatedInterfaceTransport:
         break; // TODO: The spec is not really clear here.
     case QModbusPdu::Invalid:
     case QModbusPdu::UndefinedFunctionCode:
-        return 0u;
+        return -1;
     }
-    return 0u;
+    return -1;
 }
 
 }   // namespace Private
@@ -394,22 +394,27 @@ QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu)
 
 /*!
     Returns the minimum data size for a request, based on the function \a code.
+    \note The function returns \c {-1} if the size could not be properly calculated.
 */
-quint8 QModbusRequest::minimumDataSize(FunctionCode code)
+int QModbusRequest::minimumDataSize(FunctionCode code)
 {
+    // TODO: Wrong for QModbusPdu::EncapsulatedInterfaceTransport.
     return Private::minimumDataSize(code, Private::Type::Request);
 }
 
 /*!
     Calculates the expected data size for a request, based on the function \a code.
     The \a data byte array is expected to be the part directly following the function
-    code. Returns the full size of the PDU's data part; -1 if the size could not be
+    code. Returns the full size of the PDU's data part; \c {-1} if the size could not be
     properly calculated.
 */
 int QModbusRequest::calculateDataSize(FunctionCode code, const QByteArray &data)
 {
     int size = -1;
     int minimum = Private::minimumDataSize(code, Private::Type::Request);
+    if (minimum < 0)
+        return size;
+
     switch (code) {
     case QModbusPdu::WriteMultipleCoils:
         minimum -= 1; // first payload payload byte
@@ -429,7 +434,10 @@ int QModbusRequest::calculateDataSize(FunctionCode code, const QByteArray &data)
         break;
     case QModbusPdu::Diagnostics:
     case QModbusPdu::EncapsulatedInterfaceTransport:
-        size = 252; // TODO: Implement!
+        // The following part makes sure we pass all checks in the request processing functions
+        // and unhandled function codes get passed on the processPrivateModbusRequest function.
+        // TODO: Implement for real!
+        size = data.size();
         break;
     default:
         size = minimum;
@@ -450,7 +458,9 @@ QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu)
     pdu.setFunctionCode(static_cast<QModbusPdu::FunctionCode> (code));
 
     int size = Private::minimumDataSize(pdu.functionCode(), Private::Type::Request);
-    if (size == 0u)
+    if (size < 0)
+        pdu.setFunctionCode(QModbusRequest::Invalid);
+    if (size <= 0)  // TODO: Wrong for QModbusPdu::EncapsulatedInterfaceTransport.
         return stream;
 
     QByteArray data(size, Qt::Uninitialized);
@@ -521,26 +531,28 @@ QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu)
 
 /*!
     Returns the minimum data size for a response, based on the function \a code.
+    \note The function returns \c {-1} if the size could not be properly calculated.
 */
-quint8 QModbusResponse::minimumDataSize(FunctionCode code)
+int QModbusResponse::minimumDataSize(FunctionCode code)
 {
     if (code & quint8(0x80))
-        return 1u;
+        return 1;
+    // TODO: Wrong for QModbusPdu::EncapsulatedInterfaceTransport.
     return Private::minimumDataSize(code, Private::Type::Response);
 }
 
 /*!
     Calculates the expected data size for a response, based on the function \a code.
     The \a data byte array is expected to be the part directly following the function
-    code. Returns the full size of the PDU's data part; -1 if the size could not be
+    code. Returns the full size of the PDU's data part; \c {-1} if the size could not be
     properly calculated.
 */
 int QModbusResponse::calculateDataSize(FunctionCode code, const QByteArray &data)
 {
-    if (code & quint8(0x80))
-        return 1;
-
     int size = -1;
+    if (QModbusResponse::minimumDataSize(code) < 0)
+        return size;
+
     switch (code) {
     case QModbusResponse::ReadCoils:
     case QModbusResponse::ReadDiscreteInputs:
@@ -564,7 +576,9 @@ int QModbusResponse::calculateDataSize(FunctionCode code, const QByteArray &data
     case QModbusPdu::Diagnostics:
     case QModbusResponse::ReportServerId:
     case QModbusPdu::EncapsulatedInterfaceTransport:
-        size = 252; // TODO: Implement!
+        // The following part makes sure we pass all checks in the response processing
+        // function. TODO: Implement for real!
+        size = data.size();
         break;
     default:
         size = QModbusResponse::minimumDataSize(code);
@@ -581,10 +595,14 @@ int QModbusResponse::calculateDataSize(FunctionCode code, const QByteArray &data
 QDataStream &operator>>(QDataStream &stream, QModbusResponse &pdu)
 {
     quint8 code;
-    stream >> code;
+    stream >> code;// TODO: Wrong for QModbusPdu::EncapsulatedInterfaceTransport.
     pdu.setFunctionCode(static_cast<QModbusPdu::FunctionCode> (code));
 
     int size = Private::minimumDataSize(pdu.functionCode(), Private::Type::Response);
+    if (size < 0)
+        pdu.setFunctionCode(QModbusResponse::Invalid);
+    if (size <= 0)  // TODO: Wrong for QModbusPdu::EncapsulatedInterfaceTransport.
+        return stream;
 
     QByteArray data(size, Qt::Uninitialized);
     stream.device()->peek(data.data(), data.size());

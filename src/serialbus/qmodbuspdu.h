@@ -194,7 +194,7 @@ public:
         : QModbusPdu(code, newData)
     {}
 
-    Q_SERIALBUS_EXPORT static quint8 minimumDataSize(FunctionCode code);
+    Q_SERIALBUS_EXPORT static int minimumDataSize(FunctionCode code);
     Q_SERIALBUS_EXPORT static int calculateDataSize(FunctionCode code, const QByteArray &data);
 };
 Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu);
@@ -214,7 +214,7 @@ public:
         : QModbusPdu(code, newData)
     {}
 
-    Q_SERIALBUS_EXPORT static quint8 minimumDataSize(FunctionCode code);
+    Q_SERIALBUS_EXPORT static int minimumDataSize(FunctionCode code);
     Q_SERIALBUS_EXPORT static int calculateDataSize(FunctionCode code, const QByteArray &data);
 };
 

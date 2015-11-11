@@ -57,49 +57,49 @@ private:
     QtMessageHandler oldMessageHandler;
 };
 
-static quint8 minimumDataSize(QModbusPdu::FunctionCode code, bool request)
+static int minimumDataSize(QModbusPdu::FunctionCode code, bool request)
 {
     switch (code) {
-    case QModbusPdu::Invalid:
-    case QModbusPdu::UndefinedFunctionCode:
-        return 0u;
     case QModbusPdu::ReadCoils:
     case QModbusPdu::ReadDiscreteInputs:
-        return request ? 4u : 2u;
+        return request ? 4 : 2;
     case QModbusPdu::WriteSingleCoil:
     case QModbusPdu::WriteSingleRegister:
-        return 4u;
+        return 4;
     case QModbusPdu::ReadHoldingRegisters:
     case QModbusPdu::ReadInputRegisters:
-        return request ? 4u : 3u;
+        return request ? 4 : 3;
     case QModbusPdu::ReadExceptionStatus:
-        return request ? 0u : 1u;
+        return request ? 0 : 1;
     case QModbusPdu::Diagnostics:
-        return 4u;
+        return 4;
     case QModbusPdu::GetCommEventCounter:
-        return request ? 0u : 4u;
+        return request ? 0 : 4;
     case QModbusPdu::GetCommEventLog:
-        return request ? 0u : 8u;
+        return request ? 0 : 8;
     case QModbusPdu::WriteMultipleCoils:
-        return request ? 6u : 4u;
+        return request ? 6 : 4;
     case QModbusPdu::WriteMultipleRegisters:
-        return request ? 7u : 4u;
+        return request ? 7 : 4;
     case QModbusPdu::ReportServerId:
-        return request ? 0u : 4u;   // TODO: The spec is not really clear here.
+        return request ? 0 : 4;
     case QModbusPdu::ReadFileRecord:
-        return request ? 8u : 5u;
+        return request ? 8 : 5;
     case QModbusPdu::WriteFileRecord:
-        return 10u;
+        return 10;
     case QModbusPdu::MaskWriteRegister:
-        return 6u;
+        return 6;
     case QModbusPdu::ReadWriteMultipleRegisters:
-        return request ? 11u : 3u;
+        return request ? 11 : 3;
     case QModbusPdu::ReadFifoQueue:
-        return request ? 2u : 6u;
+        return request ? 2 : 6;
     case QModbusPdu::EncapsulatedInterfaceTransport:
         break; // TODO: The spec is not really clear here.
+    case QModbusPdu::Invalid:
+    case QModbusPdu::UndefinedFunctionCode:
+        return -1;
     }
-    return 0u;
+    return -1;
 }
 
 class tst_QModbusPdu : public QObject
