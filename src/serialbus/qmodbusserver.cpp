@@ -38,6 +38,7 @@
 #include "qmodbusserver_p.h"
 #include "qmodbus_symbols_p.h"
 
+#include <QtCore/qdebug.h>
 #include <QtCore/qloggingcategory.h>
 
 #include <bitset>
@@ -505,6 +506,24 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
     return q_func()->processPrivateModbusRequest(request);
 }
 
+#define CHECK_SIZE_EQUALS(req) \
+    do { \
+        if (req.dataSize() != QModbusRequest::minimumDataSize(req.functionCode())) { \
+            qCDebug(QT_MODBUS) << "The request's data size does not equal the expected size."; \
+            return QModbusExceptionResponse(req.functionCode(), \
+                                            QModbusExceptionResponse::IllegalDataValue); \
+        } \
+    } while (0)
+
+#define CHECK_SIZE_LESS_THAN(req) \
+    do { \
+        if (req.dataSize() < QModbusRequest::minimumDataSize(req.functionCode())) { \
+            qCDebug(QT_MODBUS) << "The request's data size is less than the expected size."; \
+            return QModbusExceptionResponse(req.functionCode(), \
+                                            QModbusExceptionResponse::IllegalDataValue); \
+        } \
+    } while (0)
+
 QModbusResponse QModbusServerPrivate::processReadCoilsRequest(const QModbusRequest &request)
 {
     return readBits(request, QModbusDataUnit::Coils);
@@ -518,12 +537,7 @@ QModbusResponse QModbusServerPrivate::processReadDiscreteInputsRequest(const QMo
 QModbusResponse QModbusServerPrivate::readBits(const QModbusPdu &request,
                                                QModbusDataUnit::RegisterType unitType)
 {
-    // request data size corrupt
-    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
-
+    CHECK_SIZE_EQUALS(request);
     quint16 address, count;
     request.decodeData(&address, &count);
 
@@ -574,12 +588,7 @@ QModbusResponse QModbusServerPrivate::processReadInputRegistersRequest(const QMo
 QModbusResponse QModbusServerPrivate::readBytes(const QModbusPdu &request,
                                                 QModbusDataUnit::RegisterType unitType)
 {
-    // request data size corrupt
-    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
-
+    CHECK_SIZE_EQUALS(request);
     quint16 address, count;
     request.decodeData(&address, &count);
 
@@ -612,12 +621,7 @@ QModbusResponse QModbusServerPrivate::processWriteSingleRegisterRequest(const QM
 QModbusResponse QModbusServerPrivate::writeSingle(const QModbusPdu &request,
                                                   QModbusDataUnit::RegisterType unitType)
 {
-    // request data size corrupt
-    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
-
+    CHECK_SIZE_EQUALS(request);
     quint16 address, value;
     request.decodeData(&address, &value);
 
@@ -643,11 +647,7 @@ QModbusResponse QModbusServerPrivate::writeSingle(const QModbusPdu &request,
 
 QModbusResponse QModbusServerPrivate::processReadExceptionStatus(const QModbusRequest &request)
 {
-    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
-        return QModbusExceptionResponse(request.functionCode(),
-                                        QModbusExceptionResponse::IllegalDataValue);
-    }
-
+    CHECK_SIZE_EQUALS(request);
     // Get the requested range out of the registers.
     QModbusDataUnit coils(QModbusDataUnit::Coils, m_exceptionStatusOffset, 8);
     if (!q_func()->data(&coils)) {
@@ -750,20 +750,13 @@ QModbusResponse QModbusServerPrivate::processDiagnostics(const QModbusRequest &r
 
 QModbusResponse QModbusServerPrivate::processGetCommEventCounter(const QModbusRequest &request)
 {
-    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
-        return QModbusExceptionResponse(request.functionCode(),
-                                        QModbusExceptionResponse::IllegalDataValue);
-    }
+    CHECK_SIZE_EQUALS(request);
     return QModbusResponse(request.functionCode(), m_deviceBusy, m_counters[Counter::CommEvent]);
 }
 
 QModbusResponse QModbusServerPrivate::processGetCommEventLog(const QModbusRequest &request)
 {
-    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
-        return QModbusExceptionResponse(request.functionCode(),
-                                        QModbusExceptionResponse::IllegalDataValue);
-    }
-
+    CHECK_SIZE_EQUALS(request);
     m_commEventLog.normalizeIndexes();
     QVector<quint16> eventLog(m_commEventLog.count());
     for (int i = 0; i < m_commEventLog.count(); ++i)
@@ -777,12 +770,7 @@ QModbusResponse QModbusServerPrivate::processGetCommEventLog(const QModbusReques
 
 QModbusResponse QModbusServerPrivate::processWriteMultipleCoilsRequest(const QModbusRequest &request)
 {
-    // request data size corrupt: 5 header + 1 minimum data byte required
-    if (request.dataSize() < QModbusRequest::minimumDataSize(request.functionCode())) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
-
+    CHECK_SIZE_LESS_THAN(request);
     quint16 address, numberOfCoils;
     quint8 byteCount;
     request.decodeData(&address, &numberOfCoils, &byteCount);
@@ -836,12 +824,7 @@ QModbusResponse QModbusServerPrivate::processWriteMultipleCoilsRequest(const QMo
 QModbusResponse QModbusServerPrivate::processWriteMultipleRegistersRequest(
     const QModbusRequest &request)
 {
-    // request data size corrupt: 5 header + 2 minimum data byte required
-    if (request.dataSize() < QModbusRequest::minimumDataSize(request.functionCode())) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
-
+    CHECK_SIZE_LESS_THAN(request);
     quint16 address, numberOfRegisters;
     quint8 byteCount;
     request.decodeData(&address, &numberOfRegisters, &byteCount);
@@ -887,11 +870,7 @@ QModbusResponse QModbusServerPrivate::processWriteMultipleRegistersRequest(
 
 QModbusResponse QModbusServerPrivate::processMaskWriteRegister(const QModbusRequest &request)
 {
-    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
-
+    CHECK_SIZE_EQUALS(request);
     quint16 address, andMask, orMask;
     request.decodeData(&address, &andMask, &orMask);
 
@@ -912,12 +891,7 @@ QModbusResponse QModbusServerPrivate::processMaskWriteRegister(const QModbusRequ
 QModbusResponse QModbusServerPrivate::processReadWriteMultipleRegistersRequest(
     const QModbusRequest &request)
 {
-    // request data size corrupt: 9 header + 2 minimum data byte required
-    if (request.dataSize() < QModbusRequest::minimumDataSize(request.functionCode())) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
-
+    CHECK_SIZE_LESS_THAN(request);
     quint16 readStartAddress, readQuantity, writeStartAddress, writeQuantity;
     quint8 byteCount;
     request.decodeData(&readStartAddress, &readQuantity,
@@ -976,10 +950,7 @@ QModbusResponse QModbusServerPrivate::processReadWriteMultipleRegistersRequest(
 
 QModbusResponse QModbusServerPrivate::processReadFifoQueue(const QModbusRequest &request)
 {
-    if (request.dataSize() < QModbusRequest::minimumDataSize(request.functionCode())) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
+    CHECK_SIZE_LESS_THAN(request);
     quint16 address;
     request.decodeData(&address);
 
@@ -1053,5 +1024,8 @@ void QModbusServerPrivate::storeEvent(quint8 eventByte)
     // message completion. Add a check once we implement event counting.
     m_counters[Counter::CommEvent]++;
 }
+
+#undef CHECK_SIZE_EQUALS
+#undef CHECK_SIZE_LESS_THAN
 
 QT_END_NAMESPACE
