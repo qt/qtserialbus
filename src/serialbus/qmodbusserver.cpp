@@ -377,8 +377,6 @@ bool QModbusServer::readData(QModbusDataUnit *newData) const
     const QModbusDataUnit *current;
 
     switch (newData->registerType()) {
-    case QModbusDataUnit::Invalid:
-        return false;
     case QModbusDataUnit::DiscreteInputs:
         current = &(d->m_discreteInputs);
         break;
@@ -391,6 +389,8 @@ bool QModbusServer::readData(QModbusDataUnit *newData) const
     case QModbusDataUnit::HoldingRegisters:
         current = &(d->m_holdingRegisters);
         break;
+    default:
+        return false;
     }
 
     if (newData->startAddress() < 0) { //return entire map for given type
