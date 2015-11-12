@@ -696,9 +696,6 @@ QModbusResponse QModbusServerPrivate::processDiagnostics(const QModbusRequest &r
         CHECK_SIZE_AND_CONDITION(request, (data != 0x0000));
         return QModbusResponse(request.functionCode(), subFunctionCode,
                                m_counters[static_cast<Counter> (subFunctionCode)]);
-
-    case Diagnostics::ClearOverrunCounterAndFlag:
-        break; // Modicon 884 PLC specific, deliberately ignore
     }
     return q_func()->processPrivateModbusRequest(request);
 
