@@ -175,7 +175,7 @@ public:
             if (isListenOnly())
                 event |= QModbusCommEvent::SendFlag::CurrentlyInListenOnlyMode;
 
-            if (q->processesBroadcast() || !response.isValid()) {
+            if ((!response.isValid()) || isListenOnly() || q->processesBroadcast()) {
                 // The quantity of messages addressed to the remote device for which it has
                 // returned no response (neither a normal response nor an exception response),
                 // since its last restart, clear counters operation, or power–up.
