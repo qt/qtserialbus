@@ -538,7 +538,6 @@ QModbusResponse QModbusServerPrivate::readBits(const QModbusPdu &request,
         bytes.append(static_cast<quint8> (byte.to_ulong()));
     }
 
-    // TODO: Increase message counters when they are implemented
     return QModbusResponse(request.functionCode(), byteCount, bytes);
 }
 
@@ -571,7 +570,6 @@ QModbusResponse QModbusServerPrivate::readBytes(const QModbusPdu &request,
             QModbusExceptionResponse::IllegalDataAddress);
     }
 
-    // TODO: Increase message counters when they are implemented
     return QModbusResponse(request.functionCode(), quint8(count * 2), unit.values());
 }
 
@@ -608,7 +606,6 @@ QModbusResponse QModbusServerPrivate::writeSingle(const QModbusPdu &request,
             QModbusExceptionResponse::ServerDeviceFailure);
     }
 
-    // - TODO: Increase message counters when they are implemented
     return QModbusResponse(request.functionCode(), address, value);
 }
 
@@ -629,7 +626,6 @@ QModbusResponse QModbusServerPrivate::processReadExceptionStatus(const QModbusRe
         byte[currentBit] = coils.value(address++); // The padding happens inside value().
     bytes.append(static_cast<quint8> (byte.to_ulong()));
 
-    // TODO: Increase message counters when they are implemented
     return QModbusResponse(request.functionCode(), bytes);
 }
 
@@ -675,13 +671,7 @@ QModbusResponse QModbusServerPrivate::processDiagnostics(const QModbusRequest &r
     case Diagnostics::ForceListenOnlyMode:
         CHECK_SIZE_AND_CONDITION(request, (data != 0x0000));
         m_forceListenOnlyMode = true;
-        // TODO: this is a simple way of encoding the event byte. As we currently
-        // have no methods for the four types of event bytes to store, use this as
-        // a temporary way.
-        storeEvent(4u);
-        // TODO: this is only a dummy response. The response should not leave the server
-        // after setting the server into listen only mode (as with all responses
-        // when listenOnly == true)
+        storeModbusCommEvent(QModbusCommEvent::EnteredListenOnlyMode);
         return QModbusResponse();
 
     case Diagnostics::ClearCountersAndDiagnosticRegister:
@@ -784,7 +774,6 @@ QModbusResponse QModbusServerPrivate::processWriteMultipleCoilsRequest(const QMo
             QModbusExceptionResponse::ServerDeviceFailure);
     }
 
-    // - TODO: Increase message counters when they are implemented
     return QModbusResponse(request.functionCode(), address, numberOfCoils);
 }
 
@@ -831,7 +820,6 @@ QModbusResponse QModbusServerPrivate::processWriteMultipleRegistersRequest(
             QModbusExceptionResponse::ServerDeviceFailure);
     }
 
-    // - TODO: Increase message counters when they are implemented
     return QModbusResponse(request.functionCode(), address, numberOfRegisters);
 }
 
@@ -910,7 +898,6 @@ QModbusResponse QModbusServerPrivate::processReadWriteMultipleRegistersRequest(
             QModbusExceptionResponse::IllegalDataAddress);
     }
 
-    // - TODO: Increase message counters when they are implemented
     return QModbusResponse(request.functionCode(), quint8(readQuantity * 2),
                            readRegisters.values());
 }
@@ -962,8 +949,8 @@ bool QModbusServerPrivate::restartCommunicationsOption(bool clearLog)
 
     resetCommunicationCounters();
     m_forceListenOnlyMode = false;
+    storeModbusCommEvent(QModbusCommEvent::InitiatedCommunicationRestart);
 
-    storeEvent(0u);
     return q_func()->connectDevice();
 }
 
@@ -984,12 +971,9 @@ bool QModbusServerPrivate::restartCommunicationsOption(bool clearLog)
 
     \sa getCommEventLog(), restartCommunicationsOption()
 */
-void QModbusServerPrivate::storeEvent(quint8 eventByte)
+void QModbusServerPrivate::storeModbusCommEvent(const QModbusCommEvent &eventByte)
 {
     m_commEventLog.prepend(eventByte);
-    // TODO: The definition of commEventCounter says that it only stores successful
-    // message completion. Add a check once we implement event counting.
-    m_counters[Counter::CommEvent]++;
 }
 
 #undef CHECK_SIZE_EQUALS

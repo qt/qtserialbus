@@ -97,6 +97,10 @@ public:
             // FunctionCode specific content -> 0-252 bytes
             // CRC                           -> 2 bytes
 
+            QModbusCommEvent event = QModbusCommEvent::ReceiveEvent;
+            if (isListenOnly())
+                event |= QModbusCommEvent::ReceiveFlag::CurrentlyInListenOnlyMode;
+
             // We expect at least the slave address, function code and CRC.
             if (buffer.size() < 4) { // TODO: LRC should be 3 bytes.
                 qCWarning(QT_MODBUS) << "Invalid Modbus PDU received";
@@ -105,8 +109,14 @@ public:
                 // restart, clear counters operation, or power–up. In case of a message
                 // length < 4 bytes, the receiving device is not able to calculate the CRC.
                 incrementCounter(QModbusServerPrivate::Counter::BusCommunicationError);
+                storeModbusCommEvent(event | QModbusCommEvent::ReceiveFlag::CommunicationError);
                 return;
             }
+
+            // Slave address is set to 0, this is a broadcast.
+            m_processesBroadcast = (buffer.at(0) == 0);
+            if (q->processesBroadcast())
+                event |= QModbusCommEvent::ReceiveFlag::BroadcastReceived;
 
             const QModbusPdu::FunctionCode code = QModbusRequest::FunctionCode(buffer.at(1));
             const int pduSizeWithoutFcode = QModbusRequest::calculateDataSize(code, buffer.mid(2));
@@ -120,6 +130,7 @@ public:
                 // characters arriving at the port faster than they can be stored, or by the loss
                 // of a character due to a hardware malfunction.
                 incrementCounter(QModbusServerPrivate::Counter::BusCharacterOverrun);
+                storeModbusCommEvent(event | QModbusCommEvent::ReceiveFlag::CharacterOverrun);
                 return;
             }
 
@@ -130,15 +141,13 @@ public:
                 // The quantity of CRC errors encountered by the remote device since its last
                 // restart, clear counters operation, or power–up.
                 incrementCounter(QModbusServerPrivate::Counter::BusCommunicationError);
+                storeModbusCommEvent(event | QModbusCommEvent::ReceiveFlag::CommunicationError);
                 return;
             }
 
             // The quantity of messages that the remote device has detected on the communications
             // system since its last restart, clear counters operation, or power–up.
             incrementCounter(QModbusServerPrivate::Counter::BusMessage);
-
-            // Slave address is set to 0, this is a broadcast.
-            m_processesBroadcast = (buffer.at(0) == 0);
 
             // If we do not process a Broadcast ...
             if (!q->processesBroadcast()) {
@@ -155,17 +164,23 @@ public:
             // remote device has processed since its last restart, clear counters operation, or
             // power–up.
             incrementCounter(QModbusServerPrivate::Counter::ServerMessage);
+            storeModbusCommEvent(event); // store the final event before processing
 
             // remove slave address, function code & CRC
             const QModbusRequest req(code, buffer.mid(2, pduSizeWithoutFcode));
             qCDebug(QT_MODBUS) << "Request PDU" << req;
             const QModbusResponse response = q->processRequest(req);
 
+            event = QModbusCommEvent::SentEvent; // reset event after processing
+            if (isListenOnly())
+                event |= QModbusCommEvent::SendFlag::CurrentlyInListenOnlyMode;
+
             if (q->processesBroadcast() || !response.isValid()) {
                 // The quantity of messages addressed to the remote device for which it has
                 // returned no response (neither a normal response nor an exception response),
                 // since its last restart, clear counters operation, or power–up.
                 incrementCounter(QModbusServerPrivate::Counter::ServerNoResponse);
+                storeModbusCommEvent(event);
                 return;
             }
 
@@ -184,6 +199,7 @@ public:
                 q->setError(QModbusRtuSerialSlave::tr("Requesting serial port is closed"),
                             QModbusDevice::WriteError);
                 incrementCounter(QModbusServerPrivate::Counter::ServerNoResponse);
+                storeModbusCommEvent(event);
                 return;
             }
 
@@ -193,26 +209,54 @@ public:
                 q->setError(QModbusRtuSerialSlave::tr("Could not write response to client"),
                             QModbusDevice::WriteError);
                 incrementCounter(QModbusServerPrivate::Counter::ServerNoResponse);
+                storeModbusCommEvent(event);
                 return;
             }
 
             if (response.isException()) {
-                // The quantity of messages addressed to the remote device for which it returned a
-                // server device busy exception response, since its last restart, clear counters
-                // operation, or power–up.
-                if (response.exceptionCode() == QModbusExceptionResponse::ServerDeviceBusy)
+                switch (response.exceptionCode()) {
+                case QModbusExceptionResponse::IllegalFunction:
+                case QModbusExceptionResponse::IllegalDataAddress:
+                case QModbusExceptionResponse::IllegalDataValue:
+                    event |= QModbusCommEvent::SendFlag::ReadExceptionSent;
+                    break;
+
+                case QModbusExceptionResponse::ServerDeviceFailure:
+                    event |= QModbusCommEvent::SendFlag::ServerAbortExceptionSent;
+                    break;
+
+                case QModbusExceptionResponse::ServerDeviceBusy:
+                    // The quantity of messages addressed to the remote device for which it
+                    // returned a server device busy exception response, since its last restart,
+                    // clear counters operation, or power–up.
                     incrementCounter(QModbusServerPrivate::Counter::ServerBusy);
+                    event |= QModbusCommEvent::SendFlag::ServerBusyExceptionSent;
+                    break;
 
-                // The quantity of messages addressed to the remote device for which it returned a
-                // negative acknowledge (NAK) exception response, since its last restart, clear
-                // counters operation, or power–up.
-                if (response.exceptionCode() == QModbusExceptionResponse::NegativeAcknowledge)
+                case  QModbusExceptionResponse::NegativeAcknowledge:
+                    // The quantity of messages addressed to the remote device for which it
+                    // returned a negative acknowledge (NAK) exception response, since its last
+                    // restart, clear counters operation, or power–up.
                     incrementCounter(QModbusServerPrivate::Counter::ServerNAK);
+                    event |= QModbusCommEvent::SendFlag::ServerProgramNAKExceptionSent;
+                    break;
 
+                default:
+                    break;
+                }
                 // The quantity of Modbus exception responses returned by the remote device since
                 // its last restart, clear counters operation, or power–up.
                 incrementCounter(QModbusServerPrivate::Counter::BusExceptionError);
             }
+
+            if ((req.functionCode() != QModbusRequest::GetCommEventCounter)
+                || (req.functionCode() != QModbusRequest::GetCommEventLog)) {
+                // The device's event counter is incremented once for each successful message
+                // completion. Do not increment for exception responses, poll commands, or fetch
+                // event counter commands.
+                incrementCounter(QModbusServerPrivate::Counter::CommEvent);
+            }
+            storeModbusCommEvent(event); // store the final event after processing
         });
 
         using TypeId = void (QSerialPort::*)(QSerialPort::SerialPortError);

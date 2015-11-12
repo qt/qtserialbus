@@ -37,6 +37,7 @@
 #ifndef QMODBUSERVER_P_H
 #define QMODBUSERVER_P_H
 
+#include <QtSerialBus/private/qmodbuscommevent_p.h>
 #include <QtSerialBus/private/qmodbusdevice_p.h>
 #include <QtSerialBus/private/qmodbus_symbols_p.h>
 #include <QtSerialBus/qmodbusdataunit.h>
@@ -110,9 +111,11 @@ public:
     QModbusResponse processReadWriteMultipleRegistersRequest(const QModbusRequest &request);
     QModbusResponse processReadFifoQueue(const QModbusRequest &request);
 
+    bool isListenOnly() const { return m_forceListenOnlyMode; }
+    void storeModbusCommEvent(const QModbusCommEvent &eventByte);
+
 private:
     bool restartCommunicationsOption(bool clearLog);
-    void storeEvent(quint8 eventByte);
 
     // Device specific fields to be moved later
     QModbusDataUnitMap m_modbusDataUnitMap;
