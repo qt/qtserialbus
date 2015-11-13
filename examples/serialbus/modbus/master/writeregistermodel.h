@@ -38,55 +38,29 @@
 **
 ****************************************************************************/
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef WRITEREGISTERMODEL_H
+#define WRITEREGISTERMODEL_H
 
-#include <QMainWindow>
+#include <QtCore/qabstractitemmodel.h>
+#include <QtCore/qbitarray.h>
 
-QT_BEGIN_NAMESPACE
-
-class QModbusClient;
-class QModbusReply;
-
-namespace Ui {
-class MainWindow;
-class SettingsDialog;
-}
-
-QT_END_NAMESPACE
-
-class SettingsDialog;
-class WriteRegisterModel;
-
-class MainWindow : public QMainWindow
+class WriteRegisterModel : public QAbstractTableModel
 {
-    Q_OBJECT
+public:
+    WriteRegisterModel(QObject* parent = 0);
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
+
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const Q_DECL_OVERRIDE;
+    bool setData(const QModelIndex &index, const QVariant &value, int role) Q_DECL_OVERRIDE;
+
+    Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
-
-private:
-    void initActions();
-
-private slots:
-    void on_connectButton_clicked();
-    void onStateChanged(int state);
-
-    void on_readButton_clicked();
-    void readReady();
-
-    void on_writeButton_clicked();
-    void writeReady();
-
-    void on_connectType_currentIndexChanged(int);
-
-private:
-    Ui::MainWindow *ui;
-    QModbusReply* lastRequest;
-    QModbusClient* modbusDevice;
-    SettingsDialog *m_settingsDialog;
-    WriteRegisterModel *writeModel;
+    QBitArray m_coils;
+    QVector<quint16> m_holdingRegisters;
 };
 
-#endif // MAINWINDOW_H
+#endif // WRITEREGISTERMODEL_H

@@ -6,10 +6,12 @@ CONFIG += c++11
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-        settingsdialog.cpp
+        settingsdialog.cpp \
+        writeregistermodel.cpp
 
 HEADERS  += mainwindow.h \
-         settingsdialog.h
+         settingsdialog.h \
+        writeregistermodel.h
 
 FORMS    += mainwindow.ui \
          settingsdialog.ui

@@ -41,6 +41,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "settingsdialog.h"
+#include "writeregistermodel.h"
 
 #include <QtSerialBus/qmodbustcpclient.h>
 #include <QtSerialBus/qmodbusrtuserialmaster.h>
@@ -64,11 +65,16 @@ MainWindow::MainWindow(QWidget *parent)
 
     initActions();
 
+    writeModel = new WriteRegisterModel(this);
+    ui->writeValueTable->setModel(writeModel);
+    ui->writeValueTable->resizeColumnToContents(0);
+    ui->writeValueTable->horizontalHeader()->setStretchLastSection(true);
+    ui->writeValueTable->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
     ui->readTable->addItem(tr("Coils"), QModbusDataUnit::Coils);
     ui->readTable->addItem(tr("Discrete Inputs"), QModbusDataUnit::DiscreteInputs);
     ui->readTable->addItem(tr("Input Registers"), QModbusDataUnit::InputRegisters);
     ui->readTable->addItem(tr("Holding Registers"), QModbusDataUnit::HoldingRegisters);
-    on_writeTable_currentIndexChanged(ui->writeTable->currentText());
 
     ui->connectType->setCurrentIndex(0);
     on_connectType_currentIndexChanged(0);
@@ -224,14 +230,25 @@ void MainWindow::on_writeButton_clicked()
     if (ui->writeTable->currentText() == tr("Coils"))
         table = QModbusDataUnit::Coils;
 
-    QModbusDataUnit unit(table, ui->writeAddress->text().toInt(), 1u);
-    unit.setValue(0, ui->writeValue->text().toInt(0, 16));
+    int numberOfEntries = ui->writeSize->currentText().toInt();
+    int startAddress = ui->writeAddress->text().toInt();
+    // do not go beyond 10 entries
+    numberOfEntries = qMin(numberOfEntries, 10 - startAddress);
+
+    Q_ASSERT(startAddress >= 0 && startAddress < 10);
+    QModbusDataUnit writeUnit(table, startAddress, numberOfEntries);
+    for (int i = startAddress; i < (startAddress + numberOfEntries); i++)
+    {
+        if (table == QModbusDataUnit::Coils)
+            writeUnit.setValue(i - startAddress, writeModel->m_coils[i]);
+        else
+            writeUnit.setValue(i - startAddress, writeModel->m_holdingRegisters[i]);
+    }
 
     statusBar()->clearMessage();
 
-    // TODO extend to test write of single coil and holding register
-    // Write Multiple coils and registers as well as R/W MultipleRegisters is missing
-    QModbusReply *reply = modbusDevice->sendWriteRequest(unit, ui->writeSlave->text().toInt());
+    // TODO test for R/W MultipleRegisters is missing
+    QModbusReply *reply = modbusDevice->sendWriteRequest(writeUnit, ui->writeSlave->text().toInt());
 
     // broadcast replies return immediately
     if (reply && reply->isFinished()) {
@@ -262,17 +279,4 @@ void MainWindow::writeReady()
     }
 
     reply->deleteLater();
-}
-
-void MainWindow::on_writeTable_currentIndexChanged(const QString &text)
-{
-    ui->writeValue->clear();
-    if (text == tr("Coils")) {
-        ui->writeValue->setValidator(new QIntValidator(0, 1, this));
-        ui->writeValue->setPlaceholderText(tr("Binary 0-1."));
-    } else if (text == tr("Holding Registers")) {
-        ui->writeValue->setValidator(new QRegExpValidator(QRegExp(QStringLiteral("[0-9a-f]{0,4}"),
-            Qt::CaseInsensitive), this));
-        ui->writeValue->setPlaceholderText(tr("Hexadecimal A-F, a-f, 0-9."));
-    }
 }
