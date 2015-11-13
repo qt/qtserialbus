@@ -58,6 +58,8 @@ protected:
 
     bool open() Q_DECL_OVERRIDE;
     void close() Q_DECL_OVERRIDE;
+
+    QModbusResponse processRequest(const QModbusPdu &request) Q_DECL_OVERRIDE;
 };
 
 QT_END_NAMESPACE

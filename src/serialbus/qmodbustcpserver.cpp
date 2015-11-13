@@ -126,4 +126,36 @@ void QModbusTcpServer::close()
     setState(QModbusDevice::UnconnectedState);
 }
 
+/*!
+    Processes a Modbus client \a request and returns a Modbus response.
+
+    \note The following Modbus function codes are filtered as they are serial
+    line only according to the Modbus Application Protocol Specification 1.1b:
+    \list
+        \li \l QModbusRequest::ReadExceptionStatus
+        \li \l QModbusRequest::Diagnostics
+        \li \l QModbusRequest::GetCommEventCounter
+        \li \l QModbusRequest::GetCommEventLog
+        \li \l QModbusRequest::ReportServerId
+    \endlist
+    A request to the TCP server will be answered with a Modbus exception
+    response with exception code QModbusExceptionResponse::IllegalFunction.
+
+*/
+QModbusResponse QModbusTcpServer::processRequest(const QModbusPdu &request)
+{
+    switch (request.functionCode()) {
+    case QModbusRequest::ReadExceptionStatus:
+    case QModbusRequest::Diagnostics:
+    case QModbusRequest::GetCommEventCounter:
+    case QModbusRequest::GetCommEventLog:
+    case QModbusRequest::ReportServerId:
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalFunction);
+    default:
+        break;
+    }
+    return QModbusServer::processRequest(request);
+}
+
 QT_END_NAMESPACE

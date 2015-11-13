@@ -1,4 +1,4 @@
-QT = core testlib serialbus
+QT = core testlib serialbus network
 TARGET = tst_qmodbusserver
 CONFIG += testcase c++11
 

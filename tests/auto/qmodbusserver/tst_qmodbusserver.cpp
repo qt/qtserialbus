@@ -35,6 +35,7 @@
 ****************************************************************************/
 
 #include <QtSerialBus/qmodbusserver.h>
+#include <QtSerialBus/qmodbustcpserver.h>
 
 #include <QtCore/qdebug.h>
 #include <QtTest/QtTest>
@@ -1097,6 +1098,34 @@ private slots:
         QModbusDataUnit missing(QModbusDataUnit::HoldingRegisters);
         QCOMPARE(local.data(&missing), false);
         QCOMPARE(local.setData(missing), false);
+    }
+
+    void testIllegalTcpFunctionCodes()
+    {
+        class ModbusTcpServer : public QModbusTcpServer
+        {
+        public:
+            QModbusResponse processRequest(const QModbusPdu &request) Q_DECL_OVERRIDE {
+                return QModbusTcpServer::processRequest(request);
+            }
+
+        };
+        ModbusTcpServer local;
+
+        QModbusRequest request(QModbusRequest::ReadExceptionStatus);
+        QCOMPARE(local.processRequest(request).exceptionCode(), QModbusPdu::IllegalFunction);
+
+        request = QModbusRequest(QModbusRequest::Diagnostics);
+        QCOMPARE(local.processRequest(request).exceptionCode(), QModbusPdu::IllegalFunction);
+
+        request = QModbusRequest(QModbusRequest::GetCommEventCounter);
+        QCOMPARE(local.processRequest(request).exceptionCode(), QModbusPdu::IllegalFunction);
+
+        request = QModbusRequest(QModbusRequest::GetCommEventLog);
+        QCOMPARE(local.processRequest(request).exceptionCode(), QModbusPdu::IllegalFunction);
+
+        request = QModbusRequest(QModbusRequest::ReportServerId);
+        QCOMPARE(local.processRequest(request).exceptionCode(), QModbusPdu::IllegalFunction);
     }
 };
 
