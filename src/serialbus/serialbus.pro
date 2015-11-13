@@ -36,7 +36,8 @@ PRIVATE_HEADERS += \
     qmodbustcpserver_p.h \
     qmodbusrtuserialslave_p.h \
     qmodbus_symbols_p.h \
-    qmodbuscommevent_p.h
+    qmodbuscommevent_p.h \
+    qmodbusadu_p.h
 
 SOURCES += \
     qcanbusdevice.cpp \

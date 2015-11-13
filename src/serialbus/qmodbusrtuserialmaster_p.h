@@ -38,6 +38,7 @@
 #define QMODBUSSERIALMASTER_P_H
 
 #include <QtSerialBus/qmodbusrtuserialmaster.h>
+#include <QtSerialBus/private/qmodbusadu_p.h>
 #include <QtSerialBus/private/qmodbusclient_p.h>
 
 #include <QtCore/qloggingcategory.h>
@@ -89,48 +90,43 @@ public:
                 return;
             }
 
-            int aduSize = 2; //slave address & function code
-
-            QModbusPdu::FunctionCode fcode = QModbusPdu::FunctionCode(responseBuffer.at(1));
-            int pduSizeWithoutFcode = QModbusResponse::calculateDataSize(fcode, responseBuffer.mid(2));
+            const QModbusSerialAdu tmpAdu(QModbusSerialAdu::Rtu, responseBuffer);
+            const QModbusResponse tmpPdu = tmpAdu.pdu();
+            int pduSizeWithoutFcode = QModbusResponse::calculateDataSize(tmpPdu.functionCode(),
+                                                                         tmpPdu.data());
             if (pduSizeWithoutFcode < 0) {
                 // wait for more data
                 qCDebug(QT_MODBUS) << "Cannot calculate PDU size for fcode, delaying pending frame"
-                                   << fcode;
+                                   << tmpPdu.functionCode();
                 return;
             }
-            aduSize += pduSizeWithoutFcode;
 
-            aduSize += 2; //CRC
-            if (responseBuffer.size() < aduSize) {
+            // slave address byte + function code byte + PDU size + 2 bytes CRC
+            const int aduSize = 2 + pduSizeWithoutFcode + 2;
+            if (tmpAdu.rawSize() < aduSize) {
                 qCDebug(QT_MODBUS) << "ADU too short, ignoring pending frame";
                 return;
             }
 
-            const QByteArray completeAduFrame = responseBuffer.left(aduSize);
+            const QModbusSerialAdu adu(QModbusSerialAdu::Rtu, responseBuffer.left(aduSize));
             responseBuffer.remove(0, aduSize);
 
             stopResponseTimer();
 
-            qCDebug(QT_MODBUS)<< "Received response (incl ADU)" << completeAduFrame.toHex();
+            qCDebug(QT_MODBUS)<< "Received response (incl ADU)" << adu.data().toHex();
             if (QT_MODBUS().isDebugEnabled() && !responseBuffer.isEmpty())
                 qCDebug(QT_MODBUS_LOW) << "Pending buffer:" << responseBuffer.toHex();
 
             // check CRC
-            quint16 receivedCrc = quint8(completeAduFrame[aduSize - 2]) << 8
-                                  | quint8(completeAduFrame[aduSize - 1]);
-            if (!matchingCRC(completeAduFrame, completeAduFrame.size() - 2, receivedCrc)) {
+            if (!adu.matchingChecksum()) {
                 qCWarning(QT_MODBUS) << "Discarding request with wrong CRC, received:"
-                                     << receivedCrc << "got:"
-                                     << calculateCRC(completeAduFrame, completeAduFrame.size());
+                                     << adu.checksum<quint16>() << "got:"
+                                     << QModbusSerialAdu::calculateCRC(adu.data(), adu.size());
                 return;
             }
 
-
-            const QModbusResponse response(fcode,
-                                           completeAduFrame.mid(2, completeAduFrame.size() - 4));
-
-            if (!canMatchRequestAndResponse(response, quint8(completeAduFrame.at(0)))) {
+            const QModbusResponse response = adu.pdu();
+            if (!canMatchRequestAndResponse(response, adu.slaveAddress())) {
                 qCWarning(QT_MODBUS) << "Cannot match response with open request. "
                                         "Ignoring response.";
                 return;
@@ -161,22 +157,12 @@ public:
         });
     }
 
-    QByteArray wrapInADU(const QModbusRequest &request, int slaveAddress) const
-    {
-        QByteArray result;
-        QDataStream out(&result, QIODevice::WriteOnly);
-        out << quint8(slaveAddress);
-        out << request;
-        out << calculateCRC(result, result.size());
-
-        return result;
-    }
-
     bool sendNextAdu(const QModbusRequest &request, int slaveAddress)
     {
         Q_Q(QModbusRtuSerialMaster);
 
-        const QByteArray adu = wrapInADU(request, slaveAddress);
+        const QByteArray adu = QModbusSerialAdu::create(QModbusSerialAdu::Rtu, slaveAddress,
+                                                        request);
         int writtenBytes = m_serialPort->write(adu);
         if (writtenBytes == -1 || writtenBytes < adu.size()) {
             qCDebug(QT_MODBUS) << "Cannot write request to serial port. Failed ADU"

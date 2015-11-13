@@ -38,6 +38,7 @@
 #define QMODBUSRTUSERIALSLAVE_P_H
 
 #include <QtSerialBus/qmodbusrtuserialslave.h>
+#include <QtSerialBus/private/qmodbusadu_p.h>
 #include <QtSerialBus/private/qmodbusserver_p.h>
 
 #include <QtCore/qdebug.h>
@@ -87,9 +88,8 @@ public:
             Q_Q(QModbusRtuSerialSlave);
 
             const int size = m_serialPort->size();
-            const QByteArray buffer = m_serialPort->read(size);
-
-            qCDebug(QT_MODBUS_LOW) << "Received buffer (incl ADU):" << buffer.toHex();
+            const QModbusSerialAdu adu(QModbusSerialAdu::Rtu, m_serialPort->read(size));
+            qCDebug(QT_MODBUS_LOW) << "Received buffer (incl ADU):" << adu.rawData().toHex();
 
             // Index                         -> description
             // SlaveId                       -> 1 byte
@@ -102,7 +102,7 @@ public:
                 event |= QModbusCommEvent::ReceiveFlag::CurrentlyInListenOnlyMode;
 
             // We expect at least the slave address, function code and CRC.
-            if (buffer.size() < 4) { // TODO: LRC should be 3 bytes.
+            if (adu.size() < 4) { // TODO: LRC should be 3 bytes.
                 qCWarning(QT_MODBUS) << "Invalid Modbus PDU received";
 
                 // The quantity of CRC errors encountered by the remote device since its last
@@ -114,15 +114,16 @@ public:
             }
 
             // Slave address is set to 0, this is a broadcast.
-            m_processesBroadcast = (buffer.at(0) == 0);
+            m_processesBroadcast = (adu.slaveAddress() == 0);
             if (q->processesBroadcast())
                 event |= QModbusCommEvent::ReceiveFlag::BroadcastReceived;
 
-            const QModbusPdu::FunctionCode code = QModbusRequest::FunctionCode(buffer.at(1));
-            const int pduSizeWithoutFcode = QModbusRequest::calculateDataSize(code, buffer.mid(2));
+            const QModbusRequest req = adu.pdu();
+            const int pduSizeWithoutFcode = QModbusRequest::calculateDataSize(req.functionCode(),
+                                                                              req.data());
 
             // slave address byte + function code byte + PDU size + 2 bytes CRC
-            if ((pduSizeWithoutFcode < 0) || (2 + pduSizeWithoutFcode + 2) != buffer.size()) {
+            if ((pduSizeWithoutFcode < 0) || ((2 + pduSizeWithoutFcode + 2) != adu.rawSize())) {
                 qCWarning(QT_MODBUS) << "ADU does not match expected size, ignoring";
                 // The quantity of messages addressed to the remote device that it could not
                 // handle due to a character overrun condition, since its last restart, clear
@@ -134,9 +135,7 @@ public:
                 return;
             }
 
-            const quint16 receivedCrc = quint8(buffer[buffer.size() - 2]) << 8
-                                        | quint8(buffer[buffer.size() -1]);
-            if (!matchingCRC(buffer.constData(), buffer.size() - 2, receivedCrc)) {
+            if (!adu.matchingChecksum()) {
                 qCWarning(QT_MODBUS) << "Ignoring request with wrong CRC";
                 // The quantity of CRC errors encountered by the remote device since its last
                 // restart, clear counters operation, or power–up.
@@ -152,10 +151,10 @@ public:
             // If we do not process a Broadcast ...
             if (!q->processesBroadcast()) {
                 // check if the slave address matches ...
-                if (q->slaveAddress() != quint8(buffer.at(0))) {
+                if (q->slaveAddress() != adu.slaveAddress()) {
                     // no, not our address! Ignore!
                     qCDebug(QT_MODBUS) << "Wrong slave address, expected" << q->slaveAddress()
-                                       << "got" << quint8(buffer.at(0));
+                                       << "got" << adu.slaveAddress();
                     return;
                 }
             } // else { Broadcast -> Slave Id will never match, deliberately ignore }
@@ -166,8 +165,6 @@ public:
             incrementCounter(QModbusServerPrivate::Counter::ServerMessage);
             storeModbusCommEvent(event); // store the final event before processing
 
-            // remove slave address, function code & CRC
-            const QModbusRequest req(code, buffer.mid(2, pduSizeWithoutFcode));
             qCDebug(QT_MODBUS) << "Request PDU" << req;
             const QModbusResponse response = q->processRequest(req);
 
@@ -186,11 +183,8 @@ public:
 
             qCDebug(QT_MODBUS) << "Response PDU:" << response;
 
-            QByteArray result;
-            QDataStream out(&result, QIODevice::WriteOnly);
-            out << quint8(q->slaveAddress());
-            out << response;
-            out << calculateCRC(result, result.size());
+            const QByteArray result = QModbusSerialAdu::create(QModbusSerialAdu::Rtu,
+                                                               q->slaveAddress(), response);
 
             qCDebug(QT_MODBUS_LOW) << "Sending response (incl ADU):" << result.toHex();
 
