@@ -37,8 +37,8 @@
 #ifndef QMODBUSTCPCLIENT_P_H
 #define QMODBUSTCPCLIENT_P_H
 
-#include <QtSerialBus/private/qmodbusclient_p.h>
-#include <QtSerialBus/qmodbustcpclient.h>
+#include "qmodbusclient_p.h"
+#include "qmodbustcpclient.h"
 
 #include <QtCore/qloggingcategory.h>
 #include <QtNetwork/qhostaddress.h>
@@ -77,6 +77,7 @@ public:
             qCDebug(QT_MODBUS) << "Connected to" << m_socket->peerAddress()
                                << "on port" << m_socket->peerPort();
             Q_Q(QModbusTcpClient);
+            responseBuffer.clear();
             q->setState(QModbusDevice::ConnectedState);
         });
 
@@ -92,23 +93,108 @@ public:
         {
             Q_Q(QModbusTcpClient);
 
-            q->setError(QModbusDevice::tr("TCP socket error (%1)").arg(m_socket->errorString()),
+            q->setError(QModbusClient::tr("TCP socket error (%1).").arg(m_socket->errorString()),
                         QModbusDevice::ConnectionError);
 
             if (m_socket->state() == QAbstractSocket::UnconnectedState)
                 q->setState(QModbusDevice::UnconnectedState);
         });
+
+        QObject::connect(m_socket, &QIODevice::readyRead, [this](){
+            responseBuffer += m_socket->read(m_socket->bytesAvailable());
+            qCDebug(QT_MODBUS_LOW) << "Response buffer:" << responseBuffer.toHex();
+
+            while (!responseBuffer.isEmpty()) {
+                // can we read enough for Modbus ADU header?
+                if (responseBuffer.size() < mbpaHeaderSize) {
+                    qCDebug(QT_MODBUS_LOW) << "Modbus ADU not complete";
+                    return;
+                }
+
+                quint8 slaveAddress;
+                quint16 transactionId, bytesPdu, protocolId;
+                QDataStream input(responseBuffer);
+                input >> transactionId >> protocolId >> bytesPdu >> slaveAddress;
+
+                qCDebug(QT_MODBUS) << "tid:" << hex << transactionId << "size:" << bytesPdu
+                                   << "slave id:" << slaveAddress;
+
+                // The length field is the byte count of the following fields, including the Unit
+                // Identifier and the PDU, so we remove on byte.
+                bytesPdu--;
+
+                int tcpAduSize = mbpaHeaderSize + bytesPdu;
+                if (responseBuffer.size() < tcpAduSize) {
+                    qCDebug(QT_MODBUS) << "PDU too short. Waiting for more data";
+                    return;
+                }
+
+                QModbusResponse responsePdu;
+                input >> responsePdu;
+                qCDebug(QT_MODBUS) << "Received PDU:" << responsePdu.functionCode()
+                                   << responsePdu.data().toHex();
+
+                responseBuffer.remove(0, tcpAduSize);
+
+                if (!m_transactionStore.contains(transactionId)) {
+                    qCDebug(QT_MODBUS) << "No pending request for response with given transaction "
+                                          "ID, ignoring response message.";
+                    continue;
+                }
+
+                const QueueElement elem = m_transactionStore.take(transactionId);
+                if (!responsePdu.isException()) {
+                    QModbusDataUnit unit = elem.unit;
+                    if (processResponse(responsePdu, &unit)) {
+                        elem.reply->setResult(unit);
+                        elem.reply->setFinished(true);
+                    } else {
+                        elem.reply->setError(
+                                    QModbusReply::UnknownError,
+                                    QModbusClient::tr("An invalid response has been received."));
+                    }
+                } else {
+                    elem.reply->setProtocolError(responsePdu.exceptionCode(),
+                                                 QModbusClient::tr("Modbus Exception Response."));
+                }
+            }
+        });
     }
 
-    QModbusReply *enqueueRequest(const QModbusRequest &/*request*/, int /*slaveAddress*/,
-                                 const QModbusDataUnit /*unit*/)
+    QModbusReply *enqueueRequest(const QModbusRequest &request, int slaveAddress,
+                                 const QModbusDataUnit unit)
     {
-        // TODO Implement enqueueRequest
-        // requires general abstraction of QModbusRtuSerialMasterPrivate::QueueElement
-        return Q_NULLPTR;
+        Q_Q(QModbusTcpClient);
+
+        quint16 tId = qrand() % 0x10000;
+        QByteArray buffer;
+        QDataStream output(&buffer, QIODevice::WriteOnly);
+        output << tId << quint16(0) << quint16(request.size() + 1)
+               << quint8(slaveAddress) << request;
+
+
+        int writtenBytes = m_socket->write(buffer);
+        if (writtenBytes == -1 || writtenBytes < buffer.size()) {
+            qCDebug(QT_MODBUS) << "Cannot write request to socket.";
+            q->setError(QModbusTcpClient::tr("Could not write request to socket."),
+                        QModbusDevice::WriteError);
+            return Q_NULLPTR;
+        }
+
+        qCDebug(QT_MODBUS) << "Sending TCP ADU:" << buffer.toHex();
+
+        QModbusReply *reply = new QModbusReply(slaveAddress, q);
+        QueueElement elem = { reply, request, unit };
+        m_transactionStore.insert(tId, elem);
+
+        return reply;
     }
 
     QTcpSocket *m_socket = Q_NULLPTR;
+    QByteArray responseBuffer;
+    QHash<quint16, QueueElement> m_transactionStore;
+    int mbpaHeaderSize = 7;
+
 };
 
 QT_END_NAMESPACE

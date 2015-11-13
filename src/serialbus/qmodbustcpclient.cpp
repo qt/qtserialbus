@@ -37,6 +37,7 @@
 #include "qmodbustcpclient.h"
 #include "qmodbustcpclient_p.h"
 
+#include <QtCore/qdatetime.h>
 #include <QtCore/qurl.h>
 #include <QtNetwork/qhostaddress.h>
 
@@ -60,6 +61,8 @@ QModbusTcpClient::QModbusTcpClient(QObject *parent)
 {
     Q_D(QModbusTcpClient);
     d->setupTcpSocket();
+
+    qsrand(QTime::currentTime().msec());
 }
 
 /*!
@@ -77,6 +80,8 @@ QModbusTcpClient::QModbusTcpClient(QModbusTcpClientPrivate &dd, QObject *parent)
 {
     Q_D(QModbusTcpClient);
     d->setupTcpSocket();
+
+    qsrand(QTime::currentTime().msec());
 }
 
 /*!

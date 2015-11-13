@@ -263,13 +263,6 @@ public:
 
     QSerialPort *m_serialPort;
     QByteArray responseBuffer;
-
-    struct QueueElement {
-        QPointer<QModbusReply> reply;
-        QModbusRequest requestPdu;
-        QModbusDataUnit unit;
-    };
-
     QQueue<QueueElement> m_queue;
 };
 

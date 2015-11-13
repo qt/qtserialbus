@@ -133,7 +133,7 @@ public:
                     QDataStream input(*buffer);
                     input >> transactionId >> protocolId >> bytesPdu >> unitId;
 
-                    qCDebug(QT_MODBUS_LOW) << "Request MBPA:" << "Transaction Id:" << transactionId
+                    qCDebug(QT_MODBUS_LOW) << "Request MBPA:" << "Transaction Id:" << hex << transactionId
                                            << "Protocol Id:" << protocolId << "PDU bytes:" << bytesPdu
                                            << "Unit Id:" << unitId;
 

@@ -91,6 +91,12 @@ public:
 
     int m_responseTimeoutDuration = 200;
     QTimer *m_responseTimer = Q_NULLPTR;
+
+    struct QueueElement {
+        QPointer<QModbusReply> reply;
+        QModbusRequest requestPdu;
+        QModbusDataUnit unit;
+    };
 };
 
 QT_END_NAMESPACE
