@@ -84,6 +84,7 @@ public:
 
         QObject::connect(m_serialPort, &QSerialPort::readyRead, [this]() {
             responseBuffer += m_serialPort->read(m_serialPort->bytesAvailable());
+            qCDebug(QT_MODBUS_LOW) << "Response buffer:" << responseBuffer.toHex();
 
             if (responseBuffer.size() < 2) {
                 qCDebug(QT_MODBUS) << "Modbus ADU not complete";
@@ -96,15 +97,15 @@ public:
                                                                          tmpPdu.data());
             if (pduSizeWithoutFcode < 0) {
                 // wait for more data
-                qCDebug(QT_MODBUS) << "Cannot calculate PDU size for fcode, delaying pending frame"
-                                   << tmpPdu.functionCode();
+                qCDebug(QT_MODBUS) << "Cannot calculate PDU size for function code:"
+                                   << tmpPdu.functionCode() << " , delaying pending frame";
                 return;
             }
 
             // slave address byte + function code byte + PDU size + 2 bytes CRC
             const int aduSize = 2 + pduSizeWithoutFcode + 2;
             if (tmpAdu.rawSize() < aduSize) {
-                qCDebug(QT_MODBUS) << "ADU too short, ignoring pending frame";
+                qCDebug(QT_MODBUS) << "Incomplete ADU received, ignoring";
                 return;
             }
 
@@ -113,22 +114,21 @@ public:
 
             stopResponseTimer();
 
-            qCDebug(QT_MODBUS)<< "Received response (incl ADU)" << adu.data().toHex();
+            qCDebug(QT_MODBUS)<< "Received ADU:" << adu.rawData().toHex();
             if (QT_MODBUS().isDebugEnabled() && !responseBuffer.isEmpty())
                 qCDebug(QT_MODBUS_LOW) << "Pending buffer:" << responseBuffer.toHex();
 
             // check CRC
             if (!adu.matchingChecksum()) {
-                qCWarning(QT_MODBUS) << "Discarding request with wrong CRC, received:"
-                                     << adu.checksum<quint16>() << "got:"
+                qCWarning(QT_MODBUS) << "Discarding response with wrong CRC, received:"
+                                     << adu.checksum<quint16>() << ", calculated CRC:"
                                      << QModbusSerialAdu::calculateCRC(adu.data(), adu.size());
                 return;
             }
 
             const QModbusResponse response = adu.pdu();
             if (!canMatchRequestAndResponse(response, adu.slaveAddress())) {
-                qCWarning(QT_MODBUS) << "Cannot match response with open request. "
-                                        "Ignoring response.";
+                qCWarning(QT_MODBUS) << "Cannot match response with open request, ignoring";
                 return;
             }
 
@@ -165,14 +165,12 @@ public:
                                                         request);
         int writtenBytes = m_serialPort->write(adu);
         if (writtenBytes == -1 || writtenBytes < adu.size()) {
-            qCDebug(QT_MODBUS) << "Cannot write request to serial port. Failed ADU"
-                               << adu;
+            qCDebug(QT_MODBUS) << "Cannot write request to serial port. Failed ADU" << adu;
             q->setError(QModbusRtuSerialMaster::tr("Could not write request to serial bus"),
                         QModbusDevice::WriteError);
             return false;
-        } else {
-            qCDebug(QT_MODBUS)<< "Sent request (incl ADU)" << adu.toHex();
         }
+        qCDebug(QT_MODBUS)<< "Sent ADU:" << adu.toHex();
 
         return true;
 

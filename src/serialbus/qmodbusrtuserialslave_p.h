@@ -89,7 +89,7 @@ public:
 
             const int size = m_serialPort->size();
             const QModbusSerialAdu adu(QModbusSerialAdu::Rtu, m_serialPort->read(size));
-            qCDebug(QT_MODBUS_LOW) << "Received buffer (incl ADU):" << adu.rawData().toHex();
+            qCDebug(QT_MODBUS_LOW) << "Received ADU:" << adu.rawData().toHex();
 
             // Index                         -> description
             // SlaveId                       -> 1 byte
@@ -103,7 +103,7 @@ public:
 
             // We expect at least the slave address, function code and CRC.
             if (adu.size() < 4) { // TODO: LRC should be 3 bytes.
-                qCWarning(QT_MODBUS) << "Invalid Modbus PDU received";
+                qCWarning(QT_MODBUS) << "Incomplete ADU received, ignoring";
 
                 // The quantity of CRC errors encountered by the remote device since its last
                 // restart, clear counters operation, or power–up. In case of a message
@@ -136,7 +136,9 @@ public:
             }
 
             if (!adu.matchingChecksum()) {
-                qCWarning(QT_MODBUS) << "Ignoring request with wrong CRC";
+                qCWarning(QT_MODBUS) << "Discarding request with wrong CRC, received:"
+                                     << adu.checksum<quint16>() << ", calculated CRC:"
+                                     << QModbusSerialAdu::calculateCRC(adu.data(), adu.size());
                 // The quantity of CRC errors encountered by the remote device since its last
                 // restart, clear counters operation, or power–up.
                 incrementCounter(QModbusServerPrivate::Counter::BusCommunicationError);
@@ -165,7 +167,7 @@ public:
             incrementCounter(QModbusServerPrivate::Counter::ServerMessage);
             storeModbusCommEvent(event); // store the final event before processing
 
-            qCDebug(QT_MODBUS) << "Request PDU" << req;
+            qCDebug(QT_MODBUS) << "Request PDU:" << req;
             const QModbusResponse response = q->processRequest(req);
 
             event = QModbusCommEvent::SentEvent; // reset event after processing
@@ -186,7 +188,7 @@ public:
             const QByteArray result = QModbusSerialAdu::create(QModbusSerialAdu::Rtu,
                                                                q->slaveAddress(), response);
 
-            qCDebug(QT_MODBUS_LOW) << "Sending response (incl ADU):" << result.toHex();
+            qCDebug(QT_MODBUS_LOW) << "Response ADU:" << result.toHex();
 
             if (!m_serialPort->isOpen()) {
                 qCDebug(QT_MODBUS) << "Requesting serial port has closed.";
