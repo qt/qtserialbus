@@ -37,31 +37,6 @@
 #include <QtTest/QtTest>
 #include <QtSerialBus/QModbusReply>
 
-class QModbusReplyTest : public QModbusReply
-{
-public:
-    QModbusReplyTest() : QModbusReply(1, Q_NULLPTR) {}
-    void setResult(const QModbusDataUnit &unit)
-    {
-        QModbusReply::setResult(unit);
-    }
-
-    void setFinished(bool isFinished)
-    {
-        QModbusReply::setFinished(isFinished);
-    }
-
-    void setProtocolError(QModbusPdu::ExceptionCode error, const QString &errorText)
-    {
-        QModbusReply::setProtocolError(error, errorText);
-    }
-
-    void setError(QModbusReply::ReplyError error, const QString &errorText)
-    {
-        QModbusReply::setError(error, errorText);
-    }
-};
-
 class tst_QModbusReply : public QObject
 {
     Q_OBJECT
@@ -97,7 +72,8 @@ void tst_QModbusReply::tst_ctor()
 
 void tst_QModbusReply::tst_setFinished()
 {
-    QModbusReplyTest replyTest;
+    QModbusReply replyTest(1);
+    QCOMPARE(replyTest.slaveAddress(), 1);
     QSignalSpy finishedSpy(&replyTest, SIGNAL(finished()));
     QSignalSpy errorSpy(&replyTest, SIGNAL(errorOccurred(QModbusReply::ReplyError)));
 
@@ -149,7 +125,8 @@ void tst_QModbusReply::tst_setError()
     QFETCH(QModbusReply::ReplyError, error);
     QFETCH(QString, errorText);
 
-    QModbusReplyTest replyTest;
+    QModbusReply replyTest(1);
+    QCOMPARE(replyTest.slaveAddress(), 1);
     QSignalSpy finishedSpy(&replyTest, SIGNAL(finished()));
     QSignalSpy errorSpy(&replyTest, SIGNAL(errorOccurred(QModbusReply::ReplyError)));
 
@@ -185,7 +162,8 @@ void tst_QModbusReply::tst_setProtocolError()
     QFETCH(QModbusPdu::ExceptionCode, error);
     QFETCH(QString, errorText);
 
-    QModbusReplyTest replyTest;
+    QModbusReply replyTest(1);
+    QCOMPARE(replyTest.slaveAddress(), 1);
     QSignalSpy finishedSpy(&replyTest, SIGNAL(finished()));
     QSignalSpy errorSpy(&replyTest, SIGNAL(errorOccurred(QModbusReply::ReplyError)));
 
@@ -216,7 +194,8 @@ void tst_QModbusReply::tst_setResult()
     QVector<quint16>  reference = { 4,5,6 };
     QCOMPARE(unit.values(), reference);
 
-    QModbusReplyTest replyTest;
+    QModbusReply replyTest(1);
+    QCOMPARE(replyTest.slaveAddress(), 1);
     QSignalSpy finishedSpy(&replyTest, SIGNAL(finished()));
     QSignalSpy errorSpy(&replyTest, SIGNAL(errorOccurred(QModbusReply::ReplyError)));
 

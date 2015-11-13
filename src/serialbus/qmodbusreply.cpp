@@ -104,6 +104,7 @@ bool QModbusReply::isFinished() const
 }
 
 /*!
+   \internal
     Sets whether or not this reply has finished to \a isFinished.
 
     If \a isFinished is \c true, this will cause the \l finished() signal to be emitted.
@@ -151,6 +152,7 @@ QModbusDataUnit QModbusReply::result() const
 }
 
 /*!
+    \internal
     Sets the results of a read/write request to a Modbus register data \a unit.
 */
 void QModbusReply::setResult(const QModbusDataUnit &unit)
@@ -206,6 +208,7 @@ QModbusReply::ReplyError QModbusReply::error() const
 }
 
 /*!
+    \internal
     Sets the Modbus exception error state of this reply to \a error and the textual representation of
     the error to \a errorText. This function implicitly sets \l error() to \l ProtocolError.
 
@@ -223,6 +226,7 @@ void QModbusReply::setProtocolError(QModbusPdu::ExceptionCode error, const QStri
 }
 
 /*!
+   \internal
     Sets the error state of this reply to \a error and the textual representation of
     the error to \a errorText.
 

@@ -71,18 +71,15 @@ public:
     QModbusPdu::ExceptionCode protocolError() const;
     QString errorText() const;
 
-Q_SIGNALS:
-    void finished();
-    void errorOccurred(QModbusReply::ReplyError error);
-
-protected:
     void setResult(const QModbusDataUnit &unit);
     void setFinished(bool isFinished);
     void setProtocolError(QModbusPdu::ExceptionCode error, const QString &errorText);
     void setError(QModbusReply::ReplyError error, const QString &errorText);
 
-    friend class QModbusRtuSerialMaster;
-    friend class QModbusRtuSerialMasterPrivate;
+
+Q_SIGNALS:
+    void finished();
+    void errorOccurred(QModbusReply::ReplyError error);
 };
 
 Q_DECLARE_TYPEINFO(QModbusReply::ReplyError, Q_PRIMITIVE_TYPE);
