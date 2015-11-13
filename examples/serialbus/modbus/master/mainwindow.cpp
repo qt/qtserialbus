@@ -118,6 +118,8 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
         modbusDevice = new QModbusRtuSerialMaster(this);
     } else if (type == Tcp) {
         modbusDevice = new QModbusTcpClient(this);
+        if (ui->portEdit->text().isEmpty())
+            ui->portEdit->setText(QLatin1Literal("127.0.0.1:502"));
     }
 
     if (!modbusDevice) {
