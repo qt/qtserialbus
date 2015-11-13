@@ -122,6 +122,11 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
             ui->portEdit->setText(QLatin1Literal("127.0.0.1:502"));
     }
 
+    connect(modbusDevice, &QModbusClient::errorOccurred,
+            [this](QModbusDevice::ModbusError){
+        statusBar()->showMessage(modbusDevice->errorString(), 5000);
+    });
+
     if (!modbusDevice) {
         ui->connectButton->setDisabled(true);
         if (type == Serial)
