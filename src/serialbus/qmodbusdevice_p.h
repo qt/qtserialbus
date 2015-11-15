@@ -56,15 +56,12 @@ QT_BEGIN_NAMESPACE
 class QModbusDevicePrivate : public QObjectPrivate
 {
     Q_DECLARE_PUBLIC(QModbusDevice)
-public:
-    QModbusDevicePrivate()
-        : state(QModbusDevice::UnconnectedState),
-          error(QModbusDevice::NoError)
-    {
-    }
 
-    QModbusDevice::ModbusDeviceState state;
-    QModbusDevice::ModbusError error;
+public:
+    QModbusDevicePrivate() Q_DECL_EQ_DEFAULT;
+
+    QModbusDevice::ModbusDeviceState state = QModbusDevice::UnconnectedState;
+    QModbusDevice::ModbusError error = QModbusDevice::NoError;
     QString errorString;
     QString portName;
 };

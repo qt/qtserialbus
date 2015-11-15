@@ -88,7 +88,7 @@ public:
     Q_ENUMS(FunctionCode)
 
     QModbusPdu() Q_DECL_EQ_DEFAULT;
-    virtual ~QModbusPdu() {}
+    virtual ~QModbusPdu() Q_DECL_EQ_DEFAULT;
 
     bool isValid() const {
         return (m_code >= ReadCoils && m_code < UndefinedFunctionCode)
@@ -191,7 +191,7 @@ public:
     QModbusRequest(FunctionCode code, Args ... newData)
         : QModbusPdu(code, newData...)
     {}
-    QModbusRequest(FunctionCode code, const QByteArray &newData = QByteArray())
+    explicit QModbusRequest(FunctionCode code, const QByteArray &newData = QByteArray())
         : QModbusPdu(code, newData)
     {}
 
@@ -211,7 +211,7 @@ public:
     QModbusResponse(FunctionCode code, Args ... newData)
         : QModbusPdu(code, newData...)
     {}
-    QModbusResponse(FunctionCode code, const QByteArray &newData = QByteArray())
+    explicit QModbusResponse(FunctionCode code, const QByteArray &newData = QByteArray())
         : QModbusPdu(code, newData)
     {}
 

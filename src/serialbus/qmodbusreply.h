@@ -61,7 +61,7 @@ public:
     };
     Q_ENUMS(ReplyError)
 
-    QModbusReply(int slaveAddress, QObject *parent = Q_NULLPTR);
+    explicit QModbusReply(int slaveAddress, QObject *parent = Q_NULLPTR);
 
     bool isFinished() const;
     QModbusDataUnit result() const;

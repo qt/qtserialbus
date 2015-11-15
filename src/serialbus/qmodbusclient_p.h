@@ -60,10 +60,10 @@ QT_BEGIN_NAMESPACE
 class Q_AUTOTEST_EXPORT QModbusClientPrivate : public QModbusDevicePrivate
 {
     Q_DECLARE_PUBLIC(QModbusClient)
+
 public:
-    QModbusClientPrivate() : m_responseTimeoutDuration(200), m_responseTimer(Q_NULLPTR)
-    {
-    }
+    QModbusClientPrivate() Q_DECL_EQ_DEFAULT;
+    virtual ~QModbusClientPrivate() Q_DECL_EQ_DEFAULT;
 
     QModbusRequest createReadRequest(const QModbusDataUnit &data) const;
     QModbusRequest createWriteRequest(const QModbusDataUnit &data) const;
@@ -89,8 +89,8 @@ public:
 
     virtual void handleResponseTimeout() {}
 
-    int m_responseTimeoutDuration;
-    QTimer *m_responseTimer;
+    int m_responseTimeoutDuration = 200;
+    QTimer *m_responseTimer = Q_NULLPTR;
 };
 
 QT_END_NAMESPACE

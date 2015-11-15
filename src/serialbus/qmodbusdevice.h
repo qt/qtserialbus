@@ -71,7 +71,7 @@ public:
     Q_ENUM(ModbusDeviceState)
 
     explicit QModbusDevice(QObject *parent = 0);
-    virtual ~QModbusDevice();
+    ~QModbusDevice();
 
     //TODO should become part of connect call in RTS specific sub class
     void setPortName(const QString& name);

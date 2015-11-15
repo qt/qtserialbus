@@ -58,12 +58,9 @@ class QModbusTcpClientPrivate : public QModbusClientPrivate
     Q_DECLARE_PUBLIC(QModbusTcpClient)
 
 public:
-    QModbusTcpClientPrivate()
-    {
-    }
+    QModbusTcpClientPrivate() Q_DECL_EQ_DEFAULT;
 };
 
 QT_END_NAMESPACE
 
 #endif // QMODBUSTCPCLIENT_P_H
-

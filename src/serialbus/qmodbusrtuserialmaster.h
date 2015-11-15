@@ -54,12 +54,10 @@ public:
     explicit QModbusRtuSerialMaster(QObject *parent = Q_NULLPTR);
     ~QModbusRtuSerialMaster();
 
-    virtual QModbusReply *sendReadRequest(const QModbusDataUnit &read,
-                                          int slaveAddress) Q_DECL_OVERRIDE;
-    virtual QModbusReply *sendWriteRequest(const QModbusDataUnit &write,
-                                           int slaveAddress) Q_DECL_OVERRIDE;
-    virtual QModbusReply *sendReadWriteRequest(const QModbusDataUnit &read,
-                                   const QModbusDataUnit &write, int slaveAddress) Q_DECL_OVERRIDE;
+    QModbusReply *sendReadRequest(const QModbusDataUnit &read, int slaveAddress) Q_DECL_OVERRIDE;
+    QModbusReply *sendWriteRequest(const QModbusDataUnit &write, int slaveAddress) Q_DECL_OVERRIDE;
+    QModbusReply *sendReadWriteRequest(const QModbusDataUnit &read, const QModbusDataUnit &write,
+                                       int slaveAddress) Q_DECL_OVERRIDE;
 
 protected:
     QModbusRtuSerialMaster(QModbusRtuSerialMasterPrivate &dd, QObject *parent = Q_NULLPTR);

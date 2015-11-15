@@ -69,9 +69,7 @@ class QModbusTcpServerPrivate : public QModbusServerPrivate
     Q_DECLARE_PUBLIC(QModbusTcpServer)
 
 public:
-    QModbusTcpServerPrivate()
-    {
-    }
+    QModbusTcpServerPrivate() Q_DECL_EQ_DEFAULT;
 
     /*
         This function is a workaround since 2nd level lambda below cannot

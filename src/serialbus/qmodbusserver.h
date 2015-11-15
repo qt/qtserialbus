@@ -55,7 +55,7 @@ class Q_SERIALBUS_EXPORT QModbusServer : public QModbusDevice
 
 public:
     explicit QModbusServer(QObject *parent = 0);
-    virtual ~QModbusServer();
+    ~QModbusServer();
 
     virtual bool setMap(const QModbusDataUnitMap &map);
     virtual bool processesBroadcast() const { return false; }

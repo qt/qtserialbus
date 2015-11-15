@@ -66,13 +66,7 @@ class QModbusRtuSerialSlavePrivate : public QModbusServerPrivate
     Q_DECLARE_PUBLIC(QModbusRtuSerialSlave)
 
 public:
-    QModbusRtuSerialSlavePrivate()
-    {
-    }
-
-    ~QModbusRtuSerialSlavePrivate()
-    {
-    }
+    QModbusRtuSerialSlavePrivate() Q_DECL_EQ_DEFAULT;
 
     void setupSerialPort()
     {
@@ -337,4 +331,3 @@ public:
 QT_END_NAMESPACE
 
 #endif // QMODBUSRTUSERIALSLAVE_P_H
-

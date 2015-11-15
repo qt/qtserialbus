@@ -68,9 +68,7 @@ class QModbusRtuSerialMasterPrivate : public QModbusClientPrivate
     Q_DECLARE_PUBLIC(QModbusRtuSerialMaster)
 
 public:
-    QModbusRtuSerialMasterPrivate()
-    {
-    }
+    QModbusRtuSerialMasterPrivate() Q_DECL_EQ_DEFAULT;
 
     void setupSerialPort()
     {
@@ -277,4 +275,3 @@ public:
 QT_END_NAMESPACE
 
 #endif // QMODBUSSERIALMASTER_P_H
-

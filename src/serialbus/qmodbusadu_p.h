@@ -60,7 +60,7 @@ public:
         Rtu
     };
 
-    inline explicit QModbusSerialAdu(Type type, const QByteArray &data)
+    inline QModbusSerialAdu(Type type, const QByteArray &data)
         : m_type(type), m_data(data), m_rawData(data)
     {
         if (m_type == Ascii)

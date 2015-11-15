@@ -57,7 +57,7 @@ class Q_SERIALBUS_EXPORT QModbusClient : public QModbusDevice
 
 public:
     explicit QModbusClient(QObject *parent = 0);
-    virtual ~QModbusClient();
+    ~QModbusClient();
 
     virtual QModbusReply *sendReadRequest(const QModbusDataUnit &read, int slaveAddress) = 0;
     virtual QModbusReply *sendWriteRequest(const QModbusDataUnit &write, int slaveAddress) = 0;
