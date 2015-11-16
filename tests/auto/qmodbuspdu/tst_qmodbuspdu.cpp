@@ -82,7 +82,7 @@ static int minimumDataSize(QModbusPdu::FunctionCode code, bool request)
     case QModbusPdu::WriteMultipleRegisters:
         return request ? 7 : 4;
     case QModbusPdu::ReportServerId:
-        return request ? 0 : 4;
+        return request ? 0 : 3;
     case QModbusPdu::ReadFileRecord:
         return request ? 8 : 5;
     case QModbusPdu::WriteFileRecord:
@@ -94,7 +94,7 @@ static int minimumDataSize(QModbusPdu::FunctionCode code, bool request)
     case QModbusPdu::ReadFifoQueue:
         return request ? 2 : 6;
     case QModbusPdu::EncapsulatedInterfaceTransport:
-        break; // TODO: The spec is not really clear here.
+        return 2;
     case QModbusPdu::Invalid:
     case QModbusPdu::UndefinedFunctionCode:
         return -1;
@@ -426,9 +426,8 @@ private slots:
             << QByteArray::fromHex("00010003") << QByteArray::fromHex("0600010003");
         QTest::newRow("ReadExceptionStatus") << QModbusRequest::ReadExceptionStatus
             << QByteArray() << QByteArray::fromHex("07");
-
-        // TODO: Implement QModbusRequest::Diagnostics!
-
+        QTest::newRow("Diagnostics") << QModbusRequest::Diagnostics
+            << QByteArray::fromHex("0000a537") << QByteArray::fromHex("080000a537");
         QTest::newRow("GetCommEventCounter") << QModbusRequest::GetCommEventCounter
             << QByteArray() << QByteArray::fromHex("0b");
         QTest::newRow("GetCommEventLog") << QModbusRequest::GetCommEventLog
@@ -452,8 +451,9 @@ private slots:
             << QByteArray::fromHex("1700030006000e00030600ff00ff00ff");
         QTest::newRow("ReadFifoQueue") << QModbusRequest::ReadFifoQueue
             << QByteArray::fromHex("04de") << QByteArray::fromHex("1804de");
-
-        // TODO: Implement QModbusRequest::EncapsulatedInterfaceTransport!
+        QTest::newRow("EncapsulatedInterfaceTransport")
+            << QModbusRequest::EncapsulatedInterfaceTransport
+            << QByteArray::fromHex("0e0100") << QByteArray::fromHex("2b0e0100");
     }
 
     void testQModbusRequestStreamOperator()
@@ -494,9 +494,8 @@ private slots:
             << QByteArray::fromHex("00010003") << QByteArray::fromHex("0600010003");
         QTest::newRow("ReadExceptionStatus") << QModbusResponse::ReadExceptionStatus
             << QByteArray::fromHex("6d") << QByteArray::fromHex("076d");
-
-        // TODO: Implement QModbusResponse::Diagnostics!
-
+        QTest::newRow("Diagnostics") << QModbusResponse::Diagnostics
+            << QByteArray::fromHex("ffff0108") << QByteArray::fromHex("08ffff0108");
         QTest::newRow("GetCommEventCounter") << QModbusResponse::GetCommEventCounter
             << QByteArray::fromHex("ffff0108") << QByteArray::fromHex("0bffff0108");
         QTest::newRow("GetCommEventLog") << QModbusResponse::GetCommEventLog
@@ -505,9 +504,8 @@ private slots:
             << QByteArray::fromHex("0013000a") << QByteArray::fromHex("0f0013000a");
         QTest::newRow("WriteMultipleRegisters") << QModbusResponse::WriteMultipleRegisters
             << QByteArray::fromHex("00010002") << QByteArray::fromHex("1000010002");
-
-        // TODO: Implement ReportServerId!
-
+        QTest::newRow("ReportServerId") << QModbusResponse::ReportServerId
+            << QByteArray::fromHex("030aff12") << QByteArray::fromHex("11030aff12");
         QTest::newRow("ReadFileRecord") << QModbusResponse::ReadFileRecord
             << QByteArray::fromHex("0c05060dfe0020050633cd0040")
             << QByteArray::fromHex("140c05060dfe0020050633cd0040");
@@ -521,8 +519,14 @@ private slots:
             << QByteArray::fromHex("170c00fe0acd00010003000d00ff");
         QTest::newRow("ReadFifoQueue") << QModbusResponse::ReadFifoQueue
             << QByteArray::fromHex("0006000201b81284") << QByteArray::fromHex("180006000201b81284");
-
-        // TODO: Implement QModbusResponse::EncapsulatedInterfaceTransport!
+        QTest::newRow("EncapsulatedInterfaceTransport")
+            << QModbusResponse::EncapsulatedInterfaceTransport
+            << QByteArray::fromHex("0e01010000030016") + "Company identification" +
+                QByteArray::fromHex("010d") + "Product code" + QByteArray::fromHex("0205") +
+                "V2.11"
+            << QByteArray::fromHex("2b0e01010000030016") + "Company identification" +
+                QByteArray::fromHex("010d") + "Product code" + QByteArray::fromHex("0205") +
+                "V2.11";
     }
 
     void testQModbusResponseStreamOperator()
