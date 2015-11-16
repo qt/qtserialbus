@@ -59,6 +59,8 @@ public:
     explicit QModbusClient(QObject *parent = 0);
     ~QModbusClient();
 
+    // TODO: the 3 functions below could be implemented in this class
+    // once the connection layer has been abstracted.
     virtual QModbusReply *sendReadRequest(const QModbusDataUnit &read, int slaveAddress) = 0;
     virtual QModbusReply *sendWriteRequest(const QModbusDataUnit &write, int slaveAddress) = 0;
     virtual QModbusReply *sendReadWriteRequest(const QModbusDataUnit &read,

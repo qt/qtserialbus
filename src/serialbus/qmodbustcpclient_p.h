@@ -100,6 +100,14 @@ public:
         });
     }
 
+    QModbusReply *enqueueRequest(const QModbusRequest &/*request*/, int /*slaveAddress*/,
+                                 const QModbusDataUnit /*unit*/)
+    {
+        // TODO Implement enqueueRequest
+        // requires general abstraction of QModbusRtuSerialMasterPrivate::QueueElement
+        return Q_NULLPTR;
+    }
+
     QTcpSocket *m_socket = Q_NULLPTR;
 };
 

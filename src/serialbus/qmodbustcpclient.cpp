@@ -84,11 +84,19 @@ QModbusTcpClient::QModbusTcpClient(QModbusTcpClientPrivate &dd, QObject *parent)
 */
 QModbusReply *QModbusTcpClient::sendReadRequest(const QModbusDataUnit &read, int slaveAddress)
 {
-    // TODO: Implement!
+    Q_D(QModbusTcpClient);
 
-    Q_UNUSED(read)
-    Q_UNUSED(slaveAddress)
-    return Q_NULLPTR;
+    if (!d->m_socket->isOpen()|| state() != QModbusDevice::ConnectedState) {
+        setError(tr("Device not connected."), QModbusDevice::ConnectionError);
+        qCWarning(QT_MODBUS) << "TCP client is not connected";
+        return Q_NULLPTR;
+    }
+
+    QModbusRequest request = d->createReadRequest(read);
+    if (!request.isValid())
+        return Q_NULLPTR;
+
+    return d->enqueueRequest(request, slaveAddress, read);
 }
 
 /*!
@@ -96,11 +104,19 @@ QModbusReply *QModbusTcpClient::sendReadRequest(const QModbusDataUnit &read, int
 */
 QModbusReply *QModbusTcpClient::sendWriteRequest(const QModbusDataUnit &write, int slaveAddress)
 {
-    // TODO: Implement!
+    Q_D(QModbusTcpClient);
 
-    Q_UNUSED(write)
-    Q_UNUSED(slaveAddress)
-    return Q_NULLPTR;
+    if (!d->m_socket->isOpen() || state() != QModbusDevice::ConnectedState) {
+        setError(tr("Device not connected."), QModbusDevice::ConnectionError);
+        qCWarning(QT_MODBUS) << "TCP client is not connected";
+        return Q_NULLPTR;
+    }
+
+    QModbusRequest request = d->createWriteRequest(write);
+    if (!request.isValid())
+        return Q_NULLPTR;
+
+    return d->enqueueRequest(request, slaveAddress, write);
 }
 
 /*!
@@ -109,12 +125,20 @@ QModbusReply *QModbusTcpClient::sendWriteRequest(const QModbusDataUnit &write, i
 QModbusReply *QModbusTcpClient::sendReadWriteRequest(const QModbusDataUnit &read,
                                                      const QModbusDataUnit &write, int slaveAddress)
 {
-    // TODO: Implement!
+    Q_D(QModbusTcpClient);
 
-    Q_UNUSED(read)
-    Q_UNUSED(write)
-    Q_UNUSED(slaveAddress)
-    return Q_NULLPTR;
+    if (!d->m_socket->isOpen() || state() != QModbusDevice::ConnectedState) {
+        setError(tr("Device not connected."), QModbusDevice::ConnectionError);
+        qCWarning(QT_MODBUS) << "TCP client is not connected";
+        return Q_NULLPTR;
+    }
+
+    QModbusRequest request = d->createRWRequest(read, write);
+    if (!request.isValid())
+        return Q_NULLPTR;
+
+    return d->enqueueRequest(request, slaveAddress, read); // only need to remember read
+
 }
 
 /*!
