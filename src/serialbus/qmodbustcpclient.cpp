@@ -37,6 +37,9 @@
 #include "qmodbustcpclient.h"
 #include "qmodbustcpclient_p.h"
 
+#include <QtCore/qurl.h>
+#include <QtNetwork/qhostaddress.h>
+
 QT_BEGIN_NAMESPACE
 
 /*!
@@ -55,6 +58,8 @@ QT_BEGIN_NAMESPACE
 QModbusTcpClient::QModbusTcpClient(QObject *parent)
     : QModbusClient(*new QModbusTcpClientPrivate, parent)
 {
+    Q_D(QModbusTcpClient);
+    d->setupTcpSocket();
 }
 
 /*!
@@ -70,6 +75,8 @@ QModbusTcpClient::~QModbusTcpClient()
 QModbusTcpClient::QModbusTcpClient(QModbusTcpClientPrivate &dd, QObject *parent)
     : QModbusClient(dd, parent)
 {
+    Q_D(QModbusTcpClient);
+    d->setupTcpSocket();
 }
 
 /*!
@@ -115,7 +122,20 @@ QModbusReply *QModbusTcpClient::sendReadWriteRequest(const QModbusDataUnit &read
 */
 bool QModbusTcpClient::open()
 {
-    // TODO: Implement!
+    if (state() == QModbusDevice::ConnectedState)
+        return true;
+
+    Q_D(QModbusTcpClient);
+    if (d->m_socket->state() != QAbstractSocket::UnconnectedState)
+        return false;
+
+    const QUrl url = QUrl::fromUserInput(portName());
+    if (!url.isValid()) {
+        qCWarning(QT_MODBUS) << "Invalid host:" << url.host();
+        return false;
+    }
+
+    d->m_socket->connectToHost(url.host(), url.port());
 
     return true;
 }
@@ -125,7 +145,9 @@ bool QModbusTcpClient::open()
 */
 void QModbusTcpClient::close()
 {
-    // TODO: Implement!
+    Q_D(QModbusTcpClient);
+
+    d->m_socket->disconnectFromHost();
 }
 
 QT_END_NAMESPACE

@@ -40,6 +40,10 @@
 #include <QtSerialBus/private/qmodbusclient_p.h>
 #include <QtSerialBus/qmodbustcpclient.h>
 
+#include <QtCore/qloggingcategory.h>
+#include <QtNetwork/qhostaddress.h>
+#include <QtNetwork/qtcpsocket.h>
+
 //
 //  W A R N I N G
 //  -------------
@@ -53,12 +57,50 @@
 
 QT_BEGIN_NAMESPACE
 
+Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
+Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS_LOW)
+
 class QModbusTcpClientPrivate : public QModbusClientPrivate
 {
     Q_DECLARE_PUBLIC(QModbusTcpClient)
 
 public:
     QModbusTcpClientPrivate() Q_DECL_EQ_DEFAULT;
+
+    void setupTcpSocket()
+    {
+        Q_Q(QModbusTcpClient);
+
+        m_socket = new QTcpSocket(q);
+
+        QObject::connect(m_socket, &QAbstractSocket::connected, [this]() {
+            qCDebug(QT_MODBUS) << "Connected to" << m_socket->peerAddress()
+                               << "on port" << m_socket->peerPort();
+            Q_Q(QModbusTcpClient);
+            q->setState(QModbusDevice::ConnectedState);
+        });
+
+        QObject::connect(m_socket, &QAbstractSocket::disconnected, [this]() {
+           qCDebug(QT_MODBUS)  << "Connection closed.";
+           Q_Q(QModbusTcpClient);
+           q->setState(QModbusDevice::UnconnectedState);
+        });
+
+        using TypeId = void (QAbstractSocket::*)(QAbstractSocket::SocketError);
+        QObject::connect(m_socket, static_cast<TypeId>(&QAbstractSocket::error),
+                         [this](QAbstractSocket::SocketError /*error*/)
+        {
+            Q_Q(QModbusTcpClient);
+
+            q->setError(QModbusDevice::tr("TCP socket error (%1)").arg(m_socket->errorString()),
+                        QModbusDevice::ConnectionError);
+
+            if (m_socket->state() == QAbstractSocket::UnconnectedState)
+                q->setState(QModbusDevice::UnconnectedState);
+        });
+    }
+
+    QTcpSocket *m_socket = Q_NULLPTR;
 };
 
 QT_END_NAMESPACE
