@@ -460,6 +460,7 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
     case QModbusRequest::ReportServerId:
     case QModbusRequest::ReadFileRecord:
     case QModbusRequest::WriteFileRecord:
+        return q_func()->processPrivateModbusRequest(request);
     case QModbusRequest::MaskWriteRegister:
         return processMaskWriteRegister(request);
     case QModbusRequest::ReadWriteMultipleRegisters:
