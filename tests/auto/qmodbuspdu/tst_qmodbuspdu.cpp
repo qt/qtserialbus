@@ -404,6 +404,10 @@ private slots:
             QModbusRequest::minimumDataSize(QModbusRequest::Invalid));
         QCOMPARE(minimumDataSize(QModbusPdu::UndefinedFunctionCode, request),
             QModbusRequest::minimumDataSize(QModbusRequest::Invalid));
+
+        QModbusExceptionResponse exception(QModbusResponse::ReadCoils, QModbusPdu::IllegalFunction);
+        QCOMPARE(minimumDataSize(exception.functionCode(), request), -1);
+        QCOMPARE(QModbusResponse::minimumDataSize(exception.functionCode()), 1);
     }
 
     void testQModbusRequestStreamOperator_data()
@@ -527,6 +531,10 @@ private slots:
             << QByteArray::fromHex("2b0e01010000030016") + "Company identification" +
                 QByteArray::fromHex("010d") + "Product code" + QByteArray::fromHex("0205") +
                 "V2.11";
+
+        QModbusExceptionResponse ex(QModbusPdu::ReadCoils, QModbusPdu::IllegalDataAddress);
+        QTest::newRow("StreamExceptionResponse") << ex.functionCode()
+            << QByteArray::fromHex("02") << QByteArray::fromHex("8102");
     }
 
     void testQModbusResponseStreamOperator()

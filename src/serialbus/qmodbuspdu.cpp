@@ -49,6 +49,7 @@ enum struct Type {
 
 static int minimumDataSize(QModbusPdu::FunctionCode code, Type type)
 {
+    Q_ASSERT(!(code & 0x80));
     switch (code) {
     case QModbusPdu::ReadCoils:
     case QModbusPdu::ReadDiscreteInputs:
@@ -612,7 +613,7 @@ QDataStream &operator>>(QDataStream &stream, QModbusResponse &pdu)
     stream >> code;
     pdu.setFunctionCode(static_cast<QModbusPdu::FunctionCode> (code));
 
-    int size = Private::minimumDataSize(pdu.functionCode(), Private::Type::Response);
+    int size = QModbusResponse::minimumDataSize(pdu.functionCode());
     if (size < 0)
         pdu.setFunctionCode(QModbusResponse::Invalid);
     if (size <= 0)
