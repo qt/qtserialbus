@@ -237,14 +237,19 @@ public:
                 // The quantity of Modbus exception responses returned by the remote device since
                 // its last restart, clear counters operation, or power–up.
                 incrementCounter(QModbusServerPrivate::Counter::BusExceptionError);
-            }
-
-            if ((req.functionCode() != QModbusRequest::GetCommEventCounter)
-                || (req.functionCode() != QModbusRequest::GetCommEventLog)) {
-                // The device's event counter is incremented once for each successful message
-                // completion. Do not increment for exception responses, poll commands, or fetch
-                // event counter commands.
-                incrementCounter(QModbusServerPrivate::Counter::CommEvent);
+            } else {
+                switch (req.functionCode()) {
+                case 0x0a: // Poll 484 (not in the official Modbus specification) *1
+                case 0x0e: // Poll Controller (not in the official Modbus specification) *1
+                case QModbusRequest::GetCommEventCounter: // fall through and bail out
+                    break;
+                default:
+                    // The device's event counter is incremented once for each successful message
+                    // completion. Do not increment for exception responses, poll commands, or fetch
+                    // event counter commands.            *1 but mentioned here ^^^
+                    incrementCounter(QModbusServerPrivate::Counter::CommEvent);
+                    break;
+                }
             }
             storeModbusCommEvent(event); // store the final event after processing
         });
