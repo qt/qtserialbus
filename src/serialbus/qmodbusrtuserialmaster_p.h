@@ -139,11 +139,11 @@ public:
                 } else {
                     headOfQueue.reply->setError(
                             QModbusReply::UnknownError,
-                            QModbusRtuSerialMaster::tr("An invalid response has been received."));
+                            QModbusClient::tr("An invalid response has been received."));
                 }
             } else {
                headOfQueue.reply->setProtocolError(response.exceptionCode(),
-                                                   QModbusClient::tr("Modbus Exception Response"));
+                                                   QModbusClient::tr("Modbus Exception Response."));
             }
 
             sendNextRequest(); // go to next request
@@ -165,7 +165,7 @@ public:
         int writtenBytes = m_serialPort->write(adu);
         if (writtenBytes == -1 || writtenBytes < adu.size()) {
             qCDebug(QT_MODBUS) << "Cannot write request to serial port. Failed ADU" << adu;
-            q->setError(QModbusRtuSerialMaster::tr("Could not write request to serial bus"),
+            q->setError(QModbusClient::tr("Could not write request to serial bus."),
                         QModbusDevice::WriteError);
             return false;
         }
@@ -192,7 +192,7 @@ public:
             QueueElement elem = m_queue.dequeue();
 
             elem.reply->setError(QModbusReply::WriteError,
-                                 QModbusRtuSerialMaster::tr("Could not write message to serial bus."));
+                                 QModbusClient::tr("Could not write message to serial bus."));
 
             sendNextRequest();
             return;
@@ -258,7 +258,7 @@ public:
         }
 
         elem.reply->setError(QModbusReply::TimeoutError,
-                             QModbusRtuSerialMaster::tr("Request timeout."));
+                             QModbusClient::tr("Request timeout."));
     }
 
     QSerialPort *m_serialPort;
