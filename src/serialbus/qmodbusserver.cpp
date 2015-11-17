@@ -60,6 +60,24 @@ Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
 */
 
 /*!
+    \enum QModbusServer::Option
+
+    Each Modbus server has a set of values associated with it, each with its own option.
+
+    The general purpose options (and the associated types) are:
+
+    \value DiagnosticRegister       The diagnostic register of the server. \c quint16
+    \value ExceptionStatusOffset    The exception status byte offset of the server. \c quint16
+
+    User options:
+
+    \value UserOption               The first option that can be used for user-specific purposes.
+
+    For user options, it is up to the developer to decide which types to use and ensure that
+    components use the correct types when accessing and setting values.
+*/
+
+/*!
     Constructs a Modbus server with the specified \a parent.
 */
 QModbusServer::QModbusServer(QObject *parent) :
@@ -120,102 +138,112 @@ int QModbusServer::slaveAddress() const
 }
 
 /*!
-    Sets the diagnostic register of the server in a device specific encoding to \a value. The bit
-    values of the register need device specific documentation.
+    Returns the value for \a option or an invalid \c QVariant if the option is
+    not set.
 
-    \sa diagnosticRegister()
+    \table
+        \header
+            \li Option
+            \li Description
+        \row
+            \li \l QModbusServer::DiagnosticRegister
+            \li Returns the diagnostic register value of the server. The
+                diagnostic register contains device specific contents where
+                each bit has a specific meaning.
+        \row
+            \li \l QModbusServer::ExceptionStatusOffset
+            \li Returns the offset address of the exception status byte
+                location in the coils register.
+        \row
+            \li \l QModbusServer::UserOption
+            \li Returns the value of a user option.
+
+                \note For user options, it is up to the developer to decide
+                which types to use and ensure that components use the correct
+                types when accessing and setting values.
+    \endtable
 */
-void QModbusServer::setDiagnosticRegister(quint16 value)
-{
-    d_func()->m_diagnosticRegister = value;
-}
-
-/*!
-    Returns the diagnostic register value of the server. The diagnostic register contains device
-    specific contents where each bit has a specific meaning.
-
-    \sa setDiagnosticRegister()
-*/
-quint16 QModbusServer::diagnosticRegister() const
-{
-    return d_func()->m_diagnosticRegister;
-}
-
-/*!
-    Sets the continue on error flag of the server according to \a value.
-    If \a value is \c true, the server keeps answering requests even if
-    communication errors have been detected, otherwise stops responding to
-    requests. The flag can be reset externally using a diagnostics function code
-    (0x08) request with subfunction code 01, Restart Communications Option, where
-    the data field corresponds to:
-
-    \list
-    \li 0x0000 = Continue on error set to \c true
-    \li 0xFF00 = Continue on error set to \c false (equals stop on error)
-    \endlist
-
-    By default the continue on error flag is set to \c true.
-
-    \sa continueOnError()
-*/
-void QModbusServer::setContinueOnError(bool value)
-{
-    Q_D(QModbusServer);
-    d->m_continueOnError = value;
-}
-
-/*!
-    Returns the continue on error flag of the server.
-
-    If the returned value is \c true, communication requests are responded to even
-    if errors in the communication handling were detected. If \c false is returned,
-    the server is in stop on error mode and does not answer client requests.
-
-    The default value of the continue on error flag is set to true.
-
-    \sa setContinueOnError()
-*/
-bool QModbusServer::continueOnError() const
+QVariant QModbusServer::value(int option) const
 {
     Q_D(const QModbusServer);
 
-    return d->m_continueOnError;
+    switch (option) {
+        case DiagnosticRegister:
+            return d->m_diagnosticRegister;
+        case ExceptionStatusOffset:
+            return d->m_exceptionStatusOffset;
+        default:
+            break;
+    };
+
+    if (option < UserOption)
+        return QVariant();
+    return d->m_userOptions.value(option, QVariant());
 }
 
 /*!
-    Sets the exception status byte offset of the server to \a offsetAddress
-    which is the absolute offset address in the coils (0x register) Modbus
-    register table starting with 0x0000h. The default value preset is 0,
-    using the exception status coils similar to Modicon 984 CPUs (coils 1-8).
+    Sets the \a newValue for \a option and returns \c true on success; \c false
+    otherwise.
 
-    The function returns \c true if the coils register contains the 8 bits
-    required for storing and retrieving the status coils, otherwise \c false.
+    \table
+        \header
+            \li Key
+            \li Description
+        \row
+            \li \l QModbusServer::DiagnosticRegister
+            \li Sets the diagnostic register of the server in a device specific
+                encoding to \a newValue. The default value preset is \c 0x0000.
+                The bit values of the register need device specific documentation.
+        \row
+            \li \l QModbusServer::ExceptionStatusOffset
+            \li Sets the exception status byte offset of the server to
+                \a newValue which is the absolute offset address in the coils
+                (0x register). Modbus register table starting with \c 0x0000h.
+                The default value preset is \c 0x0000, using the exception
+                status coils similar to Modicon 984 CPUs (coils 1-8).
 
-    \sa exceptionStatusOffset()
+                The function returns \c true if the coils register contains the
+                8 bits required for storing and retrieving the status coils,
+                otherwise \c false.
+        \row
+            \li \l QModbusServer::UserOption
+            \li Sets the value of a user option to \a newValue.
+
+                \note For user options, it is up to the developer to decide
+                which types to use and ensure that components use the correct
+                types when accessing and setting values.
+    \endtable
 */
-bool QModbusServer::setExceptionStatusOffset(quint16 offsetAddress)
+bool QModbusServer::setValue(int option, const QVariant &newValue)
 {
     Q_D(QModbusServer);
 
-    QModbusDataUnit coils(QModbusDataUnit::Coils, offsetAddress, 8);
-    if (!data(&coils))
+    switch (option) {
+    case DiagnosticRegister:
+        if (!newValue.canConvert<quint16>())
+            return false;
+        d->m_diagnosticRegister = newValue.value<quint16>();
+        return true;
+
+    case ExceptionStatusOffset: {
+        if (!newValue.canConvert<quint16>())
+            return false;
+
+        const quint16 tmp = newValue.value<quint16>();
+        QModbusDataUnit coils(QModbusDataUnit::Coils, tmp, 8);
+        if (!data(&coils))
+            return false;
+        d->m_exceptionStatusOffset = tmp;
+        return true;
+    }
+    default:
+        break;
+    };
+
+    if (option < UserOption)
         return false;
-
-    d->m_exceptionStatusOffset = offsetAddress;
+    d_func()->m_userOptions.insert(option, newValue);
     return true;
-}
-
-/*!
-    Returns the offset address of the exception status byte location in the coils
-    register.
-
-    \sa setExceptionStatusOffset()
-*/
-quint16 QModbusServer::exceptionStatusOffset() const
-{
-    Q_D(const QModbusServer);
-
-    return d->m_exceptionStatusOffset;
 }
 
 /*!
@@ -613,8 +641,15 @@ QModbusResponse QModbusServerPrivate::writeSingle(const QModbusPdu &request,
 QModbusResponse QModbusServerPrivate::processReadExceptionStatus(const QModbusRequest &request)
 {
     CHECK_SIZE_EQUALS(request);
+
     // Get the requested range out of the registers.
-    QModbusDataUnit coils(QModbusDataUnit::Coils, m_exceptionStatusOffset, 8);
+    const QVariant tmp = q_func()->value(QModbusServer::ExceptionStatusOffset);
+    if (tmp.isNull() || (!tmp.isValid())) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::ServerDeviceFailure);
+    }
+    const quint16 exceptionStatusOffset = tmp.value<quint16>();
+    QModbusDataUnit coils(QModbusDataUnit::Coils, exceptionStatusOffset, 8);
     if (!q_func()->data(&coils)) {
         return QModbusExceptionResponse(request.functionCode(),
                                         QModbusExceptionResponse::IllegalDataAddress);
@@ -682,7 +717,7 @@ QModbusResponse QModbusServerPrivate::processDiagnostics(const QModbusRequest &r
         // requirement, a server configuration variable could be added to check if the
         // diagnostic register should be cleared or not.
         resetCommunicationCounters();
-        m_diagnosticRegister = 0x0000;
+        q_func()->setValue(QModbusServer::DiagnosticRegister, 0x0000);
         return QModbusResponse(request.functionCode(), request.data());
 
     case Diagnostics::ReturnDiagnosticRegister:

@@ -43,6 +43,7 @@
 #include <QtSerialBus/qmodbuspdu.h>
 
 #include <QtCore/qobject.h>
+#include <QtCore/qvariant.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -54,23 +55,25 @@ class Q_SERIALBUS_EXPORT QModbusServer : public QModbusDevice
     Q_DECLARE_PRIVATE(QModbusServer)
 
 public:
+    enum Option {
+        DiagnosticRegister,
+        ExceptionStatusOffset,
+        // Reserved
+        UserOption = 0x100
+    };
+    Q_ENUMS(Option)
+
     explicit QModbusServer(QObject *parent = 0);
     ~QModbusServer();
-
-    virtual bool setMap(const QModbusDataUnitMap &map);
-    virtual bool processesBroadcast() const { return false; }
 
     int slaveAddress() const;
     void setSlaveAddress(int slaveAddress);
 
-    quint16 diagnosticRegister() const;
-    void setDiagnosticRegister(quint16 value);
+    virtual bool setMap(const QModbusDataUnitMap &map);
+    virtual bool processesBroadcast() const { return false; }
 
-    bool continueOnError() const;
-    void setContinueOnError(bool value);
-
-    quint16 exceptionStatusOffset() const;
-    bool setExceptionStatusOffset(quint16 offsetAddress);
+    virtual QVariant value(int option) const;
+    virtual bool setValue(int option, const QVariant &value);
 
     bool data(QModbusDataUnit *newData) const;
     bool setData(const QModbusDataUnit &unit);
@@ -90,6 +93,8 @@ protected:
     virtual QModbusResponse processRequest(const QModbusPdu &request);
     virtual QModbusResponse processPrivateModbusRequest(const QModbusPdu &request);
 };
+
+Q_DECLARE_TYPEINFO(QModbusServer::Option, Q_PRIMITIVE_TYPE);
 
 QT_END_NAMESPACE
 

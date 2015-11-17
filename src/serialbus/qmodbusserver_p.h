@@ -123,7 +123,6 @@ private:
     int m_slaveAddress = 0;
 
     // Modbus Communication fields to stay
-    bool m_continueOnError = true; //TODO hook into server implementations
     quint16 m_deviceBusy = 0x0000; // TODO not taken into account yet
     uchar m_asciiInputDelimiter; // TODO not taken into account yet
     QContiguousCache<quint8> m_commEventLog; // TODO not taken into account yet
@@ -132,6 +131,7 @@ private:
     bool m_forceListenOnlyMode = false;
     quint16 m_diagnosticRegister = 0x0000;
     quint16 m_exceptionStatusOffset = 0x0000;
+    QHash<int, QVariant> m_userOptions;
 };
 
 QT_END_NAMESPACE

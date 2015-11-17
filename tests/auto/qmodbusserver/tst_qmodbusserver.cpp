@@ -301,7 +301,7 @@ private slots:
     void testProcessReadExceptionStatus()
     {
          // simulate Modicon 484 (start at coil 257 up to 264)
-        server.setExceptionStatusOffset(256u);
+        server.setValue(QModbusServer::ExceptionStatusOffset, 256u);
         // set the exception status byte to 0000 0011 simulating two bits set
         // request write Coil 257, address: 0x0100 -> 256, value: 0xff00 -> ON
         QModbusRequest request = QModbusRequest(QModbusRequest::WriteSingleCoil,
@@ -1010,26 +1010,18 @@ private slots:
 
     void tst_diagnosticRegister()
     {
-        server.setDiagnosticRegister(56u);
-        QCOMPARE(server.diagnosticRegister(), quint16(56));
-        server.setDiagnosticRegister(1u);
-        QCOMPARE(server.diagnosticRegister(), quint16(1));
-    }
-
-    void tst_continueOnError()
-    {
-        server.setContinueOnError(true);
-        QCOMPARE(server.continueOnError(), true);
-        server.setContinueOnError(false);
-        QCOMPARE(server.continueOnError(), false);
+        server.setValue(QModbusServer::DiagnosticRegister, 56u);
+        QCOMPARE(server.value(QModbusServer::DiagnosticRegister).value<quint16>(), quint16(56));
+        server.setValue(QModbusServer::DiagnosticRegister, 1u);
+        QCOMPARE(server.value(QModbusServer::DiagnosticRegister).value<quint16>(), quint16(1));
     }
 
     void tst_exceptionStatusOffset()
     {
-       server.setExceptionStatusOffset(256u);
-       QCOMPARE(server.exceptionStatusOffset(), quint16(256));
-       server.setExceptionStatusOffset(0);
-       QCOMPARE(server.exceptionStatusOffset(), quint16(0));
+       server.setValue(QModbusServer::ExceptionStatusOffset, 256u);
+       QCOMPARE(server.value(QModbusServer::ExceptionStatusOffset).value<quint16>(), quint16(256));
+       server.setValue(QModbusServer::ExceptionStatusOffset, 0x0000);
+       QCOMPARE(server.value(QModbusServer::ExceptionStatusOffset).value<quint16>(), quint16(0));
     }
 
     void tst_readWriteDataInheritance()
