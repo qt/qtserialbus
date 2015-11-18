@@ -101,15 +101,15 @@ public:
     QModbusResponse processWriteSingleRegisterRequest(const QModbusRequest &request);
     QModbusResponse writeSingle(const QModbusPdu &request, QModbusDataUnit::RegisterType unitType);
 
-    QModbusResponse processReadExceptionStatus(const QModbusRequest &request);
-    QModbusResponse processDiagnostics(const QModbusRequest &request);
-    QModbusResponse processGetCommEventCounter(const QModbusRequest &request);
-    QModbusResponse processGetCommEventLog(const QModbusRequest &request);
+    QModbusResponse processReadExceptionStatusRequest(const QModbusRequest &request);
+    QModbusResponse processDiagnosticsRequest(const QModbusRequest &request);
+    QModbusResponse processGetCommEventCounterRequest(const QModbusRequest &request);
+    QModbusResponse processGetCommEventLogRequest(const QModbusRequest &request);
     QModbusResponse processWriteMultipleCoilsRequest(const QModbusRequest &request);
     QModbusResponse processWriteMultipleRegistersRequest(const QModbusRequest &request);
-    QModbusResponse processMaskWriteRegister(const QModbusRequest &request);
+    QModbusResponse processMaskWriteRegisterRequest(const QModbusRequest &request);
     QModbusResponse processReadWriteMultipleRegistersRequest(const QModbusRequest &request);
-    QModbusResponse processReadFifoQueue(const QModbusRequest &request);
+    QModbusResponse processReadFifoQueueRequest(const QModbusRequest &request);
 
     bool isListenOnly() const { return m_forceListenOnlyMode; }
     void storeModbusCommEvent(const QModbusCommEvent &eventByte);

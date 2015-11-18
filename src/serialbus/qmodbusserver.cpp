@@ -505,13 +505,13 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
     case QModbusRequest::WriteSingleRegister:
         return processWriteSingleRegisterRequest(request);
     case QModbusRequest::ReadExceptionStatus:
-        return processReadExceptionStatus(request);
+        return processReadExceptionStatusRequest(request);
     case QModbusRequest::Diagnostics:
-        return processDiagnostics(request);
+        return processDiagnosticsRequest(request);
     case QModbusRequest::GetCommEventCounter:
-        return processGetCommEventCounter(request);
+        return processGetCommEventCounterRequest(request);
     case QModbusRequest::GetCommEventLog:
-        return processGetCommEventLog(request);
+        return processGetCommEventLogRequest(request);
     case QModbusRequest::WriteMultipleCoils:
         return processWriteMultipleCoilsRequest(request);
     case QModbusRequest::WriteMultipleRegisters:
@@ -521,11 +521,11 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
     case QModbusRequest::WriteFileRecord:
         return q_func()->processPrivateRequest(request);
     case QModbusRequest::MaskWriteRegister:
-        return processMaskWriteRegister(request);
+        return processMaskWriteRegisterRequest(request);
     case QModbusRequest::ReadWriteMultipleRegisters:
         return processReadWriteMultipleRegistersRequest(request);
     case QModbusRequest::ReadFifoQueue:
-        return processReadFifoQueue(request);
+        return processReadFifoQueueRequest(request);
     case QModbusRequest::EncapsulatedInterfaceTransport:
     default:
         break;
@@ -669,7 +669,7 @@ QModbusResponse QModbusServerPrivate::writeSingle(const QModbusPdu &request,
     return QModbusResponse(request.functionCode(), address, value);
 }
 
-QModbusResponse QModbusServerPrivate::processReadExceptionStatus(const QModbusRequest &request)
+QModbusResponse QModbusServerPrivate::processReadExceptionStatusRequest(const QModbusRequest &request)
 {
     CHECK_SIZE_EQUALS(request);
 
@@ -696,7 +696,7 @@ QModbusResponse QModbusServerPrivate::processReadExceptionStatus(const QModbusRe
     return QModbusResponse(request.functionCode(), bytes);
 }
 
-QModbusResponse QModbusServerPrivate::processDiagnostics(const QModbusRequest &request)
+QModbusResponse QModbusServerPrivate::processDiagnosticsRequest(const QModbusRequest &request)
 {
 #define CHECK_SIZE_AND_CONDITION(req, condition) \
     CHECK_SIZE_EQUALS(req); \
@@ -769,13 +769,13 @@ QModbusResponse QModbusServerPrivate::processDiagnostics(const QModbusRequest &r
 #undef CHECK_SIZE_AND_CONDITION
 }
 
-QModbusResponse QModbusServerPrivate::processGetCommEventCounter(const QModbusRequest &request)
+QModbusResponse QModbusServerPrivate::processGetCommEventCounterRequest(const QModbusRequest &request)
 {
     CHECK_SIZE_EQUALS(request);
     return QModbusResponse(request.functionCode(), m_deviceBusy, m_counters[Counter::CommEvent]);
 }
 
-QModbusResponse QModbusServerPrivate::processGetCommEventLog(const QModbusRequest &request)
+QModbusResponse QModbusServerPrivate::processGetCommEventLogRequest(const QModbusRequest &request)
 {
     CHECK_SIZE_EQUALS(request);
     m_commEventLog.normalizeIndexes();
@@ -887,7 +887,7 @@ QModbusResponse QModbusServerPrivate::processWriteMultipleRegistersRequest(
     return QModbusResponse(request.functionCode(), address, numberOfRegisters);
 }
 
-QModbusResponse QModbusServerPrivate::processMaskWriteRegister(const QModbusRequest &request)
+QModbusResponse QModbusServerPrivate::processMaskWriteRegisterRequest(const QModbusRequest &request)
 {
     CHECK_SIZE_EQUALS(request);
     quint16 address, andMask, orMask;
@@ -966,7 +966,7 @@ QModbusResponse QModbusServerPrivate::processReadWriteMultipleRegistersRequest(
                            readRegisters.values());
 }
 
-QModbusResponse QModbusServerPrivate::processReadFifoQueue(const QModbusRequest &request)
+QModbusResponse QModbusServerPrivate::processReadFifoQueueRequest(const QModbusRequest &request)
 {
     CHECK_SIZE_LESS_THAN(request);
     quint16 address;
