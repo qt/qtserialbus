@@ -68,6 +68,9 @@ Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
 
     \value DiagnosticRegister       The diagnostic register of the server. \c quint16
     \value ExceptionStatusOffset    The exception status byte offset of the server. \c quint16
+    \value ServerIdentifier         The identifier of the server, \b not the server address. \c quint8
+    \value RunIndicatorStatus       The run indicator of the server. \c quint8
+    \value AdditionalData           The additional data of the server. \c QByteArray
 
     User options:
 
@@ -155,6 +158,18 @@ int QModbusServer::slaveAddress() const
             \li Returns the offset address of the exception status byte
                 location in the coils register.
         \row
+            \li \l QModbusServer::ServerIdentifier
+            \li Returns the server manufacturer's identifier code. This can be
+                an arbitrary value in the range of \c 0x00 to 0xff.
+        \row
+            \li \l QModbusServer::RunIndicatorStatus
+            \li Returns the server's run indicator status. This data is used as
+                addendum by the \l QModbusPdu::ReportServerId function code.
+        \row
+            \li \l QModbusServer::AdditionalData
+            \li Returns the server's additional data. This data is used as
+                addendum by the \l QModbusPdu::ReportServerId function code.
+        \row
             \li \l QModbusServer::UserOption
             \li Returns the value of a user option.
 
@@ -172,6 +187,12 @@ QVariant QModbusServer::value(int option) const
             return d->m_diagnosticRegister;
         case ExceptionStatusOffset:
             return d->m_exceptionStatusOffset;
+        case ServerIdentifier:
+            return d->m_serverIdentifier;
+        case RunIndicatorStatus:
+            return d->m_runIndicatorStatus;
+        case AdditionalData:
+            return d->m_additionalData;
         default:
             break;
     };
@@ -184,6 +205,10 @@ QVariant QModbusServer::value(int option) const
 /*!
     Sets the \a newValue for \a option and returns \c true on success; \c false
     otherwise.
+
+    \note If the option's associated type is \c quint8 or \c quint16 and the
+    type of \a newValue is larger, the data will be truncated or conversation
+    will fail.
 
     \table
         \header
@@ -206,6 +231,24 @@ QVariant QModbusServer::value(int option) const
                 8 bits required for storing and retrieving the status coils,
                 otherwise \c false.
         \row
+            \li \l QModbusServer::ServerIdentifier
+            \li Sets the server's manufacturer identifier to \a newValue.
+                Possible values are in the range of \c 0x00 to 0xff.
+                The default value preset is \c 0x0a.
+        \row
+            \li \l QModbusServer::RunIndicatorStatus
+            \li Sets the servers' run indicator status to \a newValue. This
+                data is used as addendum by the \l QModbusPdu::ReportServerId
+                function code. Valid values are \c 0x00 (OFF) and \c 0xff (ON).
+                The default value preset is \c 0xff (ON).
+        \row
+            \li \l QModbusServer::AdditionalData
+            \li Sets the server's additional data to \a newValue. This data is
+                used as addendum by the \l QModbusPdu::ReportServerId function
+                code. The maximum data size cannot exceed 249 bytes to match
+                response message size restrictions.
+                The default value preset is \c {Qt Modbus Server}.
+        \row
             \li \l QModbusServer::UserOption
             \li Sets the value of a user option to \a newValue.
 
@@ -216,24 +259,46 @@ QVariant QModbusServer::value(int option) const
 */
 bool QModbusServer::setValue(int option, const QVariant &newValue)
 {
-    Q_D(QModbusServer);
+#define CHECK_INT_OR_UINT(val) \
+    do { \
+        if ((val.type() != QVariant::Int) && (val.type() != QVariant::UInt)) \
+            return false; \
+    } while (0)
 
+    Q_D(QModbusServer);
     switch (option) {
     case DiagnosticRegister:
-        if (!newValue.canConvert<quint16>())
-            return false;
+        CHECK_INT_OR_UINT(newValue);
         d->m_diagnosticRegister = newValue.value<quint16>();
         return true;
-
     case ExceptionStatusOffset: {
-        if (!newValue.canConvert<quint16>())
-            return false;
-
+        CHECK_INT_OR_UINT(newValue);
         const quint16 tmp = newValue.value<quint16>();
         QModbusDataUnit coils(QModbusDataUnit::Coils, tmp, 8);
         if (!data(&coils))
             return false;
         d->m_exceptionStatusOffset = tmp;
+        return true;
+    }
+    case ServerIdentifier:
+        CHECK_INT_OR_UINT(newValue);
+        d->m_serverIdentifier = newValue.value<quint8>();
+        return true;
+    case RunIndicatorStatus: {
+        CHECK_INT_OR_UINT(newValue);
+        const quint8 tmp = newValue.value<quint8>();
+        if ((tmp != 0x00) && (tmp != 0xff))
+            return false;
+        d->m_runIndicatorStatus = tmp;
+        return true;
+    }
+    case AdditionalData: {
+        if (newValue.type() != QVariant::ByteArray)
+            return false;
+        const QByteArray additionalData = newValue.toByteArray();
+        if (additionalData.size() > 249)
+            return false;
+        d->m_additionalData = additionalData;
         return true;
     }
     default:
@@ -244,6 +309,8 @@ bool QModbusServer::setValue(int option, const QVariant &newValue)
         return false;
     d_func()->m_userOptions.insert(option, newValue);
     return true;
+
+#undef CHECK_INT_OR_UINT
 }
 
 /*!
@@ -517,8 +584,9 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
     case QModbusRequest::WriteMultipleRegisters:
         return processWriteMultipleRegistersRequest(request);
     case QModbusRequest::ReportServerId:
-    case QModbusRequest::ReadFileRecord:
-    case QModbusRequest::WriteFileRecord:
+        return processReportServerIdRequest(request);
+    case QModbusRequest::ReadFileRecord:    // TODO: Implement.
+    case QModbusRequest::WriteFileRecord:   // TODO: Implement.
         return q_func()->processPrivateRequest(request);
     case QModbusRequest::MaskWriteRegister:
         return processMaskWriteRegisterRequest(request);
@@ -526,7 +594,7 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
         return processReadWriteMultipleRegistersRequest(request);
     case QModbusRequest::ReadFifoQueue:
         return processReadFifoQueueRequest(request);
-    case QModbusRequest::EncapsulatedInterfaceTransport:
+    case QModbusRequest::EncapsulatedInterfaceTransport:    // TODO: Implement.
     default:
         break;
     }
@@ -885,6 +953,35 @@ QModbusResponse QModbusServerPrivate::processWriteMultipleRegistersRequest(
     }
 
     return QModbusResponse(request.functionCode(), address, numberOfRegisters);
+}
+
+QModbusResponse QModbusServerPrivate::processReportServerIdRequest(const QModbusRequest &request)
+{
+    CHECK_SIZE_EQUALS(request);
+
+    Q_Q(QModbusServer);
+
+    QByteArray data;
+    QVariant tmp = q->value(QModbusServer::ServerIdentifier);
+    if (tmp.isNull() || (!tmp.isValid())) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::ServerDeviceFailure);
+    }
+    data.append(tmp.value<quint8>());
+
+    tmp = q->value(QModbusServer::RunIndicatorStatus);
+    if (tmp.isNull() || (!tmp.isValid())) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::ServerDeviceFailure);
+    }
+    data.append(tmp.value<quint8>());
+
+    tmp = q->value(QModbusServer::AdditionalData);
+    if (!tmp.isNull() && tmp.isValid())
+        data.append(tmp.toByteArray());
+
+    data.prepend(data.size()); // byte count
+    return QModbusResponse(request.functionCode(), data);
 }
 
 QModbusResponse QModbusServerPrivate::processMaskWriteRegisterRequest(const QModbusRequest &request)

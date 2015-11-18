@@ -58,6 +58,9 @@ public:
     enum Option {
         DiagnosticRegister,
         ExceptionStatusOffset,
+        ServerIdentifier,
+        RunIndicatorStatus,
+        AdditionalData,
         // Reserved
         UserOption = 0x100
     };

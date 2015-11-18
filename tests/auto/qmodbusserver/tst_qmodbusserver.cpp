@@ -715,6 +715,40 @@ private slots:
         QCOMPARE(response.data(), QByteArray::fromHex("03"));
     }
 
+    void testReportServerId()
+    {
+        QModbusRequest request = QModbusRequest(QModbusRequest::ReportServerId);
+        QModbusResponse response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        QCOMPARE(response.functionCode(), QModbusRequest::ReportServerId);
+
+        const QByteArray additionalData = "Qt Modbus Server";
+        QCOMPARE(server.value(QModbusServer::ServerIdentifier).value<quint8>(), quint8(0x0a));
+        QCOMPARE(server.value(QModbusServer::RunIndicatorStatus).value<quint8>(), quint8(0xff));
+        QCOMPARE(server.value(QModbusServer::AdditionalData).toByteArray(), additionalData);
+
+        QByteArray data = QByteArray::fromHex("0aff") + additionalData;
+        data.prepend(quint8(data.size()));
+        QCOMPARE(response.data(), data);
+
+        request = QModbusRequest(QModbusRequest::ReportServerId, data);
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.exceptionCode(), QModbusPdu::IllegalDataValue);
+
+        server.setValue(QModbusServer::ServerIdentifier, quint8(0xff));
+        QCOMPARE(server.setValue(QModbusServer::ServerIdentifier, additionalData), false);
+        QCOMPARE(server.value(QModbusServer::ServerIdentifier).value<quint8>(), quint8(0xff));
+
+        server.setValue(QModbusServer::RunIndicatorStatus, quint8(0x00));
+        QCOMPARE(server.setValue(QModbusServer::RunIndicatorStatus, quint8(0xab)), false);
+        QCOMPARE(server.value(QModbusServer::RunIndicatorStatus).value<quint8>(), quint8(0x00));
+
+        server.setValue(QModbusServer::AdditionalData, QByteArray("TestData"));
+        QCOMPARE(server.setValue(QModbusServer::AdditionalData, QStringList()), false);
+        QCOMPARE(server.value(QModbusServer::AdditionalData).toByteArray(), QByteArray("TestData"));
+    }
+
     void testMaskWriteRegister()
     {
         // preset register 172 with value 18 (0x0012h)

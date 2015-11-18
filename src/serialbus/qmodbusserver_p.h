@@ -107,6 +107,7 @@ public:
     QModbusResponse processGetCommEventLogRequest(const QModbusRequest &request);
     QModbusResponse processWriteMultipleCoilsRequest(const QModbusRequest &request);
     QModbusResponse processWriteMultipleRegistersRequest(const QModbusRequest &request);
+    QModbusResponse processReportServerIdRequest(const QModbusRequest &request);
     QModbusResponse processMaskWriteRegisterRequest(const QModbusRequest &request);
     QModbusResponse processReadWriteMultipleRegistersRequest(const QModbusRequest &request);
     QModbusResponse processReadFifoQueueRequest(const QModbusRequest &request);
@@ -132,6 +133,9 @@ private:
     quint16 m_diagnosticRegister = 0x0000;
     quint16 m_exceptionStatusOffset = 0x0000;
     QHash<int, QVariant> m_userOptions;
+    quint8 m_serverIdentifier = 0x0a;
+    quint8 m_runIndicatorStatus = 0xff;
+    QByteArray m_additionalData = "Qt Modbus Server";
 };
 
 QT_END_NAMESPACE
