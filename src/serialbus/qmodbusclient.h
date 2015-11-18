@@ -76,7 +76,7 @@ protected:
     QModbusClient(QModbusClientPrivate &dd, QObject *parent = Q_NULLPTR);
 
     virtual bool processResponse(const QModbusResponse &response, QModbusDataUnit *data);
-    virtual bool processPrivateModbusResponse(const QModbusResponse &response, QModbusDataUnit *data);
+    virtual bool processPrivateResponse(const QModbusResponse &response, QModbusDataUnit *data);
 };
 
 QT_END_NAMESPACE
