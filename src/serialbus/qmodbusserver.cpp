@@ -430,6 +430,26 @@ bool QModbusServer::readData(QModbusDataUnit *newData) const
 
 /*!
     Processes a Modbus client \a request and returns a Modbus response.
+    This function returns a \l QModbusResponse or \l QModbusExceptionResponse depending
+    on the nature of the request.
+
+    The default implementation of this function handles all standard Modbus
+    function codes as defined by the Modbus Application Protocol Specification 1.1b.
+    All other Modbus function codes not included in the specification are forwarded to
+    \l processPrivateModbusRequest().
+
+    The default handling of the standard Modbus function code requests can be overwritten
+    by reimplementing this function. The override must handle the request type
+    in question and return the appropriate \l QModbusResponse. A common reason might be to
+    filter out function code requests for data values to limit read/write access and
+    function codes not desired in particular implementations such as serial line diagnostics
+    on ethernet or Modbus Plus transport layers. Every other request type should be
+    forwarded to this default implementation.
+
+    \note This function should not be overridden to provide a custom implementation for
+    non-standard Modbus request types.
+
+    \sa processPrivateModbusRequest()
 */
 QModbusResponse QModbusServer::processRequest(const QModbusPdu &request)
 {
@@ -437,9 +457,20 @@ QModbusResponse QModbusServer::processRequest(const QModbusPdu &request)
 }
 
 /*!
-    To be implemented by custom Modbus server implementation. The default implementation returns
-    a \c QModbusExceptionResponse with the \a request function code and error code set to illegal
-    function.
+    This function should be implemented by custom Modbus servers. It is
+    called by \l processRequest() if the given \a request is not a standard
+    Modbus request.
+
+    Overwriting this function allows handling of additional function codes and
+    subfunction-codes not specified in the Modbus Application Protocol
+    Specification 1.1b. Reimplementations should call this function again to
+    ensure an exception response is returned for all unknown function codes the
+    custom Modbus implementation does not handle.
+
+    This default implementation returns a \c QModbusExceptionResponse with the
+    \a request function code and error code set to illegal function.
+
+    \sa processRequest()
 */
 QModbusResponse QModbusServer::processPrivateModbusRequest(const QModbusPdu &request)
 {

@@ -127,9 +127,11 @@ void QModbusTcpServer::close()
 }
 
 /*!
+    \reimp
+
     Processes a Modbus client \a request and returns a Modbus response.
 
-    \note The following Modbus function codes are filtered as they are serial
+    The following Modbus function codes are filtered out as they are serial
     line only according to the Modbus Application Protocol Specification 1.1b:
     \list
         \li \l QModbusRequest::ReadExceptionStatus
@@ -140,7 +142,6 @@ void QModbusTcpServer::close()
     \endlist
     A request to the TCP server will be answered with a Modbus exception
     response with exception code QModbusExceptionResponse::IllegalFunction.
-
 */
 QModbusResponse QModbusTcpServer::processRequest(const QModbusPdu &request)
 {
