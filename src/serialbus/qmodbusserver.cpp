@@ -784,7 +784,19 @@ QModbusResponse QModbusServerPrivate::processDiagnosticsRequest(const QModbusReq
 
     case Diagnostics::RestartCommunicationsOption: {
         CHECK_SIZE_AND_CONDITION(request, ((data != 0xff00) && (data != 0x0000)));
-        if (!restartCommunicationsOption(data == 0xff00)) {
+        // Restarts the communication by closing the connection and re - opening.After closing,
+        // all communication counters are cleared and the listen only mode set to false.This
+        // function is the only way to remotely clear the listen only mode and bring the device
+        // back into communication. If data is 0xff00, the event log history is also cleared.
+        q_func()->disconnectDevice();
+        if (data == 0xff00)
+            m_commEventLog.clear();
+
+        resetCommunicationCounters();
+        m_forceListenOnlyMode = false;
+        storeModbusCommEvent(QModbusCommEvent::InitiatedCommunicationRestart);
+
+        if (!q_func()->connectDevice()) {
             qCWarning(QT_MODBUS) << "Cannot restart server communication";
             return QModbusExceptionResponse(request.functionCode(),
                                             QModbusExceptionResponse::ServerDeviceFailure);
@@ -1093,31 +1105,6 @@ QModbusResponse QModbusServerPrivate::processReadFifoQueueRequest(const QModbusR
 /*!
     \internal
 
-    Access function of the device for Modbus Diagnostic Function Code 0x08, Subcode 01
-    (0x08, 0x0001 hex)
-
-    Restarts the communication by closing the connection and re-opening. After closing,
-    all communication event counters are cleared and the listen only mode set to false.
-    If \a clearEventLog is set to true, the event log history gets cleared also.
-
-    \sa forceListenOnlyMode(), getCommEventLog()
-*/
-bool QModbusServerPrivate::restartCommunicationsOption(bool clearLog)
-{
-    q_func()->disconnectDevice();
-    if (clearLog)
-        m_commEventLog.clear();
-
-    resetCommunicationCounters();
-    m_forceListenOnlyMode = false;
-    storeModbusCommEvent(QModbusCommEvent::InitiatedCommunicationRestart);
-
-    return q_func()->connectDevice();
-}
-
-/*!
-    \internal
-
     Stores an event byte into the Modbus event log history table (0-64 bytes) at
     the first position (byte 0) and pushes all other events back. The communication
     event counter is increased for each event stored in the event log.
@@ -1130,7 +1117,7 @@ bool QModbusServerPrivate::restartCommunicationsOption(bool clearLog)
      \li Remote Device Initiated Communication Restart
     \endlist
 
-    \sa getCommEventLog(), restartCommunicationsOption()
+    \sa getCommEventLog()
 */
 void QModbusServerPrivate::storeModbusCommEvent(const QModbusCommEvent &eventByte)
 {

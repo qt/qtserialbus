@@ -115,9 +115,6 @@ public:
     bool isListenOnly() const { return m_forceListenOnlyMode; }
     void storeModbusCommEvent(const QModbusCommEvent &eventByte);
 
-private:
-    bool restartCommunicationsOption(bool clearLog);
-
     // Device specific fields to be moved later
     QModbusDataUnitMap m_modbusDataUnitMap;
 
