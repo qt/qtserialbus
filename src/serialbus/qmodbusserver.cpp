@@ -254,7 +254,7 @@ bool QModbusServer::setValue(int option, const QVariant &newValue)
     broadcast request; otherwise \c false. The default implementation returns always \c false.
 
     \note The return value of this function only makes sense from within processRequest() or
-    processPrivateModbusRequest(), otherwise it can only tell that the last request processed
+    processPrivateRequest(), otherwise it can only tell that the last request processed
     was a broadcast request.
 */
 
@@ -436,7 +436,7 @@ bool QModbusServer::readData(QModbusDataUnit *newData) const
     The default implementation of this function handles all standard Modbus
     function codes as defined by the Modbus Application Protocol Specification 1.1b.
     All other Modbus function codes not included in the specification are forwarded to
-    \l processPrivateModbusRequest().
+    \l processPrivateRequest().
 
     The default handling of the standard Modbus function code requests can be overwritten
     by reimplementing this function. The override must handle the request type
@@ -449,7 +449,7 @@ bool QModbusServer::readData(QModbusDataUnit *newData) const
     \note This function should not be overridden to provide a custom implementation for
     non-standard Modbus request types.
 
-    \sa processPrivateModbusRequest()
+    \sa processPrivateRequest()
 */
 QModbusResponse QModbusServer::processRequest(const QModbusPdu &request)
 {
@@ -472,7 +472,7 @@ QModbusResponse QModbusServer::processRequest(const QModbusPdu &request)
 
     \sa processRequest()
 */
-QModbusResponse QModbusServer::processPrivateModbusRequest(const QModbusPdu &request)
+QModbusResponse QModbusServer::processPrivateRequest(const QModbusPdu &request)
 {
     return QModbusExceptionResponse(request.functionCode(),
         QModbusExceptionResponse::IllegalFunction);
@@ -519,7 +519,7 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
     case QModbusRequest::ReportServerId:
     case QModbusRequest::ReadFileRecord:
     case QModbusRequest::WriteFileRecord:
-        return q_func()->processPrivateModbusRequest(request);
+        return q_func()->processPrivateRequest(request);
     case QModbusRequest::MaskWriteRegister:
         return processMaskWriteRegister(request);
     case QModbusRequest::ReadWriteMultipleRegisters:
@@ -530,7 +530,7 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
     default:
         break;
     }
-    return q_func()->processPrivateModbusRequest(request);
+    return q_func()->processPrivateRequest(request);
 }
 
 #define CHECK_SIZE_EQUALS(req) \
@@ -764,7 +764,7 @@ QModbusResponse QModbusServerPrivate::processDiagnostics(const QModbusRequest &r
         return QModbusResponse(request.functionCode(), subFunctionCode,
                                m_counters[static_cast<Counter> (subFunctionCode)]);
     }
-    return q_func()->processPrivateModbusRequest(request);
+    return q_func()->processPrivateRequest(request);
 
 #undef CHECK_SIZE_AND_CONDITION
 }

@@ -91,7 +91,7 @@ protected:
     virtual bool readData(QModbusDataUnit *newData) const;
 
     virtual QModbusResponse processRequest(const QModbusPdu &request);
-    virtual QModbusResponse processPrivateModbusRequest(const QModbusPdu &request);
+    virtual QModbusResponse processPrivateRequest(const QModbusPdu &request);
 };
 
 Q_DECLARE_TYPEINFO(QModbusServer::Option, Q_PRIMITIVE_TYPE);

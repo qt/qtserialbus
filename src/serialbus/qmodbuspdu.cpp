@@ -435,7 +435,7 @@ int QModbusRequest::calculateDataSize(FunctionCode code, const QByteArray &data)
     case QModbusPdu::Diagnostics:
     case QModbusPdu::EncapsulatedInterfaceTransport:
         // The following part makes sure we pass all checks in the request processing functions
-        // and not handled function codes get passed on the processPrivateModbusRequest function.
+        // and not handled function codes get passed on the processPrivateRequest() function.
         size = data.size();
         break;
     default:
