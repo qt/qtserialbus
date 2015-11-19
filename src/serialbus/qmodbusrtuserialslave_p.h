@@ -238,7 +238,7 @@ public:
                 // its last restart, clear counters operation, or power–up.
                 incrementCounter(QModbusServerPrivate::Counter::BusExceptionError);
             } else {
-                switch (req.functionCode()) {
+                switch (quint16(req.functionCode())) {
                 case 0x0a: // Poll 484 (not in the official Modbus specification) *1
                 case 0x0e: // Poll Controller (not in the official Modbus specification) *1
                 case QModbusRequest::GetCommEventCounter: // fall through and bail out
