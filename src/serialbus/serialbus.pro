@@ -12,6 +12,7 @@ load(qt_module)
 
 PUBLIC_HEADERS += \
     qcanbusdevice.h \
+    qcanbusfactory.h \
     qcanbusframe.h \
     qcanbus.h \
     qserialbusglobal.h \
