@@ -1102,25 +1102,11 @@ QModbusResponse QModbusServerPrivate::processReadFifoQueueRequest(const QModbusR
                            fifoRegisters.values());
 }
 
-/*!
-    \internal
-
-    Stores an event byte into the Modbus event log history table (0-64 bytes) at
-    the first position (byte 0) and pushes all other events back. The communication
-    event counter is increased for each event stored in the event log.
-
-    A communication event is encoded into one byte with the four types:
-    \list
-     \li Remote Device Modbus Receive Event
-     \li Remote Device Modbus Send Event
-     \li Remote Device Entered Listen Only Mode
-     \li Remote Device Initiated Communication Restart
-    \endlist
-
-    \sa getCommEventLog()
-*/
 void QModbusServerPrivate::storeModbusCommEvent(const QModbusCommEvent &eventByte)
 {
+    // Inserts an event byte at the start of the event log. If the event log
+    // is already full, the byte at the end of the log will be removed. The
+    // event log size is 64 bytes, starting at index 0.
     m_commEventLog.prepend(eventByte);
 }
 
