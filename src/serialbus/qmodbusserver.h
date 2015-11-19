@@ -58,6 +58,7 @@ public:
     enum Option {
         DiagnosticRegister,
         ExceptionStatusOffset,
+        DeviceBusy,
         ServerIdentifier,
         RunIndicatorStatus,
         AdditionalData,

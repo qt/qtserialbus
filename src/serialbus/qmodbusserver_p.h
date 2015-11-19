@@ -120,13 +120,12 @@ public:
 
     int m_slaveAddress = 0;
 
-    // Modbus Communication fields to stay
-    quint16 m_deviceBusy = 0x0000; // TODO not taken into account yet
-    uchar m_asciiInputDelimiter; // TODO not taken into account yet
-    QContiguousCache<quint8> m_commEventLog; // TODO not taken into account yet
+    quint16 m_deviceBusy = 0x0000;
+    uchar m_asciiInputDelimiter; // TODO: Expose through value()|setValue() and use.
+    QContiguousCache<quint8> m_commEventLog;
 
     QVector<quint16> m_counters;
-    bool m_forceListenOnlyMode = false;
+    bool m_forceListenOnlyMode = false; // TODO: Expose through value()|setValue() .
     quint16 m_diagnosticRegister = 0x0000;
     quint16 m_exceptionStatusOffset = 0x0000;
     QHash<int, QVariant> m_userOptions;

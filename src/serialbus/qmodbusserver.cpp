@@ -68,6 +68,8 @@ Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
 
     \value DiagnosticRegister       The diagnostic register of the server. \c quint16
     \value ExceptionStatusOffset    The exception status byte offset of the server. \c quint16
+    \value DeviceBusy               Flag to signal the server is engaged in processing a
+                                    long-duration program command. \c quint16
     \value ServerIdentifier         The identifier of the server, \b not the server address. \c quint8
     \value RunIndicatorStatus       The run indicator of the server. \c quint8
     \value AdditionalData           The additional data of the server. \c QByteArray
@@ -158,6 +160,10 @@ int QModbusServer::slaveAddress() const
             \li Returns the offset address of the exception status byte
                 location in the coils register.
         \row
+            \li \l QModbusServer::DeviceBusy
+            \li Returns a flag that signals if the server is engaged in
+                processing a long-duration program command.
+        \row
             \li \l QModbusServer::ServerIdentifier
             \li Returns the server manufacturer's identifier code. This can be
                 an arbitrary value in the range of \c 0x00 to 0xff.
@@ -187,6 +193,8 @@ QVariant QModbusServer::value(int option) const
             return d->m_diagnosticRegister;
         case ExceptionStatusOffset:
             return d->m_exceptionStatusOffset;
+        case DeviceBusy:
+            return d->m_deviceBusy;
         case ServerIdentifier:
             return d->m_serverIdentifier;
         case RunIndicatorStatus:
@@ -230,6 +238,12 @@ QVariant QModbusServer::value(int option) const
                 The function returns \c true if the coils register contains the
                 8 bits required for storing and retrieving the status coils,
                 otherwise \c false.
+        \row
+            \li \l QModbusServer::DeviceBusy
+            \li Sets a flag that signals that the server is engaged in
+                processing a long-duration program command. Valid values are
+                \c 0x0000 (not busy) and \c 0xffff (busy).
+                The default value preset is \c 0x0000.
         \row
             \li \l QModbusServer::ServerIdentifier
             \li Sets the server's manufacturer identifier to \a newValue.
@@ -278,6 +292,14 @@ bool QModbusServer::setValue(int option, const QVariant &newValue)
         if (!data(&coils))
             return false;
         d->m_exceptionStatusOffset = tmp;
+        return true;
+    }
+    case DeviceBusy: {
+        CHECK_INT_OR_UINT(newValue);
+        const quint16 tmp = newValue.value<quint16>();
+        if ((tmp != 0x0000) && (tmp != 0xffff))
+            return false;
+        d->m_deviceBusy = tmp;
         return true;
     }
     case ServerIdentifier:
@@ -553,9 +575,6 @@ bool QModbusServerPrivate::setMap(const QModbusDataUnitMap &map)
     return true;
 }
 
-/*
-    TODO: implement
-*/
 QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
 {
     switch (request.functionCode()) {
@@ -852,21 +871,33 @@ QModbusResponse QModbusServerPrivate::processDiagnosticsRequest(const QModbusReq
 QModbusResponse QModbusServerPrivate::processGetCommEventCounterRequest(const QModbusRequest &request)
 {
     CHECK_SIZE_EQUALS(request);
-    return QModbusResponse(request.functionCode(), m_deviceBusy, m_counters[Counter::CommEvent]);
+    const QVariant tmp = q_func()->value(QModbusServer::DeviceBusy);
+    if (tmp.isNull() || (!tmp.isValid())) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::ServerDeviceFailure);
+    }
+    const quint16 deviceBusy = tmp.value<quint16>();
+    return QModbusResponse(request.functionCode(), deviceBusy, m_counters[Counter::CommEvent]);
 }
 
 QModbusResponse QModbusServerPrivate::processGetCommEventLogRequest(const QModbusRequest &request)
 {
     CHECK_SIZE_EQUALS(request);
+    const QVariant tmp = q_func()->value(QModbusServer::DeviceBusy);
+    if (tmp.isNull() || (!tmp.isValid())) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::ServerDeviceFailure);
+    }
+    const quint16 deviceBusy = tmp.value<quint16>();
+
     m_commEventLog.normalizeIndexes();
     QVector<quint16> eventLog(m_commEventLog.count());
     for (int i = 0; i < m_commEventLog.count(); ++i)
         eventLog[i] = m_commEventLog[i];
 
     // 6 -> 3 x 2 Bytes (Status, Event Count and Message Count)
-    return QModbusResponse(request.functionCode(), quint8(m_commEventLog.count() + 6),
-                           m_deviceBusy, m_counters[Counter::CommEvent],
-                           m_counters[Counter::BusMessage], eventLog);
+    return QModbusResponse(request.functionCode(), quint8(m_commEventLog.count() + 6), deviceBusy,
+        m_counters[Counter::CommEvent], m_counters[Counter::BusMessage], eventLog);
 }
 
 QModbusResponse QModbusServerPrivate::processWriteMultipleCoilsRequest(const QModbusRequest &request)
