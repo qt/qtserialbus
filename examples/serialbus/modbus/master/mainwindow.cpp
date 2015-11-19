@@ -181,8 +181,16 @@ void MainWindow::on_readButton_clicked()
     const QModbusDataUnit::RegisterType registerType =
         static_cast<QModbusDataUnit::RegisterType> (ui->readTable->currentData().toInt());
     QModbusDataUnit dataRequest(registerType);
-    dataRequest.setValueCount(ui->readSize->currentText().toInt());
-    dataRequest.setStartAddress(ui->readAddress->text().toInt());
+
+    int numberOfEntries = ui->readSize->currentText().toInt();
+    int startAddress = ui->readAddress->text().toInt();
+
+    // do not go beyond 10 entries
+    numberOfEntries = qMin(numberOfEntries, 10 - startAddress);
+    Q_ASSERT(startAddress >= 0 && startAddress < 10);
+
+    dataRequest.setValueCount(numberOfEntries);
+    dataRequest.setStartAddress(startAddress);
 
     ui->readValue->clear();
     statusBar()->clearMessage();
