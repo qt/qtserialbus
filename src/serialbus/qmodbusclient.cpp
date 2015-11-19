@@ -38,9 +38,14 @@
 #include "qmodbusclient_p.h"
 #include "qmodbus_symbols_p.h"
 
+#include <QtCore/qdebug.h>
+#include <QtCore/qloggingcategory.h>
+
 #include <bitset>
 
 QT_BEGIN_NAMESPACE
+
+Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
 
 /*!
     \class QModbusClient
@@ -77,6 +82,84 @@ QModbusClient::QModbusClient(QObject *parent)
 */
 QModbusClient::~QModbusClient()
 {
+}
+
+/*!
+    Sends a request to read the contents of the data pointed by \a read. Returns a new valid
+    QModbusReply object if it did send the request, otherwise Q_NULLPTR. Modbus network may
+    have multiple servers, each server has unique \a slaveAddress.
+*/
+QModbusReply *QModbusClient::sendReadRequest(const QModbusDataUnit &read, int slaveAddress)
+{
+    Q_D(QModbusClient);
+
+    if (!d->isOpen() || state() != QModbusDevice::ConnectedState) {
+        qCWarning(QT_MODBUS) << "Device is not connected";
+        setError(QModbusClient::tr("Device not connected."), QModbusDevice::ConnectionError);
+        return Q_NULLPTR;
+    }
+
+    const QModbusRequest request = d->createReadRequest(read);
+    if (!request.isValid())
+        return Q_NULLPTR;
+
+    return d->enqueueRequest(request, slaveAddress, read);
+}
+
+
+/*!
+    Sends a request to modify the contents of the data pointed by \a write. Returns a new valid
+    QModbusReply object if it did send the request, otherwise Q_NULLPTR. Modbus network may
+    have multiple servers, each server has a unique \a slaveAddress.
+*/
+QModbusReply *QModbusClient::sendWriteRequest(const QModbusDataUnit &write, int slaveAddress)
+{
+    Q_D(QModbusClient);
+
+    if (!d->isOpen() || state() != QModbusDevice::ConnectedState) {
+        qCWarning(QT_MODBUS) << "Device is not connected";
+        setError(QModbusClient::tr("Device not connected."), QModbusDevice::ConnectionError);
+        return Q_NULLPTR;
+    }
+
+    const QModbusRequest request = d->createWriteRequest(write);
+    if (!request.isValid())
+        return Q_NULLPTR;
+
+    return d->enqueueRequest(request, slaveAddress, write);
+}
+
+/*!
+    Sends a request to read the contents of the data pointed by \a read and to modify the contents
+    of the data pointed by \a write using Modbus Function Code 23. Returns a new valid
+    QModbusReply object if it did send the request, otherwise Q_NULLPTR. Modbus network may
+    have multiple servers, each server has a unique \a slaveAddress.
+
+    \note: Sending this kind of request is only valid of both \a read and \a write are of type
+    QModbusDataUnit::HoldingRegisters. If the remote device is not be able to process Modbus
+    Function Code 23 , the request cannot be performed and is usually answered with a Modbus
+    Exception Response. Also, on overlapping data areas of \a read and \a write
+    the behavior of the remote device determines the result. The Modbus Application Protocol
+    defines that the write operation is handled before the read operation. Particular devices
+    such as the Schneider Electric Premium PLC platform behave differently and perform the read
+    operation before the write operation.
+*/
+QModbusReply *QModbusClient::sendReadWriteRequest(const QModbusDataUnit &read,
+                                                  const QModbusDataUnit &write, int slaveAddress)
+{
+    Q_D(QModbusClient);
+
+    if (!d->isOpen() || state() != QModbusDevice::ConnectedState) {
+        qCWarning(QT_MODBUS) << "Device is not connected";
+        setError(QModbusClient::tr("Device not connected."), QModbusDevice::ConnectionError);
+        return Q_NULLPTR;
+    }
+
+    const QModbusRequest request = d->createRWRequest(read, write);
+    if (!request.isValid())
+        return Q_NULLPTR;
+
+    return d->enqueueRequest(request, slaveAddress, read); // only need to remember read
 }
 
 /*!
@@ -130,44 +213,6 @@ QModbusClient::QModbusClient(QModbusClientPrivate &dd, QObject *parent) :
 {
 
 }
-
-/*!
-    \fn QModbusReply *QModbusClient::sendReadRequest(const QModbusDataUnit &read,
-                                                     int slaveAddress) = 0
-
-    Sends a request to read the contents of the data pointed by \a read. Returns a new valid
-    QModbusReply object if it did send the request, otherwise Q_NULLPTR. Modbus network may
-    have multiple servers, each server has unique \a slaveAddress.
-*/
-
-/*!
-    \fn QModbusReply *QModbusClient::sendWriteRequest(const QModbusDataUnit &write,
-                                                      int slaveAddress) = 0
-
-    Sends a request to modify the contents of the data pointed by \a write. Returns a new valid
-    QModbusReply object if it did send the request, otherwise Q_NULLPTR. Modbus network may
-    have multiple servers, each server has a unique \a slaveAddress.
-*/
-
-/*!
-    \fn QModbusReply *QModbusClient::sendReadWriteRequest(const QModbusDataUnit &read,
-                                                          const QModbusDataUnit &write,
-                                                          int slaveAddress) = 0
-
-    Sends a request to read the contents of the data pointed by \a read and to modify the contents
-    of the data pointed by \a write using Modbus Function Code 23. Returns a new valid
-    QModbusReply object if it did send the request, otherwise Q_NULLPTR. Modbus network may
-    have multiple servers, each server has a unique \a slaveAddress.
-
-    \note: Sending this kind of request is only valid of both \a read and \a write are of type
-    QModbusDataUnit::HoldingRegisters. If the remote device is not be able to process Modbus
-    Function Code 23 , the request cannot be performed and is usually answered with a Modbus
-    Exception Response. Also, on overlapping data areas of \a read and \a write
-    the behavior of the remote device determines the result. The Modbus Application Protocol
-    defines that the write operation is handled before the read operation. Particular devices
-    such as the Schneider Electric Premium PLC platform behave differently and perform the read
-    operation before the write operation.
-*/
 
 /*!
     Processes a Modbus server \a response and stores the decoded information in \a data. Returns

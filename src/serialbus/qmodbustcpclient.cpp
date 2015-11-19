@@ -85,68 +85,6 @@ QModbusTcpClient::QModbusTcpClient(QModbusTcpClientPrivate &dd, QObject *parent)
 }
 
 /*!
-    \reimp
-*/
-QModbusReply *QModbusTcpClient::sendReadRequest(const QModbusDataUnit &read, int slaveAddress)
-{
-    Q_D(QModbusTcpClient);
-
-    if (!d->m_socket->isOpen()|| state() != QModbusDevice::ConnectedState) {
-        setError(tr("Device not connected."), QModbusDevice::ConnectionError);
-        qCWarning(QT_MODBUS) << "TCP client is not connected";
-        return Q_NULLPTR;
-    }
-
-    QModbusRequest request = d->createReadRequest(read);
-    if (!request.isValid())
-        return Q_NULLPTR;
-
-    return d->enqueueRequest(request, slaveAddress, read);
-}
-
-/*!
-    \reimp
-*/
-QModbusReply *QModbusTcpClient::sendWriteRequest(const QModbusDataUnit &write, int slaveAddress)
-{
-    Q_D(QModbusTcpClient);
-
-    if (!d->m_socket->isOpen() || state() != QModbusDevice::ConnectedState) {
-        setError(tr("Device not connected."), QModbusDevice::ConnectionError);
-        qCWarning(QT_MODBUS) << "TCP client is not connected";
-        return Q_NULLPTR;
-    }
-
-    QModbusRequest request = d->createWriteRequest(write);
-    if (!request.isValid())
-        return Q_NULLPTR;
-
-    return d->enqueueRequest(request, slaveAddress, write);
-}
-
-/*!
-    \reimp
-*/
-QModbusReply *QModbusTcpClient::sendReadWriteRequest(const QModbusDataUnit &read,
-                                                     const QModbusDataUnit &write, int slaveAddress)
-{
-    Q_D(QModbusTcpClient);
-
-    if (!d->m_socket->isOpen() || state() != QModbusDevice::ConnectedState) {
-        setError(tr("Device not connected."), QModbusDevice::ConnectionError);
-        qCWarning(QT_MODBUS) << "TCP client is not connected";
-        return Q_NULLPTR;
-    }
-
-    QModbusRequest request = d->createRWRequest(read, write);
-    if (!request.isValid())
-        return Q_NULLPTR;
-
-    return d->enqueueRequest(request, slaveAddress, read); // only need to remember read
-
-}
-
-/*!
      \reimp
 */
 bool QModbusTcpClient::open()

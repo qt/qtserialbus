@@ -213,7 +213,7 @@ public:
     }
 
     QModbusReply *enqueueRequest(const QModbusRequest &request, int slaveAddress,
-                                       const QModbusDataUnit unit)
+                                       const QModbusDataUnit &unit) Q_DECL_OVERRIDE
     {
         Q_Q(QModbusRtuSerialMaster);
 
@@ -244,7 +244,7 @@ public:
         return true;
     }
 
-    void handleResponseTimeout()
+    void handleResponseTimeout() Q_DECL_OVERRIDE
     {
         qCDebug(QT_MODBUS) << "Timeout of last request";
 
@@ -260,6 +260,14 @@ public:
 
         elem.reply->setError(QModbusReply::TimeoutError,
                              QModbusClient::tr("Request timeout."));
+    }
+
+    // TODO: Review once we have a transport layer in place.
+    bool isOpen() const Q_DECL_OVERRIDE
+    {
+        if (m_serialPort)
+            return m_serialPort->isOpen();
+        return false;
     }
 
     QSerialPort *m_serialPort;

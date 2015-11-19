@@ -161,8 +161,13 @@ public:
         });
     }
 
+    void handleResponseTimeout() Q_DECL_OVERRIDE
+    {
+        // TODO: Implement!
+    }
+
     QModbusReply *enqueueRequest(const QModbusRequest &request, int slaveAddress,
-                                 const QModbusDataUnit unit)
+                                 const QModbusDataUnit &unit) Q_DECL_OVERRIDE
     {
         Q_Q(QModbusTcpClient);
 
@@ -191,11 +196,18 @@ public:
         return reply;
     }
 
+    // TODO: Review once we have a transport layer in place.
+    bool isOpen() const Q_DECL_OVERRIDE
+    {
+        if (m_socket)
+            return m_socket->isOpen();
+        return false;
+    }
+
     QTcpSocket *m_socket = Q_NULLPTR;
     QByteArray responseBuffer;
     QHash<quint16, QueueElement> m_transactionStore;
     int mbpaHeaderSize = 7;
-
 };
 
 QT_END_NAMESPACE

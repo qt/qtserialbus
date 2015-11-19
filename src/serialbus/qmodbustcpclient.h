@@ -54,11 +54,6 @@ public:
     explicit QModbusTcpClient(QObject *parent = Q_NULLPTR);
     ~QModbusTcpClient();
 
-    QModbusReply *sendReadRequest(const QModbusDataUnit &read, int slaveAddress) Q_DECL_OVERRIDE;
-    QModbusReply *sendWriteRequest(const QModbusDataUnit &write, int slaveAddress) Q_DECL_OVERRIDE;
-    QModbusReply *sendReadWriteRequest(const QModbusDataUnit &read, const QModbusDataUnit &write,
-                                       int slaveAddress) Q_DECL_OVERRIDE;
-
 protected:
     QModbusTcpClient(QModbusTcpClientPrivate &dd, QObject *parent = Q_NULLPTR);
 

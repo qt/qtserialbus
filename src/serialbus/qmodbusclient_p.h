@@ -88,6 +88,11 @@ public:
     void stopResponseTimer();
 
     virtual void handleResponseTimeout() {}
+    virtual QModbusReply *enqueueRequest(const QModbusRequest &, int, const QModbusDataUnit &) {
+        return Q_NULLPTR;
+    }
+    // TODO: Review once we have a transport layer in place.
+    virtual bool isOpen() const { return false; }
 
     int m_responseTimeoutDuration = 200;
     QTimer *m_responseTimer = Q_NULLPTR;
