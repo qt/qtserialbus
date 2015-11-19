@@ -190,7 +190,8 @@ int QModbusClient::timeout() const
     a response from the server. If the response is not received within the
     required timeout, the \l TimeoutError is set.
 
-    Setting the timeout to a negative value disables timeouts.
+    Setting the timeout to a negative value disables timeouts. Already active/running timeouts
+    are not affected by such timeout duration changes.
 
     \sa timeout
 */

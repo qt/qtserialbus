@@ -190,6 +190,23 @@ public:
         qCDebug(QT_MODBUS) << "Sent TCP PDU:" << request;
 
         QModbusReply *reply = new QModbusReply(serverAddress, q);
+        if (m_responseTimeoutDuration >= 0) {
+            QTimer::singleShot(m_responseTimeoutDuration, [this, tId]() {
+                if (!m_transactionStore.contains(tId)) {
+                    qCDebug(QT_MODBUS) << "No pending request for time out with given transaction ID";
+                    return;
+                }
+
+                QueueElement elem = m_transactionStore.take(tId);
+                if (elem.reply.isNull())
+                    return;
+
+                qCDebug(QT_MODBUS) << "Timeout of request with id" << tId;
+                elem.reply->setError(QModbusReply::TimeoutError,
+                                     QModbusClient::tr("Request timeout"));
+            });
+        }
+
         QueueElement elem = { reply, request, unit };
         m_transactionStore.insert(tId, elem);
 
