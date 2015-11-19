@@ -181,7 +181,8 @@ public:
             return Q_NULLPTR;
         }
 
-        qCDebug(QT_MODBUS) << "Sending TCP ADU:" << buffer.toHex();
+        qCDebug(QT_MODBUS_LOW) << "Sent TCP ADU:" << buffer.toHex();
+        qCDebug(QT_MODBUS) << "Sent TCP PDU:" << request;
 
         QModbusReply *reply = new QModbusReply(slaveAddress, q);
         QueueElement elem = { reply, request, unit };

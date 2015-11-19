@@ -169,7 +169,8 @@ public:
                         QModbusDevice::WriteError);
             return false;
         }
-        qCDebug(QT_MODBUS)<< "Sent ADU:" << adu.toHex();
+        qCDebug(QT_MODBUS_LOW)<< "Sent Serial ADU:" << adu.toHex();
+        qCDebug(QT_MODBUS) << "Sent Serial PDU:" << request;
 
         return true;
 
