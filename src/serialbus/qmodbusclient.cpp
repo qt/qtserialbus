@@ -327,9 +327,6 @@ static bool isValid(const QModbusResponse &response, QModbusResponse::FunctionCo
 bool QModbusClientPrivate::processReadCoilsResponse(const QModbusResponse &response,
     QModbusDataUnit *data)
 {
-    if (!data)
-        return false;
-
     if (!isValid(response, QModbusResponse::ReadCoils))
         return false;
 
@@ -342,24 +339,22 @@ bool QModbusClientPrivate::processReadCoilsResponse(const QModbusResponse &respo
     if ((payload.size() - 1) != byteCount)
         return false;
 
-    uint coil = 0;
-    QVector<quint16> values(data->valueCount());
-    for (qint32 i = 1; i < payload.size(); ++i) {
-        const std::bitset<8> byte = payload[i];
-        for (qint32 currentBit = 0; currentBit < 8 && coil < data->valueCount(); ++currentBit)
-            values[coil++] = byte[currentBit];
+    if (data) {
+        uint coil = 0;
+        QVector<quint16> values(data->valueCount());
+        for (qint32 i = 1; i < payload.size(); ++i) {
+            const std::bitset<8> byte = payload[i];
+            for (qint32 currentBit = 0; currentBit < 8 && coil < data->valueCount(); ++currentBit)
+                values[coil++] = byte[currentBit];
+        }
+        data->setValues(values);
     }
-
-    data->setValues(values);
     return true;
 }
 
 bool QModbusClientPrivate::processReadDiscreteInputsResponse(const QModbusResponse &response,
                                                              QModbusDataUnit *data)
 {
-    if (!data)
-        return false;
-
     if (!isValid(response, QModbusResponse::ReadDiscreteInputs))
         return false;
 
@@ -372,15 +367,16 @@ bool QModbusClientPrivate::processReadDiscreteInputsResponse(const QModbusRespon
     if ((payload.size() - 1) != byteCount)
         return false;
 
-    uint input = 0;
-    QVector<quint16> values(data->valueCount());
-    for (qint32 i = 1; i < payload.size(); ++i) {
-        const std::bitset<8> byte = payload[i];
-        for (qint32 currentBit = 0; currentBit < 8 && input < data->valueCount(); ++currentBit)
-            values[input++] = byte[currentBit];
+    if (data) {
+        uint input = 0;
+        QVector<quint16> values(data->valueCount());
+        for (qint32 i = 1; i < payload.size(); ++i) {
+            const std::bitset<8> byte = payload[i];
+            for (qint32 currentBit = 0; currentBit < 8 && input < data->valueCount(); ++currentBit)
+                values[input++] = byte[currentBit];
+        }
+        data->setValues(values);
     }
-
-    data->setValues(values);
     return true;
 }
 
