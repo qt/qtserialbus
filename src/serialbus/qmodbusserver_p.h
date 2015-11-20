@@ -120,18 +120,11 @@ public:
 
     int m_slaveAddress = 0;
 
-    quint16 m_deviceBusy = 0x0000;
-    QChar m_asciiInputDelimiter = '\n';
     QContiguousCache<quint8> m_commEventLog;
 
     QVector<quint16> m_counters;
     bool m_forceListenOnlyMode = false; // TODO: Expose through value()|setValue() .
-    quint16 m_diagnosticRegister = 0x0000;
-    quint16 m_exceptionStatusOffset = 0x0000;
-    QHash<int, QVariant> m_userOptions;
-    quint8 m_serverIdentifier = 0x0a;
-    quint8 m_runIndicatorStatus = 0xff;
-    QByteArray m_additionalData = "Qt Modbus Server";
+    QHash<int, QVariant> m_serverOptions;
 };
 
 QT_END_NAMESPACE

@@ -194,26 +194,25 @@ QVariant QModbusServer::value(int option) const
 
     switch (option) {
         case DiagnosticRegister:
-            return d->m_diagnosticRegister;
+            return d->m_serverOptions.value(option, quint16(0x0000));
         case ExceptionStatusOffset:
-            return d->m_exceptionStatusOffset;
+            return d->m_serverOptions.value(option, quint16(0x0000));
         case DeviceBusy:
-            return d->m_deviceBusy;
+            return d->m_serverOptions.value(option, quint16(0x0000));
         case AsciiInputDelimiter:
-            return d->m_asciiInputDelimiter;
+            return d->m_serverOptions.value(option, QChar('\n'));
         case ServerIdentifier:
-            return d->m_serverIdentifier;
+            return d->m_serverOptions.value(option, quint8(0x0a));
         case RunIndicatorStatus:
-            return d->m_runIndicatorStatus;
+            return d->m_serverOptions.value(option, quint8(0xff));
         case AdditionalData:
-            return d->m_additionalData;
-        default:
-            break;
+            return d->m_serverOptions.value(option, QByteArray("Qt Modbus Server"));
     };
 
     if (option < UserOption)
         return QVariant();
-    return d->m_userOptions.value(option, QVariant());
+
+    return d->m_serverOptions.value(option, QVariant());
 }
 
 /*!
@@ -293,7 +292,7 @@ bool QModbusServer::setValue(int option, const QVariant &newValue)
     switch (option) {
     case DiagnosticRegister:
         CHECK_INT_OR_UINT(newValue);
-        d->m_diagnosticRegister = newValue.value<quint16>();
+        d->m_serverOptions.insert(option, newValue);
         return true;
     case ExceptionStatusOffset: {
         CHECK_INT_OR_UINT(newValue);
@@ -301,7 +300,7 @@ bool QModbusServer::setValue(int option, const QVariant &newValue)
         QModbusDataUnit coils(QModbusDataUnit::Coils, tmp, 8);
         if (!data(&coils))
             return false;
-        d->m_exceptionStatusOffset = tmp;
+        d->m_serverOptions.insert(option, tmp);
         return true;
     }
     case DeviceBusy: {
@@ -309,25 +308,25 @@ bool QModbusServer::setValue(int option, const QVariant &newValue)
         const quint16 tmp = newValue.value<quint16>();
         if ((tmp != 0x0000) && (tmp != 0xffff))
             return false;
-        d->m_deviceBusy = tmp;
+        d->m_serverOptions.insert(option, tmp);
         return true;
     }
     case AsciiInputDelimiter: {
         if (newValue.type() != QVariant::Char)
             return false;
-        d->m_asciiInputDelimiter = newValue.toChar();
+        d->m_serverOptions.insert(option, newValue);
         return true;
     }
     case ServerIdentifier:
         CHECK_INT_OR_UINT(newValue);
-        d->m_serverIdentifier = newValue.value<quint8>();
+        d->m_serverOptions.insert(option, newValue);
         return true;
     case RunIndicatorStatus: {
         CHECK_INT_OR_UINT(newValue);
         const quint8 tmp = newValue.value<quint8>();
         if ((tmp != 0x00) && (tmp != 0xff))
             return false;
-        d->m_runIndicatorStatus = tmp;
+        d->m_serverOptions.insert(option, tmp);
         return true;
     }
     case AdditionalData: {
@@ -336,7 +335,7 @@ bool QModbusServer::setValue(int option, const QVariant &newValue)
         const QByteArray additionalData = newValue.toByteArray();
         if (additionalData.size() > 249)
             return false;
-        d->m_additionalData = additionalData;
+        d->m_serverOptions.insert(option, additionalData);
         return true;
     }
     default:
@@ -345,7 +344,7 @@ bool QModbusServer::setValue(int option, const QVariant &newValue)
 
     if (option < UserOption)
         return false;
-    d_func()->m_userOptions.insert(option, newValue);
+    d->m_serverOptions.insert(option, newValue);
     return true;
 
 #undef CHECK_INT_OR_UINT
