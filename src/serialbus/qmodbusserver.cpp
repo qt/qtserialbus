@@ -200,7 +200,7 @@ QVariant QModbusServer::value(int option) const
         case DeviceBusy:
             return d->m_serverOptions.value(option, quint16(0x0000));
         case AsciiInputDelimiter:
-            return d->m_serverOptions.value(option, QChar('\n'));
+            return d->m_serverOptions.value(option, '\n');
         case ServerIdentifier:
             return d->m_serverOptions.value(option, quint8(0x0a));
         case RunIndicatorStatus:
@@ -312,7 +312,9 @@ bool QModbusServer::setValue(int option, const QVariant &newValue)
         return true;
     }
     case AsciiInputDelimiter: {
-        if (newValue.type() != QVariant::Char)
+        CHECK_INT_OR_UINT(newValue);
+        bool ok = false;
+        if (newValue.toUInt(&ok) > 0xff || !ok)
             return false;
         d->m_serverOptions.insert(option, newValue);
         return true;
@@ -841,7 +843,7 @@ QModbusResponse QModbusServerPrivate::processDiagnosticsRequest(const QModbusReq
     case Diagnostics::ChangeAsciiInputDelimiter: {
         const QByteArray data = request.data().mid(2, 2);
         CHECK_SIZE_AND_CONDITION(request, (data[1] != 0x00));
-        q_func()->setValue(QModbusServer::AsciiInputDelimiter, QChar(data[0]));
+        q_func()->setValue(QModbusServer::AsciiInputDelimiter, data[0]);
         return QModbusResponse(request.functionCode(), request.data());
     }   break;
 

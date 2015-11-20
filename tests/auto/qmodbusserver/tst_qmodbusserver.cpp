@@ -1159,10 +1159,20 @@ private slots:
         // TODO: Add a local class implementation to test value()/setValue with a different backing
         // store. That's not only related to AsciiInputDelimiter, rather to all enum values there.
 
-        QCOMPARE(server.value(QModbusServer::AsciiInputDelimiter).toChar(), QChar('\n'));
+        QCOMPARE(server.value(QModbusServer::AsciiInputDelimiter).toInt(), int('\n'));
         QCOMPARE(server.setValue(QModbusServer::AsciiInputDelimiter, "Test"), false);
-        QCOMPARE(server.setValue(QModbusServer::AsciiInputDelimiter, QChar('@')), true);
-        QCOMPARE(server.value(QModbusServer::AsciiInputDelimiter).toChar(), QChar('@'));
+        QCOMPARE(server.setValue(QModbusServer::AsciiInputDelimiter, '@'), true);
+        QCOMPARE(server.value(QModbusServer::AsciiInputDelimiter).toInt(), int('@'));
+
+        QVERIFY(server.setValue(QModbusServer::AsciiInputDelimiter, 'j'));
+        QCOMPARE(server.value(QModbusServer::AsciiInputDelimiter).toInt(), int('j'));
+        QVERIFY(server.setValue(QModbusServer::AsciiInputDelimiter, 0x6a));
+        QCOMPARE(server.value(QModbusServer::AsciiInputDelimiter).toInt(), int('j'));
+        QVERIFY(server.setValue(QModbusServer::AsciiInputDelimiter, 0x6a));
+        QCOMPARE(server.value(QModbusServer::AsciiInputDelimiter).toInt(), int('j'));
+        QVERIFY(!server.setValue(QModbusServer::AsciiInputDelimiter, 0x100));
+        QCOMPARE(server.value(QModbusServer::AsciiInputDelimiter).toInt(), int('j'));
+        QVERIFY(!server.setValue(QModbusServer::AsciiInputDelimiter, -1));
     }
 };
 
