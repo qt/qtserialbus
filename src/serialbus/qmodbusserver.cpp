@@ -70,6 +70,7 @@ Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
     \value ExceptionStatusOffset    The exception status byte offset of the server. \c quint16
     \value DeviceBusy               Flag to signal the server is engaged in processing a
                                     long-duration program command. \c quint16
+    \value AsciiInputDelimiter    The Modbus ASCII end of message delimiter. \c QChar
     \value ServerIdentifier         The identifier of the server, \b not the server address. \c quint8
     \value RunIndicatorStatus       The run indicator of the server. \c quint8
     \value AdditionalData           The additional data of the server. \c QByteArray
@@ -164,6 +165,9 @@ int QModbusServer::slaveAddress() const
             \li Returns a flag that signals if the server is engaged in
                 processing a long-duration program command.
         \row
+            \li \l QModbusServer::AsciiInputDelimiter
+            \li Returns a end of message delimiter of Modbus ASCII messages.
+        \row
             \li \l QModbusServer::ServerIdentifier
             \li Returns the server manufacturer's identifier code. This can be
                 an arbitrary value in the range of \c 0x00 to 0xff.
@@ -195,6 +199,8 @@ QVariant QModbusServer::value(int option) const
             return d->m_exceptionStatusOffset;
         case DeviceBusy:
             return d->m_deviceBusy;
+        case AsciiInputDelimiter:
+            return d->m_asciiInputDelimiter;
         case ServerIdentifier:
             return d->m_serverIdentifier;
         case RunIndicatorStatus:
@@ -244,6 +250,10 @@ QVariant QModbusServer::value(int option) const
                 processing a long-duration program command. Valid values are
                 \c 0x0000 (not busy) and \c 0xffff (busy).
                 The default value preset is \c 0x0000.
+        \row
+            \li \l QModbusServer::AsciiInputDelimiter
+            \li The \a newValue becomes the end of message delimiter for future
+                Modbus ASCII messages. The default value preset is \c {\n}.
         \row
             \li \l QModbusServer::ServerIdentifier
             \li Sets the server's manufacturer identifier to \a newValue.
@@ -300,6 +310,12 @@ bool QModbusServer::setValue(int option, const QVariant &newValue)
         if ((tmp != 0x0000) && (tmp != 0xffff))
             return false;
         d->m_deviceBusy = tmp;
+        return true;
+    }
+    case AsciiInputDelimiter: {
+        if (newValue.type() != QVariant::Char)
+            return false;
+        d->m_asciiInputDelimiter = newValue.toChar();
         return true;
     }
     case ServerIdentifier:
@@ -826,11 +842,7 @@ QModbusResponse QModbusServerPrivate::processDiagnosticsRequest(const QModbusReq
     case Diagnostics::ChangeAsciiInputDelimiter: {
         const QByteArray data = request.data().mid(2, 2);
         CHECK_SIZE_AND_CONDITION(request, (data[1] != 0x00));
-        // TODO: This changes the variable m_asciiInputDelimiter only for now.
-        // Cite PI-MBUS-300.pdf: The character 'CHAR' passed in the query data field becomes the
-        // end of message delimiter for future messages (replacing the default LF character). This
-        // function is useful in cases where a Line Feed is not wanted at the end of ASCII messages.
-        m_asciiInputDelimiter = data[0];
+        q_func()->setValue(QModbusServer::AsciiInputDelimiter, QChar(data[0]));
         return QModbusResponse(request.functionCode(), request.data());
     }   break;
 

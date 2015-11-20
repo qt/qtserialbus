@@ -59,6 +59,7 @@ public:
         DiagnosticRegister,
         ExceptionStatusOffset,
         DeviceBusy,
+        AsciiInputDelimiter,
         ServerIdentifier,
         RunIndicatorStatus,
         AdditionalData,

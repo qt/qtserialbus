@@ -121,7 +121,7 @@ public:
     int m_slaveAddress = 0;
 
     quint16 m_deviceBusy = 0x0000;
-    uchar m_asciiInputDelimiter; // TODO: Expose through value()|setValue() and use.
+    QChar m_asciiInputDelimiter = '\n';
     QContiguousCache<quint8> m_commEventLog;
 
     QVector<quint16> m_counters;
