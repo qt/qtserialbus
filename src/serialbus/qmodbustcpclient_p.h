@@ -111,13 +111,13 @@ public:
                     return;
                 }
 
-                quint8 slaveAddress;
+                quint8 serverAddress;
                 quint16 transactionId, bytesPdu, protocolId;
                 QDataStream input(responseBuffer);
-                input >> transactionId >> protocolId >> bytesPdu >> slaveAddress;
+                input >> transactionId >> protocolId >> bytesPdu >> serverAddress;
 
                 qCDebug(QT_MODBUS) << "tid:" << hex << transactionId << "size:" << bytesPdu
-                                   << "slave id:" << slaveAddress;
+                                   << "server address:" << serverAddress;
 
                 // The length field is the byte count of the following fields, including the Unit
                 // Identifier and the PDU, so we remove on byte.
@@ -166,7 +166,7 @@ public:
         // TODO: Implement!
     }
 
-    QModbusReply *enqueueRequest(const QModbusRequest &request, int slaveAddress,
+    QModbusReply *enqueueRequest(const QModbusRequest &request, int serverAddress,
                                  const QModbusDataUnit &unit) Q_DECL_OVERRIDE
     {
         Q_Q(QModbusTcpClient);
@@ -175,7 +175,7 @@ public:
         QByteArray buffer;
         QDataStream output(&buffer, QIODevice::WriteOnly);
         output << tId << quint16(0) << quint16(request.size() + 1)
-               << quint8(slaveAddress) << request;
+               << quint8(serverAddress) << request;
 
 
         int writtenBytes = m_socket->write(buffer);
@@ -189,7 +189,7 @@ public:
         qCDebug(QT_MODBUS_LOW) << "Sent TCP ADU:" << buffer.toHex();
         qCDebug(QT_MODBUS) << "Sent TCP PDU:" << request;
 
-        QModbusReply *reply = new QModbusReply(slaveAddress, q);
+        QModbusReply *reply = new QModbusReply(serverAddress, q);
         QueueElement elem = { reply, request, unit };
         m_transactionStore.insert(tId, elem);
 

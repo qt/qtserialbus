@@ -71,8 +71,8 @@ public:
     explicit QModbusServer(QObject *parent = 0);
     ~QModbusServer();
 
-    int slaveAddress() const;
-    void setSlaveAddress(int slaveAddress);
+    int serverAddress() const;
+    void setServerAddress(int serverAddress);
 
     virtual bool setMap(const QModbusDataUnitMap &map);
     virtual bool processesBroadcast() const { return false; }

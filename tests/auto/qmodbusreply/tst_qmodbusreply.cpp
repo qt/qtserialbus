@@ -54,7 +54,7 @@ private slots:
 void tst_QModbusReply::tst_ctor()
 {
     QModbusReply r(1, this);
-    QCOMPARE(r.slaveAddress(), 1);
+    QCOMPARE(r.serverAddress(), 1);
     QCOMPARE(r.isFinished(), false);
     QCOMPARE(r.result().isValid(), false);
     QCOMPARE(r.protocolError(), QModbusPdu::ExtendedException);
@@ -62,7 +62,7 @@ void tst_QModbusReply::tst_ctor()
     QCOMPARE(r.error(), QModbusReply::NoError);
 
     QModbusReply r2(2, this);
-    QCOMPARE(r2.slaveAddress(), 2);
+    QCOMPARE(r2.serverAddress(), 2);
     QCOMPARE(r2.isFinished(), false);
     QCOMPARE(r2.result().isValid(), false);
     QCOMPARE(r2.protocolError(), QModbusPdu::ExtendedException);
@@ -73,11 +73,11 @@ void tst_QModbusReply::tst_ctor()
 void tst_QModbusReply::tst_setFinished()
 {
     QModbusReply replyTest(1);
-    QCOMPARE(replyTest.slaveAddress(), 1);
+    QCOMPARE(replyTest.serverAddress(), 1);
     QSignalSpy finishedSpy(&replyTest, SIGNAL(finished()));
     QSignalSpy errorSpy(&replyTest, SIGNAL(errorOccurred(QModbusReply::ReplyError)));
 
-    QCOMPARE(replyTest.slaveAddress(), 1);
+    QCOMPARE(replyTest.serverAddress(), 1);
     QCOMPARE(replyTest.isFinished(), false);
     QCOMPARE(replyTest.result().isValid(), false);
     QCOMPARE(replyTest.protocolError(), QModbusPdu::ExtendedException);
@@ -90,7 +90,7 @@ void tst_QModbusReply::tst_setFinished()
     replyTest.setFinished(true);
     QVERIFY(finishedSpy.count() == 1);
     QVERIFY(errorSpy.isEmpty());
-    QCOMPARE(replyTest.slaveAddress(), 1);
+    QCOMPARE(replyTest.serverAddress(), 1);
     QCOMPARE(replyTest.isFinished(), true);
     QCOMPARE(replyTest.result().isValid(), false);
     QCOMPARE(replyTest.protocolError(), QModbusPdu::ExtendedException);
@@ -100,7 +100,7 @@ void tst_QModbusReply::tst_setFinished()
     replyTest.setFinished(false);
     QVERIFY(finishedSpy.count() == 1); // no further singal
     QVERIFY(errorSpy.isEmpty());
-    QCOMPARE(replyTest.slaveAddress(), 1);
+    QCOMPARE(replyTest.serverAddress(), 1);
     QCOMPARE(replyTest.isFinished(), false);
     QCOMPARE(replyTest.result().isValid(), false);
     QCOMPARE(replyTest.protocolError(), QModbusPdu::ExtendedException);
@@ -126,7 +126,7 @@ void tst_QModbusReply::tst_setError()
     QFETCH(QString, errorText);
 
     QModbusReply replyTest(1);
-    QCOMPARE(replyTest.slaveAddress(), 1);
+    QCOMPARE(replyTest.serverAddress(), 1);
     QSignalSpy finishedSpy(&replyTest, SIGNAL(finished()));
     QSignalSpy errorSpy(&replyTest, SIGNAL(errorOccurred(QModbusReply::ReplyError)));
 
@@ -163,7 +163,7 @@ void tst_QModbusReply::tst_setProtocolError()
     QFETCH(QString, errorText);
 
     QModbusReply replyTest(1);
-    QCOMPARE(replyTest.slaveAddress(), 1);
+    QCOMPARE(replyTest.serverAddress(), 1);
     QSignalSpy finishedSpy(&replyTest, SIGNAL(finished()));
     QSignalSpy errorSpy(&replyTest, SIGNAL(errorOccurred(QModbusReply::ReplyError)));
 
@@ -195,7 +195,7 @@ void tst_QModbusReply::tst_setResult()
     QCOMPARE(unit.values(), reference);
 
     QModbusReply replyTest(1);
-    QCOMPARE(replyTest.slaveAddress(), 1);
+    QCOMPARE(replyTest.serverAddress(), 1);
     QSignalSpy finishedSpy(&replyTest, SIGNAL(finished()));
     QSignalSpy errorSpy(&replyTest, SIGNAL(errorOccurred(QModbusReply::ReplyError)));
 

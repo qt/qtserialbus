@@ -118,7 +118,7 @@ public:
     // Device specific fields to be moved later
     QModbusDataUnitMap m_modbusDataUnitMap;
 
-    int m_slaveAddress = 0;
+    int m_serverAddress = 0;
 
     QContiguousCache<quint8> m_commEventLog;
 

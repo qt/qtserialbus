@@ -63,10 +63,10 @@ private slots:
     void testSlaveAddress()
     {
         QModbusSerialAdu adu(QModbusSerialAdu::Ascii, ":f0010300120008f2\r\n");
-        QCOMPARE(adu.slaveAddress(), 240);
+        QCOMPARE(adu.serverAddress(), 240);
 
         adu = QModbusSerialAdu(QModbusSerialAdu::Rtu, QByteArray::fromHex("f00103001200080f1d"));
-        QCOMPARE(adu.slaveAddress(), 240);
+        QCOMPARE(adu.serverAddress(), 240);
     }
 
     void testPdu()

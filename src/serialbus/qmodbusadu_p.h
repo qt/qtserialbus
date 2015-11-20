@@ -77,8 +77,8 @@ public:
     inline int rawSize() const { return m_rawData.size(); }
     inline QByteArray rawData() const { return m_rawData; }
 
-    inline int slaveAddress() const {
-        Q_ASSERT_X(!m_data.isEmpty(), "QModbusAdu::slaveAddress()", "Empty ADU.");
+    inline int serverAddress() const {
+        Q_ASSERT_X(!m_data.isEmpty(), "QModbusAdu::serverAddress()", "Empty ADU.");
         return quint8(m_data.at(0));
     }
 
@@ -133,11 +133,11 @@ public:
         return (crc >> 8) | (crc << 8); // swap bytes
     }
 
-    inline static QByteArray create(Type type, int slaveAddress, const QModbusPdu &pdu,
+    inline static QByteArray create(Type type, int serverAddress, const QModbusPdu &pdu,
                                     char delimiter = '\n') {
         QByteArray result;
         QDataStream out(&result, QIODevice::WriteOnly);
-        out << quint8(slaveAddress) << pdu;
+        out << quint8(serverAddress) << pdu;
 
         if (type == Ascii) {
             out << calculateLRC(result, result.size());

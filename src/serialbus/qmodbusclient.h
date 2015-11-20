@@ -59,10 +59,10 @@ public:
     explicit QModbusClient(QObject *parent = 0);
     ~QModbusClient();
 
-    QModbusReply *sendReadRequest(const QModbusDataUnit &read, int slaveAddress);
-    QModbusReply *sendWriteRequest(const QModbusDataUnit &write, int slaveAddress);
+    QModbusReply *sendReadRequest(const QModbusDataUnit &read, int serverAddress);
+    QModbusReply *sendWriteRequest(const QModbusDataUnit &write, int serverAddress);
     QModbusReply *sendReadWriteRequest(const QModbusDataUnit &read, const QModbusDataUnit &write,
-                                       int slaveAddress);
+                                       int serverAddress);
 
     int timeout() const;
     void setTimeout(int newTimeout);

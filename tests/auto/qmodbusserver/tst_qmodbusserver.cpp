@@ -1034,12 +1034,12 @@ private slots:
         }
     }
 
-    void tst_slaveAddress()
+    void tst_serverAddress()
     {
-        server.setSlaveAddress(56);
-        QCOMPARE(server.slaveAddress(), 56);
-        server.setSlaveAddress(1);
-        QCOMPARE(server.slaveAddress(), 1);
+        server.setServerAddress(56);
+        QCOMPARE(server.serverAddress(), 56);
+        server.setServerAddress(1);
+        QCOMPARE(server.serverAddress(), 1);
     }
 
     void tst_diagnosticRegister()

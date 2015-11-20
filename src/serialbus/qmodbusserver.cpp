@@ -121,26 +121,26 @@ bool QModbusServer::setMap(const QModbusDataUnitMap &map)
 }
 
 /*!
-    Sets the slave address for this Modbus server instance to \a slaveAddress.
+    Sets the address for this Modbus server instance to \a serverAddress.
 
-    \sa slaveAddress()
+    \sa serverAddress()
 */
-void QModbusServer::setSlaveAddress(int slaveAddress)
+void QModbusServer::setServerAddress(int serverAddress)
 {
     Q_D(QModbusServer);
-    d->m_slaveAddress = slaveAddress;
+    d->m_serverAddress = serverAddress;
 }
 
 /*!
-    Returns the slave address of this Mobus server instance.
+    Returns the address of this Mobus server instance.
 
-    \sa setSlaveAddress()
+    \sa setServerAddress()
 */
-int QModbusServer::slaveAddress() const
+int QModbusServer::serverAddress() const
 {
     Q_D(const QModbusServer);
 
-    return d->m_slaveAddress;
+    return d->m_serverAddress;
 }
 
 /*!

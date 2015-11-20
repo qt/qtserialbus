@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Modbus Slave Example</string>
+   <string>Modbus Server Example</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -26,7 +26,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Slave Address:</string>
+         <string>Server Address:</string>
         </property>
        </widget>
       </item>
@@ -60,7 +60,7 @@
        </spacer>
       </item>
       <item row="0" column="6">
-       <widget class="QSpinBox" name="slaveEdit">
+       <widget class="QSpinBox" name="serverEdit">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
           <horstretch>0</horstretch>

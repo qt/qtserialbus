@@ -48,7 +48,7 @@ public:
     QModbusReplyPrivate() Q_DECL_EQ_DEFAULT;
 
     QModbusDataUnit m_unit;
-    int m_slaveAddress = 0xff;
+    int m_serverAddress = 0xff;
     bool m_finished = false;
     QModbusPdu::ExceptionCode m_protocolError = QModbusPdu::ExtendedException;
     QModbusReply::ReplyError m_error = QModbusReply::NoError;
@@ -85,13 +85,13 @@ public:
     Constructs a QModbusReply object with the specified \a parent.
 
     The reply will be send to the Modbus client represented by
-    \a slaveAddress.
+    \a serverAddress.
 */
-QModbusReply::QModbusReply(int slaveAddress, QObject *parent) :
+QModbusReply::QModbusReply(int serverAddress, QObject *parent) :
     QObject(*new QModbusReplyPrivate, parent)
 {
     Q_D(QModbusReply);
-    d->m_slaveAddress = slaveAddress;
+    d->m_serverAddress = serverAddress;
 }
 
 /*!
@@ -162,12 +162,12 @@ void QModbusReply::setResult(const QModbusDataUnit &unit)
 }
 
 /*!
-    Returns the slave address that this reply object targets.
+    Returns the server address that this reply object targets.
 */
-int QModbusReply::slaveAddress() const
+int QModbusReply::serverAddress() const
 {
     Q_D(const QModbusReply);
-    return d->m_slaveAddress;
+    return d->m_serverAddress;
 }
 
 /*!

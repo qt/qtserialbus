@@ -53,7 +53,7 @@ QT_BEGIN_NAMESPACE
     multiple Modbus server. This class provides the Modbus server implementation via a serial port.
 
     Since multiple Modbus server instances can interact with a Modbus client at the same time
-    (using a serial bus), servers are identified by their \l slaveAddress().
+    (using a serial bus), servers are identified by their \l serverAddress().
 */
 
 /*!

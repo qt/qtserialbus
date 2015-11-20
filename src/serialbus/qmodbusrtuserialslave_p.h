@@ -86,7 +86,7 @@ public:
             qCDebug(QT_MODBUS_LOW) << "Received ADU:" << adu.rawData().toHex();
 
             // Index                         -> description
-            // SlaveId                       -> 1 byte
+            // Server address                -> 1 byte
             // FunctionCode                  -> 1 byte
             // FunctionCode specific content -> 0-252 bytes
             // CRC                           -> 2 bytes
@@ -95,7 +95,7 @@ public:
             if (isListenOnly())
                 event |= QModbusCommEvent::ReceiveFlag::CurrentlyInListenOnlyMode;
 
-            // We expect at least the slave address, function code and CRC.
+            // We expect at least the server address, function code and CRC.
             if (adu.size() < 4) { // TODO: LRC should be 3 bytes.
                 qCWarning(QT_MODBUS) << "Incomplete ADU received, ignoring";
 
@@ -107,8 +107,8 @@ public:
                 return;
             }
 
-            // Slave address is set to 0, this is a broadcast.
-            m_processesBroadcast = (adu.slaveAddress() == 0);
+            // Server address is set to 0, this is a broadcast.
+            m_processesBroadcast = (adu.serverAddress() == 0);
             if (q->processesBroadcast())
                 event |= QModbusCommEvent::ReceiveFlag::BroadcastReceived;
 
@@ -116,7 +116,7 @@ public:
             const int pduSizeWithoutFcode = QModbusRequest::calculateDataSize(req.functionCode(),
                                                                               req.data());
 
-            // slave address byte + function code byte + PDU size + 2 bytes CRC
+            // server address byte + function code byte + PDU size + 2 bytes CRC
             if ((pduSizeWithoutFcode < 0) || ((2 + pduSizeWithoutFcode + 2) != adu.rawSize())) {
                 qCWarning(QT_MODBUS) << "ADU does not match expected size, ignoring";
                 // The quantity of messages addressed to the remote device that it could not
@@ -146,14 +146,14 @@ public:
 
             // If we do not process a Broadcast ...
             if (!q->processesBroadcast()) {
-                // check if the slave address matches ...
-                if (q->slaveAddress() != adu.slaveAddress()) {
+                // check if the server address matches ...
+                if (q->serverAddress() != adu.serverAddress()) {
                     // no, not our address! Ignore!
-                    qCDebug(QT_MODBUS) << "Wrong slave address, expected" << q->slaveAddress()
-                                       << "got" << adu.slaveAddress();
+                    qCDebug(QT_MODBUS) << "Wrong server address, expected" << q->serverAddress()
+                                       << "got" << adu.serverAddress();
                     return;
                 }
-            } // else { Broadcast -> Slave Id will never match, deliberately ignore }
+            } // else { Broadcast -> Server address will never match, deliberately ignore }
 
             // The quantity of messages addressed to the remote device, or broadcast, that the
             // remote device has processed since its last restart, clear counters operation, or
@@ -180,7 +180,7 @@ public:
             qCDebug(QT_MODBUS) << "Response PDU:" << response;
 
             const QByteArray result = QModbusSerialAdu::create(QModbusSerialAdu::Rtu,
-                                                               q->slaveAddress(), response);
+                                                               q->serverAddress(), response);
 
             qCDebug(QT_MODBUS_LOW) << "Response ADU:" << result.toHex();
 

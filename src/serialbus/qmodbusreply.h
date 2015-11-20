@@ -61,11 +61,11 @@ public:
     };
     Q_ENUMS(ReplyError)
 
-    explicit QModbusReply(int slaveAddress, QObject *parent = Q_NULLPTR);
+    explicit QModbusReply(int serverAddress, QObject *parent = Q_NULLPTR);
 
     bool isFinished() const;
     QModbusDataUnit result() const;
-    int slaveAddress() const;
+    int serverAddress() const;
 
     ReplyError error() const;
     QModbusPdu::ExceptionCode protocolError() const;

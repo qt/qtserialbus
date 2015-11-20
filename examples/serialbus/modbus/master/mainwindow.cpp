@@ -196,7 +196,7 @@ void MainWindow::on_readButton_clicked()
     statusBar()->clearMessage();
 
     QModbusReply *reply = modbusDevice->sendReadRequest(dataRequest,
-                                                        ui->readSlave->text().toInt());
+                                                        ui->readServer->text().toInt());
     // broadcast replies return immediately
     if (reply && reply->isFinished()) {
         delete reply;
@@ -263,7 +263,7 @@ void MainWindow::on_writeButton_clicked()
     statusBar()->clearMessage();
 
     // TODO test for R/W MultipleRegisters is missing
-    QModbusReply *reply = modbusDevice->sendWriteRequest(writeUnit, ui->writeSlave->text().toInt());
+    QModbusReply *reply = modbusDevice->sendWriteRequest(writeUnit, ui->writeServer->text().toInt());
 
     // broadcast replies return immediately
     if (reply && reply->isFinished()) {

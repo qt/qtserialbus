@@ -87,9 +87,9 @@ QModbusClient::~QModbusClient()
 /*!
     Sends a request to read the contents of the data pointed by \a read. Returns a new valid
     QModbusReply object if it did send the request, otherwise Q_NULLPTR. Modbus network may
-    have multiple servers, each server has unique \a slaveAddress.
+    have multiple servers, each server has unique \a serverAddress.
 */
-QModbusReply *QModbusClient::sendReadRequest(const QModbusDataUnit &read, int slaveAddress)
+QModbusReply *QModbusClient::sendReadRequest(const QModbusDataUnit &read, int serverAddress)
 {
     Q_D(QModbusClient);
 
@@ -103,16 +103,16 @@ QModbusReply *QModbusClient::sendReadRequest(const QModbusDataUnit &read, int sl
     if (!request.isValid())
         return Q_NULLPTR;
 
-    return d->enqueueRequest(request, slaveAddress, read);
+    return d->enqueueRequest(request, serverAddress, read);
 }
 
 
 /*!
     Sends a request to modify the contents of the data pointed by \a write. Returns a new valid
     QModbusReply object if it did send the request, otherwise Q_NULLPTR. Modbus network may
-    have multiple servers, each server has a unique \a slaveAddress.
+    have multiple servers, each server has a unique \a serverAddress.
 */
-QModbusReply *QModbusClient::sendWriteRequest(const QModbusDataUnit &write, int slaveAddress)
+QModbusReply *QModbusClient::sendWriteRequest(const QModbusDataUnit &write, int serverAddress)
 {
     Q_D(QModbusClient);
 
@@ -126,14 +126,14 @@ QModbusReply *QModbusClient::sendWriteRequest(const QModbusDataUnit &write, int 
     if (!request.isValid())
         return Q_NULLPTR;
 
-    return d->enqueueRequest(request, slaveAddress, write);
+    return d->enqueueRequest(request, serverAddress, write);
 }
 
 /*!
     Sends a request to read the contents of the data pointed by \a read and to modify the contents
     of the data pointed by \a write using Modbus Function Code 23. Returns a new valid
     QModbusReply object if it did send the request, otherwise Q_NULLPTR. Modbus network may
-    have multiple servers, each server has a unique \a slaveAddress.
+    have multiple servers, each server has a unique \a serverAddress.
 
     \note: Sending this kind of request is only valid of both \a read and \a write are of type
     QModbusDataUnit::HoldingRegisters. If the remote device is not be able to process Modbus
@@ -145,7 +145,7 @@ QModbusReply *QModbusClient::sendWriteRequest(const QModbusDataUnit &write, int 
     operation before the write operation.
 */
 QModbusReply *QModbusClient::sendReadWriteRequest(const QModbusDataUnit &read,
-                                                  const QModbusDataUnit &write, int slaveAddress)
+                                                  const QModbusDataUnit &write, int serverAddress)
 {
     Q_D(QModbusClient);
 
@@ -159,7 +159,7 @@ QModbusReply *QModbusClient::sendReadWriteRequest(const QModbusDataUnit &read,
     if (!request.isValid())
         return Q_NULLPTR;
 
-    return d->enqueueRequest(request, slaveAddress, read); // only need to remember read
+    return d->enqueueRequest(request, serverAddress, read); // only need to remember read
 }
 
 /*!

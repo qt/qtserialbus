@@ -100,7 +100,7 @@ public:
                 return;
             }
 
-            // slave address byte + function code byte + PDU size + 2 bytes CRC
+            // server address byte + function code byte + PDU size + 2 bytes CRC
             const int aduSize = 2 + pduSizeWithoutFcode + 2;
             if (tmpAdu.rawSize() < aduSize) {
                 qCDebug(QT_MODBUS) << "Incomplete ADU received, ignoring";
@@ -125,7 +125,7 @@ public:
             }
 
             const QModbusResponse response = adu.pdu();
-            if (!canMatchRequestAndResponse(response, adu.slaveAddress())) {
+            if (!canMatchRequestAndResponse(response, adu.serverAddress())) {
                 qCWarning(QT_MODBUS) << "Cannot match response with open request, ignoring";
                 return;
             }
@@ -156,11 +156,11 @@ public:
         });
     }
 
-    bool sendNextAdu(const QModbusRequest &request, int slaveAddress)
+    bool sendNextAdu(const QModbusRequest &request, int serverAddress)
     {
         Q_Q(QModbusRtuSerialMaster);
 
-        const QByteArray adu = QModbusSerialAdu::create(QModbusSerialAdu::Rtu, slaveAddress,
+        const QByteArray adu = QModbusSerialAdu::create(QModbusSerialAdu::Rtu, serverAddress,
                                                         request);
         int writtenBytes = m_serialPort->write(adu);
         if (writtenBytes == -1 || writtenBytes < adu.size()) {
@@ -188,7 +188,7 @@ public:
         }
 
         bool success = sendNextAdu(m_queue.head().requestPdu,
-                                   m_queue.head().reply->slaveAddress());
+                                   m_queue.head().reply->serverAddress());
         if (!success) {
             QueueElement elem = m_queue.dequeue();
 
@@ -199,7 +199,7 @@ public:
             return;
         }
 
-        if (!m_queue.head().reply->slaveAddress()) {
+        if (!m_queue.head().reply->serverAddress()) {
             // broadcasts return immediately but we delay a bit to avoid spaming of bus
             QueueElement elem = m_queue.dequeue();
             elem.reply->setFinished(true);
@@ -212,12 +212,12 @@ public:
         startResponseTimer();
     }
 
-    QModbusReply *enqueueRequest(const QModbusRequest &request, int slaveAddress,
+    QModbusReply *enqueueRequest(const QModbusRequest &request, int serverAddress,
                                        const QModbusDataUnit &unit) Q_DECL_OVERRIDE
     {
         Q_Q(QModbusRtuSerialMaster);
 
-        QModbusReply *reply = new QModbusReply(slaveAddress, q);
+        QModbusReply *reply = new QModbusReply(serverAddress, q);
         QueueElement elem = { reply, request, unit };
         m_queue.enqueue(elem);
         sendNextRequest();
@@ -225,7 +225,7 @@ public:
         return reply;
     }
 
-    bool canMatchRequestAndResponse(const QModbusResponse &response, int sendingSlave) const
+    bool canMatchRequestAndResponse(const QModbusResponse &response, int sendingServer) const
     {
         if (m_queue.isEmpty()) // nothing pending
             return false;
@@ -234,7 +234,7 @@ public:
         if (head.reply.isNull())
             return false;
 
-        if (head.reply->slaveAddress() != sendingSlave) // slave mismatch
+        if (head.reply->serverAddress() != sendingServer) // server mismatch
             return false;
 
         // request for different fcode

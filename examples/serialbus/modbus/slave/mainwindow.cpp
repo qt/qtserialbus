@@ -132,7 +132,7 @@ void MainWindow::on_connectButton_clicked()
 
     if (intendToConnect) {
         modbusDevice->setPortName(ui->portEdit->text());
-        modbusDevice->setSlaveAddress(ui->slaveEdit->text().toInt());
+        modbusDevice->setServerAddress(ui->serverEdit->text().toInt());
         if (!modbusDevice->connectDevice())
             statusBar()->showMessage(tr("Connect failed: ") + modbusDevice->errorString(), 5000);
     } else {
