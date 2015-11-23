@@ -226,7 +226,7 @@ void MainWindow::readReady()
     } else if (reply->error() == QModbusReply::ProtocolError) {
         statusBar()->showMessage(tr("Write response error: %1 (Mobus exception: 0x%2)").
                                     arg(reply->errorText()).
-                                    arg(reply->protocolError(), -1, 16), 5000);
+                                    arg(reply->rawResult().exceptionCode(), -1, 16), 5000);
     } else {
         statusBar()->showMessage(tr("Write response error: %1 (code: 0x%2)").
                                     arg(reply->errorText()).
@@ -286,7 +286,7 @@ void MainWindow::writeReady()
     if (reply->error() == QModbusReply::ProtocolError) {
         statusBar()->showMessage(tr("Write response error: %1 (Mobus exception: 0x%2)").
                                     arg(reply->errorText()).
-                                    arg(reply->protocolError(), -1, 16), 5000);
+                                    arg(reply->rawResult().exceptionCode(), -1, 16), 5000);
     } else if (reply->error() != QModbusReply::NoError) {
         statusBar()->showMessage(tr("Write response error: %1 (code: 0x%2)").
                                     arg(reply->errorText()).

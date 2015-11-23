@@ -46,33 +46,33 @@ private slots:
     void tst_setFinished();
     void tst_setError_data();
     void tst_setError();
-    void tst_setProtocolError_data();
-    void tst_setProtocolError();
     void tst_setResult();
 };
 
 void tst_QModbusReply::tst_ctor()
 {
-    QModbusReply r(1, this);
+    QModbusReply r(QModbusReply::Common, 1, this);
+    QCOMPARE(r.type(), QModbusReply::Common);
     QCOMPARE(r.serverAddress(), 1);
     QCOMPARE(r.isFinished(), false);
     QCOMPARE(r.result().isValid(), false);
-    QCOMPARE(r.protocolError(), QModbusPdu::ExtendedException);
+    QCOMPARE(r.rawResult().isValid(), false);
     QCOMPARE(r.errorText(), QString());
     QCOMPARE(r.error(), QModbusReply::NoError);
 
-    QModbusReply r2(2, this);
+    QModbusReply r2(QModbusReply::Raw, 2, this);
+    QCOMPARE(r2.type(), QModbusReply::Raw);
     QCOMPARE(r2.serverAddress(), 2);
     QCOMPARE(r2.isFinished(), false);
     QCOMPARE(r2.result().isValid(), false);
-    QCOMPARE(r2.protocolError(), QModbusPdu::ExtendedException);
+    QCOMPARE(r2.rawResult().isValid(), false);
     QCOMPARE(r2.errorText(), QString());
     QCOMPARE(r2.error(), QModbusReply::NoError);
 }
 
 void tst_QModbusReply::tst_setFinished()
 {
-    QModbusReply replyTest(1);
+    QModbusReply replyTest(QModbusReply::Common, 1);
     QCOMPARE(replyTest.serverAddress(), 1);
     QSignalSpy finishedSpy(&replyTest, SIGNAL(finished()));
     QSignalSpy errorSpy(&replyTest, SIGNAL(errorOccurred(QModbusReply::ReplyError)));
@@ -80,7 +80,7 @@ void tst_QModbusReply::tst_setFinished()
     QCOMPARE(replyTest.serverAddress(), 1);
     QCOMPARE(replyTest.isFinished(), false);
     QCOMPARE(replyTest.result().isValid(), false);
-    QCOMPARE(replyTest.protocolError(), QModbusPdu::ExtendedException);
+    QCOMPARE(replyTest.rawResult().isValid(), false);
     QCOMPARE(replyTest.errorText(), QString());
     QCOMPARE(replyTest.error(), QModbusReply::NoError);
 
@@ -93,17 +93,17 @@ void tst_QModbusReply::tst_setFinished()
     QCOMPARE(replyTest.serverAddress(), 1);
     QCOMPARE(replyTest.isFinished(), true);
     QCOMPARE(replyTest.result().isValid(), false);
-    QCOMPARE(replyTest.protocolError(), QModbusPdu::ExtendedException);
+    QCOMPARE(replyTest.rawResult().isValid(), false);
     QCOMPARE(replyTest.errorText(), QString());
     QCOMPARE(replyTest.error(), QModbusReply::NoError);
 
     replyTest.setFinished(false);
-    QVERIFY(finishedSpy.count() == 1); // no further singal
+    QVERIFY(finishedSpy.count() == 1); // no further signal
     QVERIFY(errorSpy.isEmpty());
     QCOMPARE(replyTest.serverAddress(), 1);
     QCOMPARE(replyTest.isFinished(), false);
     QCOMPARE(replyTest.result().isValid(), false);
-    QCOMPARE(replyTest.protocolError(), QModbusPdu::ExtendedException);
+    QCOMPARE(replyTest.rawResult().isValid(), false);
     QCOMPARE(replyTest.errorText(), QString());
     QCOMPARE(replyTest.error(), QModbusReply::NoError);
 }
@@ -125,7 +125,7 @@ void tst_QModbusReply::tst_setError()
     QFETCH(QModbusReply::ReplyError, error);
     QFETCH(QString, errorText);
 
-    QModbusReply replyTest(1);
+    QModbusReply replyTest(QModbusReply::Common, 1);
     QCOMPARE(replyTest.serverAddress(), 1);
     QSignalSpy finishedSpy(&replyTest, SIGNAL(finished()));
     QSignalSpy errorSpy(&replyTest, SIGNAL(errorOccurred(QModbusReply::ReplyError)));
@@ -136,49 +136,12 @@ void tst_QModbusReply::tst_setError()
     replyTest.setError(error, errorText);
     QCOMPARE(finishedSpy.count(), 1);
     QCOMPARE(errorSpy.count(), 1);
-    QCOMPARE(replyTest.protocolError(), QModbusPdu::ExtendedException);
+    QCOMPARE(replyTest.rawResult().isValid(), false);
     QCOMPARE(replyTest.error(), error);
     QCOMPARE(replyTest.errorText(), errorText);
     QCOMPARE(errorSpy.at(0).at(0).value<QModbusReply::ReplyError>(), error);
 
     replyTest.setError(error, errorText);
-    replyTest.setFinished(true);
-    QCOMPARE(finishedSpy.count(), 3); //setError() implies call to setFinished()
-    QCOMPARE(errorSpy.count(), 2);
-}
-
-void tst_QModbusReply::tst_setProtocolError_data()
-{
-    QTest::addColumn<QModbusPdu::ExceptionCode>("error");
-    QTest::addColumn<QString>("errorText");
-
-    QTest::newRow("IllegalFunction") << QModbusPdu::IllegalFunction << QString("foobar");
-    QTest::newRow("IllegalDataAddress") << QModbusPdu::IllegalDataAddress << QString();
-    QTest::newRow("GatewayPathUnavailable") << QModbusPdu::GatewayPathUnavailable << QString("no");
-}
-
-void tst_QModbusReply::tst_setProtocolError()
-{
-    QFETCH(QModbusPdu::ExceptionCode, error);
-    QFETCH(QString, errorText);
-
-    QModbusReply replyTest(1);
-    QCOMPARE(replyTest.serverAddress(), 1);
-    QSignalSpy finishedSpy(&replyTest, SIGNAL(finished()));
-    QSignalSpy errorSpy(&replyTest, SIGNAL(errorOccurred(QModbusReply::ReplyError)));
-
-    QVERIFY(finishedSpy.isEmpty());
-    QVERIFY(errorSpy.isEmpty());
-
-    replyTest.setProtocolError(error, errorText);
-    QCOMPARE(finishedSpy.count(), 1);
-    QCOMPARE(errorSpy.count(), 1);
-    QCOMPARE(replyTest.protocolError(), error);
-    QCOMPARE(replyTest.error(), QModbusReply::ProtocolError);
-    QCOMPARE(replyTest.errorText(), errorText);
-    QCOMPARE(errorSpy.at(0).at(0).value<QModbusReply::ReplyError>(), QModbusReply::ProtocolError);
-
-    replyTest.setProtocolError(error, errorText);
     replyTest.setFinished(true);
     QCOMPARE(finishedSpy.count(), 3); //setError() implies call to setFinished()
     QCOMPARE(errorSpy.count(), 2);
@@ -194,7 +157,7 @@ void tst_QModbusReply::tst_setResult()
     QVector<quint16>  reference = { 4,5,6 };
     QCOMPARE(unit.values(), reference);
 
-    QModbusReply replyTest(1);
+    QModbusReply replyTest(QModbusReply::Common, 1);
     QCOMPARE(replyTest.serverAddress(), 1);
     QSignalSpy finishedSpy(&replyTest, SIGNAL(finished()));
     QSignalSpy errorSpy(&replyTest, SIGNAL(errorOccurred(QModbusReply::ReplyError)));
@@ -206,9 +169,12 @@ void tst_QModbusReply::tst_setResult()
     QCOMPARE(replyTest.result().valueCount(), 0u);
     QCOMPARE(replyTest.result().registerType(), QModbusDataUnit::Invalid);
     QCOMPARE(replyTest.result().isValid(), false);
+    QCOMPARE(replyTest.rawResult().isValid(), false);
     QCOMPARE(replyTest.result().values(), QVector<quint16>());
 
+    QModbusResponse response(QModbusResponse::ReadExceptionStatus, quint16(0x0000));
     replyTest.setResult(unit);
+    replyTest.setRawResult(response);
     QCOMPARE(finishedSpy.count(), 0);
     QCOMPARE(errorSpy.count(), 0);
     QCOMPARE(replyTest.result().startAddress(), 5);
@@ -216,6 +182,37 @@ void tst_QModbusReply::tst_setResult()
     QCOMPARE(replyTest.result().registerType(), QModbusDataUnit::Coils);
     QCOMPARE(replyTest.result().isValid(), true);
     QCOMPARE(replyTest.result().values(), reference);
+    QCOMPARE(replyTest.rawResult().isValid(), true);
+
+    auto tmp = replyTest.rawResult();
+    QCOMPARE(tmp.functionCode(), QModbusResponse::ReadExceptionStatus);
+    QCOMPARE(tmp.data(), QByteArray::fromHex("0000"));
+
+    QModbusReply replyRawTest(QModbusReply::Raw, 1);
+    QCOMPARE(replyRawTest.serverAddress(), 1);
+    QSignalSpy finishedSpyRaw(&replyRawTest, SIGNAL(finished()));
+    QSignalSpy errorSpyRaw(&replyRawTest, SIGNAL(errorOccurred(QModbusReply::ReplyError)));
+
+    QVERIFY(finishedSpyRaw.isEmpty());
+    QVERIFY(errorSpyRaw.isEmpty());
+
+    QCOMPARE(replyRawTest.result().startAddress(), -1);
+    QCOMPARE(replyRawTest.result().valueCount(), 0u);
+    QCOMPARE(replyRawTest.result().registerType(), QModbusDataUnit::Invalid);
+    QCOMPARE(replyRawTest.result().isValid(), false);
+    QCOMPARE(replyRawTest.rawResult().isValid(), false);
+    QCOMPARE(replyRawTest.result().values(), QVector<quint16>());
+
+    replyRawTest.setResult(unit);
+    replyRawTest.setRawResult(response);
+    QCOMPARE(finishedSpy.count(), 0);
+    QCOMPARE(errorSpyRaw.count(), 0);
+    QCOMPARE(replyRawTest.result().isValid(), false);
+    QCOMPARE(replyRawTest.rawResult().isValid(), true);
+
+    tmp = replyRawTest.rawResult();
+    QCOMPARE(tmp.functionCode(), QModbusResponse::ReadExceptionStatus);
+    QCOMPARE(tmp.data(), QByteArray::fromHex("0000"));
 }
 
 QTEST_MAIN(tst_QModbusReply)

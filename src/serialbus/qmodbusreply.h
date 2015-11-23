@@ -51,6 +51,12 @@ class Q_SERIALBUS_EXPORT QModbusReply : public QObject
     Q_DECLARE_PRIVATE(QModbusReply)
 
 public:
+    enum ReplyType {
+        Raw,
+        Common
+    };
+    Q_ENUMS(ReplyType)
+
     enum ReplyError {
         NoError =               0x00,
         ProtocolError =         0x01,
@@ -61,27 +67,31 @@ public:
     };
     Q_ENUMS(ReplyError)
 
-    explicit QModbusReply(int serverAddress, QObject *parent = Q_NULLPTR);
+    QModbusReply(ReplyType type, int serverAddress, QObject *parent = Q_NULLPTR);
 
-    bool isFinished() const;
-    QModbusDataUnit result() const;
+    ReplyType type() const;
     int serverAddress() const;
 
+    bool isFinished() const;
+
+    QModbusDataUnit result() const;
+    QModbusResponse rawResult() const;
+
     ReplyError error() const;
-    QModbusPdu::ExceptionCode protocolError() const;
     QString errorText() const;
 
     void setResult(const QModbusDataUnit &unit);
-    void setFinished(bool isFinished);
-    void setProtocolError(QModbusPdu::ExceptionCode error, const QString &errorText);
-    void setError(QModbusReply::ReplyError error, const QString &errorText);
+    void setRawResult(const QModbusResponse &unit);
 
+    void setFinished(bool isFinished);
+    void setError(QModbusReply::ReplyError error, const QString &errorText);
 
 Q_SIGNALS:
     void finished();
     void errorOccurred(QModbusReply::ReplyError error);
 };
 
+Q_DECLARE_TYPEINFO(QModbusReply::ReplyType, Q_PRIMITIVE_TYPE);
 Q_DECLARE_TYPEINFO(QModbusReply::ReplyError, Q_PRIMITIVE_TYPE);
 
 QT_END_NAMESPACE

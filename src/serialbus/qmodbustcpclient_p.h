@@ -154,8 +154,8 @@ public:
                                     QModbusClient::tr("An invalid response has been received."));
                     }
                 } else {
-                    elem.reply->setProtocolError(responsePdu.exceptionCode(),
-                                                 QModbusClient::tr("Modbus Exception Response."));
+                    elem.reply->setError(QModbusReply::ProtocolError,
+                        QModbusClient::tr("Modbus Exception Response."));
                 }
             }
         });
@@ -189,7 +189,7 @@ public:
         qCDebug(QT_MODBUS_LOW) << "Sent TCP ADU:" << buffer.toHex();
         qCDebug(QT_MODBUS) << "Sent TCP PDU:" << request;
 
-        QModbusReply *reply = new QModbusReply(serverAddress, q);
+        QModbusReply *reply = new QModbusReply(QModbusReply::Common, serverAddress, q);
         if (m_responseTimeoutDuration >= 0) {
             QTimer::singleShot(m_responseTimeoutDuration, [this, tId]() {
                 if (!m_transactionStore.contains(tId)) {

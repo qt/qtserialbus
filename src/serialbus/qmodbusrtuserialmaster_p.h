@@ -142,8 +142,8 @@ public:
                             QModbusClient::tr("An invalid response has been received."));
                 }
             } else {
-               headOfQueue.reply->setProtocolError(response.exceptionCode(),
-                                                   QModbusClient::tr("Modbus Exception Response."));
+               headOfQueue.reply->setError(QModbusReply::ProtocolError,
+                   QModbusClient::tr("Modbus Exception Response."));
             }
 
             sendNextRequest(); // go to next request
@@ -217,7 +217,7 @@ public:
     {
         Q_Q(QModbusRtuSerialMaster);
 
-        QModbusReply *reply = new QModbusReply(serverAddress, q);
+        QModbusReply *reply = new QModbusReply(QModbusReply::Common, serverAddress, q);
         QueueElement elem = { reply, request, unit };
         m_queue.enqueue(elem);
         sendNextRequest();

@@ -50,9 +50,10 @@ public:
     QModbusDataUnit m_unit;
     int m_serverAddress = 1;
     bool m_finished = false;
-    QModbusPdu::ExceptionCode m_protocolError = QModbusPdu::ExtendedException;
     QModbusReply::ReplyError m_error = QModbusReply::NoError;
     QString m_errorText;
+    QModbusRequest m_response;
+    QModbusReply::ReplyType m_type;
 };
 
 /*!
@@ -65,32 +66,43 @@ public:
 */
 
 /*!
+    \enum QModbusReply::ReplyType
+
+    This enum describes the possible reply type.
+
+    \value Raw      The reply originates from a raw Modbus request. See
+                    \l QModbusClient::sendRawRequest
+    \value Common   The reply originates from a common read, write or read/write
+                    request. See \l QModbusClient::sendReadRequest,
+                    \l QModbusClient::sendWriteRequest and \l QModbusClient::sendReadWriteRequest
+*/
+
+/*!
     \enum QModbusReply::ReplyError
 
     This enum describes all the possible error conditions.
 
-    \value NoError                              No error has occurred.
-    \value ProtocolError                        The request was answered with a Modbus exception.
-                                                The exact Modbus exception code can be retrieved
-                                                using \l protocolError().
-    \value TimeoutError                         The Modbus request was not answered within the given
-                                                \l QModbusClient::timeout().
-    \value ReplyAbortedError                    The reply was aborted due to a disconnection of
-                                                the \l QModbusClient.
-    \value UnknownError                         An unknown error has occurred.
-    \value WriteError                           The request could not be written/sent to the remote party.
+    \value NoError                      No error has occurred.
+    \value ProtocolError                The request was answered with a Modbus exception.
+    \value TimeoutError                 The Modbus request was not answered within the given
+                                        \l QModbusClient::timeout().
+    \value ReplyAbortedError            The reply was aborted due to a disconnection of
+                                        the \l QModbusClient.
+    \value UnknownError                 An unknown error has occurred.
+    \value WriteError                   The request could not be written/sent to the remote party.
 */
 
 /*!
-    Constructs a QModbusReply object with the specified \a parent.
+    Constructs a QModbusReply object with a given \a type and the specified \a parent.
 
     The reply will be send to the Modbus client represented by
     \a serverAddress.
 */
-QModbusReply::QModbusReply(int serverAddress, QObject *parent) :
-    QObject(*new QModbusReplyPrivate, parent)
+QModbusReply::QModbusReply(ReplyType type, int serverAddress, QObject *parent)
+    : QObject(*new QModbusReplyPrivate, parent)
 {
     Q_D(QModbusReply);
+    d->m_type = type;
     d->m_serverAddress = serverAddress;
 }
 
@@ -137,18 +149,26 @@ void QModbusReply::setFinished(bool isFinished)
 */
 
 /*!
-    Returns the result of a standard register read request.
+    Returns the preprocessed result of a Modbus request.
 
-    Combined read/write requests send via \l QModbusClient::sendReadWriteRequest()
-    contain the values read from the server instance.
+    For read requests as well as combined read/write requests send via
+    \l QModbusClient::sendReadWriteRequest() it contains the values read
+    from the server instance.
 
-    If the request has not finished, has failed with an error or
-    was a write request then the returned \l QModbusDataUnit instance is invalid.
+    If the request has not finished, has failed with an error or was a write
+    request then the returned \l QModbusDataUnit instance is invalid.
+
+    \note If the \l type() of the reply is \l QModbusReply::Raw, the return
+    value will always be invalid.
+
+    \sa type(), rawResult()
 */
 QModbusDataUnit QModbusReply::result() const
 {
     Q_D(const QModbusReply);
-    return d->m_unit;
+    if (type() == QModbusReply::Common)
+        return d->m_unit;
+    return QModbusDataUnit();
 }
 
 /*!
@@ -171,28 +191,15 @@ int QModbusReply::serverAddress() const
 }
 
 /*!
-    Returns the Modbus exception code that this reply ended up with. It implies
-    that the reply finished with a \l ProtocolError.
-
-    \note This function always returns \l QModbusPdu::ExtendedException if \l error()
-    is not set to \l ProtocolError.
-*/
-QModbusPdu::ExceptionCode QModbusReply::protocolError() const
-{
-    Q_D(const QModbusReply);
-    return d->m_protocolError;
-}
-
-/*!
     \fn void QModbusReply::errorOccurred(QModbusReply::ReplyError error)
 
     This signal is emitted when an error has been detected in the processing of this reply.
     The \l finished() signal will probably follow.
 
-    The error will be described by the error code \a error. If errorString is not empty
-    it will contain a textual description of the error. In case of a \l ProtocolError
-    the \l protocolError() function can be used to obtain the exact type of Modbus exception
-    as defined by the Modbus specification.
+    The error will be described by the error code \a error. If errorString is
+    not empty it will contain a textual description of the error. In case of a
+    \l QModbusReply::ProtocolError the \l rawResult() function can be used to
+    obtain the original Modbus exception response to get the exception code.
 
     Note: Do not delete this reply object in the slot connected to this signal.
     Use \l deleteLater() instead.
@@ -205,24 +212,6 @@ QModbusReply::ReplyError QModbusReply::error() const
 {
     Q_D(const QModbusReply);
     return d->m_error;
-}
-
-/*!
-    \internal
-    Sets the Modbus exception error state of this reply to \a error and the textual representation of
-    the error to \a errorText. This function implicitly sets \l error() to \l ProtocolError.
-
-    This causes the \l errorOccurred() and \l finished() signals to be emitted,
-    in that order.
-*/
-void QModbusReply::setProtocolError(QModbusPdu::ExceptionCode error, const QString &errorText)
-{
-    Q_D(QModbusReply);
-    d->m_error = ProtocolError;
-    d->m_protocolError = error;
-    d->m_errorText = errorText;
-    emit errorOccurred(ProtocolError);
-    setFinished(true);
 }
 
 /*!
@@ -255,6 +244,45 @@ QString QModbusReply::errorText() const
 {
     Q_D(const QModbusReply);
     return d->m_errorText;
+}
+
+
+/*!
+    Returns the type of the reply.
+
+    \note If the type of the reply is \l QModbusReply::Raw, the return value
+    of \l result() will always be invalid.
+
+    \sa result(), rawResult()
+*/
+QModbusReply::ReplyType QModbusReply::type() const
+{
+    Q_D(const QModbusReply);
+    return d->m_type;
+}
+
+/*!
+    Returns the raw response of a Modbus request.
+
+    If the request has not finished then the returned \l QModbusResponse
+    instance is invalid.
+
+    \sa type(), result()
+*/
+QModbusResponse QModbusReply::rawResult() const
+{
+    Q_D(const QModbusReply);
+    return d->m_response;
+}
+
+/*!
+    \internal
+    Sets the result of a Modbus request to a Modbus \a response.
+*/
+void QModbusReply::setRawResult(const QModbusResponse &response)
+{
+    Q_D(QModbusReply);
+    d->m_response = response;
 }
 
 #include "moc_qmodbusreply.cpp"
