@@ -322,6 +322,32 @@ QModbusRequest QModbusClientPrivate::createRWRequest(const QModbusDataUnit &read
                           quint16(write.valueCount()), byteCount, write.values());
 }
 
+void QModbusClientPrivate::processQueueElement(const QModbusResponse &pdu,
+                                               const QueueElement &element)
+{
+    element.reply->setRawResult(pdu);
+    if (pdu.isException()) {
+        element.reply->setError(QModbusReply::ProtocolError,
+            QModbusClient::tr("Modbus Exception Response."));
+        return;
+    }
+
+    if (element.reply->type() == QModbusReply::Raw) {
+        element.reply->setFinished(true);
+        return;
+    }
+
+    QModbusDataUnit unit = element.unit;
+    if (!processResponse(pdu, &unit)) {
+        element.reply->setError(QModbusReply::UnknownError,
+            QModbusClient::tr("An invalid response has been received."));
+        return;
+    }
+
+    element.reply->setResult(unit);
+    element.reply->setFinished(true);
+}
+
 /*
     TODO: implement
 */

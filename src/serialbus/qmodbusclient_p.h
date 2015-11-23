@@ -105,6 +105,7 @@ public:
         QModbusRequest requestPdu;
         QModbusDataUnit unit;
     };
+    void processQueueElement(const QModbusResponse &pdu, const QueueElement &element);
 };
 
 QT_END_NAMESPACE

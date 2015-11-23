@@ -130,26 +130,7 @@ public:
                 return;
             }
 
-            const QueueElement headOfQueue = m_queue.dequeue();
-            headOfQueue.reply->setRawResult(response);
-            if (!response.isException()) {
-                if (headOfQueue.reply->type() == QModbusReply::Common) {
-                    QModbusDataUnit unit = headOfQueue.unit;
-                    if (processResponse(response, &unit)) {
-                        headOfQueue.reply->setResult(unit);
-                        headOfQueue.reply->setFinished(true);
-                    } else {
-                        headOfQueue.reply->setError(QModbusReply::UnknownError,
-                            QModbusClient::tr("An invalid response has been received."));
-                    }
-                } else {
-                    headOfQueue.reply->setFinished(true);
-                }
-            } else {
-               headOfQueue.reply->setError(QModbusReply::ProtocolError,
-                   QModbusClient::tr("Modbus Exception Response."));
-            }
-
+            processQueueElement(response, m_queue.dequeue());
             sendNextRequest(); // go to next request
         });
 
