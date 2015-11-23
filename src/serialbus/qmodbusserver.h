@@ -60,6 +60,7 @@ public:
         ExceptionStatusOffset,
         DeviceBusy,
         AsciiInputDelimiter,
+        ListenOnlyMode,
         ServerIdentifier,
         RunIndicatorStatus,
         AdditionalData,

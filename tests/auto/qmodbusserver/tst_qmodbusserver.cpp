@@ -1161,7 +1161,7 @@ private slots:
         QCOMPARE(local.processRequest(request).exceptionCode(), QModbusPdu::IllegalFunction);
     }
 
-    void testSetAsciiInputDelimiter()
+    void testQModbusServerOptions()
     {
         // TODO: Add a local class implementation to test value()/setValue with a different backing
         // store. That's not only related to AsciiInputDelimiter, rather to all enum values there.
@@ -1180,6 +1180,12 @@ private slots:
         QVERIFY(!server.setValue(QModbusServer::AsciiInputDelimiter, 0x100));
         QCOMPARE(server.value(QModbusServer::AsciiInputDelimiter).toInt(), int('j'));
         QVERIFY(!server.setValue(QModbusServer::AsciiInputDelimiter, -1));
+
+        TestServer local;
+        QCOMPARE(local.value(QModbusServer::ListenOnlyMode).toBool(), false);
+        QCOMPARE(local.setValue(QModbusServer::ListenOnlyMode, "Test"), false);
+        QCOMPARE(local.setValue(QModbusServer::ListenOnlyMode, true), true);
+        QCOMPARE(local.value(QModbusServer::ListenOnlyMode).toBool(), true);
     }
 };
 

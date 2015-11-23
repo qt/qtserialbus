@@ -71,6 +71,7 @@ Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
     \value DeviceBusy               Flag to signal the server is engaged in processing a
                                     long-duration program command. \c quint16
     \value AsciiInputDelimiter      The Modbus ASCII end of message delimiter. \c char \uchar
+    \value ListenOnlyMode           Flag to set listen only mode of the server. \c bool
     \value ServerIdentifier         The identifier of the server, \b not the server address. \c quint8
     \value RunIndicatorStatus       The run indicator of the server. \c quint8
     \value AdditionalData           The additional data of the server. \c QByteArray
@@ -168,6 +169,10 @@ int QModbusServer::serverAddress() const
             \li \l QModbusServer::AsciiInputDelimiter
             \li Returns a end of message delimiter of Modbus ASCII messages.
         \row
+            \li \l QModbusServer::ListenOnlyMode
+            \li Returns the server's listen only state. Messages are monitored
+                but no response will be sent.
+        \row
             \li \l QModbusServer::ServerIdentifier
             \li Returns the server manufacturer's identifier code. This can be
                 an arbitrary value in the range of \c 0x00 to 0xff.
@@ -201,6 +206,8 @@ QVariant QModbusServer::value(int option) const
             return d->m_serverOptions.value(option, quint16(0x0000));
         case AsciiInputDelimiter:
             return d->m_serverOptions.value(option, '\n');
+        case ListenOnlyMode:
+            return d->m_serverOptions.value(option, false);
         case ServerIdentifier:
             return d->m_serverOptions.value(option, quint8(0x0a));
         case RunIndicatorStatus:
@@ -253,6 +260,11 @@ QVariant QModbusServer::value(int option) const
             \li \l QModbusServer::AsciiInputDelimiter
             \li The \a newValue becomes the end of message delimiter for future
                 Modbus ASCII messages. The default value preset is \c {\n}.
+        \row
+            \li \l QModbusServer::ListenOnlyMode
+            \li Ss the server's listen only state to \a newValue. If listen only
+                mode is set to \c true, messages are monitored but no response
+                will be sent. The default value preset is \c false.
         \row
             \li \l QModbusServer::ServerIdentifier
             \li Sets the server's manufacturer identifier to \a newValue.
@@ -315,6 +327,12 @@ bool QModbusServer::setValue(int option, const QVariant &newValue)
         CHECK_INT_OR_UINT(newValue);
         bool ok = false;
         if (newValue.toUInt(&ok) > 0xff || !ok)
+            return false;
+        d->m_serverOptions.insert(option, newValue);
+        return true;
+    }
+    case ListenOnlyMode: {
+        if (newValue.type() != QVariant::Bool)
             return false;
         d->m_serverOptions.insert(option, newValue);
         return true;
@@ -829,7 +847,7 @@ QModbusResponse QModbusServerPrivate::processDiagnosticsRequest(const QModbusReq
             m_commEventLog.clear();
 
         resetCommunicationCounters();
-        m_forceListenOnlyMode = false;
+        q_func()->setValue(QModbusServer::ListenOnlyMode, false);
         storeModbusCommEvent(QModbusCommEvent::InitiatedCommunicationRestart);
 
         if (!q_func()->connectDevice()) {
@@ -849,7 +867,7 @@ QModbusResponse QModbusServerPrivate::processDiagnosticsRequest(const QModbusReq
 
     case Diagnostics::ForceListenOnlyMode:
         CHECK_SIZE_AND_CONDITION(request, (data != 0x0000));
-        m_forceListenOnlyMode = true;
+        q_func()->setValue(QModbusServer::ListenOnlyMode, true);
         storeModbusCommEvent(QModbusCommEvent::EnteredListenOnlyMode);
         return QModbusResponse();
 

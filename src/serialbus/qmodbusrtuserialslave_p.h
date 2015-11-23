@@ -92,7 +92,7 @@ public:
             // CRC                           -> 2 bytes
 
             QModbusCommEvent event = QModbusCommEvent::ReceiveEvent;
-            if (isListenOnly())
+            if (q->value(QModbusServer::ListenOnlyMode).toBool())
                 event |= QModbusCommEvent::ReceiveFlag::CurrentlyInListenOnlyMode;
 
             // We expect at least the server address, function code and CRC.
@@ -165,10 +165,12 @@ public:
             const QModbusResponse response = q->processRequest(req);
 
             event = QModbusCommEvent::SentEvent; // reset event after processing
-            if (isListenOnly())
+            if (q->value(QModbusServer::ListenOnlyMode).toBool())
                 event |= QModbusCommEvent::SendFlag::CurrentlyInListenOnlyMode;
 
-            if ((!response.isValid()) || isListenOnly() || q->processesBroadcast()) {
+            if ((!response.isValid())
+                || q->processesBroadcast()
+                || q->value(QModbusServer::ListenOnlyMode).toBool()) {
                 // The quantity of messages addressed to the remote device for which it has
                 // returned no response (neither a normal response nor an exception response),
                 // since its last restart, clear counters operation, or power–up.

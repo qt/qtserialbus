@@ -112,19 +112,13 @@ public:
     QModbusResponse processReadWriteMultipleRegistersRequest(const QModbusRequest &request);
     QModbusResponse processReadFifoQueueRequest(const QModbusRequest &request);
 
-    bool isListenOnly() const { return m_forceListenOnlyMode; }
     void storeModbusCommEvent(const QModbusCommEvent &eventByte);
 
-    // Device specific fields to be moved later
-    QModbusDataUnitMap m_modbusDataUnitMap;
-
     int m_serverAddress = 1;
-
-    QContiguousCache<quint8> m_commEventLog;
-
     QVector<quint16> m_counters;
-    bool m_forceListenOnlyMode = false; // TODO: Expose through value()|setValue() .
     QHash<int, QVariant> m_serverOptions;
+    QModbusDataUnitMap m_modbusDataUnitMap;
+    QContiguousCache<quint8> m_commEventLog;
 };
 
 QT_END_NAMESPACE
