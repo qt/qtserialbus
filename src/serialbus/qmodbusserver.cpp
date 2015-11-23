@@ -70,7 +70,7 @@ Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
     \value ExceptionStatusOffset    The exception status byte offset of the server. \c quint16
     \value DeviceBusy               Flag to signal the server is engaged in processing a
                                     long-duration program command. \c quint16
-    \value AsciiInputDelimiter    The Modbus ASCII end of message delimiter. \c QChar
+    \value AsciiInputDelimiter      The Modbus ASCII end of message delimiter. \c char \uchar
     \value ServerIdentifier         The identifier of the server, \b not the server address. \c quint8
     \value RunIndicatorStatus       The run indicator of the server. \c quint8
     \value AdditionalData           The additional data of the server. \c QByteArray
