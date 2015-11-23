@@ -57,7 +57,8 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    Constructs a serial Modbus slave with the specified \a parent.
+    Constructs a serial Modbus slave with the specified \a parent. The
+    \l serverAddress preset is \c 1.
 */
 QModbusRtuSerialSlave::QModbusRtuSerialSlave(QObject *parent)
     : QModbusServer(*new QModbusRtuSerialSlavePrivate, parent)

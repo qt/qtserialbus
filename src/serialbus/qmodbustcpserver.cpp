@@ -52,13 +52,15 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    Constructs a QModbusTcpServer with the specified \a parent.
+    Constructs a QModbusTcpServer with the specified \a parent. The
+    \l serverAddress preset is \c 255.
 */
 QModbusTcpServer::QModbusTcpServer(QObject *parent)
     : QModbusServer(*new QModbusTcpServerPrivate, parent)
 {
     Q_D(QModbusTcpServer);
     d->setupTcpServer();
+    setServerAddress(0xff);
 }
 
 /*!

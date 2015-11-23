@@ -48,7 +48,7 @@ public:
     QModbusReplyPrivate() Q_DECL_EQ_DEFAULT;
 
     QModbusDataUnit m_unit;
-    int m_serverAddress = 0xff;
+    int m_serverAddress = 1;
     bool m_finished = false;
     QModbusPdu::ExceptionCode m_protocolError = QModbusPdu::ExtendedException;
     QModbusReply::ReplyError m_error = QModbusReply::NoError;

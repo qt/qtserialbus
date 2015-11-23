@@ -35,6 +35,7 @@
 ****************************************************************************/
 
 #include <QtSerialBus/qmodbusserver.h>
+#include <QtSerialBus/qmodbusrtuserialslave.h>
 #include <QtSerialBus/qmodbustcpserver.h>
 
 #include <QtCore/qdebug.h>
@@ -77,6 +78,12 @@ private slots:
         map.insert(QModbusDataUnit::InputRegisters, { QModbusDataUnit::InputRegisters, 0, MAP_RANGE });
         map.insert(QModbusDataUnit::HoldingRegisters, { QModbusDataUnit::HoldingRegisters, 0, MAP_RANGE });
         server.setMap(map);
+    }
+
+    void testServerAddress()
+    {
+        QCOMPARE(QModbusTcpServer().serverAddress(), 0xff);
+        QCOMPARE(QModbusRtuSerialSlave().serverAddress(), 1);
     }
 
     void testProcessRequestReadWriteSingleMultipleCoils()
