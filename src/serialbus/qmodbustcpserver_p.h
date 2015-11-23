@@ -91,6 +91,22 @@ public:
         q->setError(errorText, error);
     }
 
+    /*
+        This function is a workaround since 2nd level lambda below
+        cannot call QModbusServer::serverAddress(..) function on VS2013.
+    */
+    bool matchingServerAddress(quint8 unitId) const
+    {
+        Q_Q(const QModbusTcpServer);
+        if (q->serverAddress() == unitId)
+            return true;
+
+        // No, not our address! Ignore!
+        qCDebug(QT_MODBUS) << "Wrong server unit identifier address, expected"
+            << q->serverAddress() << "got" << unitId;
+        return false;
+    }
+
     void setupTcpServer()
     {
         Q_Q(QModbusTcpServer);
@@ -149,11 +165,14 @@ public:
                     QModbusRequest request;
                     input >> request;
 
+                    buffer->remove(0, mbpaHeaderSize + bytesPdu);
+
+                    if (!matchingServerAddress(unitId))
+                        continue;
+
                     qCDebug(QT_MODBUS) << "Request PDU:" << request;
                     const QModbusResponse response = forwardProcessRequest(request);
                     qCDebug(QT_MODBUS) << "Response PDU:" << response;
-
-                    buffer->remove(0, mbpaHeaderSize + bytesPdu);
 
                     QByteArray result;
                     QDataStream output(&result, QIODevice::WriteOnly);
