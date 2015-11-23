@@ -44,11 +44,15 @@ QT_BEGIN_NAMESPACE
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QModbusTcpServer class is the interface class for Modbus TCP sever device.
+    \brief The QModbusTcpServer class represents a Modbus server that uses a
+    TCP server for its communication with the Modbus client.
 
-    Modbus TCP networks can have multiple servers. Servers are read/written by a client device
-    represented by \l QModbusTcpClient. QModbusTcpServer communicates with a Modbus backend,
-    providing users with a convenient API.
+    Communication via Modbus requires the interaction between a single Modbus
+    client instance and single Modbus server. This class provides the Modbus
+    server implementation via a TCP server.
+
+    Modbus TCP networks can have multiple servers. Servers are read/written by
+    a client device represented by \l QModbusTcpClient.
 */
 
 /*!

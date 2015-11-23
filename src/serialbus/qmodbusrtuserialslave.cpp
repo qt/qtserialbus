@@ -49,15 +49,17 @@ QT_BEGIN_NAMESPACE
     \brief The QModbusRtuSerialSlave class represents a Modbus server
     that uses a serial port for its communication with the Modbus client.
 
-    Communication via Modbus requires the interaction between a single Modbus client instance and
-    multiple Modbus server. This class provides the Modbus server implementation via a serial port.
+    Communication via Modbus requires the interaction between a single Modbus
+    client instance and multiple Modbus server. This class provides the Modbus
+    server implementation via a serial port.
 
-    Since multiple Modbus server instances can interact with a Modbus client at the same time
-    (using a serial bus), servers are identified by their \l serverAddress().
+    Since multiple Modbus server instances can interact with a Modbus client
+    at the same time (using a serial bus), servers are identified by their
+    \l serverAddress().
 */
 
 /*!
-    Constructs a serial Modbus slave with the specified \a parent. The
+    Constructs a QModbusRtuSerialSlave with the specified \a parent. The
     \l serverAddress preset is \c 1.
 */
 QModbusRtuSerialSlave::QModbusRtuSerialSlave(QObject *parent)
@@ -68,7 +70,7 @@ QModbusRtuSerialSlave::QModbusRtuSerialSlave(QObject *parent)
 }
 
 /*!
-    \internal
+    Destroys the QModbusRtuSerialSlave instance.
 */
 QModbusRtuSerialSlave::~QModbusRtuSerialSlave()
 {
