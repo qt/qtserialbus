@@ -65,6 +65,8 @@ public:
     QModbusClientPrivate() Q_DECL_EQ_DEFAULT;
     virtual ~QModbusClientPrivate() Q_DECL_EQ_DEFAULT;
 
+    QModbusReply *sendRequest(const QModbusRequest &request, int serverAddress,
+                              const QModbusDataUnit *const unit);
     QModbusRequest createReadRequest(const QModbusDataUnit &data) const;
     QModbusRequest createWriteRequest(const QModbusDataUnit &data) const;
     QModbusRequest createRWRequest(const QModbusDataUnit &read, const QModbusDataUnit &write) const;
@@ -88,7 +90,8 @@ public:
     void stopResponseTimer();
 
     virtual void handleResponseTimeout() {}
-    virtual QModbusReply *enqueueRequest(const QModbusRequest &, int, const QModbusDataUnit &) {
+    virtual QModbusReply *enqueueRequest(const QModbusRequest &, int, const QModbusDataUnit &,
+                                         QModbusReply::ReplyType) {
         return Q_NULLPTR;
     }
     // TODO: Review once we have a transport layer in place.

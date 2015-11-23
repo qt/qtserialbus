@@ -143,15 +143,19 @@ public:
                 }
 
                 const QueueElement elem = m_transactionStore.take(transactionId);
+                elem.reply->setRawResult(responsePdu);
                 if (!responsePdu.isException()) {
-                    QModbusDataUnit unit = elem.unit;
-                    if (processResponse(responsePdu, &unit)) {
-                        elem.reply->setResult(unit);
-                        elem.reply->setFinished(true);
+                    if (elem.reply->type() == QModbusReply::Common) {
+                        QModbusDataUnit unit = elem.unit;
+                        if (processResponse(responsePdu, &unit)) {
+                            elem.reply->setResult(unit);
+                            elem.reply->setFinished(true);
+                        } else {
+                            elem.reply->setError(QModbusReply::UnknownError,
+                                QModbusClient::tr("An invalid response has been received."));
+                        }
                     } else {
-                        elem.reply->setError(
-                                    QModbusReply::UnknownError,
-                                    QModbusClient::tr("An invalid response has been received."));
+                        elem.reply->setFinished(true);
                     }
                 } else {
                     elem.reply->setError(QModbusReply::ProtocolError,
@@ -161,13 +165,9 @@ public:
         });
     }
 
-    void handleResponseTimeout() Q_DECL_OVERRIDE
-    {
-        // TODO: Implement!
-    }
-
     QModbusReply *enqueueRequest(const QModbusRequest &request, int serverAddress,
-                                 const QModbusDataUnit &unit) Q_DECL_OVERRIDE
+                                 const QModbusDataUnit &unit,
+                                 QModbusReply::ReplyType type) Q_DECL_OVERRIDE
     {
         Q_Q(QModbusTcpClient);
 
@@ -189,7 +189,7 @@ public:
         qCDebug(QT_MODBUS_LOW) << "Sent TCP ADU:" << buffer.toHex();
         qCDebug(QT_MODBUS) << "Sent TCP PDU:" << request;
 
-        QModbusReply *reply = new QModbusReply(QModbusReply::Common, serverAddress, q);
+        QModbusReply *reply = new QModbusReply(type, serverAddress, q);
         if (m_responseTimeoutDuration >= 0) {
             QTimer::singleShot(m_responseTimeoutDuration, [this, tId]() {
                 if (!m_transactionStore.contains(tId)) {
@@ -206,9 +206,7 @@ public:
                                      QModbusClient::tr("Request timeout"));
             });
         }
-
-        QueueElement elem = { reply, request, unit };
-        m_transactionStore.insert(tId, elem);
+        m_transactionStore.insert(tId, QueueElement{ reply, request, unit });
 
         return reply;
     }

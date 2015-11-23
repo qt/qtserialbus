@@ -63,6 +63,7 @@ public:
     QModbusReply *sendWriteRequest(const QModbusDataUnit &write, int serverAddress);
     QModbusReply *sendReadWriteRequest(const QModbusDataUnit &read, const QModbusDataUnit &write,
                                        int serverAddress);
+    QModbusReply *sendRawRequest(const QModbusRequest &request, int serverAddress);
 
     int timeout() const;
     void setTimeout(int newTimeout);

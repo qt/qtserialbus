@@ -92,20 +92,8 @@ QModbusClient::~QModbusClient()
 QModbusReply *QModbusClient::sendReadRequest(const QModbusDataUnit &read, int serverAddress)
 {
     Q_D(QModbusClient);
-
-    if (!d->isOpen() || state() != QModbusDevice::ConnectedState) {
-        qCWarning(QT_MODBUS) << "Device is not connected";
-        setError(QModbusClient::tr("Device not connected."), QModbusDevice::ConnectionError);
-        return Q_NULLPTR;
-    }
-
-    const QModbusRequest request = d->createReadRequest(read);
-    if (!request.isValid())
-        return Q_NULLPTR;
-
-    return d->enqueueRequest(request, serverAddress, read);
+    return d->sendRequest(d->createReadRequest(read), serverAddress, &read);
 }
-
 
 /*!
     Sends a request to modify the contents of the data pointed by \a write. Returns a new valid
@@ -115,18 +103,7 @@ QModbusReply *QModbusClient::sendReadRequest(const QModbusDataUnit &read, int se
 QModbusReply *QModbusClient::sendWriteRequest(const QModbusDataUnit &write, int serverAddress)
 {
     Q_D(QModbusClient);
-
-    if (!d->isOpen() || state() != QModbusDevice::ConnectedState) {
-        qCWarning(QT_MODBUS) << "Device is not connected";
-        setError(QModbusClient::tr("Device not connected."), QModbusDevice::ConnectionError);
-        return Q_NULLPTR;
-    }
-
-    const QModbusRequest request = d->createWriteRequest(write);
-    if (!request.isValid())
-        return Q_NULLPTR;
-
-    return d->enqueueRequest(request, serverAddress, write);
+    return d->sendRequest(d->createWriteRequest(write), serverAddress, &write);
 }
 
 /*!
@@ -148,18 +125,22 @@ QModbusReply *QModbusClient::sendReadWriteRequest(const QModbusDataUnit &read,
                                                   const QModbusDataUnit &write, int serverAddress)
 {
     Q_D(QModbusClient);
+    return d->sendRequest(d->createRWRequest(read, write), serverAddress, &read);
+}
 
-    if (!d->isOpen() || state() != QModbusDevice::ConnectedState) {
-        qCWarning(QT_MODBUS) << "Device is not connected";
-        setError(QModbusClient::tr("Device not connected."), QModbusDevice::ConnectionError);
-        return Q_NULLPTR;
-    }
+/*!
+    Sends a raw Modbus \a request. A raw request can contain anything that
+    fits inside the Modbus PDU data section and has a valid function code.
+    The only check performed before sending is therefore the validity check,
+    see \l QModbusPdu::isValid. Returns a new valid \l QModbusReply object if
+    it did send the request, otherwise Q_NULLPTR. Modbus networks may have
+    multiple servers, each server has a unique \a serverAddress.
 
-    const QModbusRequest request = d->createRWRequest(read, write);
-    if (!request.isValid())
-        return Q_NULLPTR;
-
-    return d->enqueueRequest(request, serverAddress, read); // only need to remember read
+    \sa QModbusReply::rawResult()
+*/
+QModbusReply *QModbusClient::sendRawRequest(const QModbusRequest &request, int serverAddress)
+{
+    return d_func()->sendRequest(request, serverAddress, Q_NULLPTR);
 }
 
 /*!
@@ -233,6 +214,28 @@ bool QModbusClient::processPrivateResponse(const QModbusResponse &response, QMod
     Q_UNUSED(response)
     Q_UNUSED(data)
     return false;
+}
+
+QModbusReply *QModbusClientPrivate::sendRequest(const QModbusRequest &request, int serverAddress,
+                                                const QModbusDataUnit *const unit)
+{
+    Q_Q(QModbusClient);
+
+    if (!isOpen() || q->state() != QModbusDevice::ConnectedState) {
+        qCWarning(QT_MODBUS) << "Device is not connected";
+        q->setError(QModbusClient::tr("Device not connected."), QModbusDevice::ConnectionError);
+        return Q_NULLPTR;
+    }
+
+    if (!request.isValid()) {
+        qCWarning(QT_MODBUS) << "Refuse to send invalid request.";  // TODO: WriteError ???
+        q->setError(QModbusClient::tr("Invalid Modbus request."), QModbusDevice::WriteError);
+        return Q_NULLPTR;
+    }
+
+    if (!unit)
+        return enqueueRequest(request, serverAddress, *unit, QModbusReply::Common);
+    return enqueueRequest(request, serverAddress, QModbusDataUnit(), QModbusReply::Raw);
 }
 
 QModbusRequest QModbusClientPrivate::createReadRequest(const QModbusDataUnit &data) const

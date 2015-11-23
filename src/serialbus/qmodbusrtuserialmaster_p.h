@@ -130,16 +130,20 @@ public:
                 return;
             }
 
-            QueueElement headOfQueue = m_queue.dequeue();
+            const QueueElement headOfQueue = m_queue.dequeue();
+            headOfQueue.reply->setRawResult(response);
             if (!response.isException()) {
-                QModbusDataUnit unit = headOfQueue.unit;
-                if (processResponse(response, &unit)) {
-                    headOfQueue.reply->setResult(unit);
-                    headOfQueue.reply->setFinished(true);
-                } else {
-                    headOfQueue.reply->setError(
-                            QModbusReply::UnknownError,
+                if (headOfQueue.reply->type() == QModbusReply::Common) {
+                    QModbusDataUnit unit = headOfQueue.unit;
+                    if (processResponse(response, &unit)) {
+                        headOfQueue.reply->setResult(unit);
+                        headOfQueue.reply->setFinished(true);
+                    } else {
+                        headOfQueue.reply->setError(QModbusReply::UnknownError,
                             QModbusClient::tr("An invalid response has been received."));
+                    }
+                } else {
+                    headOfQueue.reply->setFinished(true);
                 }
             } else {
                headOfQueue.reply->setError(QModbusReply::ProtocolError,
@@ -212,14 +216,14 @@ public:
         startResponseTimer();
     }
 
-    QModbusReply *enqueueRequest(const QModbusRequest &request, int serverAddress,
-                                       const QModbusDataUnit &unit) Q_DECL_OVERRIDE
+    QModbusReply *enqueueRequest(const QModbusRequest &request, int slaveAddress,
+                                 const QModbusDataUnit &unit,
+                                 QModbusReply::ReplyType type) Q_DECL_OVERRIDE
     {
         Q_Q(QModbusRtuSerialMaster);
 
-        QModbusReply *reply = new QModbusReply(QModbusReply::Common, serverAddress, q);
-        QueueElement elem = { reply, request, unit };
-        m_queue.enqueue(elem);
+        QModbusReply *reply = new QModbusReply(type, slaveAddress, q);
+        m_queue.enqueue(QueueElement{ reply, request, unit });
         sendNextRequest();
 
         return reply;
