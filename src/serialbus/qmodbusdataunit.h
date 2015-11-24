@@ -54,7 +54,11 @@ public:
         HoldingRegisters
     };
 
+#ifndef Q_QDOC
     QModbusDataUnit() Q_DECL_EQ_DEFAULT;
+#else
+    QModbusDataUnit();
+#endif
 
     explicit QModbusDataUnit(RegisterType regType)
         : QModbusDataUnit(regType, 0, 0)

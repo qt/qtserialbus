@@ -238,7 +238,7 @@ void QModbusReply::setError(QModbusReply::ReplyError error, const QString &error
     that an error occurred which has no associated textual representation,
     in which case this will also return an empty string.
 
-    \sa error(), errorOccurred(), setError()
+    \sa error(), errorOccurred()
 */
 QString QModbusReply::errorText() const
 {
