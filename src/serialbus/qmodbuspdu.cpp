@@ -471,7 +471,7 @@ QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu)
     QByteArray data(size, Qt::Uninitialized);
     if (code == QModbusPdu::Diagnostics || code == QModbusPdu::EncapsulatedInterfaceTransport) {
         data.resize(stream.device()->size() - 1); // One byte for the Function code.
-        if (data.size() >= 253) { // The maximum PDU size is 252 bytes.
+        if (data.size() > 252) { // The maximum PDU data size is 252 bytes.
             pdu.setFunctionCode(QModbusRequest::Invalid);
             return stream;
         }
@@ -622,7 +622,7 @@ QDataStream &operator>>(QDataStream &stream, QModbusResponse &pdu)
     QByteArray data(size, Qt::Uninitialized);
     if (code == QModbusPdu::Diagnostics || code == QModbusPdu::EncapsulatedInterfaceTransport) {
         data.resize(stream.device()->size() - 1); // One byte for the Function code.
-        if (data.size() >= 253) { // The maximum PDU size is 252 bytes.
+        if (data.size() > 252) { // The maximum PDU data size is 252 bytes.
             pdu.setFunctionCode(QModbusRequest::Invalid);
             return stream;
         }
