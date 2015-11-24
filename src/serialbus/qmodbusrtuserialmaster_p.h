@@ -141,6 +141,54 @@ public:
         });
     }
 
+    void startResponseTimer()
+    {
+        if (m_responseTimeoutDuration < 0)
+            return;
+
+        Q_Q(QModbusRtuSerialMaster);
+
+        if (!m_responseTimer) {
+            m_responseTimer = new QTimer(q);
+            m_responseTimer->setSingleShot(true);
+            m_responseTimer->setInterval(m_responseTimeoutDuration);
+            QObject::connect(m_responseTimer, &QTimer::timeout, q, [this]() {
+                qCDebug(QT_MODBUS) << "Timeout of last request";
+
+                if (m_queue.isEmpty())
+                    return;
+
+                QueueElement elem = m_queue.dequeue();
+                if (elem.reply.isNull()) {
+                    // reply deleted while waiting for response which timed out
+                    // nothing really to do here
+                    return;
+                }
+
+                elem.reply->setError(QModbusReply::TimeoutError,
+                                     QModbusClient::tr("Request timeout."));
+            });
+
+            QObject::connect(q, &QModbusClient::timeoutChanged, q, [q, this]() {
+                m_responseTimer->setInterval(q->timeout());
+            });
+        }
+
+        m_responseTimer->start();
+    }
+
+    void stopResponseTimer()
+    {
+        if (m_responseTimeoutDuration < 0)
+            return;
+
+        if (!m_responseTimer)
+            return;
+
+        if (m_responseTimer->isActive())
+            m_responseTimer->stop();
+    }
+
     bool sendNextAdu(const QModbusRequest &request, int serverAddress)
     {
         Q_Q(QModbusRtuSerialMaster);
@@ -229,24 +277,6 @@ public:
         return true;
     }
 
-    void handleResponseTimeout() Q_DECL_OVERRIDE
-    {
-        qCDebug(QT_MODBUS) << "Timeout of last request";
-
-        if (m_queue.isEmpty())
-            return;
-
-        QueueElement elem = m_queue.dequeue();
-        if (elem.reply.isNull()) {
-            // reply deleted while waiting for response which timed out
-            // nothing really to do here
-            return;
-        }
-
-        elem.reply->setError(QModbusReply::TimeoutError,
-                             QModbusClient::tr("Request timeout."));
-    }
-
     // TODO: Review once we have a transport layer in place.
     bool isOpen() const Q_DECL_OVERRIDE
     {
@@ -258,6 +288,7 @@ public:
     QSerialPort *m_serialPort;
     QByteArray responseBuffer;
     QQueue<QueueElement> m_queue;
+    QTimer *m_responseTimer = Q_NULLPTR;
 };
 
 QT_END_NAMESPACE

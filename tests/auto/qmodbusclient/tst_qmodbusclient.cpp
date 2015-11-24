@@ -42,13 +42,7 @@
 
 class TestClientPrivate : public QModbusClientPrivate
 {
-public:
-    void handleResponseTimeout() Q_DECL_OVERRIDE
-    {
-        timeoutCounter++;
-    }
 
-    int timeoutCounter = 0;
 };
 
 class TestClient : public QModbusClient
@@ -59,7 +53,7 @@ class TestClient : public QModbusClient
 
 public:
     TestClient(QObject *parent = Q_NULLPTR)
-        : QModbusClient(*new TestClientPrivate, parent)
+        : QModbusClient(parent)
     {}
 
     virtual bool open() Q_DECL_OVERRIDE { return true; }
@@ -89,20 +83,6 @@ private slots:
         // test timer firing off
         client.setTimeout(100);
         QCOMPARE(client.timeout(), 100);
-
-        TestClientPrivate *tcp = client.d_func();
-
-        tcp->startResponseTimer();
-        QTRY_COMPARE(tcp->timeoutCounter, 1);
-        QTest::qWait(1000); // wait to test single shot character of timer
-        QCOMPARE(tcp->timeoutCounter, 1);
-
-
-        client.setTimeout(-1);
-        QCOMPARE(client.timeout(), -1);
-        tcp->startResponseTimer();
-        QTest::qWait(4000); //long enough to account for time deviations in Qt CI
-        QCOMPARE(tcp->timeoutCounter, 1);
     }
 
     void testProcessReadWriteSingleMultipleCoilsResponse()

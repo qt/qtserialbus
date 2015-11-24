@@ -181,8 +181,6 @@ void QModbusClient::setTimeout(int newTimeout)
     Q_D(QModbusClient);
     if (d->m_responseTimeoutDuration != newTimeout) {
         d->m_responseTimeoutDuration = newTimeout;
-        if (d->m_responseTimer)
-            d->m_responseTimer->setInterval(newTimeout);
         emit timeoutChanged();
     }
 }
@@ -653,37 +651,6 @@ bool QModbusClientPrivate::processReadWriteMultipleRegistersResponse(
         data->setRegisterType(QModbusDataUnit::HoldingRegisters);
     }
     return true;
-}
-
-void QModbusClientPrivate::startResponseTimer()
-{
-    if (m_responseTimeoutDuration < 0)
-        return;
-
-    Q_Q(QModbusClient);
-
-    if (!m_responseTimer) {
-        m_responseTimer = new QTimer(q);
-        m_responseTimer->setSingleShot(true);
-        m_responseTimer->setInterval(m_responseTimeoutDuration);
-        QObject::connect(m_responseTimer, &QTimer::timeout, [this]() {
-            handleResponseTimeout();
-        });
-    }
-
-    m_responseTimer->start();
-}
-
-void QModbusClientPrivate::stopResponseTimer()
-{
-    if (m_responseTimeoutDuration < 0)
-        return;
-
-    if (!m_responseTimer)
-        return;
-
-    if (m_responseTimer->isActive())
-        m_responseTimer->stop();
 }
 
 QT_END_NAMESPACE

@@ -86,10 +86,6 @@ public:
     bool processReadWriteMultipleRegistersResponse(const QModbusResponse &response,
                                                   QModbusDataUnit *data);
 
-    void startResponseTimer();
-    void stopResponseTimer();
-
-    virtual void handleResponseTimeout() {}
     virtual QModbusReply *enqueueRequest(const QModbusRequest &, int, const QModbusDataUnit &,
                                          QModbusReply::ReplyType) {
         return Q_NULLPTR;
@@ -98,7 +94,6 @@ public:
     virtual bool isOpen() const { return false; }
 
     int m_responseTimeoutDuration = 200;
-    QTimer *m_responseTimer = Q_NULLPTR;
 
     struct QueueElement {
         QPointer<QModbusReply> reply;
