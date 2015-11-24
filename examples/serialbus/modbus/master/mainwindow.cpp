@@ -224,11 +224,11 @@ void MainWindow::readReady()
             ui->readValue->addItem(entry);
         }
     } else if (reply->error() == QModbusReply::ProtocolError) {
-        statusBar()->showMessage(tr("Write response error: %1 (Mobus exception: 0x%2)").
+        statusBar()->showMessage(tr("Read response error: %1 (Mobus exception: 0x%2)").
                                     arg(reply->errorText()).
                                     arg(reply->rawResult().exceptionCode(), -1, 16), 5000);
     } else {
-        statusBar()->showMessage(tr("Write response error: %1 (code: 0x%2)").
+        statusBar()->showMessage(tr("Read response error: %1 (code: 0x%2)").
                                     arg(reply->errorText()).
                                     arg(reply->error(), -1, 16), 5000);
     }
