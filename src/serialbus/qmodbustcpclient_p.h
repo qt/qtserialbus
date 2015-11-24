@@ -169,13 +169,14 @@ public:
         }
 
         qCDebug(QT_MODBUS_LOW) << "Sent TCP ADU:" << buffer.toHex();
-        qCDebug(QT_MODBUS) << "Sent TCP PDU:" << request;
+        qCDebug(QT_MODBUS) << "Sent TCP PDU:" << request << "with tId:" << tId;
 
         QModbusReply *reply = new QModbusReply(type, serverAddress, q);
         if (m_responseTimeoutDuration >= 0) {
             QTimer::singleShot(m_responseTimeoutDuration, [this, tId]() {
                 if (!m_transactionStore.contains(tId)) {
-                    qCDebug(QT_MODBUS) << "No pending request for time out with given transaction ID";
+                    qCDebug(QT_MODBUS_LOW) << "No pending request for timeout with given transaction ID"
+                                       << hex << tId;
                     return;
                 }
 
@@ -183,7 +184,7 @@ public:
                 if (elem.reply.isNull())
                     return;
 
-                qCDebug(QT_MODBUS) << "Timeout of request with id" << tId;
+                qCDebug(QT_MODBUS) << "Timeout of request with id" << hex << tId;
                 elem.reply->setError(QModbusReply::TimeoutError,
                                      QModbusClient::tr("Request timeout"));
             });
