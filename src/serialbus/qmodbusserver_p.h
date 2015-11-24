@@ -77,8 +77,8 @@ public:
     };
 
     QModbusServerPrivate()
-        : m_commEventLog(64)
-        , m_counters(20, 0u)
+        : m_counters(20, 0u)
+        , m_commEventLog(64)
     {
     }
 
