@@ -85,6 +85,7 @@ public:
            qCDebug(QT_MODBUS)  << "Connection closed.";
            Q_Q(QModbusTcpClient);
            q->setState(QModbusDevice::UnconnectedState);
+           cleanupTransactionStore();
         });
 
         using TypeId = void (QAbstractSocket::*)(QAbstractSocket::SocketError);
@@ -96,8 +97,10 @@ public:
             q->setError(QModbusClient::tr("TCP socket error (%1).").arg(m_socket->errorString()),
                         QModbusDevice::ConnectionError);
 
-            if (m_socket->state() == QAbstractSocket::UnconnectedState)
+            if (m_socket->state() == QAbstractSocket::UnconnectedState) {
+                cleanupTransactionStore();
                 q->setState(QModbusDevice::UnconnectedState);
+            }
         });
 
         QObject::connect(m_socket, &QIODevice::readyRead, [this](){
@@ -200,6 +203,23 @@ public:
         if (m_socket)
             return m_socket->isOpen();
         return false;
+    }
+
+    void cleanupTransactionStore()
+    {
+        if (m_transactionStore.isEmpty())
+            return;
+
+        qCDebug(QT_MODBUS) << "Cleanup of pending requests";
+
+        foreach (auto tid, m_transactionStore.keys()) {
+            QueueElement elem = m_transactionStore.take(tid);
+            if (elem.reply.isNull())
+                continue;
+
+            elem.reply->setError(QModbusReply::ReplyAbortedError,
+                                 QModbusClient::tr("Reply aborted due to connection closure."));
+        }
     }
 
     QTcpSocket *m_socket = Q_NULLPTR;
