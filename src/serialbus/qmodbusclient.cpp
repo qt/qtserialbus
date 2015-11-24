@@ -233,7 +233,7 @@ QModbusReply *QModbusClientPrivate::sendRequest(const QModbusRequest &request, i
         return Q_NULLPTR;
     }
 
-    if (!unit)
+    if (unit)
         return enqueueRequest(request, serverAddress, *unit, QModbusReply::Common);
     return enqueueRequest(request, serverAddress, QModbusDataUnit(), QModbusReply::Raw);
 }
