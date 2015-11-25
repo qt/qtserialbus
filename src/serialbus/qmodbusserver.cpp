@@ -922,12 +922,12 @@ QModbusResponse QModbusServerPrivate::processGetCommEventLogRequest(const QModbu
     const quint16 deviceBusy = tmp.value<quint16>();
 
     m_commEventLog.normalizeIndexes();
-    QVector<quint16> eventLog(m_commEventLog.count());
+    QVector<quint8> eventLog(m_commEventLog.count());
     for (int i = 0; i < m_commEventLog.count(); ++i)
         eventLog[i] = m_commEventLog[i];
 
     // 6 -> 3 x 2 Bytes (Status, Event Count and Message Count)
-    return QModbusResponse(request.functionCode(), quint8(m_commEventLog.count() + 6), deviceBusy,
+    return QModbusResponse(request.functionCode(), quint8(eventLog.count() + 6), deviceBusy,
         m_counters[Counter::CommEvent], m_counters[Counter::BusMessage], eventLog);
 }
 
