@@ -1,12 +1,20 @@
-QT       += core gui serialbus widgets
+QT += serialbus widgets
 
 TARGET = modbusmaster
 TEMPLATE = app
 CONFIG += c++11
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+        settingsdialog.cpp \
+        writeregistermodel.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+         settingsdialog.h \
+        writeregistermodel.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+         settingsdialog.ui
+
+RESOURCES += \
+    master.qrc

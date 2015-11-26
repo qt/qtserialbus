@@ -39,53 +39,63 @@
 
 #include <QtSerialBus/qserialbusglobal.h>
 #include <QtSerialBus/qmodbusdataunit.h>
-
-#include <QtCore/qobject.h>
-#include <QtCore/qiodevice.h>
-
+#include <QtSerialBus/qmodbuspdu.h>
 
 QT_BEGIN_NAMESPACE
+
+class QModbusReplyPrivate;
 
 class Q_SERIALBUS_EXPORT QModbusReply : public QObject
 {
     Q_OBJECT
-public:
-    enum RequestError {
-        NoError,
-        IllegalFunction,
-        IllegalDataAddress,
-        IllegalDataValue,
-        SlaveFailure,
-        Acknowledge,
-        SlaveBusy,
-        MemoryParity,
-        GatewayUnavailable,
-        NoResponse,
-        InvalidCRC,
-        InvalidError
-    };
-    explicit QModbusReply(QObject *parent = 0);
+    Q_DECLARE_PRIVATE(QModbusReply)
 
-    RequestError error() const;
-    QString errorString() const;
+public:
+    enum ReplyType {
+        Raw,
+        Common
+    };
+    Q_ENUMS(ReplyType)
+
+    enum ReplyError {
+        NoError =               0x00,
+        ProtocolError =         0x01,
+        TimeoutError =          0x02,
+        ReplyAbortedError =     0x03,
+        UnknownError =          0x04,
+        WriteError =            0x05
+    };
+    Q_ENUMS(ReplyError)
+
+    QModbusReply(ReplyType type, int serverAddress, QObject *parent = Q_NULLPTR);
+
+    ReplyType type() const;
+    int serverAddress() const;
+
     bool isFinished() const;
-    bool isRunning() const;
-    QList<QModbusDataUnit> result() const;
+
+    QModbusDataUnit result() const;
+    QModbusResponse rawResult() const;
+
+    ReplyError error() const;
+    QString errorText() const;
+
+    void setResult(const QModbusDataUnit &unit);
+    void setRawResult(const QModbusResponse &unit);
+
+    void setFinished(bool isFinished);
+    void setError(QModbusReply::ReplyError error, const QString &errorText);
 
 Q_SIGNALS:
-    void errorOccurred(RequestError code);
     void finished();
-
-protected:
-    virtual void setFinished() = 0;
-    virtual void setError(RequestError errorCode, const QString &errorString) = 0;
-
-    RequestError errorType;
-    QString errorText;
-    QList<QModbusDataUnit> payload;
-    bool finish;
+    void errorOccurred(QModbusReply::ReplyError error);
 };
 
+Q_DECLARE_TYPEINFO(QModbusReply::ReplyType, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(QModbusReply::ReplyError, Q_PRIMITIVE_TYPE);
+
 QT_END_NAMESPACE
+
+Q_DECLARE_METATYPE(QModbusReply::ReplyError)
 
 #endif // QMODBUSREPLY_H

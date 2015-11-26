@@ -38,7 +38,9 @@
 #include "qmodbusserver_p.h"
 #include "qmodbus_symbols_p.h"
 
+#include <QtCore/qdebug.h>
 #include <QtCore/qloggingcategory.h>
+
 #include <bitset>
 
 QT_BEGIN_NAMESPACE
@@ -55,12 +57,36 @@ Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
     Modbus networks can have multiple Modbus servers. Modbus Servers are read/written by a
     Modbus client represented by \l QModbusClient. QModbusServer communicates with a Modbus
     backend, providing users with a convenient API.
+*/
 
- */
+/*!
+    \enum QModbusServer::Option
+
+    Each Modbus server has a set of values associated with it, each with its own option.
+
+    The general purpose options (and the associated types) are:
+
+    \value DiagnosticRegister       The diagnostic register of the server. \c quint16
+    \value ExceptionStatusOffset    The exception status byte offset of the server. \c quint16
+    \value DeviceBusy               Flag to signal the server is engaged in processing a
+                                    long-duration program command. \c quint16
+    \value AsciiInputDelimiter      The Modbus ASCII end of message delimiter. \c char
+    \value ListenOnlyMode           Flag to set listen only mode of the server. \c bool
+    \value ServerIdentifier         The identifier of the server, \b not the server address. \c quint8
+    \value RunIndicatorStatus       The run indicator of the server. \c quint8
+    \value AdditionalData           The additional data of the server. \c QByteArray
+
+    User options:
+
+    \value UserOption               The first option that can be used for user-specific purposes.
+
+    For user options, it is up to the developer to decide which types to use and ensure that
+    components use the correct types when accessing and setting values.
+*/
 
 /*!
     Constructs a Modbus server with the specified \a parent.
- */
+*/
 QModbusServer::QModbusServer(QObject *parent) :
     QModbusDevice(*new QModbusServerPrivate, parent)
 {
@@ -75,7 +101,7 @@ QModbusServer::~QModbusServer()
 
 /*!
     \internal
- */
+*/
 QModbusServer::QModbusServer(QModbusServerPrivate &dd, QObject *parent) :
     QModbusDevice(dd, parent)
 {
@@ -89,103 +115,272 @@ QModbusServer::QModbusServer(QModbusServerPrivate &dd, QObject *parent) :
     entries is setup.
 
     \note Calling this function discards any register value that was previously set.
- */
+*/
 bool QModbusServer::setMap(const QModbusDataUnitMap &map)
 {
     return d_func()->setMap(map);
 }
 
 /*!
-    Sets the slave address for this modbus server instance.
+    Sets the address for this Modbus server instance to \a serverAddress.
 
-    \sa slaveAddress()
+    \sa serverAddress()
 */
-void QModbusServer::setSlaveAddress(int slaveAddress)
+void QModbusServer::setServerAddress(int serverAddress)
 {
     Q_D(QModbusServer);
-    d->m_slaveAddress = slaveAddress;
+    d->m_serverAddress = serverAddress;
 }
 
 /*!
-    Returns the slave address of this modbus server instance.
+    Returns the address of this Mobus server instance.
 
-    The purpose of the slave address is to identify the modbus server
-    that is responsible for a client request.
+    \sa setServerAddress()
 */
-int QModbusServer::slaveAddress() const
+int QModbusServer::serverAddress() const
 {
     Q_D(const QModbusServer);
 
-    return d->m_slaveAddress;
+    return d->m_serverAddress;
 }
 
 /*!
-    Sets the diagnostic register value of the server in a device specific
-    encoding. The bit values of the register need device specific documentation.
+    Returns the value for \a option or an invalid \c QVariant if the option is
+    not set.
 
-    \sa diagnosticRegister()
+    \table
+        \header
+            \li Option
+            \li Description
+        \row
+            \li \l QModbusServer::DiagnosticRegister
+            \li Returns the diagnostic register value of the server. The
+                diagnostic register contains device specific contents where
+                each bit has a specific meaning.
+        \row
+            \li \l QModbusServer::ExceptionStatusOffset
+            \li Returns the offset address of the exception status byte
+                location in the coils register.
+        \row
+            \li \l QModbusServer::DeviceBusy
+            \li Returns a flag that signals if the server is engaged in
+                processing a long-duration program command.
+        \row
+            \li \l QModbusServer::AsciiInputDelimiter
+            \li Returns a end of message delimiter of Modbus ASCII messages.
+        \row
+            \li \l QModbusServer::ListenOnlyMode
+            \li Returns the server's listen only state. Messages are monitored
+                but no response will be sent.
+        \row
+            \li \l QModbusServer::ServerIdentifier
+            \li Returns the server manufacturer's identifier code. This can be
+                an arbitrary value in the range of \c 0x00 to 0xff.
+        \row
+            \li \l QModbusServer::RunIndicatorStatus
+            \li Returns the server's run indicator status. This data is used as
+                addendum by the \l QModbusPdu::ReportServerId function code.
+        \row
+            \li \l QModbusServer::AdditionalData
+            \li Returns the server's additional data. This data is used as
+                addendum by the \l QModbusPdu::ReportServerId function code.
+        \row
+            \li \l QModbusServer::UserOption
+            \li Returns the value of a user option.
+
+                \note For user options, it is up to the developer to decide
+                which types to use and ensure that components use the correct
+                types when accessing and setting values.
+    \endtable
 */
-void QModbusServer::setDiagnosticRegister(quint16 value)
-{
-    Q_D(QModbusServer);
-    d->m_diagnosticRegister = value;
-}
-
-/*!
-    Returns the diagnostic register value of the server.
-
-    The diagnostic register contains device-specific contents where each bit
-    has a specific meaning.
-
-    \sa setDiagnosticRegister()
-**/
-quint16 QModbusServer::diagnosticRegister() const
+QVariant QModbusServer::value(int option) const
 {
     Q_D(const QModbusServer);
 
-    return d->m_diagnosticRegister;
+    switch (option) {
+        case DiagnosticRegister:
+            return d->m_serverOptions.value(option, quint16(0x0000));
+        case ExceptionStatusOffset:
+            return d->m_serverOptions.value(option, quint16(0x0000));
+        case DeviceBusy:
+            return d->m_serverOptions.value(option, quint16(0x0000));
+        case AsciiInputDelimiter:
+            return d->m_serverOptions.value(option, '\n');
+        case ListenOnlyMode:
+            return d->m_serverOptions.value(option, false);
+        case ServerIdentifier:
+            return d->m_serverOptions.value(option, quint8(0x0a));
+        case RunIndicatorStatus:
+            return d->m_serverOptions.value(option, quint8(0xff));
+        case AdditionalData:
+            return d->m_serverOptions.value(option, QByteArray("Qt Modbus Server"));
+    };
+
+    if (option < UserOption)
+        return QVariant();
+
+    return d->m_serverOptions.value(option, QVariant());
 }
 
 /*!
-    Sets the continue on error flag of the server according to \a value.
-    If \a value is \c true, the server keeps answering requests even if
-    communication errors have been detected, otherwise stops responding to
-    requests. The flag can be reset externally using a diagnostics function code
-    (0x08) request with subfunction code 01, Restart Communications Option, where
-    the data field corresponds to:
+    Sets the \a newValue for \a option and returns \c true on success; \c false
+    otherwise.
 
-    \list
-    \li 0x0000 = Continue on error set to \c true
-    \li 0xFF00 = Continue on error set to \c false (equals stop on error)
-    \endlist
+    \note If the option's associated type is \c quint8 or \c quint16 and the
+    type of \a newValue is larger, the data will be truncated or conversation
+    will fail.
 
-    By default the continue on error flag is set to \c true.
+    \table
+        \header
+            \li Key
+            \li Description
+        \row
+            \li \l QModbusServer::DiagnosticRegister
+            \li Sets the diagnostic register of the server in a device specific
+                encoding to \a newValue. The default value preset is \c 0x0000.
+                The bit values of the register need device specific documentation.
+        \row
+            \li \l QModbusServer::ExceptionStatusOffset
+            \li Sets the exception status byte offset of the server to
+                \a newValue which is the absolute offset address in the coils
+                (0x register). Modbus register table starting with \c 0x0000h.
+                The default value preset is \c 0x0000, using the exception
+                status coils similar to Modicon 984 CPUs (coils 1-8).
 
-    \sa continueOnError()
+                The function returns \c true if the coils register contains the
+                8 bits required for storing and retrieving the status coils,
+                otherwise \c false.
+        \row
+            \li \l QModbusServer::DeviceBusy
+            \li Sets a flag that signals that the server is engaged in
+                processing a long-duration program command. Valid values are
+                \c 0x0000 (not busy) and \c 0xffff (busy).
+                The default value preset is \c 0x0000.
+        \row
+            \li \l QModbusServer::AsciiInputDelimiter
+            \li The \a newValue becomes the end of message delimiter for future
+                Modbus ASCII messages. The default value preset is \c {\n}.
+        \row
+            \li \l QModbusServer::ListenOnlyMode
+            \li Ss the server's listen only state to \a newValue. If listen only
+                mode is set to \c true, messages are monitored but no response
+                will be sent. The default value preset is \c false.
+        \row
+            \li \l QModbusServer::ServerIdentifier
+            \li Sets the server's manufacturer identifier to \a newValue.
+                Possible values are in the range of \c 0x00 to 0xff.
+                The default value preset is \c 0x0a.
+        \row
+            \li \l QModbusServer::RunIndicatorStatus
+            \li Sets the servers' run indicator status to \a newValue. This
+                data is used as addendum by the \l QModbusPdu::ReportServerId
+                function code. Valid values are \c 0x00 (OFF) and \c 0xff (ON).
+                The default value preset is \c 0xff (ON).
+        \row
+            \li \l QModbusServer::AdditionalData
+            \li Sets the server's additional data to \a newValue. This data is
+                used as addendum by the \l QModbusPdu::ReportServerId function
+                code. The maximum data size cannot exceed 249 bytes to match
+                response message size restrictions.
+                The default value preset is \c {Qt Modbus Server}.
+        \row
+            \li \l QModbusServer::UserOption
+            \li Sets the value of a user option to \a newValue.
+
+                \note For user options, it is up to the developer to decide
+                which types to use and ensure that components use the correct
+                types when accessing and setting values.
+    \endtable
 */
-void QModbusServer::setContinueOnError(bool value)
+bool QModbusServer::setValue(int option, const QVariant &newValue)
 {
+#define CHECK_INT_OR_UINT(val) \
+    do { \
+        if ((val.type() != QVariant::Int) && (val.type() != QVariant::UInt)) \
+            return false; \
+    } while (0)
+
     Q_D(QModbusServer);
-    d->m_continueOnError = value;
+    switch (option) {
+    case DiagnosticRegister:
+        CHECK_INT_OR_UINT(newValue);
+        d->m_serverOptions.insert(option, newValue);
+        return true;
+    case ExceptionStatusOffset: {
+        CHECK_INT_OR_UINT(newValue);
+        const quint16 tmp = newValue.value<quint16>();
+        QModbusDataUnit coils(QModbusDataUnit::Coils, tmp, 8);
+        if (!data(&coils))
+            return false;
+        d->m_serverOptions.insert(option, tmp);
+        return true;
+    }
+    case DeviceBusy: {
+        CHECK_INT_OR_UINT(newValue);
+        const quint16 tmp = newValue.value<quint16>();
+        if ((tmp != 0x0000) && (tmp != 0xffff))
+            return false;
+        d->m_serverOptions.insert(option, tmp);
+        return true;
+    }
+    case AsciiInputDelimiter: {
+        CHECK_INT_OR_UINT(newValue);
+        bool ok = false;
+        if (newValue.toUInt(&ok) > 0xff || !ok)
+            return false;
+        d->m_serverOptions.insert(option, newValue);
+        return true;
+    }
+    case ListenOnlyMode: {
+        if (newValue.type() != QVariant::Bool)
+            return false;
+        d->m_serverOptions.insert(option, newValue);
+        return true;
+    }
+    case ServerIdentifier:
+        CHECK_INT_OR_UINT(newValue);
+        d->m_serverOptions.insert(option, newValue);
+        return true;
+    case RunIndicatorStatus: {
+        CHECK_INT_OR_UINT(newValue);
+        const quint8 tmp = newValue.value<quint8>();
+        if ((tmp != 0x00) && (tmp != 0xff))
+            return false;
+        d->m_serverOptions.insert(option, tmp);
+        return true;
+    }
+    case AdditionalData: {
+        if (newValue.type() != QVariant::ByteArray)
+            return false;
+        const QByteArray additionalData = newValue.toByteArray();
+        if (additionalData.size() > 249)
+            return false;
+        d->m_serverOptions.insert(option, additionalData);
+        return true;
+    }
+    default:
+        break;
+    };
+
+    if (option < UserOption)
+        return false;
+    d->m_serverOptions.insert(option, newValue);
+    return true;
+
+#undef CHECK_INT_OR_UINT
 }
 
 /*!
-    Returns the continue on error flag of the server.
+    \fn bool QModbusServer::processesBroadcast() const
 
-    If the returned value is \c true, communication requests are responded to even
-    if errors in the communication handling were detected. If \c false is returned,
-    the server is in stop on error mode and does not answer client requests.
+    Subclasses should implement this function if the transport layer shall handle broadcasts.
+    The implementation then should return \c true if the currently processed request is a
+    broadcast request; otherwise \c false. The default implementation returns always \c false.
 
-    The default value of the continue on error flag is set to true.
-
-    \sa setContinueOnError()
+    \note The return value of this function only makes sense from within processRequest() or
+    processPrivateRequest(), otherwise it can only tell that the last request processed
+    was a broadcast request.
 */
-bool QModbusServer::continueOnError()
-{
-    Q_D(const QModbusServer);
-
-    return d->m_continueOnError;
-}
 
 /*!
     Reads data stored in the Modbus server. A Modbus server has four tables (\a table) and each
@@ -194,42 +389,15 @@ bool QModbusServer::continueOnError()
     Returns \c false if address is outside of the map range or the register type is not even defined.
 
     \sa QModbusDataUnit::RegisterType, setData()
- */
-bool QModbusServer::data(QModbusDataUnit::RegisterType table,
-                         quint16 address, quint16 *data) const
+*/
+bool QModbusServer::data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data) const
 {
-    Q_D(const QModbusServer);
-    if (!data)
-        return false;
-
-    const QModbusDataUnit *unit;
-
-    switch (table) {
-    case QModbusDataUnit::Invalid:
-        return false;
-    case QModbusDataUnit::DiscreteInputs:
-        unit = &(d->m_discreteInputs);
-        break;
-    case QModbusDataUnit::Coils:
-        unit = &(d->m_coils);
-        break;
-    case QModbusDataUnit::InputRegisters:
-        unit = &(d->m_inputRegisters);
-        break;
-    case QModbusDataUnit::HoldingRegisters:
-        unit = &(d->m_holdingRegisters);
-        break;
+    QModbusDataUnit unit(table, address, 1u);
+    if (data && readData(&unit)) {
+        *data = unit.value(0);
+        return true;
     }
-
-    if (!unit->isValid()
-        || address < unit->startAddress()
-        || address >= (unit->startAddress() + unit->valueCount())) {
-        return false;
-    }
-
-    *data = unit->value(address);
-
-    return true;
+    return false;
 }
 
 /*!
@@ -241,55 +409,10 @@ bool QModbusServer::data(QModbusDataUnit::RegisterType table,
 
     If \a newData contains a valid register type but a negative start address
     the entire register map is returned and \a newData appropriately sized.
- */
+*/
 bool QModbusServer::data(QModbusDataUnit *newData) const
 {
-    Q_D(const QModbusServer);
-
-    if (!newData)
-        return false;
-
-    const QModbusDataUnit *current;
-
-    switch (newData->registerType()) {
-    case QModbusDataUnit::Invalid:
-        return false;
-    case QModbusDataUnit::DiscreteInputs:
-        current = &(d->m_discreteInputs);
-        break;
-    case QModbusDataUnit::Coils:
-        current = &(d->m_coils);
-        break;
-    case QModbusDataUnit::InputRegisters:
-        current = &(d->m_inputRegisters);
-        break;
-    case QModbusDataUnit::HoldingRegisters:
-        current = &(d->m_holdingRegisters);
-        break;
-    }
-
-    if (newData->startAddress() < 0) { //return entire map for given type
-        *newData = *current;
-        return true;
-    }
-
-    //check range start is within internal map range
-    int internalRangeEndAddress = current->startAddress() + current->valueCount() - 1;
-    if (newData->startAddress() < current->startAddress()
-        || newData->startAddress() > internalRangeEndAddress) {
-        return false;
-    }
-
-    //check range end is within internal map range
-    int rangeEndAddress = newData->startAddress() + newData->valueCount() - 1;
-    if (rangeEndAddress < current->startAddress()
-        || rangeEndAddress > internalRangeEndAddress) {
-        return false;
-    }
-
-    newData->setValues(current->values().mid(newData->startAddress(),
-                                             newData->valueCount()));
-    return true;
+    return readData(newData);
 }
 
 /*!
@@ -302,43 +425,10 @@ bool QModbusServer::data(QModbusDataUnit *newData) const
     returns \c true in such cases.
 
     \sa QModbusDataUnit::RegisterType, data(), dataWritten()
- */
-
-bool QModbusServer::setData(QModbusDataUnit::RegisterType table,
-                            quint16 address, quint16 data)
+*/
+bool QModbusServer::setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data)
 {
-    Q_D(QModbusServer);
-    QModbusDataUnit* unit;
-
-    switch (table) {
-    case QModbusDataUnit::Invalid:
-        return false;
-    case QModbusDataUnit::DiscreteInputs:
-        unit = &(d->m_discreteInputs);
-        break;
-    case QModbusDataUnit::Coils:
-        unit = &(d->m_coils);
-        break;
-    case QModbusDataUnit::InputRegisters:
-        unit = &(d->m_inputRegisters);
-        break;
-    case QModbusDataUnit::HoldingRegisters:
-        unit = &(d->m_holdingRegisters);
-        break;
-    }
-
-    if (!unit->isValid()
-        || address < unit->startAddress()
-        || address >= (unit->startAddress() + unit->valueCount())) {
-        return false;
-    }
-
-    if (unit->value(address) != data) {
-        unit->setValue(address, data);
-        emit dataWritten(table, address, 1);
-    }
-
-    return true;
+    return writeData(QModbusDataUnit(table, address, QVector<quint16>() << data));
 }
 
 /*!
@@ -351,136 +441,175 @@ bool QModbusServer::setData(QModbusDataUnit::RegisterType table,
     register already. Nevertheless this function returns \c true in such cases.
 
     \sa data()
- */
-
+*/
 bool QModbusServer::setData(const QModbusDataUnit &newData)
 {
+    return writeData(newData);
+}
+
+/*!
+    Writes \a newData to the Modbus server map. Returns \c true on success,
+    or \c false if the \a newData range is outside of the map range or the
+    registerType() does not exist.
+
+    \note Sub-classes that implement writing to a different backing store
+    then default one, also need to implement setMap() and readData(). The
+    dataWritten() signal needs to be emitted from within the functions
+    implementation as well.
+
+    \sa setMap(), readData(), dataWritten()
+*/
+bool QModbusServer::writeData(const QModbusDataUnit &newData)
+{
     Q_D(QModbusServer);
-
-    QModbusDataUnit *current = Q_NULLPTR;
-
-    switch (newData.registerType()) {
-    case QModbusDataUnit::Invalid:
-        return false;
-    case QModbusDataUnit::DiscreteInputs:
-        current = &(d->m_discreteInputs);
-        break;
-    case QModbusDataUnit::Coils:
-        current = &(d->m_coils);
-        break;
-    case QModbusDataUnit::InputRegisters:
-        current = &(d->m_inputRegisters);
-        break;
-    case QModbusDataUnit::HoldingRegisters:
-        current = &(d->m_holdingRegisters);
-        break;
-    }
-
-    if (!current->isValid())
+    if (!d->m_modbusDataUnitMap.contains(newData.registerType()))
         return false;
 
-    //check range start is within internal map range
-    int internalRangeEndAddress = current->startAddress() + current->valueCount() - 1;
-    if (newData.startAddress() < current->startAddress()
+    QModbusDataUnit &current = d->m_modbusDataUnitMap[newData.registerType()];
+    if (!current.isValid())
+        return false;
+
+    // check range start is within internal map range
+    int internalRangeEndAddress = current.startAddress() + current.valueCount() - 1;
+    if (newData.startAddress() < current.startAddress()
         || newData.startAddress() > internalRangeEndAddress) {
         return false;
     }
 
-    //check range end is within internal map range
+    // check range end is within internal map range
     int rangeEndAddress = newData.startAddress() + newData.valueCount() - 1;
-    if (rangeEndAddress < current->startAddress()
-        || rangeEndAddress > internalRangeEndAddress) {
+    if (rangeEndAddress < current.startAddress() || rangeEndAddress > internalRangeEndAddress)
         return false;
-    }
 
     bool changeRequired = false;
-    for (int i = newData.startAddress();
-         i < newData.startAddress() + int(newData.valueCount()); i++) {
+    for (int i = newData.startAddress(); i <= rangeEndAddress; i++) {
         quint16 newValue = newData.value(i - newData.startAddress());
-        if (current->value(i) != newValue) {
-            current->setValue(i, newValue);
-            changeRequired = true;
-        }
+        changeRequired |= (current.value(i) != newValue);
+        current.setValue(i, newValue);
     }
 
     if (changeRequired)
-        emit dataWritten(newData.registerType(),
-                         newData.startAddress(),
-                         newData.valueCount());
-
+        emit dataWritten(newData.registerType(), newData.startAddress(), newData.valueCount());
     return true;
 }
 
 /*!
-    \fn int QModbusServer::slaveAddress() const
-    Multiple Modbus devices can be connected together on the same physical link.
-    Slave address is a unique identifier that each Modbus server must have, and it is used
-    to filter out incoming messages.
+    Reads the values in the register range given by \a newData and writes the
+    data back to \a newData. Returns \c true on success or \c false if
+    \a newData is \c 0, the \a newData range is outside of the map range or the
+    registerType() does not exist.
 
-    Returns slave address.
+    \note Sub-classes that implement reading from a different backing store
+    then default one, also need to implement setMap() and writeData().
 
-    \sa setSlaveAddress()
- */
+    \sa setMap(), writeData()
+*/
+bool QModbusServer::readData(QModbusDataUnit *newData) const
+{
+    Q_D(const QModbusServer);
+
+    if ((!newData) || (!d->m_modbusDataUnitMap.contains(newData->registerType())))
+        return false;
+
+    const QModbusDataUnit &current = d->m_modbusDataUnitMap.value(newData->registerType());
+    if (!current.isValid())
+        return false;
+
+     // return entire map for given type
+    if (newData->startAddress() < 0) {
+        *newData = current;
+        return true;
+    }
+
+    // check range start is within internal map range
+    int internalRangeEndAddress = current.startAddress() + current.valueCount() - 1;
+    if (newData->startAddress() < current.startAddress()
+        || newData->startAddress() > internalRangeEndAddress) {
+        return false;
+    }
+
+    // check range end is within internal map range
+    const int rangeEndAddress = newData->startAddress() + newData->valueCount() - 1;
+    if (rangeEndAddress < current.startAddress() || rangeEndAddress > internalRangeEndAddress)
+        return false;
+
+    newData->setValues(current.values().mid(newData->startAddress(), newData->valueCount()));
+    return true;
+}
 
 /*!
-    \fn void QModbusServer::setSlaveAddress(int slaveAddress)
-    Multiple Modbus devices can be connected together on the same physical link.
-    So it is important that each server is identified by a unique id.
-
-    Sets \a slaveAddress as slave address.
-
-    \sa slaveAddress()
- */
-
-/*!
-    \fn void QModbusServer::dataWritten(QModbusDataUnit::RegisterType table, int address, int size)
+    \fn void QModbusServer::dataWritten(QModbusDataUnit::RegisterType register, int address, int size)
 
     This signal is emitted when a Modbus client has written one or more fields of data to the
     Modbus server. The signal contains information about the fields that were written:
     \list
-     \li \a register type that was written,
-     \li \a address of the first field that was written,
-     \li and \a amount of consecutive fields that were written starting from \a address.
+        \li \a register type that was written,
+        \li \a address of the first field that was written,
+        \li and \a size of consecutive fields that were written starting from \a address.
     \endlist
 
     The signal is not emitted when the to-be-written fields have not changed
     due to no change in value.
- */
+*/
 
-/*
+/*!
     Processes a Modbus client \a request and returns a Modbus response.
+    This function returns a \l QModbusResponse or \l QModbusExceptionResponse depending
+    on the nature of the request.
+
+    The default implementation of this function handles all standard Modbus
+    function codes as defined by the Modbus Application Protocol Specification 1.1b.
+    All other Modbus function codes not included in the specification are forwarded to
+    \l processPrivateRequest().
+
+    The default handling of the standard Modbus function code requests can be overwritten
+    by reimplementing this function. The override must handle the request type
+    in question and return the appropriate \l QModbusResponse. A common reason might be to
+    filter out function code requests for data values to limit read/write access and
+    function codes not desired in particular implementations such as serial line diagnostics
+    on ethernet or Modbus Plus transport layers. Every other request type should be
+    forwarded to this default implementation.
+
+    \note This function should not be overridden to provide a custom implementation for
+    non-standard Modbus request types.
+
+    \sa processPrivateRequest()
 */
 QModbusResponse QModbusServer::processRequest(const QModbusPdu &request)
 {
     return d_func()->processRequest(request);
 }
 
-/*
-    To be implemented by custom Modbus server implementation. The default implementation returns
-    a \c QModbusExceptionResponse with the \a request function code and error code set to illegal
-    function.
+/*!
+    This function should be implemented by custom Modbus servers. It is
+    called by \l processRequest() if the given \a request is not a standard
+    Modbus request.
+
+    Overwriting this function allows handling of additional function codes and
+    subfunction-codes not specified in the Modbus Application Protocol
+    Specification 1.1b. Reimplementations should call this function again to
+    ensure an exception response is returned for all unknown function codes the
+    custom Modbus implementation does not handle.
+
+    This default implementation returns a \c QModbusExceptionResponse with the
+    \a request function code and error code set to illegal function.
+
+    \sa processRequest()
 */
-QModbusResponse QModbusServer::processPrivateModbusRequest(const QModbusPdu &request)
+QModbusResponse QModbusServer::processPrivateRequest(const QModbusPdu &request)
 {
     return QModbusExceptionResponse(request.functionCode(),
         QModbusExceptionResponse::IllegalFunction);
 }
 
-
 // -- QModbusServerPrivate
 
 bool QModbusServerPrivate::setMap(const QModbusDataUnitMap &map)
 {
-    m_discreteInputs = map.value(QModbusDataUnit::DiscreteInputs);
-    m_coils = map.value(QModbusDataUnit::Coils);
-    m_inputRegisters = map.value(QModbusDataUnit::InputRegisters);
-    m_holdingRegisters = map.value(QModbusDataUnit::HoldingRegisters);
+    m_modbusDataUnitMap = map;
     return true;
 }
 
-/*
-    TODO: implement
-*/
 QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
 {
     switch (request.functionCode()) {
@@ -497,351 +626,314 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
     case QModbusRequest::WriteSingleRegister:
         return processWriteSingleRegisterRequest(request);
     case QModbusRequest::ReadExceptionStatus:
+        return processReadExceptionStatusRequest(request);
     case QModbusRequest::Diagnostics:
-        return processDiagnostics(request);
+        return processDiagnosticsRequest(request);
     case QModbusRequest::GetCommEventCounter:
+        return processGetCommEventCounterRequest(request);
     case QModbusRequest::GetCommEventLog:
+        return processGetCommEventLogRequest(request);
     case QModbusRequest::WriteMultipleCoils:
         return processWriteMultipleCoilsRequest(request);
     case QModbusRequest::WriteMultipleRegisters:
         return processWriteMultipleRegistersRequest(request);
     case QModbusRequest::ReportServerId:
-    case QModbusRequest::ReadFileRecord:
-    case QModbusRequest::WriteFileRecord:
+        return processReportServerIdRequest(request);
+    case QModbusRequest::ReadFileRecord:    // TODO: Implement.
+    case QModbusRequest::WriteFileRecord:   // TODO: Implement.
+        return q_func()->processPrivateRequest(request);
     case QModbusRequest::MaskWriteRegister:
+        return processMaskWriteRegisterRequest(request);
     case QModbusRequest::ReadWriteMultipleRegisters:
         return processReadWriteMultipleRegistersRequest(request);
     case QModbusRequest::ReadFifoQueue:
-    case QModbusRequest::EncapsulatedInterfaceTransport:
+        return processReadFifoQueueRequest(request);
+    case QModbusRequest::EncapsulatedInterfaceTransport:    // TODO: Implement.
     default:
         break;
     }
-    return q_func()->processPrivateModbusRequest(request);
+    return q_func()->processPrivateRequest(request);
 }
+
+#define CHECK_SIZE_EQUALS(req) \
+    do { \
+        if (req.dataSize() != QModbusRequest::minimumDataSize(req.functionCode())) { \
+            qCDebug(QT_MODBUS) << "The request's data size does not equal the expected size."; \
+            return QModbusExceptionResponse(req.functionCode(), \
+                                            QModbusExceptionResponse::IllegalDataValue); \
+        } \
+    } while (0)
+
+#define CHECK_SIZE_LESS_THAN(req) \
+    do { \
+        if (req.dataSize() < QModbusRequest::minimumDataSize(req.functionCode())) { \
+            qCDebug(QT_MODBUS) << "The request's data size is less than the expected size."; \
+            return QModbusExceptionResponse(req.functionCode(), \
+                                            QModbusExceptionResponse::IllegalDataValue); \
+        } \
+    } while (0)
 
 QModbusResponse QModbusServerPrivate::processReadCoilsRequest(const QModbusRequest &request)
 {
-    // request data size corrupt
-    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
+    return readBits(request, QModbusDataUnit::Coils);
+}
 
-    quint16 address, numberOfCoils;
-    request.decodeData(&address, &numberOfCoils);
+QModbusResponse QModbusServerPrivate::processReadDiscreteInputsRequest(const QModbusRequest &rqst)
+{
+    return readBits(rqst, QModbusDataUnit::DiscreteInputs);
+}
 
-    if ((numberOfCoils < 0x0001) || (numberOfCoils > 0x07D0)) {
+QModbusResponse QModbusServerPrivate::readBits(const QModbusPdu &request,
+                                               QModbusDataUnit::RegisterType unitType)
+{
+    CHECK_SIZE_EQUALS(request);
+    quint16 address, count;
+    request.decodeData(&address, &count);
+
+    if ((count < 0x0001) || (count > 0x07D0)) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataValue);
     }
 
     // Get the requested range out of the registers.
-    QModbusDataUnit coils(QModbusDataUnit::Coils, address, numberOfCoils);
-    if (!q_func()->data(&coils)) {
+    QModbusDataUnit unit(unitType, address, count);
+    if (!q_func()->data(&unit)) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataAddress);
     }
 
-    quint8 byteCount = numberOfCoils / 8;
-    if ((numberOfCoils % 8) != 0) {
+    quint8 byteCount = count / 8;
+    if ((count % 8) != 0) {
         byteCount += 1;
         // If the range is not a multiple of 8, resize.
-        coils.setValueCount(byteCount * 8);
+        unit.setValueCount(byteCount * 8);
     }
 
     address = 0; // The data range now starts with zero.
     QVector<quint8> bytes;
     for (int i = 0; i < byteCount; ++i) {
         std::bitset<8> byte;
-        // According to the spec: If the returned output quantity is not a multiple of
-        // eight, the remaining bits in the final data byte will be padded with zeros.
+        // According to the spec: If the returned quantity is not a multiple of eight,
+        // the remaining bits in the final data byte will be padded with zeros.
         for (int currentBit = 0; currentBit < 8; ++currentBit)
-            byte[currentBit] = coils.value(address++); // The padding happens inside value().
+            byte[currentBit] = unit.value(address++); // The padding happens inside value().
         bytes.append(static_cast<quint8> (byte.to_ulong()));
     }
 
-    // TODO: Increase message counters when they are implemented
     return QModbusResponse(request.functionCode(), byteCount, bytes);
 }
 
-QModbusResponse QModbusServerPrivate::processReadDiscreteInputsRequest(
-        const QModbusRequest &request)
+QModbusResponse QModbusServerPrivate::processReadHoldingRegistersRequest(const QModbusRequest &rqst)
 {
-    // request data size corrupt
-    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
-
-    quint16 address, numberOfInputs;
-    request.decodeData(&address, &numberOfInputs);
-
-    if ((numberOfInputs < 0x0001) || (numberOfInputs > 0x07D0)) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
-
-    // Get the requested range out of the registers.
-    QModbusDataUnit inputs(QModbusDataUnit::DiscreteInputs, address, numberOfInputs);
-    if (!q_func()->data(&inputs)) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataAddress);
-    }
-
-    quint8 byteCount = numberOfInputs / 8;
-    if ((numberOfInputs % 8) != 0) {
-        byteCount += 1;
-        // If the range is not a multiple of 8, resize.
-        inputs.setValueCount(byteCount * 8);
-    }
-
-    address = 0; // The data range now starts with zero.
-    QVector<quint8> bytes;
-    for (int i = 0; i < byteCount; ++i) {
-        std::bitset<8> byte;
-        // According to the spec: If the returned input quantity is not a multiple of
-        // eight, the remaining bits in the final data byte will be padded with zeros.
-        for (int currentBit = 0; currentBit < 8; ++currentBit)
-            byte[currentBit] = inputs.value(address++); // The padding happens inside value().
-        bytes.append(static_cast<quint8> (byte.to_ulong()));
-    }
-
-    // TODO: Increase message counters when they are implemented
-    return QModbusResponse(request.functionCode(), byteCount, bytes);
+    return readBytes(rqst, QModbusDataUnit::HoldingRegisters);
 }
 
-QModbusResponse QModbusServerPrivate::processReadHoldingRegistersRequest(const QModbusRequest &request)
+QModbusResponse QModbusServerPrivate::processReadInputRegistersRequest(const QModbusRequest &rqst)
 {
-    // request data size corrupt
-    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
-
-    quint16 address, numberOfRegisters;
-    request.decodeData(&address, &numberOfRegisters);
-
-    if ((numberOfRegisters < 0x0001) || (numberOfRegisters > 0x007D)) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
-
-    // Get the requested range out of the registers.
-    QModbusDataUnit registers(QModbusDataUnit::HoldingRegisters, address, numberOfRegisters);
-    if (!q_func()->data(&registers)) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataAddress);
-    }
-
-    // TODO: Increase message counters when they are implemented
-    return QModbusResponse(request.functionCode(), quint8(numberOfRegisters * 2), registers.values());
+    return readBytes(rqst, QModbusDataUnit::InputRegisters);
 }
 
-QModbusResponse QModbusServerPrivate::processReadInputRegistersRequest(
-    const QModbusRequest &request)
+QModbusResponse QModbusServerPrivate::readBytes(const QModbusPdu &request,
+                                                QModbusDataUnit::RegisterType unitType)
 {
-    // request data size corrupt
-    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
+    CHECK_SIZE_EQUALS(request);
+    quint16 address, count;
+    request.decodeData(&address, &count);
 
-    quint16 address, numberOfRegisters;
-    request.decodeData(&address, &numberOfRegisters);
-
-    if ((numberOfRegisters < 0x0001) || (numberOfRegisters > 0x007D)) {
+    if ((count < 0x0001) || (count > 0x007D)) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataValue);
     }
 
     // Get the requested range out of the registers.
-    QModbusDataUnit registers(QModbusDataUnit::InputRegisters, address, numberOfRegisters);
-    if (!q_func()->data(&registers)) {
+    QModbusDataUnit unit(unitType, address, count);
+    if (!q_func()->data(&unit)) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataAddress);
     }
 
-    // TODO: Increase message counters when they are implemented
-    return QModbusResponse(request.functionCode(), quint8(numberOfRegisters * 2), registers.values());
+    return QModbusResponse(request.functionCode(), quint8(count * 2), unit.values());
 }
 
 QModbusResponse QModbusServerPrivate::processWriteSingleCoilRequest(const QModbusRequest &request)
 {
-    // request data size corrupt
-    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
+    return writeSingle(request, QModbusDataUnit::Coils);
+}
 
+QModbusResponse QModbusServerPrivate::processWriteSingleRegisterRequest(const QModbusRequest &rqst)
+{
+    return writeSingle(rqst, QModbusDataUnit::HoldingRegisters);
+}
+
+QModbusResponse QModbusServerPrivate::writeSingle(const QModbusPdu &request,
+                                                  QModbusDataUnit::RegisterType unitType)
+{
+    CHECK_SIZE_EQUALS(request);
     quint16 address, value;
     request.decodeData(&address, &value);
 
-    if ((value != Coil::Off) && (value != Coil::On)) {
+    if ((unitType == QModbusDataUnit::Coils) && ((value != Coil::Off) && (value != Coil::On))) {
         return QModbusExceptionResponse(request.functionCode(),
             QModbusExceptionResponse::IllegalDataValue);
     }
 
-    // Get the requested register.
-    QModbusDataUnit coils(QModbusDataUnit::Coils, address, 1u);
+    quint16 reg;   // Get the requested register, but deliberately ignore.
+    if (!q_func()->data(unitType, address, &reg)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataAddress);
+    }
+
+    if (!q_func()->setData(unitType, address, value)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::ServerDeviceFailure);
+    }
+
+    return QModbusResponse(request.functionCode(), address, value);
+}
+
+QModbusResponse QModbusServerPrivate::processReadExceptionStatusRequest(const QModbusRequest &request)
+{
+    CHECK_SIZE_EQUALS(request);
+
+    // Get the requested range out of the registers.
+    const QVariant tmp = q_func()->value(QModbusServer::ExceptionStatusOffset);
+    if (tmp.isNull() || (!tmp.isValid())) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::ServerDeviceFailure);
+    }
+    const quint16 exceptionStatusOffset = tmp.value<quint16>();
+    QModbusDataUnit coils(QModbusDataUnit::Coils, exceptionStatusOffset, 8);
     if (!q_func()->data(&coils)) {
         return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataAddress);
+                                        QModbusExceptionResponse::IllegalDataAddress);
     }
 
-    // Since we picked the coil at address, data range
-    // is now 1 and therefore index needs to be 0.
-    coils.setValue(0, value);
+    quint16 address = 0;
+    QVector<quint8> bytes;
+    std::bitset<8> byte;
+    for (int currentBit = 0; currentBit < 8; ++currentBit)
+        byte[currentBit] = coils.value(address++); // The padding happens inside value().
+    bytes.append(static_cast<quint8> (byte.to_ulong()));
 
-    if (!q_func()->setData(coils)) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::ServerDeviceFailure);
-    }
-
-    // - TODO: Increase message counters when they are implemented
-    return QModbusResponse(request.functionCode(), address, value);
+    return QModbusResponse(request.functionCode(), bytes);
 }
 
-QModbusResponse QModbusServerPrivate::processWriteSingleRegisterRequest(const QModbusRequest &request)
+QModbusResponse QModbusServerPrivate::processDiagnosticsRequest(const QModbusRequest &request)
 {
-    if (request.dataSize() != QModbusRequest::minimumDataSize(request.functionCode())) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
+#define CHECK_SIZE_AND_CONDITION(req, condition) \
+    CHECK_SIZE_EQUALS(req); \
+    do { \
+        if ((condition)) { \
+            return QModbusExceptionResponse(req.functionCode(), \
+                                            QModbusExceptionResponse::IllegalDataValue); \
+        } \
+    } while (0)
 
-    quint16 address, value;
-    request.decodeData(&address, &value);
+    quint16 subFunctionCode, data = 0xffff;
+    request.decodeData(&subFunctionCode, &data);
 
-    // Get the requested register.
-    QModbusDataUnit registers(QModbusDataUnit::HoldingRegisters, address, 1u);
-    if (!q_func()->data(&registers)) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataAddress);
-    }
-
-    // Since we picked the holding register at address, data range
-    // is now 1 and therefore index needs to be 0.
-    registers.setValue(0, value);
-
-    if (!q_func()->setData(registers)) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::ServerDeviceFailure);
-    }
-
-    // - TODO: Increase message counters when they are implemented
-    return QModbusResponse(request.functionCode(), address, value);
-}
-
-QModbusResponse QModbusServerPrivate::processDiagnostics(const QModbusRequest &request)
-{
-    quint16 subFunctionCode;
-    request.decodeData(&subFunctionCode);
-
-    if ((subFunctionCode > Diagnostics::ForceListenOnlyMode
-         && subFunctionCode < Diagnostics::ClearCountersAndDiagnosticRegister)
-         || (subFunctionCode > Diagnostics::ReturnBusCharacterOverrunCount)) {
-        return q_func()->processPrivateModbusRequest(request);
-    }
-
-    if (subFunctionCode == Diagnostics::ReturnQueryData) {
-        // note: we return an echo even if the data is empty as there is no minimum required
+    switch (subFunctionCode) {
+    case Diagnostics::ReturnQueryData:
         return QModbusResponse(request.functionCode(), request.data());
-    }
 
-    // all other sub-functions have two byte sub-function + 2 byte data
-    if (request.dataSize() != 4) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
+    case Diagnostics::RestartCommunicationsOption: {
+        CHECK_SIZE_AND_CONDITION(request, ((data != 0xff00) && (data != 0x0000)));
+        // Restarts the communication by closing the connection and re - opening.After closing,
+        // all communication counters are cleared and the listen only mode set to false.This
+        // function is the only way to remotely clear the listen only mode and bring the device
+        // back into communication. If data is 0xff00, the event log history is also cleared.
+        q_func()->disconnectDevice();
+        if (data == 0xff00)
+            m_commEventLog.clear();
 
-    if (subFunctionCode == Diagnostics::RestartCommunicationsOption) {
-        quint16 clearLog;
-        request.decodeData(&subFunctionCode, &clearLog);
-        if ((clearLog != 0xFF00) && (clearLog != 0x0000)) {
-            return QModbusExceptionResponse(request.functionCode(),
-                QModbusExceptionResponse::IllegalDataValue);
-        }
-        if (!restartCommunicationsOption(clearLog == 0xFF00)) {
+        resetCommunicationCounters();
+        q_func()->setValue(QModbusServer::ListenOnlyMode, false);
+        storeModbusCommEvent(QModbusCommEvent::InitiatedCommunicationRestart);
+
+        if (!q_func()->connectDevice()) {
             qCWarning(QT_MODBUS) << "Cannot restart server communication";
             return QModbusExceptionResponse(request.functionCode(),
                                             QModbusExceptionResponse::ServerDeviceFailure);
         }
         return QModbusResponse(request.functionCode(), request.data());
-    }
+    }   break;
 
-    if (subFunctionCode == Diagnostics::ChangeAsciiInputDelimiter) {
+    case Diagnostics::ChangeAsciiInputDelimiter: {
         const QByteArray data = request.data().mid(2, 2);
-        if (data[1] != 0x00) {
-            return QModbusExceptionResponse(request.functionCode(),
-                QModbusExceptionResponse::IllegalDataValue);
-        }
-        // TODO: this changes the variable asciiInputDelimiter only for now.
-        // cite PI-MBUS-300.pdf:
-        // The character ‘CHAR’ passed in the query data field becomes the end of message
-        // delimiter for future messages (replacing the default LF character). This function is
-        // useful in cases where a Line Feed is not wanted at the end of ASCII messages.
-        m_asciiInputDelimiter = data[0];
+        CHECK_SIZE_AND_CONDITION(request, (data[1] != 0x00));
+        q_func()->setValue(QModbusServer::AsciiInputDelimiter, data[0]);
         return QModbusResponse(request.functionCode(), request.data());
-    }
+    }   break;
 
-    // all other subfunctions require data = 0x0000
-    quint16 nullData;
-    request.decodeData(&subFunctionCode, &nullData);
-    if (nullData != 0x0000) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
-
-    switch (subFunctionCode) {
-    case Diagnostics::ReturnDiagnosticRegister:
-        return QModbusResponse(request.functionCode(), subFunctionCode,
-                               q_func()->diagnosticRegister());
     case Diagnostics::ForceListenOnlyMode:
-        m_listenOnly = true;
-        // TODO: this is a simple way of encoding the event byte. As we currently
-        // have no methods for the four types of event bytes to store, use this as
-        // a temporary way.
-        storeEvent(4u);
-        // TODO: this is only a dummy response. The response should not leave the server
-        // after setting the server into listen only mode (as with all responses
-        // when listenOnly == true)
-        return QModbusResponse(request.functionCode(), request.data());
+        CHECK_SIZE_AND_CONDITION(request, (data != 0x0000));
+        q_func()->setValue(QModbusServer::ListenOnlyMode, true);
+        storeModbusCommEvent(QModbusCommEvent::EnteredListenOnlyMode);
+        return QModbusResponse();
+
     case Diagnostics::ClearCountersAndDiagnosticRegister:
+        CHECK_SIZE_AND_CONDITION(request, (data != 0x0000));
+        // TODO: According to PI_MBUS_300 specification, the clearing of the diagnostic
+        // register is dependent on the device model. For legacy support to fulfill this
+        // requirement, a server configuration variable could be added to check if the
+        // diagnostic register should be cleared or not.
         resetCommunicationCounters();
-        // TODO: according to PI_MBUS_300 specification, the clearing of the diagnostic
-        // register is dependent on the device model. For legacy support to fullfill
-        // this requirement, a server configuration variable could be added to check
-        // if the diagnostic register should be cleared or not.
-        q_func()->setDiagnosticRegister(0u);
+        q_func()->setValue(QModbusServer::DiagnosticRegister, 0x0000);
         return QModbusResponse(request.functionCode(), request.data());
+
+    case Diagnostics::ReturnDiagnosticRegister:
     case Diagnostics::ReturnBusMessageCount:
-        return QModbusResponse(request.functionCode(), subFunctionCode, m_busMessageCounter);
     case Diagnostics::ReturnBusCommunicationErrorCount:
-        return QModbusResponse(request.functionCode(), subFunctionCode, m_crcErrorCounter);
     case Diagnostics::ReturnBusExceptionErrorCount:
-        return QModbusResponse(request.functionCode(), subFunctionCode, m_exceptionErrorCounter);
     case Diagnostics::ReturnServerMessageCount:
-        return QModbusResponse(request.functionCode(), subFunctionCode, m_serverMessageCounter);
     case Diagnostics::ReturnServerNoResponseCount:
-        return QModbusResponse(request.functionCode(), subFunctionCode, m_serverNoResponseCounter);
     case Diagnostics::ReturnServerNAKCount:
-        return QModbusResponse(request.functionCode(), subFunctionCode, m_serverNAKCounter);
     case Diagnostics::ReturnServerBusyCount:
-        return QModbusResponse(request.functionCode(), subFunctionCode, m_serverDeviceBusyCounter);
     case Diagnostics::ReturnBusCharacterOverrunCount:
-        return QModbusResponse(request.functionCode(), subFunctionCode, m_serverCharacterOverrunCounter);
-    default:
-        return q_func()->processPrivateModbusRequest(request);
+        CHECK_SIZE_AND_CONDITION(request, (data != 0x0000));
+        return QModbusResponse(request.functionCode(), subFunctionCode,
+                               m_counters[static_cast<Counter> (subFunctionCode)]);
     }
+    return q_func()->processPrivateRequest(request);
+
+#undef CHECK_SIZE_AND_CONDITION
+}
+
+QModbusResponse QModbusServerPrivate::processGetCommEventCounterRequest(const QModbusRequest &request)
+{
+    CHECK_SIZE_EQUALS(request);
+    const QVariant tmp = q_func()->value(QModbusServer::DeviceBusy);
+    if (tmp.isNull() || (!tmp.isValid())) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::ServerDeviceFailure);
+    }
+    const quint16 deviceBusy = tmp.value<quint16>();
+    return QModbusResponse(request.functionCode(), deviceBusy, m_counters[Counter::CommEvent]);
+}
+
+QModbusResponse QModbusServerPrivate::processGetCommEventLogRequest(const QModbusRequest &request)
+{
+    CHECK_SIZE_EQUALS(request);
+    const QVariant tmp = q_func()->value(QModbusServer::DeviceBusy);
+    if (tmp.isNull() || (!tmp.isValid())) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::ServerDeviceFailure);
+    }
+    const quint16 deviceBusy = tmp.value<quint16>();
+
+    m_commEventLog.normalizeIndexes();
+    QVector<quint16> eventLog(m_commEventLog.count());
+    for (int i = 0; i < m_commEventLog.count(); ++i)
+        eventLog[i] = m_commEventLog[i];
+
+    // 6 -> 3 x 2 Bytes (Status, Event Count and Message Count)
+    return QModbusResponse(request.functionCode(), quint8(m_commEventLog.count() + 6), deviceBusy,
+        m_counters[Counter::CommEvent], m_counters[Counter::BusMessage], eventLog);
 }
 
 QModbusResponse QModbusServerPrivate::processWriteMultipleCoilsRequest(const QModbusRequest &request)
 {
-    // request data size corrupt: 5 header + 1 minimum data byte required
-    if (request.dataSize() < QModbusRequest::minimumDataSize(request.functionCode())) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
-
+    CHECK_SIZE_LESS_THAN(request);
     quint16 address, numberOfCoils;
     quint8 byteCount;
     request.decodeData(&address, &numberOfCoils, &byteCount);
@@ -888,19 +980,13 @@ QModbusResponse QModbusServerPrivate::processWriteMultipleCoilsRequest(const QMo
             QModbusExceptionResponse::ServerDeviceFailure);
     }
 
-    // - TODO: Increase message counters when they are implemented
     return QModbusResponse(request.functionCode(), address, numberOfCoils);
 }
 
 QModbusResponse QModbusServerPrivate::processWriteMultipleRegistersRequest(
     const QModbusRequest &request)
 {
-    // request data size corrupt: 5 header + 2 minimum data byte required
-    if (request.dataSize() < QModbusRequest::minimumDataSize(request.functionCode())) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
-
+    CHECK_SIZE_LESS_THAN(request);
     quint16 address, numberOfRegisters;
     quint8 byteCount;
     request.decodeData(&address, &numberOfRegisters, &byteCount);
@@ -940,19 +1026,62 @@ QModbusResponse QModbusServerPrivate::processWriteMultipleRegistersRequest(
             QModbusExceptionResponse::ServerDeviceFailure);
     }
 
-    // - TODO: Increase message counters when they are implemented
     return QModbusResponse(request.functionCode(), address, numberOfRegisters);
+}
+
+QModbusResponse QModbusServerPrivate::processReportServerIdRequest(const QModbusRequest &request)
+{
+    CHECK_SIZE_EQUALS(request);
+
+    Q_Q(QModbusServer);
+
+    QByteArray data;
+    QVariant tmp = q->value(QModbusServer::ServerIdentifier);
+    if (tmp.isNull() || (!tmp.isValid())) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::ServerDeviceFailure);
+    }
+    data.append(tmp.value<quint8>());
+
+    tmp = q->value(QModbusServer::RunIndicatorStatus);
+    if (tmp.isNull() || (!tmp.isValid())) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::ServerDeviceFailure);
+    }
+    data.append(tmp.value<quint8>());
+
+    tmp = q->value(QModbusServer::AdditionalData);
+    if (!tmp.isNull() && tmp.isValid())
+        data.append(tmp.toByteArray());
+
+    data.prepend(data.size()); // byte count
+    return QModbusResponse(request.functionCode(), data);
+}
+
+QModbusResponse QModbusServerPrivate::processMaskWriteRegisterRequest(const QModbusRequest &request)
+{
+    CHECK_SIZE_EQUALS(request);
+    quint16 address, andMask, orMask;
+    request.decodeData(&address, &andMask, &orMask);
+
+    quint16 reg;
+    if (!q_func()->data(QModbusDataUnit::HoldingRegisters, address, &reg)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataAddress);
+    }
+
+    const quint16 result = (reg & andMask) | (orMask & (~ andMask));
+    if (!q_func()->setData(QModbusDataUnit::HoldingRegisters, address, result)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::ServerDeviceFailure);
+    }
+    return QModbusResponse(request.functionCode(), request.data());
 }
 
 QModbusResponse QModbusServerPrivate::processReadWriteMultipleRegistersRequest(
     const QModbusRequest &request)
 {
-    // request data size corrupt: 9 header + 2 minimum data byte required
-    if (request.dataSize() < QModbusRequest::minimumDataSize(request.functionCode())) {
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalDataValue);
-    }
-
+    CHECK_SIZE_LESS_THAN(request);
     quint16 readStartAddress, readQuantity, writeStartAddress, writeQuantity;
     quint8 byteCount;
     request.decodeData(&readStartAddress, &readQuantity,
@@ -1004,74 +1133,46 @@ QModbusResponse QModbusServerPrivate::processReadWriteMultipleRegistersRequest(
             QModbusExceptionResponse::IllegalDataAddress);
     }
 
-    // - TODO: Increase message counters when they are implemented
     return QModbusResponse(request.functionCode(), quint8(readQuantity * 2),
                            readRegisters.values());
 }
 
-/*!
-    \internal
-    Access function of the device for Modbus Diagnostic Function Code 0x08, Subcode 01
-    (0x08, 0x0001 hex)
-
-    Restarts the communication by closing the connection and re-opening. After closing,
-    all communication event counters are cleared and the listen only mode set to false.
-    If \a clearEventLog is set to true, the event log history gets cleared also.
-
-    \sa forceListenOnlyMode(), getCommEventLog()
- */
-bool QModbusServerPrivate::restartCommunicationsOption(bool clearLog)
+QModbusResponse QModbusServerPrivate::processReadFifoQueueRequest(const QModbusRequest &request)
 {
-    q_func()->disconnectDevice();
-    m_listenOnly = false;
-    if (clearLog)
-        m_commEventLog.clear();
+    CHECK_SIZE_LESS_THAN(request);
+    quint16 address;
+    request.decodeData(&address);
 
-    resetCommunicationCounters();
-    storeEvent(0u);
-    return q_func()->connectDevice();
+    quint16 fifoCount;
+    if (!q_func()->data(QModbusDataUnit::HoldingRegisters, address, &fifoCount)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataAddress);
+    }
+
+    if (fifoCount > 31u) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataValue);
+    }
+
+    QModbusDataUnit fifoRegisters(QModbusDataUnit::HoldingRegisters, address + 1u, fifoCount);
+    if (!q_func()->data(&fifoRegisters)) {
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalDataAddress);
+    }
+
+    return QModbusResponse(request.functionCode(), quint16((fifoCount * 2) + 2u), fifoCount,
+                           fifoRegisters.values());
 }
 
-/*!
-    \internal
-    Resets all communication event counters of the Modbus server to zero.
-*/
-void QModbusServerPrivate::resetCommunicationCounters()
+void QModbusServerPrivate::storeModbusCommEvent(const QModbusCommEvent &eventByte)
 {
-    m_commEventCounter = 0;
-    m_busMessageCounter = 0;
-    m_crcErrorCounter = 0;
-    m_exceptionErrorCounter = 0;
-    m_serverCharacterOverrunCounter = 0;
-    m_serverDeviceBusyCounter = 0;
-    m_serverMessageCounter = 0;
-    m_serverNAKCounter = 0;
-    m_serverNoResponseCounter = 0;
-}
-
-/*!
-    \internal
-    Stores an event byte into the Modbus event log history table (0-64 bytes) at
-    the first position (byte 0) and pushes all other events back. The communication
-    event counter is increased for each event stored in the event log.
-
-    A communication event is encoded into one byte with the four types:
-    \list
-     \li Remote Device Modbus Receive Event
-     \li Remote Device Modbus Send Event
-     \li Remote Device Entered Listen Only Mode
-     \li Remote Device Initiated Communication Restart
-    \endlist
-
-    \sa getCommEventLog(), restartCommunicationsOption()
-*/
-void QModbusServerPrivate::storeEvent(quint8 eventByte)
-{
-    if (m_commEventLog.size() == 64)
-        m_commEventLog.resize(63);
-
+    // Inserts an event byte at the start of the event log. If the event log
+    // is already full, the byte at the end of the log will be removed. The
+    // event log size is 64 bytes, starting at index 0.
     m_commEventLog.prepend(eventByte);
-    m_commEventCounter += 1;
 }
+
+#undef CHECK_SIZE_EQUALS
+#undef CHECK_SIZE_LESS_THAN
 
 QT_END_NAMESPACE

@@ -40,22 +40,22 @@
 
 #include <QtTest/QtTest>
 
+class TestClientPrivate : public QModbusClientPrivate
+{
+
+};
+
 class TestClient : public QModbusClient
 {
-public:
-    TestClient() Q_DECL_EQ_DEFAULT;
+    Q_OBJECT
+    Q_DECLARE_PRIVATE(TestClient)
+    friend class tst_QModbusClient;
 
-    QModbusReplyEx *sendReadRequest(const QModbusDataUnit &, int) Q_DECL_OVERRIDE {
-        return Q_NULLPTR;
-    }
-    QModbusReplyEx *sendWriteRequest(const QModbusDataUnit &, int) Q_DECL_OVERRIDE {
-        return Q_NULLPTR;
-    }
-    QModbusReplyEx *sendReadWriteRequest(const QModbusDataUnit &, const QModbusDataUnit &, int) {
-        return Q_NULLPTR;
-    }
-    QModbusReply *read(const QModbusDataUnit &, int) Q_DECL_OVERRIDE { return Q_NULLPTR; }
-    QModbusReply *write(const QModbusDataUnit &, int) Q_DECL_OVERRIDE { return Q_NULLPTR; }
+public:
+    TestClient(QObject *parent = Q_NULLPTR)
+        : QModbusClient(parent)
+    {}
+
     virtual bool open() Q_DECL_OVERRIDE { return true; }
     virtual void close() Q_DECL_OVERRIDE {}
 
@@ -78,17 +78,18 @@ private slots:
         client.setTimeout(300);
         QCOMPARE(client.timeout(), 300);
         client.setTimeout(-1); // disables timeout
-        QCOMPARE(client.timeout(), -1);;
+        QCOMPARE(client.timeout(), -1);
 
+        // test timer firing off
+        client.setTimeout(100);
+        QCOMPARE(client.timeout(), 100);
     }
 
     void testProcessReadWriteSingleMultipleCoilsResponse()
     {
         TestClient client;
 
-        QModbusDataUnit unit;
-        unit.setStartAddress(100);
-
+        QModbusDataUnit unit(QModbusDataUnit::Coils, 100, 24);
         QModbusResponse response = QModbusResponse(QModbusResponse::ReadCoils,
             QByteArray::fromHex("03cd6b05"));
         QCOMPARE(client.processResponse(response, &unit), true);
@@ -127,8 +128,7 @@ private slots:
     {
         TestClient client;
 
-        QModbusDataUnit unit;
-        unit.setStartAddress(100);
+        QModbusDataUnit unit(QModbusDataUnit::DiscreteInputs, 100, 24);
         QModbusResponse response = QModbusResponse(QModbusResponse::ReadDiscreteInputs,
             QByteArray::fromHex("03cd6b05"));
         QCOMPARE(client.processResponse(response, &unit), true);
@@ -159,13 +159,14 @@ private slots:
         TestClient client;
 
         QModbusDataUnit unit;
+        unit.setStartAddress(100);
         QModbusResponse response = QModbusResponse(QModbusResponse::ReadHoldingRegisters,
                                                    QByteArray::fromHex("04cd6b057f"));
         QCOMPARE(client.processResponse(response, &unit), true);
 
         QCOMPARE(unit.isValid(), true);
         QCOMPARE(unit.valueCount(), 2u);
-        QCOMPARE(unit.startAddress(), 0);
+        QCOMPARE(unit.startAddress(), 100);
         QCOMPARE(unit.values(), QVector<quint16>({ 52587, 1407 }));
         QCOMPARE(unit.registerType(), QModbusDataUnit::HoldingRegisters);
 
@@ -189,7 +190,6 @@ private slots:
 
         QModbusDataUnit unit;
         unit.setStartAddress(100);
-
         QModbusResponse response = QModbusResponse(QModbusResponse::ReadInputRegisters,
                                                    QByteArray::fromHex("04cd6b057f"));
         QCOMPARE(client.processResponse(response, &unit), true);
@@ -331,11 +331,9 @@ private slots:
         QFETCH(int, address);
         QFETCH(int, count);
 
-        // we leak it for now, can't call delete without crash
-        QModbusClientPrivate *client = new QModbusClientPrivate;
-
+        TestClient client;
         QModbusDataUnit read(rc, address, count);
-        QModbusRequest request = client->createReadRequest(read);
+        QModbusRequest request = client.d_func()->createReadRequest(read);
         QTEST(request.functionCode(), "fc");
         QTEST(request.data(), "data");
         QTEST(request.isValid(), "isValid");
@@ -379,11 +377,9 @@ private slots:
         QFETCH(int, address);
         QFETCH(QVector<quint16>, values);
 
-        // we leak it for now, can't call delete without crash
-        QModbusClientPrivate *client = new QModbusClientPrivate;
-
+        TestClient client;
         QModbusDataUnit write(rc, address, values);
-        QModbusRequest request = client->createWriteRequest(write);
+        QModbusRequest request = client.d_func()->createWriteRequest(write);
         QTEST(request.functionCode(), "fc");
         QTEST(request.data(), "data");
         QTEST(request.isValid(), "isValid");
@@ -418,12 +414,10 @@ private slots:
         QFETCH(int, address);
         QFETCH(QVector<quint16>, values);
 
-        // we leak it for now, can't call delete without crash
-        QModbusClientPrivate *client = new QModbusClientPrivate;
-
+        TestClient client;
         QModbusDataUnit read(rc, address, values.count());
         QModbusDataUnit write(rc, address, values);
-        QModbusRequest request = client->createRWRequest(read, write);
+        QModbusRequest request = client.d_func()->createRWRequest(read, write);
         QTEST(request.functionCode(), "fc");
         QTEST(request.data(), "data");
         QTEST(request.isValid(), "isValid");

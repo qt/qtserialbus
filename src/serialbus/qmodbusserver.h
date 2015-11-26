@@ -43,6 +43,7 @@
 #include <QtSerialBus/qmodbuspdu.h>
 
 #include <QtCore/qobject.h>
+#include <QtCore/qvariant.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -54,26 +55,37 @@ class Q_SERIALBUS_EXPORT QModbusServer : public QModbusDevice
     Q_DECLARE_PRIVATE(QModbusServer)
 
 public:
+    enum Option {
+        DiagnosticRegister,
+        ExceptionStatusOffset,
+        DeviceBusy,
+        AsciiInputDelimiter,
+        ListenOnlyMode,
+        ServerIdentifier,
+        RunIndicatorStatus,
+        AdditionalData,
+        // Reserved
+        UserOption = 0x100
+    };
+    Q_ENUMS(Option)
 
     explicit QModbusServer(QObject *parent = 0);
-    virtual ~QModbusServer();
+    ~QModbusServer();
+
+    int serverAddress() const;
+    void setServerAddress(int serverAddress);
 
     virtual bool setMap(const QModbusDataUnitMap &map);
+    virtual bool processesBroadcast() const { return false; }
 
-    void setSlaveAddress(int slaveAddress);
-    int slaveAddress() const;
+    virtual QVariant value(int option) const;
+    virtual bool setValue(int option, const QVariant &value);
 
-    void setDiagnosticRegister(quint16 value);
-    quint16 diagnosticRegister() const;
+    bool data(QModbusDataUnit *newData) const;
+    bool setData(const QModbusDataUnit &unit);
 
-    void setContinueOnError(bool value);
-    bool continueOnError();
-
-    //TODO: Review if QModbusDataUnitMap would be useful. It could replace setMap(), data() and setData()
-    virtual bool data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data) const;
-    virtual bool data(QModbusDataUnit *newData) const;
-    virtual bool setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data);
-    virtual bool setData(const QModbusDataUnit &unit);
+    bool setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data);
+    bool data(QModbusDataUnit::RegisterType table, quint16 address, quint16 *data) const;
 
 Q_SIGNALS:
     void dataWritten(QModbusDataUnit::RegisterType table, int address, int size);
@@ -81,10 +93,14 @@ Q_SIGNALS:
 protected:
     QModbusServer(QModbusServerPrivate &dd, QObject *parent = Q_NULLPTR);
 
-    virtual QModbusResponse processRequest(const QModbusPdu &request);
-    virtual QModbusResponse processPrivateModbusRequest(const QModbusPdu &request);
+    virtual bool writeData(const QModbusDataUnit &unit);
+    virtual bool readData(QModbusDataUnit *newData) const;
 
+    virtual QModbusResponse processRequest(const QModbusPdu &request);
+    virtual QModbusResponse processPrivateRequest(const QModbusPdu &request);
 };
+
+Q_DECLARE_TYPEINFO(QModbusServer::Option, Q_PRIMITIVE_TYPE);
 
 QT_END_NAMESPACE
 

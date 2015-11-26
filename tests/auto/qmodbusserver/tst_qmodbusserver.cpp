@@ -35,7 +35,10 @@
 ****************************************************************************/
 
 #include <QtSerialBus/qmodbusserver.h>
+#include <QtSerialBus/qmodbusrtuserialslave.h>
+#include <QtSerialBus/qmodbustcpserver.h>
 
+#include <QtCore/qdebug.h>
 #include <QtTest/QtTest>
 
 class TestServer : public QModbusServer
@@ -53,6 +56,11 @@ public:
 };
 
 #define MAP_RANGE 500
+static QString s_msg;
+static void myMessageHandler(QtMsgType, const QMessageLogContext &, const QString &msg)
+{
+    s_msg = msg;
+}
 
 class tst_QModbusServer : public QObject
 {
@@ -70,6 +78,12 @@ private slots:
         map.insert(QModbusDataUnit::InputRegisters, { QModbusDataUnit::InputRegisters, 0, MAP_RANGE });
         map.insert(QModbusDataUnit::HoldingRegisters, { QModbusDataUnit::HoldingRegisters, 0, MAP_RANGE });
         server.setMap(map);
+    }
+
+    void testServerAddress()
+    {
+        QCOMPARE(QModbusTcpServer().serverAddress(), 0xff);
+        QCOMPARE(QModbusRtuSerialSlave().serverAddress(), 1);
     }
 
     void testProcessRequestReadWriteSingleMultipleCoils()
@@ -291,6 +305,34 @@ private slots:
         QCOMPARE(response.data(), QByteArray::fromHex("03"));
     }
 
+    void testProcessReadExceptionStatus()
+    {
+         // simulate Modicon 484 (start at coil 257 up to 264)
+        server.setValue(QModbusServer::ExceptionStatusOffset, 256u);
+        // set the exception status byte to 0000 0011 simulating two bits set
+        // request write Coil 257, address: 0x0100 -> 256, value: 0xff00 -> ON
+        QModbusRequest request = QModbusRequest(QModbusRequest::WriteSingleCoil,
+            QByteArray::fromHex("0100ff00"));
+        QModbusResponse response = server.processRequest(request);
+        // request write Coil 258, address: 0x0101 -> 257, value: 0xff00 -> ON
+        request = QModbusRequest(QModbusRequest::WriteSingleCoil,
+            QByteArray::fromHex("0101ff00"));
+        response = server.processRequest(request);
+
+        request = QModbusRequest(QModbusRequest::ReadExceptionStatus);
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+
+        // invalid request test
+        request = QModbusRequest(QModbusRequest::ReadExceptionStatus,
+                                 QByteArray::fromHex("007d"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+    }
+
     void testProcessDiagnosticsRequest()
     {
         // subfunction 00
@@ -300,7 +342,6 @@ private slots:
         QCOMPARE(response.isException(), false);
         // response, equals request
         QCOMPARE(response.data(), QByteArray::fromHex("000000ffabcd"));
-
 
         //subfunction 01
         //TODO: impossible due to connectDevice() asking open() which is pure virtual
@@ -379,9 +420,10 @@ private slots:
         request = QModbusRequest(QModbusRequest::Diagnostics,
                                  QByteArray::fromHex("00040000"));
         response = server.processRequest(request);
+        QCOMPARE(response.isValid(), false);
         QCOMPARE(response.isException(), false);
-        // response, equals request
-        QCOMPARE(response.data(), QByteArray::fromHex("00040000"));
+        QCOMPARE(response.data(), QByteArray());
+        QCOMPARE(response.functionCode(), QModbusResponse::Invalid);
 
         // invalidate
         request = QModbusRequest(QModbusRequest::Diagnostics,
@@ -622,6 +664,39 @@ private slots:
         QCOMPARE(response.data(), QByteArray::fromHex("01"));
     }
 
+    void testProcessGetCommEventCounter()
+    {
+         TestServer local; // Used later to control the correct event amount.
+
+        QModbusRequest request = QModbusRequest(QModbusRequest::GetCommEventCounter);
+        QModbusResponse response = local.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        QCOMPARE(response.data(), QByteArray::fromHex("00000000"));
+
+        // TODO: Add more tests once event handling is implemented.
+
+        request = QModbusRequest(QModbusRequest::GetCommEventCounter, quint8(10));
+        response = local.processRequest(request);
+        QCOMPARE(response.isException(), true);
+
+    }
+
+    void testProcessGetCommEventLogRequest()
+    {
+        TestServer local; // Used later to control the correct event amount.
+
+        QModbusRequest request = QModbusRequest(QModbusRequest::GetCommEventLog);
+        QModbusResponse response = local.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        QCOMPARE(response.data(), QByteArray::fromHex("06000000000000"));
+
+        // TODO: Add more tests once event handling is implemented.
+
+        request = QModbusRequest(QModbusRequest::GetCommEventLog, quint8(10));
+        response = local.processRequest(request);
+        QCOMPARE(response.isException(), true);
+    }
+
     void testProcessWriteMultipleRegistersRequest()
     {
         // request write at register 173, address: 0x00ac -> 172, value: 0x00ff 0x1234
@@ -642,6 +717,78 @@ private slots:
         // request write 1 register at offset 0 value only 1 byte
         request = QModbusRequest(QModbusRequest::WriteMultipleRegisters,
                                  QByteArray::fromHex("000000010200"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+    }
+
+    void testReportServerId()
+    {
+        QModbusRequest request = QModbusRequest(QModbusRequest::ReportServerId);
+        QModbusResponse response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        QCOMPARE(response.functionCode(), QModbusRequest::ReportServerId);
+
+        const QByteArray additionalData = "Qt Modbus Server";
+        QCOMPARE(server.value(QModbusServer::ServerIdentifier).value<quint8>(), quint8(0x0a));
+        QCOMPARE(server.value(QModbusServer::RunIndicatorStatus).value<quint8>(), quint8(0xff));
+        QCOMPARE(server.value(QModbusServer::AdditionalData).toByteArray(), additionalData);
+
+        QByteArray data = QByteArray::fromHex("0aff") + additionalData;
+        data.prepend(quint8(data.size()));
+        QCOMPARE(response.data(), data);
+
+        request = QModbusRequest(QModbusRequest::ReportServerId, data);
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.exceptionCode(), QModbusPdu::IllegalDataValue);
+
+        server.setValue(QModbusServer::ServerIdentifier, quint8(0xff));
+        QCOMPARE(server.setValue(QModbusServer::ServerIdentifier, additionalData), false);
+        QCOMPARE(server.value(QModbusServer::ServerIdentifier).value<quint8>(), quint8(0xff));
+
+        server.setValue(QModbusServer::RunIndicatorStatus, quint8(0x00));
+        QCOMPARE(server.setValue(QModbusServer::RunIndicatorStatus, quint8(0xab)), false);
+        QCOMPARE(server.value(QModbusServer::RunIndicatorStatus).value<quint8>(), quint8(0x00));
+
+        server.setValue(QModbusServer::AdditionalData, QByteArray("TestData"));
+        QCOMPARE(server.setValue(QModbusServer::AdditionalData, QStringList()), false);
+        QCOMPARE(server.value(QModbusServer::AdditionalData).toByteArray(), QByteArray("TestData"));
+    }
+
+    void testMaskWriteRegister()
+    {
+        // preset register 172 with value 18 (0x0012h)
+        server.setData(QModbusDataUnit::HoldingRegisters, 172, 18u);
+        //mask request register 172 with andMask: 242 (0x00f2)
+        //                               orMask:   37 (0x0025)
+        //                               result:   23 (0x0017)
+        QModbusRequest request = QModbusRequest(QModbusRequest::MaskWriteRegister,
+            QByteArray::fromHex("00ac00f20025"));
+        QModbusResponse response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("00ac00f20025"));
+        // validate contents after masking
+        quint16 data;
+        QVERIFY(server.data(QModbusDataUnit::HoldingRegisters, 172, &data));
+        QCOMPARE(data, quint16(23));
+
+        // invalidate use register 501:
+        request = QModbusRequest(QModbusRequest::MaskWriteRegister,
+                    QByteArray::fromHex("01f500f20025"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.data(), QByteArray::fromHex("02"));
+        // invalidate with one bytes less data:
+        request = QModbusRequest(QModbusRequest::MaskWriteRegister,
+                    QByteArray::fromHex("00ac00f200"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+        // invalidate with one bytes more data:
+        request = QModbusRequest(QModbusRequest::MaskWriteRegister,
+                    QByteArray::fromHex("00ac00f2002500"));
         response = server.processRequest(request);
         QCOMPARE(response.isException(), true);
         QCOMPARE(response.data(), QByteArray::fromHex("03"));
@@ -675,6 +822,41 @@ private slots:
         response = server.processRequest(request);
         QCOMPARE(response.isException(), true);
         QCOMPARE(response.data(), QByteArray::fromHex("03"));
+    }
+
+    void testProcessReadFifoQueue()
+    {
+        // prepare a fifo with two object values, pointer address is 172 with value 2 items
+        server.setData(QModbusDataUnit::HoldingRegisters, 172, 2u);
+        server.setData(QModbusDataUnit::HoldingRegisters, 173, 1235u);
+        server.setData(QModbusDataUnit::HoldingRegisters, 174, 1236u);
+        // request read fifo queue at fifo pointer address 172
+        QModbusRequest request = QModbusRequest(QModbusRequest::ReadFifoQueue,
+                                                QByteArray::fromHex("00ac"));
+        QModbusResponse response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        QCOMPARE(response.data(), QByteArray::fromHex("0006000204d304d4"));
+        // invalidate tests
+        // invalid offset address (501)
+        request = QModbusRequest(QModbusRequest::ReadFifoQueue,
+                                 QByteArray::fromHex("01f5"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.data(), QByteArray::fromHex("02"));
+        // invalid fifo count > 31
+        server.setData(QModbusDataUnit::HoldingRegisters, 172, 32u);
+        request = QModbusRequest(QModbusRequest::ReadFifoQueue,
+                                 QByteArray::fromHex("00ac"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.data(), QByteArray::fromHex("03"));
+        // invalid fifo data address beyond 500, fifo values 3 (500-502)
+        server.setData(QModbusDataUnit::HoldingRegisters, 499, 3u);
+        request = QModbusRequest(QModbusRequest::ReadFifoQueue,
+                                 QByteArray::fromHex("01f3"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), true);
+        QCOMPARE(response.data(), QByteArray::fromHex("02"));
     }
 
     void tst_dataCalls_data()
@@ -859,30 +1041,152 @@ private slots:
         }
     }
 
-    void tst_slaveAddress()
+    void tst_serverAddress()
     {
-        server.setSlaveAddress(56);
-        QCOMPARE(server.slaveAddress(), 56);
-        server.setSlaveAddress(1);
-        QCOMPARE(server.slaveAddress(), 1);
+        server.setServerAddress(56);
+        QCOMPARE(server.serverAddress(), 56);
+        server.setServerAddress(1);
+        QCOMPARE(server.serverAddress(), 1);
     }
 
     void tst_diagnosticRegister()
     {
-        server.setDiagnosticRegister(56u);
-        QCOMPARE(server.diagnosticRegister(), quint16(56));
-        server.setDiagnosticRegister(1u);
-        QCOMPARE(server.diagnosticRegister(), quint16(1));
+        server.setValue(QModbusServer::DiagnosticRegister, 56u);
+        QCOMPARE(server.value(QModbusServer::DiagnosticRegister).value<quint16>(), quint16(56));
+        server.setValue(QModbusServer::DiagnosticRegister, 1u);
+        QCOMPARE(server.value(QModbusServer::DiagnosticRegister).value<quint16>(), quint16(1));
     }
 
-    void tst_continueOnError()
+    void tst_exceptionStatusOffset()
     {
-        server.setContinueOnError(true);
-        QCOMPARE(server.continueOnError(), true);
-        server.setContinueOnError(false);
-        QCOMPARE(server.continueOnError(), false);
+       server.setValue(QModbusServer::ExceptionStatusOffset, 256u);
+       QCOMPARE(server.value(QModbusServer::ExceptionStatusOffset).value<quint16>(), quint16(256));
+       server.setValue(QModbusServer::ExceptionStatusOffset, 0x0000);
+       QCOMPARE(server.value(QModbusServer::ExceptionStatusOffset).value<quint16>(), quint16(0));
     }
 
+    void tst_readWriteDataInheritance()
+    {
+        class DebugHandler
+        {
+        public:
+            DebugHandler(QtMessageHandler newMessageHandler)
+                : oldMessageHandler(qInstallMessageHandler(newMessageHandler)) {}
+            ~DebugHandler() {
+                qInstallMessageHandler(oldMessageHandler);
+            }
+        private:
+            QtMessageHandler oldMessageHandler;
+        };
+
+        class InheritanceTestServer : public QModbusServer
+        {
+        public:
+            InheritanceTestServer() Q_DECL_EQ_DEFAULT;
+            void close() Q_DECL_OVERRIDE {}
+            bool open() Q_DECL_OVERRIDE { return true; }
+
+            bool readData(QModbusDataUnit *) const Q_DECL_OVERRIDE {
+                qDebug() << "QModbusServer::data() call did end in the expected OVERRIDE.";
+                return false;
+            }
+            bool writeData(const QModbusDataUnit &) Q_DECL_OVERRIDE {
+                qDebug() << "QModbusServer::setData() call did end in the expected OVERRIDE.";
+                return false;
+            }
+        };
+
+        InheritanceTestServer s;
+        DebugHandler mhs(myMessageHandler);
+        {
+            QModbusDataUnit unit;
+            s.data(&unit);
+        }
+        QCOMPARE(s_msg, QString("QModbusServer::data() call did end in the expected OVERRIDE."));
+        {
+            s.data(QModbusDataUnit::Coils, 0u, Q_NULLPTR);
+        }
+        QCOMPARE(s_msg, QString("QModbusServer::data() call did end in the expected OVERRIDE."));
+        {
+            s.setData(QModbusDataUnit());
+        }
+        QCOMPARE(s_msg, QString("QModbusServer::setData() call did end in the expected OVERRIDE."));
+        {
+            s.setData(QModbusDataUnit::Coils, 0u, 0u);
+        }
+        QCOMPARE(s_msg, QString("QModbusServer::setData() call did end in the expected OVERRIDE."));
+    }
+
+    void testReadWriteDataMissingOrInvalidRegister()
+    {
+        TestServer local;
+        local.setMap({ { QModbusDataUnit::Invalid, QModbusDataUnit() },
+            { QModbusDataUnit::Coils, QModbusDataUnit(QModbusDataUnit::Coils) },
+            { QModbusDataUnit::DiscreteInputs, QModbusDataUnit(QModbusDataUnit::DiscreteInputs) }});
+
+        QModbusDataUnit invalid;
+        QCOMPARE(local.data(&invalid), false);
+        QCOMPARE(local.setData(invalid), false);
+
+        QModbusDataUnit missing(QModbusDataUnit::HoldingRegisters);
+        QCOMPARE(local.data(&missing), false);
+        QCOMPARE(local.setData(missing), false);
+    }
+
+    void testIllegalTcpFunctionCodes()
+    {
+        class ModbusTcpServer : public QModbusTcpServer
+        {
+        public:
+            QModbusResponse processRequest(const QModbusPdu &request) Q_DECL_OVERRIDE {
+                return QModbusTcpServer::processRequest(request);
+            }
+
+        };
+        ModbusTcpServer local;
+
+        QModbusRequest request(QModbusRequest::ReadExceptionStatus);
+        QCOMPARE(local.processRequest(request).exceptionCode(), QModbusPdu::IllegalFunction);
+
+        request = QModbusRequest(QModbusRequest::Diagnostics);
+        QCOMPARE(local.processRequest(request).exceptionCode(), QModbusPdu::IllegalFunction);
+
+        request = QModbusRequest(QModbusRequest::GetCommEventCounter);
+        QCOMPARE(local.processRequest(request).exceptionCode(), QModbusPdu::IllegalFunction);
+
+        request = QModbusRequest(QModbusRequest::GetCommEventLog);
+        QCOMPARE(local.processRequest(request).exceptionCode(), QModbusPdu::IllegalFunction);
+
+        request = QModbusRequest(QModbusRequest::ReportServerId);
+        QCOMPARE(local.processRequest(request).exceptionCode(), QModbusPdu::IllegalFunction);
+    }
+
+    void testQModbusServerOptions()
+    {
+        // TODO: Add a local class implementation to test value()/setValue with a different backing
+        // store. That's not only related to AsciiInputDelimiter, rather to all enum values there.
+
+        QCOMPARE(server.value(QModbusServer::AsciiInputDelimiter).toInt(), int('\n'));
+        QCOMPARE(server.setValue(QModbusServer::AsciiInputDelimiter, "Test"), false);
+        QCOMPARE(server.setValue(QModbusServer::AsciiInputDelimiter, '@'), true);
+        QCOMPARE(server.value(QModbusServer::AsciiInputDelimiter).toInt(), int('@'));
+
+        QVERIFY(server.setValue(QModbusServer::AsciiInputDelimiter, 'j'));
+        QCOMPARE(server.value(QModbusServer::AsciiInputDelimiter).toInt(), int('j'));
+        QVERIFY(server.setValue(QModbusServer::AsciiInputDelimiter, 0x6a));
+        QCOMPARE(server.value(QModbusServer::AsciiInputDelimiter).toInt(), int('j'));
+        QVERIFY(server.setValue(QModbusServer::AsciiInputDelimiter, 0x6a));
+        QCOMPARE(server.value(QModbusServer::AsciiInputDelimiter).toInt(), int('j'));
+        QVERIFY(!server.setValue(QModbusServer::AsciiInputDelimiter, 0x100));
+        QCOMPARE(server.value(QModbusServer::AsciiInputDelimiter).toInt(), int('j'));
+        QVERIFY(!server.setValue(QModbusServer::AsciiInputDelimiter, -1));
+
+        TestServer local;
+        QCOMPARE(local.value(QModbusServer::ListenOnlyMode).toBool(), false);
+        QCOMPARE(local.setValue(QModbusServer::ListenOnlyMode, "Test"), false);
+        QCOMPARE(local.setValue(QModbusServer::ListenOnlyMode, true), true);
+        QCOMPARE(local.value(QModbusServer::ListenOnlyMode).toBool(), true);
+    }
 };
 
 QTEST_MAIN(tst_QModbusServer)

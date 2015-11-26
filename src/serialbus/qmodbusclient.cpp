@@ -38,9 +38,14 @@
 #include "qmodbusclient_p.h"
 #include "qmodbus_symbols_p.h"
 
+#include <QtCore/qdebug.h>
+#include <QtCore/qloggingcategory.h>
+
 #include <bitset>
 
 QT_BEGIN_NAMESPACE
+
+Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
 
 /*!
     \class QModbusClient
@@ -57,11 +62,7 @@ QT_BEGIN_NAMESPACE
     The returned object is used to obtain any data returned in response to the corresponding request.
 
     QModbusClient has an asynchronous API. When the finished slot is called, the parameter
-    it takes is the QModbusReplyEx object containing the PDU as well as meta-data (Addressing, etc.).
-
-    Note: After the request has finished, it is the responsibility of the user to delete the
-    QModbusReplyEx object at an appropriate time. Do not directly delete it inside the slot connected
-    to requestFinished(). You can use the deleteLater() function.
+    it takes is the QModbusReply object containing the PDU as well as meta-data (Addressing, etc.).
 
     Note: QModbusClient queues the requests it receives. The number of requests executed in
     parallel is dependent on the protocol. For example, the HTTP protocol on desktop platforms
@@ -70,7 +71,7 @@ QT_BEGIN_NAMESPACE
 
 /*!
     Constructs a Modbus client device with the specified \a parent.
- */
+*/
 QModbusClient::QModbusClient(QObject *parent)
     : QModbusDevice(*new QModbusClientPrivate, parent)
 {
@@ -84,6 +85,68 @@ QModbusClient::~QModbusClient()
 }
 
 /*!
+    Sends a request to read the contents of the data pointed by \a read. Returns a new valid
+    QModbusReply object if it did send the request, otherwise Q_NULLPTR. Modbus network may
+    have multiple servers, each server has unique \a serverAddress.
+*/
+QModbusReply *QModbusClient::sendReadRequest(const QModbusDataUnit &read, int serverAddress)
+{
+    Q_D(QModbusClient);
+    return d->sendRequest(d->createReadRequest(read), serverAddress, &read);
+}
+
+/*!
+    Sends a request to modify the contents of the data pointed by \a write. Returns a new valid
+    QModbusReply object if it did send the request, otherwise Q_NULLPTR. Modbus network may
+    have multiple servers, each server has a unique \a serverAddress.
+*/
+QModbusReply *QModbusClient::sendWriteRequest(const QModbusDataUnit &write, int serverAddress)
+{
+    Q_D(QModbusClient);
+    return d->sendRequest(d->createWriteRequest(write), serverAddress, &write);
+}
+
+/*!
+    Sends a request to read the contents of the data pointed by \a read and to modify the contents
+    of the data pointed by \a write using Modbus Function Code 23. Returns a new valid
+    QModbusReply object if it did send the request, otherwise Q_NULLPTR. Modbus network may
+    have multiple servers, each server has a unique \a serverAddress.
+
+    \note: Sending this kind of request is only valid of both \a read and \a write are of type
+    QModbusDataUnit::HoldingRegisters. If the remote device is not be able to process Modbus
+    Function Code 23 , the request cannot be performed and is usually answered with a Modbus
+    Exception Response. Also, on overlapping data areas of \a read and \a write
+    the behavior of the remote device determines the result. The Modbus Application Protocol
+    defines that the write operation is handled before the read operation. Particular devices
+    such as the Schneider Electric Premium PLC platform behave differently and perform the read
+    operation before the write operation.
+*/
+QModbusReply *QModbusClient::sendReadWriteRequest(const QModbusDataUnit &read,
+                                                  const QModbusDataUnit &write, int serverAddress)
+{
+    Q_D(QModbusClient);
+    return d->sendRequest(d->createRWRequest(read, write), serverAddress, &read);
+}
+
+/*!
+    Sends a raw Modbus \a request. A raw request can contain anything that
+    fits inside the Modbus PDU data section and has a valid function code.
+    The only check performed before sending is therefore the validity check,
+    see \l QModbusPdu::isValid. Returns a new valid \l QModbusReply object if
+    it did send the request, otherwise Q_NULLPTR. Modbus networks may have
+    multiple servers, each server has a unique \a serverAddress.
+
+    \sa QModbusReply::rawResult()
+*/
+QModbusReply *QModbusClient::sendRawRequest(const QModbusRequest &request, int serverAddress)
+{
+    return d_func()->sendRequest(request, serverAddress, Q_NULLPTR);
+}
+
+/*!
+    \property QModbusClient::timeout
+    \brief the timeout value this client
+
     Returns the timeout value used by this QModbusClient instance in ms.
     A timeout is indicated by a \l TimeoutError. The default value is 200 ms.
 
@@ -92,31 +155,32 @@ QModbusClient::~QModbusClient()
 int QModbusClient::timeout() const
 {
     Q_D(const QModbusClient);
-    return d->timeout;
+    return d->m_responseTimeoutDuration;
 }
 
 /*!
     \fn void QModbusClient::timeoutChanged()
 
-    This signal is emitted
- */
+    This signal is emitted if the response is not received within the required timeout.
+*/
 
 /*!
-    Sets the \a newTimout for this QModbusClient instance.
+    Sets the \a newTimeout for this QModbusClient instance.
 
     The timeout is used by the client to determine how long it waits for
     a response from the server. If the response is not received within the
-    required timeout, the \l TimeOutError is sert.
+    required timeout, the \l TimeoutError is set.
 
-    Setting the timeout to a negative value disables timeouts.
+    Setting the timeout to a negative value disables timeouts. Already active/running timeouts
+    are not affected by such timeout duration changes.
 
     \sa timeout
- */
+*/
 void QModbusClient::setTimeout(int newTimeout)
 {
     Q_D(QModbusClient);
-    if (d->timeout != newTimeout) {
-        d->timeout = newTimeout;
+    if (d->m_responseTimeoutDuration != newTimeout) {
+        d->m_responseTimeoutDuration = newTimeout;
         emit timeoutChanged();
     }
 }
@@ -131,35 +195,6 @@ QModbusClient::QModbusClient(QModbusClientPrivate &dd, QObject *parent) :
 }
 
 /*!
-    \fn QModbusReplyEx *QModbusClient::sendReadRequest(const QModbusDataUnit &read, int slaveId) = 0
-
-    Sends a request to read the contents of the data pointed by \a read. Returns a new valid
-    QModbusReplyEx object if it did send the request, otherwise Q_NULLPTR. Modbus network may
-    have multiple servers, each server has unique \a slaveId.
-*/
-
-/*!
-    \fn QModbusReplyEx *QModbusClient::sendWriteRequest(const QModbusDataUnit &write, int slaveId) = 0
-
-    Sends a request to modify the contents of the data pointed by \a write. Returns a new valid
-    QModbusReplyEx object if it did send the request, otherwise Q_NULLPTR. Modbus network may
-    have multiple servers, each server has a unique \a slaveId.
-*/
-
-/*!
-    \fn QModbusReplyEx *QModbusClient::sendReadWriteRequest(const QModbusDataUnit &read,
-                                                     const QModbusDataUnit &write, int slaveId) = 0
-
-    Sends a request to read the contents of the data pointed by \a read. In addition, sends a
-    request to modify the contents of the data pointed by \a write. Returns a new valid
-    QModbusReplyEx object if it did send the request, otherwise Q_NULLPTR. Modbus network may
-    have multiple servers, each server has a unique \a slaveId.
-
-    \note: Sending this kind of request is only valid of both \a read and \a write are of type
-        QModbusDataUnit::HoldingRegisters.
-*/
-
-/*
     Processes a Modbus server \a response and stores the decoded information in \a data. Returns
     true on success; otherwise false.
 */
@@ -168,15 +203,37 @@ bool QModbusClient::processResponse(const QModbusResponse &response, QModbusData
     return d_func()->processResponse(response, data);
 }
 
-/*
+/*!
     To be implemented by custom Modbus client implementation. The default implementation ignores
     \a response and \a data. It always returns false to indicate error.
 */
-bool QModbusClient::processPrivateModbusResponse(const QModbusResponse &response, QModbusDataUnit *data)
+bool QModbusClient::processPrivateResponse(const QModbusResponse &response, QModbusDataUnit *data)
 {
     Q_UNUSED(response)
     Q_UNUSED(data)
     return false;
+}
+
+QModbusReply *QModbusClientPrivate::sendRequest(const QModbusRequest &request, int serverAddress,
+                                                const QModbusDataUnit *const unit)
+{
+    Q_Q(QModbusClient);
+
+    if (!isOpen() || q->state() != QModbusDevice::ConnectedState) {
+        qCWarning(QT_MODBUS) << "Device is not connected";
+        q->setError(QModbusClient::tr("Device not connected."), QModbusDevice::ConnectionError);
+        return Q_NULLPTR;
+    }
+
+    if (!request.isValid()) {
+        qCWarning(QT_MODBUS) << "Refuse to send invalid request.";  // TODO: WriteError ???
+        q->setError(QModbusClient::tr("Invalid Modbus request."), QModbusDevice::WriteError);
+        return Q_NULLPTR;
+    }
+
+    if (unit)
+        return enqueueRequest(request, serverAddress, *unit, QModbusReply::Common);
+    return enqueueRequest(request, serverAddress, QModbusDataUnit(), QModbusReply::Raw);
 }
 
 QModbusRequest QModbusClientPrivate::createReadRequest(const QModbusDataUnit &data) const
@@ -263,6 +320,32 @@ QModbusRequest QModbusClientPrivate::createRWRequest(const QModbusDataUnit &read
                           quint16(write.valueCount()), byteCount, write.values());
 }
 
+void QModbusClientPrivate::processQueueElement(const QModbusResponse &pdu,
+                                               const QueueElement &element)
+{
+    element.reply->setRawResult(pdu);
+    if (pdu.isException()) {
+        element.reply->setError(QModbusReply::ProtocolError,
+            QModbusClient::tr("Modbus Exception Response."));
+        return;
+    }
+
+    if (element.reply->type() == QModbusReply::Raw) {
+        element.reply->setFinished(true);
+        return;
+    }
+
+    QModbusDataUnit unit = element.unit;
+    if (!processResponse(pdu, &unit)) {
+        element.reply->setError(QModbusReply::UnknownError,
+            QModbusClient::tr("An invalid response has been received."));
+        return;
+    }
+
+    element.reply->setResult(unit);
+    element.reply->setFinished(true);
+}
+
 /*
     TODO: implement
 */
@@ -300,7 +383,7 @@ bool QModbusClientPrivate::processResponse(const QModbusResponse &response, QMod
     default:
         break;
     }
-    return q_func()->processPrivateModbusResponse(response, data);
+    return q_func()->processPrivateResponse(response, data);
 }
 
 static bool isValid(const QModbusResponse &response, QModbusResponse::FunctionCode fc)
@@ -329,18 +412,15 @@ bool QModbusClientPrivate::processReadCoilsResponse(const QModbusResponse &respo
     if ((payload.size() - 1) != byteCount)
         return false;
 
-    qint32 coil = 0;
-    QVector<quint16> values(byteCount * 8);
-    for (qint32 i = 1; i < payload.size(); ++i) {
-        const std::bitset<8> byte = payload[i];
-        for (qint32 currentBit = 0; currentBit < 8; ++currentBit)
-            values[coil++] = byte[currentBit];
-    }
-
     if (data) {
+        uint coil = 0;
+        QVector<quint16> values(data->valueCount());
+        for (qint32 i = 1; i < payload.size(); ++i) {
+            const std::bitset<8> byte = payload[i];
+            for (qint32 currentBit = 0; currentBit < 8 && coil < data->valueCount(); ++currentBit)
+                values[coil++] = byte[currentBit];
+        }
         data->setValues(values);
-        data->setValueCount(byteCount * 8);
-        data->setRegisterType(QModbusDataUnit::Coils);
     }
     return true;
 }
@@ -360,18 +440,15 @@ bool QModbusClientPrivate::processReadDiscreteInputsResponse(const QModbusRespon
     if ((payload.size() - 1) != byteCount)
         return false;
 
-    qint32 input = 0;
-    QVector<quint16> values(byteCount * 8);
-    for (qint32 i = 1; i < payload.size(); ++i) {
-        const std::bitset<8> byte = payload[i];
-        for (qint32 currentBit = 0; currentBit < 8; ++currentBit)
-            values[input++] = byte[currentBit];
-    }
-
     if (data) {
+        uint input = 0;
+        QVector<quint16> values(data->valueCount());
+        for (qint32 i = 1; i < payload.size(); ++i) {
+            const std::bitset<8> byte = payload[i];
+            for (qint32 currentBit = 0; currentBit < 8 && input < data->valueCount(); ++currentBit)
+                values[input++] = byte[currentBit];
+        }
         data->setValues(values);
-        data->setValueCount(byteCount * 8);
-        data->setRegisterType(QModbusDataUnit::DiscreteInputs);
     }
     return true;
 }
@@ -408,7 +485,6 @@ bool QModbusClientPrivate::processReadHoldingRegistersResponse(const QModbusResp
 
     if (data) {
         data->setValues(values);
-        data->setStartAddress(0);
         data->setValueCount(values.count());
         data->setRegisterType(QModbusDataUnit::HoldingRegisters);
     }

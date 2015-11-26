@@ -67,6 +67,8 @@ void tst_QModbusDataUnit::constructors()
     QCOMPARE(coils.startAddress(), 15);
     QCOMPARE(coils.values().size(), 20);
     QCOMPARE(coils.values(), QVector<quint16>(20));
+    foreach (auto val, coils.values())
+        QCOMPARE(val, quint16(0));
     QCOMPARE(coils.valueCount(), 20u);
 
     QModbusDataUnit unit2(QModbusDataUnit::HoldingRegisters, 3, QVector<quint16>() << 9);
@@ -139,6 +141,12 @@ void tst_QModbusDataUnit::testAPI()
     }
 
     QModbusDataUnit unit;
+    QCOMPARE(unit.isValid(), false);
+    QCOMPARE(unit.registerType(), QModbusDataUnit::Invalid);
+    QCOMPARE(unit.startAddress(), -1);
+    QCOMPARE(unit.valueCount(), 0u);
+    QCOMPARE(unit.values(), QVector<quint16>());
+
     unit.setStartAddress(15);
     unit.setRegisterType(QModbusDataUnit::Coils);
     QCOMPARE(unit.isValid(), true);
@@ -154,13 +162,6 @@ void tst_QModbusDataUnit::testAPI()
     QCOMPARE(unit.value(0), quint16(1));
     unit.setValue(0, 25);
     QCOMPARE(unit.value(0), quint16(25));
-
-    unit.reset();
-    QCOMPARE(unit.isValid(), false);
-    QCOMPARE(unit.registerType(), QModbusDataUnit::Invalid);
-    QCOMPARE(unit.startAddress(), -1);
-    QCOMPARE(unit.valueCount(), 0u);
-    QCOMPARE(unit.values(), QVector<quint16>());
 }
 
 QTEST_MAIN(tst_QModbusDataUnit)

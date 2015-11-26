@@ -41,10 +41,16 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <QtSerialBus/qmodbus.h>
 #include <QtSerialBus/qmodbusrtuserialslave.h>
 #include <QtSerialBus/qmodbustcpserver.h>
-#include <QRegularExpression>
+
+#include <QtCore/qregularexpression.h>
+#include <QtWidgets/qstatusbar.h>
+
+enum ModbusConnection {
+    Serial,
+    Tcp
+};
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -75,10 +81,10 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
         modbusDevice = Q_NULLPTR;
     }
 
-    QModbusDevice::ModbusConnection type = static_cast<QModbusDevice::ModbusConnection> (index);
-    if (type == QModbusDevice::Serial) {
+    ModbusConnection type = static_cast<ModbusConnection> (index);
+    if (type == Serial) {
         modbusDevice = new QModbusRtuSerialSlave(this);
-    } else if (type == QModbusDevice::Tcp) {
+    } else if (type == Tcp) {
         modbusDevice = new QModbusTcpServer(this);
         if (ui->portEdit->text().isEmpty())
             ui->portEdit->setText(QLatin1Literal("127.0.0.1:502"));
@@ -86,10 +92,10 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
 
     if (!modbusDevice) {
         ui->connectButton->setDisabled(true);
-        if (type == QModbusDevice::Serial)
-            ui->errorLabel->setText(tr("Could not create Modbus slave."));
+        if (type == Serial)
+            statusBar()->showMessage(tr("Could not create Modbus slave."), 5000);
         else
-            ui->errorLabel->setText(tr("Could not create Modbus server."));
+            statusBar()->showMessage(tr("Could not create Modbus server."), 5000);
     } else {
         QModbusDataUnitMap reg;
         reg.insert(QModbusDataUnit::Coils, { QModbusDataUnit::Coils, 0, 10 });
@@ -101,7 +107,7 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
 
         connect(modbusDevice, &QModbusServer::dataWritten,
                 this, &MainWindow::updateWidgets);
-        connect(modbusDevice, &QModbusClient::stateChanged,
+        connect(modbusDevice, &QModbusServer::stateChanged,
                 this, &MainWindow::onStateChanged);
         connect(modbusDevice, &QModbusServer::errorOccurred,
                 this, &MainWindow::handleDeviceError);
@@ -115,20 +121,20 @@ void MainWindow::handleDeviceError(QModbusDevice::ModbusError newError)
     if (newError == QModbusDevice::NoError || !modbusDevice)
         return;
 
-    ui->errorLabel->setText(modbusDevice->errorString());
+    statusBar()->showMessage(modbusDevice->errorString(), 5000);
 }
 
 void MainWindow::on_connectButton_clicked()
 {
     bool intendToConnect = (modbusDevice->state() == QModbusDevice::UnconnectedState);
 
-    ui->errorLabel->setText(QString());
+    statusBar()->clearMessage();
 
     if (intendToConnect) {
         modbusDevice->setPortName(ui->portEdit->text());
-        modbusDevice->setSlaveAddress(ui->slaveEdit->text().toInt());
+        modbusDevice->setServerAddress(ui->serverEdit->text().toInt());
         if (!modbusDevice->connectDevice())
-            ui->errorLabel->setText(tr("Connect failed: ") + modbusDevice->errorString());
+            statusBar()->showMessage(tr("Connect failed: ") + modbusDevice->errorString(), 5000);
     } else {
         modbusDevice->disconnectDevice();
     }
@@ -160,7 +166,7 @@ void MainWindow::bitChanged(int id, QModbusDataUnit::RegisterType table, bool va
         return;
 
     if (!modbusDevice->setData(table, id, value))
-        ui->errorLabel->setText(tr("Could not set data: ") + modbusDevice->errorString());
+        statusBar()->showMessage(tr("Could not set data: ") + modbusDevice->errorString(), 5000);
 }
 
 void MainWindow::setRegister(const QString &value)
@@ -178,7 +184,8 @@ void MainWindow::setRegister(const QString &value)
             ok = modbusDevice->setData(QModbusDataUnit::HoldingRegisters, id, value.toInt(&ok, 16));
 
         if (!ok)
-            ui->errorLabel->setText(tr("Could not set register: ") + modbusDevice->errorString());
+            statusBar()->showMessage(tr("Could not set register: ") + modbusDevice->errorString(),
+                                     5000);
     }
 }
 

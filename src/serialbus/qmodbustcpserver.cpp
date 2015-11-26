@@ -44,21 +44,27 @@ QT_BEGIN_NAMESPACE
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QModbusTcpServer class is the interface class for Modbus TCP sever device.
+    \brief The QModbusTcpServer class represents a Modbus server that uses a
+    TCP server for its communication with the Modbus client.
 
-    Modbus TCP networks can have multiple servers. Servers are read/written by a client device
-    represented by \l QModbusTcpClient. QModbusTcpServer communicates with a Modbus backend,
-    providing users with a convenient API.
- */
+    Communication via Modbus requires the interaction between a single Modbus
+    client instance and single Modbus server. This class provides the Modbus
+    server implementation via a TCP server.
+
+    Modbus TCP networks can have multiple servers. Servers are read/written by
+    a client device represented by \l QModbusTcpClient.
+*/
 
 /*!
-    Constructs a QModbusTcpServer with the specified \a parent.
- */
+    Constructs a QModbusTcpServer with the specified \a parent. The
+    \l serverAddress preset is \c 255.
+*/
 QModbusTcpServer::QModbusTcpServer(QObject *parent)
     : QModbusServer(*new QModbusTcpServerPrivate, parent)
 {
     Q_D(QModbusTcpServer);
     d->setupTcpServer();
+    setServerAddress(0xff);
 }
 
 /*!
@@ -70,7 +76,7 @@ QModbusTcpServer::~QModbusTcpServer()
 
 /*!
     \internal
- */
+*/
 QModbusTcpServer::QModbusTcpServer(QModbusTcpServerPrivate &dd, QObject *parent)
     : QModbusServer(dd, parent)
 {
@@ -124,6 +130,39 @@ void QModbusTcpServer::close()
         socket->disconnectFromHost();
 
     setState(QModbusDevice::UnconnectedState);
+}
+
+/*!
+    \reimp
+
+    Processes a Modbus client \a request and returns a Modbus response.
+
+    The following Modbus function codes are filtered out as they are serial
+    line only according to the Modbus Application Protocol Specification 1.1b:
+    \list
+        \li \l QModbusRequest::ReadExceptionStatus
+        \li \l QModbusRequest::Diagnostics
+        \li \l QModbusRequest::GetCommEventCounter
+        \li \l QModbusRequest::GetCommEventLog
+        \li \l QModbusRequest::ReportServerId
+    \endlist
+    A request to the TCP server will be answered with a Modbus exception
+    response with exception code QModbusExceptionResponse::IllegalFunction.
+*/
+QModbusResponse QModbusTcpServer::processRequest(const QModbusPdu &request)
+{
+    switch (request.functionCode()) {
+    case QModbusRequest::ReadExceptionStatus:
+    case QModbusRequest::Diagnostics:
+    case QModbusRequest::GetCommEventCounter:
+    case QModbusRequest::GetCommEventLog:
+    case QModbusRequest::ReportServerId:
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalFunction);
+    default:
+        break;
+    }
+    return QModbusServer::processRequest(request);
 }
 
 QT_END_NAMESPACE

@@ -37,9 +37,12 @@
 #ifndef QMODBUSCLIENT_P_H
 #define QMODBUSCLIENT_P_H
 
-#include "qmodbusclient.h"
-#include "qmodbusdevice_p.h"
-#include "qmodbuspdu.h"
+#include <QtSerialBus/qmodbusclient.h>
+#include <QtSerialBus/private/qmodbusdevice_p.h>
+#include <QtSerialBus/qmodbuspdu.h>
+
+#include <QtCore/qtimer.h>
+#include <QtCore/qdebug.h>
 
 //
 //  W A R N I N G
@@ -57,11 +60,13 @@ QT_BEGIN_NAMESPACE
 class Q_AUTOTEST_EXPORT QModbusClientPrivate : public QModbusDevicePrivate
 {
     Q_DECLARE_PUBLIC(QModbusClient)
-public:
-    QModbusClientPrivate() : timeout(200)
-    {
-    }
 
+public:
+    QModbusClientPrivate() Q_DECL_EQ_DEFAULT;
+    virtual ~QModbusClientPrivate() Q_DECL_EQ_DEFAULT;
+
+    QModbusReply *sendRequest(const QModbusRequest &request, int serverAddress,
+                              const QModbusDataUnit *const unit);
     QModbusRequest createReadRequest(const QModbusDataUnit &data) const;
     QModbusRequest createWriteRequest(const QModbusDataUnit &data) const;
     QModbusRequest createRWRequest(const QModbusDataUnit &read, const QModbusDataUnit &write) const;
@@ -81,7 +86,21 @@ public:
     bool processReadWriteMultipleRegistersResponse(const QModbusResponse &response,
                                                   QModbusDataUnit *data);
 
-    int timeout;
+    virtual QModbusReply *enqueueRequest(const QModbusRequest &, int, const QModbusDataUnit &,
+                                         QModbusReply::ReplyType) {
+        return Q_NULLPTR;
+    }
+    // TODO: Review once we have a transport layer in place.
+    virtual bool isOpen() const { return false; }
+
+    int m_responseTimeoutDuration = 200;
+
+    struct QueueElement {
+        QPointer<QModbusReply> reply;
+        QModbusRequest requestPdu;
+        QModbusDataUnit unit;
+    };
+    void processQueueElement(const QModbusResponse &pdu, const QueueElement &element);
 };
 
 QT_END_NAMESPACE

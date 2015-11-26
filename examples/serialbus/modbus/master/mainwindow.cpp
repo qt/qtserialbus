@@ -40,10 +40,18 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "settingsdialog.h"
+#include "writeregistermodel.h"
 
-#include <QByteArray>
-#include <QModbus>
-#include <QModbusRtuSerialMaster>
+#include <QtSerialBus/qmodbustcpclient.h>
+#include <QtSerialBus/qmodbusrtuserialmaster.h>
+#include <QtCore/qbytearray.h>
+#include <QtWidgets/qstatusbar.h>
+
+enum ModbusConnection {
+    Serial,
+    Tcp
+};
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -52,11 +60,21 @@ MainWindow::MainWindow(QWidget *parent)
     , modbusDevice(Q_NULLPTR)
 {
     ui->setupUi(this);
+
+    m_settingsDialog = new SettingsDialog(this);
+
+    initActions();
+
+    writeModel = new WriteRegisterModel(this);
+    ui->writeValueTable->setModel(writeModel);
+    ui->writeValueTable->resizeColumnToContents(0);
+    ui->writeValueTable->horizontalHeader()->setStretchLastSection(true);
+    ui->writeValueTable->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
     ui->readTable->addItem(tr("Coils"), QModbusDataUnit::Coils);
     ui->readTable->addItem(tr("Discrete Inputs"), QModbusDataUnit::DiscreteInputs);
     ui->readTable->addItem(tr("Input Registers"), QModbusDataUnit::InputRegisters);
     ui->readTable->addItem(tr("Holding Registers"), QModbusDataUnit::HoldingRegisters);
-    on_writeTable_currentIndexChanged(ui->writeTable->currentText());
 
     ui->connectType->setCurrentIndex(0);
     on_connectType_currentIndexChanged(0);
@@ -71,6 +89,22 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::initActions()
+{
+    ui->actionConnect->setEnabled(true);
+    ui->actionDisconnect->setEnabled(false);
+    ui->actionExit->setEnabled(true);
+    ui->actionOptions->setEnabled(true);
+
+    connect(ui->actionConnect, &QAction::triggered,
+            this, &MainWindow::on_connectButton_clicked);
+    connect(ui->actionDisconnect, &QAction::triggered,
+            this, &MainWindow::on_connectButton_clicked);
+
+    connect(ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
+    connect(ui->actionOptions, &QAction::triggered, m_settingsDialog, &QDialog::show);
+}
+
 void MainWindow::on_connectType_currentIndexChanged(int index)
 {
     if (modbusDevice) {
@@ -79,19 +113,26 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
         modbusDevice = Q_NULLPTR;
     }
 
-    QModbusDevice::ModbusConnection type = static_cast<QModbusDevice::ModbusConnection> (index);
-    if (type == QModbusDevice::Serial) {
+    ModbusConnection type = static_cast<ModbusConnection> (index);
+    if (type == Serial) {
         modbusDevice = new QModbusRtuSerialMaster(this);
-    } else if (type == QModbusDevice::Tcp) {
-        modbusDevice = QModbus::instance()->createClient("libmodbus", type);
+    } else if (type == Tcp) {
+        modbusDevice = new QModbusTcpClient(this);
+        if (ui->portEdit->text().isEmpty())
+            ui->portEdit->setText(QLatin1Literal("127.0.0.1:502"));
     }
+
+    connect(modbusDevice, &QModbusClient::errorOccurred,
+            [this](QModbusDevice::ModbusError){
+        statusBar()->showMessage(modbusDevice->errorString(), 5000);
+    });
 
     if (!modbusDevice) {
         ui->connectButton->setDisabled(true);
-        if (type == QModbusDevice::Serial)
-            ui->errorLabel->setText(tr("Could not create Modbus master."));
+        if (type == Serial)
+            statusBar()->showMessage(tr("Could not create Modbus master."), 5000);
         else
-            ui->errorLabel->setText(tr("Could not create Modbus client."));
+            statusBar()->showMessage(tr("Could not create Modbus client."), 5000);
     } else {
         connect(modbusDevice, &QModbusClient::stateChanged,
                 this, &MainWindow::onStateChanged);
@@ -103,27 +144,29 @@ void MainWindow::on_connectButton_clicked()
     if (!modbusDevice)
         return;
 
-    ui->errorLabel->setText(QString());
+    statusBar()->clearMessage();
     if (modbusDevice->state() != QModbusDevice::ConnectedState) {
-        const QString portString = ui->portEdit->text();
-        QModbusRtuSerialMaster *serialMaster = qobject_cast<QModbusRtuSerialMaster *>(modbusDevice);
-        bool connectResult = false;
-
-        if (serialMaster) {
-            connectResult = serialMaster->connectDevice(portString);
+        modbusDevice->setPortName(ui->portEdit->text());
+        modbusDevice->setTimeout(m_settingsDialog->settings().responseTime);
+        if (!modbusDevice->connectDevice()) {
+            statusBar()->showMessage(tr("Connect failed: ") + modbusDevice->errorString(), 5000);
         } else {
-            modbusDevice->setPortName(ui->portEdit->text());
-            connectResult = modbusDevice->connectDevice();
+            ui->actionConnect->setEnabled(false);
+            ui->actionDisconnect->setEnabled(true);
         }
-        if (!connectResult)
-            ui->errorLabel->setText(tr("Connect failed: ") + modbusDevice->errorString());
     } else {
         modbusDevice->disconnectDevice();
+        ui->actionConnect->setEnabled(true);
+        ui->actionDisconnect->setEnabled(false);
     }
 }
 
 void MainWindow::onStateChanged(int state)
 {
+    bool connected = (state != QModbusDevice::UnconnectedState);
+    ui->actionConnect->setEnabled(!connected);
+    ui->actionDisconnect->setEnabled(connected);
+
     if (state == QModbusDevice::UnconnectedState)
         ui->connectButton->setText(tr("Connect"));
     else if (state == QModbusDevice::ConnectedState)
@@ -132,70 +175,123 @@ void MainWindow::onStateChanged(int state)
 
 void MainWindow::on_readButton_clicked()
 {
-    delete lastRequest;
-    if (!modbusDevice || modbusDevice->state() != QModbusDevice::ConnectedState)
+    if (!modbusDevice)
         return;
 
     const QModbusDataUnit::RegisterType registerType =
         static_cast<QModbusDataUnit::RegisterType> (ui->readTable->currentData().toInt());
     QModbusDataUnit dataRequest(registerType);
-    dataRequest.setValueCount(ui->readSize->currentText().toInt());
-    dataRequest.setStartAddress(ui->readAddress->text().toInt());
+
+    int numberOfEntries = ui->readSize->currentText().toInt();
+    int startAddress = ui->readAddress->text().toInt();
+
+    // do not go beyond 10 entries
+    numberOfEntries = qMin(numberOfEntries, 10 - startAddress);
+    Q_ASSERT(startAddress >= 0 && startAddress < 10);
+
+    dataRequest.setValueCount(numberOfEntries);
+    dataRequest.setStartAddress(startAddress);
 
     ui->readValue->clear();
-    lastRequest = modbusDevice->read(dataRequest, ui->readSlave->text().toInt());
-    if (lastRequest)
-        connect(lastRequest, &QModbusReply::finished, this, &MainWindow::readReady);
+    statusBar()->clearMessage();
+
+    QModbusReply *reply = modbusDevice->sendReadRequest(dataRequest,
+                                                        ui->readServer->text().toInt());
+    // broadcast replies return immediately
+    if (reply && reply->isFinished()) {
+        delete reply;
+        return;
+    }
+
+    if (reply)
+        connect(reply, &QModbusReply::finished, this, &MainWindow::readReady);
     else
-        ui->errorLabel->setText(tr("Read error: ") + modbusDevice->errorString());
+        statusBar()->showMessage(tr("Read error: ") + modbusDevice->errorString(), 5000);
 }
 
 void MainWindow::readReady()
 {
-    const QList<QModbusDataUnit> units = lastRequest->result();
-    for (int i = 0; i < units.size(); i++) {
-        const QString entry = tr("Address: ") + QString::number(units.at(i).startAddress())
-            + tr(" Value: ") + QString::number(units.at(i).values().at(0),
-                units.at(i).registerType() <= QModbusDataUnit::Coils ? 10 : 16);
-        ui->readValue->addItem(entry);
+    QModbusReply *reply = qobject_cast<QModbusReply *>(sender());
+    if (!reply)
+        return;
+
+    if (reply->error() == QModbusReply::NoError) {
+        const QModbusDataUnit unit = reply->result();
+        for (uint i = 0; i < unit.valueCount(); i++) {
+            const QString entry = tr("Address: %1, Value: %2").arg(unit.startAddress())
+                                     .arg(QString::number(unit.value(i),
+                                          unit.registerType() <= QModbusDataUnit::Coils ? 10 : 16));
+            ui->readValue->addItem(entry);
+        }
+    } else if (reply->error() == QModbusReply::ProtocolError) {
+        statusBar()->showMessage(tr("Read response error: %1 (Mobus exception: 0x%2)").
+                                    arg(reply->errorText()).
+                                    arg(reply->rawResult().exceptionCode(), -1, 16), 5000);
+    } else {
+        statusBar()->showMessage(tr("Read response error: %1 (code: 0x%2)").
+                                    arg(reply->errorText()).
+                                    arg(reply->error(), -1, 16), 5000);
     }
-    lastRequest->deleteLater();
-    lastRequest = Q_NULLPTR;
+
+    reply->deleteLater();
 }
 
 void MainWindow::on_writeButton_clicked()
 {
-    delete lastRequest;
-    if (!modbusDevice || modbusDevice->state() != QModbusDevice::ConnectedState)
+    if (!modbusDevice)
         return;
 
     QModbusDataUnit::RegisterType table = QModbusDataUnit::HoldingRegisters;
     if (ui->writeTable->currentText() == tr("Coils"))
         table = QModbusDataUnit::Coils;
 
-    lastRequest = modbusDevice->write(QModbusDataUnit(table, ui->writeAddress->text().toInt(),
-        ui->writeValue->text().toInt(0, 16)), ui->readSlave->text().toInt());
-    if (lastRequest)
-        connect(lastRequest, &QModbusReply::finished, this, &MainWindow::writeReady);
+    int numberOfEntries = ui->writeSize->currentText().toInt();
+    int startAddress = ui->writeAddress->text().toInt();
+    // do not go beyond 10 entries
+    numberOfEntries = qMin(numberOfEntries, 10 - startAddress);
+
+    Q_ASSERT(startAddress >= 0 && startAddress < 10);
+    QModbusDataUnit writeUnit(table, startAddress, numberOfEntries);
+    for (int i = startAddress; i < (startAddress + numberOfEntries); i++)
+    {
+        if (table == QModbusDataUnit::Coils)
+            writeUnit.setValue(i - startAddress, writeModel->m_coils[i]);
+        else
+            writeUnit.setValue(i - startAddress, writeModel->m_holdingRegisters[i]);
+    }
+
+    statusBar()->clearMessage();
+
+    // TODO test for R/W MultipleRegisters is missing
+    QModbusReply *reply = modbusDevice->sendWriteRequest(writeUnit, ui->writeServer->text().toInt());
+
+    // broadcast replies return immediately
+    if (reply && reply->isFinished()) {
+        delete reply;
+        return;
+    }
+
+    if (reply)
+        connect(reply, &QModbusReply::finished, this, &MainWindow::writeReady);
     else
-        ui->errorLabel->setText(tr("Write error: ") + modbusDevice->errorString());
+       statusBar()->showMessage(tr("Write error: ") + modbusDevice->errorString(), 5000);
 }
 
 void MainWindow::writeReady()
 {
-    lastRequest->deleteLater();
-    lastRequest = Q_NULLPTR;
-}
+    QModbusReply *reply = qobject_cast<QModbusReply *>(sender());
+    if (!reply)
+        return;
 
-void MainWindow::on_writeTable_currentIndexChanged(const QString &text)
-{
-    ui->writeValue->clear();
-    if (text == tr("Coils")) {
-        ui->writeValue->setValidator(new QIntValidator(0, 1, this));
-        ui->writeValue->setPlaceholderText(tr("Binary 0-1."));
-    } else if (text == tr("Holding Registers")) {
-        ui->writeValue->setValidator(new QRegExpValidator(QRegExp(QStringLiteral("[0-9a-f]{0,4}"),
-            Qt::CaseInsensitive), this));
-        ui->writeValue->setPlaceholderText(tr("Hexadecimal A-F, a-f, 0-9."));
+    if (reply->error() == QModbusReply::ProtocolError) {
+        statusBar()->showMessage(tr("Write response error: %1 (Mobus exception: 0x%2)").
+                                    arg(reply->errorText()).
+                                    arg(reply->rawResult().exceptionCode(), -1, 16), 5000);
+    } else if (reply->error() != QModbusReply::NoError) {
+        statusBar()->showMessage(tr("Write response error: %1 (code: 0x%2)").
+                                    arg(reply->errorText()).
+                                    arg(reply->error(), -1, 16), 5000);
     }
+
+    reply->deleteLater();
 }

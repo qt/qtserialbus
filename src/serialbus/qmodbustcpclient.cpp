@@ -37,6 +37,10 @@
 #include "qmodbustcpclient.h"
 #include "qmodbustcpclient_p.h"
 
+#include <QtCore/qdatetime.h>
+#include <QtCore/qurl.h>
+#include <QtNetwork/qhostaddress.h>
+
 QT_BEGIN_NAMESPACE
 
 /*!
@@ -51,10 +55,14 @@ QT_BEGIN_NAMESPACE
 
 /*!
     Constructs a QModbusTcpClient with the specified \a parent.
- */
+*/
 QModbusTcpClient::QModbusTcpClient(QObject *parent)
     : QModbusClient(*new QModbusTcpClientPrivate, parent)
 {
+    Q_D(QModbusTcpClient);
+    d->setupTcpSocket();
+
+    qsrand(QTime::currentTime().msec());
 }
 
 /*!
@@ -70,53 +78,43 @@ QModbusTcpClient::~QModbusTcpClient()
 QModbusTcpClient::QModbusTcpClient(QModbusTcpClientPrivate &dd, QObject *parent)
     : QModbusClient(dd, parent)
 {
+    Q_D(QModbusTcpClient);
+    d->setupTcpSocket();
+
+    qsrand(QTime::currentTime().msec());
 }
 
 /*!
-    \fn void QModbusTcpClient::connectDevice(const QString &hostName, quint16 port = 502)
-
-    Attempts to make a connection to \a hostName on the given \a port. If a connection is
-    established, it emits stateChanged() with ModbusDeviceState::ConnectedState.
-
-    At any point, the class can emit stateChanged() to signal the current device state or emit
-    errorOccurred() to signal that an error occurred.
-
-    \note \a hostName may be an IP address in string form (e.g., "43.195.83.32"), or it may be a
-    host name (e.g., "example.com"). \a port is in native byte order and defaults to number 502.
+     \reimp
 */
+bool QModbusTcpClient::open()
+{
+    if (state() == QModbusDevice::ConnectedState)
+        return true;
+
+    Q_D(QModbusTcpClient);
+    if (d->m_socket->state() != QAbstractSocket::UnconnectedState)
+        return false;
+
+    const QUrl url = QUrl::fromUserInput(portName());
+    if (!url.isValid()) {
+        qCWarning(QT_MODBUS) << "Invalid host:" << url.host();
+        return false;
+    }
+
+    d->m_socket->connectToHost(url.host(), url.port());
+
+    return true;
+}
 
 /*!
-    \fn void QModbusTcpClient::connectDevice(const QHostAddress &address, quint16 port = 502)
-
-    \overload
-
-    Attempts to make a connection to \a address on port \a port.
+     \reimp
 */
-
-/*
-    TODO: implement
-*/
-QModbusReplyEx *QModbusTcpClient::sendReadRequest(const QModbusDataUnit &read, int slaveAddress)
+void QModbusTcpClient::close()
 {
-    Q_UNUSED(read)
-    Q_UNUSED(slaveAddress)
-    return Q_NULLPTR;
-}
+    Q_D(QModbusTcpClient);
 
-QModbusReplyEx *QModbusTcpClient::sendWriteRequest(const QModbusDataUnit &write, int slaveAddress)
-{
-    Q_UNUSED(write)
-    Q_UNUSED(slaveAddress)
-    return Q_NULLPTR;
-}
-
-QModbusReplyEx *QModbusTcpClient::sendReadWriteRequest(const QModbusDataUnit &read,
-                                                       const QModbusDataUnit &write, int slaveAddress)
-{
-    Q_UNUSED(read)
-    Q_UNUSED(write)
-    Q_UNUSED(slaveAddress)
-    return Q_NULLPTR;
+    d->m_socket->disconnectFromHost();
 }
 
 QT_END_NAMESPACE

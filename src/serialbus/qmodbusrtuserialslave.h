@@ -52,16 +52,13 @@ public:
     explicit QModbusRtuSerialSlave(QObject *parent = Q_NULLPTR);
     ~QModbusRtuSerialSlave();
 
+    bool processesBroadcast() const Q_DECL_OVERRIDE;
+
 protected:
     QModbusRtuSerialSlave(QModbusRtuSerialSlavePrivate &dd, QObject *parent = Q_NULLPTR);
 
     bool open() Q_DECL_OVERRIDE;
     void close() Q_DECL_OVERRIDE;
-
-private:
-    Q_PRIVATE_SLOT(d_func(), void handleErrorOccurred(QSerialPort::SerialPortError))
-    Q_PRIVATE_SLOT(d_func(), void serialPortReadyRead())
-    Q_PRIVATE_SLOT(d_func(), void aboutToClose())
 };
 
 QT_END_NAMESPACE

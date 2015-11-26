@@ -37,9 +37,14 @@
 #ifndef QMODBUSERVER_P_H
 #define QMODBUSERVER_P_H
 
-#include "qmodbusserver.h"
-#include "qmodbusdevice_p.h"
-#include "qmodbusdataunit.h"
+#include <QtSerialBus/private/qmodbuscommevent_p.h>
+#include <QtSerialBus/private/qmodbusdevice_p.h>
+#include <QtSerialBus/private/qmodbus_symbols_p.h>
+#include <QtSerialBus/qmodbusdataunit.h>
+#include <QtSerialBus/qmodbusserver.h>
+
+#include <QtCore/qcontiguouscache.h>
+#include <QtCore/qvector.h>
 
 //
 //  W A R N I N G
@@ -59,56 +64,63 @@ class QModbusServerPrivate : public QModbusDevicePrivate
     Q_DECLARE_PUBLIC(QModbusServer)
 
 public:
-    QModbusServerPrivate() Q_DECL_EQ_DEFAULT;
+    enum Counter {
+        CommEvent = 0x0001,
+        BusMessage = Diagnostics::ReturnBusMessageCount,
+        BusCommunicationError = Diagnostics::ReturnBusCommunicationErrorCount,
+        BusExceptionError = Diagnostics::ReturnBusExceptionErrorCount,
+        ServerMessage = Diagnostics::ReturnServerMessageCount,
+        ServerNoResponse = Diagnostics::ReturnServerNoResponseCount,
+        ServerNAK = Diagnostics::ReturnServerNAKCount,
+        ServerBusy = Diagnostics::ReturnServerBusyCount,
+        BusCharacterOverrun = Diagnostics::ReturnBusCharacterOverrunCount
+    };
+
+    QModbusServerPrivate()
+        : m_counters(20, 0u)
+        , m_commEventLog(64)
+    {
+    }
 
     bool setMap(const QModbusDataUnitMap &map);
 
+    void resetCommunicationCounters() { m_counters.fill(0u, m_counters.size()); }
+    void incrementCounter(QModbusServerPrivate::Counter counter) { m_counters[counter]++; }
+
     QModbusResponse processRequest(const QModbusPdu &request);
+
     QModbusResponse processReadCoilsRequest(const QModbusRequest &request);
     QModbusResponse processReadDiscreteInputsRequest(const QModbusRequest &request);
+    QModbusResponse readBits(const QModbusPdu &request, QModbusDataUnit::RegisterType unitType);
+
     QModbusResponse processReadHoldingRegistersRequest(const QModbusRequest &request);
     QModbusResponse processReadInputRegistersRequest(const QModbusRequest &request);
+    QModbusResponse readBytes(const QModbusPdu &request, QModbusDataUnit::RegisterType unitType);
+
     QModbusResponse processWriteSingleCoilRequest(const QModbusRequest &request);
     QModbusResponse processWriteSingleRegisterRequest(const QModbusRequest &request);
-    QModbusResponse processDiagnostics(const QModbusRequest &request);
+    QModbusResponse writeSingle(const QModbusPdu &request, QModbusDataUnit::RegisterType unitType);
+
+    QModbusResponse processReadExceptionStatusRequest(const QModbusRequest &request);
+    QModbusResponse processDiagnosticsRequest(const QModbusRequest &request);
+    QModbusResponse processGetCommEventCounterRequest(const QModbusRequest &request);
+    QModbusResponse processGetCommEventLogRequest(const QModbusRequest &request);
     QModbusResponse processWriteMultipleCoilsRequest(const QModbusRequest &request);
     QModbusResponse processWriteMultipleRegistersRequest(const QModbusRequest &request);
+    QModbusResponse processReportServerIdRequest(const QModbusRequest &request);
+    QModbusResponse processMaskWriteRegisterRequest(const QModbusRequest &request);
     QModbusResponse processReadWriteMultipleRegistersRequest(const QModbusRequest &request);
+    QModbusResponse processReadFifoQueueRequest(const QModbusRequest &request);
 
-private:
-    bool restartCommunicationsOption(bool clearLog);
-    void resetCommunicationCounters();
-    void storeEvent(quint8 eventByte);
+    void storeModbusCommEvent(const QModbusCommEvent &eventByte);
 
-    // Device specific fields to be moved later
-    QModbusDataUnit m_discreteInputs;
-    QModbusDataUnit m_coils;
-    QModbusDataUnit m_inputRegisters;
-    QModbusDataUnit m_holdingRegisters;
-
-    quint16 m_diagnosticRegister = 0;
-
-    int m_slaveAddress = 0;
-
-    // Modbus Communication fields to stay
-    bool m_listenOnly = false; //TODO not enforced yet
-    bool m_continueOnError = true; //TODO hook into server implementations
-    bool m_deviceBusy = false; //TODO required?
-    uchar m_asciiInputDelimiter; // TODO not taken into account yet
-    quint16 m_commEventCounter = 0;
-    QByteArray m_commEventLog;
-
-    quint16 m_busMessageCounter = 0;
-    quint16 m_crcErrorCounter = 0;
-    quint16 m_exceptionErrorCounter = 0;
-    quint16 m_serverMessageCounter = 0;
-    quint16 m_serverNoResponseCounter = 0;
-    quint16 m_serverNAKCounter = 0;
-    quint16 m_serverDeviceBusyCounter = 0;
-    quint16 m_serverCharacterOverrunCounter = 0;
+    int m_serverAddress = 1;
+    QVector<quint16> m_counters;
+    QHash<int, QVariant> m_serverOptions;
+    QModbusDataUnitMap m_modbusDataUnitMap;
+    QContiguousCache<quint8> m_commEventLog;
 };
 
 QT_END_NAMESPACE
 
 #endif // QMODBUSERVER_P_H
-

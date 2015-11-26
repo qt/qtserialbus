@@ -37,12 +37,15 @@
 #ifndef QMODBUSSERIALMASTER_P_H
 #define QMODBUSSERIALMASTER_P_H
 
-#include "qmodbusrtuserialmaster.h"
-#include "qmodbusclient_p.h"
+#include <QtSerialBus/qmodbusrtuserialmaster.h>
+#include <QtSerialBus/private/qmodbusadu_p.h>
+#include <QtSerialBus/private/qmodbusclient_p.h>
 
-#include "qmodbus.h"
-
-#include <QtCore/qdebug.h>
+#include <QtCore/qloggingcategory.h>
+#include <QtCore/qpointer.h>
+#include <QtCore/qqueue.h>
+#include <QtCore/qtimer.h>
+#include <QtSerialPort/qserialport.h>
 
 //
 //  W A R N I N G
@@ -57,48 +60,237 @@
 
 QT_BEGIN_NAMESPACE
 
+Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
+Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS_LOW)
+
 class QModbusRtuSerialMasterPrivate : public QModbusClientPrivate
 {
     Q_DECLARE_PUBLIC(QModbusRtuSerialMaster)
 
 public:
-    QModbusRtuSerialMasterPrivate()
-        : pluginMaster(Q_NULLPTR)
+    QModbusRtuSerialMasterPrivate() Q_DECL_EQ_DEFAULT;
+
+    void setupSerialPort()
     {
-        //hard usage of libmodbus plugin
-        pluginMaster = QModbus::instance()->createClient(QByteArray("libmodbus"));
-        if (!pluginMaster)
-            qWarning() << "Cannot find libmodbus plugin.";
+        Q_Q(QModbusRtuSerialMaster);
+
+        m_serialPort = new QSerialPort(q);
+        m_serialPort->setBaudRate(QSerialPort::Baud9600);
+        m_serialPort->setParity(QSerialPort::NoParity);
+        m_serialPort->setDataBits(QSerialPort::Data8);
+        m_serialPort->setStopBits(QSerialPort::OneStop);
+
+        QObject::connect(m_serialPort, &QSerialPort::readyRead, [this]() {
+            responseBuffer += m_serialPort->read(m_serialPort->bytesAvailable());
+            qCDebug(QT_MODBUS_LOW) << "Response buffer:" << responseBuffer.toHex();
+
+            if (responseBuffer.size() < 2) {
+                qCDebug(QT_MODBUS) << "Modbus ADU not complete";
+                return;
+            }
+
+            const QModbusSerialAdu tmpAdu(QModbusSerialAdu::Rtu, responseBuffer);
+            const QModbusResponse tmpPdu = tmpAdu.pdu();
+            int pduSizeWithoutFcode = QModbusResponse::calculateDataSize(tmpPdu.functionCode(),
+                                                                         tmpPdu.data());
+            if (pduSizeWithoutFcode < 0) {
+                // wait for more data
+                qCDebug(QT_MODBUS) << "Cannot calculate PDU size for function code:"
+                                   << tmpPdu.functionCode() << " , delaying pending frame";
+                return;
+            }
+
+            // server address byte + function code byte + PDU size + 2 bytes CRC
+            const int aduSize = 2 + pduSizeWithoutFcode + 2;
+            if (tmpAdu.rawSize() < aduSize) {
+                qCDebug(QT_MODBUS) << "Incomplete ADU received, ignoring";
+                return;
+            }
+
+            const QModbusSerialAdu adu(QModbusSerialAdu::Rtu, responseBuffer.left(aduSize));
+            responseBuffer.remove(0, aduSize);
+
+            stopResponseTimer();
+
+            qCDebug(QT_MODBUS)<< "Received ADU:" << adu.rawData().toHex();
+            if (QT_MODBUS().isDebugEnabled() && !responseBuffer.isEmpty())
+                qCDebug(QT_MODBUS_LOW) << "Pending buffer:" << responseBuffer.toHex();
+
+            // check CRC
+            if (!adu.matchingChecksum()) {
+                qCWarning(QT_MODBUS) << "Discarding response with wrong CRC, received:"
+                                     << adu.checksum<quint16>() << ", calculated CRC:"
+                                     << QModbusSerialAdu::calculateCRC(adu.data(), adu.size());
+                return;
+            }
+
+            const QModbusResponse response = adu.pdu();
+            if (!canMatchRequestAndResponse(response, adu.serverAddress())) {
+                qCWarning(QT_MODBUS) << "Cannot match response with open request, ignoring";
+                return;
+            }
+
+            processQueueElement(response, m_queue.dequeue());
+            sendNextRequest(); // go to next request
+        });
+
+        QObject::connect(m_serialPort, &QSerialPort::aboutToClose, [this]() {
+            Q_Q(QModbusRtuSerialMaster);
+            if (q->state() != QModbusDevice::ClosingState)
+                q->close();
+        });
     }
 
-    ~QModbusRtuSerialMasterPrivate()
+    void startResponseTimer()
     {
-        delete pluginMaster;
-    }
-
-    void setupMaster()
-    {
-        if (!pluginMaster)
+        if (m_responseTimeoutDuration < 0)
             return;
 
         Q_Q(QModbusRtuSerialMaster);
-        // forward the error and state changes
-        QObject::connect(pluginMaster, SIGNAL(stateChanged(QModbusDevice::ModbusDeviceState)),
-            q, SLOT(handleStateChanged(QModbusDevice::ModbusDeviceState)));
-        QObject::connect(pluginMaster, SIGNAL(errorOccurred(QModbusDevice::ModbusError)),
-            q, SLOT(handleErrorOccurred(QModbusDevice::ModbusError)));
 
-        q->setState(pluginMaster->state());
-        q->setError(pluginMaster->errorString(), pluginMaster->error());
+        if (!m_responseTimer) {
+            m_responseTimer = new QTimer(q);
+            m_responseTimer->setSingleShot(true);
+            m_responseTimer->setInterval(m_responseTimeoutDuration);
+            QObject::connect(m_responseTimer, &QTimer::timeout, q, [this]() {
+                qCDebug(QT_MODBUS) << "Timeout of last request";
+
+                if (m_queue.isEmpty())
+                    return;
+
+                QueueElement elem = m_queue.dequeue();
+                if (elem.reply.isNull()) {
+                    // reply deleted while waiting for response which timed out
+                    // nothing really to do here
+                    return;
+                }
+
+                elem.reply->setError(QModbusReply::TimeoutError,
+                                     QModbusClient::tr("Request timeout."));
+            });
+
+            QObject::connect(q, &QModbusClient::timeoutChanged, q, [q, this]() {
+                m_responseTimer->setInterval(q->timeout());
+            });
+        }
+
+        m_responseTimer->start();
     }
 
-    void handleStateChanged(QModbusDevice::ModbusDeviceState);
-    void handleErrorOccurred(QModbusDevice::ModbusError);
+    void stopResponseTimer()
+    {
+        if (m_responseTimeoutDuration < 0)
+            return;
 
-    QModbusClient* pluginMaster;
+        if (!m_responseTimer)
+            return;
+
+        if (m_responseTimer->isActive())
+            m_responseTimer->stop();
+    }
+
+    bool sendNextAdu(const QModbusRequest &request, int serverAddress)
+    {
+        Q_Q(QModbusRtuSerialMaster);
+
+        const QByteArray adu = QModbusSerialAdu::create(QModbusSerialAdu::Rtu, serverAddress,
+                                                        request);
+        int writtenBytes = m_serialPort->write(adu);
+        if (writtenBytes == -1 || writtenBytes < adu.size()) {
+            qCDebug(QT_MODBUS) << "Cannot write request to serial port. Failed ADU" << adu;
+            q->setError(QModbusClient::tr("Could not write request to serial bus."),
+                        QModbusDevice::WriteError);
+            return false;
+        }
+        qCDebug(QT_MODBUS_LOW)<< "Sent Serial ADU:" << adu.toHex();
+        qCDebug(QT_MODBUS) << "Sent Serial PDU:" << request;
+
+        return true;
+
+    }
+
+    void sendNextRequest()
+    {
+        if (m_queue.isEmpty())
+            return;
+
+        if (m_queue.head().reply.isNull()) { // reply deleted, skip it
+            m_queue.dequeue();
+            sendNextRequest();
+            return;
+        }
+
+        bool success = sendNextAdu(m_queue.head().requestPdu,
+                                   m_queue.head().reply->serverAddress());
+        if (!success) {
+            QueueElement elem = m_queue.dequeue();
+
+            elem.reply->setError(QModbusReply::WriteError,
+                                 QModbusClient::tr("Could not write message to serial bus."));
+
+            sendNextRequest();
+            return;
+        }
+
+        if (!m_queue.head().reply->serverAddress()) {
+            // broadcasts return immediately but we delay a bit to avoid spaming of bus
+            QueueElement elem = m_queue.dequeue();
+            elem.reply->setFinished(true);
+
+            QTimer::singleShot(0, [this]() { sendNextRequest(); });
+            return;
+        }
+
+        // regular send -> keep in queue
+        startResponseTimer();
+    }
+
+    QModbusReply *enqueueRequest(const QModbusRequest &request, int slaveAddress,
+                                 const QModbusDataUnit &unit,
+                                 QModbusReply::ReplyType type) Q_DECL_OVERRIDE
+    {
+        Q_Q(QModbusRtuSerialMaster);
+
+        QModbusReply *reply = new QModbusReply(type, slaveAddress, q);
+        m_queue.enqueue(QueueElement{ reply, request, unit });
+        sendNextRequest();
+
+        return reply;
+    }
+
+    bool canMatchRequestAndResponse(const QModbusResponse &response, int sendingServer) const
+    {
+        if (m_queue.isEmpty()) // nothing pending
+            return false;
+
+        const QueueElement &head = m_queue.head(); // reply deleted
+        if (head.reply.isNull())
+            return false;
+
+        if (head.reply->serverAddress() != sendingServer) // server mismatch
+            return false;
+
+        // request for different fcode
+        if (head.requestPdu.functionCode() != response.functionCode())
+            return false;
+
+        return true;
+    }
+
+    // TODO: Review once we have a transport layer in place.
+    bool isOpen() const Q_DECL_OVERRIDE
+    {
+        if (m_serialPort)
+            return m_serialPort->isOpen();
+        return false;
+    }
+
+    QSerialPort *m_serialPort;
+    QByteArray responseBuffer;
+    QQueue<QueueElement> m_queue;
+    QTimer *m_responseTimer = Q_NULLPTR;
 };
 
 QT_END_NAMESPACE
 
 #endif // QMODBUSSERIALMASTER_P_H
-

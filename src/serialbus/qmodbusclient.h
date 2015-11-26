@@ -42,7 +42,6 @@
 #include <QtSerialBus/qmodbusdataunit.h>
 #include <QtSerialBus/qmodbuspdu.h>
 #include <QtSerialBus/qmodbusreply.h>
-#include <QtSerialBus/qmodbusreplyex.h>
 
 #include <QtCore/qobject.h>
 
@@ -58,29 +57,25 @@ class Q_SERIALBUS_EXPORT QModbusClient : public QModbusDevice
 
 public:
     explicit QModbusClient(QObject *parent = 0);
-    virtual ~QModbusClient();
+    ~QModbusClient();
 
-    virtual QModbusReplyEx *sendReadRequest(const QModbusDataUnit &read, int slaveAddress) = 0;
-    virtual QModbusReplyEx *sendWriteRequest(const QModbusDataUnit &write, int slaveAddress) = 0;
-    virtual QModbusReplyEx *sendReadWriteRequest(const QModbusDataUnit &read,
-                                                 const QModbusDataUnit &write, int slaveAddress) = 0;
-
-    //TODO to be removed once new setup ready
-    virtual QModbusReply *write(const QModbusDataUnit &request, int slaveAddress = 1) = 0;
-    virtual QModbusReply *read(const QModbusDataUnit &request, int slaveAddress = 1) = 0;
+    QModbusReply *sendReadRequest(const QModbusDataUnit &read, int serverAddress);
+    QModbusReply *sendWriteRequest(const QModbusDataUnit &write, int serverAddress);
+    QModbusReply *sendReadWriteRequest(const QModbusDataUnit &read, const QModbusDataUnit &write,
+                                       int serverAddress);
+    QModbusReply *sendRawRequest(const QModbusRequest &request, int serverAddress);
 
     int timeout() const;
     void setTimeout(int newTimeout);
 
 Q_SIGNALS:
-    void requestFinished(QModbusReplyEx *result);
     void timeoutChanged();
 
 protected:
     QModbusClient(QModbusClientPrivate &dd, QObject *parent = Q_NULLPTR);
 
     virtual bool processResponse(const QModbusResponse &response, QModbusDataUnit *data);
-    virtual bool processPrivateModbusResponse(const QModbusResponse &response, QModbusDataUnit *data);
+    virtual bool processPrivateResponse(const QModbusResponse &response, QModbusDataUnit *data);
 };
 
 QT_END_NAMESPACE

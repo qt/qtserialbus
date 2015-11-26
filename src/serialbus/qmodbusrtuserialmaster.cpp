@@ -37,9 +37,12 @@
 #include "qmodbusrtuserialmaster.h"
 #include "qmodbusrtuserialmaster_p.h"
 
-#include <QtSerialBus/qmodbus.h>
+#include <QtCore/qloggingcategory.h>
 
 QT_BEGIN_NAMESPACE
+
+Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
+Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS_LOW)
 
 /*!
     \class QModbusRtuSerialMaster
@@ -56,42 +59,20 @@ QT_BEGIN_NAMESPACE
 
 /*!
     Constructs a serial Modbus master with the specified \a parent.
- */
+*/
 QModbusRtuSerialMaster::QModbusRtuSerialMaster(QObject *parent)
     : QModbusClient(*new QModbusRtuSerialMasterPrivate, parent)
 {
     Q_D(QModbusRtuSerialMaster);
-    d->setupMaster();
+    d->setupSerialPort();
 }
 
 /*!
     \internal
- */
+*/
 QModbusRtuSerialMaster::~QModbusRtuSerialMaster()
 {
-}
-
-/*!
-    Connects the Modbus master to a serial port. \a deviceName
-    represents the serial port to which the Modbus servers are connected.
-
-    The function returns \c true on success; otherwise \c false.
-
-    \sa disconnectDevice()
- */
-bool QModbusRtuSerialMaster::connectDevice(const QString &deviceName)
-{
-    Q_D(QModbusRtuSerialMaster);
-
-    if (!d->pluginMaster)
-        return false;
-
-    // TODO remove setPortName() usage
-    d->pluginMaster->setPortName(deviceName);
-
-    // TODO Implement QModbusRtuSerialMaster::connectDevice(QString)
-
-    return d->pluginMaster->connectDevice();
+    close();
 }
 
 /*!
@@ -101,100 +82,52 @@ QModbusRtuSerialMaster::QModbusRtuSerialMaster(QModbusRtuSerialMasterPrivate &dd
     : QModbusClient(dd, parent)
 {
     Q_D(QModbusRtuSerialMaster);
-    d->setupMaster();
+    d->setupSerialPort();
 }
 
 /*!
-    \reimp
- */
+     \reimp
+*/
 bool QModbusRtuSerialMaster::open()
 {
-    // TODO remove later on
-    // The function is not needed anymore as connectDevice(QString)
-    // does not rely on it anymore.
-    return false;
+    if (state() == QModbusDevice::ConnectedState)
+        return true;
+
+    Q_D(QModbusRtuSerialMaster);
+
+    d->responseBuffer.clear();
+
+    d->m_serialPort->setPortName(portName());
+    if (d->m_serialPort->open(QIODevice::ReadWrite))
+        setState(QModbusDevice::ConnectedState);
+    else
+        setError(d->m_serialPort->errorString(), QModbusDevice::ConnectionError);
+
+    return (state() == QModbusDevice::ConnectedState);
 }
 
 /*!
-    \reimp
- */
+     \reimp
+*/
 void QModbusRtuSerialMaster::close()
 {
     Q_D(QModbusRtuSerialMaster);
 
-    if (!d->pluginMaster)
-        return;
+    if (d->m_serialPort->isOpen())
+        d->m_serialPort->close();
 
-    d->pluginMaster->disconnectDevice();
+    qCDebug(QT_MODBUS_LOW) << "Aborted replies:" << d->m_queue.count();
+
+    while (!d->m_queue.isEmpty()) {
+        // Finish each open reply and forget them
+        QModbusRtuSerialMasterPrivate::QueueElement elem = d->m_queue.dequeue();
+        if (!elem.reply.isNull()) {
+            elem.reply->setError(QModbusReply::ReplyAbortedError,
+                                 QModbusClient::tr("Reply aborted due to connection closure."));
+        }
+    }
+
+    setState(QModbusDevice::UnconnectedState);
 }
-
-// forward the state changes
-void QModbusRtuSerialMasterPrivate::handleStateChanged(QModbusDevice::ModbusDeviceState state)
-{
-    Q_Q(QModbusRtuSerialMaster);
-    q->setState(state);
-}
-
-// forward the error changes
-void QModbusRtuSerialMasterPrivate::handleErrorOccurred(QModbusDevice::ModbusError error)
-{
-    Q_Q(QModbusRtuSerialMaster);
-    q->setError(pluginMaster ? pluginMaster->errorString() : QString(), error);
-}
-
-/*!
-    \reimp
- */
-QModbusReply *QModbusRtuSerialMaster::write(const QModbusDataUnit &request, int slaveId)
-{
-    Q_D(QModbusRtuSerialMaster);
-
-    if (!d->pluginMaster)
-        return 0;
-
-    return d->pluginMaster->write(request, slaveId);
-}
-
-/*!
-    \reimp
- */
-QModbusReply *QModbusRtuSerialMaster::read(const QModbusDataUnit &request, int slaveId)
-{
-    Q_D(QModbusRtuSerialMaster);
-
-    if (!d->pluginMaster)
-        return 0;
-
-    return d->pluginMaster->read(request, slaveId);
-
-}
-
-/*
-    TODO: implement
-*/
-QModbusReplyEx *QModbusRtuSerialMaster::sendReadRequest(const QModbusDataUnit &read, int slaveId)
-{
-    Q_UNUSED(read)
-    Q_UNUSED(slaveId)
-    return Q_NULLPTR;
-}
-
-QModbusReplyEx *QModbusRtuSerialMaster::sendWriteRequest(const QModbusDataUnit &write, int slaveId)
-{
-    Q_UNUSED(write)
-    Q_UNUSED(slaveId)
-    return Q_NULLPTR;
-}
-
-QModbusReplyEx *QModbusRtuSerialMaster::sendReadWriteRequest(const QModbusDataUnit &read,
-                                                         const QModbusDataUnit &write, int slaveId)
-{
-    Q_UNUSED(read)
-    Q_UNUSED(write)
-    Q_UNUSED(slaveId)
-    return Q_NULLPTR;
-}
-
-#include "moc_qmodbusrtuserialmaster.cpp"
 
 QT_END_NAMESPACE

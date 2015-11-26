@@ -45,20 +45,13 @@ QT_BEGIN_NAMESPACE
 
 class QModbusDevicePrivate;
 
-
 class Q_SERIALBUS_EXPORT QModbusDevice : public QObject
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(QModbusDevice)
 
 public:
-    // TODO: Temporarily added until plugin system removed.
-    enum ModbusConnection {
-        Serial,
-        Tcp
-    };
-
-    enum ModbusError {
+    enum ModbusError { //TODO review -> some values are reported via QModbusReply (e.g. WriteError)
         NoError,
         ReadError,
         WriteError,
@@ -78,7 +71,7 @@ public:
     Q_ENUM(ModbusDeviceState)
 
     explicit QModbusDevice(QObject *parent = 0);
-    virtual ~QModbusDevice();
+    ~QModbusDevice();
 
     //TODO should become part of connect call in RTS specific sub class
     void setPortName(const QString& name);

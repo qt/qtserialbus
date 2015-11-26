@@ -57,49 +57,49 @@ private:
     QtMessageHandler oldMessageHandler;
 };
 
-static quint8 minimumDataSize(QModbusPdu::FunctionCode code, bool request)
+static int minimumDataSize(QModbusPdu::FunctionCode code, bool request)
 {
     switch (code) {
-    case QModbusPdu::Invalid:
-    case QModbusPdu::UndefinedFunctionCode:
-        return 0u;
     case QModbusPdu::ReadCoils:
     case QModbusPdu::ReadDiscreteInputs:
-        return request ? 4u : 2u;
+        return request ? 4 : 2;
     case QModbusPdu::WriteSingleCoil:
     case QModbusPdu::WriteSingleRegister:
-        return 4u;
+        return 4;
     case QModbusPdu::ReadHoldingRegisters:
     case QModbusPdu::ReadInputRegisters:
-        return request ? 4u : 3u;
+        return request ? 4 : 3;
     case QModbusPdu::ReadExceptionStatus:
-        return request ? 0u : 1u;
+        return request ? 0 : 1;
     case QModbusPdu::Diagnostics:
-        return 4u;
+        return 4;
     case QModbusPdu::GetCommEventCounter:
-        return request ? 0u : 4u;
+        return request ? 0 : 4;
     case QModbusPdu::GetCommEventLog:
-        return request ? 0u : 8u;
+        return request ? 0 : 8;
     case QModbusPdu::WriteMultipleCoils:
-        return request ? 6u : 4u;
+        return request ? 6 : 4;
     case QModbusPdu::WriteMultipleRegisters:
-        return request ? 7u : 4u;
+        return request ? 7 : 4;
     case QModbusPdu::ReportServerId:
-        return request ? 0u : 4u;   // TODO: The spec is not really clear here.
+        return request ? 0 : 3;
     case QModbusPdu::ReadFileRecord:
-        return request ? 8u : 5u;
+        return request ? 8 : 5;
     case QModbusPdu::WriteFileRecord:
-        return 10u;
+        return 10;
     case QModbusPdu::MaskWriteRegister:
-        return 6u;
+        return 6;
     case QModbusPdu::ReadWriteMultipleRegisters:
-        return request ? 11u : 3u;
+        return request ? 11 : 3;
     case QModbusPdu::ReadFifoQueue:
-        return request ? 2u : 6u;
+        return request ? 2 : 6;
     case QModbusPdu::EncapsulatedInterfaceTransport:
-        break; // TODO: The spec is not really clear here.
+        return 2;
+    case QModbusPdu::Invalid:
+    case QModbusPdu::UndefinedFunctionCode:
+        return -1;
     }
-    return 0u;
+    return -1;
 }
 
 class tst_QModbusPdu : public QObject
@@ -113,17 +113,20 @@ private slots:
         QCOMPARE(request.isValid(), false);
         QCOMPARE(request.isException(), false);
         QCOMPARE(request.functionCode(), QModbusRequest::FunctionCode(0x00));
+        QCOMPARE(request.exceptionCode(), QModbusPdu::ExtendedException);
         QCOMPARE(request.data().toHex(), QByteArray());
 
         QModbusResponse response;
         QCOMPARE(response.isValid(), false);
         QCOMPARE(response.isException(), false);
         QCOMPARE(response.functionCode(), QModbusResponse::FunctionCode(0x00));
+        QCOMPARE(response.exceptionCode(), QModbusPdu::ExtendedException);
         QCOMPARE(response.data().toHex(), QByteArray());
 
         QModbusExceptionResponse exception;
         QCOMPARE(exception.isValid(), false);
         QCOMPARE(exception.isException(), false);
+        QCOMPARE(exception.exceptionCode(), QModbusPdu::ExtendedException);
         QCOMPARE(exception.functionCode(), QModbusExceptionResponse::FunctionCode(0x00));
         QCOMPARE(exception.data().toHex(), QByteArray());
     }
@@ -134,6 +137,7 @@ private slots:
         QCOMPARE(request.isValid(), true);
         QCOMPARE(request.isException(), false);
         QCOMPARE(request.functionCode(), QModbusRequest::ReportServerId);
+        QCOMPARE(request.exceptionCode(), QModbusPdu::ExtendedException);
         QCOMPARE(request.data().toHex(), QByteArray());
 
         // Byte Count, Server ID, Run Indicator Status
@@ -142,6 +146,7 @@ private slots:
         QCOMPARE(response.isValid(), true);
         QCOMPARE(response.isException(), false);
         QCOMPARE(response.functionCode(), QModbusResponse::ReportServerId);
+        QCOMPARE(response.exceptionCode(), QModbusPdu::ExtendedException);
         QCOMPARE(response.data().toHex(), QByteArray("0201ff"));
     }
 
@@ -245,6 +250,7 @@ private slots:
         QCOMPARE(exception.isException(), true);
         QCOMPARE(exception.functionCode(), QModbusExceptionResponse::FunctionCode(0x91));
         QCOMPARE(exception.data().toHex(), QByteArray("04"));
+        QCOMPARE(exception.exceptionCode(), QModbusExceptionResponse::ServerDeviceFailure);
 
         QModbusExceptionResponse response;
         QCOMPARE(response.isValid(), false);
@@ -252,11 +258,12 @@ private slots:
         QCOMPARE(response.functionCode(), QModbusExceptionResponse::Invalid);
 
         response.setFunctionCode(QModbusExceptionResponse::ReportServerId);
-        response.setExeceptionCode(QModbusExceptionResponse::ServerDeviceFailure);
+        response.setExceptionCode(QModbusExceptionResponse::ServerDeviceFailure);
         QCOMPARE(response.isValid(), true);
         QCOMPARE(response.isException(), true);
         QCOMPARE(response.functionCode(), QModbusExceptionResponse::FunctionCode(0x91));
         QCOMPARE(response.data().toHex(), QByteArray("04"));
+        QCOMPARE(exception.exceptionCode(), QModbusExceptionResponse::ServerDeviceFailure);
 
         QModbusPdu pdu;
         pdu.setFunctionCode(QModbusExceptionResponse::FunctionCode(QModbusPdu::ReadCoils | quint8(0x80)));
@@ -266,10 +273,14 @@ private slots:
         QModbusExceptionResponse exception2(pdu);
         QCOMPARE(exception2.isException(), true);
         QCOMPARE(exception2.functionCode(), QModbusExceptionResponse::FunctionCode(0x81));
+        QCOMPARE(exception2.exceptionCode(), QModbusExceptionResponse::ExtendedException);
+        exception2.setExceptionCode(QModbusExceptionResponse::IllegalFunction);
+        QCOMPARE(exception2.exceptionCode(), QModbusExceptionResponse::IllegalFunction);
 
         QModbusExceptionResponse exception3 = pdu;
         QCOMPARE(exception3.isException(), true);
         QCOMPARE(exception3.functionCode(), QModbusExceptionResponse::FunctionCode(0x81));
+        QCOMPARE(exception3.exceptionCode(), QModbusExceptionResponse::ExtendedException);
     }
 
     void testQDebugStreamOperator()
@@ -393,6 +404,10 @@ private slots:
             QModbusRequest::minimumDataSize(QModbusRequest::Invalid));
         QCOMPARE(minimumDataSize(QModbusPdu::UndefinedFunctionCode, request),
             QModbusRequest::minimumDataSize(QModbusRequest::Invalid));
+
+        QModbusExceptionResponse exception(QModbusResponse::ReadCoils, QModbusPdu::IllegalFunction);
+        QCOMPARE(minimumDataSize(exception.functionCode(), request), -1);
+        QCOMPARE(QModbusResponse::minimumDataSize(exception.functionCode()), 1);
     }
 
     void testQModbusRequestStreamOperator_data()
@@ -415,9 +430,8 @@ private slots:
             << QByteArray::fromHex("00010003") << QByteArray::fromHex("0600010003");
         QTest::newRow("ReadExceptionStatus") << QModbusRequest::ReadExceptionStatus
             << QByteArray() << QByteArray::fromHex("07");
-
-        // TODO: Implement QModbusRequest::Diagnostics!
-
+        QTest::newRow("Diagnostics") << QModbusRequest::Diagnostics
+            << QByteArray::fromHex("0000a537") << QByteArray::fromHex("080000a537");
         QTest::newRow("GetCommEventCounter") << QModbusRequest::GetCommEventCounter
             << QByteArray() << QByteArray::fromHex("0b");
         QTest::newRow("GetCommEventLog") << QModbusRequest::GetCommEventLog
@@ -441,8 +455,9 @@ private slots:
             << QByteArray::fromHex("1700030006000e00030600ff00ff00ff");
         QTest::newRow("ReadFifoQueue") << QModbusRequest::ReadFifoQueue
             << QByteArray::fromHex("04de") << QByteArray::fromHex("1804de");
-
-        // TODO: Implement QModbusRequest::EncapsulatedInterfaceTransport!
+        QTest::newRow("EncapsulatedInterfaceTransport")
+            << QModbusRequest::EncapsulatedInterfaceTransport
+            << QByteArray::fromHex("0e0100") << QByteArray::fromHex("2b0e0100");
     }
 
     void testQModbusRequestStreamOperator()
@@ -483,9 +498,8 @@ private slots:
             << QByteArray::fromHex("00010003") << QByteArray::fromHex("0600010003");
         QTest::newRow("ReadExceptionStatus") << QModbusResponse::ReadExceptionStatus
             << QByteArray::fromHex("6d") << QByteArray::fromHex("076d");
-
-        // TODO: Implement QModbusResponse::Diagnostics!
-
+        QTest::newRow("Diagnostics") << QModbusResponse::Diagnostics
+            << QByteArray::fromHex("ffff0108") << QByteArray::fromHex("08ffff0108");
         QTest::newRow("GetCommEventCounter") << QModbusResponse::GetCommEventCounter
             << QByteArray::fromHex("ffff0108") << QByteArray::fromHex("0bffff0108");
         QTest::newRow("GetCommEventLog") << QModbusResponse::GetCommEventLog
@@ -494,9 +508,8 @@ private slots:
             << QByteArray::fromHex("0013000a") << QByteArray::fromHex("0f0013000a");
         QTest::newRow("WriteMultipleRegisters") << QModbusResponse::WriteMultipleRegisters
             << QByteArray::fromHex("00010002") << QByteArray::fromHex("1000010002");
-
-        // TODO: Implement ReportServerId!
-
+        QTest::newRow("ReportServerId") << QModbusResponse::ReportServerId
+            << QByteArray::fromHex("030aff12") << QByteArray::fromHex("11030aff12");
         QTest::newRow("ReadFileRecord") << QModbusResponse::ReadFileRecord
             << QByteArray::fromHex("0c05060dfe0020050633cd0040")
             << QByteArray::fromHex("140c05060dfe0020050633cd0040");
@@ -510,8 +523,18 @@ private slots:
             << QByteArray::fromHex("170c00fe0acd00010003000d00ff");
         QTest::newRow("ReadFifoQueue") << QModbusResponse::ReadFifoQueue
             << QByteArray::fromHex("0006000201b81284") << QByteArray::fromHex("180006000201b81284");
+        QTest::newRow("EncapsulatedInterfaceTransport")
+            << QModbusResponse::EncapsulatedInterfaceTransport
+            << QByteArray::fromHex("0e01010000030016") + "Company identification" +
+                QByteArray::fromHex("010d") + "Product code" + QByteArray::fromHex("0205") +
+                "V2.11"
+            << QByteArray::fromHex("2b0e01010000030016") + "Company identification" +
+                QByteArray::fromHex("010d") + "Product code" + QByteArray::fromHex("0205") +
+                "V2.11";
 
-        // TODO: Implement QModbusResponse::EncapsulatedInterfaceTransport!
+        QModbusExceptionResponse ex(QModbusPdu::ReadCoils, QModbusPdu::IllegalDataAddress);
+        QTest::newRow("StreamExceptionResponse") << ex.functionCode()
+            << QByteArray::fromHex("02") << QByteArray::fromHex("8102");
     }
 
     void testQModbusResponseStreamOperator()

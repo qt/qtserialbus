@@ -55,7 +55,7 @@ QT_BEGIN_NAMESPACE
 
     QCanBusDevice communicates with a CAN backend providing users with a convenient API.
     The CAN backend must be specified during the object creation.
- */
+*/
 
 /*!
     \enum QCanBusDevice::CanBusError
@@ -68,7 +68,7 @@ QT_BEGIN_NAMESPACE
     \value ConfigurationError   An error occurred when attempting to set a configuration
                                 parameter.
     \value UnknownError         An unknown error occurred.
- */
+*/
 
 /*!
     \enum QCanBusDevice::CanBusDeviceState
@@ -78,7 +78,7 @@ QT_BEGIN_NAMESPACE
     \value ConnectingState  The device is being connected.
     \value ConnectedState   The device is connected to the CAN bus.
     \value ClosingState     The device is being closed.
- */
+*/
 
 /*!
     \enum QCanBusDevice::ConfigurationKey
@@ -101,7 +101,7 @@ QT_BEGIN_NAMESPACE
     \value UserKey          This key defines the range where custom keys start. It's most
                             common purpose is to permit platform-specific configuration
                             options.
- */
+*/
 
 /*!
     \class QCanBusDevice::Filter
@@ -117,7 +117,7 @@ QT_BEGIN_NAMESPACE
     The example below demonstrates how to use the struct:
 
     \snippet main.cpp Filter Examples
- */
+*/
 
 /*!
     \enum QCanBusDevice::Filter::FormatFilter
@@ -130,7 +130,7 @@ QT_BEGIN_NAMESPACE
                                         (29 bit identifier).
     \value MatchBaseAndExtendedFormat   The CAN bus message can have a base or an extended
                                         message format.
- */
+*/
 
 /*!
     \variable QCanBusDevice::Filter::frameId
@@ -145,7 +145,7 @@ QT_BEGIN_NAMESPACE
     \endcode
 
     \sa frameIdMask
- */
+*/
 
 /*!
     \variable QCanBusDevice::Filter::frameIdMask
@@ -159,7 +159,7 @@ QT_BEGIN_NAMESPACE
     \endcode
 
     \sa frameId
- */
+*/
 
 /*!
     \variable QCanBusDevice::Filter::type
@@ -173,23 +173,23 @@ QT_BEGIN_NAMESPACE
     type is equal to \l QCanBusFrame::UnknownFrame.
 
     \sa QCanBusFrame::FrameType
- */
+*/
 
 /*!
     \variable QCanBusDevice::Filter::format
 
     \brief the message format of the matching CAN bus message.
- */
+*/
 
 /*!
     \fn QCanBusDevice::errorOccurred(CanBusError error)
 
     This signal is emitted when an error of the type \a error occurs.
- */
+*/
 
 /*!
     Constructs a serial bus device with the specified \a parent.
- */
+*/
 QCanBusDevice::QCanBusDevice(QObject *parent) :
     QObject(*new QCanBusDevicePrivate, parent)
 {
@@ -204,7 +204,7 @@ QCanBusDevice::QCanBusDevice(QObject *parent) :
     error state.
 
     \sa error(), errorOccurred()
- */
+*/
 void QCanBusDevice::setError(const QString &errorText, CanBusError errorId)
 {
     Q_D(QCanBusDevice);
@@ -222,7 +222,7 @@ void QCanBusDevice::setError(const QString &errorText, CanBusError errorId)
 
     Subclasses must call this function when they receive frames.
 
- */
+*/
 void QCanBusDevice::enqueueReceivedFrames(const QVector<QCanBusFrame> &newFrames)
 {
     Q_D(QCanBusDevice);
@@ -241,7 +241,7 @@ void QCanBusDevice::enqueueReceivedFrames(const QVector<QCanBusFrame> &newFrames
     can be accessed by \l writeFrame().
 
     Subclasses must call this function when they write a new frame.
- */
+*/
 void QCanBusDevice::enqueueOutgoingFrame(const QCanBusFrame &newFrame)
 {
     Q_D(QCanBusDevice);
@@ -253,7 +253,7 @@ void QCanBusDevice::enqueueOutgoingFrame(const QCanBusFrame &newFrame)
     Returns the next \l QCanBusFrame from the internal list of outgoing frames;
     otherwise returns an invalid QCanBusFrame. The returned frame is removed
     from the internal list.
- */
+*/
 QCanBusFrame QCanBusDevice::dequeueOutgoingFrame()
 {
     Q_D(QCanBusDevice);
@@ -266,7 +266,7 @@ QCanBusFrame QCanBusDevice::dequeueOutgoingFrame()
 /*!
     Returns \c true if the internal list of outgoing frames is not
     empty; otherwise returns \c false.
- */
+*/
 bool QCanBusDevice::hasOutgoingFrames() const
 {
     Q_D(const QCanBusDevice);
@@ -286,7 +286,7 @@ bool QCanBusDevice::hasOutgoingFrames() const
     after a reconnect.
 
     \sa configurationParameter()
- */
+*/
 void QCanBusDevice::setConfigurationParameter(int key,
                                               const QVariant &value)
 {
@@ -317,7 +317,7 @@ void QCanBusDevice::setConfigurationParameter(int key,
     an invalid \l QVariant.
 
     \sa setConfigurationParameter(), configurationKeys()
- */
+*/
 QVariant QCanBusDevice::configurationParameter(int key) const
 {
     Q_D(const QCanBusDevice);
@@ -336,7 +336,7 @@ QVariant QCanBusDevice::configurationParameter(int key) const
     The the meaning of the keys is equivalent to \l ConfigurationKey.
     If a key is not explicitly mentioned the platform's
     default setting for the relevant key is used.
- */
+*/
 QVector<int> QCanBusDevice::configurationKeys() const
 {
     Q_D(const QCanBusDevice);
@@ -353,7 +353,7 @@ QVector<int> QCanBusDevice::configurationKeys() const
     occurred and it is never reset.
 
     \sa errorString()
- */
+*/
 QCanBusDevice::CanBusError QCanBusDevice::error() const
 {
     return d_func()->lastError;
@@ -363,7 +363,7 @@ QCanBusDevice::CanBusError QCanBusDevice::error() const
     Returns a human-readable description of the last device error that occurred.
 
     \sa error()
- */
+*/
 QString QCanBusDevice::errorString() const
 {
     Q_D(const QCanBusDevice);
@@ -411,7 +411,7 @@ qint64 QCanBusDevice::framesToWrite() const
     \l QCanBusDevice::UnconnectedState.
 
     \sa connectDevice()
- */
+*/
 
 /*!
     \fn void QCanBusDevice::close()
@@ -428,7 +428,7 @@ qint64 QCanBusDevice::framesToWrite() const
 
     This signal is emitted when one or more frames have been received.
     The frames should be read using \l readFrame() and \l framesAvailable().
- */
+*/
 
 /*!
     Returns the next \l QCanBusFrame from the queue; otherwise returns
@@ -437,7 +437,7 @@ qint64 QCanBusDevice::framesToWrite() const
     The queue operates according to the FIFO principle.
 
     \sa framesAvailable()
- */
+*/
 QCanBusFrame QCanBusDevice::readFrame()
 {
     Q_D(QCanBusDevice);
@@ -459,14 +459,14 @@ QCanBusFrame QCanBusDevice::readFrame()
     This signal is emitted every time a payload of frames has been
     written to the CAN bus. The \a framesCount argument is set to
     the number of frames that were written in this payload.
- */
+*/
 
 /*!
     \fn bool QCanBusDevice::writeFrame(const QCanBusFrame &frame)
 
     Writes \a frame to the CAN bus and returns \c true on success;
     otherwise \c false.
- */
+*/
 
 /*!
     \fn QString interpretErrorFrame(const QCanBusFrame &frame)
@@ -475,14 +475,14 @@ QCanBusFrame QCanBusDevice::readFrame()
     description of the error.
 
     If \a frame is not an error frame, the return string is empty.
- */
+*/
 
 /*!
     Connects the device to the CAN bus. Returns \c true on success;
     otherwise \c false.
 
     This function calls \l open() as part of its implementation.
- */
+*/
 bool QCanBusDevice::connectDevice()
 {
     Q_D(QCanBusDevice);
@@ -506,7 +506,7 @@ bool QCanBusDevice::connectDevice()
     Disconnects the device from the CAN bus.
 
     This function calls \l close() as part of its implementation.
- */
+*/
 void QCanBusDevice::disconnectDevice()
 {
     setState(QCanBusDevice::ClosingState);
@@ -522,13 +522,13 @@ void QCanBusDevice::disconnectDevice()
     The new state is represented by \a state.
 
     \sa setState(), state()
- */
+*/
 
 /*!
     Returns the current state of the device.
 
     \sa setState(), stateChanged()
- */
+*/
 QCanBusDevice::CanBusDeviceState QCanBusDevice::state() const
 {
     return d_func()->state;
@@ -537,7 +537,7 @@ QCanBusDevice::CanBusDeviceState QCanBusDevice::state() const
 /*!
     Sets the state of the device to \a newState. CAN bus implementations
     must use this function to update the device state.
- */
+*/
 void QCanBusDevice::setState(QCanBusDevice::CanBusDeviceState newState)
 {
     Q_D(QCanBusDevice);

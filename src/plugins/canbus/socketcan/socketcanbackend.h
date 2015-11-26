@@ -41,15 +41,11 @@
 #include <QtSerialBus/qcanbusdevice.h>
 
 #include <QtCore/qpointer.h>
+#include <QtCore/qsocketnotifier.h>
+#include <QtCore/qstring.h>
 #include <QtCore/qvariant.h>
-#include <QtCore/qvector.h>
-#include <QtCore/qlist.h>
-
-struct canfd_frame;
 
 QT_BEGIN_NAMESPACE
-
-class QSocketNotifier;
 
 class SocketCanBackend : public QCanBusDevice
 {

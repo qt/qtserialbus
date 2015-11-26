@@ -37,8 +37,8 @@
 #ifndef QMODBUSTCPSERVER_P_H
 #define QMODBUSTCPSERVER_P_H
 
-#include "qmodbusserver_p.h"
-#include "qmodbustcpserver.h"
+#include <QtSerialBus/private/qmodbusserver_p.h>
+#include <QtSerialBus/qmodbustcpserver.h>
 
 #include <QtCore/qdatastream.h>
 #include <QtCore/qdebug.h>
@@ -69,28 +69,42 @@ class QModbusTcpServerPrivate : public QModbusServerPrivate
     Q_DECLARE_PUBLIC(QModbusTcpServer)
 
 public:
-    QModbusTcpServerPrivate()
-    {
-    }
+    QModbusTcpServerPrivate() Q_DECL_EQ_DEFAULT;
 
-    /*!
+    /*
         This function is a workaround since 2nd level lambda below cannot
         call protected QModbusTcpServer::processRequest(..) function on VS2013.
-     */
+    */
     QModbusResponse forwardProcessRequest(const QModbusRequest &r)
     {
         Q_Q(QModbusTcpServer);
         return q->processRequest(r);
     }
 
-    /*!
+    /*
         This function is a workaround since 2nd level lambda below cannot
         call protected QModbusDevice::setError(..) function on VS2013.
-     */
+    */
     void forwardError(const QString &errorText, QModbusDevice::ModbusError error)
     {
         Q_Q(QModbusTcpServer);
         q->setError(errorText, error);
+    }
+
+    /*
+        This function is a workaround since 2nd level lambda below
+        cannot call QModbusServer::serverAddress(..) function on VS2013.
+    */
+    bool matchingServerAddress(quint8 unitId) const
+    {
+        Q_Q(const QModbusTcpServer);
+        if (q->serverAddress() == unitId)
+            return true;
+
+        // No, not our address! Ignore!
+        qCDebug(QT_MODBUS) << "Wrong server unit identifier address, expected"
+            << q->serverAddress() << "got" << unitId;
+        return false;
     }
 
     void setupTcpServer()
@@ -135,7 +149,7 @@ public:
                     QDataStream input(*buffer);
                     input >> transactionId >> protocolId >> bytesPdu >> unitId;
 
-                    qCDebug(QT_MODBUS_LOW) << "Request MBPA:" << "Transaction Id:" << transactionId
+                    qCDebug(QT_MODBUS_LOW) << "Request MBPA:" << "Transaction Id:" << hex << transactionId
                                            << "Protocol Id:" << protocolId << "PDU bytes:" << bytesPdu
                                            << "Unit Id:" << unitId;
 
@@ -151,11 +165,14 @@ public:
                     QModbusRequest request;
                     input >> request;
 
+                    buffer->remove(0, mbpaHeaderSize + bytesPdu);
+
+                    if (!matchingServerAddress(unitId))
+                        continue;
+
                     qCDebug(QT_MODBUS) << "Request PDU:" << request;
                     const QModbusResponse response = forwardProcessRequest(request);
                     qCDebug(QT_MODBUS) << "Response PDU:" << response;
-
-                    buffer->remove(0, mbpaHeaderSize + bytesPdu);
 
                     QByteArray result;
                     QDataStream output(&result, QIODevice::WriteOnly);

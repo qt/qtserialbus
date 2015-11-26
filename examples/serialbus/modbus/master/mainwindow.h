@@ -50,9 +50,13 @@ class QModbusReply;
 
 namespace Ui {
 class MainWindow;
+class SettingsDialog;
 }
 
 QT_END_NAMESPACE
+
+class SettingsDialog;
+class WriteRegisterModel;
 
 class MainWindow : public QMainWindow
 {
@@ -61,6 +65,9 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+private:
+    void initActions();
 
 private slots:
     void on_connectButton_clicked();
@@ -72,14 +79,14 @@ private slots:
     void on_writeButton_clicked();
     void writeReady();
 
-    void on_writeTable_currentIndexChanged(const QString &arg1);
-
     void on_connectType_currentIndexChanged(int);
 
 private:
     Ui::MainWindow *ui;
     QModbusReply* lastRequest;
     QModbusClient* modbusDevice;
+    SettingsDialog *m_settingsDialog;
+    WriteRegisterModel *writeModel;
 };
 
 #endif // MAINWINDOW_H

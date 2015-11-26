@@ -1,4 +1,4 @@
-QT += core-private serialbus
+QT = core-private serialbus
 
 TARGET = qttinycanbus
 

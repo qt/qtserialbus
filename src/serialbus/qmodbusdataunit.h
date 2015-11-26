@@ -54,7 +54,11 @@ public:
         HoldingRegisters
     };
 
+#ifndef Q_QDOC
     QModbusDataUnit() Q_DECL_EQ_DEFAULT;
+#else
+    QModbusDataUnit();
+#endif
 
     explicit QModbusDataUnit(RegisterType regType)
         : QModbusDataUnit(regType, 0, 0)
@@ -99,13 +103,6 @@ public:
     }
     inline quint16 value(int index) const { return dataValue.value(index); }
 
-    // TODO: Do we really need the next two functions and the 'Invalid' enum value.
-    inline void reset() {
-        rType = Invalid;
-        sAddress = -1;
-        dataRange = 0;
-        dataValue = {};
-    }
     bool isValid() const { return rType != Invalid && sAddress != -1; }
 
 private:

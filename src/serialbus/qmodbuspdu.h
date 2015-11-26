@@ -54,9 +54,11 @@ public:
         ServerDeviceFailure = 0x04,
         Acknowledge = 0x05,
         ServerDeviceBusy = 0x06,
+        NegativeAcknowledge = 0x07,
         MemoryParityError = 0x08,
         GatewayPathUnavailable = 0x0A,
-        GatewayTargetDeviceFailedToRespond = 0x0B
+        GatewayTargetDeviceFailedToRespond = 0x0B,
+        ExtendedException = 0xFF,
     };
     Q_ENUMS(ExceptionCode)
 
@@ -86,13 +88,19 @@ public:
     Q_ENUMS(FunctionCode)
 
     QModbusPdu() Q_DECL_EQ_DEFAULT;
-    virtual ~QModbusPdu() {}
+    virtual ~QModbusPdu() Q_DECL_EQ_DEFAULT;
 
     bool isValid() const {
         return (m_code >= ReadCoils && m_code < UndefinedFunctionCode)
                 && (m_data.size() < 253);
     }
     bool isException() const { return m_code & quint8(0x80); }
+    ExceptionCode exceptionCode() const {
+        if (!dataSize() || !isException())
+            return ExtendedException;
+
+        return static_cast<ExceptionCode>(data().at(0));
+    }
 
     qint16 size() const { return dataSize() + 1; }
     qint16 dataSize() const { return m_data.size(); }
@@ -167,6 +175,7 @@ private:
 private:
     FunctionCode m_code = Invalid;
     QByteArray m_data;
+    friend class QModbusSerialAdu;
 };
 Q_SERIALBUS_EXPORT QDebug operator<<(QDebug debug, const QModbusPdu &pdu);
 Q_SERIALBUS_EXPORT QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu);
@@ -182,11 +191,11 @@ public:
     QModbusRequest(FunctionCode code, Args ... newData)
         : QModbusPdu(code, newData...)
     {}
-    QModbusRequest(FunctionCode code, const QByteArray &newData = QByteArray())
+    explicit QModbusRequest(FunctionCode code, const QByteArray &newData = QByteArray())
         : QModbusPdu(code, newData)
     {}
 
-    Q_SERIALBUS_EXPORT static quint8 minimumDataSize(FunctionCode code);
+    Q_SERIALBUS_EXPORT static int minimumDataSize(FunctionCode code);
     Q_SERIALBUS_EXPORT static int calculateDataSize(FunctionCode code, const QByteArray &data);
 };
 Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu);
@@ -202,11 +211,11 @@ public:
     QModbusResponse(FunctionCode code, Args ... newData)
         : QModbusPdu(code, newData...)
     {}
-    QModbusResponse(FunctionCode code, const QByteArray &newData = QByteArray())
+    explicit QModbusResponse(FunctionCode code, const QByteArray &newData = QByteArray())
         : QModbusPdu(code, newData)
     {}
 
-    Q_SERIALBUS_EXPORT static quint8 minimumDataSize(FunctionCode code);
+    Q_SERIALBUS_EXPORT static int minimumDataSize(FunctionCode code);
     Q_SERIALBUS_EXPORT static int calculateDataSize(FunctionCode code, const QByteArray &data);
 };
 
@@ -224,7 +233,7 @@ public:
     void setFunctionCode(FunctionCode c) {
         QModbusPdu::setFunctionCode(FunctionCode(quint8(c) | quint8(0x80)));
     }
-    void setExeceptionCode(ExceptionCode ec) { QModbusPdu::encodeData(quint8(ec)); }
+    void setExceptionCode(ExceptionCode ec) { QModbusPdu::encodeData(quint8(ec)); }
 };
 Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &stream, QModbusResponse &pdu);
 

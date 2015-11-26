@@ -1,6 +1,5 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 Denis Shienkov <denis.shienkov@gmail.com>
 ** Copyright (C) 2015 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
@@ -64,14 +63,20 @@ enum SubFunctionCode {
     ForceListenOnlyMode = 0x0004,
     ClearCountersAndDiagnosticRegister = 0x000a,
     ReturnBusMessageCount = 0x000b,
-    ReturnBusCommunicationErrorCount = 0x000c,
+    ReturnBusCommunicationErrorCount = 0x000c,  // CRC error counter
     ReturnBusExceptionErrorCount = 0x000d,
     ReturnServerMessageCount = 0x000e,
     ReturnServerNoResponseCount = 0x000f,
     ReturnServerNAKCount = 0x0010,
     ReturnServerBusyCount = 0x0011,
-    ReturnBusCharacterOverrunCount = 0x0012,
-    ClearOverrunCounterAndFlag = 0x0014
+    ReturnBusCharacterOverrunCount = 0x0012
+
+    // The Clear Overrun Counter and Flag handling for diagnostics
+    // sub-code is only used in the legacy Modicon 84 and 884 PLC
+    // processor system where it clears the only counter there (the
+    // IOP Overrun counter which doesn't exist anywhere else) and
+    // the according overrun flag bit 0 in the diagnosticRegister.
+    // ClearOverrunCounterAndFlag = 0x0014 // Deliberately not implemented!
 };
 
 }
