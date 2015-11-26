@@ -101,7 +101,10 @@ static int minimumDataSize(QModbusPdu::FunctionCode code, Type type)
     \since 5.6
 
     \brief QModbusPdu is a abstract container class containing the function code and
-        payload that is stored inside a Modbus ADU.
+    payload that is stored inside a Modbus ADU.
+
+    The class provides access to the raw Modbus protocol packets as defined by
+    the  Modbus Application Protocol Specification 1.1b.
 */
 
 /*!
@@ -202,7 +205,19 @@ static int minimumDataSize(QModbusPdu::FunctionCode code, Type type)
 */
 
 /*!
-    \internal
+    \fn QModbusPdu::QModbusPdu(const QModbusPdu &other)
+
+    Constructs a QModbusPdu that is a copy of \a other.
+
+*/
+
+/*!
+    \fn QModbusPdu& QModbusPdu::operator=(const QModbusPdu& other)
+
+    Makes a copy of the \a other and assigns it to this QModbusPdu object.
+*/
+
+/*!
     \fn QModbusPdu::QModbusPdu(FunctionCode code, const QByteArray &data)
 
     Constructs a QModbusPdu with function code set to \a code and payload set to \a data.
@@ -269,7 +284,8 @@ static int minimumDataSize(QModbusPdu::FunctionCode code, Type type)
 /*!
     \fn QByteArray QModbusPdu::data() const
 
-    Returns the PDU's payload. The payload is stored in big-endian byte order.
+    Returns the PDU's payload, excluding the function code.
+    The payload is stored in big-endian byte order.
 */
 
 /*!
@@ -280,7 +296,7 @@ static int minimumDataSize(QModbusPdu::FunctionCode code, Type type)
 */
 
 /*!
-    \fn void QModbusPdu::decodeData(Args *... data)
+    \fn void QModbusPdu::decodeData(Args data) const
 
     Converts the payload into host endianness and reads it into \a data. Data can be a variable
     length argument list.
@@ -293,11 +309,11 @@ static int minimumDataSize(QModbusPdu::FunctionCode code, Type type)
     \endcode
 
     \note Usage should be limited the POD types only. This is because \c QDataStream stream
-        operators will not only read raw data, but also e.g. size, count etc. for complex types.
+    operators will not only read raw data, but also e.g. size, count etc. for complex types.
 */
 
 /*!
-    \fn void QModbusPdu::encodeData(Args... data)
+    \fn void QModbusPdu::encodeData(Args data)
 
     Sets the payload to \a data. The data is converted and stored in big-endian byte order.
 
@@ -325,7 +341,7 @@ QDebug operator<<(QDebug debug, const QModbusPdu &pdu)
 /*!
     \relates QModbusPdu
 
-    Writes a \a pdu to the stream \a out and returns a reference to the stream.
+    Writes a \a pdu to the \a stream and returns a reference to the stream.
 */
 QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu)
 {
@@ -342,7 +358,7 @@ QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu)
     \since 5.6
 
     \brief QModbusRequest is a container class containing the function code and payload that is
-        stored inside a Modbus ADU.
+    stored inside a Modbus ADU.
 
     A Modbus request usually consists of a single byte describing the \c FunctionCode and N bytes
     of payload
@@ -448,7 +464,7 @@ int QModbusRequest::calculateDataSize(FunctionCode code, const QByteArray &data)
 /*!
     \relates QModbusRequest
 
-    Reads a \a pdu from the stream \a in and returns a reference to the stream.
+    Reads a \a pdu from the \a stream and returns a reference to the stream.
 
     \note The function might fail to properly stream PDU's with function code
     \l QModbusPdu::Diagnostics or \l QModbusPdu::EncapsulatedInterfaceTransport
