@@ -94,18 +94,21 @@ public:
         return (m_code >= ReadCoils && m_code < UndefinedFunctionCode)
                 && (m_data.size() < 253);
     }
-    bool isException() const { return m_code & quint8(0x80); }
-    ExceptionCode exceptionCode() const {
-        if (!dataSize() || !isException())
-            return ExtendedException;
 
-        return static_cast<ExceptionCode>(data().at(0));
+    static const quint8 ExceptionByte = 0x80;
+    ExceptionCode exceptionCode() const {
+        if (!m_data.size() || !isException())
+            return ExtendedException;
+        return static_cast<ExceptionCode>(m_data.at(0));
     }
+    bool isException() const { return m_code & ExceptionByte; }
 
     qint16 size() const { return dataSize() + 1; }
     qint16 dataSize() const { return m_data.size(); }
 
-    FunctionCode functionCode() const { return m_code; }
+    FunctionCode functionCode() const {
+        return FunctionCode(quint8(m_code) &~ ExceptionByte);
+    }
     virtual void setFunctionCode(FunctionCode code) { m_code = code; }
 
     QByteArray data() const { return m_data; }
@@ -209,8 +212,8 @@ public:
         : QModbusPdu(code, newData)
     {}
 
-    Q_SERIALBUS_EXPORT static int minimumDataSize(FunctionCode code);
-    Q_SERIALBUS_EXPORT static int calculateDataSize(FunctionCode code, const QByteArray &data);
+    Q_SERIALBUS_EXPORT static int minimumDataSize(const QModbusPdu &pdu);
+    Q_SERIALBUS_EXPORT static int calculateDataSize(const QModbusPdu &pdu, const QByteArray &data);
 
     // TODO currently no way to document -> qdoc issue due to template usage
     template <typename ... Args>
@@ -232,8 +235,8 @@ public:
         : QModbusPdu(code, newData)
     {}
 
-    Q_SERIALBUS_EXPORT static int minimumDataSize(FunctionCode code);
-    Q_SERIALBUS_EXPORT static int calculateDataSize(FunctionCode code, const QByteArray &data);
+    Q_SERIALBUS_EXPORT static int minimumDataSize(const QModbusPdu &pdu);
+    Q_SERIALBUS_EXPORT static int calculateDataSize(const QModbusPdu &pdu, const QByteArray &data);
 
     // TODO currently no way to document -> qdoc issue due to template usage
     template <typename ... Args>
@@ -250,11 +253,11 @@ public:
         : QModbusResponse(pdu)
     {}
     QModbusExceptionResponse(FunctionCode fc, ExceptionCode ec)
-        : QModbusResponse(FunctionCode(quint8(fc) | quint8(0x80)), static_cast<quint8> (ec))
+        : QModbusResponse(FunctionCode(quint8(fc) | ExceptionByte), static_cast<quint8> (ec))
     {}
 
     void setFunctionCode(FunctionCode c) {
-        QModbusPdu::setFunctionCode(FunctionCode(quint8(c) | quint8(0x80)));
+        QModbusPdu::setFunctionCode(FunctionCode(quint8(c) | ExceptionByte));
     }
     void setExceptionCode(ExceptionCode ec) { QModbusPdu::encodeData(quint8(ec)); }
 };

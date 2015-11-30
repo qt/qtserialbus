@@ -47,10 +47,12 @@ enum struct Type {
     Response
 };
 
-static int minimumDataSize(QModbusPdu::FunctionCode code, Type type)
+static int minimumDataSize(const QModbusPdu &pdu, Type type)
 {
-    Q_ASSERT(!(code & 0x80));
-    switch (code) {
+    if (pdu.isException())
+        return 1;
+
+    switch (pdu.functionCode()) {
     case QModbusPdu::ReadCoils:
     case QModbusPdu::ReadDiscreteInputs:
         return type == Type::Request ? 4 : 2;
@@ -246,6 +248,15 @@ static int minimumDataSize(QModbusPdu::FunctionCode code, Type type)
 */
 
 /*!
+    \variable QModbusPdu::ExceptionByte
+
+    Exceptions are reported in a defined packet format. First, a function code
+    is returned to the requesting client equal to the original function code,
+    except with its most significant bit set. This is equivalent to adding 0x80
+    to the value of the original function code. Provided for convenience.
+*/
+
+/*!
     \fn bool QModbusPdu::isException() const
 
     Returns true if the PDU contains an exception code; otherwise false.
@@ -345,7 +356,10 @@ QDebug operator<<(QDebug debug, const QModbusPdu &pdu)
 */
 QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu)
 {
-    stream << static_cast<quint8> (pdu.functionCode());
+    if (pdu.isException())
+        stream << static_cast<quint8> (pdu.functionCode() | QModbusPdu::ExceptionByte);
+    else
+        stream << static_cast<quint8> (pdu.functionCode());
     if (!pdu.data().isEmpty())
         stream.writeRawData(pdu.data().constData(), pdu.data().size());
 
@@ -410,28 +424,31 @@ QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu)
 */
 
 /*!
-    Returns the minimum data size for a request, based on the function \a code.
+    Returns the minimum data size for a request, based on the \a pdu function code.
     \note The function returns \c {-1} if the size could not be properly calculated.
 */
-int QModbusRequest::minimumDataSize(FunctionCode code)
+int QModbusRequest::minimumDataSize(const QModbusPdu &pdu)
 {
-    return Private::minimumDataSize(code, Private::Type::Request);
+    return Private::minimumDataSize(pdu, Private::Type::Request);
 }
 
 /*!
-    Calculates the expected data size for a request, based on the function \a code.
+    Calculates the expected data size for a request, based on the \a pdu function code.
     The \a data byte array is expected to be the part directly following the function
     code. Returns the full size of the PDU's data part; \c {-1} if the size could not be
     properly calculated.
 */
-int QModbusRequest::calculateDataSize(FunctionCode code, const QByteArray &data)
+int QModbusRequest::calculateDataSize(const QModbusPdu &pdu, const QByteArray &data)
 {
+    if (pdu.isException())
+        return 1;
+
     int size = -1;
-    int minimum = Private::minimumDataSize(code, Private::Type::Request);
+    int minimum = Private::minimumDataSize(pdu, Private::Type::Request);
     if (minimum < 0)
         return size;
 
-    switch (code) {
+    switch (pdu.functionCode()) {
     case QModbusPdu::WriteMultipleCoils:
         minimum -= 1; // first payload payload byte
         if (data.size() >= minimum)
@@ -478,7 +495,7 @@ QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu)
     stream >> code;
     pdu.setFunctionCode(static_cast<QModbusPdu::FunctionCode> (code));
 
-    int size = Private::minimumDataSize(pdu.functionCode(), Private::Type::Request);
+    int size = QModbusRequest::minimumDataSize(pdu);
     if (size < 0)
         pdu.setFunctionCode(QModbusRequest::Invalid);
     if (size <= 0)
@@ -493,7 +510,7 @@ QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu)
         }
     }
     stream.device()->peek(data.data(), data.size());
-    size = QModbusRequest::calculateDataSize(pdu.functionCode(), data);
+    size = QModbusRequest::calculateDataSize(pdu, data);
 
     if (size >= 0) {
         data.resize(size);
@@ -558,29 +575,30 @@ QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu)
 */
 
 /*!
-    Returns the minimum data size for a response, based on the function \a code.
+    Returns the minimum data size for a response, based on the \a pdu function code.
     \note The function returns \c {-1} if the size could not be properly calculated.
 */
-int QModbusResponse::minimumDataSize(FunctionCode code)
+int QModbusResponse::minimumDataSize(const QModbusPdu &pdu)
 {
-    if (code & quint8(0x80))
-        return 1;
-    return Private::minimumDataSize(code, Private::Type::Response);
+    return Private::minimumDataSize(pdu, Private::Type::Response);
 }
 
 /*!
-    Calculates the expected data size for a response, based on the function \a code.
+    Calculates the expected data size for a response, based on the \a pdu function code.
     The \a data byte array is expected to be the part directly following the function
     code. Returns the full size of the PDU's data part; \c {-1} if the size could not be
     properly calculated.
 */
-int QModbusResponse::calculateDataSize(FunctionCode code, const QByteArray &data)
+int QModbusResponse::calculateDataSize(const QModbusPdu &pdu, const QByteArray &data)
 {
+    if (pdu.isException())
+        return 1;
+
     int size = -1;
-    if (QModbusResponse::minimumDataSize(code) < 0)
+    if (QModbusResponse::minimumDataSize(pdu) < 0)
         return size;
 
-    switch (code) {
+    switch (pdu.functionCode()) {
     case QModbusResponse::ReadCoils:
     case QModbusResponse::ReadDiscreteInputs:
     case QModbusResponse::ReadHoldingRegisters:
@@ -606,7 +624,7 @@ int QModbusResponse::calculateDataSize(FunctionCode code, const QByteArray &data
         size = data.size(); // Make sure we pass all checks in the response processing function.
         break;
     default:
-        size = QModbusResponse::minimumDataSize(code);
+        size = QModbusResponse::minimumDataSize(pdu);
         break;
     }
     return size;
@@ -629,7 +647,7 @@ QDataStream &operator>>(QDataStream &stream, QModbusResponse &pdu)
     stream >> code;
     pdu.setFunctionCode(static_cast<QModbusPdu::FunctionCode> (code));
 
-    int size = QModbusResponse::minimumDataSize(pdu.functionCode());
+    int size = QModbusResponse::minimumDataSize(pdu);
     if (size < 0)
         pdu.setFunctionCode(QModbusResponse::Invalid);
     if (size <= 0)
@@ -644,7 +662,7 @@ QDataStream &operator>>(QDataStream &stream, QModbusResponse &pdu)
         }
     }
     stream.device()->peek(data.data(), data.size());
-    size = QModbusResponse::calculateDataSize(pdu.functionCode(), data);
+    size = QModbusResponse::calculateDataSize(pdu, data);
 
     if (size >= 0) {
         data.resize(size);

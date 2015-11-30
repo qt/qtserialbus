@@ -657,7 +657,7 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
 
 #define CHECK_SIZE_EQUALS(req) \
     do { \
-        if (req.dataSize() != QModbusRequest::minimumDataSize(req.functionCode())) { \
+        if (req.dataSize() != QModbusRequest::minimumDataSize(req)) { \
             qCDebug(QT_MODBUS) << "The request's data size does not equal the expected size."; \
             return QModbusExceptionResponse(req.functionCode(), \
                                             QModbusExceptionResponse::IllegalDataValue); \
@@ -666,7 +666,7 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
 
 #define CHECK_SIZE_LESS_THAN(req) \
     do { \
-        if (req.dataSize() < QModbusRequest::minimumDataSize(req.functionCode())) { \
+        if (req.dataSize() < QModbusRequest::minimumDataSize(req)) { \
             qCDebug(QT_MODBUS) << "The request's data size is less than the expected size."; \
             return QModbusExceptionResponse(req.functionCode(), \
                                             QModbusExceptionResponse::IllegalDataValue); \

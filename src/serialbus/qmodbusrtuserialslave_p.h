@@ -113,8 +113,7 @@ public:
                 event |= QModbusCommEvent::ReceiveFlag::BroadcastReceived;
 
             const QModbusRequest req = adu.pdu();
-            const int pduSizeWithoutFcode = QModbusRequest::calculateDataSize(req.functionCode(),
-                                                                              req.data());
+            const int pduSizeWithoutFcode = QModbusRequest::calculateDataSize(req, req.data());
 
             // server address byte + function code byte + PDU size + 2 bytes CRC
             if ((pduSizeWithoutFcode < 0) || ((2 + pduSizeWithoutFcode + 2) != adu.rawSize())) {

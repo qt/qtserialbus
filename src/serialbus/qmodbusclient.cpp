@@ -403,7 +403,7 @@ bool QModbusClientPrivate::processReadCoilsResponse(const QModbusResponse &respo
     if (!isValid(response, QModbusResponse::ReadCoils))
         return false;
 
-    if (response.dataSize() < QModbusResponse::minimumDataSize(response.functionCode()))
+    if (response.dataSize() < QModbusResponse::minimumDataSize(response))
         return false;
 
     const QByteArray payload = response.data();
@@ -431,7 +431,7 @@ bool QModbusClientPrivate::processReadDiscreteInputsResponse(const QModbusRespon
     if (!isValid(response, QModbusResponse::ReadDiscreteInputs))
         return false;
 
-    if (response.dataSize() < QModbusResponse::minimumDataSize(response.functionCode()))
+    if (response.dataSize() < QModbusResponse::minimumDataSize(response))
         return false;
 
     const QByteArray payload = response.data();
@@ -459,7 +459,7 @@ bool QModbusClientPrivate::processReadHoldingRegistersResponse(const QModbusResp
     if (!isValid(response, QModbusResponse::ReadHoldingRegisters))
         return false;
 
-    if (response.dataSize() < QModbusResponse::minimumDataSize(response.functionCode()))
+    if (response.dataSize() < QModbusResponse::minimumDataSize(response))
         return false;
 
     // byte count needs to match available bytes
@@ -497,7 +497,7 @@ bool QModbusClientPrivate::processReadInputRegistersResponse(const QModbusRespon
     if (!isValid(response, QModbusResponse::ReadInputRegisters))
         return false;
 
-    if (response.dataSize() < QModbusResponse::minimumDataSize(response.functionCode()))
+    if (response.dataSize() < QModbusResponse::minimumDataSize(response))
         return false;
 
     // byte count needs to match available bytes
@@ -535,7 +535,7 @@ bool QModbusClientPrivate::processWriteSingleCoilResponse(const QModbusResponse 
     if (!isValid(response, QModbusResponse::WriteSingleCoil))
         return false;
 
-    if (response.dataSize() != QModbusResponse::minimumDataSize(response.functionCode()))
+    if (response.dataSize() != QModbusResponse::minimumDataSize(response))
         return false;
 
     quint16 address, value;
@@ -558,7 +558,7 @@ bool QModbusClientPrivate::processWriteSingleRegisterResponse(const QModbusRespo
     if (!isValid(response, QModbusResponse::WriteSingleRegister))
         return false;
 
-    if (response.dataSize() != QModbusResponse::minimumDataSize(response.functionCode()))
+    if (response.dataSize() != QModbusResponse::minimumDataSize(response))
         return false;
 
     quint16 address, value;
@@ -578,7 +578,7 @@ bool QModbusClientPrivate::processWriteMultipleCoilsResponse(const QModbusRespon
     if (!isValid(response, QModbusResponse::WriteMultipleCoils))
         return false;
 
-    if (response.dataSize() != QModbusResponse::minimumDataSize(response.functionCode()))
+    if (response.dataSize() != QModbusResponse::minimumDataSize(response))
         return false;
 
     quint16 address, count;
@@ -597,7 +597,7 @@ bool QModbusClientPrivate::processWriteMultipleRegistersResponse(const QModbusRe
     if (!isValid(response, QModbusResponse::WriteMultipleRegisters))
         return false;
 
-    if (response.dataSize() != QModbusResponse::minimumDataSize(response.functionCode()))
+    if (response.dataSize() != QModbusResponse::minimumDataSize(response))
         return false;
 
     quint16 address, count;
@@ -620,7 +620,7 @@ bool QModbusClientPrivate::processReadWriteMultipleRegistersResponse(
     if (!isValid(response, QModbusResponse::ReadWriteMultipleRegisters))
         return false;
 
-    if (response.dataSize() < QModbusResponse::minimumDataSize(response.functionCode()))
+    if (response.dataSize() < QModbusResponse::minimumDataSize(response))
         return false;
 
     const QByteArray payload = response.data();
