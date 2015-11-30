@@ -96,7 +96,7 @@ public:
                 event |= QModbusCommEvent::ReceiveFlag::CurrentlyInListenOnlyMode;
 
             // We expect at least the server address, function code and CRC.
-            if (adu.size() < 4) { // TODO: LRC should be 3 bytes.
+            if (adu.rawSize() < 4) { // TODO: LRC should be 3 bytes.
                 qCWarning(QT_MODBUS) << "Incomplete ADU received, ignoring";
 
                 // The quantity of CRC errors encountered by the remote device since its last
