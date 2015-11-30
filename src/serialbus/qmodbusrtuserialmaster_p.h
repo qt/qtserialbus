@@ -106,10 +106,10 @@ public:
                 return;
             }
 
+            stopResponseTimer();
+
             const QModbusSerialAdu adu(QModbusSerialAdu::Rtu, responseBuffer.left(aduSize));
             responseBuffer.remove(0, aduSize);
-
-            stopResponseTimer();
 
             qCDebug(QT_MODBUS)<< "Received ADU:" << adu.rawData().toHex();
             if (QT_MODBUS().isDebugEnabled() && !responseBuffer.isEmpty())
@@ -166,6 +166,7 @@ public:
 
                 elem.reply->setError(QModbusReply::TimeoutError,
                                      QModbusClient::tr("Request timeout."));
+                sendNextRequest(); // go to next request
             });
 
             QObject::connect(q, &QModbusClient::timeoutChanged, q, [q, this]() {
@@ -194,9 +195,10 @@ public:
 
         const QByteArray adu = QModbusSerialAdu::create(QModbusSerialAdu::Rtu, serverAddress,
                                                         request);
+        m_serialPort->clear(QSerialPort::Output);
         int writtenBytes = m_serialPort->write(adu);
         if (writtenBytes == -1 || writtenBytes < adu.size()) {
-            qCDebug(QT_MODBUS) << "Cannot write request to serial port. Failed ADU" << adu;
+            qCDebug(QT_MODBUS_LOW) << "Cannot send Serial ADU:" << adu.toHex();
             q->setError(QModbusClient::tr("Could not write request to serial bus."),
                         QModbusDevice::WriteError);
             return false;
@@ -252,7 +254,9 @@ public:
 
         QModbusReply *reply = new QModbusReply(type, slaveAddress, q);
         m_queue.enqueue(QueueElement{ reply, request, unit });
-        sendNextRequest();
+
+        if (!m_responseTimer || (!m_responseTimer->isActive()))
+            sendNextRequest();
 
         return reply;
     }
