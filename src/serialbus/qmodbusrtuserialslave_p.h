@@ -201,6 +201,7 @@ public:
                             QModbusDevice::WriteError);
                 incrementCounter(QModbusServerPrivate::Counter::ServerNoResponse);
                 storeModbusCommEvent(event);
+                m_serialPort->clear(QSerialPort::Output);
                 return;
             }
 
