@@ -82,10 +82,10 @@ public:
 
         QObject::connect(m_serialPort, &QSerialPort::readyRead, [this]() {
             responseBuffer += m_serialPort->read(m_serialPort->bytesAvailable());
-            qCDebug(QT_MODBUS_LOW) << "Response buffer:" << responseBuffer.toHex();
+            qCDebug(QT_MODBUS_LOW) << "(RTU client) Response buffer:" << responseBuffer.toHex();
 
             if (responseBuffer.size() < 2) {
-                qCDebug(QT_MODBUS) << "Modbus ADU not complete";
+                qCDebug(QT_MODBUS) << "(RTU client) Modbus ADU not complete";
                 return;
             }
 
@@ -94,7 +94,7 @@ public:
             int pduSizeWithoutFcode = QModbusResponse::calculateDataSize(tmpPdu, tmpPdu.data());
             if (pduSizeWithoutFcode < 0) {
                 // wait for more data
-                qCDebug(QT_MODBUS) << "Cannot calculate PDU size for function code:"
+                qCDebug(QT_MODBUS) << "(RTU client) Cannot calculate PDU size for function code:"
                                    << tmpPdu.functionCode() << " , delaying pending frame";
                 return;
             }
@@ -102,7 +102,7 @@ public:
             // server address byte + function code byte + PDU size + 2 bytes CRC
             const int aduSize = 2 + pduSizeWithoutFcode + 2;
             if (tmpAdu.rawSize() < aduSize) {
-                qCDebug(QT_MODBUS) << "Incomplete ADU received, ignoring";
+                qCDebug(QT_MODBUS) << "(RTU client) Incomplete ADU received, ignoring";
                 return;
             }
 
@@ -111,13 +111,13 @@ public:
             const QModbusSerialAdu adu(QModbusSerialAdu::Rtu, responseBuffer.left(aduSize));
             responseBuffer.remove(0, aduSize);
 
-            qCDebug(QT_MODBUS)<< "Received ADU:" << adu.rawData().toHex();
+            qCDebug(QT_MODBUS)<< "(RTU client) Received ADU:" << adu.rawData().toHex();
             if (QT_MODBUS().isDebugEnabled() && !responseBuffer.isEmpty())
                 qCDebug(QT_MODBUS_LOW) << "Pending buffer:" << responseBuffer.toHex();
 
             // check CRC
             if (!adu.matchingChecksum()) {
-                qCWarning(QT_MODBUS) << "Discarding response with wrong CRC, received:"
+                qCWarning(QT_MODBUS) << "(RTU client) Discarding response with wrong CRC, received:"
                                      << adu.checksum<quint16>() << ", calculated CRC:"
                                      << QModbusSerialAdu::calculateCRC(adu.data(), adu.size());
                 return;
@@ -125,7 +125,8 @@ public:
 
             const QModbusResponse response = adu.pdu();
             if (!canMatchRequestAndResponse(response, adu.serverAddress())) {
-                qCWarning(QT_MODBUS) << "Cannot match response with open request, ignoring";
+                qCWarning(QT_MODBUS) << "(RTU client) Cannot match response with open request, "
+                    "ignoring";
                 return;
             }
 
@@ -152,7 +153,7 @@ public:
             m_responseTimer->setSingleShot(true);
             m_responseTimer->setInterval(m_responseTimeoutDuration);
             QObject::connect(m_responseTimer, &QTimer::timeout, q, [this]() {
-                qCDebug(QT_MODBUS) << "Timeout of last request";
+                qCDebug(QT_MODBUS) << "(RTU client) Timeout of last request";
 
                 if (m_queue.isEmpty())
                     return;
@@ -198,13 +199,13 @@ public:
         m_serialPort->clear(QSerialPort::Output);
         int writtenBytes = m_serialPort->write(adu);
         if (writtenBytes == -1 || writtenBytes < adu.size()) {
-            qCDebug(QT_MODBUS_LOW) << "Cannot send Serial ADU:" << adu.toHex();
+            qCDebug(QT_MODBUS_LOW) << "(RTU client) Cannot send Serial ADU:" << adu.toHex();
             q->setError(QModbusClient::tr("Could not write request to serial bus."),
                         QModbusDevice::WriteError);
             return false;
         }
-        qCDebug(QT_MODBUS_LOW)<< "Sent Serial ADU:" << adu.toHex();
-        qCDebug(QT_MODBUS) << "Sent Serial PDU:" << request;
+        qCDebug(QT_MODBUS_LOW)<< "(RTU client) Sent Serial ADU:" << adu.toHex();
+        qCDebug(QT_MODBUS) << "(RTU client) Sent Serial PDU:" << request;
 
         return true;
 
