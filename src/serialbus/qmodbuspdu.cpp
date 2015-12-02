@@ -250,10 +250,15 @@ static int minimumDataSize(const QModbusPdu &pdu, Type type)
 /*!
     \variable QModbusPdu::ExceptionByte
 
-    Exceptions are reported in a defined packet format. First, a function code
+    The variable is initialised to 0x80.
+
+    Exceptions are reported in a defined packet format. A function code
     is returned to the requesting client equal to the original function code,
     except with its most significant bit set. This is equivalent to adding 0x80
-    to the value of the original function code. Provided for convenience.
+    to the value of the original function code.
+
+    This field may be used to mask the exception bit in the function field
+    of a raw Modbus packet.
 */
 
 /*!

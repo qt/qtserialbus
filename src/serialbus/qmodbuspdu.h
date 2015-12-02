@@ -95,7 +95,11 @@ public:
                 && (m_data.size() < 253);
     }
 
+#ifdef Q_QDOC
+    static const quint8 ExceptionByte;
+#else
     static const quint8 ExceptionByte = 0x80;
+#endif
     ExceptionCode exceptionCode() const {
         if (!m_data.size() || !isException())
             return ExtendedException;
