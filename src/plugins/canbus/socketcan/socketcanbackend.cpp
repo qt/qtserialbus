@@ -507,12 +507,12 @@ void SocketCanBackend::readSocket()
         struct canfd_frame frame;
         int bytesReceived = 0;
 
-        bytesReceived = ::read(canSocket, &frame, CANFD_MTU);
+        bytesReceived = ::read(canSocket, &frame, sizeof(frame));
 
         if (bytesReceived <= 0) {
             break;
-        } else if (bytesReceived != CANFD_MTU) {
-            setError(tr("ERROR SocketCanBackend: invalid can frame"),
+        } else if (bytesReceived != CANFD_MTU && bytesReceived != CAN_MTU) {
+            setError(tr("ERROR SocketCanBackend: incomplete can frame"),
                      QCanBusDevice::CanBusError::ReadError);
             continue;
         }
