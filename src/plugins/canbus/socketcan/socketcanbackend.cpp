@@ -309,22 +309,42 @@ bool SocketCanBackend::writeFrame(const QCanBusFrame &newData)
     if (state() != ConnectedState)
         return false;
 
-    canfd_frame frame;
-    frame.can_id = newData.frameId();
+    canid_t canId = newData.frameId();
     if (newData.hasExtendedFrameFormat())
-        frame.can_id |= CAN_EFF_FLAG;
+        canId |= CAN_EFF_FLAG;
+
     if (newData.frameType() == QCanBusFrame::ErrorFrame) {
-        frame.can_id = (uint)(newData.error() & QCanBusFrame::AnyError);
-        frame.can_id |= CAN_ERR_FLAG;
+        canId = (uint)(newData.error() & QCanBusFrame::AnyError);
+        canId |= CAN_ERR_FLAG;
     }
     if (newData.frameType() == QCanBusFrame::RemoteRequestFrame)
-        frame.can_id |= CAN_RTR_FLAG;
+        canId |= CAN_RTR_FLAG;
 
-    frame.len = newData.payload().size();
-    for (int i = 0; i < frame.len ; i++)
-        frame.data[i] = newData.payload().at(i);
+    bool isFdFrame = (newData.payload().size() > 8);
+    if (isFdFrame && newData.payload().size() > CANFD_MAX_DLEN) {
+        qWarning() << QString("payload (%1 bytes) is too large for chosen frame size of "
+                              "maximal %2 bytes. Frame is discarded.").
+                        arg(newData.payload().size()).arg(CANFD_MAX_DLEN);
+        return false;
+    }
 
-    const qint64 bytesWritten = ::write(canSocket, &frame, CANFD_MTU);
+    qint64 bytesWritten = 0;
+    if (isFdFrame) {
+        canfd_frame frame;
+        frame.len = newData.payload().size();
+        frame.can_id = canId;
+        ::memcpy(frame.data, newData.payload().constData(), frame.len);
+
+        bytesWritten = ::write(canSocket, &frame, sizeof(frame));
+    } else {
+        can_frame frame;
+        frame.can_dlc = newData.payload().size();
+        frame.can_id = canId;
+        ::memcpy(frame.data, newData.payload().constData(), frame.can_dlc);
+
+        bytesWritten = ::write(canSocket, &frame, sizeof(frame));
+    }
+
     if (bytesWritten < 0) {
         setError(qt_error_string(errno),
                  QCanBusDevice::CanBusError::WriteError);
@@ -537,6 +557,8 @@ void SocketCanBackend::readSocket()
         bufferedFrame.setTimeStamp(stamp);
 
         bufferedFrame.setExtendedFrameFormat(frame.can_id & CAN_EFF_FLAG);
+        Q_ASSERT(frame.len <= CANFD_MAX_DLEN);
+
         if (frame.can_id & CAN_RTR_FLAG)
             bufferedFrame.setFrameType(QCanBusFrame::RemoteRequestFrame);
         if (frame.can_id & CAN_ERR_FLAG)
