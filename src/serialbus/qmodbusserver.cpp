@@ -641,7 +641,8 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
         return processReportServerIdRequest(request);
     case QModbusRequest::ReadFileRecord:    // TODO: Implement.
     case QModbusRequest::WriteFileRecord:   // TODO: Implement.
-        return q_func()->processPrivateRequest(request);
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalFunction);
     case QModbusRequest::MaskWriteRegister:
         return processMaskWriteRegisterRequest(request);
     case QModbusRequest::ReadWriteMultipleRegisters:
@@ -649,6 +650,8 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
     case QModbusRequest::ReadFifoQueue:
         return processReadFifoQueueRequest(request);
     case QModbusRequest::EncapsulatedInterfaceTransport:    // TODO: Implement.
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalFunction);
     default:
         break;
     }
@@ -894,7 +897,8 @@ QModbusResponse QModbusServerPrivate::processDiagnosticsRequest(const QModbusReq
         return QModbusResponse(request.functionCode(), subFunctionCode,
                                m_counters[static_cast<Counter> (subFunctionCode)]);
     }
-    return q_func()->processPrivateRequest(request);
+    return QModbusExceptionResponse(request.functionCode(),
+        QModbusExceptionResponse::IllegalFunction);
 
 #undef CHECK_SIZE_AND_CONDITION
 }
