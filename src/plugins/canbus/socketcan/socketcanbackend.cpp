@@ -544,9 +544,7 @@ void SocketCanBackend::readSocket()
 
         bufferedFrame.setFrameId(frame.can_id & CAN_EFF_MASK);
 
-        QByteArray load;
-        for (int i = 0; i < frame.len ; i++)
-            load.insert(i, frame.data[i]);
+        QByteArray load(reinterpret_cast<char *>(frame.data), frame.len);
         bufferedFrame.setPayload(load);
 
         newFrames.append(bufferedFrame);
