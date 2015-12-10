@@ -505,7 +505,7 @@ void SocketCanBackend::readSocket()
 
     while (true) {
         struct canfd_frame frame;
-        int bytesReceived = 0;
+        int bytesReceived;
 
         bytesReceived = ::read(canSocket, &frame, sizeof(frame));
 
