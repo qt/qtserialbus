@@ -66,6 +66,7 @@ void tst_QCanBusFrame::constructors()
 {
     QCanBusFrame frame1;
     QCanBusFrame frame2(123, "tst");
+    QCanBusFrame frame3(123456, "tst");
     QCanBusFrame::TimeStamp timeStamp1;
     QCanBusFrame::TimeStamp timeStamp2(5, 5);
 
@@ -75,25 +76,39 @@ void tst_QCanBusFrame::constructors()
     QVERIFY(!frame2.payload().isEmpty());
     QVERIFY(frame2.frameId());
 
+    QVERIFY(!frame3.payload().isEmpty());
+    QVERIFY(frame3.frameId());
+
     QVERIFY(!timeStamp1.seconds());
     QVERIFY(!timeStamp1.microSeconds());
 
     QVERIFY(timeStamp2.seconds());
     QVERIFY(timeStamp2.microSeconds());
 
-    QVERIFY(frame1.hasExtendedFrameFormat() == true);
-    QVERIFY(frame2.hasExtendedFrameFormat() == true);
+    QVERIFY(frame1.hasExtendedFrameFormat() == false);
+    QVERIFY(frame2.hasExtendedFrameFormat() == false);
+    QVERIFY(frame3.hasExtendedFrameFormat() == true);
 
     QCOMPARE(frame1.frameType(), QCanBusFrame::DataFrame);
     QCOMPARE(frame2.frameType(), QCanBusFrame::DataFrame);
+    QCOMPARE(frame3.frameType(), QCanBusFrame::DataFrame);
 }
 
 void tst_QCanBusFrame::id()
 {
     QCanBusFrame frame;
     QVERIFY(!frame.frameId());
+    frame.setFrameId(2047u);
+    QCOMPARE(frame.frameId(), 2047u);
+    QVERIFY(frame.hasExtendedFrameFormat() == false);
+    // id > 2^11 -> extended format
+    frame.setFrameId(2048u);
+    QCOMPARE(frame.frameId(), 2048u);
+    QVERIFY(frame.hasExtendedFrameFormat() == true);
+    // id < 2^11 -> no extended format
     frame.setFrameId(512u);
     QCOMPARE(frame.frameId(), 512u);
+    QVERIFY(frame.hasExtendedFrameFormat() == false);
 }
 
 void tst_QCanBusFrame::payload()

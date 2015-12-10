@@ -73,7 +73,7 @@ public:
 
     explicit QCanBusFrame(QCanBusFrame::FrameType type) :
         canId(0x0),
-        isExtendedFrame(0x1),
+        isExtendedFrame(0x0),
         version(0x0)
     {
         setFrameType(type);
@@ -100,7 +100,7 @@ public:
     explicit QCanBusFrame(quint32 identifier = 0, const QByteArray &data = QByteArray()) :
         canId(identifier & 0x1FFFFFFFU),
         format(DataFrame),
-        isExtendedFrame(0x1),
+        isExtendedFrame((identifier & 0x1FFFF800U) ? 0x1 : 0x0),
         version(0x0),
         load(data)
     {
@@ -157,6 +157,7 @@ public:
     inline void setFrameId(quint32 newFrameId)
     {
         canId = (newFrameId & 0x1FFFFFFFU);
+        setExtendedFrameFormat(newFrameId & 0x1FFFF800U);
     }
 
     inline void setPayload(const QByteArray &data) { load = data; }

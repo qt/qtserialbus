@@ -76,9 +76,9 @@ QT_BEGIN_NAMESPACE
 
     Sets the identifier of the CAN frame to \a newFrameId. The maximum size of a CAN frame
     identifier is 11 bits, which can be extended up to 29 bits by supporting the \e {CAN extended frame
-    format}.
+    format}. The \e {CAN extended frame format} setting is automatically adapted to match \a newFrameId.
 
-    \sa frameId()
+    \sa frameId(), hasExtendedFrameFormat()
 */
 
 /*!
