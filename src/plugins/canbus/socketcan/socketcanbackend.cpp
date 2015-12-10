@@ -515,6 +515,10 @@ void SocketCanBackend::readSocket()
             setError(tr("ERROR SocketCanBackend: incomplete can frame"),
                      QCanBusDevice::CanBusError::ReadError);
             continue;
+        } else if (frame.len > bytesReceived - offsetof(canfd_frame, data)) {
+            setError(tr("ERROR SocketCanBackend: invalid can frame length"),
+                     QCanBusDevice::CanBusError::ReadError);
+            continue;
         }
 
         struct timeval timeStamp;
