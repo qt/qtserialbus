@@ -40,7 +40,9 @@
 
 #include <QtCore/qdebug.h>
 #include <QtCore/qloggingcategory.h>
+#include <QtCore/qvector.h>
 
+#include <algorithm>
 #include <bitset>
 
 QT_BEGIN_NAMESPACE
@@ -925,13 +927,11 @@ QModbusResponse QModbusServerPrivate::processGetCommEventLogRequest(const QModbu
     }
     const quint16 deviceBusy = tmp.value<quint16>();
 
-    m_commEventLog.normalizeIndexes();
-    QVector<quint8> eventLog(m_commEventLog.count());
-    for (int i = 0; i < m_commEventLog.count(); ++i)
-        eventLog[i] = m_commEventLog[i];
+    QVector<quint8> eventLog(m_commEventLog.size());
+    std::copy(m_commEventLog.cbegin(), m_commEventLog.cend(), eventLog.begin());
 
     // 6 -> 3 x 2 Bytes (Status, Event Count and Message Count)
-    return QModbusResponse(request.functionCode(), quint8(eventLog.count() + 6), deviceBusy,
+    return QModbusResponse(request.functionCode(), quint8(eventLog.size() + 6), deviceBusy,
         m_counters[Counter::CommEvent], m_counters[Counter::BusMessage], eventLog);
 }
 
@@ -1173,7 +1173,9 @@ void QModbusServerPrivate::storeModbusCommEvent(const QModbusCommEvent &eventByt
     // Inserts an event byte at the start of the event log. If the event log
     // is already full, the byte at the end of the log will be removed. The
     // event log size is 64 bytes, starting at index 0.
-    m_commEventLog.prepend(eventByte);
+    m_commEventLog.push_front(eventByte);
+    if (m_commEventLog.size() > 64)
+        m_commEventLog.pop_back();
 }
 
 #undef CHECK_SIZE_EQUALS
