@@ -313,12 +313,12 @@ bool SocketCanBackend::writeFrame(const QCanBusFrame &newData)
     if (newData.hasExtendedFrameFormat())
         canId |= CAN_EFF_FLAG;
 
-    if (newData.frameType() == QCanBusFrame::ErrorFrame) {
+    if (newData.frameType() == QCanBusFrame::RemoteRequestFrame) {
+        canId |= CAN_RTR_FLAG;
+    } else if (newData.frameType() == QCanBusFrame::ErrorFrame) {
         canId = (uint)(newData.error() & QCanBusFrame::AnyError);
         canId |= CAN_ERR_FLAG;
     }
-    if (newData.frameType() == QCanBusFrame::RemoteRequestFrame)
-        canId |= CAN_RTR_FLAG;
 
     bool isFdFrame = (newData.payload().size() > 8);
     if (isFdFrame && newData.payload().size() > CANFD_MAX_DLEN) {
