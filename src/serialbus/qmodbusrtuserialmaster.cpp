@@ -116,7 +116,8 @@ void QModbusRtuSerialMaster::close()
     if (d->m_serialPort->isOpen())
         d->m_serialPort->close();
 
-    qCDebug(QT_MODBUS_LOW) << "Aborted replies:" << d->m_queue.count();
+    if (d->m_queue.count())
+        qCDebug(QT_MODBUS_LOW) << "Aborted replies:" << d->m_queue.count();
 
     while (!d->m_queue.isEmpty()) {
         // Finish each open reply and forget them
