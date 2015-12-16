@@ -77,7 +77,7 @@ public:
     void setPortName(const QString& name);
     QString portName() const;
 
-    virtual bool connectDevice(); //TODO remove virtual, workaround
+    bool connectDevice();
     void disconnectDevice();
 
     ModbusDeviceState state() const;
