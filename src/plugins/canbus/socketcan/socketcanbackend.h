@@ -74,6 +74,7 @@ private:
     qint64 canSocket;
     QPointer<QSocketNotifier> notifier;
     QString canSocketName;
+    bool canFdOptionEnabled;
 };
 
 QT_END_NAMESPACE

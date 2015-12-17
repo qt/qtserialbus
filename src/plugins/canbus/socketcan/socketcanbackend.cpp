@@ -53,7 +53,8 @@ QT_BEGIN_NAMESPACE
 SocketCanBackend::SocketCanBackend(const QString &name) :
     canSocket(-1),
     notifier(0),
-    canSocketName(name)
+    canSocketName(name),
+    canFdOptionEnabled(false)
 {
     resetConfigurations();
 }
@@ -72,6 +73,8 @@ void SocketCanBackend::resetConfigurations()
     QCanBusDevice::setConfigurationParameter(
                 QCanBusDevice::ErrorFilterKey,
                 QVariant::fromValue(QCanBusFrame::FrameErrors(QCanBusFrame::AnyError)));
+    QCanBusDevice::setConfigurationParameter(
+                QCanBusDevice::CanFdKey, false);
 }
 
 bool SocketCanBackend::open()
@@ -204,6 +207,17 @@ bool SocketCanBackend::applyConfigurationParameter(int key, const QVariant &valu
         success = true;
         break;
     }
+    case QCanBusDevice::CanFdKey:
+    {
+        const int fd_frames = value.toBool() ? 1 : 0;
+        if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &fd_frames, sizeof(fd_frames)) < 0) {
+            setError(qt_error_string(errno),
+                     QCanBusDevice::CanBusError::ConfigurationError);
+            break;
+        }
+        success = true;
+        break;
+    }
     default:
         setError(tr("SocketCanBackend: No such configuration as %1 in SocketCanBackend").arg(key),
                  QCanBusDevice::CanBusError::ConfigurationError);
@@ -236,13 +250,6 @@ bool SocketCanBackend::connectSocket()
     address.can_ifindex = interface.ifr_ifindex;
 
     if (bind(canSocket, reinterpret_cast<struct sockaddr *>(&address), sizeof(address)) < 0) {
-        setError(qt_error_string(errno),
-                 QCanBusDevice::CanBusError::ConnectionError);
-        return false;
-    }
-
-    const int fd_frames = 1;
-    if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &fd_frames, sizeof(fd_frames)) < 0) {
         setError(qt_error_string(errno),
                  QCanBusDevice::CanBusError::ConnectionError);
         return false;
@@ -301,6 +308,10 @@ void SocketCanBackend::setConfigurationParameter(int key, const QVariant &value)
         return;
 
     QCanBusDevice::setConfigurationParameter(key, value);
+
+    // we need to check canfd option a lot -> cache it and avoid QVector lookup
+    if (key == QCanBusDevice::CanFdKey)
+        canFdOptionEnabled = value.toBool();
 }
 
 bool SocketCanBackend::writeFrame(const QCanBusFrame &newData)
@@ -319,16 +330,24 @@ bool SocketCanBackend::writeFrame(const QCanBusFrame &newData)
         canId |= CAN_ERR_FLAG;
     }
 
-    bool isFdFrame = (newData.payload().size() > 8);
-    if (isFdFrame && newData.payload().size() > CANFD_MAX_DLEN) {
+
+    int payloadSize = newData.payload().size();
+    if ((!canFdOptionEnabled && payloadSize > CAN_MAX_DLEN)
+            || (canFdOptionEnabled && payloadSize > CANFD_MAX_DLEN)) {
         qWarning() << QString("payload (%1 bytes) is too large for chosen frame size of "
                               "maximal %2 bytes. Frame is discarded.").
-                        arg(newData.payload().size()).arg(CANFD_MAX_DLEN);
+                        arg(payloadSize).arg(canFdOptionEnabled ? CANFD_MAX_DLEN : CAN_MAX_DLEN);
+        if (!canFdOptionEnabled && payloadSize <= CANFD_MAX_DLEN)
+            setError(tr("Sending CanFd frame although CanFd option not enabled."),
+                     QCanBusDevice::WriteError);
+        else
+            setError(tr("Frame payload exceeds maximum CAN frame payload length."),
+                     QCanBusDevice::WriteError);
         return false;
     }
 
     qint64 bytesWritten = 0;
-    if (isFdFrame) {
+    if (canFdOptionEnabled) {
         canfd_frame frame;
         frame.len = newData.payload().size();
         frame.can_id = canId;

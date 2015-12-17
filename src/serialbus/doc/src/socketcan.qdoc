@@ -107,6 +107,11 @@
             \li QCanBusDevice::BitRateKey
             \li This configuration is not supported by the socketcan backend. However
             it is possible to set the rate when configuring the CAN network interface using the \c {ip link} command.
+        \row
+            \li QCanBusDevice::CanFdKey
+            \li This configuration option determines whether CANFD frames may be sent or received.
+                By default, this option is disabled. It controls controls the CAN_RAW_FD_FRAMES
+                option of the CAN socket.
     \endtable
 
     For example:
