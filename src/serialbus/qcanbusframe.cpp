@@ -68,7 +68,11 @@ QT_BEGIN_NAMESPACE
 /*!
     \fn bool QCanBusFrame::isValid() const
 
-    Returns \c true if the \l frameType() is \l InvalidFrame; otherwise \c false.
+    Returns \c false if the \l frameType() is \l InvalidFrame,
+    the \l hasExtendedFrameFormat() is not set although \l frameId() is longer than 11 bit or
+    the payload is longer than the maximal permitted payload length of 64 byte.
+
+    Otherwise this function returns \c true.
 */
 
 /*!

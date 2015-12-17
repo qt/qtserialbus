@@ -110,7 +110,18 @@ public:
 
     bool isValid() const
     {
-        return (format != 0x4);
+        if (format == InvalidFrame)
+            return false;
+
+        // long id used, but extended flag not set
+        if (!isExtendedFrame && (canId & 0x1FFFF800U))
+            return false;
+
+        // maximum permitted payload size in CANFD
+        if (load.length() > 64)
+            return false;
+
+        return true;
     }
 
     FrameType frameType() const
