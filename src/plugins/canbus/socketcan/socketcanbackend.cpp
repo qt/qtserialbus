@@ -248,8 +248,7 @@ bool SocketCanBackend::connectSocket()
         return false;
     }
 
-    if (notifier)
-        delete notifier;
+    delete notifier;
 
     notifier = new QSocketNotifier(canSocket, QSocketNotifier::Read, this);
     connect(notifier.data(), &QSocketNotifier::activated,
