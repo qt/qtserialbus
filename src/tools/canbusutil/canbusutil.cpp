@@ -97,11 +97,8 @@ bool CanBusUtil::parseDataField(qint32 &id, QString &payload)
     return true;
 }
 
-bool CanBusUtil::setFrameFromPayload(QString payload, QCanBusFrame *frame,
-                                   bool &fdFrame)
+bool CanBusUtil::setFrameFromPayload(QString payload, QCanBusFrame *frame)
 {
-    fdFrame = false;
-
     if (!payload.isEmpty() && payload.at(0).toUpper() == 'R') {
         bool validPayloadLength = false;
 
@@ -127,7 +124,7 @@ bool CanBusUtil::setFrameFromPayload(QString payload, QCanBusFrame *frame,
 
         return validPayloadLength;
     } else if (!payload.isEmpty() && payload.at(0) == '#') {
-        fdFrame = true;
+        frame->setFlexibleDataRateFormat(true);
         payload = payload.mid(1);
     }
 
@@ -144,7 +141,7 @@ bool CanBusUtil::setFrameFromPayload(QString payload, QCanBusFrame *frame,
 
     QByteArray bytes = QByteArray::fromHex(payload.toLatin1());
 
-    const int maxSize = fdFrame ? 64 : 8;
+    const int maxSize = frame->hasFlexibleDataRateFormat() ? 64 : 8;
     if (bytes.size() > maxSize) {
         m_output << "Warning: Truncating payload at max. size of " << maxSize << " bytes." << endl;
         bytes.truncate(maxSize);
@@ -182,13 +179,12 @@ bool CanBusUtil::sendData()
 {
     qint32 id;
     QString payload;
-    bool fdFrame;
     QCanBusFrame frame;
 
     if (parseDataField(id, payload) == false)
         return false;
 
-    if (setFrameFromPayload(payload, &frame, fdFrame) == false)
+    if (setFrameFromPayload(payload, &frame) == false)
         return false;
 
     if (id < 0 || id > 0x1FFFFFFF) { // 29 bits
@@ -198,7 +194,7 @@ bool CanBusUtil::sendData()
 
     frame.setFrameId(id);
 
-    if (fdFrame)
+    if (frame.hasFlexibleDataRateFormat())
         m_canDevice->setConfigurationParameter(QCanBusDevice::CanFdKey, true);
 
     return m_canDevice->writeFrame(frame);

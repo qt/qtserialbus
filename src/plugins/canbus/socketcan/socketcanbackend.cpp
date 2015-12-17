@@ -368,7 +368,7 @@ bool SocketCanBackend::writeFrame(const QCanBusFrame &newData)
         qWarning() << QString("payload (%1 bytes) is too large for chosen frame size of "
                               "maximal %2 bytes. Frame is discarded.").
                         arg(payloadSize).arg(canFdOptionEnabled ? CANFD_MAX_DLEN : CAN_MAX_DLEN);
-        if (!canFdOptionEnabled && payloadSize <= CANFD_MAX_DLEN)
+        if (!canFdOptionEnabled && newData.hasFlexibleDataRateFormat())
             setError(tr("Sending CAN FD frame although CAN FD option not enabled."),
                      QCanBusDevice::WriteError);
         else
@@ -378,7 +378,7 @@ bool SocketCanBackend::writeFrame(const QCanBusFrame &newData)
     }
 
     qint64 bytesWritten = 0;
-    if (canFdOptionEnabled) {
+    if (newData.hasFlexibleDataRateFormat()) {
         canfd_frame frame;
         frame.len = newData.payload().size();
         frame.can_id = canId;
@@ -600,6 +600,7 @@ void SocketCanBackend::readSocket()
         const QCanBusFrame::TimeStamp stamp(timeStamp.tv_sec, timeStamp.tv_usec);
         QCanBusFrame bufferedFrame;
         bufferedFrame.setTimeStamp(stamp);
+        bufferedFrame.setFlexibleDataRateFormat(bytesReceived == CANFD_MTU);
 
         bufferedFrame.setExtendedFrameFormat(frame.can_id & CAN_EFF_FLAG);
         Q_ASSERT(frame.len <= CANFD_MAX_DLEN);

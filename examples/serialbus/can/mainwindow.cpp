@@ -232,6 +232,7 @@ void MainWindow::sendMessage() const
 
     frame.setFrameId(id);
     frame.setExtendedFrameFormat(m_ui->effBox->checkState());
+    frame.setFlexibleDataRateFormat(m_ui->fdBox->checkState());
 
     if (m_ui->remoteFrame->isChecked())
         frame.setFrameType(QCanBusFrame::RemoteRequestFrame);

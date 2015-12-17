@@ -70,31 +70,39 @@ void tst_QCanBusFrame::constructors()
     QCanBusFrame frame1;
     QCanBusFrame frame2(123, "tst");
     QCanBusFrame frame3(123456, "tst");
+    QCanBusFrame frame4(1234, "tst tst tst");
     QCanBusFrame::TimeStamp timeStamp1;
     QCanBusFrame::TimeStamp timeStamp2(5, 5);
 
     QVERIFY(frame1.payload().isEmpty());
     QVERIFY(!frame1.frameId());
+    QVERIFY(!frame1.hasFlexibleDataRateFormat());
+    QVERIFY(!frame1.hasExtendedFrameFormat());
+    QCOMPARE(frame1.frameType(), QCanBusFrame::DataFrame);
 
     QVERIFY(!frame2.payload().isEmpty());
     QVERIFY(frame2.frameId());
+    QVERIFY(!frame2.hasFlexibleDataRateFormat());
+    QVERIFY(!frame2.hasExtendedFrameFormat());
+    QCOMPARE(frame2.frameType(), QCanBusFrame::DataFrame);
 
     QVERIFY(!frame3.payload().isEmpty());
     QVERIFY(frame3.frameId());
+    QVERIFY(!frame3.hasFlexibleDataRateFormat());
+    QVERIFY(frame3.hasExtendedFrameFormat());
+    QCOMPARE(frame3.frameType(), QCanBusFrame::DataFrame);
+
+    QVERIFY(!frame4.payload().isEmpty());
+    QVERIFY(frame4.frameId());
+    QVERIFY(frame4.hasFlexibleDataRateFormat());
+    QVERIFY(!frame4.hasExtendedFrameFormat());
+    QCOMPARE(frame4.frameType(), QCanBusFrame::DataFrame);
 
     QVERIFY(!timeStamp1.seconds());
     QVERIFY(!timeStamp1.microSeconds());
 
     QVERIFY(timeStamp2.seconds());
     QVERIFY(timeStamp2.microSeconds());
-
-    QVERIFY(frame1.hasExtendedFrameFormat() == false);
-    QVERIFY(frame2.hasExtendedFrameFormat() == false);
-    QVERIFY(frame3.hasExtendedFrameFormat() == true);
-
-    QCOMPARE(frame1.frameType(), QCanBusFrame::DataFrame);
-    QCOMPARE(frame2.frameType(), QCanBusFrame::DataFrame);
-    QCOMPARE(frame3.frameType(), QCanBusFrame::DataFrame);
 }
 
 void tst_QCanBusFrame::id()
@@ -138,6 +146,15 @@ void tst_QCanBusFrame::payload()
     QVERIFY(frame.payload().isEmpty());
     frame.setPayload("test");
     QCOMPARE(frame.payload().data(), "test");
+    QVERIFY(!frame.hasFlexibleDataRateFormat());
+    // setting long payload should automatically set hasFlexibleDataRateFormat()
+    frame.setPayload("testtesttest");
+    QCOMPARE(frame.payload().data(), "testtesttest");
+    QVERIFY(frame.hasFlexibleDataRateFormat());
+    // setting short payload should not change hasFlexibleDataRateFormat()
+    frame.setPayload("test");
+    QCOMPARE(frame.payload().data(), "test");
+    QVERIFY(frame.hasFlexibleDataRateFormat());
 }
 
 void tst_QCanBusFrame::timeStamp()
@@ -170,40 +187,53 @@ void tst_QCanBusFrame::tst_isValid_data()
     QTest::addColumn<QByteArray>("payload");
     QTest::addColumn<uint>("id");
     QTest::addColumn<bool>("extended");
+    QTest::addColumn<bool>("flexibleData");
 
     QTest::newRow("invalid frame")
                  << QCanBusFrame::InvalidFrame << false
-                 << QByteArray() << 0u << false;
+                 << QByteArray() << 0u << false << false;
     QTest::newRow("data frame")
                  << QCanBusFrame::DataFrame << true
-                 << QByteArray() << 0u << false;
+                 << QByteArray() << 0u << false << false;
     QTest::newRow("error frame")
                  << QCanBusFrame::ErrorFrame << true
-                 << QByteArray() << 0u << false;
+                 << QByteArray() << 0u << false << false;
     QTest::newRow("remote request frame")
                  << QCanBusFrame::RemoteRequestFrame << true
-                 << QByteArray() << 0u << false;
+                 << QByteArray() << 0u << false << false;
+    QTest::newRow("remote request CAN FD frame")
+                 << QCanBusFrame::RemoteRequestFrame << false
+                 << QByteArray() << 0u << false << true;
     QTest::newRow("unknown frame")
                  << QCanBusFrame::UnknownFrame << true
-                 << QByteArray() << 0u << false;
+                 << QByteArray() << 0u << false << false;
     QTest::newRow("data frame CAN max payload")
                  << QCanBusFrame::DataFrame << true
-                 << QByteArray(8, 0) << 0u << false;
+                 << QByteArray(8, 0) << 0u << false << false;
     QTest::newRow("data frame CAN FD max payload")
                  << QCanBusFrame::DataFrame << true
-                 << QByteArray(64, 0) << 0u << false;
+                 << QByteArray(64, 0) << 0u << false << true;
     QTest::newRow("data frame CAN too much payload")
                  << QCanBusFrame::DataFrame << false
-                 << QByteArray(65, 0) << 0u << false;
+                 << QByteArray(65, 0) << 0u << false << false;
     QTest::newRow("data frame short id")
                  << QCanBusFrame::DataFrame << true
-                 << QByteArray(8, 0) << (1u << 11) - 1 << false;
+                 << QByteArray(8, 0) << (1u << 11) - 1 << false << false;
     QTest::newRow("data frame long id")
                  << QCanBusFrame::DataFrame << true
-                 << QByteArray(8, 0) << (1u << 11) << true;
+                 << QByteArray(8, 0) << (1u << 11) << true << false;
     QTest::newRow("data frame bad long id")
                  << QCanBusFrame::DataFrame << false
-                 << QByteArray(8, 0) << (1u << 11) << false;
+                 << QByteArray(8, 0) << (1u << 11) << false << false;
+    QTest::newRow("data frame CAN too long payload")
+                 << QCanBusFrame::DataFrame << false
+                 << QByteArray(9, 0) << 512u << false << false;
+    QTest::newRow("data frame CAN FD long payload")
+                 << QCanBusFrame::DataFrame << true
+                 << QByteArray(9, 0) << 512u << false << true;
+    QTest::newRow("data frame CAN FD too long payload")
+                 << QCanBusFrame::DataFrame << false
+                 << QByteArray(65, 0) << 512u << false << true;
  }
 
 void tst_QCanBusFrame::tst_isValid()
@@ -213,16 +243,19 @@ void tst_QCanBusFrame::tst_isValid()
     QFETCH(QByteArray, payload);
     QFETCH(uint, id);
     QFETCH(bool, extended);
+    QFETCH(bool, flexibleData);
 
     QCanBusFrame frame(frameType);
     frame.setPayload(payload);
     frame.setFrameId(id);
     frame.setExtendedFrameFormat(extended);
+    frame.setFlexibleDataRateFormat(flexibleData);
     QCOMPARE(frame.isValid(), isValid);
     QCOMPARE(frame.frameType(), frameType);
     QCOMPARE(frame.payload(), payload);
     QCOMPARE(frame.frameId(), id);
     QCOMPARE(frame.hasExtendedFrameFormat(), extended);
+    QCOMPARE(frame.hasFlexibleDataRateFormat(), flexibleData);
 
     frame.setFrameType(QCanBusFrame::InvalidFrame);
     QCOMPARE(frame.isValid(), false);
@@ -280,7 +313,7 @@ void tst_QCanBusFrame::tst_toString_data()
     QTest::newRow("short data frame FD")
             << QCanBusFrame::DataFrame << 0x123u << false
             << QByteArray::fromHex("001122334455667788")
-            << QString("     123   [9]  00 11 22 33 44 55 66 77 88");
+            << QString("     123  [09]  00 11 22 33 44 55 66 77 88");
     QTest::newRow("long data frame FD")
             << QCanBusFrame::DataFrame << 0x123u << false
             << QByteArray::fromHex("00112233445566778899")
@@ -312,30 +345,34 @@ void tst_QCanBusFrame::streaming_data()
     QTest::addColumn<qint64>("seconds");
     QTest::addColumn<qint64>("microSeconds");
     QTest::addColumn<bool>("isExtended");
+    QTest::addColumn<bool>("isFlexibleDataRate");
     QTest::addColumn<QCanBusFrame::FrameType>("frameType");
 
 
     QTest::newRow("emptyFrame") << quint32(0) << QByteArray()
                                 << qint64(0) << qint64(0)
-                                << false << QCanBusFrame::DataFrame;
+                                << false << false << QCanBusFrame::DataFrame;
     QTest::newRow("fullFrame1") << quint32(123) << QByteArray("abcde1")
                                << qint64(456) << qint64(784)
-                               << true << QCanBusFrame::DataFrame;
+                               << true << false << QCanBusFrame::DataFrame;
     QTest::newRow("fullFrame2") << quint32(123) << QByteArray("abcde2")
                                << qint64(457) << qint64(785)
-                               << false << QCanBusFrame::DataFrame;
+                               << false << false << QCanBusFrame::DataFrame;
+    QTest::newRow("fullFrameFD") << quint32(123) << QByteArray("abcdfd")
+                                << qint64(457) << qint64(785)
+                                << false << true << QCanBusFrame::DataFrame;
     QTest::newRow("fullFrame3") << quint32(123) << QByteArray("abcde3")
                                << qint64(458) << qint64(786)
-                               << true << QCanBusFrame::RemoteRequestFrame;
+                               << true << false << QCanBusFrame::RemoteRequestFrame;
     QTest::newRow("fullFrame4") << quint32(123) << QByteArray("abcde4")
                                << qint64(459) << qint64(787)
-                               << false << QCanBusFrame::RemoteRequestFrame;
+                               << false << false << QCanBusFrame::RemoteRequestFrame;
     QTest::newRow("fullFrame5") << quint32(123) << QByteArray("abcde5")
                                << qint64(460) << qint64(789)
-                               << true << QCanBusFrame::ErrorFrame;
+                               << true << false << QCanBusFrame::ErrorFrame;
     QTest::newRow("fullFrame6") << quint32(123) << QByteArray("abcde6")
                                << qint64(453) << qint64(788)
-                               << false << QCanBusFrame::ErrorFrame;
+                               << false << false << QCanBusFrame::ErrorFrame;
 }
 
 void tst_QCanBusFrame::streaming()
@@ -345,6 +382,7 @@ void tst_QCanBusFrame::streaming()
     QFETCH(qint64, seconds);
     QFETCH(qint64, microSeconds);
     QFETCH(bool, isExtended);
+    QFETCH(bool, isFlexibleDataRate);
     QFETCH(QCanBusFrame::FrameType, frameType);
 
     QCanBusFrame originalFrame(frameId, payload);
@@ -352,6 +390,7 @@ void tst_QCanBusFrame::streaming()
     originalFrame.setTimeStamp(originalStamp);
 
     originalFrame.setExtendedFrameFormat(isExtended);
+    originalFrame.setFlexibleDataRateFormat(isFlexibleDataRate);
     originalFrame.setFrameType(frameType);
 
     QByteArray buffer;
@@ -372,6 +411,8 @@ void tst_QCanBusFrame::streaming()
     QCOMPARE(restoredFrame.frameType(), originalFrame.frameType());
     QCOMPARE(restoredFrame.hasExtendedFrameFormat(),
              originalFrame.hasExtendedFrameFormat());
+    QCOMPARE(restoredFrame.hasFlexibleDataRateFormat(),
+             originalFrame.hasFlexibleDataRateFormat());
 }
 
 void tst_QCanBusFrame::tst_error()
