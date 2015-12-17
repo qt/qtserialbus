@@ -208,7 +208,7 @@ bool TinyCanBackendPrivate::setConfigurationParameter(int key, const QVariant &v
     case QCanBusDevice::BitRateKey:
         return setBitRate(value.toInt());
     default:
-        q->setError(TinyCanBackend::tr("Unsuported configuration key"), QCanBusDevice::ConfigurationError);
+        q->setError(TinyCanBackend::tr("Unsupported configuration key"), QCanBusDevice::ConfigurationError);
         return false;
     }
 }

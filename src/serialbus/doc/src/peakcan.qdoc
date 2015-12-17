@@ -89,7 +89,7 @@
         \row
             \li QDCanBusDevice::BitRateKey
             \li Determines the bit rate of the CAN bus connection. The following bit rates
-                are suported: 5000, 10000, 20000, 33000, 47000, 50000, 83000, 95000,
+                are supported: 5000, 10000, 20000, 33000, 47000, 50000, 83000, 95000,
                 100000, 125000, 250000, 500000, 800000, 1000000. Note that this configuration
                 parameter can only be adjusted while the QCanBusDevice is not connected.
    \endtable
