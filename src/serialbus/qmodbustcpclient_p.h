@@ -187,6 +187,14 @@ public:
             m_responseTimeoutDuration };
         m_transactionStore.insert(tId, element);
 
+        q->connect(reply, &QObject::destroyed, q, [this, tId](QObject *) {
+            if (!m_transactionStore.contains(tId))
+                return;
+            const QueueElement element = m_transactionStore.take(tId);
+            if (element.timer)
+                element.timer->stop();
+        });
+
         if (element.timer) {
             q->connect(q, &QModbusClient::timeoutChanged, element.timer.data(), &QTimer::setInterval);
             QObject::connect(element.timer.data(), &QTimer::timeout, [this, writeToSocket, tId]() {

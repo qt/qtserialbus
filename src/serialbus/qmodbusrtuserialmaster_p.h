@@ -259,6 +259,14 @@ public:
         QModbusReply *reply = new QModbusReply(type, slaveAddress, q);
         m_queue.enqueue(QueueElement{ reply, request, unit, m_numberOfRetries });
 
+        q->connect(reply, &QObject::destroyed, q, [this](QObject *obj) {
+            foreach (const QueueElement &element, m_queue) {
+                if (element.reply != obj)
+                    continue;
+                m_queue.removeAll(element);
+                QTimer::singleShot(0, [this]() { sendNextRequest(); });
+            }
+        });
         if (!m_responseTimer || (!m_responseTimer->isActive()))
             sendNextRequest();
 

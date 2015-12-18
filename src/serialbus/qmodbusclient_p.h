@@ -108,6 +108,9 @@ public:
                 timer->setInterval(timeout);
             }
         }
+        bool operator==(const QueueElement &other) const {
+            return reply == other.reply;
+        }
 
         QPointer<QModbusReply> reply;
         QModbusRequest requestPdu;
