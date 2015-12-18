@@ -93,7 +93,7 @@ public:
     virtual bool isOpen() const { return false; }
 
     int m_numberOfRetries = 3;
-    int m_responseTimeoutDuration = 200;
+    int m_responseTimeoutDuration = 1000;
 
     struct QueueElement {
         QueueElement() Q_DECL_EQ_DEFAULT;
