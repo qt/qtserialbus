@@ -186,6 +186,29 @@ void QModbusClient::setTimeout(int newTimeout)
 }
 
 /*!
+    Returns the number of retries a client will perform before a
+    request fails. The default value is set to \c 3.
+*/
+int QModbusClient::numberOfRetries() const
+{
+    Q_D(const QModbusClient);
+    return d->m_numberOfRetries;
+}
+
+/*!
+    Sets the \a number of retries a client will perform before a
+    request fails. The default value is set to \c 3.
+
+    \note Changing this property will only effect new request, not
+    already scheduled ones.
+*/
+void QModbusClient::setNumberOfRetries(int number)
+{
+    Q_D(QModbusClient);
+    d->m_numberOfRetries = number;
+}
+
+/*!
     \internal
 */
 QModbusClient::QModbusClient(QModbusClientPrivate &dd, QObject *parent) :

@@ -37,7 +37,6 @@
 #include "qmodbustcpclient.h"
 #include "qmodbustcpclient_p.h"
 
-#include <QtCore/qdatetime.h>
 #include <QtCore/qurl.h>
 
 QT_BEGIN_NAMESPACE
@@ -60,8 +59,6 @@ QModbusTcpClient::QModbusTcpClient(QObject *parent)
 {
     Q_D(QModbusTcpClient);
     d->setupTcpSocket();
-
-    qsrand(QTime::currentTime().msec());
 }
 
 /*!
@@ -80,8 +77,6 @@ QModbusTcpClient::QModbusTcpClient(QModbusTcpClientPrivate &dd, QObject *parent)
 {
     Q_D(QModbusTcpClient);
     d->setupTcpSocket();
-
-    qsrand(QTime::currentTime().msec());
 }
 
 /*!

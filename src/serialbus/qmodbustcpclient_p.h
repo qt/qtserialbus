@@ -119,6 +119,11 @@ public:
                 QDataStream input(responseBuffer);
                 input >> transactionId >> protocolId >> bytesPdu >> serverAddress;
 
+                // stop the timer as soon as we know enough about the transaction
+                const bool knownTransaction = m_transactionStore.contains(transactionId);
+                if (knownTransaction && m_transactionStore[transactionId].timer)
+                    m_transactionStore[transactionId].timer->stop();
+
                 qCDebug(QT_MODBUS) << "(TCP client) tid:" << hex << transactionId << "size:"
                     << bytesPdu << "server address:" << serverAddress;
 
@@ -139,13 +144,12 @@ public:
 
                 responseBuffer.remove(0, tcpAduSize);
 
-                if (!m_transactionStore.contains(transactionId)) {
+                if (!knownTransaction) {
                     qCDebug(QT_MODBUS) << "(TCP client) No pending request for response with "
                         "given transaction ID, ignoring response message.";
-                    continue;
+                } else {
+                    processQueueElement(responsePdu, m_transactionStore[transactionId]);
                 }
-
-                processQueueElement(responsePdu, m_transactionStore.take(transactionId));
             }
         });
     }
@@ -154,45 +158,66 @@ public:
                                  const QModbusDataUnit &unit,
                                  QModbusReply::ReplyType type) Q_DECL_OVERRIDE
     {
-        Q_Q(QModbusTcpClient);
+        auto writeToSocket = [this](quint16 tId, const QModbusRequest &request, int address) {
+            QByteArray buffer;
+            QDataStream output(&buffer, QIODevice::WriteOnly);
+            output << tId << quint16(0) << quint16(request.size() + 1) << quint8(address) << request;
 
-        quint16 tId = qrand() % 0x10000;
-        QByteArray buffer;
-        QDataStream output(&buffer, QIODevice::WriteOnly);
-        output << tId << quint16(0) << quint16(request.size() + 1)
-               << quint8(serverAddress) << request;
+            int writtenBytes = m_socket->write(buffer);
+            if (writtenBytes == -1 || writtenBytes < buffer.size()) {
+                Q_Q(QModbusTcpClient);
+                qCDebug(QT_MODBUS) << "(TCP client) Cannot write request to socket.";
+                q->setError(QModbusTcpClient::tr("Could not write request to socket."),
+                            QModbusDevice::WriteError);
+                return false;
+            }
+            qCDebug(QT_MODBUS_LOW) << "(TCP client) Sent TCP ADU:" << buffer.toHex();
+            qCDebug(QT_MODBUS) << "(TCP client) Sent TCP PDU:" << request << "with tId:" << hex
+                << tId;
+            return true;
+        };
 
-
-        int writtenBytes = m_socket->write(buffer);
-        if (writtenBytes == -1 || writtenBytes < buffer.size()) {
-            qCDebug(QT_MODBUS) << "Cannot write request to socket.";
-            q->setError(QModbusTcpClient::tr("Could not write request to socket."),
-                        QModbusDevice::WriteError);
+        const int tId = transactionId();
+        if (!writeToSocket(tId, request, serverAddress))
             return Q_NULLPTR;
-        }
 
-        qCDebug(QT_MODBUS_LOW) << "Sent TCP ADU:" << buffer.toHex();
-        qCDebug(QT_MODBUS) << "Sent TCP PDU:" << request << "with tId:" << tId;
+        Q_Q(QModbusTcpClient);
+        QModbusReply *const reply = new QModbusReply(type, serverAddress, q);
+        const QueueElement element = QueueElement{ reply, request, unit, m_numberOfRetries,
+            m_responseTimeoutDuration };
+        m_transactionStore.insert(tId, element);
 
-        QModbusReply *reply = new QModbusReply(type, serverAddress, q);
-        if (m_responseTimeoutDuration >= 0) {
-            QTimer::singleShot(m_responseTimeoutDuration, [this, tId]() {
-                if (!m_transactionStore.contains(tId)) {
-                    qCDebug(QT_MODBUS_LOW) << "No pending request for timeout with given transaction ID"
-                                       << hex << tId;
+        if (element.timer) {
+            q->connect(q, &QModbusClient::timeoutChanged, element.timer.data(), [q, &element]() {
+                element.timer->setInterval(q->timeout());
+            });
+            QObject::connect(element.timer.data(), &QTimer::timeout, [this, writeToSocket, tId]() {
+                if (!m_transactionStore.contains(tId))
                     return;
-                }
 
                 QueueElement elem = m_transactionStore.take(tId);
                 if (elem.reply.isNull())
                     return;
 
-                qCDebug(QT_MODBUS) << "Timeout of request with id" << hex << tId;
-                elem.reply->setError(QModbusReply::TimeoutError,
-                                     QModbusClient::tr("Request timeout"));
+                if (elem.numberOfRetries > 0) {
+                    elem.numberOfRetries--;
+                    if (!writeToSocket(tId, elem.requestPdu, elem.reply->serverAddress()))
+                        return;
+                    m_transactionStore.insert(tId, elem);
+                    elem.timer->start();
+                    qCDebug(QT_MODBUS) << "(TCP client) Resend request with tId:" << hex << tId;
+                } else {
+                    qCDebug(QT_MODBUS) << "(TCP client) Timeout of request with tId:" << hex << tId;
+                    elem.reply->setError(QModbusReply::TimeoutError,
+                        QModbusClient::tr("Request timeout."));
+                }
             });
+            element.timer->start();
+        } else {
+            qCWarning(QT_MODBUS) << "(TCP client) No response timeout timer for request with tId:"
+                << hex << tId << ". Expected timeout:" << m_responseTimeoutDuration;
         }
-        m_transactionStore.insert(tId, QueueElement{ reply, request, unit });
+        incrementTransactionId();
 
         return reply;
     }
@@ -213,7 +238,7 @@ public:
         qCDebug(QT_MODBUS) << "(TCP client) Cleanup of pending requests";
 
         foreach (auto tid, m_transactionStore.keys()) {
-            QueueElement elem = m_transactionStore.take(tid);
+            const QueueElement elem = m_transactionStore.take(tid);
             if (elem.reply.isNull())
                 continue;
 
@@ -222,10 +247,17 @@ public:
         }
     }
 
+    // This doesn't overflow, it rather "wraps around". Expected.
+    inline void incrementTransactionId() { m_transactionId++; }
+    inline int transactionId() const { return m_transactionId; }
+
     QTcpSocket *m_socket = Q_NULLPTR;
     QByteArray responseBuffer;
     QHash<quint16, QueueElement> m_transactionStore;
     int mbpaHeaderSize = 7;
+
+private:   // Private to avoid using the wrong id inside the timer lambda,
+    quint16 m_transactionId = 0; // capturing 'this' will not copy the id.
 };
 
 QT_END_NAMESPACE

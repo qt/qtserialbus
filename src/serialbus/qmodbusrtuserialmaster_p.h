@@ -151,28 +151,29 @@ public:
         if (m_responseTimeoutDuration < 0)
             return;
 
-        Q_Q(QModbusRtuSerialMaster);
-
         if (!m_responseTimer) {
+            Q_Q(QModbusRtuSerialMaster);
             m_responseTimer = new QTimer(q);
             m_responseTimer->setSingleShot(true);
             m_responseTimer->setInterval(m_responseTimeoutDuration);
             QObject::connect(m_responseTimer, &QTimer::timeout, q, [this]() {
-                qCDebug(QT_MODBUS) << "(RTU client) Timeout of last request";
-
                 if (m_queue.isEmpty())
                     return;
 
-                QueueElement elem = m_queue.dequeue();
-                if (elem.reply.isNull()) {
-                    // reply deleted while waiting for response which timed out
-                    // nothing really to do here
-                    return;
+                QueueElement elem = m_queue.head();
+                if (elem.reply.isNull() || elem.numberOfRetries <= 0) {
+                    elem = m_queue.dequeue();
+                    if (elem.numberOfRetries <= 0) {
+                        elem.reply->setError(QModbusReply::TimeoutError,
+                            QModbusClient::tr("Request timeout."));
+                        qCDebug(QT_MODBUS) << "(RTU client) Timeout of request" << elem.requestPdu;
+                    }
+                } else {
+                    m_queue[0].numberOfRetries--;
+                    qCDebug(QT_MODBUS) << "(RTU client) Resend request:" << elem.requestPdu;
                 }
-
-                elem.reply->setError(QModbusReply::TimeoutError,
-                                     QModbusClient::tr("Request timeout."));
-                sendNextRequest(); // go to next request
+                // go to next request or send request again
+                QTimer::singleShot(0, [this]() { sendNextRequest(); });
             });
 
             QObject::connect(q, &QModbusClient::timeoutChanged, q, [q, this]() {
@@ -259,7 +260,7 @@ public:
         Q_Q(QModbusRtuSerialMaster);
 
         QModbusReply *reply = new QModbusReply(type, slaveAddress, q);
-        m_queue.enqueue(QueueElement{ reply, request, unit });
+        m_queue.enqueue(QueueElement{ reply, request, unit, m_numberOfRetries });
 
         if (!m_responseTimer || (!m_responseTimer->isActive()))
             sendNextRequest();

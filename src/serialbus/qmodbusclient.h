@@ -68,6 +68,9 @@ public:
     int timeout() const;
     void setTimeout(int newTimeout);
 
+    int numberOfRetries() const;
+    void setNumberOfRetries(int number);
+
 Q_SIGNALS:
     void timeoutChanged();
 
