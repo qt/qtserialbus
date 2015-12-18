@@ -37,6 +37,8 @@
 #include "qmodbustcpserver.h"
 #include "qmodbustcpserver_p.h"
 
+#include <QtCore/qurl.h>
+
 QT_BEGIN_NAMESPACE
 
 /*!
@@ -92,23 +94,21 @@ bool QModbusTcpServer::open()
     if (state() == QModbusDevice::ConnectedState)
         return true;
 
-    const QStringList parts =  portName().split(QLatin1Char(':'), QString::SkipEmptyParts);
-    if (parts.count() < 1) {
-        setError(tr("Invalid host and port for TCP communication specified."),
-            QModbusDevice::ConnectionError);
-        return false;
-    }
-
-    bool ok = false;
-    const quint16 port = parts.value(1).toInt(&ok);
-    if (!ok) {
-        setError(tr("Invalid port for TCP communication specified."),
-            QModbusDevice::ConnectionError);
-        return false;
-    }
-
     Q_D(QModbusTcpServer);
-    if (d->m_tcpServer->listen(QHostAddress(parts.value(0)), port))
+    if (d->m_tcpServer->isListening())
+        return false;
+
+    const QUrl url = QUrl::fromUserInput(d->m_networkAddress + QStringLiteral(":")
+        + QString::number(d->m_networkPort));
+
+    if (!url.isValid()) {
+        setError(tr("Invalid connection settings for TCP communication specified."),
+            QModbusDevice::ConnectionError);
+        qCWarning(QT_MODBUS) << "Invalid host:" << url.host() << "or port:" << url.port();
+        return false;
+    }
+
+    if (d->m_tcpServer->listen(QHostAddress(url.host()), url.port()))
         setState(QModbusDevice::ConnectedState);
     else
         setError(d->m_tcpServer->errorString(), QModbusDevice::ConnectionError);

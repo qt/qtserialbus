@@ -37,8 +37,10 @@
 #ifndef QMODBUSDEVICE_P_H
 #define QMODBUSDEVICE_P_H
 
+#include <private/qobject_p.h>
+#include <QtCore/qvariant.h>
 #include <QtSerialBus/qmodbusdevice.h>
-#include <QtCore/private/qobject_p.h>
+#include <QtSerialPort/qserialport.h>
 
 //
 //  W A R N I N G
@@ -63,7 +65,17 @@ public:
     QModbusDevice::ModbusDeviceState state = QModbusDevice::UnconnectedState;
     QModbusDevice::ModbusError error = QModbusDevice::NoError;
     QString errorString;
-    QString portName;
+
+    QString m_comPort;
+    QSerialPort::DataBits m_dataBits = QSerialPort::Data8;
+    QSerialPort::Parity m_parity = QSerialPort::EvenParity;
+    QSerialPort::StopBits m_stopBits = QSerialPort::OneStop;
+    QSerialPort::BaudRate m_baudRate = QSerialPort::Baud19200;
+
+    int m_networkPort = 502;
+    QString m_networkAddress = QStringLiteral("127.0.0.1");
+
+    QHash<int, QVariant> m_userConnectionParams;
 };
 
 QT_END_NAMESPACE

@@ -96,7 +96,9 @@ bool QModbusTcpClient::open()
     if (d->m_socket->state() != QAbstractSocket::UnconnectedState)
         return false;
 
-    const QUrl url = QUrl::fromUserInput(portName());
+    const QUrl url = QUrl::fromUserInput(d->m_networkAddress + QStringLiteral(":")
+        + QString::number(d->m_networkPort));
+
     if (!url.isValid()) {
         setError(tr("Invalid connection settings for TCP communication specified."),
             QModbusDevice::ConnectionError);

@@ -45,6 +45,7 @@
 #include <QtSerialBus/qmodbustcpserver.h>
 
 #include <QtCore/qregularexpression.h>
+#include <QtCore/qurl.h>
 #include <QtWidgets/qstatusbar.h>
 
 enum ModbusConnection {
@@ -131,7 +132,14 @@ void MainWindow::on_connectButton_clicked()
     statusBar()->clearMessage();
 
     if (intendToConnect) {
-        modbusDevice->setPortName(ui->portEdit->text());
+        if (static_cast<ModbusConnection> (ui->connectType->currentIndex()) == Serial) {
+            modbusDevice->setConnectionParameter(QModbusDevice::SerialPortNameParameter,
+                ui->portEdit->text());
+        } else {
+            const QUrl url = QUrl::fromUserInput(ui->portEdit->text());
+            modbusDevice->setConnectionParameter(QModbusDevice::NetworkPortParameter, url.port());
+            modbusDevice->setConnectionParameter(QModbusDevice::NetworkAddressParameter, url.host());
+        }
         modbusDevice->setServerAddress(ui->serverEdit->text().toInt());
         if (!modbusDevice->connectDevice())
             statusBar()->showMessage(tr("Connect failed: ") + modbusDevice->errorString(), 5000);

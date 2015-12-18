@@ -103,7 +103,7 @@ bool QModbusRtuSerialSlave::open()
         return true;
 
     Q_D(QModbusRtuSerialSlave);
-    d->m_serialPort->setPortName(portName());
+    d->updateSerialPortConnectionInfo();
     if (d->m_serialPort->open(QIODevice::ReadWrite))
         setState(QModbusDevice::ConnectedState);
     else

@@ -73,11 +73,6 @@ public:
         Q_Q(QModbusRtuSerialSlave);
 
         m_serialPort = new QSerialPort(q);
-        m_serialPort->setBaudRate(QSerialPort::Baud9600);
-        m_serialPort->setParity(QSerialPort::NoParity);
-        m_serialPort->setDataBits(QSerialPort::Data8);
-        m_serialPort->setStopBits(QSerialPort::OneStop);
-
         QObject::connect(m_serialPort, &QSerialPort::readyRead, [this]() {
             Q_Q(QModbusRtuSerialSlave);
 
@@ -325,6 +320,16 @@ public:
             if (q->state() != QModbusDevice::ClosingState)
                 q->setState(QModbusDevice::UnconnectedState);
         });
+    }
+
+    void updateSerialPortConnectionInfo() {
+        if (m_serialPort) {
+            m_serialPort->setPortName(m_comPort);
+            m_serialPort->setParity(m_parity);
+            m_serialPort->setBaudRate(m_baudRate);
+            m_serialPort->setDataBits(m_dataBits);
+            m_serialPort->setStopBits(m_stopBits);
+        }
     }
 
     void handleErrorOccurred(QSerialPort::SerialPortError);

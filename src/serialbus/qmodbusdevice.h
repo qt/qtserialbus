@@ -70,12 +70,26 @@ public:
     };
     Q_ENUM(ModbusDeviceState)
 
+    enum ConnectionParameter {
+        SerialPortNameParameter,
+        SerialParityParameter,
+        SerialBaudRateParameter,
+        SerialDataBitsParameter,
+        SerialStopBitsParameter,
+
+        NetworkPortParameter,
+        NetworkAddressParameter,
+
+        // Reserved
+        UserParameter = 0x100
+    };
+    Q_ENUM(ConnectionParameter)
+
     explicit QModbusDevice(QObject *parent = 0);
     ~QModbusDevice();
 
-    //TODO should become part of connect call in RTS specific sub class
-    void setPortName(const QString& name);
-    QString portName() const;
+    QVariant connectionParameter(int parameter) const;
+    void setConnectionParameter(int parameter, const QVariant &value);
 
     bool connectDevice();
     void disconnectDevice();
@@ -100,6 +114,7 @@ protected:
 
 Q_DECLARE_TYPEINFO(QModbusDevice::ModbusError, Q_PRIMITIVE_TYPE);
 Q_DECLARE_TYPEINFO(QModbusDevice::ModbusDeviceState, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(QModbusDevice::ConnectionParameter, Q_PRIMITIVE_TYPE);
 
 QT_END_NAMESPACE
 

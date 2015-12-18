@@ -97,7 +97,7 @@ bool QModbusRtuSerialMaster::open()
 
     d->responseBuffer.clear();
 
-    d->m_serialPort->setPortName(portName());
+    d->updateSerialPortConnectionInfo();
     if (d->m_serialPort->open(QIODevice::ReadWrite))
         setState(QModbusDevice::ConnectedState);
     else
