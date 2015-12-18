@@ -193,8 +193,10 @@ public:
 
     void sendNextRequest()
     {
-        if (m_queue.isEmpty())
+        if (m_queue.isEmpty()) {
             m_responseTimer.stop();
+            return;
+        }
 
         if (m_responseTimer.isActive() || m_processesTimeout)
             return;
