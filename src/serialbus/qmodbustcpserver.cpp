@@ -74,6 +74,7 @@ QModbusTcpServer::QModbusTcpServer(QObject *parent)
 */
 QModbusTcpServer::~QModbusTcpServer()
 {
+    close();
 }
 
 /*!
@@ -122,6 +123,9 @@ bool QModbusTcpServer::open()
 */
 void QModbusTcpServer::close()
 {
+    if (state() == QModbusDevice::UnconnectedState)
+        return;
+
     Q_D(QModbusTcpServer);
 
     if (d->m_tcpServer->isListening())

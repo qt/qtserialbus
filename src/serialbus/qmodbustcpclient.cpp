@@ -69,6 +69,7 @@ QModbusTcpClient::QModbusTcpClient(QObject *parent)
 */
 QModbusTcpClient::~QModbusTcpClient()
 {
+    close();
 }
 
 /*!
@@ -116,8 +117,10 @@ bool QModbusTcpClient::open()
 */
 void QModbusTcpClient::close()
 {
-    Q_D(QModbusTcpClient);
+    if (state() == QModbusDevice::UnconnectedState)
+        return;
 
+    Q_D(QModbusTcpClient);
     d->m_socket->disconnectFromHost();
 }
 

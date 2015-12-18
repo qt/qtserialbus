@@ -111,6 +111,9 @@ bool QModbusRtuSerialMaster::open()
 */
 void QModbusRtuSerialMaster::close()
 {
+    if (state() == QModbusDevice::UnconnectedState)
+        return;
+
     Q_D(QModbusRtuSerialMaster);
 
     if (d->m_serialPort->isOpen())

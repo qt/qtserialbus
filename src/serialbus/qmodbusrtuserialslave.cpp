@@ -74,6 +74,7 @@ QModbusRtuSerialSlave::QModbusRtuSerialSlave(QObject *parent)
 */
 QModbusRtuSerialSlave::~QModbusRtuSerialSlave()
 {
+    close();
 }
 
 /*!
@@ -117,6 +118,9 @@ bool QModbusRtuSerialSlave::open()
 */
 void QModbusRtuSerialSlave::close()
 {
+    if (state() == QModbusDevice::UnconnectedState)
+        return;
+
     Q_D(QModbusRtuSerialSlave);
 
     if (d->m_serialPort->isOpen())
