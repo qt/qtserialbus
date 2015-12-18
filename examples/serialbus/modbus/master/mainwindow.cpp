@@ -164,6 +164,7 @@ void MainWindow::on_connectButton_clicked()
             modbusDevice->setConnectionParameter(QModbusDevice::NetworkAddressParameter, url.host());
         }
         modbusDevice->setTimeout(m_settingsDialog->settings().responseTime);
+        modbusDevice->setNumberOfRetries(m_settingsDialog->settings().numberOfRetries);
         if (!modbusDevice->connectDevice()) {
             statusBar()->showMessage(tr("Connect failed: ") + modbusDevice->errorString(), 5000);
         } else {

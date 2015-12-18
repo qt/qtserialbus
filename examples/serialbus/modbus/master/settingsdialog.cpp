@@ -52,6 +52,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->dataBitsCombo->setCurrentText(QString::number(m_settings.dataBits));
     ui->stopBitsCombo->setCurrentText(QString::number(m_settings.stopBits));
     ui->timeoutSpinner->setValue(m_settings.responseTime);
+    ui->retriesSpinner->setValue(m_settings.numberOfRetries);
 
     connect(ui->applyButton, &QPushButton::clicked, [this]() {
         m_settings.parity = ui->parityCombo->currentIndex();
@@ -61,6 +62,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
         m_settings.dataBits = ui->dataBitsCombo->currentText().toInt();
         m_settings.stopBits = ui->stopBitsCombo->currentText().toInt();
         m_settings.responseTime = ui->timeoutSpinner->value();
+        m_settings.numberOfRetries = ui->retriesSpinner->value();
 
         hide();
     });

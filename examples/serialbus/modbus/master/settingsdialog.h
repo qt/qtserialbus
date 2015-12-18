@@ -63,6 +63,7 @@ public:
         int dataBits = QSerialPort::Data8;
         int stopBits = QSerialPort::OneStop;
         int responseTime = 200;
+        int numberOfRetries = 3;
     };
 
     explicit SettingsDialog(QWidget *parent = 0);
