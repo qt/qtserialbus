@@ -38,8 +38,6 @@
 #define QMODBUSTCPCLIENT_H
 
 #include <QtSerialBus/qmodbusclient.h>
-#include <QtSerialBus/qmodbusdataunit.h>
-#include <QtSerialBus/qmodbusreply.h>
 
 QT_BEGIN_NAMESPACE
 

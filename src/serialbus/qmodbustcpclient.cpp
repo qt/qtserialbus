@@ -39,7 +39,6 @@
 
 #include <QtCore/qdatetime.h>
 #include <QtCore/qurl.h>
-#include <QtNetwork/qhostaddress.h>
 
 QT_BEGIN_NAMESPACE
 
