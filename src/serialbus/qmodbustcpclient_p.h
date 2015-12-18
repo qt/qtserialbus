@@ -188,9 +188,7 @@ public:
         m_transactionStore.insert(tId, element);
 
         if (element.timer) {
-            q->connect(q, &QModbusClient::timeoutChanged, element.timer.data(), [q, &element]() {
-                element.timer->setInterval(q->timeout());
-            });
+            q->connect(q, &QModbusClient::timeoutChanged, element.timer.data(), &QTimer::setInterval);
             QObject::connect(element.timer.data(), &QTimer::timeout, [this, writeToSocket, tId]() {
                 if (!m_transactionStore.contains(tId))
                     return;

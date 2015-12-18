@@ -72,7 +72,7 @@ public:
     void setNumberOfRetries(int number);
 
 Q_SIGNALS:
-    void timeoutChanged();
+    void timeoutChanged(int newTimeout);
 
 protected:
     QModbusClient(QModbusClientPrivate &dd, QObject *parent = Q_NULLPTR);

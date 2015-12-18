@@ -159,9 +159,10 @@ int QModbusClient::timeout() const
 }
 
 /*!
-    \fn void QModbusClient::timeoutChanged()
+    \fn void QModbusClient::timeoutChanged(int newTimeout)
 
-    This signal is emitted if the response is not received within the required timeout.
+    This signal is emitted if the response is not received within the required
+    timeout. The new response timeout for the device is passed as \a newTimeout.
 */
 
 /*!
@@ -171,8 +172,8 @@ int QModbusClient::timeout() const
     a response from the server. If the response is not received within the
     required timeout, the \l TimeoutError is set.
 
-    Setting the timeout to a negative value disables timeouts. Already active/running timeouts
-    are not affected by such timeout duration changes.
+    Setting the timeout to a negative value disables timeouts. Already
+    active/running timeouts are not affected by such timeout duration changes.
 
     \sa timeout
 */
@@ -181,7 +182,7 @@ void QModbusClient::setTimeout(int newTimeout)
     Q_D(QModbusClient);
     if (d->m_responseTimeoutDuration != newTimeout) {
         d->m_responseTimeoutDuration = newTimeout;
-        emit timeoutChanged();
+        emit timeoutChanged(newTimeout);
     }
 }
 

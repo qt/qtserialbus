@@ -175,10 +175,7 @@ public:
                 // go to next request or send request again
                 QTimer::singleShot(0, [this]() { sendNextRequest(); });
             });
-
-            QObject::connect(q, &QModbusClient::timeoutChanged, q, [q, this]() {
-                m_responseTimer->setInterval(q->timeout());
-            });
+            q->connect(q, &QModbusClient::timeoutChanged, m_responseTimer, &QTimer::setInterval);
         }
 
         m_responseTimer->start();
