@@ -541,6 +541,11 @@ bool TinyCanBackend::writeFrame(const QCanBusFrame &newData)
     if (state() != QCanBusDevice::ConnectedState)
         return false;
 
+    if (!newData.isValid()) {
+        setError(tr("Cannot write invalid QCanBusFrame"), QCanBusDevice::WriteError);
+        return false;
+    }
+
     if (newData.frameType() != QCanBusFrame::DataFrame
             && newData.frameType() != QCanBusFrame::RemoteRequestFrame
             && newData.frameType() != QCanBusFrame::ErrorFrame) {

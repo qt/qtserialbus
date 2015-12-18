@@ -319,6 +319,11 @@ bool SocketCanBackend::writeFrame(const QCanBusFrame &newData)
     if (state() != ConnectedState)
         return false;
 
+    if (!newData.isValid()) {
+        setError(tr("Cannot write invalid QCanBusFrame"), QCanBusDevice::WriteError);
+        return false;
+    }
+
     canid_t canId = newData.frameId();
     if (newData.hasExtendedFrameFormat())
         canId |= CAN_EFF_FLAG;
