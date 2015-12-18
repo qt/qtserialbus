@@ -524,9 +524,9 @@ bool PeakCanBackend::writeFrame(const QCanBusFrame &newData)
         return false;
     }
 
+    // canFD frame format not implemented at this stage
     if (newData.payload().size() > 8) {
-        setError(tr("Unable to write a frame with unacceptable payload size"),
-                 QCanBusDevice::WriteError);
+        setError(tr("CanFD frame format not supported."), QCanBusDevice::WriteError);
         return false;
     }
 
