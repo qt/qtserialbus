@@ -108,7 +108,7 @@ public:
 
             qCDebug(QT_MODBUS)<< "(RTU client) Received ADU:" << adu.rawData().toHex();
             if (QT_MODBUS().isDebugEnabled() && !responseBuffer.isEmpty())
-                qCDebug(QT_MODBUS_LOW) << "Pending buffer:" << responseBuffer.toHex();
+                qCDebug(QT_MODBUS_LOW) << "(RTU client) Pending buffer:" << responseBuffer.toHex();
 
             // check CRC
             if (!adu.matchingChecksum()) {

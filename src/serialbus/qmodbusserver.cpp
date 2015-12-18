@@ -663,7 +663,7 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
 #define CHECK_SIZE_EQUALS(req) \
     do { \
         if (req.dataSize() != QModbusRequest::minimumDataSize(req)) { \
-            qCDebug(QT_MODBUS) << "The request's data size does not equal the expected size."; \
+            qCDebug(QT_MODBUS) << "(Server) The request's data size does not equal the expected size."; \
             return QModbusExceptionResponse(req.functionCode(), \
                                             QModbusExceptionResponse::IllegalDataValue); \
         } \
@@ -672,7 +672,7 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
 #define CHECK_SIZE_LESS_THAN(req) \
     do { \
         if (req.dataSize() < QModbusRequest::minimumDataSize(req)) { \
-            qCDebug(QT_MODBUS) << "The request's data size is less than the expected size."; \
+            qCDebug(QT_MODBUS) << "(Server) The request's data size is less than the expected size."; \
             return QModbusExceptionResponse(req.functionCode(), \
                                             QModbusExceptionResponse::IllegalDataValue); \
         } \
@@ -856,7 +856,7 @@ QModbusResponse QModbusServerPrivate::processDiagnosticsRequest(const QModbusReq
         storeModbusCommEvent(QModbusCommEvent::InitiatedCommunicationRestart);
 
         if (!q_func()->connectDevice()) {
-            qCWarning(QT_MODBUS) << "Cannot restart server communication";
+            qCWarning(QT_MODBUS) << "(Server) Cannot restart server communication";
             return QModbusExceptionResponse(request.functionCode(),
                                             QModbusExceptionResponse::ServerDeviceFailure);
         }

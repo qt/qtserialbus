@@ -309,7 +309,7 @@ public:
                 q->setError(QModbusDevice::tr("Unknown error."), QModbusDevice::UnknownError);
                 break;
             default:
-                qCDebug(QT_MODBUS) << "Unhandled QSerialPort error" << error;
+                qCDebug(QT_MODBUS) << "(RTU server) Unhandled QSerialPort error" << error;
                 break;
             }
         });

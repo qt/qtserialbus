@@ -102,7 +102,7 @@ public:
             return true;
 
         // No, not our address! Ignore!
-        qCDebug(QT_MODBUS) << "Wrong server unit identifier address, expected"
+        qCDebug(QT_MODBUS) << "(TCP server) Wrong server unit identifier address, expected"
             << q->serverAddress() << "got" << unitId;
         return false;
     }
@@ -116,7 +116,7 @@ public:
             if (!socket)
                 return;
 
-            qCDebug(QT_MODBUS) << "Incoming socket from" << socket->peerAddress()
+            qCDebug(QT_MODBUS) << "(TCP server) Incoming socket from" << socket->peerAddress()
                                << socket->peerName() << socket->peerPort();
 
             connections.append(socket);
@@ -137,10 +137,11 @@ public:
 
                 buffer->append(socket->readAll());
                 while (!buffer->isEmpty()) {
-                    qCDebug(QT_MODBUS_LOW).noquote() << "Read buffer: 0x" + buffer->toHex();
+                    qCDebug(QT_MODBUS_LOW).noquote() << "(TCP server) Read buffer: 0x"
+                        + buffer->toHex();
 
                     if (buffer->size() < mbpaHeaderSize) {
-                        qCDebug(QT_MODBUS) << "ADU too short. Waiting for more data.";
+                        qCDebug(QT_MODBUS) << "(TCP server) ADU too short. Waiting for more data.";
                         return;
                     }
 
@@ -149,16 +150,16 @@ public:
                     QDataStream input(*buffer);
                     input >> transactionId >> protocolId >> bytesPdu >> unitId;
 
-                    qCDebug(QT_MODBUS_LOW) << "Request MBPA:" << "Transaction Id:" << hex << transactionId
-                                           << "Protocol Id:" << protocolId << "PDU bytes:" << bytesPdu
-                                           << "Unit Id:" << unitId;
+                    qCDebug(QT_MODBUS_LOW) << "(TCP server) Request MBPA:" << "Transaction Id:"
+                        << hex << transactionId << "Protocol Id:" << protocolId << "PDU bytes:"
+                        << bytesPdu << "Unit Id:" << unitId;
 
                     // The length field is the byte count of the following fields, including the Unit
                     // Identifier and the PDU, so we remove on byte.
                     bytesPdu--;
 
                     if (buffer->size() < mbpaHeaderSize + bytesPdu) {
-                        qCDebug(QT_MODBUS) << "PDU too short. Waiting for more data";
+                        qCDebug(QT_MODBUS) << "(TCP server) PDU too short. Waiting for more data";
                         return;
                     }
 
@@ -170,9 +171,9 @@ public:
                     if (!matchingServerAddress(unitId))
                         continue;
 
-                    qCDebug(QT_MODBUS) << "Request PDU:" << request;
+                    qCDebug(QT_MODBUS) << "(TCP server) Request PDU:" << request;
                     const QModbusResponse response = forwardProcessRequest(request);
-                    qCDebug(QT_MODBUS) << "Response PDU:" << response;
+                    qCDebug(QT_MODBUS) << "(TCP server) Response PDU:" << response;
 
                     QByteArray result;
                     QDataStream output(&result, QIODevice::WriteOnly);
@@ -182,7 +183,7 @@ public:
                            << unitId << response;
 
                     if (!socket->isOpen()) {
-                        qCDebug(QT_MODBUS) << "Requesting socket has closed.";
+                        qCDebug(QT_MODBUS) << "(TCP server) Requesting socket has closed.";
                         forwardError(QModbusTcpServer::tr("Requesting socket is closed"),
                                      QModbusDevice::WriteError);
                         return;
@@ -190,7 +191,7 @@ public:
 
                     int writtenBytes = socket->write(result);
                     if (writtenBytes == -1 || writtenBytes < result.size()) {
-                        qCDebug(QT_MODBUS) << "Cannot write requested response to socket.";
+                        qCDebug(QT_MODBUS) << "(TCP server) Cannot write requested response to socket.";
                         forwardError(QModbusTcpServer::tr("Could not write response to client"),
                                      QModbusDevice::WriteError);
                     }
@@ -201,7 +202,7 @@ public:
                          [this](QAbstractSocket::SocketError /*sError*/) {
             Q_Q(QModbusTcpServer);
 
-            qCWarning(QT_MODBUS) << "Server accept error";
+            qCWarning(QT_MODBUS) << "(TCP server) Accept error";
             q->setError(m_tcpServer->errorString(), QModbusDevice::ConnectionError);
         });
     }

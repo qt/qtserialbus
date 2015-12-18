@@ -74,7 +74,7 @@ public:
         m_socket = new QTcpSocket(q);
 
         QObject::connect(m_socket, &QAbstractSocket::connected, [this]() {
-            qCDebug(QT_MODBUS) << "Connected to" << m_socket->peerAddress()
+            qCDebug(QT_MODBUS) << "(TCP client) Connected to" << m_socket->peerAddress()
                                << "on port" << m_socket->peerPort();
             Q_Q(QModbusTcpClient);
             responseBuffer.clear();
@@ -82,7 +82,7 @@ public:
         });
 
         QObject::connect(m_socket, &QAbstractSocket::disconnected, [this]() {
-           qCDebug(QT_MODBUS)  << "Connection closed.";
+           qCDebug(QT_MODBUS)  << "(TCP client) Connection closed.";
            Q_Q(QModbusTcpClient);
            q->setState(QModbusDevice::UnconnectedState);
            cleanupTransactionStore();
@@ -105,12 +105,12 @@ public:
 
         QObject::connect(m_socket, &QIODevice::readyRead, [this](){
             responseBuffer += m_socket->read(m_socket->bytesAvailable());
-            qCDebug(QT_MODBUS_LOW) << "Response buffer:" << responseBuffer.toHex();
+            qCDebug(QT_MODBUS_LOW) << "(TCP client) Response buffer:" << responseBuffer.toHex();
 
             while (!responseBuffer.isEmpty()) {
                 // can we read enough for Modbus ADU header?
                 if (responseBuffer.size() < mbpaHeaderSize) {
-                    qCDebug(QT_MODBUS_LOW) << "Modbus ADU not complete";
+                    qCDebug(QT_MODBUS_LOW) << "(TCP client) Modbus ADU not complete";
                     return;
                 }
 
@@ -119,8 +119,8 @@ public:
                 QDataStream input(responseBuffer);
                 input >> transactionId >> protocolId >> bytesPdu >> serverAddress;
 
-                qCDebug(QT_MODBUS) << "tid:" << hex << transactionId << "size:" << bytesPdu
-                                   << "server address:" << serverAddress;
+                qCDebug(QT_MODBUS) << "(TCP client) tid:" << hex << transactionId << "size:"
+                    << bytesPdu << "server address:" << serverAddress;
 
                 // The length field is the byte count of the following fields, including the Unit
                 // Identifier and the PDU, so we remove on byte.
@@ -128,20 +128,20 @@ public:
 
                 int tcpAduSize = mbpaHeaderSize + bytesPdu;
                 if (responseBuffer.size() < tcpAduSize) {
-                    qCDebug(QT_MODBUS) << "PDU too short. Waiting for more data";
+                    qCDebug(QT_MODBUS) << "(TCP client) PDU too short. Waiting for more data";
                     return;
                 }
 
                 QModbusResponse responsePdu;
                 input >> responsePdu;
-                qCDebug(QT_MODBUS) << "Received PDU:" << responsePdu.functionCode()
+                qCDebug(QT_MODBUS) << "(TCP client) Received PDU:" << responsePdu.functionCode()
                                    << responsePdu.data().toHex();
 
                 responseBuffer.remove(0, tcpAduSize);
 
                 if (!m_transactionStore.contains(transactionId)) {
-                    qCDebug(QT_MODBUS) << "No pending request for response with given transaction "
-                                          "ID, ignoring response message.";
+                    qCDebug(QT_MODBUS) << "(TCP client) No pending request for response with "
+                        "given transaction ID, ignoring response message.";
                     continue;
                 }
 
@@ -210,7 +210,7 @@ public:
         if (m_transactionStore.isEmpty())
             return;
 
-        qCDebug(QT_MODBUS) << "Cleanup of pending requests";
+        qCDebug(QT_MODBUS) << "(TCP client) Cleanup of pending requests";
 
         foreach (auto tid, m_transactionStore.keys()) {
             QueueElement elem = m_transactionStore.take(tid);
