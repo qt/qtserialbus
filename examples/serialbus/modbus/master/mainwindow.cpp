@@ -150,6 +150,14 @@ void MainWindow::on_connectButton_clicked()
         if (static_cast<ModbusConnection> (ui->connectType->currentIndex()) == Serial) {
             modbusDevice->setConnectionParameter(QModbusDevice::SerialPortNameParameter,
                 ui->portEdit->text());
+            modbusDevice->setConnectionParameter(QModbusDevice::SerialParityParameter,
+                m_settingsDialog->settings().parity);
+            modbusDevice->setConnectionParameter(QModbusDevice::SerialBaudRateParameter,
+                m_settingsDialog->settings().baud);
+            modbusDevice->setConnectionParameter(QModbusDevice::SerialDataBitsParameter,
+                m_settingsDialog->settings().dataBits);
+            modbusDevice->setConnectionParameter(QModbusDevice::SerialStopBitsParameter,
+                m_settingsDialog->settings().stopBits);
         } else {
             const QUrl url = QUrl::fromUserInput(ui->portEdit->text());
             modbusDevice->setConnectionParameter(QModbusDevice::NetworkPortParameter, url.port());

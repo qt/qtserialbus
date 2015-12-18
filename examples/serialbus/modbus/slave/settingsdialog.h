@@ -38,61 +38,40 @@
 **
 ****************************************************************************/
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef SETTINGSDIALOG_H
+#define SETTINGSDIALOG_H
 
-#include <QButtonGroup>
-#include <QMainWindow>
-#include <QModbusServer>
+#include <QDialog>
+#include <QSerialPort>
 
 QT_BEGIN_NAMESPACE
 
-class QLineEdit;
-
 namespace Ui {
-class MainWindow;
 class SettingsDialog;
 }
 
 QT_END_NAMESPACE
 
-class SettingsDialog;
-
-class MainWindow : public QMainWindow
+class SettingsDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    struct Settings {
+        int parity = QSerialPort::EvenParity;
+        int baud = QSerialPort::Baud19200;
+        int dataBits = QSerialPort::Data8;
+        int stopBits = QSerialPort::OneStop;
+    };
 
-private Q_SLOTS:
-    void on_connectButton_clicked();
-    void onStateChanged(int state);
+    explicit SettingsDialog(QWidget *parent = 0);
+    ~SettingsDialog();
 
-    void coilChanged(int id);
-    void discreteInputChanged(int id);
-    void bitChanged(int id, QModbusDataUnit::RegisterType table, bool value);
-
-    void setRegister(const QString &value);
-    void updateWidgets(QModbusDataUnit::RegisterType table, int address, int size);
-
-    void on_connectType_currentIndexChanged(int);
-
-    void handleDeviceError(QModbusDevice::ModbusError newError);
+    Settings settings() const;
 
 private:
-    void initActions();
-    void setupDeviceData();
-    void setupWidgetContainers();
-
-    Ui::MainWindow *ui;
-    QModbusServer* modbusDevice;
-
-    QButtonGroup coilButtons;
-    QButtonGroup discreteButtons;
-    QHash<QString, QLineEdit*> registers;
-    SettingsDialog *m_settingsDialog;
+    Settings m_settings;
+    Ui::SettingsDialog *ui;
 };
 
-#endif // MAINWINDOW_H
+#endif // SETTINGSDIALOG_H

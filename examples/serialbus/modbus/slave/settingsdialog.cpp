@@ -38,61 +38,38 @@
 **
 ****************************************************************************/
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#include "settingsdialog.h"
+#include "ui_settingsdialog.h"
 
-#include <QButtonGroup>
-#include <QMainWindow>
-#include <QModbusServer>
+SettingsDialog::SettingsDialog(QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::SettingsDialog)
+{
+    ui->setupUi(this);
 
-QT_BEGIN_NAMESPACE
+    ui->parityCombo->setCurrentIndex(1);
+    ui->baudCombo->setCurrentText(QString::number(m_settings.baud));
+    ui->dataBitsCombo->setCurrentText(QString::number(m_settings.dataBits));
+    ui->stopBitsCombo->setCurrentText(QString::number(m_settings.stopBits));
 
-class QLineEdit;
+    connect(ui->applyButton, &QPushButton::clicked, [this]() {
+        m_settings.parity = ui->parityCombo->currentIndex();
+        if (m_settings.parity > 0)
+            m_settings.parity++;
+        m_settings.baud = ui->baudCombo->currentText().toInt();
+        m_settings.dataBits = ui->dataBitsCombo->currentText().toInt();
+        m_settings.stopBits = ui->stopBitsCombo->currentText().toInt();
 
-namespace Ui {
-class MainWindow;
-class SettingsDialog;
+        hide();
+    });
 }
 
-QT_END_NAMESPACE
-
-class SettingsDialog;
-
-class MainWindow : public QMainWindow
+SettingsDialog::~SettingsDialog()
 {
-    Q_OBJECT
+    delete ui;
+}
 
-public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
-
-private Q_SLOTS:
-    void on_connectButton_clicked();
-    void onStateChanged(int state);
-
-    void coilChanged(int id);
-    void discreteInputChanged(int id);
-    void bitChanged(int id, QModbusDataUnit::RegisterType table, bool value);
-
-    void setRegister(const QString &value);
-    void updateWidgets(QModbusDataUnit::RegisterType table, int address, int size);
-
-    void on_connectType_currentIndexChanged(int);
-
-    void handleDeviceError(QModbusDevice::ModbusError newError);
-
-private:
-    void initActions();
-    void setupDeviceData();
-    void setupWidgetContainers();
-
-    Ui::MainWindow *ui;
-    QModbusServer* modbusDevice;
-
-    QButtonGroup coilButtons;
-    QButtonGroup discreteButtons;
-    QHash<QString, QLineEdit*> registers;
-    SettingsDialog *m_settingsDialog;
-};
-
-#endif // MAINWINDOW_H
+SettingsDialog::Settings SettingsDialog::settings() const
+{
+    return m_settings;
+}
