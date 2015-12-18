@@ -161,16 +161,16 @@ void QModbusDevice::setConnectionParameter(int parameter, const QVariant &value)
         d->m_comPort = value.toString();
         break;
     case SerialDataBitsParameter:
-        d->m_dataBits = value.value<QSerialPort::DataBits>();
+        d->m_dataBits = QSerialPort::DataBits(value.toInt());
         break;
     case SerialParityParameter:
-        d->m_parity = value.value<QSerialPort::Parity>();
+        d->m_parity = QSerialPort::Parity(value.toInt());
         break;
     case SerialStopBitsParameter:
-        d->m_stopBits = value.value<QSerialPort::StopBits>();
+        d->m_stopBits = QSerialPort::StopBits(value.toInt());
         break;
     case SerialBaudRateParameter:
-        d->m_baudRate = value.value<QSerialPort::BaudRate>();
+        d->m_baudRate = QSerialPort::BaudRate(value.toInt());
         break;
     case NetworkPortParameter:
         d->m_networkPort = value.toInt();
