@@ -94,13 +94,12 @@ public:
         {
             Q_Q(QModbusTcpClient);
 
-            q->setError(QModbusClient::tr("TCP socket error (%1).").arg(m_socket->errorString()),
-                        QModbusDevice::ConnectionError);
-
             if (m_socket->state() == QAbstractSocket::UnconnectedState) {
                 cleanupTransactionStore();
                 q->setState(QModbusDevice::UnconnectedState);
             }
+            q->setError(QModbusClient::tr("TCP socket error (%1).").arg(m_socket->errorString()),
+                        QModbusDevice::ConnectionError);
         });
 
         QObject::connect(m_socket, &QIODevice::readyRead, [this](){

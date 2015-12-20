@@ -2,4 +2,5 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     master \
-    slave
+    slave \
+    adueditor
