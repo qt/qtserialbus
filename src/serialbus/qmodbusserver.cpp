@@ -40,7 +40,9 @@
 
 #include <QtCore/qdebug.h>
 #include <QtCore/qloggingcategory.h>
+#include <QtCore/qvector.h>
 
+#include <algorithm>
 #include <bitset>
 
 QT_BEGIN_NAMESPACE
@@ -641,7 +643,8 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
         return processReportServerIdRequest(request);
     case QModbusRequest::ReadFileRecord:    // TODO: Implement.
     case QModbusRequest::WriteFileRecord:   // TODO: Implement.
-        return q_func()->processPrivateRequest(request);
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalFunction);
     case QModbusRequest::MaskWriteRegister:
         return processMaskWriteRegisterRequest(request);
     case QModbusRequest::ReadWriteMultipleRegisters:
@@ -649,6 +652,8 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
     case QModbusRequest::ReadFifoQueue:
         return processReadFifoQueueRequest(request);
     case QModbusRequest::EncapsulatedInterfaceTransport:    // TODO: Implement.
+        return QModbusExceptionResponse(request.functionCode(),
+            QModbusExceptionResponse::IllegalFunction);
     default:
         break;
     }
@@ -657,8 +662,8 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
 
 #define CHECK_SIZE_EQUALS(req) \
     do { \
-        if (req.dataSize() != QModbusRequest::minimumDataSize(req.functionCode())) { \
-            qCDebug(QT_MODBUS) << "The request's data size does not equal the expected size."; \
+        if (req.dataSize() != QModbusRequest::minimumDataSize(req)) { \
+            qCDebug(QT_MODBUS) << "(Server) The request's data size does not equal the expected size."; \
             return QModbusExceptionResponse(req.functionCode(), \
                                             QModbusExceptionResponse::IllegalDataValue); \
         } \
@@ -666,8 +671,8 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
 
 #define CHECK_SIZE_LESS_THAN(req) \
     do { \
-        if (req.dataSize() < QModbusRequest::minimumDataSize(req.functionCode())) { \
-            qCDebug(QT_MODBUS) << "The request's data size is less than the expected size."; \
+        if (req.dataSize() < QModbusRequest::minimumDataSize(req)) { \
+            qCDebug(QT_MODBUS) << "(Server) The request's data size is less than the expected size."; \
             return QModbusExceptionResponse(req.functionCode(), \
                                             QModbusExceptionResponse::IllegalDataValue); \
         } \
@@ -851,7 +856,7 @@ QModbusResponse QModbusServerPrivate::processDiagnosticsRequest(const QModbusReq
         storeModbusCommEvent(QModbusCommEvent::InitiatedCommunicationRestart);
 
         if (!q_func()->connectDevice()) {
-            qCWarning(QT_MODBUS) << "Cannot restart server communication";
+            qCWarning(QT_MODBUS) << "(Server) Cannot restart server communication";
             return QModbusExceptionResponse(request.functionCode(),
                                             QModbusExceptionResponse::ServerDeviceFailure);
         }
@@ -894,7 +899,8 @@ QModbusResponse QModbusServerPrivate::processDiagnosticsRequest(const QModbusReq
         return QModbusResponse(request.functionCode(), subFunctionCode,
                                m_counters[static_cast<Counter> (subFunctionCode)]);
     }
-    return q_func()->processPrivateRequest(request);
+    return QModbusExceptionResponse(request.functionCode(),
+        QModbusExceptionResponse::IllegalFunction);
 
 #undef CHECK_SIZE_AND_CONDITION
 }
@@ -921,13 +927,11 @@ QModbusResponse QModbusServerPrivate::processGetCommEventLogRequest(const QModbu
     }
     const quint16 deviceBusy = tmp.value<quint16>();
 
-    m_commEventLog.normalizeIndexes();
-    QVector<quint16> eventLog(m_commEventLog.count());
-    for (int i = 0; i < m_commEventLog.count(); ++i)
-        eventLog[i] = m_commEventLog[i];
+    QVector<quint8> eventLog(m_commEventLog.size());
+    std::copy(m_commEventLog.cbegin(), m_commEventLog.cend(), eventLog.begin());
 
     // 6 -> 3 x 2 Bytes (Status, Event Count and Message Count)
-    return QModbusResponse(request.functionCode(), quint8(m_commEventLog.count() + 6), deviceBusy,
+    return QModbusResponse(request.functionCode(), quint8(eventLog.size() + 6), deviceBusy,
         m_counters[Counter::CommEvent], m_counters[Counter::BusMessage], eventLog);
 }
 
@@ -1169,7 +1173,9 @@ void QModbusServerPrivate::storeModbusCommEvent(const QModbusCommEvent &eventByt
     // Inserts an event byte at the start of the event log. If the event log
     // is already full, the byte at the end of the log will be removed. The
     // event log size is 64 bytes, starting at index 0.
-    m_commEventLog.prepend(eventByte);
+    m_commEventLog.push_front(eventByte);
+    if (m_commEventLog.size() > 64)
+        m_commEventLog.pop_back();
 }
 
 #undef CHECK_SIZE_EQUALS

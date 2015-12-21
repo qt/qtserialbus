@@ -38,61 +38,46 @@
 **
 ****************************************************************************/
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef PLAINTEXTEDIT_H
+#define PLAINTEXTEDIT_H
 
-#include <QButtonGroup>
-#include <QMainWindow>
-#include <QModbusServer>
+#include <QMenu>
+#include <QPlainTextEdit>
 
-QT_BEGIN_NAMESPACE
-
-class QLineEdit;
-
-namespace Ui {
-class MainWindow;
-class SettingsDialog;
-}
-
-QT_END_NAMESPACE
-
-class SettingsDialog;
-
-class MainWindow : public QMainWindow
+class PlainTextEdit : public QPlainTextEdit
 {
     Q_OBJECT
+    Q_DISABLE_COPY(PlainTextEdit)
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    explicit PlainTextEdit(QWidget *parent = Q_NULLPTR)
+        : QPlainTextEdit(parent)
+    {}
 
-private Q_SLOTS:
-    void on_connectButton_clicked();
-    void onStateChanged(int state);
+    void keyPressEvent(QKeyEvent *e)
+    {
+        switch (e->key()) {
+        case Qt::Key_Delete:
+        case Qt::Key_Backspace:
+            setTextInteractionFlags(textInteractionFlags() | Qt::TextEditable);
+            QPlainTextEdit::keyPressEvent(e);
+            setTextInteractionFlags(textInteractionFlags() &~ Qt::TextEditable);
+            break;
+        default:
+            QPlainTextEdit::keyPressEvent(e);
+        }
+    }
 
-    void coilChanged(int id);
-    void discreteInputChanged(int id);
-    void bitChanged(int id, QModbusDataUnit::RegisterType table, bool value);
-
-    void setRegister(const QString &value);
-    void updateWidgets(QModbusDataUnit::RegisterType table, int address, int size);
-
-    void on_connectType_currentIndexChanged(int);
-
-    void handleDeviceError(QModbusDevice::ModbusError newError);
-
-private:
-    void initActions();
-    void setupDeviceData();
-    void setupWidgetContainers();
-
-    Ui::MainWindow *ui;
-    QModbusServer* modbusDevice;
-
-    QButtonGroup coilButtons;
-    QButtonGroup discreteButtons;
-    QHash<QString, QLineEdit*> registers;
-    SettingsDialog *m_settingsDialog;
+    void contextMenuEvent(QContextMenuEvent *event)
+    {
+        QMenu menu(this);
+        menu.addAction(QStringLiteral("Clear"), this, &QPlainTextEdit::clear);
+        menu.addAction(QStringLiteral("Copy"), this, &QPlainTextEdit::copy, QKeySequence::Copy);
+        menu.addSeparator();
+        menu.addAction(QStringLiteral("Select All"), this, &QPlainTextEdit::selectAll,
+            QKeySequence::SelectAll);
+        menu.exec(event->globalPos());
+    }
 };
 
-#endif // MAINWINDOW_H
+#endif // PLAINTEXTEDIT_H

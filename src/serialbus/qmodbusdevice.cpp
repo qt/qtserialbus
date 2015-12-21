@@ -77,21 +77,111 @@ QModbusDevice::~QModbusDevice()
 }
 
 /*!
-    \internal
+    \enum QModbusDevice::ConnectionParameter
+
+    This enum describes the possible values that can be set for a Modbus device
+    connection.
+
+    The general purpose value (and the associated types) are:
+
+    \value SerialPortNameParameter   This parameter holds the serial port used for
+                                     device communication, e.g. COM1. \c QString
+    \value SerialParityParameter     This parameter holds the parity checking mode.
+                                     \c QSerialPort::Parity
+    \value SerialBaudRateParameter   This parameter holds the data baud rate for
+                                     the communication. \c QSerialPort::BaudRate
+    \value SerialDataBitsParameter   This parameter holds the data bits in a frame.
+                                     \c QSerialPort::DataBits
+    \value SerialStopBitsParameter   This parameter holds the number of stop bits in a
+                                     frame. \c QSerialPort::StopBits
+    \value NetworkPortParameter      This parameter holds the network port. \c int
+    \value NetworkAddressParameter   This parameter holds the host address for network
+                                     communication. \c QString
+
+    User options:
+
+    \value UserParameter             The first parameter that can be used for user-specific
+                                     purposes. \c QVariant
 */
-void QModbusDevice::setPortName(const QString &name)
+
+/*!
+    Returns the value associated with the given connection \a parameter. The
+    returned value can be empty.
+
+    By default the \c QModbusDevice is initialized with some common values. The
+    serial port settings are even parity, a baud rate of 19200 bits per second,
+    eight data bits and one stop bit. The network settings for the host address
+    is set to local host and port to 502.
+
+    \note For a serial connection to succeed, the \l SerialPortNameParameter
+    needs to be set to a valid communication port. The information about valid
+    serial ports can be obtained from \l QSerialPortInfo.
+
+    \note If the device is already connected, the settings are taken into account
+    after reconnecting the device.
+
+    \sa ConnectionParameter
+*/
+QVariant QModbusDevice::connectionParameter(int parameter) const
 {
-    Q_D(QModbusDevice);
-    d->portName = name;
+    Q_D(const QModbusDevice);
+    switch (parameter) {
+    case SerialPortNameParameter:
+        return d->m_comPort;
+    case SerialDataBitsParameter:
+        return d->m_dataBits;
+    case SerialParityParameter:
+        return d->m_parity;
+    case SerialStopBitsParameter:
+        return d->m_stopBits;
+    case SerialBaudRateParameter:
+        return d->m_baudRate;
+    case NetworkPortParameter:
+        return d->m_networkPort;
+    case NetworkAddressParameter:
+        return d->m_networkAddress;
+    default:
+        break;
+    }
+    return d->m_userConnectionParams.value(parameter);
 }
 
 /*!
-    \internal
+    Sets the value of \a parameter to \a value. If the \a parameter already
+    exists, the previous value is overwritten.
+
+    \sa ConnectionParameter
+    \sa ConnectionParameter()
 */
-QString QModbusDevice::portName() const
+void QModbusDevice::setConnectionParameter(int parameter, const QVariant &value)
 {
-    Q_D(const QModbusDevice);
-    return d->portName;
+    Q_D(QModbusDevice);
+    switch (parameter) {
+    case SerialPortNameParameter:
+        d->m_comPort = value.toString();
+        break;
+    case SerialDataBitsParameter:
+        d->m_dataBits = QSerialPort::DataBits(value.toInt());
+        break;
+    case SerialParityParameter:
+        d->m_parity = QSerialPort::Parity(value.toInt());
+        break;
+    case SerialStopBitsParameter:
+        d->m_stopBits = QSerialPort::StopBits(value.toInt());
+        break;
+    case SerialBaudRateParameter:
+        d->m_baudRate = QSerialPort::BaudRate(value.toInt());
+        break;
+    case NetworkPortParameter:
+        d->m_networkPort = value.toInt();
+        break;
+    case NetworkAddressParameter:
+        d->m_networkAddress = value.toString();
+        break;
+    default:
+        d->m_userConnectionParams.insert(parameter, value);
+        break;
+    }
 }
 
 /*!

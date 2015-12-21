@@ -157,6 +157,12 @@ void SettingsDialog::updateSettings()
             item.second = QVariant(bitrate);
             m_currentSettings.configurations.append(item);
         }
+
+        // process CanFD setting
+        ConfigurationItem fdItem;
+        fdItem.first = QCanBusDevice::CanFdKey;
+        fdItem.second  = QVariant(m_ui->canFdBox->currentIndex() == 1); // 0 -> no, 1 - yes
+        m_currentSettings.configurations.append(fdItem);
     }
 }
 

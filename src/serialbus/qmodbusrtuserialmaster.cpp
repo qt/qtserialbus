@@ -54,7 +54,7 @@ Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS_LOW)
 
     Communication via Modbus requires the interaction between a single
     Modbus client instance and multiple Modbus servers. This class
-    provides the server implementation via a serial port.
+    provides the client implementation via a serial port.
 */
 
 /*!
@@ -97,7 +97,7 @@ bool QModbusRtuSerialMaster::open()
 
     d->responseBuffer.clear();
 
-    d->m_serialPort->setPortName(portName());
+    d->updateSerialPortConnectionInfo();
     if (d->m_serialPort->open(QIODevice::ReadWrite))
         setState(QModbusDevice::ConnectedState);
     else
@@ -111,12 +111,16 @@ bool QModbusRtuSerialMaster::open()
 */
 void QModbusRtuSerialMaster::close()
 {
+    if (state() == QModbusDevice::UnconnectedState)
+        return;
+
     Q_D(QModbusRtuSerialMaster);
 
     if (d->m_serialPort->isOpen())
         d->m_serialPort->close();
 
-    qCDebug(QT_MODBUS_LOW) << "Aborted replies:" << d->m_queue.count();
+    if (d->m_queue.count())
+        qCDebug(QT_MODBUS_LOW) << "(RTU client) Aborted replies:" << d->m_queue.count();
 
     while (!d->m_queue.isEmpty()) {
         // Finish each open reply and forget them

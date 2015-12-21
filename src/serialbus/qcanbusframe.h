@@ -73,7 +73,7 @@ public:
 
     explicit QCanBusFrame(QCanBusFrame::FrameType type) :
         canId(0x0),
-        isExtendedFrame(0x1),
+        isExtendedFrame(0x0),
         version(0x0)
     {
         setFrameType(type);
@@ -100,7 +100,7 @@ public:
     explicit QCanBusFrame(quint32 identifier = 0, const QByteArray &data = QByteArray()) :
         canId(identifier & 0x1FFFFFFFU),
         format(DataFrame),
-        isExtendedFrame(0x1),
+        isExtendedFrame((identifier & 0x1FFFF800U) ? 0x1 : 0x0),
         version(0x0),
         load(data)
     {
@@ -110,7 +110,18 @@ public:
 
     bool isValid() const
     {
-        return (format != 0x4);
+        if (format == InvalidFrame)
+            return false;
+
+        // long id used, but extended flag not set
+        if (!isExtendedFrame && (canId & 0x1FFFF800U))
+            return false;
+
+        // maximum permitted payload size in CANFD
+        if (load.length() > 64)
+            return false;
+
+        return true;
     }
 
     FrameType frameType() const
@@ -157,6 +168,7 @@ public:
     inline void setFrameId(quint32 newFrameId)
     {
         canId = (newFrameId & 0x1FFFFFFFU);
+        setExtendedFrameFormat(newFrameId & 0x1FFFF800U);
     }
 
     inline void setPayload(const QByteArray &data) { load = data; }

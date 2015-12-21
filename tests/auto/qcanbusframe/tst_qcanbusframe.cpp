@@ -66,6 +66,7 @@ void tst_QCanBusFrame::constructors()
 {
     QCanBusFrame frame1;
     QCanBusFrame frame2(123, "tst");
+    QCanBusFrame frame3(123456, "tst");
     QCanBusFrame::TimeStamp timeStamp1;
     QCanBusFrame::TimeStamp timeStamp2(5, 5);
 
@@ -75,25 +76,39 @@ void tst_QCanBusFrame::constructors()
     QVERIFY(!frame2.payload().isEmpty());
     QVERIFY(frame2.frameId());
 
+    QVERIFY(!frame3.payload().isEmpty());
+    QVERIFY(frame3.frameId());
+
     QVERIFY(!timeStamp1.seconds());
     QVERIFY(!timeStamp1.microSeconds());
 
     QVERIFY(timeStamp2.seconds());
     QVERIFY(timeStamp2.microSeconds());
 
-    QVERIFY(frame1.hasExtendedFrameFormat() == true);
-    QVERIFY(frame2.hasExtendedFrameFormat() == true);
+    QVERIFY(frame1.hasExtendedFrameFormat() == false);
+    QVERIFY(frame2.hasExtendedFrameFormat() == false);
+    QVERIFY(frame3.hasExtendedFrameFormat() == true);
 
     QCOMPARE(frame1.frameType(), QCanBusFrame::DataFrame);
     QCOMPARE(frame2.frameType(), QCanBusFrame::DataFrame);
+    QCOMPARE(frame3.frameType(), QCanBusFrame::DataFrame);
 }
 
 void tst_QCanBusFrame::id()
 {
     QCanBusFrame frame;
     QVERIFY(!frame.frameId());
+    frame.setFrameId(2047u);
+    QCOMPARE(frame.frameId(), 2047u);
+    QVERIFY(frame.hasExtendedFrameFormat() == false);
+    // id > 2^11 -> extended format
+    frame.setFrameId(2048u);
+    QCOMPARE(frame.frameId(), 2048u);
+    QVERIFY(frame.hasExtendedFrameFormat() == true);
+    // id < 2^11 -> no extended format
     frame.setFrameId(512u);
     QCOMPARE(frame.frameId(), 512u);
+    QVERIFY(frame.hasExtendedFrameFormat() == false);
 }
 
 void tst_QCanBusFrame::payload()
@@ -120,30 +135,66 @@ void tst_QCanBusFrame::tst_isValid_data()
 {
     QTest::addColumn<QCanBusFrame::FrameType>("frameType");
     QTest::addColumn<bool>("isValid");
+    QTest::addColumn<QByteArray>("payload");
+    QTest::addColumn<uint>("id");
+    QTest::addColumn<bool>("extended");
 
-    QTest::newRow("invalid frame") << QCanBusFrame::InvalidFrame << false;
-    QTest::newRow("data frame") << QCanBusFrame::DataFrame << true;
-    QTest::newRow("error frame") << QCanBusFrame::ErrorFrame << true;
-    QTest::newRow("remote request frame") << QCanBusFrame::RemoteRequestFrame << true;
-    QTest::newRow("unknown frame") << QCanBusFrame::UnknownFrame << true;
-}
+    QTest::newRow("invalid frame")
+                 << QCanBusFrame::InvalidFrame << false
+                 << QByteArray() << 0u << false;
+    QTest::newRow("data frame")
+                 << QCanBusFrame::DataFrame << true
+                 << QByteArray() << 0u << false;
+    QTest::newRow("error frame")
+                 << QCanBusFrame::ErrorFrame << true
+                 << QByteArray() << 0u << false;
+    QTest::newRow("remote request frame")
+                 << QCanBusFrame::RemoteRequestFrame << true
+                 << QByteArray() << 0u << false;
+    QTest::newRow("unknown frame")
+                 << QCanBusFrame::UnknownFrame << true
+                 << QByteArray() << 0u << false;
+    QTest::newRow("data frame can max payload")
+                 << QCanBusFrame::DataFrame << true
+                 << QByteArray(8, 0) << 0u << false;
+    QTest::newRow("data frame canfd max payload")
+                 << QCanBusFrame::DataFrame << true
+                 << QByteArray(64, 0) << 0u << false;
+    QTest::newRow("data frame can too much payload")
+                 << QCanBusFrame::DataFrame << false
+                 << QByteArray(65, 0) << 0u << false;
+    QTest::newRow("data frame short id")
+                 << QCanBusFrame::DataFrame << true
+                 << QByteArray(8, 0) << (1u << 11) - 1 << false;
+    QTest::newRow("data frame long id")
+                 << QCanBusFrame::DataFrame << true
+                 << QByteArray(8, 0) << (1u << 11) << true;
+    QTest::newRow("data frame bad long id")
+                 << QCanBusFrame::DataFrame << false
+                 << QByteArray(8, 0) << (1u << 11) << false;
+ }
 
 void tst_QCanBusFrame::tst_isValid()
 {
     QFETCH(QCanBusFrame::FrameType, frameType);
     QFETCH(bool, isValid);
+    QFETCH(QByteArray, payload);
+    QFETCH(uint, id);
+    QFETCH(bool, extended);
 
     QCanBusFrame frame(frameType);
-    QCOMPARE(isValid, frame.isValid());
-    QCOMPARE(frameType, frame.frameType());
-
-    frame.setFrameType(QCanBusFrame::ErrorFrame);
-    QCOMPARE(true, frame.isValid());
-    QCOMPARE(frame.frameType(), QCanBusFrame::ErrorFrame);
+    frame.setPayload(payload);
+    frame.setFrameId(id);
+    frame.setExtendedFrameFormat(extended);
+    QCOMPARE(frame.isValid(), isValid);
+    QCOMPARE(frame.frameType(), frameType);
+    QCOMPARE(frame.payload(), payload);
+    QCOMPARE(frame.frameId(), id);
+    QCOMPARE(frame.hasExtendedFrameFormat(), extended);
 
     frame.setFrameType(QCanBusFrame::InvalidFrame);
-    QCOMPARE(false, frame.isValid());
-    QCOMPARE(frame.frameType(), QCanBusFrame::InvalidFrame);
+    QCOMPARE(frame.isValid(), false);
+    QCOMPARE(QCanBusFrame::InvalidFrame, frame.frameType());
 }
 
 void tst_QCanBusFrame::streaming_data()

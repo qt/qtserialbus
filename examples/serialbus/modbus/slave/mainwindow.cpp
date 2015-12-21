@@ -39,12 +39,14 @@
 ****************************************************************************/
 
 #include "mainwindow.h"
+#include "settingsdialog.h"
 #include "ui_mainwindow.h"
 
 #include <QtSerialBus/qmodbusrtuserialslave.h>
 #include <QtSerialBus/qmodbustcpserver.h>
 
 #include <QtCore/qregularexpression.h>
+#include <QtCore/qurl.h>
 #include <QtWidgets/qstatusbar.h>
 
 enum ModbusConnection {
@@ -62,6 +64,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->connectType->setCurrentIndex(0);
     on_connectType_currentIndexChanged(0);
+
+    m_settingsDialog = new SettingsDialog(this);
+    initActions();
 }
 
 MainWindow::~MainWindow()
@@ -71,6 +76,22 @@ MainWindow::~MainWindow()
     delete modbusDevice;
 
     delete ui;
+}
+
+void MainWindow::initActions()
+{
+    ui->actionConnect->setEnabled(true);
+    ui->actionDisconnect->setEnabled(false);
+    ui->actionExit->setEnabled(true);
+    ui->actionOptions->setEnabled(true);
+
+    connect(ui->actionConnect, &QAction::triggered,
+            this, &MainWindow::on_connectButton_clicked);
+    connect(ui->actionDisconnect, &QAction::triggered,
+            this, &MainWindow::on_connectButton_clicked);
+
+    connect(ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
+    connect(ui->actionOptions, &QAction::triggered, m_settingsDialog, &QDialog::show);
 }
 
 void MainWindow::on_connectType_currentIndexChanged(int index)
@@ -131,17 +152,42 @@ void MainWindow::on_connectButton_clicked()
     statusBar()->clearMessage();
 
     if (intendToConnect) {
-        modbusDevice->setPortName(ui->portEdit->text());
+        if (static_cast<ModbusConnection> (ui->connectType->currentIndex()) == Serial) {
+            modbusDevice->setConnectionParameter(QModbusDevice::SerialPortNameParameter,
+                ui->portEdit->text());
+            modbusDevice->setConnectionParameter(QModbusDevice::SerialParityParameter,
+                m_settingsDialog->settings().parity);
+            modbusDevice->setConnectionParameter(QModbusDevice::SerialBaudRateParameter,
+                m_settingsDialog->settings().baud);
+            modbusDevice->setConnectionParameter(QModbusDevice::SerialDataBitsParameter,
+                m_settingsDialog->settings().dataBits);
+            modbusDevice->setConnectionParameter(QModbusDevice::SerialStopBitsParameter,
+                m_settingsDialog->settings().stopBits);
+        } else {
+            const QUrl url = QUrl::fromUserInput(ui->portEdit->text());
+            modbusDevice->setConnectionParameter(QModbusDevice::NetworkPortParameter, url.port());
+            modbusDevice->setConnectionParameter(QModbusDevice::NetworkAddressParameter, url.host());
+        }
         modbusDevice->setServerAddress(ui->serverEdit->text().toInt());
-        if (!modbusDevice->connectDevice())
+        if (!modbusDevice->connectDevice()) {
             statusBar()->showMessage(tr("Connect failed: ") + modbusDevice->errorString(), 5000);
+        } else {
+            ui->actionConnect->setEnabled(false);
+            ui->actionDisconnect->setEnabled(true);
+        }
     } else {
         modbusDevice->disconnectDevice();
+        ui->actionConnect->setEnabled(true);
+        ui->actionDisconnect->setEnabled(false);
     }
 }
 
 void MainWindow::onStateChanged(int state)
 {
+    bool connected = (state != QModbusDevice::UnconnectedState);
+    ui->actionConnect->setEnabled(!connected);
+    ui->actionDisconnect->setEnabled(connected);
+
     if (state == QModbusDevice::UnconnectedState)
         ui->connectButton->setText(tr("Connect"));
     else if (state == QModbusDevice::ConnectedState)

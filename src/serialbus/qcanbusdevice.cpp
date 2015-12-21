@@ -101,6 +101,8 @@ QT_BEGIN_NAMESPACE
     \value UserKey          This key defines the range where custom keys start. It's most
                             common purpose is to permit platform-specific configuration
                             options.
+    \value CanFdKey         This key defines whether sending and receiving of CANFD frames
+                            should be enabled. The expected value for this key is \c bool.
 */
 
 /*!

@@ -74,6 +74,7 @@ QModbusRtuSerialSlave::QModbusRtuSerialSlave(QObject *parent)
 */
 QModbusRtuSerialSlave::~QModbusRtuSerialSlave()
 {
+    close();
 }
 
 /*!
@@ -103,9 +104,11 @@ bool QModbusRtuSerialSlave::open()
         return true;
 
     Q_D(QModbusRtuSerialSlave);
-    d->m_serialPort->setPortName(portName());
+    d->updateSerialPortConnectionInfo();
     if (d->m_serialPort->open(QIODevice::ReadWrite))
         setState(QModbusDevice::ConnectedState);
+    else
+        setError(d->m_serialPort->errorString(), QModbusDevice::ConnectionError);
 
     return (state() == QModbusDevice::ConnectedState);
 }
@@ -115,6 +118,9 @@ bool QModbusRtuSerialSlave::open()
 */
 void QModbusRtuSerialSlave::close()
 {
+    if (state() == QModbusDevice::UnconnectedState)
+        return;
+
     Q_D(QModbusRtuSerialSlave);
 
     if (d->m_serialPort->isOpen())

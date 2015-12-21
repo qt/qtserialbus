@@ -37,9 +37,7 @@
 #include "qmodbustcpclient.h"
 #include "qmodbustcpclient_p.h"
 
-#include <QtCore/qdatetime.h>
 #include <QtCore/qurl.h>
-#include <QtNetwork/qhostaddress.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -61,8 +59,6 @@ QModbusTcpClient::QModbusTcpClient(QObject *parent)
 {
     Q_D(QModbusTcpClient);
     d->setupTcpSocket();
-
-    qsrand(QTime::currentTime().msec());
 }
 
 /*!
@@ -70,6 +66,7 @@ QModbusTcpClient::QModbusTcpClient(QObject *parent)
 */
 QModbusTcpClient::~QModbusTcpClient()
 {
+    close();
 }
 
 /*!
@@ -80,8 +77,6 @@ QModbusTcpClient::QModbusTcpClient(QModbusTcpClientPrivate &dd, QObject *parent)
 {
     Q_D(QModbusTcpClient);
     d->setupTcpSocket();
-
-    qsrand(QTime::currentTime().msec());
 }
 
 /*!
@@ -96,9 +91,14 @@ bool QModbusTcpClient::open()
     if (d->m_socket->state() != QAbstractSocket::UnconnectedState)
         return false;
 
-    const QUrl url = QUrl::fromUserInput(portName());
+    const QUrl url = QUrl::fromUserInput(d->m_networkAddress + QStringLiteral(":")
+        + QString::number(d->m_networkPort));
+
     if (!url.isValid()) {
-        qCWarning(QT_MODBUS) << "Invalid host:" << url.host();
+        setError(tr("Invalid connection settings for TCP communication specified."),
+            QModbusDevice::ConnectionError);
+        qCWarning(QT_MODBUS) << "(TCP client) Invalid host:" << url.host() << "or port:"
+            << url.port();
         return false;
     }
 
@@ -112,8 +112,10 @@ bool QModbusTcpClient::open()
 */
 void QModbusTcpClient::close()
 {
-    Q_D(QModbusTcpClient);
+    if (state() == QModbusDevice::UnconnectedState)
+        return;
 
+    Q_D(QModbusTcpClient);
     d->m_socket->disconnectFromHost();
 }
 

@@ -145,10 +145,10 @@ QModbusReply *QModbusClient::sendRawRequest(const QModbusRequest &request, int s
 
 /*!
     \property QModbusClient::timeout
-    \brief the timeout value this client
+    \brief the timeout value used by this client
 
     Returns the timeout value used by this QModbusClient instance in ms.
-    A timeout is indicated by a \l TimeoutError. The default value is 200 ms.
+    A timeout is indicated by a \l TimeoutError. The default value is 1000 ms.
 
     \sa setTimeout
 */
@@ -159,30 +159,58 @@ int QModbusClient::timeout() const
 }
 
 /*!
-    \fn void QModbusClient::timeoutChanged()
+    \fn void QModbusClient::timeoutChanged(int newTimeout)
 
-    This signal is emitted if the response is not received within the required timeout.
+    This signal is emitted if the response is not received within the required
+    timeout. The new response timeout for the device is passed as \a newTimeout.
 */
 
 /*!
-    Sets the \a newTimeout for this QModbusClient instance.
+    Sets the \a newTimeout for this QModbusClient instance. The minimum timeout
+    is 50 ms.
 
     The timeout is used by the client to determine how long it waits for
     a response from the server. If the response is not received within the
     required timeout, the \l TimeoutError is set.
 
-    Setting the timeout to a negative value disables timeouts. Already active/running timeouts
-    are not affected by such timeout duration changes.
+    Already active/running timeouts are not affected by such timeout duration
+    changes.
 
     \sa timeout
 */
 void QModbusClient::setTimeout(int newTimeout)
 {
+    if (newTimeout < 50)
+        return;
+
     Q_D(QModbusClient);
     if (d->m_responseTimeoutDuration != newTimeout) {
         d->m_responseTimeoutDuration = newTimeout;
-        emit timeoutChanged();
+        emit timeoutChanged(newTimeout);
     }
+}
+
+/*!
+    Returns the number of retries a client will perform before a
+    request fails. The default value is set to \c 3.
+*/
+int QModbusClient::numberOfRetries() const
+{
+    Q_D(const QModbusClient);
+    return d->m_numberOfRetries;
+}
+
+/*!
+    Sets the \a number of retries a client will perform before a
+    request fails. The default value is set to \c 3.
+
+    \note Changing this property will only effect new request, not
+    already scheduled ones.
+*/
+void QModbusClient::setNumberOfRetries(int number)
+{
+    Q_D(QModbusClient);
+    d->m_numberOfRetries = number;
 }
 
 /*!
@@ -220,13 +248,13 @@ QModbusReply *QModbusClientPrivate::sendRequest(const QModbusRequest &request, i
     Q_Q(QModbusClient);
 
     if (!isOpen() || q->state() != QModbusDevice::ConnectedState) {
-        qCWarning(QT_MODBUS) << "Device is not connected";
+        qCWarning(QT_MODBUS) << "(Client) Device is not connected";
         q->setError(QModbusClient::tr("Device not connected."), QModbusDevice::ConnectionError);
         return Q_NULLPTR;
     }
 
     if (!request.isValid()) {
-        qCWarning(QT_MODBUS) << "Refuse to send invalid request.";  // TODO: WriteError ???
+        qCWarning(QT_MODBUS) << "(Client) Refuse to send invalid request."; // TODO: WriteError ???
         q->setError(QModbusClient::tr("Invalid Modbus request."), QModbusDevice::WriteError);
         return Q_NULLPTR;
     }
@@ -403,7 +431,7 @@ bool QModbusClientPrivate::processReadCoilsResponse(const QModbusResponse &respo
     if (!isValid(response, QModbusResponse::ReadCoils))
         return false;
 
-    if (response.dataSize() < QModbusResponse::minimumDataSize(response.functionCode()))
+    if (response.dataSize() < QModbusResponse::minimumDataSize(response))
         return false;
 
     const QByteArray payload = response.data();
@@ -431,7 +459,7 @@ bool QModbusClientPrivate::processReadDiscreteInputsResponse(const QModbusRespon
     if (!isValid(response, QModbusResponse::ReadDiscreteInputs))
         return false;
 
-    if (response.dataSize() < QModbusResponse::minimumDataSize(response.functionCode()))
+    if (response.dataSize() < QModbusResponse::minimumDataSize(response))
         return false;
 
     const QByteArray payload = response.data();
@@ -459,7 +487,7 @@ bool QModbusClientPrivate::processReadHoldingRegistersResponse(const QModbusResp
     if (!isValid(response, QModbusResponse::ReadHoldingRegisters))
         return false;
 
-    if (response.dataSize() < QModbusResponse::minimumDataSize(response.functionCode()))
+    if (response.dataSize() < QModbusResponse::minimumDataSize(response))
         return false;
 
     // byte count needs to match available bytes
@@ -497,7 +525,7 @@ bool QModbusClientPrivate::processReadInputRegistersResponse(const QModbusRespon
     if (!isValid(response, QModbusResponse::ReadInputRegisters))
         return false;
 
-    if (response.dataSize() < QModbusResponse::minimumDataSize(response.functionCode()))
+    if (response.dataSize() < QModbusResponse::minimumDataSize(response))
         return false;
 
     // byte count needs to match available bytes
@@ -535,7 +563,7 @@ bool QModbusClientPrivate::processWriteSingleCoilResponse(const QModbusResponse 
     if (!isValid(response, QModbusResponse::WriteSingleCoil))
         return false;
 
-    if (response.dataSize() != QModbusResponse::minimumDataSize(response.functionCode()))
+    if (response.dataSize() != QModbusResponse::minimumDataSize(response))
         return false;
 
     quint16 address, value;
@@ -558,7 +586,7 @@ bool QModbusClientPrivate::processWriteSingleRegisterResponse(const QModbusRespo
     if (!isValid(response, QModbusResponse::WriteSingleRegister))
         return false;
 
-    if (response.dataSize() != QModbusResponse::minimumDataSize(response.functionCode()))
+    if (response.dataSize() != QModbusResponse::minimumDataSize(response))
         return false;
 
     quint16 address, value;
@@ -578,7 +606,7 @@ bool QModbusClientPrivate::processWriteMultipleCoilsResponse(const QModbusRespon
     if (!isValid(response, QModbusResponse::WriteMultipleCoils))
         return false;
 
-    if (response.dataSize() != QModbusResponse::minimumDataSize(response.functionCode()))
+    if (response.dataSize() != QModbusResponse::minimumDataSize(response))
         return false;
 
     quint16 address, count;
@@ -597,7 +625,7 @@ bool QModbusClientPrivate::processWriteMultipleRegistersResponse(const QModbusRe
     if (!isValid(response, QModbusResponse::WriteMultipleRegisters))
         return false;
 
-    if (response.dataSize() != QModbusResponse::minimumDataSize(response.functionCode()))
+    if (response.dataSize() != QModbusResponse::minimumDataSize(response))
         return false;
 
     quint16 address, count;
@@ -620,7 +648,7 @@ bool QModbusClientPrivate::processReadWriteMultipleRegistersResponse(
     if (!isValid(response, QModbusResponse::ReadWriteMultipleRegisters))
         return false;
 
-    if (response.dataSize() < QModbusResponse::minimumDataSize(response.functionCode()))
+    if (response.dataSize() < QModbusResponse::minimumDataSize(response))
         return false;
 
     const QByteArray payload = response.data();

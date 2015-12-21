@@ -42,7 +42,6 @@
 #include <QtSerialBus/qmodbuspdu.h>
 
 #include <QtCore/qtimer.h>
-#include <QtCore/qdebug.h>
 
 //
 //  W A R N I N G
@@ -93,12 +92,31 @@ public:
     // TODO: Review once we have a transport layer in place.
     virtual bool isOpen() const { return false; }
 
-    int m_responseTimeoutDuration = 200;
+    int m_numberOfRetries = 3;
+    int m_responseTimeoutDuration = 1000;
 
     struct QueueElement {
+        QueueElement() Q_DECL_EQ_DEFAULT;
+        QueueElement(QModbusReply *r, const QModbusRequest &req, const QModbusDataUnit &u, int num,
+                int timeout = -1)
+            : reply(r), requestPdu(req), unit(u), numberOfRetries(num)
+        {
+            if (timeout >= 0) {
+                // always the case for TCP
+                timer.reset(new QTimer);
+                timer->setSingleShot(true);
+                timer->setInterval(timeout);
+            }
+        }
+        bool operator==(const QueueElement &other) const {
+            return reply == other.reply;
+        }
+
         QPointer<QModbusReply> reply;
         QModbusRequest requestPdu;
         QModbusDataUnit unit;
+        int numberOfRetries;
+        QSharedPointer<QTimer> timer;
     };
     void processQueueElement(const QModbusResponse &pdu, const QueueElement &element);
 };

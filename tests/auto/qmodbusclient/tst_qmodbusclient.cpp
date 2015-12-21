@@ -73,12 +73,16 @@ private slots:
     void testTimeout()
     {
         TestClient client;
-        QCOMPARE(client.timeout(), 200); //default value test
+        QCOMPARE(client.timeout(), 1000); //default value test
 
         client.setTimeout(300);
         QCOMPARE(client.timeout(), 300);
-        client.setTimeout(-1); // disables timeout
-        QCOMPARE(client.timeout(), -1);
+
+        client.setTimeout(50);
+        QCOMPARE(client.timeout(), 50);
+
+        client.setTimeout(49); // everything below 50 fails
+        QVERIFY(client.timeout() >= 50);
 
         // test timer firing off
         client.setTimeout(100);

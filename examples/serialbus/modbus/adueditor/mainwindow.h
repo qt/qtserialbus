@@ -41,58 +41,54 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QButtonGroup>
+#include "ui_interface.h"
+
 #include <QMainWindow>
-#include <QModbusServer>
+#include <QObject>
 
 QT_BEGIN_NAMESPACE
+class QModbusClient;
+QT_END_NAMESPACE;
 
-class QLineEdit;
-
-namespace Ui {
-class MainWindow;
-class SettingsDialog;
-}
-
-QT_END_NAMESPACE
-
-class SettingsDialog;
-
-class MainWindow : public QMainWindow
+class DebugHandler
 {
-    Q_OBJECT
-
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
-
-private Q_SLOTS:
-    void on_connectButton_clicked();
-    void onStateChanged(int state);
-
-    void coilChanged(int id);
-    void discreteInputChanged(int id);
-    void bitChanged(int id, QModbusDataUnit::RegisterType table, bool value);
-
-    void setRegister(const QString &value);
-    void updateWidgets(QModbusDataUnit::RegisterType table, int address, int size);
-
-    void on_connectType_currentIndexChanged(int);
-
-    void handleDeviceError(QModbusDevice::ModbusError newError);
+    DebugHandler() Q_DECL_EQ_DEFAULT;
+    DebugHandler(QtMessageHandler newMessageHandler)
+        : oldMessageHandler(qInstallMessageHandler(newMessageHandler))
+    {}
+    ~DebugHandler() { qInstallMessageHandler(oldMessageHandler); }
 
 private:
-    void initActions();
-    void setupDeviceData();
-    void setupWidgetContainers();
+    QtMessageHandler oldMessageHandler;
+};
 
-    Ui::MainWindow *ui;
-    QModbusServer* modbusDevice;
+class MainWindow : public QMainWindow, private Ui::MainWindow
+{
+    Q_OBJECT
+    Q_DISABLE_COPY(MainWindow)
+    friend class ModbusTcpClient;
 
-    QButtonGroup coilButtons;
-    QButtonGroup discreteButtons;
-    QHash<QString, QLineEdit*> registers;
-    SettingsDialog *m_settingsDialog;
+public:
+    explicit MainWindow(QWidget *parent = Q_NULLPTR);
+    ~MainWindow();
+
+    static MainWindow* instance();
+    void appendToLog(const QString &msg) {
+        logTextEdit->appendPlainText(msg);
+    }
+
+private slots:
+    void on_sendButton_clicked();
+    void on_connectButton_clicked();
+    void on_disconnectButton_clicked();
+
+private:
+    void disconnectAndDelete();
+
+private:
+    DebugHandler m_debugHandler;
+    QModbusClient *m_device = Q_NULLPTR;
 };
 
 #endif // MAINWINDOW_H

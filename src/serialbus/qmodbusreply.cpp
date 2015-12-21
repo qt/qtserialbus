@@ -52,7 +52,7 @@ public:
     bool m_finished = false;
     QModbusReply::ReplyError m_error = QModbusReply::NoError;
     QString m_errorText;
-    QModbusRequest m_response;
+    QModbusResponse m_response;
     QModbusReply::ReplyType m_type;
 };
 

@@ -43,8 +43,8 @@
 #include <QtSerialBus/qmodbusdataunit.h>
 #include <QtSerialBus/qmodbusserver.h>
 
-#include <QtCore/qcontiguouscache.h>
-#include <QtCore/qvector.h>
+#include <array>
+#include <deque>
 
 //
 //  W A R N I N G
@@ -77,14 +77,13 @@ public:
     };
 
     QModbusServerPrivate()
-        : m_counters(20, 0u)
-        , m_commEventLog(64)
+        : m_counters()
     {
     }
 
     bool setMap(const QModbusDataUnitMap &map);
 
-    void resetCommunicationCounters() { m_counters.fill(0u, m_counters.size()); }
+    void resetCommunicationCounters() { m_counters.fill(0u); }
     void incrementCounter(QModbusServerPrivate::Counter counter) { m_counters[counter]++; }
 
     QModbusResponse processRequest(const QModbusPdu &request);
@@ -115,10 +114,10 @@ public:
     void storeModbusCommEvent(const QModbusCommEvent &eventByte);
 
     int m_serverAddress = 1;
-    QVector<quint16> m_counters;
+    std::array<quint16, 20> m_counters;
     QHash<int, QVariant> m_serverOptions;
     QModbusDataUnitMap m_modbusDataUnitMap;
-    QContiguousCache<quint8> m_commEventLog;
+    std::deque<quint8> m_commEventLog;
 };
 
 QT_END_NAMESPACE

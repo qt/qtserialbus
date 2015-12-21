@@ -42,6 +42,7 @@
 #define SETTINGSDIALOG_H
 
 #include <QDialog>
+#include <QSerialPort>
 
 QT_BEGIN_NAMESPACE
 
@@ -57,13 +58,17 @@ class SettingsDialog : public QDialog
 
 public:
     struct Settings {
-        int responseTime;
+        int parity = QSerialPort::EvenParity;
+        int baud = QSerialPort::Baud19200;
+        int dataBits = QSerialPort::Data8;
+        int stopBits = QSerialPort::OneStop;
+        int responseTime = 200;
+        int numberOfRetries = 3;
     };
 
     explicit SettingsDialog(QWidget *parent = 0);
     ~SettingsDialog();
 
-    void updateSettings();
     Settings settings() const;
 
 private:

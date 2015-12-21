@@ -68,8 +68,11 @@ public:
     int timeout() const;
     void setTimeout(int newTimeout);
 
+    int numberOfRetries() const;
+    void setNumberOfRetries(int number);
+
 Q_SIGNALS:
-    void timeoutChanged();
+    void timeoutChanged(int newTimeout);
 
 protected:
     QModbusClient(QModbusClientPrivate &dd, QObject *parent = Q_NULLPTR);

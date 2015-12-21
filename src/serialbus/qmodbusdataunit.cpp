@@ -36,8 +36,6 @@
 
 #include "qmodbusdataunit.h"
 
-#include <QtCore/qdatastream.h>
-
 QT_BEGIN_NAMESPACE
 
 /*!
@@ -154,7 +152,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \fn int QModbusDataUnit::valueCount() const
+    \fn uint QModbusDataUnit::valueCount() const
 
     Returns the size of the requested register's data block or the size of data read from the
     device.
@@ -184,13 +182,13 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \fn void QModbusDataUnit::value(int index) const
+    \fn quint16 QModbusDataUnit::value(int index) const
 
     Return the value at position \a index.
 */
 
 /*!
-    \fn void QModbusDataUnit::isValid() const
+    \fn bool QModbusDataUnit::isValid() const
 
     Returns \c true if the \c QModbusDataUnit is valid; otherwise \c false. A \c QModbusDataUnit is
     considered valid if the registerType() is not QModbusDataUnit::Invalid and the startAddress()

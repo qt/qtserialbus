@@ -246,7 +246,7 @@ bool PeakCanBackendPrivate::setConfigurationParameter(int key, const QVariant &v
     case QCanBusDevice::BitRateKey:
         return verifyBitRate(value.toInt());
     default:
-        q->setError(PeakCanBackend::tr("Unsuported configuration key"), QCanBusDevice::ConfigurationError);
+        q->setError(PeakCanBackend::tr("Unsupported configuration key"), QCanBusDevice::ConfigurationError);
         return false;
     }
 }
@@ -517,6 +517,11 @@ bool PeakCanBackend::writeFrame(const QCanBusFrame &newData)
     if (state() != QCanBusDevice::ConnectedState)
         return false;
 
+    if (!newData.isValid()) {
+        setError(tr("Cannot write invalid QCanBusFrame"), QCanBusDevice::WriteError);
+        return false;
+    }
+
     if (newData.frameType() != QCanBusFrame::DataFrame
             && newData.frameType() != QCanBusFrame::RemoteRequestFrame) {
         setError(tr("Unable to write a frame with unacceptable type"),
@@ -524,9 +529,9 @@ bool PeakCanBackend::writeFrame(const QCanBusFrame &newData)
         return false;
     }
 
+    // canFD frame format not implemented at this stage
     if (newData.payload().size() > 8) {
-        setError(tr("Unable to write a frame with unacceptable payload size"),
-                 QCanBusDevice::WriteError);
+        setError(tr("CanFD frame format not supported."), QCanBusDevice::WriteError);
         return false;
     }
 
