@@ -51,7 +51,7 @@ class Q_SERIALBUS_EXPORT QModbusDevice : public QObject
     Q_DECLARE_PRIVATE(QModbusDevice)
 
 public:
-    enum ModbusError { //TODO review -> some values are reported via QModbusReply (e.g. WriteError)
+    enum Error { //TODO review -> some values are reported via QModbusReply (e.g. WriteError)
         NoError,
         ReadError,
         WriteError,
@@ -60,15 +60,15 @@ public:
         TimeoutError,
         UnknownError
     };
-    Q_ENUM(ModbusError)
+    Q_ENUM(Error)
 
-    enum ModbusDeviceState {
+    enum State {
         UnconnectedState,
         ConnectingState,
         ConnectedState,
         ClosingState
     };
-    Q_ENUM(ModbusDeviceState)
+    Q_ENUM(State)
 
     enum ConnectionParameter {
         SerialPortNameParameter,
@@ -94,26 +94,26 @@ public:
     bool connectDevice();
     void disconnectDevice();
 
-    ModbusDeviceState state() const;
+    State state() const;
 
-    ModbusError error() const;
+    Error error() const;
     QString errorString() const;
 
 Q_SIGNALS:
-    void errorOccurred(QModbusDevice::ModbusError error);
-    void stateChanged(QModbusDevice::ModbusDeviceState state);
+    void errorOccurred(QModbusDevice::Error error);
+    void stateChanged(QModbusDevice::State state);
 
 protected:
     QModbusDevice(QModbusDevicePrivate &dd, QObject *parent = Q_NULLPTR);
 
-    void setState(QModbusDevice::ModbusDeviceState newState);
-    void setError(const QString &errorText, QModbusDevice::ModbusError error);
+    void setState(QModbusDevice::State newState);
+    void setError(const QString &errorText, QModbusDevice::Error error);
     virtual bool open() = 0;
     virtual void close() = 0;
 };
 
-Q_DECLARE_TYPEINFO(QModbusDevice::ModbusError, Q_PRIMITIVE_TYPE);
-Q_DECLARE_TYPEINFO(QModbusDevice::ModbusDeviceState, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(QModbusDevice::Error, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(QModbusDevice::State, Q_PRIMITIVE_TYPE);
 Q_DECLARE_TYPEINFO(QModbusDevice::ConnectionParameter, Q_PRIMITIVE_TYPE);
 
 QT_END_NAMESPACE

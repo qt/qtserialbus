@@ -137,7 +137,7 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
     }
 }
 
-void MainWindow::handleDeviceError(QModbusDevice::ModbusError newError)
+void MainWindow::handleDeviceError(QModbusDevice::Error newError)
 {
     if (newError == QModbusDevice::NoError || !modbusDevice)
         return;

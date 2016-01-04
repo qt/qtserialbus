@@ -176,12 +176,12 @@ void MainWindow::on_connectButton_clicked()
     m_device->setTimeout(timeoutSpin->value());
     m_device->setNumberOfRetries(retriesSpin->value());
 
-    connect(m_device, &QModbusDevice::errorOccurred, this, [this](QModbusDevice::ModbusError) {
+    connect(m_device, &QModbusDevice::errorOccurred, this, [this](QModbusDevice::Error) {
         qDebug().noquote() << QStringLiteral("Error: %1").arg(m_device->errorString());
         emit disconnectButton->clicked();
     }, Qt::QueuedConnection);
 
-    connect(m_device, &QModbusDevice::stateChanged, [this](QModbusDevice::ModbusDeviceState state) {
+    connect(m_device, &QModbusDevice::stateChanged, [this](QModbusDevice::State state) {
         switch (state) {
         case QModbusDevice::UnconnectedState:
             qDebug().noquote() << QStringLiteral("State: Entered unconnected state.");

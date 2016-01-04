@@ -79,7 +79,7 @@ private Q_SLOTS:
 
     void on_connectType_currentIndexChanged(int);
 
-    void handleDeviceError(QModbusDevice::ModbusError newError);
+    void handleDeviceError(QModbusDevice::Error newError);
 
 private:
     void initActions();

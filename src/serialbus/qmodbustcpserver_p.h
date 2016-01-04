@@ -85,7 +85,7 @@ public:
         This function is a workaround since 2nd level lambda below cannot
         call protected QModbusDevice::setError(..) function on VS2013.
     */
-    void forwardError(const QString &errorText, QModbusDevice::ModbusError error)
+    void forwardError(const QString &errorText, QModbusDevice::Error error)
     {
         Q_Q(QModbusTcpServer);
         q->setError(errorText, error);
