@@ -42,7 +42,7 @@
 
 class TestClientPrivate : public QModbusClientPrivate
 {
-
+    // Keep. We use this to expose and test private functions.
 };
 
 class TestClient : public QModbusClient
@@ -52,13 +52,13 @@ class TestClient : public QModbusClient
     friend class tst_QModbusClient;
 
 public:
-    TestClient(QObject *parent = Q_NULLPTR)
-        : QModbusClient(parent)
-    {}
-
-    virtual bool open() Q_DECL_OVERRIDE { return true; }
-    virtual void close() Q_DECL_OVERRIDE {}
-
+    bool open() Q_DECL_OVERRIDE {
+        setState(QModbusDevice::ConnectedState);
+        return true;
+    }
+    void close() Q_DECL_OVERRIDE {
+        setState(QModbusDevice::UnconnectedState);
+    }
     bool processResponse(const QModbusResponse &response, QModbusDataUnit *data)
     {
         return QModbusClient::processResponse(response, data);
