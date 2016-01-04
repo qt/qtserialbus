@@ -843,8 +843,8 @@ QModbusResponse QModbusServerPrivate::processDiagnosticsRequest(const QModbusReq
 
     case Diagnostics::RestartCommunicationsOption: {
         CHECK_SIZE_AND_CONDITION(request, ((data != 0xff00) && (data != 0x0000)));
-        // Restarts the communication by closing the connection and re - opening.After closing,
-        // all communication counters are cleared and the listen only mode set to false.This
+        // Restarts the communication by closing the connection and re-opening. After closing,
+        // all communication counters are cleared and the listen only mode set to false. This
         // function is the only way to remotely clear the listen only mode and bring the device
         // back into communication. If data is 0xff00, the event log history is also cleared.
         q_func()->disconnectDevice();
