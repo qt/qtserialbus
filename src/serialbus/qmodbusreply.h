@@ -55,7 +55,7 @@ public:
         Raw,
         Common
     };
-    Q_ENUMS(ReplyType)
+    Q_ENUM(ReplyType)
 
     enum ReplyError {
         NoError =               0x00,
@@ -65,7 +65,7 @@ public:
         UnknownError =          0x04,
         WriteError =            0x05
     };
-    Q_ENUMS(ReplyError)
+    Q_ENUM(ReplyError)
 
     QModbusReply(ReplyType type, int serverAddress, QObject *parent = Q_NULLPTR);
 
@@ -95,7 +95,5 @@ Q_DECLARE_TYPEINFO(QModbusReply::ReplyType, Q_PRIMITIVE_TYPE);
 Q_DECLARE_TYPEINFO(QModbusReply::ReplyError, Q_PRIMITIVE_TYPE);
 
 QT_END_NAMESPACE
-
-Q_DECLARE_METATYPE(QModbusReply::ReplyError)
 
 #endif // QMODBUSREPLY_H

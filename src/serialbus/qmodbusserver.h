@@ -67,7 +67,7 @@ public:
         // Reserved
         UserOption = 0x100
     };
-    Q_ENUMS(Option)
+    Q_ENUM(Option)
 
     explicit QModbusServer(QObject *parent = 0);
     ~QModbusServer();
