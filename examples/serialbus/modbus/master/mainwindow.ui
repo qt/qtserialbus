@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>517</width>
+    <width>514</width>
     <height>378</height>
    </rect>
   </property>
@@ -20,21 +20,75 @@
    <string>Modbus Master Example</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
+   <layout class="QGridLayout" name="gridLayout_4">
+    <item row="0" column="0">
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_111">
+      <item row="0" column="5">
+       <widget class="QLabel" name="label_27">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="text">
-         <string>Connection type:</string>
+         <string>Server Address:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="7">
+       <widget class="QPushButton" name="connectButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Connect</string>
+        </property>
+        <property name="checkable">
+         <bool>false</bool>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
+        <property name="default">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="6">
+       <widget class="QSpinBox" name="serverEdit">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>247</number>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
        <widget class="QComboBox" name="connectType">
-        <property name="text" stdset="0">
-         <string>Connection type:</string>
-        </property>
         <item>
          <property name="text">
           <string>Serial</string>
@@ -60,6 +114,13 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Connection type:</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="3">
        <widget class="QLineEdit" name="portEdit">
         <property name="sizePolicy">
@@ -70,44 +131,9 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="4">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="0" column="5">
-       <widget class="QPushButton" name="connectButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Connect</string>
-        </property>
-        <property name="checkable">
-         <bool>false</bool>
-        </property>
-        <property name="autoDefault">
-         <bool>false</bool>
-        </property>
-        <property name="default">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
-    <item>
+    <item row="1" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,0">
       <item>
        <widget class="QFrame" name="frame">
@@ -129,7 +155,14 @@
          </property>
          <item>
           <layout class="QGridLayout" name="gridLayout_2">
-           <item row="5" column="1">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_7">
+             <property name="text">
+              <string>Start address:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout_2">
              <item>
               <spacer name="horizontalSpacer_3">
@@ -153,29 +186,7 @@
              </item>
             </layout>
            </item>
-           <item row="0" column="1">
-            <widget class="QSpinBox" name="writeServer">
-             <property name="readOnly">
-              <bool>false</bool>
-             </property>
-             <property name="specialValueText">
-              <string>broadcast</string>
-             </property>
-             <property name="accelerated">
-              <bool>true</bool>
-             </property>
-             <property name="minimum">
-              <number>0</number>
-             </property>
-             <property name="maximum">
-              <number>255</number>
-             </property>
-             <property name="value">
-              <number>1</number>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
+           <item row="2" column="0">
             <widget class="QLabel" name="label_8">
              <property name="text">
               <string>Number of values:</string>
@@ -183,27 +194,13 @@
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="label_7">
-             <property name="text">
-              <string>Address:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QSpinBox" name="writeAddress">
-             <property name="maximum">
-              <number>9</number>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
             <widget class="QLabel" name="label_6">
              <property name="text">
               <string>Table:</string>
              </property>
             </widget>
            </item>
-           <item row="2" column="1">
+           <item row="1" column="1">
             <widget class="QComboBox" name="writeTable">
              <item>
               <property name="text">
@@ -217,18 +214,18 @@
              </item>
             </widget>
            </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_10">
-             <property name="text">
-              <string>Server Address:</string>
+           <item row="0" column="1">
+            <widget class="QSpinBox" name="writeAddress">
+             <property name="maximum">
+              <number>9</number>
              </property>
             </widget>
            </item>
-           <item row="4" column="0" colspan="2">
-            <widget class="QTableView" name="writeValueTable"/>
-           </item>
-           <item row="3" column="1">
+           <item row="2" column="1">
             <widget class="QComboBox" name="writeSize">
+             <property name="currentIndex">
+              <number>9</number>
+             </property>
              <item>
               <property name="text">
                <string>1</string>
@@ -281,6 +278,31 @@
              </item>
             </widget>
            </item>
+           <item row="3" column="0" colspan="2">
+            <widget class="QTreeView" name="writeValueTable">
+             <property name="showDropIndicator" stdset="0">
+              <bool>true</bool>
+             </property>
+             <property name="alternatingRowColors">
+              <bool>true</bool>
+             </property>
+             <property name="rootIsDecorated">
+              <bool>false</bool>
+             </property>
+             <property name="uniformRowHeights">
+              <bool>true</bool>
+             </property>
+             <property name="itemsExpandable">
+              <bool>false</bool>
+             </property>
+             <property name="expandsOnDoubleClick">
+              <bool>false</bool>
+             </property>
+             <attribute name="headerVisible">
+              <bool>true</bool>
+             </attribute>
+            </widget>
+           </item>
           </layout>
          </item>
         </layout>
@@ -303,7 +325,61 @@
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
           <layout class="QGridLayout" name="gridLayout_3">
-           <item row="3" column="1">
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_9">
+             <property name="text">
+              <string>Values:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>Number of values:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1" rowspan="2">
+            <widget class="QListWidget" name="readValue"/>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_3">
+             <property name="text">
+              <string>Table:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QComboBox" name="readTable"/>
+           </item>
+           <item row="0" column="1">
+            <widget class="QSpinBox" name="readAddress">
+             <property name="maximum">
+              <number>9</number>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>Start address:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
             <widget class="QComboBox" name="readSize">
              <item>
               <property name="text">
@@ -357,7 +433,7 @@
              </item>
             </widget>
            </item>
-           <item row="6" column="1">
+           <item row="5" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout">
              <item>
               <spacer name="horizontalSpacer_2">
@@ -387,89 +463,6 @@
              </item>
             </layout>
            </item>
-           <item row="1" column="1">
-            <widget class="QSpinBox" name="readAddress">
-             <property name="maximum">
-              <number>9</number>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_11">
-             <property name="text">
-              <string>Server Address:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QComboBox" name="readTable"/>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_4">
-             <property name="text">
-              <string>Start address:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QSpinBox" name="readServer">
-             <property name="readOnly">
-              <bool>false</bool>
-             </property>
-             <property name="specialValueText">
-              <string>broadcast</string>
-             </property>
-             <property name="accelerated">
-              <bool>true</bool>
-             </property>
-             <property name="minimum">
-              <number>0</number>
-             </property>
-             <property name="maximum">
-              <number>255</number>
-             </property>
-             <property name="value">
-              <number>1</number>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="label_9">
-             <property name="text">
-              <string>Values:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="label_5">
-             <property name="text">
-              <string>Number of values:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0">
-            <spacer name="verticalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="4" column="1" rowspan="2">
-            <widget class="QListWidget" name="readValue"/>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_3">
-             <property name="text">
-              <string>Table:</string>
-             </property>
-            </widget>
-           </item>
           </layout>
          </item>
         </layout>
@@ -485,7 +478,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>517</width>
+     <width>514</width>
      <height>21</height>
     </rect>
    </property>
@@ -545,6 +538,22 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>connectType</tabstop>
+  <tabstop>portEdit</tabstop>
+  <tabstop>serverEdit</tabstop>
+  <tabstop>connectButton</tabstop>
+  <tabstop>writeAddress</tabstop>
+  <tabstop>writeTable</tabstop>
+  <tabstop>writeSize</tabstop>
+  <tabstop>writeValueTable</tabstop>
+  <tabstop>writeButton</tabstop>
+  <tabstop>readAddress</tabstop>
+  <tabstop>readTable</tabstop>
+  <tabstop>readSize</tabstop>
+  <tabstop>readValue</tabstop>
+  <tabstop>readButton</tabstop>
+ </tabstops>
  <resources>
   <include location="master.qrc"/>
  </resources>

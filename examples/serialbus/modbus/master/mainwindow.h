@@ -80,6 +80,7 @@ private slots:
     void writeReady();
 
     void on_connectType_currentIndexChanged(int);
+    void on_writeTable_currentIndexChanged(int);
 
 private:
     Ui::MainWindow *ui;

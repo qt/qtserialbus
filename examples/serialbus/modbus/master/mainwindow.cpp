@@ -47,6 +47,7 @@
 #include <QtSerialBus/qmodbusrtuserialmaster.h>
 #include <QtCore/qbytearray.h>
 #include <QtCore/qurl.h>
+#include <QtGui/qstandarditemmodel.h>
 #include <QtWidgets/qstatusbar.h>
 
 enum ModbusConnection {
@@ -67,10 +68,14 @@ MainWindow::MainWindow(QWidget *parent)
     initActions();
 
     writeModel = new WriteRegisterModel(this);
+    writeModel->setStartAddress(ui->writeAddress->value());
+    writeModel->setNumberOfValues(ui->writeSize->currentText());
+
     ui->writeValueTable->setModel(writeModel);
+    ui->writeValueTable->hideColumn(2);
     ui->writeValueTable->resizeColumnToContents(0);
-    ui->writeValueTable->horizontalHeader()->setStretchLastSection(true);
-    ui->writeValueTable->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    connect(writeModel, &WriteRegisterModel::updateViewport, ui->writeValueTable->viewport(),
+        static_cast<void (QWidget::*)()>(&QWidget::update));
 
     ui->readTable->addItem(tr("Coils"), QModbusDataUnit::Coils);
     ui->readTable->addItem(tr("Discrete Inputs"), QModbusDataUnit::DiscreteInputs);
@@ -79,6 +84,31 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->connectType->setCurrentIndex(0);
     on_connectType_currentIndexChanged(0);
+
+    QStandardItemModel *model = new QStandardItemModel(10, 1, this);
+    for (int i = 0; i < 10; ++i)
+        model->setItem(i, new QStandardItem(QStringLiteral("%1").arg(i + 1)));
+    ui->writeSize->setModel(model);
+    ui->writeSize->setCurrentText("10");
+    connect(ui->writeSize,&QComboBox::currentTextChanged, writeModel,
+        &WriteRegisterModel::setNumberOfValues);
+
+    auto valueChanged = static_cast<void (QSpinBox::*)(int)> (&QSpinBox::valueChanged);
+    connect(ui->writeAddress, valueChanged, writeModel, &WriteRegisterModel::setStartAddress);
+    connect(ui->writeAddress, valueChanged, this, [this, model](int i) {
+        int lastPossibleIndex = 0;
+        const int currentIndex = ui->writeSize->currentIndex();
+        for (int ii = 0; ii < 10; ++ii) {
+            if (ii < (10 - i)) {
+                lastPossibleIndex = ii;
+                model->item(ii)->setEnabled(true);
+            } else {
+                model->item(ii)->setEnabled(false);
+            }
+        }
+        if (currentIndex > lastPossibleIndex)
+            ui->writeSize->setCurrentIndex(lastPossibleIndex);
+    });
 }
 
 MainWindow::~MainWindow()
@@ -212,7 +242,7 @@ void MainWindow::on_readButton_clicked()
     statusBar()->clearMessage();
 
     QModbusReply *reply = modbusDevice->sendReadRequest(dataRequest,
-                                                        ui->readServer->text().toInt());
+                                                        ui->serverEdit->text().toInt());
     // broadcast replies return immediately
     if (reply && reply->isFinished()) {
         delete reply;
@@ -268,8 +298,7 @@ void MainWindow::on_writeButton_clicked()
 
     Q_ASSERT(startAddress >= 0 && startAddress < 10);
     QModbusDataUnit writeUnit(table, startAddress, numberOfEntries);
-    for (int i = startAddress; i < (startAddress + numberOfEntries); i++)
-    {
+    for (int i = startAddress; i < (startAddress + numberOfEntries); i++) {
         if (table == QModbusDataUnit::Coils)
             writeUnit.setValue(i - startAddress, writeModel->m_coils[i]);
         else
@@ -279,7 +308,7 @@ void MainWindow::on_writeButton_clicked()
     statusBar()->clearMessage();
 
     // TODO test for R/W MultipleRegisters is missing
-    QModbusReply *reply = modbusDevice->sendWriteRequest(writeUnit, ui->writeServer->text().toInt());
+    QModbusReply *reply = modbusDevice->sendWriteRequest(writeUnit, ui->serverEdit->text().toInt());
 
     // broadcast replies return immediately
     if (reply && reply->isFinished()) {
@@ -310,4 +339,10 @@ void MainWindow::writeReady()
     }
 
     reply->deleteLater();
+}
+
+void MainWindow::on_writeTable_currentIndexChanged(int index)
+{
+    ui->writeValueTable->setColumnHidden(1, index != 0);
+    ui->writeValueTable->setColumnHidden(2, index != 1);
 }

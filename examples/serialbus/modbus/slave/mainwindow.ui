@@ -772,6 +772,52 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>connectType</tabstop>
+  <tabstop>portEdit</tabstop>
+  <tabstop>serverEdit</tabstop>
+  <tabstop>connectButton</tabstop>
+  <tabstop>coils_0</tabstop>
+  <tabstop>disc_0</tabstop>
+  <tabstop>inReg_0</tabstop>
+  <tabstop>holdReg_0</tabstop>
+  <tabstop>coils_1</tabstop>
+  <tabstop>disc_1</tabstop>
+  <tabstop>inReg_1</tabstop>
+  <tabstop>holdReg_1</tabstop>
+  <tabstop>coils_2</tabstop>
+  <tabstop>disc_2</tabstop>
+  <tabstop>inReg_2</tabstop>
+  <tabstop>holdReg_2</tabstop>
+  <tabstop>coils_3</tabstop>
+  <tabstop>disc_3</tabstop>
+  <tabstop>inReg_3</tabstop>
+  <tabstop>holdReg_3</tabstop>
+  <tabstop>coils_4</tabstop>
+  <tabstop>disc_4</tabstop>
+  <tabstop>inReg_4</tabstop>
+  <tabstop>holdReg_4</tabstop>
+  <tabstop>coils_5</tabstop>
+  <tabstop>disc_5</tabstop>
+  <tabstop>inReg_5</tabstop>
+  <tabstop>holdReg_5</tabstop>
+  <tabstop>coils_6</tabstop>
+  <tabstop>disc_6</tabstop>
+  <tabstop>inReg_6</tabstop>
+  <tabstop>holdReg_6</tabstop>
+  <tabstop>coils_7</tabstop>
+  <tabstop>disc_7</tabstop>
+  <tabstop>inReg_7</tabstop>
+  <tabstop>holdReg_7</tabstop>
+  <tabstop>coils_8</tabstop>
+  <tabstop>disc_8</tabstop>
+  <tabstop>inReg_8</tabstop>
+  <tabstop>holdReg_8</tabstop>
+  <tabstop>coils_9</tabstop>
+  <tabstop>disc_9</tabstop>
+  <tabstop>inReg_9</tabstop>
+  <tabstop>holdReg_9</tabstop>
+ </tabstops>
  <resources>
   <include location="slave.qrc"/>
  </resources>
