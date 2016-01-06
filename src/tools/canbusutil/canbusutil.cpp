@@ -148,9 +148,10 @@ bool CanBusUtil::parseDataField(qint32& id, QString& payload)
     return true;
 }
 
-bool CanBusUtil::parsePayloadField(QString payload, bool& rtrFrame, QByteArray& bytes)
+bool CanBusUtil::parsePayloadField(QString payload, bool& rtrFrame,
+                                   bool& fdFrame, QByteArray& bytes)
 {
-    bool fdFrame = false;
+    fdFrame = false;
 
     if (payload[0].toUpper() == 'R') {
         rtrFrame = true;
@@ -232,6 +233,7 @@ bool CanBusUtil::sendData()
     qint32 id;
     QString payload;
     bool rtrFrame;
+    bool fdFrame;
     QByteArray bytes;
     QCanBusFrame frame;
 
@@ -239,7 +241,7 @@ bool CanBusUtil::sendData()
         return false;
     }
 
-    if (parsePayloadField(payload, rtrFrame, bytes) == false) {
+    if (parsePayloadField(payload, rtrFrame, fdFrame, bytes) == false) {
         return false;
     }
 
@@ -258,5 +260,9 @@ bool CanBusUtil::sendData()
     }
 
     frame.setFrameId(id);
+
+    if (fdFrame)
+        canDevice->setConfigurationParameter(QCanBusDevice::CanFdKey, true);
+
     return canDevice->writeFrame(frame);
 }
