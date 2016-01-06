@@ -375,9 +375,6 @@ void QModbusClientPrivate::processQueueElement(const QModbusResponse &pdu,
     element.reply->setFinished(true);
 }
 
-/*
-    TODO: implement
-*/
 bool QModbusClientPrivate::processResponse(const QModbusResponse &response, QModbusDataUnit *data)
 {
     switch (response.functionCode()) {
