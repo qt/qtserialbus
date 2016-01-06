@@ -80,8 +80,9 @@ void CanBusUtil::printUsage()
            << "<plugin>       plugin name to use. See --list-plugins." << endl
            << "<device>       device to use" << endl
            << "[data]         Data to send if -l is not specified. Format: " << endl
-           << "                   <id>#{R|payload}   (CAN 2.0 frames)," << endl
-           << "                   <id>##{payload}    (CAN FD frames)," << endl
+           << "                   <id>#{payload}   (CAN 2.0 data frames)," << endl
+           << "                   <id>#Rxx         (CAN 2.0 RTR frames with xx bytes data length)," << endl
+           << "                   <id>##{payload}  (CAN FD data frames)," << endl
            << "               where {payload} has 0..8 (0..64 CAN FD) ASCII hex-value pairs," << endl
            << "               e.g. 1#1a2b3c" << endl;
 }
@@ -97,8 +98,9 @@ void CanBusUtil::printPlugins()
 void CanBusUtil::printDataUsage()
 {
     output << "Invalid [data] field, use format: " << endl
-           << "    <id>#{R|payload}   (CAN 2.0 frames)," << endl
-           << "    <id>##{payload}    (CAN FD frames)," << endl
+           << "    <id>#{payload}   (CAN 2.0 data frames)," << endl
+           << "    <id>#Rxx         (CAN 2.0 RTR frames with xx bytes data length)," << endl
+           << "    <id>##{payload}  (CAN FD data frames)," << endl
            << "{payload} has 0..8 (0..64 CAN FD) ASCII hex-value pairs" << endl;
 }
 
@@ -152,16 +154,35 @@ bool CanBusUtil::parsePayloadField(QString payload, bool& rtrFrame,
                                    bool& fdFrame, QByteArray& bytes)
 {
     fdFrame = false;
+    rtrFrame = false;
 
     if (payload[0].toUpper() == 'R') {
         rtrFrame = true;
-        return true;
+        bool validPayloadLength = false;
+        if (payload.size() > 1) {
+            payload = payload.mid(1);
+            int rtrFrameLength = payload.toInt(&validPayloadLength);
+
+            if (validPayloadLength && rtrFrameLength > 0 && rtrFrameLength <= 64) {
+                bytes = QByteArray(rtrFrameLength, 0);
+                if (rtrFrameLength > 8)
+                    fdFrame = true;
+            } else if (validPayloadLength) {
+                output << "The length must be larger than 0 and not exceed 64." << endl;
+                validPayloadLength = false;
+            }
+        }
+
+        if (!validPayloadLength) {
+            output << "RTR data frame length not specified/valid." << endl;
+            printDataUsage();
+        }
+
+        return validPayloadLength;
     } else if (payload[0] == '#') {
         fdFrame = true;
-        payload = payload.right(payload.size() - 1);
+        payload = payload.mid(1);
     }
-
-    rtrFrame = false;
 
     if (payload.size() % 2 == 0) {
         for (int i=0; i < payload.size(); i+=2) {
@@ -237,13 +258,11 @@ bool CanBusUtil::sendData()
     QByteArray bytes;
     QCanBusFrame frame;
 
-    if (parseDataField(id, payload) == false) {
+    if (parseDataField(id, payload) == false)
         return false;
-    }
 
-    if (parsePayloadField(payload, rtrFrame, fdFrame, bytes) == false) {
+    if (parsePayloadField(payload, rtrFrame, fdFrame, bytes) == false)
         return false;
-    }
 
     if (id > 0x7FF)  { //11 bits
         if (id > 0x1FFFFFFF) { // 29 bits
@@ -253,12 +272,10 @@ bool CanBusUtil::sendData()
         frame.setExtendedFrameFormat(true);
     }
 
-    if (rtrFrame) {
+    if (rtrFrame)
         frame.setFrameType(QCanBusFrame::RemoteRequestFrame);
-    } else {
-        frame.setPayload(bytes);
-    }
 
+    frame.setPayload(bytes);
     frame.setFrameId(id);
 
     if (fdFrame)
