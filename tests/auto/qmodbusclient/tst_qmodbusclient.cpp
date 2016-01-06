@@ -86,6 +86,18 @@ private slots:
         QCOMPARE(spy.isEmpty(), true); // and the signal should not fire
     }
 
+    void testNumberOfRetries()
+    {
+        TestClient client;
+        QCOMPARE(client.numberOfRetries(), 3);
+
+        client.setNumberOfRetries(-1);  // ignore everything below 0
+        QCOMPARE(client.numberOfRetries(), 3);
+
+        client.setNumberOfRetries(1);
+        QCOMPARE(client.numberOfRetries(), 1);
+    }
+
     void testProcessReadWriteSingleMultipleCoilsResponse()
     {
         TestClient client;

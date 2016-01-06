@@ -204,13 +204,14 @@ int QModbusClient::numberOfRetries() const
     Sets the \a number of retries a client will perform before a
     request fails. The default value is set to \c 3.
 
-    \note Changing this property will only effect new request, not
-    already scheduled ones.
+    \note The new value must be greater than or equal to \c 0. Changing this
+    property will only effect new requests, not already scheduled ones.
 */
 void QModbusClient::setNumberOfRetries(int number)
 {
     Q_D(QModbusClient);
-    d->m_numberOfRetries = number;
+    if (number >= 0)
+        d->m_numberOfRetries = number;
 }
 
 /*!
