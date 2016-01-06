@@ -240,7 +240,7 @@ void QModbusReply::setError(QModbusReply::ReplyError error, const QString &error
 
     \sa error(), errorOccurred()
 */
-QString QModbusReply::errorText() const
+QString QModbusReply::errorString() const
 {
     Q_D(const QModbusReply);
     return d->m_errorText;

@@ -57,7 +57,7 @@ void tst_QModbusReply::tst_ctor()
     QCOMPARE(r.isFinished(), false);
     QCOMPARE(r.result().isValid(), false);
     QCOMPARE(r.rawResult().isValid(), false);
-    QCOMPARE(r.errorText(), QString());
+    QCOMPARE(r.errorString(), QString());
     QCOMPARE(r.error(), QModbusReply::NoError);
 
     QModbusReply r2(QModbusReply::Raw, 2, this);
@@ -66,7 +66,7 @@ void tst_QModbusReply::tst_ctor()
     QCOMPARE(r2.isFinished(), false);
     QCOMPARE(r2.result().isValid(), false);
     QCOMPARE(r2.rawResult().isValid(), false);
-    QCOMPARE(r2.errorText(), QString());
+    QCOMPARE(r2.errorString(), QString());
     QCOMPARE(r2.error(), QModbusReply::NoError);
 }
 
@@ -81,7 +81,7 @@ void tst_QModbusReply::tst_setFinished()
     QCOMPARE(replyTest.isFinished(), false);
     QCOMPARE(replyTest.result().isValid(), false);
     QCOMPARE(replyTest.rawResult().isValid(), false);
-    QCOMPARE(replyTest.errorText(), QString());
+    QCOMPARE(replyTest.errorString(), QString());
     QCOMPARE(replyTest.error(), QModbusReply::NoError);
 
     QVERIFY(finishedSpy.isEmpty());
@@ -94,7 +94,7 @@ void tst_QModbusReply::tst_setFinished()
     QCOMPARE(replyTest.isFinished(), true);
     QCOMPARE(replyTest.result().isValid(), false);
     QCOMPARE(replyTest.rawResult().isValid(), false);
-    QCOMPARE(replyTest.errorText(), QString());
+    QCOMPARE(replyTest.errorString(), QString());
     QCOMPARE(replyTest.error(), QModbusReply::NoError);
 
     replyTest.setFinished(false);
@@ -104,14 +104,14 @@ void tst_QModbusReply::tst_setFinished()
     QCOMPARE(replyTest.isFinished(), false);
     QCOMPARE(replyTest.result().isValid(), false);
     QCOMPARE(replyTest.rawResult().isValid(), false);
-    QCOMPARE(replyTest.errorText(), QString());
+    QCOMPARE(replyTest.errorString(), QString());
     QCOMPARE(replyTest.error(), QModbusReply::NoError);
 }
 
 void tst_QModbusReply::tst_setError_data()
 {
     QTest::addColumn<QModbusReply::ReplyError>("error");
-    QTest::addColumn<QString>("errorText");
+    QTest::addColumn<QString>("errorString");
 
     QTest::newRow("ProtocolError") << QModbusReply::ProtocolError << QString("ProtocolError");
     QTest::newRow("NoError") << QModbusReply::NoError << QString("NoError");
@@ -123,7 +123,7 @@ void tst_QModbusReply::tst_setError_data()
 void tst_QModbusReply::tst_setError()
 {
     QFETCH(QModbusReply::ReplyError, error);
-    QFETCH(QString, errorText);
+    QFETCH(QString, errorString);
 
     QModbusReply replyTest(QModbusReply::Common, 1);
     QCOMPARE(replyTest.serverAddress(), 1);
@@ -133,15 +133,15 @@ void tst_QModbusReply::tst_setError()
     QVERIFY(finishedSpy.isEmpty());
     QVERIFY(errorSpy.isEmpty());
 
-    replyTest.setError(error, errorText);
+    replyTest.setError(error, errorString);
     QCOMPARE(finishedSpy.count(), 1);
     QCOMPARE(errorSpy.count(), 1);
     QCOMPARE(replyTest.rawResult().isValid(), false);
     QCOMPARE(replyTest.error(), error);
-    QCOMPARE(replyTest.errorText(), errorText);
+    QCOMPARE(replyTest.errorString(), errorString);
     QCOMPARE(errorSpy.at(0).at(0).value<QModbusReply::ReplyError>(), error);
 
-    replyTest.setError(error, errorText);
+    replyTest.setError(error, errorString);
     replyTest.setFinished(true);
     QCOMPARE(finishedSpy.count(), 3); //setError() implies call to setFinished()
     QCOMPARE(errorSpy.count(), 2);

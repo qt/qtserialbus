@@ -78,7 +78,7 @@ public:
     QModbusResponse rawResult() const;
 
     ReplyError error() const;
-    QString errorText() const;
+    QString errorString() const;
 
     void setResult(const QModbusDataUnit &unit);
     void setRawResult(const QModbusResponse &unit);
