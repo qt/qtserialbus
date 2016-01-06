@@ -258,6 +258,5 @@ bool CanBusUtil::sendData()
     }
 
     frame.setFrameId(id);
-    canDevice->writeFrame(frame);
-    return true;
+    return canDevice->writeFrame(frame);
 }
