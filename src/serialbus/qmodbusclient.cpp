@@ -396,6 +396,7 @@ bool QModbusClientPrivate::processResponse(const QModbusResponse &response, QMod
     case QModbusRequest::Diagnostics:
     case QModbusRequest::GetCommEventCounter:
     case QModbusRequest::GetCommEventLog:
+        return false;   // Return early, it's not a private response.
     case QModbusRequest::WriteMultipleCoils:
         return processWriteMultipleCoilsResponse(response, data);
     case QModbusRequest::WriteMultipleRegisters:
@@ -404,10 +405,12 @@ bool QModbusClientPrivate::processResponse(const QModbusResponse &response, QMod
     case QModbusRequest::ReadFileRecord:
     case QModbusRequest::WriteFileRecord:
     case QModbusRequest::MaskWriteRegister:
+        return false;   // Return early, it's not a private response.
     case QModbusRequest::ReadWriteMultipleRegisters:
         return processReadWriteMultipleRegistersResponse(response, data);
     case QModbusRequest::ReadFifoQueue:
     case QModbusRequest::EncapsulatedInterfaceTransport:
+        return false;   // Return early, it's not a private response.
     default:
         break;
     }
