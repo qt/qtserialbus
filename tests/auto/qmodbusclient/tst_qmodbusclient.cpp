@@ -386,7 +386,7 @@ private slots:
         QTEST(request.isValid(), "isValid");
     }
 
-    void testPrivatecreateRWRequest_data()
+    void testPrivateCreateRWRequest_data()
     {
         QTest::addColumn<QModbusDataUnit::RegisterType>("rc");
         QTest::addColumn<int>("address");
@@ -409,7 +409,7 @@ private slots:
             << QByteArray::fromHex("0001000200010002046b056b05") << true;
     }
 
-    void testPrivatecreateRWRequest()
+    void testPrivateCreateRWRequest()
     {
         QFETCH(QModbusDataUnit::RegisterType, rc);
         QFETCH(int, address);
