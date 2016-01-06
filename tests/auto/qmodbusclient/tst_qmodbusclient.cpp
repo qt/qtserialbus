@@ -75,18 +75,15 @@ private slots:
         TestClient client;
         QCOMPARE(client.timeout(), 1000); //default value test
 
-        client.setTimeout(300);
-        QCOMPARE(client.timeout(), 300);
-
+        QSignalSpy spy(&client, SIGNAL(timeoutChanged(int)));
         client.setTimeout(50);
         QCOMPARE(client.timeout(), 50);
+        QCOMPARE(spy.isEmpty(), false); // we expect the signal
 
+        spy.clear();
         client.setTimeout(49); // everything below 50 fails
         QVERIFY(client.timeout() >= 50);
-
-        // test timer firing off
-        client.setTimeout(100);
-        QCOMPARE(client.timeout(), 100);
+        QCOMPARE(spy.isEmpty(), true); // and the signal should not fire
     }
 
     void testProcessReadWriteSingleMultipleCoilsResponse()
