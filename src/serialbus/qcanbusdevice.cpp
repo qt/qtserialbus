@@ -98,11 +98,13 @@ QT_BEGIN_NAMESPACE
     \value ReceiveOwnKey    This key defines whether this CAN device can send messages.
                             The expected value for this key is \c bool.
     \value BitRateKey       This key defines the bitrate in bits per second.
+    \value CanFdKey         This key defines whether sending and receiving of CANFD frames
+                            should be enabled. The expected value for this key is \c bool.
     \value UserKey          This key defines the range where custom keys start. It's most
                             common purpose is to permit platform-specific configuration
                             options.
-    \value CanFdKey         This key defines whether sending and receiving of CANFD frames
-                            should be enabled. The expected value for this key is \c bool.
+
+    \sa configurationParameter()
 */
 
 /*!
@@ -468,6 +470,21 @@ QCanBusFrame QCanBusDevice::readFrame()
 
     Writes \a frame to the CAN bus and returns \c true on success;
     otherwise \c false.
+
+    On some platforms, the frame may be put into a queue and the return
+    value may only indicate a successful insertion into the queue.
+    The actual frame will be send later on. Therefore the \l framesWritten()
+    signal is the final confirmation that the frame has been handed off to
+    the transport layer. If an error occurs the \l errorOccurred() is emitted.
+
+    As per CAN bus specification, frames of type
+    \l {QCanBusFrame::RemoteRequestFrame} {remote transfer request (RTR)}
+    do not have a payload but require a size larger than zero. This size indicates
+    the expected response payload length from the remote party. Therefore when sending a RTR frame using
+    this function it may still be required to set an arbitrary payload on \a frame. The length of
+    the arbitrary payload is what is set as size expectation for the RTR frame.
+
+    \sa QCanBusFrame::setPayload()
 */
 
 /*!
