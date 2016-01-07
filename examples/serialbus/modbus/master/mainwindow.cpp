@@ -72,14 +72,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->writeValueTable->setModel(writeModel);
     ui->writeValueTable->hideColumn(2);
-    ui->writeValueTable->resizeColumnToContents(0);
     connect(writeModel, &WriteRegisterModel::updateViewport, ui->writeValueTable->viewport(),
         static_cast<void (QWidget::*)()>(&QWidget::update));
 
-    ui->readTable->addItem(tr("Coils"), QModbusDataUnit::Coils);
-    ui->readTable->addItem(tr("Discrete Inputs"), QModbusDataUnit::DiscreteInputs);
-    ui->readTable->addItem(tr("Input Registers"), QModbusDataUnit::InputRegisters);
-    ui->readTable->addItem(tr("Holding Registers"), QModbusDataUnit::HoldingRegisters);
+    ui->writeTable->addItem(tr("Coils"), QModbusDataUnit::Coils);
+    ui->writeTable->addItem(tr("Discrete Inputs"), QModbusDataUnit::DiscreteInputs);
+    ui->writeTable->addItem(tr("Input Registers"), QModbusDataUnit::InputRegisters);
+    ui->writeTable->addItem(tr("Holding Registers"), QModbusDataUnit::HoldingRegisters);
 
     ui->connectType->setCurrentIndex(0);
     on_connectType_currentIndexChanged(0);
@@ -222,36 +221,17 @@ void MainWindow::on_readButton_clicked()
 {
     if (!modbusDevice)
         return;
-
-    const QModbusDataUnit::RegisterType registerType =
-        static_cast<QModbusDataUnit::RegisterType> (ui->readTable->currentData().toInt());
-    QModbusDataUnit dataRequest(registerType);
-
-    int numberOfEntries = ui->readSize->currentText().toInt();
-    int startAddress = ui->readAddress->text().toInt();
-
-    // do not go beyond 10 entries
-    numberOfEntries = qMin(numberOfEntries, 10 - startAddress);
-    Q_ASSERT(startAddress >= 0 && startAddress < 10);
-
-    dataRequest.setValueCount(numberOfEntries);
-    dataRequest.setStartAddress(startAddress);
-
     ui->readValue->clear();
     statusBar()->clearMessage();
 
-    QModbusReply *reply = modbusDevice->sendReadRequest(dataRequest,
-                                                        ui->serverEdit->text().toInt());
-    // broadcast replies return immediately
-    if (reply && reply->isFinished()) {
-        delete reply;
-        return;
-    }
-
-    if (reply)
-        connect(reply, &QModbusReply::finished, this, &MainWindow::readReady);
-    else
+    if (auto *reply = modbusDevice->sendReadRequest(readRequest(), ui->serverEdit->value())) {
+        if (!reply->isFinished())
+            connect(reply, &QModbusReply::finished, this, &MainWindow::readReady);
+        else
+            delete reply; // broadcast replies return immediately
+    } else {
         statusBar()->showMessage(tr("Read error: ") + modbusDevice->errorString(), 5000);
+    }
 }
 
 void MainWindow::readReady()
@@ -285,63 +265,102 @@ void MainWindow::on_writeButton_clicked()
 {
     if (!modbusDevice)
         return;
-
-    QModbusDataUnit::RegisterType table = QModbusDataUnit::HoldingRegisters;
-    if (ui->writeTable->currentText() == tr("Coils"))
-        table = QModbusDataUnit::Coils;
-
-    int numberOfEntries = ui->writeSize->currentText().toInt();
-    int startAddress = ui->writeAddress->text().toInt();
-    // do not go beyond 10 entries
-    numberOfEntries = qMin(numberOfEntries, 10 - startAddress);
-
-    Q_ASSERT(startAddress >= 0 && startAddress < 10);
-    QModbusDataUnit writeUnit(table, startAddress, numberOfEntries);
-    for (int i = startAddress; i < (startAddress + numberOfEntries); i++) {
-        if (table == QModbusDataUnit::Coils)
-            writeUnit.setValue(i - startAddress, writeModel->m_coils[i]);
-        else
-            writeUnit.setValue(i - startAddress, writeModel->m_holdingRegisters[i]);
-    }
-
     statusBar()->clearMessage();
 
-    // TODO test for R/W MultipleRegisters is missing
-    QModbusReply *reply = modbusDevice->sendWriteRequest(writeUnit, ui->serverEdit->text().toInt());
-
-    // broadcast replies return immediately
-    if (reply && reply->isFinished()) {
-        delete reply;
-        return;
+    QModbusDataUnit writeUnit = writeRequest();
+    QModbusDataUnit::RegisterType table = writeUnit.registerType();
+    for (uint i = 0; i < writeUnit.valueCount(); i++) {
+        if (table == QModbusDataUnit::Coils)
+            writeUnit.setValue(i, writeModel->m_coils[i + writeUnit.startAddress()]);
+        else
+            writeUnit.setValue(i, writeModel->m_holdingRegisters[i + writeUnit.startAddress()]);
     }
 
-    if (reply)
-        connect(reply, &QModbusReply::finished, this, &MainWindow::writeReady);
-    else
-       statusBar()->showMessage(tr("Write error: ") + modbusDevice->errorString(), 5000);
+    if (auto *reply = modbusDevice->sendWriteRequest(writeUnit, ui->serverEdit->value())) {
+        if (!reply->isFinished()) {
+            connect(reply, &QModbusReply::finished, this, [this, reply]() {
+                if (reply->error() == QModbusDevice::ProtocolError) {
+                    statusBar()->showMessage(tr("Write response error: %1 (Mobus exception: 0x%2)")
+                        .arg(reply->errorString()).arg(reply->rawResult().exceptionCode(), -1, 16),
+                        5000);
+                } else if (reply->error() != QModbusDevice::NoError) {
+                    statusBar()->showMessage(tr("Write response error: %1 (code: 0x%2)").
+                        arg(reply->errorString()).arg(reply->error(), -1, 16), 5000);
+                }
+                reply->deleteLater();
+            });
+        } else {
+            // broadcast replies return immediately
+            reply->deleteLater();
+        }
+    } else {
+        statusBar()->showMessage(tr("Write error: ") + modbusDevice->errorString(), 5000);
+    }
 }
 
-void MainWindow::writeReady()
+void MainWindow::on_readWriteButton_clicked()
 {
-    QModbusReply *reply = qobject_cast<QModbusReply *>(sender());
-    if (!reply)
+    if (!modbusDevice)
         return;
+    ui->readValue->clear();
+    statusBar()->clearMessage();
 
-    if (reply->error() == QModbusDevice::ProtocolError) {
-        statusBar()->showMessage(tr("Write response error: %1 (Mobus exception: 0x%2)").
-                                    arg(reply->errorString()).
-                                    arg(reply->rawResult().exceptionCode(), -1, 16), 5000);
-    } else if (reply->error() != QModbusDevice::NoError) {
-        statusBar()->showMessage(tr("Write response error: %1 (code: 0x%2)").
-                                    arg(reply->errorString()).
-                                    arg(reply->error(), -1, 16), 5000);
+    QModbusDataUnit writeUnit = writeRequest();
+    QModbusDataUnit::RegisterType table = writeUnit.registerType();
+    for (uint i = 0; i < writeUnit.valueCount(); i++) {
+        if (table == QModbusDataUnit::Coils)
+            writeUnit.setValue(i, writeModel->m_coils[i + writeUnit.startAddress()]);
+        else
+            writeUnit.setValue(i, writeModel->m_holdingRegisters[i + writeUnit.startAddress()]);
     }
 
-    reply->deleteLater();
+    if (auto *reply = modbusDevice->sendReadWriteRequest(readRequest(), writeUnit,
+        ui->serverEdit->value())) {
+        if (!reply->isFinished())
+            connect(reply, &QModbusReply::finished, this, &MainWindow::readReady);
+        else
+            delete reply; // broadcast replies return immediately
+    } else {
+        statusBar()->showMessage(tr("Read error: ") + modbusDevice->errorString(), 5000);
+    }
 }
 
 void MainWindow::on_writeTable_currentIndexChanged(int index)
 {
-    ui->writeValueTable->setColumnHidden(1, index != 0);
-    ui->writeValueTable->setColumnHidden(2, index != 1);
+    const bool coilsOrHolding = index == 0 || index == 3;
+    if (coilsOrHolding) {
+        ui->writeValueTable->setColumnHidden(1, index != 0);
+        ui->writeValueTable->setColumnHidden(2, index != 3);
+        ui->writeValueTable->resizeColumnToContents(0);
+    }
+
+    ui->readWriteButton->setEnabled(index == 3);
+    ui->writeButton->setEnabled(coilsOrHolding);
+    ui->writeGroupBox->setEnabled(coilsOrHolding);
+}
+
+QModbusDataUnit MainWindow::readRequest() const
+{
+    const QModbusDataUnit::RegisterType table =
+        static_cast<QModbusDataUnit::RegisterType> (ui->writeTable->currentData().toInt());
+
+    int startAddress = ui->readAddress->value();
+    Q_ASSERT(startAddress >= 0 && startAddress < 10);
+
+    // do not go beyond 10 entries
+    int numberOfEntries = qMin(ui->readSize->currentText().toInt(), 10 - startAddress);
+    return QModbusDataUnit(table, startAddress, numberOfEntries);
+}
+
+QModbusDataUnit MainWindow::writeRequest() const
+{
+    const QModbusDataUnit::RegisterType table =
+        static_cast<QModbusDataUnit::RegisterType> (ui->writeTable->currentData().toInt());
+
+    int startAddress = ui->writeAddress->value();
+    Q_ASSERT(startAddress >= 0 && startAddress < 10);
+
+    // do not go beyond 10 entries
+    int numberOfEntries = qMin(ui->writeSize->currentText().toInt(), 10 - startAddress);
+    return QModbusDataUnit(table, startAddress, numberOfEntries);
 }
