@@ -71,17 +71,27 @@ public:
     QModbusRequest createRWRequest(const QModbusDataUnit &read, const QModbusDataUnit &write) const;
 
     bool processResponse(const QModbusResponse &response, QModbusDataUnit *data);
+
     bool processReadCoilsResponse(const QModbusResponse &response, QModbusDataUnit *data);
     bool processReadDiscreteInputsResponse(const QModbusResponse &response, QModbusDataUnit *data);
-    bool processReadHoldingRegistersResponse(const QModbusResponse &response,
-                                             QModbusDataUnit *data);
+    bool collateBits(const QModbusPdu &pdu, QModbusDataUnit::RegisterType type, QModbusDataUnit *data);
+
+    bool processReadHoldingRegistersResponse(const QModbusResponse &response, QModbusDataUnit *data);
     bool processReadInputRegistersResponse(const QModbusResponse &response, QModbusDataUnit *data);
+    bool collateBytes(const QModbusPdu &pdu, QModbusDataUnit::RegisterType type, QModbusDataUnit *data);
+
     bool processWriteSingleCoilResponse(const QModbusResponse &response, QModbusDataUnit *data);
     bool processWriteSingleRegisterResponse(const QModbusResponse &response,
                                             QModbusDataUnit *data);
+    bool collateSingleValue(const QModbusPdu &pdu, QModbusDataUnit::RegisterType type,
+                         QModbusDataUnit *data);
+
     bool processWriteMultipleCoilsResponse(const QModbusResponse &response, QModbusDataUnit *data);
     bool processWriteMultipleRegistersResponse(const QModbusResponse &response,
                                                QModbusDataUnit *data);
+    bool collateMultipleValues(const QModbusPdu &pdu, QModbusDataUnit::RegisterType type,
+                          QModbusDataUnit *data);
+
     bool processReadWriteMultipleRegistersResponse(const QModbusResponse &response,
                                                   QModbusDataUnit *data);
 
