@@ -105,7 +105,7 @@ public:
                 qDebug() << "Resend request with tId:" << hex << m_tId;
             } else {
                 qDebug() << "Timeout of request with tId:" << hex << m_tId;
-                elem.reply->setError(QModbusReply::TimeoutError,
+                elem.reply->setError(QModbusDevice::TimeoutError,
                     QModbusClient::tr("Request timeout."));
             }
         });

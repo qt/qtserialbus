@@ -261,7 +261,7 @@ void MainWindow::readReady()
     if (!reply)
         return;
 
-    if (reply->error() == QModbusReply::NoError) {
+    if (reply->error() == QModbusDevice::NoError) {
         const QModbusDataUnit unit = reply->result();
         for (uint i = 0; i < unit.valueCount(); i++) {
             const QString entry = tr("Address: %1, Value: %2").arg(unit.startAddress())
@@ -269,7 +269,7 @@ void MainWindow::readReady()
                                           unit.registerType() <= QModbusDataUnit::Coils ? 10 : 16));
             ui->readValue->addItem(entry);
         }
-    } else if (reply->error() == QModbusReply::ProtocolError) {
+    } else if (reply->error() == QModbusDevice::ProtocolError) {
         statusBar()->showMessage(tr("Read response error: %1 (Mobus exception: 0x%2)").
                                     arg(reply->errorString()).
                                     arg(reply->rawResult().exceptionCode(), -1, 16), 5000);
@@ -328,11 +328,11 @@ void MainWindow::writeReady()
     if (!reply)
         return;
 
-    if (reply->error() == QModbusReply::ProtocolError) {
+    if (reply->error() == QModbusDevice::ProtocolError) {
         statusBar()->showMessage(tr("Write response error: %1 (Mobus exception: 0x%2)").
                                     arg(reply->errorString()).
                                     arg(reply->rawResult().exceptionCode(), -1, 16), 5000);
-    } else if (reply->error() != QModbusReply::NoError) {
+    } else if (reply->error() != QModbusDevice::NoError) {
         statusBar()->showMessage(tr("Write response error: %1 (code: 0x%2)").
                                     arg(reply->errorString()).
                                     arg(reply->error(), -1, 16), 5000);

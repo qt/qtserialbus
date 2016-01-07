@@ -39,6 +39,7 @@
 
 #include <QtSerialBus/qserialbusglobal.h>
 #include <QtSerialBus/qmodbusdataunit.h>
+#include <QtSerialBus/qmodbusdevice.h>
 #include <QtSerialBus/qmodbuspdu.h>
 
 QT_BEGIN_NAMESPACE
@@ -57,16 +58,6 @@ public:
     };
     Q_ENUM(ReplyType)
 
-    enum ReplyError {
-        NoError =               0x00,
-        ProtocolError =         0x01,
-        TimeoutError =          0x02,
-        ReplyAbortedError =     0x03,
-        UnknownError =          0x04,
-        WriteError =            0x05
-    };
-    Q_ENUM(ReplyError)
-
     QModbusReply(ReplyType type, int serverAddress, QObject *parent = Q_NULLPTR);
 
     ReplyType type() const;
@@ -77,22 +68,20 @@ public:
     QModbusDataUnit result() const;
     QModbusResponse rawResult() const;
 
-    ReplyError error() const;
     QString errorString() const;
+    QModbusDevice::Error error() const;
 
     void setResult(const QModbusDataUnit &unit);
     void setRawResult(const QModbusResponse &unit);
 
     void setFinished(bool isFinished);
-    void setError(QModbusReply::ReplyError error, const QString &errorText);
+    void setError(QModbusDevice::Error error, const QString &errorText);
 
 Q_SIGNALS:
     void finished();
-    void errorOccurred(QModbusReply::ReplyError error);
+    void errorOccurred(QModbusDevice::Error error);
 };
-
 Q_DECLARE_TYPEINFO(QModbusReply::ReplyType, Q_PRIMITIVE_TYPE);
-Q_DECLARE_TYPEINFO(QModbusReply::ReplyError, Q_PRIMITIVE_TYPE);
 
 QT_END_NAMESPACE
 

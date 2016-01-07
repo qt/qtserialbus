@@ -132,8 +132,8 @@ QModbusReply *QModbusClient::sendReadWriteRequest(const QModbusDataUnit &read,
     Sends a raw Modbus \a request. A raw request can contain anything that
     fits inside the Modbus PDU data section and has a valid function code.
     The only check performed before sending is therefore the validity check,
-    see \l QModbusPdu::isValid. Returns a new valid \l QModbusReply object if
-    it did send the request, otherwise Q_NULLPTR. Modbus networks may have
+    see \l QModbusPdu::isValid. If no error occurred the function returns a
+    a new valid \l QModbusReply; Q_NULLPTR otherwise. Modbus networks may have
     multiple servers, each server has a unique \a serverAddress.
 
     \sa QModbusReply::rawResult()
@@ -255,8 +255,8 @@ QModbusReply *QModbusClientPrivate::sendRequest(const QModbusRequest &request, i
     }
 
     if (!request.isValid()) {
-        qCWarning(QT_MODBUS) << "(Client) Refuse to send invalid request."; // TODO: WriteError ???
-        q->setError(QModbusClient::tr("Invalid Modbus request."), QModbusDevice::WriteError);
+        qCWarning(QT_MODBUS) << "(Client) Refuse to send invalid request.";
+        q->setError(QModbusClient::tr("Invalid Modbus request."), QModbusDevice::ProtocolError);
         return Q_NULLPTR;
     }
 
@@ -354,7 +354,7 @@ void QModbusClientPrivate::processQueueElement(const QModbusResponse &pdu,
 {
     element.reply->setRawResult(pdu);
     if (pdu.isException()) {
-        element.reply->setError(QModbusReply::ProtocolError,
+        element.reply->setError(QModbusDevice::ProtocolError,
             QModbusClient::tr("Modbus Exception Response."));
         return;
     }
@@ -366,7 +366,7 @@ void QModbusClientPrivate::processQueueElement(const QModbusResponse &pdu,
 
     QModbusDataUnit unit = element.unit;
     if (!processResponse(pdu, &unit)) {
-        element.reply->setError(QModbusReply::UnknownError,
+        element.reply->setError(QModbusDevice::UnknownError,
             QModbusClient::tr("An invalid response has been received."));
         return;
     }

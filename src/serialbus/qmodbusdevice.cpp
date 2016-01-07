@@ -191,11 +191,15 @@ void QModbusDevice::setConnectionParameter(int parameter, const QVariant &value)
     \value NoError              No errors have occurred.
     \value ReadError            An error occurred during a read operation.
     \value WriteError           An error occurred during a write operation.
-    \value ConnectionError      An error occurred when attempting to open the backend.
-    \value ConfigurationError   An error occurred when attempting to set a configuration
-                                parameter.
+    \value ConnectionError      An error occurred when attempting to open the
+                                backend.
+    \value ConfigurationError   An error occurred when attempting to set a
+                                configuration parameter.
     \value TimeoutError         A timeout occurred during I/O. An I/O operation
-                                did not return within the given time frame.
+                                did not finish within a given time frame.
+    \value ProtocolError        A Modbus specific protocol error occurred.
+    \value ReplyAbortedError    The reply was aborted due to a disconnection of
+                                the device.
     \value UnknownError         An unknown error occurred.
 */
 

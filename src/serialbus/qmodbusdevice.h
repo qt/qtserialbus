@@ -51,13 +51,15 @@ class Q_SERIALBUS_EXPORT QModbusDevice : public QObject
     Q_DECLARE_PRIVATE(QModbusDevice)
 
 public:
-    enum Error { //TODO review -> some values are reported via QModbusReply (e.g. WriteError)
+    enum Error {
         NoError,
         ReadError,
         WriteError,
         ConnectionError,
         ConfigurationError,
         TimeoutError,
+        ProtocolError,
+        ReplyAbortedError,
         UnknownError
     };
     Q_ENUM(Error)
