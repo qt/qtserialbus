@@ -40,29 +40,38 @@
 
 #include <QtTest/QtTest>
 
-class TestClientPrivate : public QModbusClientPrivate
-{
-    // Keep. We use this to expose and test private functions.
-};
-
 class TestClient : public QModbusClient
 {
     Q_OBJECT
-    Q_DECLARE_PRIVATE(TestClient)
-    friend class tst_QModbusClient;
+    class TestClientPrivate : public QModbusClientPrivate
+    {
+        Q_DECLARE_PUBLIC(TestClient)
+
+    public:
+        bool isOpen() const Q_DECL_OVERRIDE { return m_open; }
+
+    private:
+        bool m_open = false;
+    };
 
 public:
+    TestClient()
+        : QModbusClient(*new TestClientPrivate)
+    {}
     bool open() Q_DECL_OVERRIDE {
+        d_func()->m_open = true;
         setState(QModbusDevice::ConnectedState);
         return true;
     }
     void close() Q_DECL_OVERRIDE {
+        d_func()->m_open = true;
         setState(QModbusDevice::UnconnectedState);
     }
     bool processResponse(const QModbusResponse &response, QModbusDataUnit *data)
     {
         return QModbusClient::processResponse(response, data);
     }
+    Q_DECLARE_PRIVATE(TestClient)
 };
 
 class tst_QModbusClient : public QObject
@@ -434,6 +443,40 @@ private slots:
         QTEST(request.functionCode(), "fc");
         QTEST(request.data(), "data");
         QTEST(request.isValid(), "isValid");
+    }
+
+    void testPrivateSendRequest()
+    {
+        TestClient client;
+        QModbusDataUnit unit;
+        QModbusReply *reply = nullptr;
+
+        QTest::ignoreMessage(QtWarningMsg, "(Client) Device is not connected");
+        QCOMPARE(client.d_func()->sendRequest(QModbusRequest(), 1, &unit), reply);
+        QCOMPARE(client.error(), QModbusDevice::ConnectionError);
+        QCOMPARE(client.errorString(), QString("Device not connected."));
+
+        QTest::ignoreMessage(QtWarningMsg, "(Client) Device is not connected");
+        QCOMPARE(client.d_func()->sendRequest(QModbusRequest(), 1, nullptr), reply);
+        QCOMPARE(client.error(), QModbusDevice::ConnectionError);
+        QCOMPARE(client.errorString(), QString("Device not connected."));
+
+        QCOMPARE(client.connectDevice(), true);
+
+        QTest::ignoreMessage(QtWarningMsg, "(Client) Refuse to send invalid request.");
+        QCOMPARE(client.d_func()->sendRequest(QModbusRequest(), 1, &unit), reply);
+        QCOMPARE(client.error(), QModbusDevice::ProtocolError);
+        QCOMPARE(client.errorString(), QString("Invalid Modbus request."));
+
+        QTest::ignoreMessage(QtWarningMsg, "(Client) Refuse to send invalid request.");
+        QCOMPARE(client.d_func()->sendRequest(QModbusRequest(), 1, nullptr), reply);
+        QCOMPARE(client.error(), QModbusDevice::ProtocolError);
+        QCOMPARE(client.errorString(), QString("Invalid Modbus request."));
+
+        QModbusRequest request(QModbusRequest::Diagnostics);
+        // The default implementation is empty and returns a null pointer.
+        QCOMPARE(client.d_func()->sendRequest(request, 1, &unit), reply);
+        QCOMPARE(client.d_func()->sendRequest(request, 1, nullptr), reply);
     }
 };
 
