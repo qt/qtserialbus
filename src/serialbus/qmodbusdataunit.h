@@ -54,62 +54,54 @@ public:
         HoldingRegisters
     };
 
-#ifndef Q_QDOC
     QModbusDataUnit() Q_DECL_EQ_DEFAULT;
-#else
-    QModbusDataUnit();
-#endif
 
-    explicit QModbusDataUnit(RegisterType regType)
-        : QModbusDataUnit(regType, 0, 0)
+    explicit QModbusDataUnit(RegisterType type)
+        : QModbusDataUnit(type, 0, 0)
     {}
 
-    QModbusDataUnit(RegisterType regType, int dataAddress, quint16 initSize)
-        : QModbusDataUnit(regType, dataAddress, QVector<quint16>(initSize))
+    QModbusDataUnit(RegisterType type, int newStartAddress, quint16 newValueCount)
+        : QModbusDataUnit(type, newStartAddress, QVector<quint16>(newValueCount))
     {}
 
-    QModbusDataUnit(RegisterType regType, int newStartAddress, const QVector<quint16> &newData)
-        : rType(regType)
-        , sAddress(newStartAddress)
-        , dataValue(newData)
-        , dataRange(newData.size())
+    QModbusDataUnit(RegisterType type, int newStartAddress, const QVector<quint16> &newValues)
+        : m_type(type)
+        , m_startAddress(newStartAddress)
+        , m_values(newValues)
+        , m_valueCount(newValues.size())
     {}
 
-    RegisterType registerType() const { return rType; }
-    void setRegisterType(RegisterType newRegisterType)
+    RegisterType registerType() const { return m_type; }
+    void setRegisterType(RegisterType type) { m_type = type; }
+
+    inline int startAddress() const { return m_startAddress; }
+    inline void setStartAddress(int newAddress) { m_startAddress = newAddress; }
+
+    inline QVector<quint16> values() const { return m_values; }
+    inline void setValues(const QVector<quint16> &newValues)
     {
-        rType = newRegisterType;
+        m_values = newValues;
+        m_valueCount = newValues.size();
     }
 
-    inline int startAddress() const { return sAddress; }
-    inline void setStartAddress(int newAddress) { sAddress = newAddress; }
-
-    inline QVector<quint16> values() const { return dataValue; }
-    inline void setValues(const QVector<quint16> &newValue)
-    {
-        dataValue = newValue;
-        dataRange = newValue.size();
-    }
-
-    // TODO: Maybe introduce Range.
-    inline uint valueCount() const { return dataRange; }
-    inline void setValueCount(uint newCount) { dataRange = newCount; }
+    inline uint valueCount() const { return m_valueCount; }
+    inline void setValueCount(uint newCount) { m_valueCount = newCount; }
 
     inline void setValue(int index, quint16 newValue)
     {
-        if (dataValue.isEmpty() || index >= dataValue.size())
+        if (m_values.isEmpty() || index >= m_values.size())
             return;
-        dataValue[index] = newValue;
+        m_values[index] = newValue;
     }
-    inline quint16 value(int index) const { return dataValue.value(index); }
+    inline quint16 value(int index) const { return m_values.value(index); }
 
-    bool isValid() const { return rType != Invalid && sAddress != -1; }
+    bool isValid() const { return m_type != Invalid && m_startAddress != -1; }
 
 private:
-    RegisterType rType = Invalid;
-    int sAddress = -1;
-    QVector<quint16> dataValue;
-    uint dataRange = 0;
+    RegisterType m_type = Invalid;
+    int m_startAddress = -1;
+    QVector<quint16> m_values;
+    uint m_valueCount = 0;
 };
 typedef QMap<QModbusDataUnit::RegisterType, QModbusDataUnit> QModbusDataUnitMap;
 
