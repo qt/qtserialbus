@@ -151,7 +151,7 @@ QVariant QModbusDevice::connectionParameter(int parameter) const
     exists, the previous value is overwritten.
 
     \sa ConnectionParameter
-    \sa ConnectionParameter()
+    \sa connectionParameter()
 */
 void QModbusDevice::setConnectionParameter(int parameter, const QVariant &value)
 {

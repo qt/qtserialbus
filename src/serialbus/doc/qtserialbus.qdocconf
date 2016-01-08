@@ -28,7 +28,8 @@ tagfile                 = ../../../doc/qtserialbus/qtserialbus.tags
 
 depends += \
     qtcore \
-    qtdoc
+    qtdoc \
+    qtserialport
 
 headerdirs  += ..
 

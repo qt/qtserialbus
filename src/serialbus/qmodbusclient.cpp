@@ -111,9 +111,10 @@ QModbusReply *QModbusClient::sendWriteRequest(const QModbusDataUnit &write, int 
 /*!
     Sends a request to read the contents of the data pointed by \a read and to
     modify the contents of the data pointed by \a write using Modbus function
-    code \l ReadWriteMultipleRegisters. Returns a new valid \l QModbusReply
-    object if no error occurred, otherwise Q_NULLPTR. Modbus network may have
-    multiple servers, each server has unique \a serverAddress.
+    code \l QModbusPdu::ReadWriteMultipleRegisters.
+    Returns a new valid \l QModbusReply object if no error occurred, otherwise
+    Q_NULLPTR. Modbus network may have multiple servers, each server has unique
+    \a serverAddress.
 
     \note: Sending this kind of request is only valid of both \a read and
     \a write are of type QModbusDataUnit::HoldingRegisters.
