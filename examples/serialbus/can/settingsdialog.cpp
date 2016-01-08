@@ -68,6 +68,9 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     connect(m_ui->speedBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
             this, &SettingsDialog::checkCustomSpeedPolicy);
 
+    m_ui->rawFilterEdit->hide();
+    m_ui->rawFilterLabel->hide();
+
     fillBackends();
     fillSpeeds();
 
