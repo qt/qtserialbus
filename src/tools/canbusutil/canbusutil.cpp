@@ -264,12 +264,9 @@ bool CanBusUtil::sendData()
     if (parsePayloadField(payload, rtrFrame, fdFrame, bytes) == false)
         return false;
 
-    if (id > 0x7FF)  { //11 bits
-        if (id > 0x1FFFFFFF) { // 29 bits
-            id = 0x1FFFFFFF;
-            output << "Warning! Id does not fit into Extended Frame Format, setting id to: " << id << endl;
-        }
-        frame.setExtendedFrameFormat(true);
+    if (id < 0 || id > 0x1FFFFFFF) { // 29 bits
+        id = 0x1FFFFFFF;
+        output << "Warning! Id does not fit into Extended Frame Format, setting id to: " << id << endl;
     }
 
     if (rtrFrame)
