@@ -931,7 +931,7 @@ QModbusResponse QModbusServerPrivate::processGetCommEventLogRequest(const QModbu
     }
     const quint16 deviceBusy = tmp.value<quint16>();
 
-    QVector<quint8> eventLog(m_commEventLog.size());
+    QVector<quint8> eventLog(int(m_commEventLog.size()));
     std::copy(m_commEventLog.cbegin(), m_commEventLog.cend(), eventLog.begin());
 
     // 6 -> 3 x 2 Bytes (Status, Event Count and Message Count)

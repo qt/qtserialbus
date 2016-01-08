@@ -276,19 +276,6 @@ public:
                 q->setError(QModbusDevice::tr("Cannot open serial device."),
                             QModbusDevice::ConnectionError);
                 break;
-            case QSerialPort::ParityError:
-                q->setError(QModbusDevice::tr("Parity error detected."),
-                            QModbusDevice::ConfigurationError);
-                incrementCounter(QModbusServerPrivate::Counter::BusCommunicationError);
-                break;
-            case QSerialPort::FramingError:
-                q->setError(QModbusDevice::tr("Framing error detected."),
-                            QModbusDevice::ConfigurationError);
-                break;
-            case QSerialPort::BreakConditionError:
-                q->setError(QModbusDevice::tr("Break condition error detected."),
-                            QModbusDevice::ConnectionError);
-                break;
             case QSerialPort::WriteError:
                 q->setError(QModbusDevice::tr("Write error."), QModbusDevice::WriteError);
                 break;
