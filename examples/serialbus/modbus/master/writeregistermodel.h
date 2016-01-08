@@ -41,9 +41,9 @@
 #ifndef WRITEREGISTERMODEL_H
 #define WRITEREGISTERMODEL_H
 
-#include <QtCore/qabstractitemmodel.h>
-#include <QtCore/qbitarray.h>
-#include <QtCore/qobject.h>
+#include <QAbstractitemmodel>
+#include <QBitarray>
+#include <QObject>
 
 class WriteRegisterModel : public QAbstractTableModel
 {

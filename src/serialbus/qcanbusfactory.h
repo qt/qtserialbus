@@ -37,10 +37,9 @@
 #ifndef QCANBUSFACTORY_H
 #define QCANBUSFACTORY_H
 
+#include <QtCore/qstringlist.h>
 #include <QtSerialBus/qserialbusglobal.h>
 #include <QtSerialBus/qcanbusdevice.h>
-
-#include <QtCore/qstringlist.h>
 
 QT_BEGIN_NAMESPACE
 

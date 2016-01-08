@@ -37,9 +37,6 @@
 #ifndef QMODBUSTCPSERVER_P_H
 #define QMODBUSTCPSERVER_P_H
 
-#include <QtSerialBus/private/qmodbusserver_p.h>
-#include <QtSerialBus/qmodbustcpserver.h>
-
 #include <QtCore/qdatastream.h>
 #include <QtCore/qdebug.h>
 #include <QtCore/qloggingcategory.h>
@@ -47,6 +44,9 @@
 #include <QtNetwork/qhostaddress.h>
 #include <QtNetwork/qtcpserver.h>
 #include <QtNetwork/qtcpsocket.h>
+#include <QtSerialBus/qmodbustcpserver.h>
+
+#include <private/qmodbusserver_p.h>
 
 //
 //  W A R N I N G

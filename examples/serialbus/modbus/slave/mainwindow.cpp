@@ -42,12 +42,11 @@
 #include "settingsdialog.h"
 #include "ui_mainwindow.h"
 
-#include <QtSerialBus/qmodbusrtuserialslave.h>
-#include <QtSerialBus/qmodbustcpserver.h>
-
-#include <QtCore/qregularexpression.h>
-#include <QtCore/qurl.h>
-#include <QtWidgets/qstatusbar.h>
+#include <QModbusrtuserialslave>
+#include <QModbustcpserver>
+#include <QRegularExpression>
+#include <QStatusBar>
+#include <QUrl>
 
 enum ModbusConnection {
     Serial,

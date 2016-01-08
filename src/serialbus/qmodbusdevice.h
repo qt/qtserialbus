@@ -36,10 +36,9 @@
 #ifndef QMODBUSDEVICE_H
 #define QMODBUSDEVICE_H
 
-#include <QtSerialBus/qserialbusglobal.h>
-
 #include <QtCore/qobject.h>
 #include <QtCore/qiodevice.h>
+#include <QtSerialBus/qserialbusglobal.h>
 
 QT_BEGIN_NAMESPACE
 

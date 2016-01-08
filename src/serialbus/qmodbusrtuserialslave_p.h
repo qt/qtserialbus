@@ -37,13 +37,13 @@
 #ifndef QMODBUSRTUSERIALSLAVE_P_H
 #define QMODBUSRTUSERIALSLAVE_P_H
 
-#include <QtSerialBus/qmodbusrtuserialslave.h>
-#include <QtSerialBus/private/qmodbusadu_p.h>
-#include <QtSerialBus/private/qmodbusserver_p.h>
-
 #include <QtCore/qdebug.h>
 #include <QtCore/qloggingcategory.h>
+#include <QtSerialBus/qmodbusrtuserialslave.h>
 #include <QtSerialPort/qserialport.h>
+
+#include <private/qmodbusadu_p.h>
+#include <private/qmodbusserver_p.h>
 
 //
 //  W A R N I N G

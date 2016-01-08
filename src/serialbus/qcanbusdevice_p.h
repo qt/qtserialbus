@@ -37,11 +37,10 @@
 #ifndef QCANBUSDEVICE_P_H
 #define QCANBUSDEVICE_P_H
 
-#include "qcanbusdevice.h"
-
 #include <QtCore/qmutex.h>
+#include <QtSerialBus/qcanbusdevice.h>
 
-#include <QtCore/private/qobject_p.h>
+#include <private/qobject_p.h>
 
 //
 //  W A R N I N G

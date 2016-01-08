@@ -36,11 +36,10 @@
 #ifndef QMODBUSPDU_H
 #define QMODBUSPDU_H
 
-#include <QtSerialBus/qserialbusglobal.h>
-
 #include <QtCore/qdatastream.h>
 #include <QtCore/qmetatype.h>
 #include <QtCore/qvector.h>
+#include <QtSerialBus/qserialbusglobal.h>
 
 QT_BEGIN_NAMESPACE
 

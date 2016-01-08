@@ -35,8 +35,8 @@
 ****************************************************************************/
 
 #include <QtSerialBus/qmodbusclient.h>
-#include <QtSerialBus/private/qmodbusclient_p.h>
-#include <QtSerialBus/private/qmodbus_symbols_p.h>
+#include <private/qmodbusclient_p.h>
+#include <private/qmodbus_symbols_p.h>
 
 #include <QtTest/QtTest>
 

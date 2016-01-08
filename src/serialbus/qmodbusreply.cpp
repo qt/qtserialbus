@@ -37,7 +37,7 @@
 #include "qmodbusreply.h"
 
 #include <QtCore/qobject.h>
-#include <QtCore/private/qobject_p.h>
+#include <private/qobject_p.h>
 
 QT_BEGIN_NAMESPACE
 

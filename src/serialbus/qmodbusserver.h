@@ -37,13 +37,11 @@
 #ifndef QMODBUSERVER_H
 #define QMODBUSERVER_H
 
-#include <QtSerialBus/qserialbusglobal.h>
+#include <QtCore/qobject.h>
+#include <QtCore/qvariant.h>
 #include <QtSerialBus/qmodbusdataunit.h>
 #include <QtSerialBus/qmodbusdevice.h>
 #include <QtSerialBus/qmodbuspdu.h>
-
-#include <QtCore/qobject.h>
-#include <QtCore/qvariant.h>
 
 QT_BEGIN_NAMESPACE
 

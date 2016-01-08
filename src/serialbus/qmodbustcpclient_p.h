@@ -37,12 +37,12 @@
 #ifndef QMODBUSTCPCLIENT_P_H
 #define QMODBUSTCPCLIENT_P_H
 
-#include "qmodbusclient_p.h"
-#include "qmodbustcpclient.h"
-
 #include <QtCore/qloggingcategory.h>
 #include <QtNetwork/qhostaddress.h>
 #include <QtNetwork/qtcpsocket.h>
+#include "QtSerialBus/qmodbustcpclient.h"
+
+#include "private/qmodbusclient_p.h"
 
 //
 //  W A R N I N G

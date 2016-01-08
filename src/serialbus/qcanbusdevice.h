@@ -37,9 +37,8 @@
 #ifndef QCANBUSDEVICE_H
 #define QCANBUSDEVICE_H
 
-#include <QtSerialBus/qcanbusframe.h>
-
 #include <QtCore/qobject.h>
+#include <QtSerialBus/qcanbusframe.h>
 
 QT_BEGIN_NAMESPACE
 

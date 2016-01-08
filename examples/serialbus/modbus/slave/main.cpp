@@ -39,8 +39,9 @@
 ****************************************************************************/
 
 #include "mainwindow.h"
+
 #include <QApplication>
-#include <QtCore/qloggingcategory.h>
+#include <QLoggingCategory>
 
 int main(int argc, char *argv[])
 {

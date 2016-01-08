@@ -37,7 +37,6 @@
 #ifndef QMODBUSREPLY_H
 #define QMODBUSREPLY_H
 
-#include <QtSerialBus/qserialbusglobal.h>
 #include <QtSerialBus/qmodbusdataunit.h>
 #include <QtSerialBus/qmodbusdevice.h>
 #include <QtSerialBus/qmodbuspdu.h>

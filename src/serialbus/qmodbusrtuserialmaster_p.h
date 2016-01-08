@@ -37,15 +37,15 @@
 #ifndef QMODBUSSERIALMASTER_P_H
 #define QMODBUSSERIALMASTER_P_H
 
-#include <QtSerialBus/qmodbusrtuserialmaster.h>
-#include <QtSerialBus/private/qmodbusadu_p.h>
-#include <QtSerialBus/private/qmodbusclient_p.h>
-
 #include <QtCore/qloggingcategory.h>
 #include <QtCore/qpointer.h>
 #include <QtCore/qqueue.h>
 #include <QtCore/qtimer.h>
+#include <QtSerialBus/qmodbusrtuserialmaster.h>
 #include <QtSerialPort/qserialport.h>
+
+#include <private/qmodbusadu_p.h>
+#include <private/qmodbusclient_p.h>
 
 //
 //  W A R N I N G
