@@ -878,10 +878,6 @@ QModbusResponse QModbusServerPrivate::processDiagnosticsRequest(const QModbusReq
 
     case Diagnostics::ClearCountersAndDiagnosticRegister:
         CHECK_SIZE_AND_CONDITION(request, (data != 0x0000));
-        // TODO: According to PI_MBUS_300 specification, the clearing of the diagnostic
-        // register is dependent on the device model. For legacy support to fulfill this
-        // requirement, a server configuration variable could be added to check if the
-        // diagnostic register should be cleared or not.
         resetCommunicationCounters();
         q_func()->setValue(QModbusServer::DiagnosticRegister, 0x0000);
         return QModbusResponse(request.functionCode(), request.data());
