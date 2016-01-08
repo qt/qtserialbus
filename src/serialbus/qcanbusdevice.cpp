@@ -88,7 +88,8 @@ QT_BEGIN_NAMESPACE
     \value RawFilterKey     This configuration determines the type of CAN bus frames
                             that the current device accepts. The expected value
                             is \c QList<QCanBusDevice::Filter>. Passing an empty list clears
-                            all previously set filters including default filters.
+                            all previously set filters including default filters. For more details
+                            see \l QCanBusDevice::Filter.
     \value ErrorFilterKey   This key defines the type of error that should be
                             forwarded via the current connection. The associated
                             value should be of type \l QCanBusFrame::FrameErrors.
