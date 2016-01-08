@@ -1189,6 +1189,14 @@ private slots:
         QCOMPARE(local.setValue(QModbusServer::ListenOnlyMode, true), true);
         QCOMPARE(local.value(QModbusServer::ListenOnlyMode).toBool(), true);
     }
+
+    void testClearOverrunCounterAndFlag()
+    {
+        TestServer server;
+        server.setValue(QModbusServer::DiagnosticRegister, 0xffff);
+        server.processRequest(QModbusRequest(QModbusRequest::Diagnostics, quint16(0x0014), quint16(0)));
+        QCOMPARE(server.value(QModbusServer::DiagnosticRegister).value<quint16>(), quint16(0xfffe));
+    }
 };
 
 QTEST_MAIN(tst_QModbusServer)

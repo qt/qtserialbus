@@ -894,6 +894,14 @@ QModbusResponse QModbusServerPrivate::processDiagnosticsRequest(const QModbusReq
         CHECK_SIZE_AND_CONDITION(request, (data != 0x0000));
         return QModbusResponse(request.functionCode(), subFunctionCode,
                                m_counters[static_cast<Counter> (subFunctionCode)]);
+
+    case Diagnostics::ClearOverrunCounterAndFlag: {
+        CHECK_SIZE_AND_CONDITION(request, (data != 0x0000));
+        m_counters[Diagnostics::ReturnBusCharacterOverrunCount] = 0;
+        quint16 reg = q_func()->value(QModbusServer::DiagnosticRegister).value<quint16>();
+        q_func()->setValue(QModbusServer::DiagnosticRegister, reg &~ 1); // clear first bit
+        return QModbusResponse(request.functionCode(), request.data());
+    }
     }
     return QModbusExceptionResponse(request.functionCode(),
         QModbusExceptionResponse::IllegalFunction);
