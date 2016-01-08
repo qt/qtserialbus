@@ -42,8 +42,8 @@
 #include "settingsdialog.h"
 #include "ui_mainwindow.h"
 
-#include <QModbusrtuserialslave>
-#include <QModbustcpserver>
+#include <QModbusRtuSerialSlave>
+#include <QModbusTcpServer>
 #include <QRegularExpression>
 #include <QStatusBar>
 #include <QUrl>
