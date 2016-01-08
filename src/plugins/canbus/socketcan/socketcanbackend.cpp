@@ -266,7 +266,7 @@ bool SocketCanBackend::connectSocket()
         const QVariant param = configurationParameter(key);
         bool success = applyConfigurationParameter(key, param);
         if (!success) {
-            qWarning() << "Cannot apply parameter:" << key
+            qWarning() << "Cannot apply parameter:" << QCanBusDevice::ConfigurationKey(key)
                        << "with value:" << param;
         }
     }
