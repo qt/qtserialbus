@@ -148,6 +148,8 @@ QT_BEGIN_NAMESPACE
         (receivedFrameId & frameIdMask) == (frameId & frameIdMask)
     \endcode
 
+    By default this field is set to \c 0x0.
+
     \sa frameIdMask
 */
 
@@ -162,6 +164,8 @@ QT_BEGIN_NAMESPACE
         (receivedFrameId & frameIdMask) == (frameId & frameIdMask)
     \endcode
 
+    By default this field is set to \c 0x0.
+
     \sa frameId
 */
 
@@ -170,11 +174,11 @@ QT_BEGIN_NAMESPACE
 
     \brief the type of the message to be filtered.
 
-    If multiple message types has to be matched
-
     Any CAN bus message type can be matched by setting this variable
     to \l QCanBusFrame::InvalidFrame. The filter object is invalid if
     type is equal to \l QCanBusFrame::UnknownFrame.
+
+    By default this field is set to \l QCanBusFrame::InvalidFrame.
 
     \sa QCanBusFrame::FrameType
 */
@@ -183,6 +187,8 @@ QT_BEGIN_NAMESPACE
     \variable QCanBusDevice::Filter::format
 
     \brief the message format of the matching CAN bus message.
+
+    By default this field is set to \l QCanBusDevice::Filter::MatchBaseAndExtendedFormat.
 */
 
 /*!
