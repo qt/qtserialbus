@@ -33,6 +33,7 @@ tests/auto/qmodbusserver/tst_qmodbusserver
 *_resource.rc
 *.exe
 *.ipch
+*_wrapper.bat
 
 # Visual Studio generated files
 *.ib_pdb_index
