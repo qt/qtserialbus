@@ -44,7 +44,9 @@
 class TestServer : public QModbusServer
 {
 public:
-    TestServer() Q_DECL_EQ_DEFAULT;
+    TestServer() {
+        qRegisterMetaType<QModbusDataUnit::RegisterType>();
+    }
 
     bool open() Q_DECL_OVERRIDE {
         setState(QModbusDevice::ConnectedState);
