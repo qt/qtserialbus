@@ -42,12 +42,18 @@ class tst_QModbusReply : public QObject
     Q_OBJECT
 
 private slots:
+    void initTestCase();
     void tst_ctor();
     void tst_setFinished();
     void tst_setError_data();
     void tst_setError();
     void tst_setResult();
 };
+
+void tst_QModbusReply::initTestCase()
+{
+    qRegisterMetaType<QModbusDevice::Error>();
+}
 
 void tst_QModbusReply::tst_ctor()
 {
