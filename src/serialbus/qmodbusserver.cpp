@@ -73,7 +73,9 @@ Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
     \value DeviceBusy               Flag to signal the server is engaged in processing a
                                     long-duration program command. \c quint16
     \value AsciiInputDelimiter      The Modbus ASCII end of message delimiter. \c char
-    \value ListenOnlyMode           Flag to set listen only mode of the server. \c bool
+    \value ListenOnlyMode           Flag to set listen only mode of the server.
+                                    This function is typically supported only
+                                    by Modbus serial devices. \c bool
     \value ServerIdentifier         The identifier of the server, \b not the server address. \c quint8
     \value RunIndicatorStatus       The run indicator of the server. \c quint8
     \value AdditionalData           The additional data of the server. \c QByteArray
