@@ -109,6 +109,7 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
         if (ui->portEdit->text().isEmpty())
             ui->portEdit->setText(QLatin1Literal("127.0.0.1:502"));
     }
+    ui->listenOnlyBox->setEnabled(type == Serial);
 
     if (!modbusDevice) {
         ui->connectButton->setDisabled(true);
@@ -131,6 +132,17 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
                 this, &MainWindow::onStateChanged);
         connect(modbusDevice, &QModbusServer::errorOccurred,
                 this, &MainWindow::handleDeviceError);
+
+        connect(ui->listenOnlyBox, &QCheckBox::toggled, this, [this](bool toggled) {
+            if (modbusDevice)
+                modbusDevice->setValue(QModbusServer::ListenOnlyMode, toggled);
+        });
+        emit ui->listenOnlyBox->toggled(ui->listenOnlyBox->isChecked());
+        connect(ui->setBusyBox, &QCheckBox::toggled, this, [this](bool toggled) {
+            if (modbusDevice)
+                modbusDevice->setValue(QModbusServer::DeviceBusy, toggled ? 0xffff : 0x0000);
+        });
+        emit ui->setBusyBox->toggled(ui->setBusyBox->isChecked());
 
         setupDeviceData();
     }
