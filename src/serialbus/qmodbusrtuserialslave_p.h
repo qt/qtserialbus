@@ -149,14 +149,25 @@ public:
                 }
             } // else { Broadcast -> Server address will never match, deliberately ignore }
 
-            // The quantity of messages addressed to the remote device, or broadcast, that the
-            // remote device has processed since its last restart, clear counters operation, or
-            // power–up.
-            incrementCounter(QModbusServerPrivate::Counter::ServerMessage);
             storeModbusCommEvent(event); // store the final event before processing
 
             qCDebug(QT_MODBUS) << "(RTU server) Request PDU:" << req;
-            const QModbusResponse response = q->processRequest(req);
+            QModbusResponse response; // If the device ...
+            if (q->value(QModbusServer::DeviceBusy).value<quint16>() == 0xffff) {
+                // is busy, update the quantity of messages addressed to the remote device for
+                // which it returned a Server Device Busy exception response, since its last
+                // restart, clear counters operation, or power–up.
+                incrementCounter(QModbusServerPrivate::Counter::ServerBusy);
+                response = QModbusExceptionResponse(req.functionCode(),
+                    QModbusExceptionResponse::ServerDeviceBusy);
+            } else {
+                // is not busy, update the quantity of messages addressed to the remote device,
+                // or broadcast, that the remote device has processed since its last restart,
+                // clear counters operation, or power–up.
+                incrementCounter(QModbusServerPrivate::Counter::ServerMessage);
+                response = q->processRequest(req);
+            }
+            qCDebug(QT_MODBUS) << "(RTU server) Response PDU:" << response;
 
             event = QModbusCommEvent::SentEvent; // reset event after processing
             if (q->value(QModbusServer::ListenOnlyMode).toBool())
@@ -172,8 +183,6 @@ public:
                 storeModbusCommEvent(event);
                 return;
             }
-
-            qCDebug(QT_MODBUS) << "(RTU server) Response PDU:" << response;
 
             const QByteArray result = QModbusSerialAdu::create(QModbusSerialAdu::Rtu,
                                                                q->serverAddress(), response);

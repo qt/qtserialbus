@@ -78,6 +78,12 @@ public:
     QModbusResponse forwardProcessRequest(const QModbusRequest &r)
     {
         Q_Q(QModbusTcpServer);
+        if (q->value(QModbusServer::DeviceBusy).value<quint16>() == 0xffff) {
+            // If the device is busy, send an exception response without processing.
+            incrementCounter(QModbusServerPrivate::Counter::ServerBusy);
+            return QModbusExceptionResponse(r.functionCode(),
+                QModbusExceptionResponse::ServerDeviceBusy);
+        }
         return q->processRequest(r);
     }
 
