@@ -45,7 +45,7 @@ class ReadTask : public QObject
 {
     Q_OBJECT
 public:
-    explicit ReadTask(QTextStream& output, QObject *parent = 0);
+    explicit ReadTask(QTextStream& output, QObject *parent = Q_NULLPTR);
 
 signals:
     void sigTermSignal();

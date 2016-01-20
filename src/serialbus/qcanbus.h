@@ -57,7 +57,7 @@ public:
                                 const QString &interfaceName) const;
 
 private:
-    QCanBus(QObject *parent = 0);
+    QCanBus(QObject *parent = Q_NULLPTR);
 
     Q_DISABLE_COPY(QCanBus)
 };

@@ -103,7 +103,7 @@ public:
 #endif
     };
 
-    explicit QCanBusDevice(QObject *parent = 0);
+    explicit QCanBusDevice(QObject *parent = Q_NULLPTR);
 
     virtual void setConfigurationParameter(int key,
                                            const QVariant &value);

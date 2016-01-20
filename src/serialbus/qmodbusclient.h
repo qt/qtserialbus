@@ -54,7 +54,7 @@ class Q_SERIALBUS_EXPORT QModbusClient : public QModbusDevice
     Q_PROPERTY(int timeout READ timeout WRITE setTimeout NOTIFY timeoutChanged)
 
 public:
-    explicit QModbusClient(QObject *parent = 0);
+    explicit QModbusClient(QObject *parent = Q_NULLPTR);
     ~QModbusClient();
 
     QModbusReply *sendReadRequest(const QModbusDataUnit &read, int serverAddress);

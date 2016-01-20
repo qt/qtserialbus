@@ -86,7 +86,7 @@ public:
     };
     Q_ENUM(ConnectionParameter)
 
-    explicit QModbusDevice(QObject *parent = 0);
+    explicit QModbusDevice(QObject *parent = Q_NULLPTR);
     ~QModbusDevice();
 
     QVariant connectionParameter(int parameter) const;

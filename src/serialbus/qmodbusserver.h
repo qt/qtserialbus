@@ -67,7 +67,7 @@ public:
     };
     Q_ENUM(Option)
 
-    explicit QModbusServer(QObject *parent = 0);
+    explicit QModbusServer(QObject *parent = Q_NULLPTR);
     ~QModbusServer();
 
     int serverAddress() const;

@@ -52,7 +52,7 @@ signals:
     void sigTermSignal();
 
 private:
-    explicit SigTermHandler(QObject *parent = 0);
+    explicit SigTermHandler(QObject *parent = Q_NULLPTR);
 };
 
 #endif // SIGTERMHANDLER_H
