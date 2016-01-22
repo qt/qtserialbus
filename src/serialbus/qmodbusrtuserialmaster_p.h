@@ -126,8 +126,6 @@ public:
                 return;
             }
 
-            m_responseTimer.stop();
-
             const QModbusSerialAdu adu(QModbusSerialAdu::Rtu, responseBuffer.left(aduSize));
             responseBuffer.remove(0, aduSize);
 
@@ -150,6 +148,7 @@ public:
                 return;
             }
 
+            m_responseTimer.stop();
             processQueueElement(response, m_queue.dequeue());
             QTimer::singleShot(0, [this]() { sendNextRequest(); });
         });
