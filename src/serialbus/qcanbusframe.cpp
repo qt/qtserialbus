@@ -89,7 +89,20 @@ QT_BEGIN_NAMESPACE
     \fn QCanBusFrame::setPayload(const QByteArray &data)
 
     Sets \a data as the payload for the CAN frame. The maximum size of payload is 8 bytes, which can
-    be extended up to 64 bytes by supporting \e {Flexible Data-Rate}.
+    be extended up to 64 bytes by supporting \e {Flexible Data-Rate}. Flexible Data-Rate has to be
+    enabled on the \l QCanBusDevice by setting the \l QCanBusDevice::CanFdKey.
+
+    Frames of type \l RemoteRequestFrame (RTR) do not have a payload. However they have to
+    provide an indication of the responses expected payload length. To set the length expection it
+    is necessary to set a fake payload whose length matches the expected payload length of the
+    response. One way of doing this might be as follows:
+
+    \code
+        QCanBusFrame frame(QCanBusFrame::RemoteRequestFrame);
+        int expectedResponseLength = ...;
+        frame.setPayload(QByteArray(expectedResponseLength, 0));
+    \endcode
+
 
     \sa payload()
 */

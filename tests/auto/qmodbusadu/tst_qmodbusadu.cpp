@@ -34,7 +34,7 @@
 **
 ****************************************************************************/
 
-#include <QtSerialBus/private/qmodbusadu_p.h>
+#include <private/qmodbusadu_p.h>
 
 #include <QtTest/QtTest>
 

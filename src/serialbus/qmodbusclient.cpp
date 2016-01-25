@@ -85,9 +85,10 @@ QModbusClient::~QModbusClient()
 }
 
 /*!
-    Sends a request to read the contents of the data pointed by \a read. Returns a new valid
-    QModbusReply object if it did send the request, otherwise Q_NULLPTR. Modbus network may
-    have multiple servers, each server has unique \a serverAddress.
+    Sends a request to read the contents of the data pointed by \a read.
+    Returns a new valid \l QModbusReply object if no error occurred, otherwise
+    Q_NULLPTR. Modbus network may have multiple servers, each server has unique
+    \a serverAddress.
 */
 QModbusReply *QModbusClient::sendReadRequest(const QModbusDataUnit &read, int serverAddress)
 {
@@ -96,9 +97,10 @@ QModbusReply *QModbusClient::sendReadRequest(const QModbusDataUnit &read, int se
 }
 
 /*!
-    Sends a request to modify the contents of the data pointed by \a write. Returns a new valid
-    QModbusReply object if it did send the request, otherwise Q_NULLPTR. Modbus network may
-    have multiple servers, each server has a unique \a serverAddress.
+    Sends a request to modify the contents of the data pointed by \a write.
+    Returns a new valid \l QModbusReply object if no error occurred, otherwise
+    Q_NULLPTR. Modbus network may have multiple servers, each server has unique
+    \a serverAddress.
 */
 QModbusReply *QModbusClient::sendWriteRequest(const QModbusDataUnit &write, int serverAddress)
 {
@@ -107,19 +109,15 @@ QModbusReply *QModbusClient::sendWriteRequest(const QModbusDataUnit &write, int 
 }
 
 /*!
-    Sends a request to read the contents of the data pointed by \a read and to modify the contents
-    of the data pointed by \a write using Modbus Function Code 23. Returns a new valid
-    QModbusReply object if it did send the request, otherwise Q_NULLPTR. Modbus network may
-    have multiple servers, each server has a unique \a serverAddress.
+    Sends a request to read the contents of the data pointed by \a read and to
+    modify the contents of the data pointed by \a write using Modbus function
+    code \l QModbusPdu::ReadWriteMultipleRegisters.
+    Returns a new valid \l QModbusReply object if no error occurred, otherwise
+    Q_NULLPTR. Modbus network may have multiple servers, each server has unique
+    \a serverAddress.
 
-    \note: Sending this kind of request is only valid of both \a read and \a write are of type
-    QModbusDataUnit::HoldingRegisters. If the remote device is not be able to process Modbus
-    Function Code 23 , the request cannot be performed and is usually answered with a Modbus
-    Exception Response. Also, on overlapping data areas of \a read and \a write
-    the behavior of the remote device determines the result. The Modbus Application Protocol
-    defines that the write operation is handled before the read operation. Particular devices
-    such as the Schneider Electric Premium PLC platform behave differently and perform the read
-    operation before the write operation.
+    \note: Sending this kind of request is only valid of both \a read and
+    \a write are of type QModbusDataUnit::HoldingRegisters.
 */
 QModbusReply *QModbusClient::sendReadWriteRequest(const QModbusDataUnit &read,
                                                   const QModbusDataUnit &write, int serverAddress)
@@ -132,8 +130,8 @@ QModbusReply *QModbusClient::sendReadWriteRequest(const QModbusDataUnit &read,
     Sends a raw Modbus \a request. A raw request can contain anything that
     fits inside the Modbus PDU data section and has a valid function code.
     The only check performed before sending is therefore the validity check,
-    see \l QModbusPdu::isValid. Returns a new valid \l QModbusReply object if
-    it did send the request, otherwise Q_NULLPTR. Modbus networks may have
+    see \l QModbusPdu::isValid. If no error occurred the function returns a
+    a new valid \l QModbusReply; Q_NULLPTR otherwise. Modbus networks may have
     multiple servers, each server has a unique \a serverAddress.
 
     \sa QModbusReply::rawResult()
@@ -204,13 +202,14 @@ int QModbusClient::numberOfRetries() const
     Sets the \a number of retries a client will perform before a
     request fails. The default value is set to \c 3.
 
-    \note Changing this property will only effect new request, not
-    already scheduled ones.
+    \note The new value must be greater than or equal to \c 0. Changing this
+    property will only effect new requests, not already scheduled ones.
 */
 void QModbusClient::setNumberOfRetries(int number)
 {
     Q_D(QModbusClient);
-    d->m_numberOfRetries = number;
+    if (number >= 0)
+        d->m_numberOfRetries = number;
 }
 
 /*!
@@ -254,8 +253,8 @@ QModbusReply *QModbusClientPrivate::sendRequest(const QModbusRequest &request, i
     }
 
     if (!request.isValid()) {
-        qCWarning(QT_MODBUS) << "(Client) Refuse to send invalid request."; // TODO: WriteError ???
-        q->setError(QModbusClient::tr("Invalid Modbus request."), QModbusDevice::WriteError);
+        qCWarning(QT_MODBUS) << "(Client) Refuse to send invalid request.";
+        q->setError(QModbusClient::tr("Invalid Modbus request."), QModbusDevice::ProtocolError);
         return Q_NULLPTR;
     }
 
@@ -353,7 +352,7 @@ void QModbusClientPrivate::processQueueElement(const QModbusResponse &pdu,
 {
     element.reply->setRawResult(pdu);
     if (pdu.isException()) {
-        element.reply->setError(QModbusReply::ProtocolError,
+        element.reply->setError(QModbusDevice::ProtocolError,
             QModbusClient::tr("Modbus Exception Response."));
         return;
     }
@@ -365,7 +364,7 @@ void QModbusClientPrivate::processQueueElement(const QModbusResponse &pdu,
 
     QModbusDataUnit unit = element.unit;
     if (!processResponse(pdu, &unit)) {
-        element.reply->setError(QModbusReply::UnknownError,
+        element.reply->setError(QModbusDevice::UnknownError,
             QModbusClient::tr("An invalid response has been received."));
         return;
     }
@@ -374,9 +373,6 @@ void QModbusClientPrivate::processQueueElement(const QModbusResponse &pdu,
     element.reply->setFinished(true);
 }
 
-/*
-    TODO: implement
-*/
 bool QModbusClientPrivate::processResponse(const QModbusResponse &response, QModbusDataUnit *data)
 {
     switch (response.functionCode()) {
@@ -396,6 +392,7 @@ bool QModbusClientPrivate::processResponse(const QModbusResponse &response, QMod
     case QModbusRequest::Diagnostics:
     case QModbusRequest::GetCommEventCounter:
     case QModbusRequest::GetCommEventLog:
+        return false;   // Return early, it's not a private response.
     case QModbusRequest::WriteMultipleCoils:
         return processWriteMultipleCoilsResponse(response, data);
     case QModbusRequest::WriteMultipleRegisters:
@@ -404,10 +401,12 @@ bool QModbusClientPrivate::processResponse(const QModbusResponse &response, QMod
     case QModbusRequest::ReadFileRecord:
     case QModbusRequest::WriteFileRecord:
     case QModbusRequest::MaskWriteRegister:
+        return false;   // Return early, it's not a private response.
     case QModbusRequest::ReadWriteMultipleRegisters:
         return processReadWriteMultipleRegistersResponse(response, data);
     case QModbusRequest::ReadFifoQueue:
     case QModbusRequest::EncapsulatedInterfaceTransport:
+        return false;   // Return early, it's not a private response.
     default:
         break;
     }
@@ -426,31 +425,11 @@ static bool isValid(const QModbusResponse &response, QModbusResponse::FunctionCo
 }
 
 bool QModbusClientPrivate::processReadCoilsResponse(const QModbusResponse &response,
-    QModbusDataUnit *data)
+                                                    QModbusDataUnit *data)
 {
     if (!isValid(response, QModbusResponse::ReadCoils))
         return false;
-
-    if (response.dataSize() < QModbusResponse::minimumDataSize(response))
-        return false;
-
-    const QByteArray payload = response.data();
-    // byte count needs to match available bytes
-    const quint8 byteCount = payload[0];
-    if ((payload.size() - 1) != byteCount)
-        return false;
-
-    if (data) {
-        uint coil = 0;
-        QVector<quint16> values(data->valueCount());
-        for (qint32 i = 1; i < payload.size(); ++i) {
-            const std::bitset<8> byte = payload[i];
-            for (qint32 currentBit = 0; currentBit < 8 && coil < data->valueCount(); ++currentBit)
-                values[coil++] = byte[currentBit];
-        }
-        data->setValues(values);
-    }
-    return true;
+    return collateBits(response, QModbusDataUnit::Coils, data);
 }
 
 bool QModbusClientPrivate::processReadDiscreteInputsResponse(const QModbusResponse &response,
@@ -458,25 +437,28 @@ bool QModbusClientPrivate::processReadDiscreteInputsResponse(const QModbusRespon
 {
     if (!isValid(response, QModbusResponse::ReadDiscreteInputs))
         return false;
+    return collateBits(response, QModbusDataUnit::DiscreteInputs, data);
+}
 
+bool QModbusClientPrivate::collateBits(const QModbusPdu &response,
+                                     QModbusDataUnit::RegisterType type, QModbusDataUnit *data)
+{
     if (response.dataSize() < QModbusResponse::minimumDataSize(response))
         return false;
 
     const QByteArray payload = response.data();
     // byte count needs to match available bytes
-    const quint8 byteCount = payload[0];
-    if ((payload.size() - 1) != byteCount)
+    if ((payload.size() - 1) != payload[0])
         return false;
 
     if (data) {
-        uint input = 0;
-        QVector<quint16> values(data->valueCount());
+        uint value = 0;
         for (qint32 i = 1; i < payload.size(); ++i) {
             const std::bitset<8> byte = payload[i];
-            for (qint32 currentBit = 0; currentBit < 8 && input < data->valueCount(); ++currentBit)
-                values[input++] = byte[currentBit];
+            for (qint32 currentBit = 0; currentBit < 8 && value < data->valueCount(); ++currentBit)
+                data->setValue(value++, byte[currentBit]);
         }
-        data->setValues(values);
+        data->setRegisterType(type);
     }
     return true;
 }
@@ -486,37 +468,7 @@ bool QModbusClientPrivate::processReadHoldingRegistersResponse(const QModbusResp
 {
     if (!isValid(response, QModbusResponse::ReadHoldingRegisters))
         return false;
-
-    if (response.dataSize() < QModbusResponse::minimumDataSize(response))
-        return false;
-
-    // byte count needs to match available bytes
-    const quint8 byteCount = response.data()[0];
-    if ((response.dataSize() - 1) != byteCount)
-        return false;
-
-    // byte count needs to be odd to match full registers
-    if (byteCount % 2 != 0)
-        return false;
-
-    const quint8 itemCount = byteCount / 2;
-
-    const QByteArray pduData = response.data().remove(0,1);
-    QDataStream stream(pduData);
-
-    QVector<quint16> values;
-    quint16 tmp;
-    for (int i = 0; i < itemCount; i++){
-        stream >> tmp;
-        values.append(tmp);
-    }
-
-    if (data) {
-        data->setValues(values);
-        data->setValueCount(values.count());
-        data->setRegisterType(QModbusDataUnit::HoldingRegisters);
-    }
-    return true;
+    return collateBytes(response, QModbusDataUnit::HoldingRegisters, data);
 }
 
 bool QModbusClientPrivate::processReadInputRegistersResponse(const QModbusResponse &response,
@@ -524,7 +476,12 @@ bool QModbusClientPrivate::processReadInputRegistersResponse(const QModbusRespon
 {
     if (!isValid(response, QModbusResponse::ReadInputRegisters))
         return false;
+    return collateBytes(response, QModbusDataUnit::InputRegisters, data);
+}
 
+bool QModbusClientPrivate::collateBytes(const QModbusPdu &response,
+                                      QModbusDataUnit::RegisterType type, QModbusDataUnit *data)
+{
     if (response.dataSize() < QModbusResponse::minimumDataSize(response))
         return false;
 
@@ -537,22 +494,18 @@ bool QModbusClientPrivate::processReadInputRegistersResponse(const QModbusRespon
     if (byteCount % 2 != 0)
         return false;
 
-    const quint8 itemCount = byteCount / 2;
-
-    const QByteArray pduData = response.data().remove(0,1);
-    QDataStream stream(pduData);
-
-    QVector<quint16> values;
-    quint16 tmp;
-    for (int i = 0; i < itemCount; i++){
-        stream >> tmp;
-        values.append(tmp);
-    }
-
     if (data) {
+        QDataStream stream(response.data().remove(0, 1));
+
+        QVector<quint16> values;
+        const quint8 itemCount = byteCount / 2;
+        for (int i = 0; i < itemCount; i++) {
+            quint16 tmp;
+            stream >> tmp;
+            values.append(tmp);
+        }
         data->setValues(values);
-        data->setValueCount(values.count());
-        data->setRegisterType(QModbusDataUnit::InputRegisters);
+        data->setRegisterType(type);
     }
     return true;
 }
@@ -562,22 +515,7 @@ bool QModbusClientPrivate::processWriteSingleCoilResponse(const QModbusResponse 
 {
     if (!isValid(response, QModbusResponse::WriteSingleCoil))
         return false;
-
-    if (response.dataSize() != QModbusResponse::minimumDataSize(response))
-        return false;
-
-    quint16 address, value;
-    response.decodeData(&address, &value);
-    if ((value != Coil::Off) && (value != Coil::On))
-        return false;
-
-    if (data) {
-        data->setValueCount(1);
-        data->setStartAddress(address);
-        data->setValues(QVector<quint16>{ value });
-        data->setRegisterType(QModbusDataUnit::Coils);
-    }
-    return true;
+    return collateSingleValue(response, QModbusDataUnit::Coils, data);
 }
 
 bool QModbusClientPrivate::processWriteSingleRegisterResponse(const QModbusResponse &response,
@@ -585,46 +523,47 @@ bool QModbusClientPrivate::processWriteSingleRegisterResponse(const QModbusRespo
 {
     if (!isValid(response, QModbusResponse::WriteSingleRegister))
         return false;
+    return collateSingleValue(response, QModbusDataUnit::HoldingRegisters, data);
+}
 
+bool QModbusClientPrivate::collateSingleValue(const QModbusPdu &response,
+                                       QModbusDataUnit::RegisterType type, QModbusDataUnit *data)
+{
     if (response.dataSize() != QModbusResponse::minimumDataSize(response))
         return false;
 
     quint16 address, value;
     response.decodeData(&address, &value);
+    if ((type == QModbusDataUnit::Coils) && (value != Coil::Off) && (value != Coil::On))
+        return false;
+
     if (data) {
-        data->setValueCount(1);
+        data->setRegisterType(type);
         data->setStartAddress(address);
         data->setValues(QVector<quint16>{ value });
-        data->setRegisterType(QModbusDataUnit::HoldingRegisters);
     }
     return true;
 }
 
 bool QModbusClientPrivate::processWriteMultipleCoilsResponse(const QModbusResponse &response,
-    QModbusDataUnit *data)
+                                                             QModbusDataUnit *data)
 {
     if (!isValid(response, QModbusResponse::WriteMultipleCoils))
         return false;
-
-    if (response.dataSize() != QModbusResponse::minimumDataSize(response))
-        return false;
-
-    quint16 address, count;
-    response.decodeData(&address, &count);
-    if (data) {
-        data->setValueCount(count);
-        data->setStartAddress(address);
-        data->setRegisterType(QModbusDataUnit::Coils);
-    }
-    return true;
+    return collateMultipleValues(response, QModbusDataUnit::Coils, data);
 }
 
 bool QModbusClientPrivate::processWriteMultipleRegistersResponse(const QModbusResponse &response,
-    QModbusDataUnit *data)
+                                                                 QModbusDataUnit *data)
 {
     if (!isValid(response, QModbusResponse::WriteMultipleRegisters))
         return false;
+    return collateMultipleValues(response, QModbusDataUnit::HoldingRegisters, data);
+}
 
+bool QModbusClientPrivate::collateMultipleValues(const QModbusPdu &response,
+                                      QModbusDataUnit::RegisterType type, QModbusDataUnit *data)
+{
     if (response.dataSize() != QModbusResponse::minimumDataSize(response))
         return false;
 
@@ -632,53 +571,23 @@ bool QModbusClientPrivate::processWriteMultipleRegistersResponse(const QModbusRe
     response.decodeData(&address, &count);
 
     // number of registers to write is 1-123 per request
-    if (count < 1 || count > 123)
+    if ((type == QModbusDataUnit::HoldingRegisters) && (count < 1 || count > 123))
         return false;
+
     if (data) {
-        data->setStartAddress(address);
         data->setValueCount(count);
-        data->setRegisterType(QModbusDataUnit::HoldingRegisters);
+        data->setRegisterType(type);
+        data->setStartAddress(address);
     }
     return true;
 }
 
-bool QModbusClientPrivate::processReadWriteMultipleRegistersResponse(
-    const QModbusResponse &response, QModbusDataUnit *data)
+bool QModbusClientPrivate::processReadWriteMultipleRegistersResponse(const QModbusResponse &resp,
+                                                                     QModbusDataUnit *data)
 {
-    if (!isValid(response, QModbusResponse::ReadWriteMultipleRegisters))
+    if (!isValid(resp, QModbusResponse::ReadWriteMultipleRegisters))
         return false;
-
-    if (response.dataSize() < QModbusResponse::minimumDataSize(response))
-        return false;
-
-    const QByteArray payload = response.data();
-    // byte count needs to match available bytes
-    const quint8 byteCount = payload[0];
-    if ((payload.size() - 1) != byteCount)
-        return false;
-
-    // byte count needs to be odd to match full registers
-    if (byteCount % 2 != 0)
-        return false;
-
-    const quint8 itemCount = byteCount / 2;
-
-    const QByteArray pduData = response.data().remove(0,1);
-    QDataStream stream(pduData);
-
-    QVector<quint16> values;
-    quint16 tmp;
-    for (int i = 0; i < itemCount; i++){
-        stream >> tmp;
-        values.append(tmp);
-    }
-
-    if (data) {
-        data->setValues(values);
-        data->setValueCount(values.count());
-        data->setRegisterType(QModbusDataUnit::HoldingRegisters);
-    }
-    return true;
+    return collateBytes(resp, QModbusDataUnit::HoldingRegisters, data);
 }
 
 QT_END_NAMESPACE

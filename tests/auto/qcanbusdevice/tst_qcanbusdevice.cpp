@@ -299,6 +299,12 @@ void tst_QCanBusDevice::cleanupTestCase()
 
 void tst_QCanBusDevice::tst_filtering()
 {
+    QCanBusDevice::Filter defaultFilter;
+    QCOMPARE(defaultFilter.frameId, 0x0u);
+    QCOMPARE(defaultFilter.frameIdMask, 0x0u);
+    QCOMPARE(defaultFilter.type, QCanBusFrame::InvalidFrame);
+    QCOMPARE(defaultFilter.format, QCanBusDevice::Filter::MatchBaseAndExtendedFormat);
+
     QList<QCanBusDevice::Filter> filters;
     QCanBusDevice::Filter f;
     f.frameId = 0x1;

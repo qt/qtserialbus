@@ -65,6 +65,23 @@
          \li \l {Qt Serial Bus C++ Classes}{C++ Classes}
     \endlist
 
+    \section1 Logging Categories
+
+    The \l QtSerialBus module exports the following \l {Configuring Categories}{logging categories}:
+
+    \table
+    \header
+        \li Logging Category
+        \li Description
+    \row
+        \li qt.modbus
+        \li Enables standard logging inside the Modbus classes
+    \row
+        \li qt.modbus.lowlevel
+        \li Enables low level logging including individual packet content inside
+            the Modbus classes
+    \endtable
+
     \section1 Examples
 
     \list

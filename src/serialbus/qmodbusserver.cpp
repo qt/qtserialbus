@@ -73,7 +73,9 @@ Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
     \value DeviceBusy               Flag to signal the server is engaged in processing a
                                     long-duration program command. \c quint16
     \value AsciiInputDelimiter      The Modbus ASCII end of message delimiter. \c char
-    \value ListenOnlyMode           Flag to set listen only mode of the server. \c bool
+    \value ListenOnlyMode           Flag to set listen only mode of the server.
+                                    This function is typically supported only
+                                    by Modbus serial devices. \c bool
     \value ServerIdentifier         The identifier of the server, \b not the server address. \c quint8
     \value RunIndicatorStatus       The run indicator of the server. \c quint8
     \value AdditionalData           The additional data of the server. \c QByteArray
@@ -843,8 +845,8 @@ QModbusResponse QModbusServerPrivate::processDiagnosticsRequest(const QModbusReq
 
     case Diagnostics::RestartCommunicationsOption: {
         CHECK_SIZE_AND_CONDITION(request, ((data != 0xff00) && (data != 0x0000)));
-        // Restarts the communication by closing the connection and re - opening.After closing,
-        // all communication counters are cleared and the listen only mode set to false.This
+        // Restarts the communication by closing the connection and re-opening. After closing,
+        // all communication counters are cleared and the listen only mode set to false. This
         // function is the only way to remotely clear the listen only mode and bring the device
         // back into communication. If data is 0xff00, the event log history is also cleared.
         q_func()->disconnectDevice();
@@ -878,10 +880,6 @@ QModbusResponse QModbusServerPrivate::processDiagnosticsRequest(const QModbusReq
 
     case Diagnostics::ClearCountersAndDiagnosticRegister:
         CHECK_SIZE_AND_CONDITION(request, (data != 0x0000));
-        // TODO: According to PI_MBUS_300 specification, the clearing of the diagnostic
-        // register is dependent on the device model. For legacy support to fulfill this
-        // requirement, a server configuration variable could be added to check if the
-        // diagnostic register should be cleared or not.
         resetCommunicationCounters();
         q_func()->setValue(QModbusServer::DiagnosticRegister, 0x0000);
         return QModbusResponse(request.functionCode(), request.data());
@@ -898,6 +896,14 @@ QModbusResponse QModbusServerPrivate::processDiagnosticsRequest(const QModbusReq
         CHECK_SIZE_AND_CONDITION(request, (data != 0x0000));
         return QModbusResponse(request.functionCode(), subFunctionCode,
                                m_counters[static_cast<Counter> (subFunctionCode)]);
+
+    case Diagnostics::ClearOverrunCounterAndFlag: {
+        CHECK_SIZE_AND_CONDITION(request, (data != 0x0000));
+        m_counters[Diagnostics::ReturnBusCharacterOverrunCount] = 0;
+        quint16 reg = q_func()->value(QModbusServer::DiagnosticRegister).value<quint16>();
+        q_func()->setValue(QModbusServer::DiagnosticRegister, reg &~ 1); // clear first bit
+        return QModbusResponse(request.functionCode(), request.data());
+    }
     }
     return QModbusExceptionResponse(request.functionCode(),
         QModbusExceptionResponse::IllegalFunction);
@@ -927,7 +933,7 @@ QModbusResponse QModbusServerPrivate::processGetCommEventLogRequest(const QModbu
     }
     const quint16 deviceBusy = tmp.value<quint16>();
 
-    QVector<quint8> eventLog(m_commEventLog.size());
+    QVector<quint8> eventLog(int(m_commEventLog.size()));
     std::copy(m_commEventLog.cbegin(), m_commEventLog.cend(), eventLog.begin());
 
     // 6 -> 3 x 2 Bytes (Status, Event Count and Message Count)

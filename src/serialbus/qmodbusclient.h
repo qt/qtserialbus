@@ -37,13 +37,11 @@
 #ifndef QMODBUSCLIENT_H
 #define QMODBUSCLIENT_H
 
-#include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qmodbusdevice.h>
+#include <QtCore/qobject.h>
 #include <QtSerialBus/qmodbusdataunit.h>
+#include <QtSerialBus/qmodbusdevice.h>
 #include <QtSerialBus/qmodbuspdu.h>
 #include <QtSerialBus/qmodbusreply.h>
-
-#include <QtCore/qobject.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -56,7 +54,7 @@ class Q_SERIALBUS_EXPORT QModbusClient : public QModbusDevice
     Q_PROPERTY(int timeout READ timeout WRITE setTimeout NOTIFY timeoutChanged)
 
 public:
-    explicit QModbusClient(QObject *parent = 0);
+    explicit QModbusClient(QObject *parent = Q_NULLPTR);
     ~QModbusClient();
 
     QModbusReply *sendReadRequest(const QModbusDataUnit &read, int serverAddress);

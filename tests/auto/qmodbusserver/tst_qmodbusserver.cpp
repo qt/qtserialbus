@@ -44,12 +44,18 @@
 class TestServer : public QModbusServer
 {
 public:
-    TestServer() Q_DECL_EQ_DEFAULT;
+    TestServer() {
+        qRegisterMetaType<QModbusDataUnit::RegisterType>();
+    }
 
-    virtual bool open() Q_DECL_OVERRIDE { return true; }
-    virtual void close() Q_DECL_OVERRIDE {}
-
-    QModbusResponse processRequest(const QModbusPdu &request)
+    bool open() Q_DECL_OVERRIDE {
+        setState(QModbusDevice::ConnectedState);
+        return true;
+    }
+    void close() Q_DECL_OVERRIDE {
+        setState(QModbusDevice::UnconnectedState);
+    }
+    QModbusResponse processRequest(const QModbusPdu &request) Q_DECL_OVERRIDE
     {
         return QModbusServer::processRequest(request);
     }
@@ -344,21 +350,19 @@ private slots:
         QCOMPARE(response.data(), QByteArray::fromHex("000000ffabcd"));
 
         //subfunction 01
-        //TODO: impossible due to connectDevice() asking open() which is pure virtual
-        //validate this in qmodbustcpserver and qmodbusrtuslave
-//        request = QModbusRequest(QModbusRequest::Diagnostics,
-//            QByteArray::fromHex("00010000"));
-//        response = server.processRequest(request);
-//        QCOMPARE(response.isException(), false);
-//        // response, equals request
-//        QCOMPARE(response.data(), QByteArray::fromHex("00010000"));
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("00010000"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("00010000"));
 
-//        request = QModbusRequest(QModbusRequest::Diagnostics,
-//            QByteArray::fromHex("0001ff00"));
-//        response = server.processRequest(request);
-//        QCOMPARE(response.isException(), false);
-//        // response, equals request
-//        QCOMPARE(response.data(), QByteArray::fromHex("0001ff00"));
+        request = QModbusRequest(QModbusRequest::Diagnostics,
+            QByteArray::fromHex("0001ff00"));
+        response = server.processRequest(request);
+        QCOMPARE(response.isException(), false);
+        // response, equals request
+        QCOMPARE(response.data(), QByteArray::fromHex("0001ff00"));
 
         // invalidate
         request = QModbusRequest(QModbusRequest::Diagnostics,
@@ -1186,6 +1190,14 @@ private slots:
         QCOMPARE(local.setValue(QModbusServer::ListenOnlyMode, "Test"), false);
         QCOMPARE(local.setValue(QModbusServer::ListenOnlyMode, true), true);
         QCOMPARE(local.value(QModbusServer::ListenOnlyMode).toBool(), true);
+    }
+
+    void testClearOverrunCounterAndFlag()
+    {
+        TestServer server;
+        server.setValue(QModbusServer::DiagnosticRegister, 0xffff);
+        server.processRequest(QModbusRequest(QModbusRequest::Diagnostics, quint16(0x0014), quint16(0)));
+        QCOMPARE(server.value(QModbusServer::DiagnosticRegister).value<quint16>(), quint16(0xfffe));
     }
 };
 

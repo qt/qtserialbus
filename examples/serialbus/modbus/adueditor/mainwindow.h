@@ -82,6 +82,7 @@ private slots:
     void on_sendButton_clicked();
     void on_connectButton_clicked();
     void on_disconnectButton_clicked();
+    void on_serialPortCombo_currentIndexChanged(int index);
 
 private:
     void disconnectAndDelete();

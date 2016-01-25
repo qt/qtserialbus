@@ -37,12 +37,12 @@
 #ifndef QMODBUSTCPCLIENT_P_H
 #define QMODBUSTCPCLIENT_P_H
 
-#include "qmodbusclient_p.h"
-#include "qmodbustcpclient.h"
-
 #include <QtCore/qloggingcategory.h>
 #include <QtNetwork/qhostaddress.h>
 #include <QtNetwork/qtcpsocket.h>
+#include "QtSerialBus/qmodbustcpclient.h"
+
+#include "private/qmodbusclient_p.h"
 
 //
 //  W A R N I N G
@@ -213,7 +213,7 @@ public:
                     qCDebug(QT_MODBUS) << "(TCP client) Resend request with tId:" << hex << tId;
                 } else {
                     qCDebug(QT_MODBUS) << "(TCP client) Timeout of request with tId:" << hex << tId;
-                    elem.reply->setError(QModbusReply::TimeoutError,
+                    elem.reply->setError(QModbusDevice::TimeoutError,
                         QModbusClient::tr("Request timeout."));
                 }
             });
@@ -247,7 +247,7 @@ public:
             if (elem.reply.isNull())
                 continue;
 
-            elem.reply->setError(QModbusReply::ReplyAbortedError,
+            elem.reply->setError(QModbusDevice::ReplyAbortedError,
                                  QModbusClient::tr("Reply aborted due to connection closure."));
         }
     }

@@ -88,7 +88,8 @@ QT_BEGIN_NAMESPACE
     \value RawFilterKey     This configuration determines the type of CAN bus frames
                             that the current device accepts. The expected value
                             is \c QList<QCanBusDevice::Filter>. Passing an empty list clears
-                            all previously set filters including default filters.
+                            all previously set filters including default filters. For more details
+                            see \l QCanBusDevice::Filter.
     \value ErrorFilterKey   This key defines the type of error that should be
                             forwarded via the current connection. The associated
                             value should be of type \l QCanBusFrame::FrameErrors.
@@ -98,11 +99,13 @@ QT_BEGIN_NAMESPACE
     \value ReceiveOwnKey    This key defines whether this CAN device can send messages.
                             The expected value for this key is \c bool.
     \value BitRateKey       This key defines the bitrate in bits per second.
+    \value CanFdKey         This key defines whether sending and receiving of CANFD frames
+                            should be enabled. The expected value for this key is \c bool.
     \value UserKey          This key defines the range where custom keys start. It's most
                             common purpose is to permit platform-specific configuration
                             options.
-    \value CanFdKey         This key defines whether sending and receiving of CANFD frames
-                            should be enabled. The expected value for this key is \c bool.
+
+    \sa configurationParameter()
 */
 
 /*!
@@ -146,6 +149,8 @@ QT_BEGIN_NAMESPACE
         (receivedFrameId & frameIdMask) == (frameId & frameIdMask)
     \endcode
 
+    By default this field is set to \c 0x0.
+
     \sa frameIdMask
 */
 
@@ -160,6 +165,8 @@ QT_BEGIN_NAMESPACE
         (receivedFrameId & frameIdMask) == (frameId & frameIdMask)
     \endcode
 
+    By default this field is set to \c 0x0.
+
     \sa frameId
 */
 
@@ -168,11 +175,11 @@ QT_BEGIN_NAMESPACE
 
     \brief the type of the message to be filtered.
 
-    If multiple message types has to be matched
-
     Any CAN bus message type can be matched by setting this variable
     to \l QCanBusFrame::InvalidFrame. The filter object is invalid if
     type is equal to \l QCanBusFrame::UnknownFrame.
+
+    By default this field is set to \l QCanBusFrame::InvalidFrame.
 
     \sa QCanBusFrame::FrameType
 */
@@ -181,6 +188,8 @@ QT_BEGIN_NAMESPACE
     \variable QCanBusDevice::Filter::format
 
     \brief the message format of the matching CAN bus message.
+
+    By default this field is set to \l QCanBusDevice::Filter::MatchBaseAndExtendedFormat.
 */
 
 /*!
@@ -468,6 +477,21 @@ QCanBusFrame QCanBusDevice::readFrame()
 
     Writes \a frame to the CAN bus and returns \c true on success;
     otherwise \c false.
+
+    On some platforms, the frame may be put into a queue and the return
+    value may only indicate a successful insertion into the queue.
+    The actual frame will be send later on. Therefore the \l framesWritten()
+    signal is the final confirmation that the frame has been handed off to
+    the transport layer. If an error occurs the \l errorOccurred() is emitted.
+
+    As per CAN bus specification, frames of type
+    \l {QCanBusFrame::RemoteRequestFrame} {remote transfer request (RTR)}
+    do not have a payload but require a size larger than zero. This size indicates
+    the expected response payload length from the remote party. Therefore when sending a RTR frame using
+    this function it may still be required to set an arbitrary payload on \a frame. The length of
+    the arbitrary payload is what is set as size expectation for the RTR frame.
+
+    \sa QCanBusFrame::setPayload()
 */
 
 /*!

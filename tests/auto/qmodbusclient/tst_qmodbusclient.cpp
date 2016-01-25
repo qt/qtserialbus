@@ -35,34 +35,43 @@
 ****************************************************************************/
 
 #include <QtSerialBus/qmodbusclient.h>
-#include <QtSerialBus/private/qmodbusclient_p.h>
-#include <QtSerialBus/private/qmodbus_symbols_p.h>
+#include <private/qmodbusclient_p.h>
+#include <private/qmodbus_symbols_p.h>
 
 #include <QtTest/QtTest>
-
-class TestClientPrivate : public QModbusClientPrivate
-{
-
-};
 
 class TestClient : public QModbusClient
 {
     Q_OBJECT
-    Q_DECLARE_PRIVATE(TestClient)
-    friend class tst_QModbusClient;
+    class TestClientPrivate : public QModbusClientPrivate
+    {
+        Q_DECLARE_PUBLIC(TestClient)
+
+    public:
+        bool isOpen() const Q_DECL_OVERRIDE { return m_open; }
+
+    private:
+        bool m_open = false;
+    };
 
 public:
-    TestClient(QObject *parent = Q_NULLPTR)
-        : QModbusClient(parent)
+    TestClient()
+        : QModbusClient(*new TestClientPrivate)
     {}
-
-    virtual bool open() Q_DECL_OVERRIDE { return true; }
-    virtual void close() Q_DECL_OVERRIDE {}
-
+    bool open() Q_DECL_OVERRIDE {
+        d_func()->m_open = true;
+        setState(QModbusDevice::ConnectedState);
+        return true;
+    }
+    void close() Q_DECL_OVERRIDE {
+        d_func()->m_open = true;
+        setState(QModbusDevice::UnconnectedState);
+    }
     bool processResponse(const QModbusResponse &response, QModbusDataUnit *data)
     {
         return QModbusClient::processResponse(response, data);
     }
+    Q_DECLARE_PRIVATE(TestClient)
 };
 
 class tst_QModbusClient : public QObject
@@ -75,18 +84,27 @@ private slots:
         TestClient client;
         QCOMPARE(client.timeout(), 1000); //default value test
 
-        client.setTimeout(300);
-        QCOMPARE(client.timeout(), 300);
-
+        QSignalSpy spy(&client, SIGNAL(timeoutChanged(int)));
         client.setTimeout(50);
         QCOMPARE(client.timeout(), 50);
+        QCOMPARE(spy.isEmpty(), false); // we expect the signal
 
+        spy.clear();
         client.setTimeout(49); // everything below 50 fails
         QVERIFY(client.timeout() >= 50);
+        QCOMPARE(spy.isEmpty(), true); // and the signal should not fire
+    }
 
-        // test timer firing off
-        client.setTimeout(100);
-        QCOMPARE(client.timeout(), 100);
+    void testNumberOfRetries()
+    {
+        TestClient client;
+        QCOMPARE(client.numberOfRetries(), 3);
+
+        client.setNumberOfRetries(-1);  // ignore everything below 0
+        QCOMPARE(client.numberOfRetries(), 3);
+
+        client.setNumberOfRetries(1);
+        QCOMPARE(client.numberOfRetries(), 1);
     }
 
     void testProcessReadWriteSingleMultipleCoilsResponse()
@@ -389,7 +407,7 @@ private slots:
         QTEST(request.isValid(), "isValid");
     }
 
-    void testPrivatecreateRWRequest_data()
+    void testPrivateCreateRWRequest_data()
     {
         QTest::addColumn<QModbusDataUnit::RegisterType>("rc");
         QTest::addColumn<int>("address");
@@ -412,7 +430,7 @@ private slots:
             << QByteArray::fromHex("0001000200010002046b056b05") << true;
     }
 
-    void testPrivatecreateRWRequest()
+    void testPrivateCreateRWRequest()
     {
         QFETCH(QModbusDataUnit::RegisterType, rc);
         QFETCH(int, address);
@@ -425,6 +443,40 @@ private slots:
         QTEST(request.functionCode(), "fc");
         QTEST(request.data(), "data");
         QTEST(request.isValid(), "isValid");
+    }
+
+    void testPrivateSendRequest()
+    {
+        TestClient client;
+        QModbusDataUnit unit;
+        QModbusReply *reply = nullptr;
+
+        QTest::ignoreMessage(QtWarningMsg, "(Client) Device is not connected");
+        QCOMPARE(client.d_func()->sendRequest(QModbusRequest(), 1, &unit), reply);
+        QCOMPARE(client.error(), QModbusDevice::ConnectionError);
+        QCOMPARE(client.errorString(), QString("Device not connected."));
+
+        QTest::ignoreMessage(QtWarningMsg, "(Client) Device is not connected");
+        QCOMPARE(client.d_func()->sendRequest(QModbusRequest(), 1, nullptr), reply);
+        QCOMPARE(client.error(), QModbusDevice::ConnectionError);
+        QCOMPARE(client.errorString(), QString("Device not connected."));
+
+        QCOMPARE(client.connectDevice(), true);
+
+        QTest::ignoreMessage(QtWarningMsg, "(Client) Refuse to send invalid request.");
+        QCOMPARE(client.d_func()->sendRequest(QModbusRequest(), 1, &unit), reply);
+        QCOMPARE(client.error(), QModbusDevice::ProtocolError);
+        QCOMPARE(client.errorString(), QString("Invalid Modbus request."));
+
+        QTest::ignoreMessage(QtWarningMsg, "(Client) Refuse to send invalid request.");
+        QCOMPARE(client.d_func()->sendRequest(QModbusRequest(), 1, nullptr), reply);
+        QCOMPARE(client.error(), QModbusDevice::ProtocolError);
+        QCOMPARE(client.errorString(), QString("Invalid Modbus request."));
+
+        QModbusRequest request(QModbusRequest::Diagnostics);
+        // The default implementation is empty and returns a null pointer.
+        QCOMPARE(client.d_func()->sendRequest(request, 1, &unit), reply);
+        QCOMPARE(client.d_func()->sendRequest(request, 1, nullptr), reply);
     }
 };
 

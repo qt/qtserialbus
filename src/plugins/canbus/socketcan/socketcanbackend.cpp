@@ -157,7 +157,8 @@ bool SocketCanBackend::applyConfigurationParameter(int key, const QVariant &valu
             break;
         }
 
-        can_filter filters[filterList.size()];
+        QVector<can_filter> filters;
+        filters.resize(filterList.size());
         for (int i = 0; i < filterList.size(); i++) {
             const QCanBusDevice::Filter f = filterList.at(i);
             can_filter filter;
@@ -199,7 +200,8 @@ bool SocketCanBackend::applyConfigurationParameter(int key, const QVariant &valu
 
             filters[i] = filter;
         }
-        if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_FILTER, filters, sizeof(filters)) < 0) {
+        if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_FILTER,
+                       filters.constData(), sizeof(filters[0]) * filters.size()) < 0) {
             setError(qt_error_string(errno),
                      QCanBusDevice::CanBusError::ConfigurationError);
             break;
@@ -266,7 +268,7 @@ bool SocketCanBackend::connectSocket()
         const QVariant param = configurationParameter(key);
         bool success = applyConfigurationParameter(key, param);
         if (!success) {
-            qWarning() << "Cannot apply parameter:" << key
+            qWarning() << "Cannot apply parameter:" << QCanBusDevice::ConfigurationKey(key)
                        << "with value:" << param;
         }
     }

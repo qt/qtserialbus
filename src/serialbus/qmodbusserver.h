@@ -37,13 +37,11 @@
 #ifndef QMODBUSERVER_H
 #define QMODBUSERVER_H
 
-#include <QtSerialBus/qserialbusglobal.h>
+#include <QtCore/qobject.h>
+#include <QtCore/qvariant.h>
 #include <QtSerialBus/qmodbusdataunit.h>
 #include <QtSerialBus/qmodbusdevice.h>
 #include <QtSerialBus/qmodbuspdu.h>
-
-#include <QtCore/qobject.h>
-#include <QtCore/qvariant.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -67,9 +65,9 @@ public:
         // Reserved
         UserOption = 0x100
     };
-    Q_ENUMS(Option)
+    Q_ENUM(Option)
 
-    explicit QModbusServer(QObject *parent = 0);
+    explicit QModbusServer(QObject *parent = Q_NULLPTR);
     ~QModbusServer();
 
     int serverAddress() const;

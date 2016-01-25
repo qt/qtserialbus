@@ -37,9 +37,6 @@
 #ifndef QMODBUSTCPSERVER_P_H
 #define QMODBUSTCPSERVER_P_H
 
-#include <QtSerialBus/private/qmodbusserver_p.h>
-#include <QtSerialBus/qmodbustcpserver.h>
-
 #include <QtCore/qdatastream.h>
 #include <QtCore/qdebug.h>
 #include <QtCore/qloggingcategory.h>
@@ -47,6 +44,9 @@
 #include <QtNetwork/qhostaddress.h>
 #include <QtNetwork/qtcpserver.h>
 #include <QtNetwork/qtcpsocket.h>
+#include <QtSerialBus/qmodbustcpserver.h>
+
+#include <private/qmodbusserver_p.h>
 
 //
 //  W A R N I N G
@@ -78,6 +78,12 @@ public:
     QModbusResponse forwardProcessRequest(const QModbusRequest &r)
     {
         Q_Q(QModbusTcpServer);
+        if (q->value(QModbusServer::DeviceBusy).value<quint16>() == 0xffff) {
+            // If the device is busy, send an exception response without processing.
+            incrementCounter(QModbusServerPrivate::Counter::ServerBusy);
+            return QModbusExceptionResponse(r.functionCode(),
+                QModbusExceptionResponse::ServerDeviceBusy);
+        }
         return q->processRequest(r);
     }
 
@@ -85,7 +91,7 @@ public:
         This function is a workaround since 2nd level lambda below cannot
         call protected QModbusDevice::setError(..) function on VS2013.
     */
-    void forwardError(const QString &errorText, QModbusDevice::ModbusError error)
+    void forwardError(const QString &errorText, QModbusDevice::Error error)
     {
         Q_Q(QModbusTcpServer);
         q->setError(errorText, error);

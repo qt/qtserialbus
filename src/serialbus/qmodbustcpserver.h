@@ -50,7 +50,7 @@ class Q_SERIALBUS_EXPORT QModbusTcpServer : public QModbusServer
     Q_DECLARE_PRIVATE(QModbusTcpServer)
 
 public:
-    explicit QModbusTcpServer(QObject *parent = 0);
+    explicit QModbusTcpServer(QObject *parent = Q_NULLPTR);
     ~QModbusTcpServer();
 
 protected:

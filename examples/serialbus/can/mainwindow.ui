@@ -72,7 +72,8 @@
          <item row="0" column="3">
           <widget class="QCheckBox" name="fdBox">
            <property name="text">
-            <string>Flexible Data-Rate</string>
+            <string>Flexible Data-Rate
+(64 byte payload)</string>
            </property>
           </widget>
          </item>

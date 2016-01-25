@@ -37,7 +37,7 @@
 #include "qmodbusreply.h"
 
 #include <QtCore/qobject.h>
-#include <QtCore/private/qobject_p.h>
+#include <private/qobject_p.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -50,7 +50,7 @@ public:
     QModbusDataUnit m_unit;
     int m_serverAddress = 1;
     bool m_finished = false;
-    QModbusReply::ReplyError m_error = QModbusReply::NoError;
+    QModbusDevice::Error m_error = QModbusDevice::NoError;
     QString m_errorText;
     QModbusResponse m_response;
     QModbusReply::ReplyType m_type;
@@ -75,21 +75,6 @@ public:
     \value Common   The reply originates from a common read, write or read/write
                     request. See \l QModbusClient::sendReadRequest,
                     \l QModbusClient::sendWriteRequest and \l QModbusClient::sendReadWriteRequest
-*/
-
-/*!
-    \enum QModbusReply::ReplyError
-
-    This enum describes all the possible error conditions.
-
-    \value NoError                      No error has occurred.
-    \value ProtocolError                The request was answered with a Modbus exception.
-    \value TimeoutError                 The Modbus request was not answered within the given
-                                        \l QModbusClient::timeout().
-    \value ReplyAbortedError            The reply was aborted due to a disconnection of
-                                        the \l QModbusClient.
-    \value UnknownError                 An unknown error has occurred.
-    \value WriteError                   The request could not be written/sent to the remote party.
 */
 
 /*!
@@ -191,14 +176,14 @@ int QModbusReply::serverAddress() const
 }
 
 /*!
-    \fn void QModbusReply::errorOccurred(QModbusReply::ReplyError error)
+    \fn void QModbusReply::errorOccurred(QModbusDevice::Error error)
 
-    This signal is emitted when an error has been detected in the processing of this reply.
-    The \l finished() signal will probably follow.
+    This signal is emitted when an error has been detected in the processing of
+    this reply. The \l finished() signal will probably follow.
 
     The error will be described by the error code \a error. If errorString is
     not empty it will contain a textual description of the error. In case of a
-    \l QModbusReply::ProtocolError the \l rawResult() function can be used to
+    \l QModbusDevice::ProtocolError the \l rawResult() function can be used to
     obtain the original Modbus exception response to get the exception code.
 
     Note: Do not delete this reply object in the slot connected to this signal.
@@ -208,7 +193,7 @@ int QModbusReply::serverAddress() const
 /*!
     Returns the error state of this reply.
 */
-QModbusReply::ReplyError QModbusReply::error() const
+QModbusDevice::Error QModbusReply::error() const
 {
     Q_D(const QModbusReply);
     return d->m_error;
@@ -222,7 +207,7 @@ QModbusReply::ReplyError QModbusReply::error() const
     This will also cause the \l errorOccurred() and \l finished() signals to be emitted,
     in that order.
 */
-void QModbusReply::setError(QModbusReply::ReplyError error, const QString &errorText)
+void QModbusReply::setError(QModbusDevice::Error error, const QString &errorText)
 {
     Q_D(QModbusReply);
     d->m_error = error;
@@ -240,7 +225,7 @@ void QModbusReply::setError(QModbusReply::ReplyError error, const QString &error
 
     \sa error(), errorOccurred()
 */
-QString QModbusReply::errorText() const
+QString QModbusReply::errorString() const
 {
     Q_D(const QModbusReply);
     return d->m_errorText;

@@ -344,6 +344,8 @@ static int minimumDataSize(const QModbusPdu &pdu, Type type)
 */
 
 /*!
+    \relates QModbusPdu
+
     Writes the Modbus \a pdu to the \a debug stream.
 */
 QDebug operator<<(QDebug debug, const QModbusPdu &pdu)

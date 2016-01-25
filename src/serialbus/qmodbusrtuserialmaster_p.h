@@ -37,15 +37,15 @@
 #ifndef QMODBUSSERIALMASTER_P_H
 #define QMODBUSSERIALMASTER_P_H
 
-#include <QtSerialBus/qmodbusrtuserialmaster.h>
-#include <QtSerialBus/private/qmodbusadu_p.h>
-#include <QtSerialBus/private/qmodbusclient_p.h>
-
 #include <QtCore/qloggingcategory.h>
 #include <QtCore/qpointer.h>
 #include <QtCore/qqueue.h>
 #include <QtCore/qtimer.h>
+#include <QtSerialBus/qmodbusrtuserialmaster.h>
 #include <QtSerialPort/qserialport.h>
+
+#include <private/qmodbusadu_p.h>
+#include <private/qmodbusclient_p.h>
 
 //
 //  W A R N I N G
@@ -87,7 +87,7 @@ public:
             if (elem.reply.isNull() || elem.numberOfRetries <= 0) {
                 elem = m_queue.dequeue();
                 if (elem.numberOfRetries <= 0) {
-                    elem.reply->setError(QModbusReply::TimeoutError,
+                    elem.reply->setError(QModbusDevice::TimeoutError,
                         QModbusClient::tr("Request timeout."));
                     qCDebug(QT_MODBUS) << "(RTU client) Timeout of request" << elem.requestPdu;
                 }
@@ -211,7 +211,7 @@ public:
         bool success = sendNextAdu(elem.requestPdu, elem.reply->serverAddress());
         if (!success) {
             elem = m_queue.dequeue();
-            elem.reply->setError(QModbusReply::WriteError,
+            elem.reply->setError(QModbusDevice::WriteError,
                                  QModbusClient::tr("Could not write message to serial bus."));
             QTimer::singleShot(0, [this]() { sendNextRequest(); });
             return;

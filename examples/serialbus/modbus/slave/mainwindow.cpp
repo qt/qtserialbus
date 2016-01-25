@@ -42,12 +42,11 @@
 #include "settingsdialog.h"
 #include "ui_mainwindow.h"
 
-#include <QtSerialBus/qmodbusrtuserialslave.h>
-#include <QtSerialBus/qmodbustcpserver.h>
-
-#include <QtCore/qregularexpression.h>
-#include <QtCore/qurl.h>
-#include <QtWidgets/qstatusbar.h>
+#include <QModbusRtuSerialSlave>
+#include <QModbusTcpServer>
+#include <QRegularExpression>
+#include <QStatusBar>
+#include <QUrl>
 
 enum ModbusConnection {
     Serial,
@@ -110,6 +109,7 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
         if (ui->portEdit->text().isEmpty())
             ui->portEdit->setText(QLatin1Literal("127.0.0.1:502"));
     }
+    ui->listenOnlyBox->setEnabled(type == Serial);
 
     if (!modbusDevice) {
         ui->connectButton->setDisabled(true);
@@ -133,11 +133,22 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
         connect(modbusDevice, &QModbusServer::errorOccurred,
                 this, &MainWindow::handleDeviceError);
 
+        connect(ui->listenOnlyBox, &QCheckBox::toggled, this, [this](bool toggled) {
+            if (modbusDevice)
+                modbusDevice->setValue(QModbusServer::ListenOnlyMode, toggled);
+        });
+        emit ui->listenOnlyBox->toggled(ui->listenOnlyBox->isChecked());
+        connect(ui->setBusyBox, &QCheckBox::toggled, this, [this](bool toggled) {
+            if (modbusDevice)
+                modbusDevice->setValue(QModbusServer::DeviceBusy, toggled ? 0xffff : 0x0000);
+        });
+        emit ui->setBusyBox->toggled(ui->setBusyBox->isChecked());
+
         setupDeviceData();
     }
 }
 
-void MainWindow::handleDeviceError(QModbusDevice::ModbusError newError)
+void MainWindow::handleDeviceError(QModbusDevice::Error newError)
 {
     if (newError == QModbusDevice::NoError || !modbusDevice)
         return;

@@ -6,7 +6,7 @@ CONFIG += c++11
 QMAKE_DOCS = $$PWD/doc/qtserialbus.qdocconf
 
 MODULE_PLUGIN_TYPES = \
-    serialbuses
+    canbus
 
 load(qt_module)
 

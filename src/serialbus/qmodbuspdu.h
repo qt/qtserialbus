@@ -36,11 +36,10 @@
 #ifndef QMODBUSPDU_H
 #define QMODBUSPDU_H
 
-#include <QtSerialBus/qserialbusglobal.h>
-
 #include <QtCore/qdatastream.h>
 #include <QtCore/qmetatype.h>
 #include <QtCore/qvector.h>
+#include <QtSerialBus/qserialbusglobal.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -60,7 +59,6 @@ public:
         GatewayTargetDeviceFailedToRespond = 0x0B,
         ExtendedException = 0xFF,
     };
-    Q_ENUMS(ExceptionCode)
 
     enum FunctionCode {
         Invalid = 0x00,
@@ -85,7 +83,6 @@ public:
         EncapsulatedInterfaceTransport = 0x2B,
         UndefinedFunctionCode = 0x100
     };
-    Q_ENUMS(FunctionCode)
 
     QModbusPdu() Q_DECL_EQ_DEFAULT;
     virtual ~QModbusPdu() Q_DECL_EQ_DEFAULT;

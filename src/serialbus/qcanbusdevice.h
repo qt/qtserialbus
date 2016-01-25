@@ -37,9 +37,8 @@
 #ifndef QCANBUSDEVICE_H
 #define QCANBUSDEVICE_H
 
-#include <QtSerialBus/qcanbusframe.h>
-
 #include <QtCore/qobject.h>
+#include <QtSerialBus/qcanbusframe.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -90,14 +89,21 @@ public:
         };
         Q_DECLARE_FLAGS(FormatFilters, FormatFilter)
 
-
+#ifndef Q_QDOC
+        quint32 frameId = 0;
+        quint32 frameIdMask = 0;
+        QCanBusFrame::FrameType type = QCanBusFrame::InvalidFrame;
+        FormatFilter format = MatchBaseAndExtendedFormat;
+#else
+        // qdoc cannot handle default initialized member
         quint32 frameId;
         quint32 frameIdMask;
         QCanBusFrame::FrameType type;
         FormatFilter format;
+#endif
     };
 
-    explicit QCanBusDevice(QObject *parent = 0);
+    explicit QCanBusDevice(QObject *parent = Q_NULLPTR);
 
     virtual void setConfigurationParameter(int key,
                                            const QVariant &value);

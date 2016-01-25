@@ -41,11 +41,14 @@
 #ifndef WRITEREGISTERMODEL_H
 #define WRITEREGISTERMODEL_H
 
-#include <QtCore/qabstractitemmodel.h>
-#include <QtCore/qbitarray.h>
+#include <QAbstractItemModel>
+#include <QBitArray>
+#include <QObject>
 
 class WriteRegisterModel : public QAbstractTableModel
 {
+    Q_OBJECT
+
 public:
     WriteRegisterModel(QObject* parent = 0);
 
@@ -58,7 +61,16 @@ public:
 
     Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
 
+public slots:
+    void setStartAddress(int address);
+    void setNumberOfValues(const QString &number);
+
+signals:
+    void updateViewport();
+
 public:
+    int m_number;
+    int m_address;
     QBitArray m_coils;
     QVector<quint16> m_holdingRegisters;
 };

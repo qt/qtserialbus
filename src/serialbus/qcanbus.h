@@ -37,10 +37,9 @@
 #ifndef QCANBUS_H
 #define QCANBUS_H
 
+#include <QtCore/qobject.h>
 #include <QtSerialBus/qserialbusglobal.h>
 #include <QtSerialBus/qcanbusdevice.h>
-
-#include <QtCore/qobject.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -58,7 +57,7 @@ public:
                                 const QString &interfaceName) const;
 
 private:
-    QCanBus(QObject *parent = 0);
+    QCanBus(QObject *parent = Q_NULLPTR);
 
     Q_DISABLE_COPY(QCanBus)
 };

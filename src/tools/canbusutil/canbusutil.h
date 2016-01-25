@@ -47,7 +47,7 @@ class CanBusUtil : public QObject
 {
     Q_OBJECT
 public:
-    explicit CanBusUtil(QTextStream& output, QCoreApplication& app, QObject *parent = 0);
+    explicit CanBusUtil(QTextStream& output, QCoreApplication& app, QObject *parent = Q_NULLPTR);
 
     bool start(int argc, char *argv[]);
 
@@ -57,7 +57,7 @@ private:
     void printDataUsage();
     bool parseArgs(int argc, char *argv[]);
     bool parseDataField(qint32 &id, QString &payload);
-    bool parsePayloadField(QString payload, bool &rtrFrame, QByteArray &bytes);
+    bool parsePayloadField(QString payload, bool &rtrFrame, bool &fdFrame, QByteArray &bytes);
     bool connectCanDevice();
     bool startListeningOnCanDevice();
     bool sendData();

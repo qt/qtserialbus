@@ -42,6 +42,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QModbusDataUnit>
 
 QT_BEGIN_NAMESPACE
 
@@ -68,6 +69,8 @@ public:
 
 private:
     void initActions();
+    QModbusDataUnit readRequest() const;
+    QModbusDataUnit writeRequest() const;
 
 private slots:
     void on_connectButton_clicked();
@@ -77,9 +80,10 @@ private slots:
     void readReady();
 
     void on_writeButton_clicked();
-    void writeReady();
+    void on_readWriteButton_clicked();
 
     void on_connectType_currentIndexChanged(int);
+    void on_writeTable_currentIndexChanged(int);
 
 private:
     Ui::MainWindow *ui;

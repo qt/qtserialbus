@@ -37,10 +37,11 @@
 #ifndef QMODBUSDEVICE_P_H
 #define QMODBUSDEVICE_P_H
 
-#include <private/qobject_p.h>
 #include <QtCore/qvariant.h>
 #include <QtSerialBus/qmodbusdevice.h>
 #include <QtSerialPort/qserialport.h>
+
+#include <private/qobject_p.h>
 
 //
 //  W A R N I N G
@@ -62,8 +63,8 @@ class QModbusDevicePrivate : public QObjectPrivate
 public:
     QModbusDevicePrivate() Q_DECL_EQ_DEFAULT;
 
-    QModbusDevice::ModbusDeviceState state = QModbusDevice::UnconnectedState;
-    QModbusDevice::ModbusError error = QModbusDevice::NoError;
+    QModbusDevice::State state = QModbusDevice::UnconnectedState;
+    QModbusDevice::Error error = QModbusDevice::NoError;
     QString errorString;
 
     QString m_comPort;

@@ -69,7 +69,10 @@ MainWindow::MainWindow(QWidget *parent)
     s_instance = this;
 
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
-        serialPortCombo->addItem(info.portName(), true);
+        serialPortCombo->addItem(info.portName(), false);
+    serialPortCombo->insertSeparator(serialPortCombo->count());
+    serialPortCombo->addItem(QStringLiteral("Add port..."), true);
+    serialPortCombo->setInsertPolicy(QComboBox::InsertAtTop);
 
     connect(tcpRadio, &QRadioButton::toggled, this, [this](bool toggled) {
         stackedWidget->setCurrentIndex(toggled);
@@ -176,12 +179,12 @@ void MainWindow::on_connectButton_clicked()
     m_device->setTimeout(timeoutSpin->value());
     m_device->setNumberOfRetries(retriesSpin->value());
 
-    connect(m_device, &QModbusDevice::errorOccurred, this, [this](QModbusDevice::ModbusError) {
+    connect(m_device, &QModbusDevice::errorOccurred, this, [this](QModbusDevice::Error) {
         qDebug().noquote() << QStringLiteral("Error: %1").arg(m_device->errorString());
         emit disconnectButton->clicked();
     }, Qt::QueuedConnection);
 
-    connect(m_device, &QModbusDevice::stateChanged, [this](QModbusDevice::ModbusDeviceState state) {
+    connect(m_device, &QModbusDevice::stateChanged, [this](QModbusDevice::State state) {
         switch (state) {
         case QModbusDevice::UnconnectedState:
             qDebug().noquote() << QStringLiteral("State: Entered unconnected state.");
@@ -203,6 +206,16 @@ void MainWindow::on_connectButton_clicked()
 void MainWindow::on_disconnectButton_clicked()
 {
     disconnectAndDelete();
+}
+
+void MainWindow::on_serialPortCombo_currentIndexChanged(int index)
+{
+    const bool custom = serialPortCombo->itemData(index, Qt::UserRole).toBool();
+    serialPortCombo->setEditable(custom);
+    if (custom) {
+        serialPortCombo->clearEditText();
+        serialPortCombo->lineEdit()->setPlaceholderText(QStringLiteral("Type here..."));
+    }
 }
 
 void MainWindow::disconnectAndDelete()

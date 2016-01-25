@@ -57,7 +57,6 @@ QT_BEGIN_NAMESPACE
 QModbusDevice::QModbusDevice(QObject *parent)
  : QObject(*new QModbusDevicePrivate, parent)
 {
-    qRegisterMetaType<QModbusDataUnit::RegisterType>();
 }
 
 /*!
@@ -66,7 +65,6 @@ QModbusDevice::QModbusDevice(QObject *parent)
 QModbusDevice::QModbusDevice(QModbusDevicePrivate &dd, QObject *parent)
  : QObject(dd, parent)
 {
-    qRegisterMetaType<QModbusDataUnit::RegisterType>();
 }
 
 /*!
@@ -151,7 +149,7 @@ QVariant QModbusDevice::connectionParameter(int parameter) const
     exists, the previous value is overwritten.
 
     \sa ConnectionParameter
-    \sa ConnectionParameter()
+    \sa connectionParameter()
 */
 void QModbusDevice::setConnectionParameter(int parameter, const QVariant &value)
 {
@@ -185,22 +183,26 @@ void QModbusDevice::setConnectionParameter(int parameter, const QVariant &value)
 }
 
 /*!
-    \enum QModbusDevice::ModbusError
+    \enum QModbusDevice::Error
     This enum describes all the possible error conditions.
 
     \value NoError              No errors have occurred.
     \value ReadError            An error occurred during a read operation.
     \value WriteError           An error occurred during a write operation.
-    \value ConnectionError      An error occurred when attempting to open the backend.
-    \value ConfigurationError   An error occurred when attempting to set a configuration
-                                parameter.
+    \value ConnectionError      An error occurred when attempting to open the
+                                backend.
+    \value ConfigurationError   An error occurred when attempting to set a
+                                configuration parameter.
     \value TimeoutError         A timeout occurred during I/O. An I/O operation
-                                did not return within the given time frame.
+                                did not finish within a given time frame.
+    \value ProtocolError        A Modbus specific protocol error occurred.
+    \value ReplyAbortedError    The reply was aborted due to a disconnection of
+                                the device.
     \value UnknownError         An unknown error occurred.
 */
 
 /*!
-    \enum QModbusDevice::ModbusDeviceState
+    \enum QModbusDevice::State
     This enum describes all possible device states.
 
     \value UnconnectedState The device is disconnected.
@@ -210,13 +212,13 @@ void QModbusDevice::setConnectionParameter(int parameter, const QVariant &value)
 */
 
 /*!
-    \fn QModbusDevice::errorOccurred(QModbusDevice::ModbusError error)
+    \fn QModbusDevice::errorOccurred(QModbusDevice::Error error)
 
     This signal is emitted when an error of the type, \a error, occurs.
 */
 
 /*!
-    \fn void QModbusDevice::stateChanged(QModbusDevice::ModbusDeviceState state)
+    \fn void QModbusDevice::stateChanged(QModbusDevice::State state)
 
     This signal is emitted every time the state of the device changes.
     The new state is represented by \a state.
@@ -265,7 +267,7 @@ void QModbusDevice::disconnectDevice()
     Sets the state of the device to \a newState. Modbus device implementations
     must use this function to update the device state.
 */
-void QModbusDevice::setState(QModbusDevice::ModbusDeviceState newState)
+void QModbusDevice::setState(QModbusDevice::State newState)
 {
     Q_D(QModbusDevice);
 
@@ -281,7 +283,7 @@ void QModbusDevice::setState(QModbusDevice::ModbusDeviceState newState)
 
     \sa setState(), stateChanged()
 */
-QModbusDevice::ModbusDeviceState QModbusDevice::state() const
+QModbusDevice::State QModbusDevice::state() const
 {
     return d_func()->state;
 }
@@ -291,9 +293,9 @@ QModbusDevice::ModbusDeviceState QModbusDevice::state() const
     must use this function in case of an error to set the \a error type and
     a descriptive \a errorText.
 
-    \sa QModbusDevice::ModbusError
+    \sa QModbusDevice::Error
 */
-void QModbusDevice::setError(const QString &errorText, QModbusDevice::ModbusError error)
+void QModbusDevice::setError(const QString &errorText, QModbusDevice::Error error)
 {
     Q_D(QModbusDevice);
 
@@ -305,9 +307,9 @@ void QModbusDevice::setError(const QString &errorText, QModbusDevice::ModbusErro
 /*!
     Returns the error state of the device.
 
-    \sa QModbusDevice::ModbusError
+    \sa QModbusDevice::Error
 */
-QModbusDevice::ModbusError QModbusDevice::error() const
+QModbusDevice::Error QModbusDevice::error() const
 {
     return d_func()->error;
 }
@@ -315,7 +317,7 @@ QModbusDevice::ModbusError QModbusDevice::error() const
 /*!
     Returns descriptive error text for the device error.
 
-    \sa QModbusDevice::ModbusError
+    \sa QModbusDevice::Error
 */
 QString QModbusDevice::errorString() const
 {
