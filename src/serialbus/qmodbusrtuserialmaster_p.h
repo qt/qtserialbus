@@ -143,6 +143,56 @@ public:
             QTimer::singleShot(m_timeoutThreeDotFiveMs, [this]() { processQueue(); });
         });
 
+        using TypeId = void (QSerialPort::*)(QSerialPort::SerialPortError);
+        QObject::connect(m_serialPort, static_cast<TypeId>(&QSerialPort::error),
+                         [this](QSerialPort::SerialPortError error) {
+            if (error == QSerialPort::NoError)
+                return;
+
+            qCDebug(QT_MODBUS) << "(RTU server) QSerialPort error:" << error
+                               << (m_serialPort ? m_serialPort->errorString() : QString());
+
+            Q_Q(QModbusRtuSerialMaster);
+
+            switch (error) {
+            case QSerialPort::DeviceNotFoundError:
+                q->setError(QModbusDevice::tr("Referenced serial device does not exist."),
+                            QModbusDevice::ConnectionError);
+                break;
+            case QSerialPort::PermissionError:
+                q->setError(QModbusDevice::tr("Cannot open serial device due to permissions."),
+                            QModbusDevice::ConnectionError);
+                break;
+            case QSerialPort::OpenError:
+            case QSerialPort::NotOpenError:
+                q->setError(QModbusDevice::tr("Cannot open serial device."),
+                            QModbusDevice::ConnectionError);
+                break;
+            case QSerialPort::WriteError:
+                q->setError(QModbusDevice::tr("Write error."), QModbusDevice::WriteError);
+                break;
+            case QSerialPort::ReadError:
+                q->setError(QModbusDevice::tr("Read error."), QModbusDevice::ReadError);
+                break;
+            case QSerialPort::ResourceError:
+                q->setError(QModbusDevice::tr("Resource error."), QModbusDevice::ConnectionError);
+                break;
+            case QSerialPort::UnsupportedOperationError:
+                q->setError(QModbusDevice::tr("Device operation is not supported error."),
+                            QModbusDevice::ConfigurationError);
+                break;
+            case QSerialPort::TimeoutError:
+                q->setError(QModbusDevice::tr("Timeout error."), QModbusDevice::TimeoutError);
+                break;
+            case QSerialPort::UnknownError:
+                q->setError(QModbusDevice::tr("Unknown error."), QModbusDevice::UnknownError);
+                break;
+            default:
+                qCDebug(QT_MODBUS) << "(RTU server) Unhandled QSerialPort error" << error;
+                break;
+            }
+        });
+
         QObject::connect(m_serialPort, &QSerialPort::bytesWritten, q, [this](qint64 bytes) {
             m_current.bytesWritten += bytes;
         });
