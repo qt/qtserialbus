@@ -328,10 +328,6 @@ public:
         }
     }
 
-    void handleErrorOccurred(QSerialPort::SerialPortError);
-    void serialPortReadyRead();
-    void aboutToClose();
-
     QSerialPort *m_serialPort;
     bool m_processesBroadcast = false;
 };
