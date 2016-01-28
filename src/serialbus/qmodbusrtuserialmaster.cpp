@@ -87,6 +87,9 @@ QModbusRtuSerialMaster::QModbusRtuSerialMaster(QModbusRtuSerialMasterPrivate &dd
 
 /*!
      \reimp
+
+     \note When calling this function, existing buffered data is removed from
+     the serial port.
 */
 bool QModbusRtuSerialMaster::open()
 {
@@ -98,11 +101,12 @@ bool QModbusRtuSerialMaster::open()
     d->responseBuffer.clear();
 
     d->updateSerialPortConnectionInfo();
-    if (d->m_serialPort->open(QIODevice::ReadWrite))
+    if (d->m_serialPort->open(QIODevice::ReadWrite)) {
+        d->m_serialPort->clear();
         setState(QModbusDevice::ConnectedState);
-    else
+    } else {
         setError(d->m_serialPort->errorString(), QModbusDevice::ConnectionError);
-
+    }
     return (state() == QModbusDevice::ConnectedState);
 }
 
