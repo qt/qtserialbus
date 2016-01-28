@@ -53,8 +53,7 @@ QT_END_NAMESPACE;
 class DebugHandler
 {
 public:
-    DebugHandler() Q_DECL_EQ_DEFAULT;
-    DebugHandler(QtMessageHandler newMessageHandler)
+    explicit DebugHandler(QtMessageHandler newMessageHandler)
         : oldMessageHandler(qInstallMessageHandler(newMessageHandler))
     {}
     ~DebugHandler() { qInstallMessageHandler(oldMessageHandler); }

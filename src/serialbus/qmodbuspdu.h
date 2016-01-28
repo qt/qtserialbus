@@ -84,8 +84,8 @@ public:
         UndefinedFunctionCode = 0x100
     };
 
-    QModbusPdu() Q_DECL_EQ_DEFAULT;
-    virtual ~QModbusPdu() Q_DECL_EQ_DEFAULT;
+    QModbusPdu() = default;
+    virtual ~QModbusPdu() = default;
 
     bool isValid() const {
         return (m_code >= ReadCoils && m_code < UndefinedFunctionCode)
@@ -137,14 +137,13 @@ public:
 #endif
 
 protected:
-
     QModbusPdu(FunctionCode code, const QByteArray &newData)
         : m_code(code)
         , m_data(newData)
     {}
 
-    QModbusPdu(const QModbusPdu &) Q_DECL_EQ_DEFAULT;
-    QModbusPdu &operator=(const QModbusPdu &) Q_DECL_EQ_DEFAULT;
+    QModbusPdu(const QModbusPdu &) = default;
+    QModbusPdu &operator=(const QModbusPdu &) = default;
 
     // qdoc cannot deal with variadic templates
     template <typename ... Args>
@@ -204,7 +203,7 @@ Q_SERIALBUS_EXPORT QDataStream &operator<<(QDataStream &stream, const QModbusPdu
 class QModbusRequest : public QModbusPdu
 {
 public:
-    QModbusRequest() Q_DECL_EQ_DEFAULT;
+    QModbusRequest() = default;
     QModbusRequest(const QModbusPdu &pdu)
         : QModbusPdu(pdu)
     {}
@@ -227,7 +226,7 @@ Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &stream, QModbusRequest &
 class QModbusResponse : public QModbusPdu
 {
 public:
-    QModbusResponse() Q_DECL_EQ_DEFAULT;
+    QModbusResponse() = default;
     QModbusResponse(const QModbusPdu &pdu)
         : QModbusPdu(pdu)
     {}
@@ -249,7 +248,7 @@ public:
 class QModbusExceptionResponse : public QModbusResponse
 {
 public:
-    QModbusExceptionResponse() Q_DECL_EQ_DEFAULT;
+    QModbusExceptionResponse() = default;
     QModbusExceptionResponse(const QModbusPdu &pdu)
         : QModbusResponse(pdu)
     {}

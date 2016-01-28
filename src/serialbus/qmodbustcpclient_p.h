@@ -65,8 +65,6 @@ class QModbusTcpClientPrivate : public QModbusClientPrivate
     Q_DECLARE_PUBLIC(QModbusTcpClient)
 
 public:
-    QModbusTcpClientPrivate() Q_DECL_EQ_DEFAULT;
-
     void setupTcpSocket()
     {
         Q_Q(QModbusTcpClient);

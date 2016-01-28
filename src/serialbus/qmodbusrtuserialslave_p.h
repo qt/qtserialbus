@@ -66,8 +66,6 @@ class QModbusRtuSerialSlavePrivate : public QModbusServerPrivate
     Q_DECLARE_PUBLIC(QModbusRtuSerialSlave)
 
 public:
-    QModbusRtuSerialSlavePrivate() Q_DECL_EQ_DEFAULT;
-
     void setupSerialPort()
     {
         Q_Q(QModbusRtuSerialSlave);

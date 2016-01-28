@@ -103,7 +103,6 @@ public:
     }
 
 private:
-    QModbusCommEvent() Q_DECL_EQ_DEFAULT;
     quint8 m_eventByte;
 };
 

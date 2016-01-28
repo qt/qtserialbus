@@ -44,9 +44,8 @@ QT_BEGIN_NAMESPACE
 class QModbusReplyPrivate : public QObjectPrivate
 {
     Q_DECLARE_PUBLIC(QModbusReply)
-public:
-    QModbusReplyPrivate() Q_DECL_EQ_DEFAULT;
 
+public:
     QModbusDataUnit m_unit;
     int m_serverAddress = 1;
     bool m_finished = false;
