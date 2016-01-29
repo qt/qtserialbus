@@ -127,6 +127,8 @@ public:
         QModbusDataUnit unit;
         int numberOfRetries;
         QSharedPointer<QTimer> timer;
+        QByteArray adu;
+        qint64 bytesWritten = 0;
     };
     void processQueueElement(const QModbusResponse &pdu, const QueueElement &element);
 };
