@@ -1,6 +1,6 @@
-QT = core-private serialbus
-
 TARGET = qttinycanbus
+
+QT = core-private serialbus
 
 PUBLIC_HEADERS += \
     tinycanbackend.h

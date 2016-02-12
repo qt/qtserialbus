@@ -1,6 +1,6 @@
-QT = core-private serialbus
-
 TARGET = qtpeakcanbus
+
+QT = core-private serialbus
 
 PUBLIC_HEADERS += \
     peakcanbackend.h

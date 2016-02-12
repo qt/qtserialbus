@@ -1,6 +1,6 @@
-QT = core serialbus
-
 TARGET = qtcanbustestgeneric
+
+QT = core serialbus
 
 HEADERS += \
     dummybackend.h

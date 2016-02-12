@@ -1,6 +1,6 @@
-QT = core-private serialbus
-
 TARGET = qtsocketcanbus
+
+QT = core-private serialbus
 
 HEADERS += \
     socketcanbackend.h \
