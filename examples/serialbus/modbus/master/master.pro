@@ -1,4 +1,4 @@
-QT += serialbus widgets
+QT += serialbus serialport widgets
 
 TARGET = modbusmaster
 TEMPLATE = app
