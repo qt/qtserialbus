@@ -2,11 +2,6 @@ QT = core-private serialbus
 
 TARGET = qttinycanbus
 
-PLUGIN_TYPE = canbus
-PLUGIN_EXTENDS = serialbus
-PLUGIN_CLASS_NAME = TinyCanBusPlugin
-load(qt_plugin)
-
 PUBLIC_HEADERS += \
     tinycanbackend.h
 
@@ -20,3 +15,8 @@ SOURCES += main.cpp \
 OTHER_FILES = plugin.json
 
 HEADERS += $$PUBLIC_HEADERS $$PRIVATE_HEADERS
+
+PLUGIN_TYPE = canbus
+PLUGIN_EXTENDS = serialbus
+PLUGIN_CLASS_NAME = TinyCanBusPlugin
+load(qt_plugin)
