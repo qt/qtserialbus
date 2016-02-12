@@ -1,5 +1,4 @@
 TARGET = QtSerialBus
-MODULE = serialbus
 QT = core-private network serialport
 CONFIG += c++11
 
