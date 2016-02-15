@@ -233,8 +233,9 @@ static int minimumDataSize(const QModbusPdu &pdu, Type type)
     Constructs a QModbusPdu with function code set to \a code and payload set to \a data.
     The data is converted and stored in big-endian byte order.
 
-    \note Usage should be limited the POD types only. This is because \c QDataStream stream
-        operators will not only append raw data, but also e.g. size, count etc. for complex types.
+    \note Usage is limited \c quint8 and \c quint16 only. This is because
+    \c QDataStream stream operators will not only append raw data, but also
+    e.g. size, count etc. for complex types.
 */
 
 /*!
@@ -324,8 +325,9 @@ static int minimumDataSize(const QModbusPdu &pdu, Type type)
         response.decodeData(&count, &id, &run);
     \endcode
 
-    \note Usage should be limited the POD types only. This is because \c QDataStream stream
-    operators will not only read raw data, but also e.g. size, count etc. for complex types.
+    \note Usage is limited \c quint8 and \c quint16 only. This is because
+    \c QDataStream stream operators will not only append raw data, but also
+    e.g. size, count etc. for complex types.
 */
 
 /*!
@@ -339,8 +341,9 @@ static int minimumDataSize(const QModbusPdu &pdu, Type type)
         request.encodeData(quint16(0x0c), quint16(0x0a));
     \endcode
 
-    \note Usage should be limited the POD types only. This is because \c QDataStream stream
-        operators will not only append raw data, but also e.g. size, count etc. for complex types.
+    \note Usage is limited \c quint8 and \c quint16 only. This is because
+    \c QDataStream stream operators will not only append raw data, but also
+    e.g. size, count etc. for complex types.
 */
 
 /*!
@@ -419,8 +422,9 @@ QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu)
     Constructs a QModbusRequest with function code set to \a code and payload set to \a data.
     The data is converted and stored in big-endian byte order.
 
-    \note Usage should be limited the POD types only. This is because \c QDataStream stream
-        operators will not only append raw data, but also e.g. size, count etc. for complex types.
+    \note Usage is limited \c quint8 and \c quint16 only. This is because
+    \c QDataStream stream operators will not only append raw data, but also
+    e.g. size, count etc. for complex types.
 */
 
 /*!
@@ -570,8 +574,9 @@ QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu)
     Constructs a QModbusResponse with function code set to \a code and payload set to \a data.
     The data is converted and stored in big-endian byte order.
 
-    \note Usage should be limited the POD types only. This is because \c QDataStream stream
-        operators will not only append raw data, but also e.g. size, count etc. for complex types.
+    \note Usage is limited \c quint8 and \c quint16 only. This is because
+    \c QDataStream stream operators will not only append raw data, but also
+    e.g. size, count etc. for complex types.
 */
 
 /*!
