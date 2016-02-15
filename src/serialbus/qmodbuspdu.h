@@ -92,11 +92,7 @@ public:
                 && (m_data.size() < 253);
     }
 
-#ifdef Q_QDOC
-    static const quint8 ExceptionByte;
-#else
     static const quint8 ExceptionByte = 0x80;
-#endif
     ExceptionCode exceptionCode() const {
         if (!m_data.size() || !isException())
             return ExtendedException;
@@ -115,7 +111,6 @@ public:
     QByteArray data() const { return m_data; }
     void setData(const QByteArray &newData) { m_data = newData; }
 
-#ifndef Q_QDOC
     template <typename ... Args> void encodeData(Args ... newData) {
         encode(std::forward<Args>(newData)...);
     }
@@ -123,18 +118,6 @@ public:
     template <typename ... Args> void decodeData(Args && ... newData) const {
         decode(std::forward<Args>(newData)...);
     }
-#else
-    // slightly modified signature to permit qdoc to have some notion of what's going on
-
-    template <typename ... Args> void encodeData(Args newData) {
-        encode(std::forward<Args>(newData)...);
-    }
-
-    template <typename ... Args> void decodeData(Args newData) const
-    {
-        decode(std::forward<Args>(newData)...);
-    }
-#endif
 
 protected:
     QModbusPdu(FunctionCode code, const QByteArray &newData)
@@ -145,7 +128,6 @@ protected:
     QModbusPdu(const QModbusPdu &) = default;
     QModbusPdu &operator=(const QModbusPdu &) = default;
 
-    // qdoc cannot deal with variadic templates
     template <typename ... Args>
     QModbusPdu(FunctionCode code, Args ... newData)
         : m_code(code)
@@ -215,7 +197,6 @@ public:
     Q_SERIALBUS_EXPORT static int minimumDataSize(const QModbusPdu &pdu);
     Q_SERIALBUS_EXPORT static int calculateDataSize(const QModbusPdu &pdu, const QByteArray &data);
 
-    // TODO currently no way to document -> qdoc issue due to template usage
     template <typename ... Args>
     QModbusRequest(FunctionCode code, Args ... newData)
         : QModbusPdu(code, newData...)
@@ -238,7 +219,6 @@ public:
     Q_SERIALBUS_EXPORT static int minimumDataSize(const QModbusPdu &pdu);
     Q_SERIALBUS_EXPORT static int calculateDataSize(const QModbusPdu &pdu, const QByteArray &data);
 
-    // TODO currently no way to document -> qdoc issue due to template usage
     template <typename ... Args>
     QModbusResponse(FunctionCode code, Args ... newData)
         : QModbusPdu(code, newData...)

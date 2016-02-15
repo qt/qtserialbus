@@ -312,7 +312,7 @@ static int minimumDataSize(const QModbusPdu &pdu, Type type)
 */
 
 /*!
-    \fn void QModbusPdu::decodeData(Args data) const
+    \fn void QModbusPdu::decodeData(Args && ... data) const
 
     Converts the payload into host endianness and reads it into \a data. Data can be a variable
     length argument list.
@@ -329,7 +329,7 @@ static int minimumDataSize(const QModbusPdu &pdu, Type type)
 */
 
 /*!
-    \fn void QModbusPdu::encodeData(Args data)
+    \fn void QModbusPdu::encodeData(Args ... data)
 
     Sets the payload to \a data. The data is converted and stored in big-endian byte order.
 
