@@ -116,7 +116,7 @@
 
     For example:
 
-    \snippet main.cpp SocketCan Filter Example
+    \snippet snippetmain.cpp SocketCan Filter Example
 
     Efficient frame format and flexible data-rate are supported in SocketCAN.
  */

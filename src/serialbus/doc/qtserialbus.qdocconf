@@ -38,7 +38,8 @@ sourcedirs  += ..
 examplesinstallpath = serialbus
 
 exampledirs += ../../../examples/serialbus \
-               snippets/
+               snippets/ \
+               ../../plugins/canbus/socketcan
 
 imagedirs   += images
 

@@ -44,6 +44,7 @@
 
 QT_BEGIN_NAMESPACE
 
+//! [SocketCanFactory]
 class CanBusPlugin : public QObject, public QCanBusFactory
 {
     Q_OBJECT
@@ -58,6 +59,7 @@ public:
         return device;
     }
 };
+//! [SocketCanFactory]
 
 QT_END_NAMESPACE
 
