@@ -96,12 +96,11 @@ public:
             }
 
             const QModbusSerialAdu tmpAdu(QModbusSerialAdu::Rtu, responseBuffer);
-            const QModbusResponse tmpPdu = tmpAdu.pdu();
-            int pduSizeWithoutFcode = QModbusResponse::calculateDataSize(tmpPdu, tmpPdu.data());
+            int pduSizeWithoutFcode = QModbusResponse::calculateDataSize(tmpAdu.pdu());
             if (pduSizeWithoutFcode < 0) {
                 // wait for more data
                 qCDebug(QT_MODBUS) << "(RTU client) Cannot calculate PDU size for function code:"
-                                   << tmpPdu.functionCode() << ", delaying pending frame";
+                                   << tmpAdu.pdu().functionCode() << ", delaying pending frame";
                 return;
             }
 

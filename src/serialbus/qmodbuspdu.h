@@ -195,7 +195,7 @@ public:
     {}
 
     Q_SERIALBUS_EXPORT static int minimumDataSize(const QModbusRequest &pdu);
-    Q_SERIALBUS_EXPORT static int calculateDataSize(const QModbusPdu &pdu, const QByteArray &data);
+    Q_SERIALBUS_EXPORT static int calculateDataSize(const QModbusRequest &pdu);
 
     template <typename ... Args>
     QModbusRequest(FunctionCode code, Args ... newData)
@@ -217,7 +217,7 @@ public:
     {}
 
     Q_SERIALBUS_EXPORT static int minimumDataSize(const QModbusResponse &pdu);
-    Q_SERIALBUS_EXPORT static int calculateDataSize(const QModbusPdu &pdu, const QByteArray &data);
+    Q_SERIALBUS_EXPORT static int calculateDataSize(const QModbusResponse &pdu);
 
     template <typename ... Args>
     QModbusResponse(FunctionCode code, Args ... newData)
