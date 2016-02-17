@@ -436,12 +436,12 @@ QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu)
 */
 
 /*!
-    Returns the minimum data size for a request, based on the \a pdu function code.
-    \note The function returns \c {-1} if the size could not be properly calculated.
+    Returns the expected minimum data size for \a request based on the
+    request's function code; \c {-1} if the function code is not known.
 */
-int QModbusRequest::minimumDataSize(const QModbusPdu &pdu)
+int QModbusRequest::minimumDataSize(const QModbusRequest &request)
 {
-    return Private::minimumDataSize(pdu, Private::Type::Request);
+    return Private::minimumDataSize(request, Private::Type::Request);
 }
 
 /*!
@@ -588,12 +588,12 @@ QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu)
 */
 
 /*!
-    Returns the minimum data size for a response, based on the \a pdu function code.
-    \note The function returns \c {-1} if the size could not be properly calculated.
+    Returns the expected minimum data size for \a response based on the
+    response's function code; \c {-1} if the function code is not known.
 */
-int QModbusResponse::minimumDataSize(const QModbusPdu &pdu)
+int QModbusResponse::minimumDataSize(const QModbusResponse &response)
 {
-    return Private::minimumDataSize(pdu, Private::Type::Response);
+    return Private::minimumDataSize(response, Private::Type::Response);
 }
 
 /*!
