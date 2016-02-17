@@ -354,8 +354,9 @@ static int minimumDataSize(const QModbusPdu &pdu, Type type)
 QDebug operator<<(QDebug debug, const QModbusPdu &pdu)
 {
     QDebugStateSaver _(debug);
-    debug.nospace().noquote() << "0x" << QByteArray(1, pdu.functionCode()).toHex() << pdu.data()
-        .toHex();
+    debug.nospace().noquote() << "0x" << hex << qSetFieldWidth(2) << qSetPadChar('0')
+        << (pdu.isException() ? pdu.functionCode() | QModbusPdu::ExceptionByte : pdu.functionCode())
+        << qSetFieldWidth(0) << pdu.data().toHex();
     return debug;
 }
 
