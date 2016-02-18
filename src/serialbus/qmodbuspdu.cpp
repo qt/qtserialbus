@@ -526,6 +526,14 @@ int QModbusRequest::calculateDataSize(const QModbusRequest &request)
         if (request.dataSize() >= 1)
             size = 1 /*byte count*/ + request.data()[0] /*actual bytes*/;
         break;
+    case QModbusPdu::EncapsulatedInterfaceTransport: {
+        if (request.dataSize() < minimum)
+            break;  // can't calculate, let's return -1 to indicate error
+        quint8 meiType;
+        request.decodeData(&meiType);
+        // ReadDeviceIdentification -> 3 == MEI type + Read device ID + Object Id
+        size = (meiType == EncapsulatedInterfaceTransport::ReadDeviceIdentification) ? 3 : minimum;
+    }   break;
     default:
         size = minimum;
         break;
