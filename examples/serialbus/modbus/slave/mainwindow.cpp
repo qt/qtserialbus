@@ -219,7 +219,7 @@ void MainWindow::discreteInputChanged(int id)
 
 void MainWindow::bitChanged(int id, QModbusDataUnit::RegisterType table, bool value)
 {
-    if (!modbusDevice || modbusDevice->state() != QModbusDevice::ConnectedState)
+    if (!modbusDevice)
         return;
 
     if (!modbusDevice->setData(table, id, value))
@@ -228,7 +228,7 @@ void MainWindow::bitChanged(int id, QModbusDataUnit::RegisterType table, bool va
 
 void MainWindow::setRegister(const QString &value)
 {
-    if (!modbusDevice || modbusDevice->state() != QModbusDevice::ConnectedState)
+    if (!modbusDevice)
         return;
 
     const QString objectName = QObject::sender()->objectName();
@@ -271,7 +271,7 @@ void MainWindow::updateWidgets(QModbusDataUnit::RegisterType table, int address,
 
 void MainWindow::setupDeviceData()
 {
-    if (!modbusDevice || modbusDevice->state() != QModbusDevice::ConnectedState)
+    if (!modbusDevice)
         return;
 
     for (int i = 0; i < coilButtons.buttons().count(); ++i)

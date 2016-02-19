@@ -61,9 +61,6 @@ class Q_AUTOTEST_EXPORT QModbusClientPrivate : public QModbusDevicePrivate
     Q_DECLARE_PUBLIC(QModbusClient)
 
 public:
-    QModbusClientPrivate() Q_DECL_EQ_DEFAULT;
-    virtual ~QModbusClientPrivate() Q_DECL_EQ_DEFAULT;
-
     QModbusReply *sendRequest(const QModbusRequest &request, int serverAddress,
                               const QModbusDataUnit *const unit);
     QModbusRequest createReadRequest(const QModbusDataUnit &data) const;
@@ -106,7 +103,7 @@ public:
     int m_responseTimeoutDuration = 1000;
 
     struct QueueElement {
-        QueueElement() Q_DECL_EQ_DEFAULT;
+        QueueElement() = default;
         QueueElement(QModbusReply *r, const QModbusRequest &req, const QModbusDataUnit &u, int num,
                 int timeout = -1)
             : reply(r), requestPdu(req), unit(u), numberOfRetries(num)
@@ -127,6 +124,8 @@ public:
         QModbusDataUnit unit;
         int numberOfRetries;
         QSharedPointer<QTimer> timer;
+        QByteArray adu;
+        qint64 bytesWritten = 0;
     };
     void processQueueElement(const QModbusResponse &pdu, const QueueElement &element);
 };

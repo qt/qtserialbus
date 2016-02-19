@@ -316,7 +316,7 @@ private slots:
             d << QModbusExceptionResponse(QModbusExceptionResponse::ReadCoils,
                 QModbusExceptionResponse::IllegalDataAddress);
         }
-        QCOMPARE(s_msg, QString::fromLatin1("0x0102"));
+        QCOMPARE(s_msg, QString::fromLatin1("0x8102"));
     }
 
     void testMinimumDataSize()

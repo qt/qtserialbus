@@ -1086,7 +1086,6 @@ private slots:
         class InheritanceTestServer : public QModbusServer
         {
         public:
-            InheritanceTestServer() Q_DECL_EQ_DEFAULT;
             void close() Q_DECL_OVERRIDE {}
             bool open() Q_DECL_OVERRIDE { return true; }
 

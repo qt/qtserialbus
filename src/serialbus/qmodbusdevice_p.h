@@ -61,8 +61,6 @@ class QModbusDevicePrivate : public QObjectPrivate
     Q_DECLARE_PUBLIC(QModbusDevice)
 
 public:
-    QModbusDevicePrivate() Q_DECL_EQ_DEFAULT;
-
     QModbusDevice::State state = QModbusDevice::UnconnectedState;
     QModbusDevice::Error error = QModbusDevice::NoError;
     QString errorString;

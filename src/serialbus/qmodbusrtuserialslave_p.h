@@ -66,8 +66,6 @@ class QModbusRtuSerialSlavePrivate : public QModbusServerPrivate
     Q_DECLARE_PUBLIC(QModbusRtuSerialSlave)
 
 public:
-    QModbusRtuSerialSlavePrivate() Q_DECL_EQ_DEFAULT;
-
     void setupSerialPort()
     {
         Q_Q(QModbusRtuSerialSlave);
@@ -107,8 +105,7 @@ public:
             if (q->processesBroadcast())
                 event |= QModbusCommEvent::ReceiveFlag::BroadcastReceived;
 
-            const QModbusRequest req = adu.pdu();
-            const int pduSizeWithoutFcode = QModbusRequest::calculateDataSize(req, req.data());
+            const int pduSizeWithoutFcode = QModbusRequest::calculateDataSize(adu.pdu());
 
             // server address byte + function code byte + PDU size + 2 bytes CRC
             if ((pduSizeWithoutFcode < 0) || ((2 + pduSizeWithoutFcode + 2) != adu.rawSize())) {
@@ -151,6 +148,7 @@ public:
 
             storeModbusCommEvent(event); // store the final event before processing
 
+            const QModbusRequest req = adu.pdu();
             qCDebug(QT_MODBUS) << "(RTU server) Request PDU:" << req;
             QModbusResponse response; // If the device ...
             if (q->value(QModbusServer::DeviceBusy).value<quint16>() == 0xffff) {
@@ -327,10 +325,6 @@ public:
             m_serialPort->setStopBits(m_stopBits);
         }
     }
-
-    void handleErrorOccurred(QSerialPort::SerialPortError);
-    void serialPortReadyRead();
-    void aboutToClose();
 
     QSerialPort *m_serialPort;
     bool m_processesBroadcast = false;

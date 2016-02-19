@@ -55,8 +55,6 @@ class ModbusTcpClientPrivate : private QModbusTcpClientPrivate
     Q_DECLARE_PUBLIC(ModbusTcpClient)
 
 public:
-    ModbusTcpClientPrivate() Q_DECL_EQ_DEFAULT;
-
     QModbusReply *enqueueRequest(const QModbusRequest &request, int, const QModbusDataUnit &unit,
                                  QModbusReply::ReplyType type) Q_DECL_OVERRIDE
     {
