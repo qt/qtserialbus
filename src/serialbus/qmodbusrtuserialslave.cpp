@@ -107,9 +107,8 @@ bool QModbusRtuSerialSlave::open()
         return true;
 
     Q_D(QModbusRtuSerialSlave);
-    d->updateSerialPortConnectionInfo();
     if (d->m_serialPort->open(QIODevice::ReadWrite)) {
-        d->m_serialPort->clear();
+        d->setupEnvironment();
         setState(QModbusDevice::ConnectedState);
     } else {
         setError(d->m_serialPort->errorString(), QModbusDevice::ConnectionError);
@@ -126,7 +125,6 @@ void QModbusRtuSerialSlave::close()
         return;
 
     Q_D(QModbusRtuSerialSlave);
-
     if (d->m_serialPort->isOpen())
         d->m_serialPort->close();
 

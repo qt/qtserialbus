@@ -218,32 +218,38 @@ public:
             Q_Q(QModbusRtuSerialMaster);
             if (q->state() != QModbusDevice::ClosingState)
                 q->close();
+            m_sendTimer.stop();
+            m_responseTimer.stop();
         });
     }
 
-    void updateSerialPortConnectionInfo() {
+    void setupEnvironment() {
         if (m_serialPort) {
+            m_serialPort->clear();
             m_serialPort->setPortName(m_comPort);
             m_serialPort->setParity(m_parity);
             m_serialPort->setBaudRate(m_baudRate);
             m_serialPort->setDataBits(m_dataBits);
             m_serialPort->setStopBits(m_stopBits);
-
-            // According to the Modbus specification, in RTU mode message frames
-            // are separated by a silent interval of at least 3.5 character times.
-            // Calculate the timeout if we are less than 19200 baud, use a fixed
-            // timeout for everything equal or greater than 19200 baud.
-            if (m_baudRate < 19200) {
-                // Example: 9600 baud, 11 bit per packet -> 872 char/sec
-                // so: 1000 ms / 872 char = 1.147 ms/char * 3.5 character
-                // Always round up because the spec requests at least 3.5 char.
-                m_timeoutThreeDotFiveMs = qCeil(3500. / (qreal(m_baudRate) / 11.));
-            } else {
-                // The spec recommends a timeout value of 1.750 msec. Without such
-                // precise single-shot timers use a approximated value of 1.750 msec.
-                m_timeoutThreeDotFiveMs = 2;
-            }
         }
+
+        // According to the Modbus specification, in RTU mode message frames
+        // are separated by a silent interval of at least 3.5 character times.
+        // Calculate the timeout if we are less than 19200 baud, use a fixed
+        // timeout for everything equal or greater than 19200 baud.
+        if (m_baudRate < 19200) {
+            // Example: 9600 baud, 11 bit per packet -> 872 char/sec
+            // so: 1000 ms / 872 char = 1.147 ms/char * 3.5 character
+            // Always round up because the spec requests at least 3.5 char.
+            m_timeoutThreeDotFiveMs = qCeil(3500. / (qreal(m_baudRate) / 11.));
+        } else {
+            // The spec recommends a timeout value of 1.750 msec. Without such
+            // precise single-shot timers use a approximated value of 1.750 msec.
+            m_timeoutThreeDotFiveMs = 2;
+        }
+
+        responseBuffer.clear();
+        m_state = QModbusRtuSerialMasterPrivate::Idle;
     }
 
     void scheduleNextRequest() {

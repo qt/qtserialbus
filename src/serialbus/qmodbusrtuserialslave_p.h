@@ -321,14 +321,17 @@ public:
         });
     }
 
-    void updateSerialPortConnectionInfo() {
+    void setupEnvironment() {
         if (m_serialPort) {
+            m_serialPort->clear();
             m_serialPort->setPortName(m_comPort);
             m_serialPort->setParity(m_parity);
             m_serialPort->setBaudRate(m_baudRate);
             m_serialPort->setDataBits(m_dataBits);
             m_serialPort->setStopBits(m_stopBits);
         }
+
+        m_requestBuffer.clear();
     }
 
     QByteArray m_requestBuffer;;
