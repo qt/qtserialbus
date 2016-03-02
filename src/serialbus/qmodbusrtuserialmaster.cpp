@@ -97,12 +97,8 @@ bool QModbusRtuSerialMaster::open()
         return true;
 
     Q_D(QModbusRtuSerialMaster);
-
-    d->responseBuffer.clear();
-
-    d->updateSerialPortConnectionInfo();
     if (d->m_serialPort->open(QIODevice::ReadWrite)) {
-        d->m_serialPort->clear();
+        d->setupEnvironment();
         setState(QModbusDevice::ConnectedState);
     } else {
         setError(d->m_serialPort->errorString(), QModbusDevice::ConnectionError);
@@ -119,7 +115,6 @@ void QModbusRtuSerialMaster::close()
         return;
 
     Q_D(QModbusRtuSerialMaster);
-
     if (d->m_serialPort->isOpen())
         d->m_serialPort->close();
 

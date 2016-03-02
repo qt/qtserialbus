@@ -159,6 +159,7 @@ private:
     }
 
     template<typename ... Args> void encode(Args ... newData) {
+        m_data.clear();
         if (sizeof...(Args)) {
             QDataStream stream(&m_data, QIODevice::WriteOnly);
             char tmp[1024] = { (encode(&stream, newData), void(), '0')... };

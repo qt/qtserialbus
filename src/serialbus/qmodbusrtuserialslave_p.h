@@ -37,6 +37,7 @@
 #ifndef QMODBUSRTUSERIALSLAVE_P_H
 #define QMODBUSRTUSERIALSLAVE_P_H
 
+#include <QtCore/qbytearray.h>
 #include <QtCore/qdebug.h>
 #include <QtCore/qloggingcategory.h>
 #include <QtSerialBus/qmodbusrtuserialslave.h>
@@ -72,10 +73,10 @@ public:
 
         m_serialPort = new QSerialPort(q);
         QObject::connect(m_serialPort, &QSerialPort::readyRead, [this]() {
-            Q_Q(QModbusRtuSerialSlave);
-
             const int size = m_serialPort->size();
-            const QModbusSerialAdu adu(QModbusSerialAdu::Rtu, m_serialPort->read(size));
+            m_requestBuffer += m_serialPort->read(size);
+
+            const QModbusSerialAdu adu(QModbusSerialAdu::Rtu, m_requestBuffer);
             qCDebug(QT_MODBUS_LOW) << "(RTU server) Received ADU:" << adu.rawData().toHex();
 
             // Index                         -> description
@@ -83,7 +84,7 @@ public:
             // FunctionCode                  -> 1 byte
             // FunctionCode specific content -> 0-252 bytes
             // CRC                           -> 2 bytes
-
+            Q_Q(QModbusRtuSerialSlave);
             QModbusCommEvent event = QModbusCommEvent::ReceiveEvent;
             if (q->value(QModbusServer::ListenOnlyMode).toBool())
                 event |= QModbusCommEvent::ReceiveFlag::CurrentlyInListenOnlyMode;
@@ -119,6 +120,10 @@ public:
                 storeModbusCommEvent(event | QModbusCommEvent::ReceiveFlag::CharacterOverrun);
                 return;
             }
+
+            // We received the full message, including checksum. We do not expect more bytes to
+            // arrive, so clear the buffer. All new bytes are considered part of the next message.
+            m_requestBuffer.resize(0);
 
             if (!adu.matchingChecksum()) {
                 qCWarning(QT_MODBUS) << "(RTU server) Discarding request with wrong CRC, received:"
@@ -316,18 +321,22 @@ public:
         });
     }
 
-    void updateSerialPortConnectionInfo() {
+    void setupEnvironment() {
         if (m_serialPort) {
+            m_serialPort->clear();
             m_serialPort->setPortName(m_comPort);
             m_serialPort->setParity(m_parity);
             m_serialPort->setBaudRate(m_baudRate);
             m_serialPort->setDataBits(m_dataBits);
             m_serialPort->setStopBits(m_stopBits);
         }
+
+        m_requestBuffer.clear();
     }
 
-    QSerialPort *m_serialPort;
+    QByteArray m_requestBuffer;;
     bool m_processesBroadcast = false;
+    QSerialPort *m_serialPort = nullptr;
 };
 
 QT_END_NAMESPACE

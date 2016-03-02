@@ -530,10 +530,10 @@ private slots:
         QTest::newRow("EncapsulatedInterfaceTransport")
             << QModbusResponse::EncapsulatedInterfaceTransport
             << QByteArray::fromHex("0e01010000030016") + "Company identification" +
-                QByteArray::fromHex("010d") + "Product code" + QByteArray::fromHex("0205") +
+                QByteArray::fromHex("010c") + "Product code" + QByteArray::fromHex("0205") +
                 "V2.11"
             << QByteArray::fromHex("2b0e01010000030016") + "Company identification" +
-                QByteArray::fromHex("010d") + "Product code" + QByteArray::fromHex("0205") +
+                QByteArray::fromHex("010c") + "Product code" + QByteArray::fromHex("0205") +
                 "V2.11";
 
         QModbusExceptionResponse ex(QModbusPdu::ReadCoils, QModbusPdu::IllegalDataAddress);
@@ -557,10 +557,251 @@ private slots:
         QDataStream input(pdu);
         input >> response;
         if (response.isException())
-            QCOMPARE(QModbusPdu::FunctionCode(fc &~ QModbusPdu::ExceptionByte), response.functionCode());
+            QCOMPARE(quint8(response.functionCode()), quint8(fc &~ QModbusPdu::ExceptionByte));
         else
-            QCOMPARE(fc, response.functionCode());
-        QCOMPARE(data, response.data());
+            QCOMPARE(response.functionCode(), fc);
+        QCOMPARE(response.data(), data);
+    }
+
+    void testEncapsulatedInterfaceTransportStreamOperator()
+    {
+        const QByteArray valid = QByteArray::fromHex("0e01010000030016") + "Company identification"
+            + QByteArray::fromHex("010c") + "Product code" + QByteArray::fromHex("0205")
+            + "V2.11";
+        {
+            QByteArray ba;
+            QDataStream output(&ba, QIODevice::ReadWrite);
+            output << QModbusResponse(QModbusResponse::EncapsulatedInterfaceTransport, valid);
+
+            QModbusResponse response;
+            QDataStream input(ba);
+            input >> response;
+            QCOMPARE(response.functionCode(), QModbusResponse::EncapsulatedInterfaceTransport);
+            QCOMPARE(response.data(), valid);
+        }
+
+        // valid embedded
+        const QByteArray suffix = QByteArray::fromHex("ffffffffff");
+        {
+            QByteArray ba;
+            QDataStream output(&ba, QIODevice::ReadWrite);
+            output << QModbusResponse(QModbusResponse::EncapsulatedInterfaceTransport, valid
+                + suffix);
+
+            QModbusResponse response;
+            QDataStream input(ba);
+            input >> response;
+            QCOMPARE(response.functionCode(), QModbusResponse::EncapsulatedInterfaceTransport);
+            QCOMPARE(response.data(), valid);
+        }
+
+        const QByteArray invalid = QByteArray::fromHex("0e01010000030016") + "Company identification"
+            + QByteArray::fromHex("01ff") + "Product code" + QByteArray::fromHex("0205")
+            + "V2.11";
+        {
+            QByteArray ba;
+            QDataStream output(&ba, QIODevice::ReadWrite);
+            output << QModbusResponse(QModbusResponse::EncapsulatedInterfaceTransport, invalid);
+
+            QModbusResponse response;
+            QDataStream input(ba);
+            input >> response;
+            QCOMPARE(response.functionCode(), QModbusResponse::Invalid);
+            QCOMPARE(response.data(), QByteArray());
+        }
+
+        const QByteArray invalidShort = QByteArray::fromHex("0e01010000030016")
+            + "Company identification" + QByteArray::fromHex("01");
+        {
+            QByteArray ba;
+            QDataStream output(&ba, QIODevice::ReadWrite);
+            output << QModbusResponse(QModbusResponse::EncapsulatedInterfaceTransport, invalidShort);
+
+            QModbusResponse response;
+            QDataStream input(ba);
+            input >> response;
+            QCOMPARE(response.functionCode(), QModbusResponse::Invalid);
+            QCOMPARE(response.data(), QByteArray());
+        }
+    }
+
+    void testCalculateDataSize()
+    {
+        // CanOpenGeneralReference
+        QModbusResponse cogr(QModbusPdu::EncapsulatedInterfaceTransport, quint8(0x0d));
+        QCOMPARE(QModbusResponse::calculateDataSize(cogr), -1);
+        cogr.encodeData(quint8(0x0d), quint8(0x00));
+        QCOMPARE(QModbusResponse::calculateDataSize(cogr), 2);
+        // TODO: fix the following once we can calculate the size for CanOpenGeneralReference
+        cogr.encodeData(quint8(0x0d), quint8(0x00), quint8(0x00));
+        QCOMPARE(QModbusResponse::calculateDataSize(cogr), 2);
+
+        // ReadDeviceIdentification
+        QModbusResponse rdi(QModbusPdu::EncapsulatedInterfaceTransport, quint8(0x0e));
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), -1);
+        rdi.encodeData(quint8(0x0e), quint8(0x01));
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 8);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01));
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 8);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00));
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 8);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00));
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 8);
+
+        // single object
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x01)); // object count
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 8);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x01),
+            quint8(0x00)); // object id
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 8);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x01),
+            quint8(0x00), quint8(0x01)); // object size
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 9);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x01),
+            quint8(0x00), quint8(0x01), quint8(0xff)); // object data
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 9);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x01),
+            quint8(0x00), quint8(0x01), quint8(0xff),
+            quint8(0xff)); // dummy additional data
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 9);
+
+        // multiple objects equal size
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0xff), quint8(0x02),
+            quint8(0x02)); // object count
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 8);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0xff), quint8(0x02),
+            quint8(0x02),
+            quint8(0x00)); // object id
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 8);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x02),
+            quint8(0x00), quint8(0x01)); // object size
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 11);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x02),
+            quint8(0x00), quint8(0x01), quint8(0xff)); // object data
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 11);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x02),
+            quint8(0x00), quint8(0x01), quint8(0xff),
+            quint8(0x01)); // second object id
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 11);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x02),
+            quint8(0x00), quint8(0x01), quint8(0xff),
+            quint8(0x01), quint8(0x01)); // second object size
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 12);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x02),
+            quint8(0x00), quint8(0x01), quint8(0xff),
+            quint8(0x01), quint8(0x01), quint8(0xff)); // second object data
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 12);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x02),
+            quint8(0x00), quint8(0x01), quint8(0xff),
+            quint8(0x01), quint8(0x01), quint8(0xff),
+            quint8(0xff)); // dummy additional data
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 12);
+
+        // multiple objects different size
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0xff), quint8(0x02),
+            quint8(0x03));
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 8);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0xff), quint8(0x02),
+            quint8(0x03),
+            quint8(0x00));
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 8);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x03),
+            quint8(0x00), quint8(0x01));
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 13);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x03),
+            quint8(0x00), quint8(0x02), quint8(0xff));
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 14);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x03),
+            quint8(0x00), quint8(0x02), quint8(0xff), quint8(0xff));
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 14);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x03),
+            quint8(0x00), quint8(0x02), quint8(0xff), quint8(0xff),
+            quint8(0x01));
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 14);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x03),
+            quint8(0x00), quint8(0x02), quint8(0xff), quint8(0xff),
+            quint8(0x01), quint8(0x03));
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 14);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x03),
+            quint8(0x00), quint8(0x02), quint8(0xff), quint8(0xff),
+            quint8(0x01), quint8(0x03), quint8(0xff));
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 14);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x03),
+            quint8(0x00), quint8(0x02), quint8(0xff), quint8(0xff),
+            quint8(0x01), quint8(0x03), quint8(0xff), quint8(0xff));
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 17);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x03),
+            quint8(0x00), quint8(0x02), quint8(0xff), quint8(0xff),
+            quint8(0x01), quint8(0x03), quint8(0xff), quint8(0xff), quint8(0xff));
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 17);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x03),
+            quint8(0x00), quint8(0x02), quint8(0xff), quint8(0xff),
+            quint8(0x01), quint8(0x03), quint8(0xff), quint8(0xff), quint8(0xff),
+            quint8(0x02));
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 17);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x03),
+            quint8(0x00), quint8(0x02), quint8(0xff), quint8(0xff),
+            quint8(0x01), quint8(0x03), quint8(0xff), quint8(0xff), quint8(0xff),
+            quint8(0x02), quint8(0x05));
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 22);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x03),
+            quint8(0x00), quint8(0x02), quint8(0xff), quint8(0xff),
+            quint8(0x01), quint8(0x03), quint8(0xff), quint8(0xff), quint8(0xff),
+            quint8(0x02), quint8(0x05), quint8(0xff));
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 22);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x03),
+            quint8(0x00), quint8(0x02), quint8(0xff), quint8(0xff),
+            quint8(0x01), quint8(0x03), quint8(0xff), quint8(0xff), quint8(0xff),
+            quint8(0x02), quint8(0x05), quint8(0xff), quint8(0xff));
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 22);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x03),
+            quint8(0x00), quint8(0x02), quint8(0xff), quint8(0xff),
+            quint8(0x01), quint8(0x03), quint8(0xff), quint8(0xff), quint8(0xff),
+            quint8(0x02), quint8(0x05), quint8(0xff), quint8(0xff), quint8(0xff));
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 22);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x03),
+            quint8(0x00), quint8(0x02), quint8(0xff), quint8(0xff),
+            quint8(0x01), quint8(0x03), quint8(0xff), quint8(0xff), quint8(0xff),
+            quint8(0x02), quint8(0x05), quint8(0xff), quint8(0xff), quint8(0xff), quint8(0xff));
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 22);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x03),
+            quint8(0x00), quint8(0x02), quint8(0xff), quint8(0xff),
+            quint8(0x01), quint8(0x03), quint8(0xff), quint8(0xff), quint8(0xff),
+            quint8(0x02), quint8(0x05), quint8(0xff), quint8(0xff), quint8(0xff), quint8(0xff), quint8(0xff));
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 22);
+        rdi.encodeData(quint8(0x0e), quint8(0x01), quint8(0x01), quint8(0x00), quint8(0x00),
+            quint8(0x03),
+            quint8(0x00), quint8(0x02), quint8(0xff), quint8(0xff),
+            quint8(0x01), quint8(0x03), quint8(0xff), quint8(0xff), quint8(0xff),
+            quint8(0x02), quint8(0x05), quint8(0xff), quint8(0xff), quint8(0xff), quint8(0xff), quint8(0xff),
+            quint8(0xff)); // dummy additional data
+        QCOMPARE(QModbusResponse::calculateDataSize(rdi), 22);
     }
 };
 

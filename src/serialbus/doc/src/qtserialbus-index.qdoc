@@ -86,5 +86,7 @@
 
     \list
          \li \l {CAN Bus Example}
+         \li \l {Modbus Master example}
+         \li \l {Modbus Slave example}
     \endlist
 */
