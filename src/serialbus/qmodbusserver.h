@@ -62,6 +62,7 @@ public:
         ServerIdentifier,
         RunIndicatorStatus,
         AdditionalData,
+        DeviceIdentification,
         // Reserved
         UserOption = 0x100
     };

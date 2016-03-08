@@ -10,7 +10,8 @@ SUBDIRS += cmake \
            qmodbusclient \
            qmodbusserver \
            qmodbuscommevent \
-           qmodbusadu
+           qmodbusadu \
+           qmodbusdeviceidentification
 
 qcanbus.depends += plugins
 qcanbusdevice.depends += plugins
