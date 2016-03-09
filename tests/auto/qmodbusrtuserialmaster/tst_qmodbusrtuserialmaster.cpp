@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
+** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the QtSerialBus module of the Qt Toolkit.
@@ -34,34 +34,29 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSRTUSERIALMASTER_H
-#define QMODBUSRTUSERIALMASTER_H
+#include <QtSerialBus/qmodbusrtuserialmaster.h>
+#include <QtSerialPort/qserialport.h>
 
-#include <QtSerialBus/qmodbusclient.h>
+#include <QtTest/QtTest>
 
-QT_BEGIN_NAMESPACE
-
-class QModbusRtuSerialMasterPrivate;
-
-class Q_SERIALBUS_EXPORT QModbusRtuSerialMaster : public QModbusClient
+class tst_QModbusRtuSerialMaster : public QObject
 {
     Q_OBJECT
-    Q_DECLARE_PRIVATE(QModbusRtuSerialMaster)
 
-public:
-    explicit QModbusRtuSerialMaster(QObject *parent = Q_NULLPTR);
-    ~QModbusRtuSerialMaster();
-
-    int interFrameDelay() const;
-    void setInterFrameDelay(int microseconds);
-
-protected:
-    QModbusRtuSerialMaster(QModbusRtuSerialMasterPrivate &dd, QObject *parent = Q_NULLPTR);
-
-    void close() Q_DECL_OVERRIDE;
-    bool open() Q_DECL_OVERRIDE;
+private slots:
+    void testInterFrameDelay()
+    {
+        QModbusRtuSerialMaster qmrsm;
+        QCOMPARE(qmrsm.interFrameDelay(), 2000);
+        qmrsm.setInterFrameDelay(1000);
+        QCOMPARE(qmrsm.interFrameDelay(), 2000);
+        qmrsm.setInterFrameDelay(3000);
+        QCOMPARE(qmrsm.interFrameDelay(), 3000);
+        qmrsm.setInterFrameDelay(-1);
+        QCOMPARE(qmrsm.interFrameDelay(), 2000);
+    }
 };
 
-QT_END_NAMESPACE
+QTEST_MAIN(tst_QModbusRtuSerialMaster)
 
-#endif // QMODBUSRTUSERIALMASTER_H
+#include "tst_qmodbusrtuserialmaster.moc"
