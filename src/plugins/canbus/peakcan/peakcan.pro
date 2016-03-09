@@ -1,11 +1,6 @@
-QT = core-private serialbus
-
 TARGET = qtpeakcanbus
 
-PLUGIN_TYPE = canbus
-PLUGIN_EXTENDS = serialbus
-PLUGIN_CLASS_NAME = PeakCanBusPlugin
-load(qt_plugin)
+QT = core-private serialbus
 
 PUBLIC_HEADERS += \
     peakcanbackend.h
@@ -21,3 +16,8 @@ SOURCES += \
 OTHER_FILES = plugin.json
 
 HEADERS += $$PUBLIC_HEADERS $$PRIVATE_HEADERS
+
+PLUGIN_TYPE = canbus
+PLUGIN_EXTENDS = serialbus
+PLUGIN_CLASS_NAME = PeakCanBusPlugin
+load(qt_plugin)
