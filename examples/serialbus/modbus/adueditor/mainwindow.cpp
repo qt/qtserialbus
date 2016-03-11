@@ -46,10 +46,12 @@
 #include <QModbusPdu>
 #include <QSerialPortInfo>
 
-QT_BEGIN_NAMESPACE
-Q_LOGGING_CATEGORY(QT_MODBUS, "qt.modbus")
-Q_LOGGING_CATEGORY(QT_MODBUS_LOW, "qt.modbus.lowlevel")
-QT_END_NAMESPACE
+#ifndef QT_STATIC
+ QT_BEGIN_NAMESPACE
+ Q_LOGGING_CATEGORY(QT_MODBUS, "qt.modbus")
+ Q_LOGGING_CATEGORY(QT_MODBUS_LOW, "qt.modbus.lowlevel")
+ QT_END_NAMESPACE
+#endif
 
 QT_USE_NAMESPACE
 
