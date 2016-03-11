@@ -12,5 +12,5 @@ OTHER_FILES = plugin.json
 
 PLUGIN_TYPE = canbus
 PLUGIN_EXTENDS = serialbus
-PLUGIN_CLASS_NAME = DummyBusPlugin
+PLUGIN_CLASS_NAME = GenericBusPlugin
 load(qt_plugin)
