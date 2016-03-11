@@ -97,6 +97,9 @@ bool QModbusRtuSerialSlave::processesBroadcast() const
 
 /*!
     \reimp
+
+     \note When calling this function, existing buffered data is removed from
+     the serial port.
 */
 bool QModbusRtuSerialSlave::open()
 {
@@ -104,12 +107,12 @@ bool QModbusRtuSerialSlave::open()
         return true;
 
     Q_D(QModbusRtuSerialSlave);
-    d->updateSerialPortConnectionInfo();
-    if (d->m_serialPort->open(QIODevice::ReadWrite))
+    if (d->m_serialPort->open(QIODevice::ReadWrite)) {
+        d->setupEnvironment();
         setState(QModbusDevice::ConnectedState);
-    else
+    } else {
         setError(d->m_serialPort->errorString(), QModbusDevice::ConnectionError);
-
+    }
     return (state() == QModbusDevice::ConnectedState);
 }
 
@@ -122,11 +125,36 @@ void QModbusRtuSerialSlave::close()
         return;
 
     Q_D(QModbusRtuSerialSlave);
-
     if (d->m_serialPort->isOpen())
         d->m_serialPort->close();
 
     setState(QModbusDevice::UnconnectedState);
+}
+
+/*!
+    \reimp
+
+    Processes the Modbus client request specified by \a request and returns a
+    Modbus response.
+
+    The Modbus function \l QModbusRequest::EncapsulatedInterfaceTransport with
+    MEI Type 13 (0x0D) CANopen General Reference is filtered out because it is
+    usually Modbus TCP or Modbus serial ASCII only.
+
+    A request to the RTU serial slave will be answered with a Modbus exception
+    response with the exception code QModbusExceptionResponse::IllegalFunction.
+*/
+QModbusResponse QModbusRtuSerialSlave::processRequest(const QModbusPdu &request)
+{
+    if (request.functionCode() == QModbusRequest::EncapsulatedInterfaceTransport) {
+        quint8 meiType;
+        request.decodeData(&meiType);
+        if (meiType == EncapsulatedInterfaceTransport::CanOpenGeneralReference) {
+            return QModbusExceptionResponse(request.functionCode(),
+                QModbusExceptionResponse::IllegalFunction);
+        }
+    }
+    return QModbusServer::processRequest(request);
 }
 
 #include "moc_qmodbusrtuserialslave.cpp"

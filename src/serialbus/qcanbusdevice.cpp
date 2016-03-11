@@ -121,7 +121,7 @@ QT_BEGIN_NAMESPACE
 
     The example below demonstrates how to use the struct:
 
-    \snippet main.cpp Filter Examples
+    \snippet snippetmain.cpp Filter Examples
 */
 
 /*!
@@ -415,11 +415,18 @@ qint64 QCanBusDevice::framesToWrite() const
 
     This function is called by connectDevice(). Subclasses must provide
     an implementation which returns \c true if the CAN bus connection
-    could be established; otherwise \c false.
+    could be established; otherwise \c false. The QCanBusDevice implementation
+    ensures upon entry of this function that the device's \l state() is set
+    to \l QCanBusDevice::ConnectingState already.
 
     The implementation must ensure that upon success the instance's \l state()
     is set to \l QCanBusDevice::ConnectedState; otherwise
-    \l QCanBusDevice::UnconnectedState.
+    \l QCanBusDevice::UnconnectedState. \l setState() must be used to set the new
+    device state.
+
+    The custom implementation is responsible for opening the socket, instanciation
+    of a potentially required \l QSocketNotifier and the application of custom and default
+    \l QCanBusDevice::configurationParameter().
 
     \sa connectDevice()
 */
@@ -430,6 +437,9 @@ qint64 QCanBusDevice::framesToWrite() const
     This function is responsible for closing the CAN bus connection.
     The implementation must ensure that the instance's
     \l state() is set to \l QCanBusDevice::UnconnectedState.
+
+    This function's most important task is to close the socket to the CAN device
+    and to call \l QCanBusDevice::setState().
 
     \sa disconnectDevice()
 */
@@ -500,7 +510,7 @@ QCanBusFrame QCanBusDevice::readFrame()
     Interprets \a frame as error frame and returns a human readable
     description of the error.
 
-    If \a frame is not an error frame, the return string is empty.
+    If \a frame is not an error frame, the returned string is empty.
 */
 
 /*!

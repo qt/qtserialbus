@@ -1,3 +1,0 @@
-Method for asking connection state and proper signaling should be added.
-
-Defined flags from socket CAN header should not be used.

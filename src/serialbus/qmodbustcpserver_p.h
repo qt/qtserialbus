@@ -69,8 +69,6 @@ class QModbusTcpServerPrivate : public QModbusServerPrivate
     Q_DECLARE_PUBLIC(QModbusTcpServer)
 
 public:
-    QModbusTcpServerPrivate() Q_DECL_EQ_DEFAULT;
-
     /*
         This function is a workaround since 2nd level lambda below cannot
         call protected QModbusTcpServer::processRequest(..) function on VS2013.

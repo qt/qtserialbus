@@ -37,6 +37,7 @@
 #include <QtSerialBus/qmodbusserver.h>
 #include <QtSerialBus/qmodbusrtuserialslave.h>
 #include <QtSerialBus/qmodbustcpserver.h>
+#include <QtSerialBus/qmodbusdeviceidentification.h>
 
 #include <QtCore/qdebug.h>
 #include <QtTest/QtTest>
@@ -1086,7 +1087,6 @@ private slots:
         class InheritanceTestServer : public QModbusServer
         {
         public:
-            InheritanceTestServer() Q_DECL_EQ_DEFAULT;
             void close() Q_DECL_OVERRIDE {}
             bool open() Q_DECL_OVERRIDE { return true; }
 
@@ -1198,6 +1198,51 @@ private slots:
         server.setValue(QModbusServer::DiagnosticRegister, 0xffff);
         server.processRequest(QModbusRequest(QModbusRequest::Diagnostics, quint16(0x0014), quint16(0)));
         QCOMPARE(server.value(QModbusServer::DiagnosticRegister).value<quint16>(), quint16(0xfffe));
+    }
+
+    void testProcessEncapsulatedInterfaceTransportRequest()
+    {
+        QModbusDeviceIdentification objectPool;
+        QCOMPARE(objectPool.insert(QModbusDeviceIdentification::VendorNameObjectId,
+            "Company identification"), true);
+        QCOMPARE(objectPool.isValid(), false);
+        QCOMPARE(objectPool.insert(QModbusDeviceIdentification::ProductCodeObjectId,
+            "Product code"), true);
+        QCOMPARE(objectPool.isValid(), false);
+        QCOMPARE(objectPool.insert(QModbusDeviceIdentification::MajorMinorRevisionObjectId,
+            "V2.11"), true);
+        QCOMPARE(objectPool.isValid(), true);
+
+        QCOMPARE(server.setValue(QModbusServer::DeviceIdentification,
+            QVariant::fromValue<QModbusDeviceIdentification>(objectPool)), true);
+
+        auto response = server
+            .processRequest(QModbusRequest(QModbusRequest::EncapsulatedInterfaceTransport,
+                QByteArray::fromHex("0e0100")));
+        QCOMPARE(response.data(), QByteArray::fromHex("0e01010000030016")
+            + "Company identification" + QByteArray::fromHex("010c") + "Product code"
+            + QByteArray::fromHex("0205") + "V2.11");
+
+        QCOMPARE(objectPool.insert(QModbusDeviceIdentification::ProductCodeObjectId, QByteArray(
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")), true);
+        QCOMPARE(objectPool.isValid(), true);
+
+        QCOMPARE(server.setValue(QModbusServer::DeviceIdentification,
+            QVariant::fromValue<QModbusDeviceIdentification>(objectPool)), true);
+
+        response = server.processRequest(QModbusRequest(QModbusPdu::EncapsulatedInterfaceTransport,
+                QByteArray::fromHex("0e0100")));
+        QCOMPARE(response.data(), QByteArray::fromHex("0e0101ff02020016")
+            + "Company identification" + QByteArray::fromHex("01dc") + QByteArray(
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"));
+
+        response = server.processRequest(QModbusRequest(QModbusPdu::EncapsulatedInterfaceTransport,
+                QByteArray::fromHex("0e0102")));
+        QCOMPARE(response.data(), QByteArray::fromHex("0e01010000010205") + "V2.11");
     }
 };
 

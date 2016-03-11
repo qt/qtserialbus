@@ -34,6 +34,7 @@
 **
 ****************************************************************************/
 
+#include "qmodbusdeviceidentification.h"
 #include "qmodbusserver.h"
 #include "qmodbusserver_p.h"
 #include "qmodbus_symbols_p.h"
@@ -79,6 +80,7 @@ Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
     \value ServerIdentifier         The identifier of the server, \b not the server address. \c quint8
     \value RunIndicatorStatus       The run indicator of the server. \c quint8
     \value AdditionalData           The additional data of the server. \c QByteArray
+    \value DeviceIdentification     The physical and functional description of the server. \c QModbusDeviceIdentification
 
     User options:
 
@@ -189,6 +191,9 @@ int QModbusServer::serverAddress() const
             \li Returns the server's additional data. This data is used as
                 addendum by the \l QModbusPdu::ReportServerId function code.
         \row
+            \li \l QModbusServer::DeviceIdentification
+            \li Returns the server's physical and functional description.
+        \row
             \li \l QModbusServer::UserOption
             \li Returns the value of a user option.
 
@@ -218,6 +223,8 @@ QVariant QModbusServer::value(int option) const
             return d->m_serverOptions.value(option, quint8(0xff));
         case AdditionalData:
             return d->m_serverOptions.value(option, QByteArray("Qt Modbus Server"));
+        case DeviceIdentification:
+            return d->m_serverOptions.value(option, QVariant());
     };
 
     if (option < UserOption)
@@ -287,6 +294,10 @@ QVariant QModbusServer::value(int option) const
                 code. The maximum data size cannot exceed 249 bytes to match
                 response message size restrictions.
                 The default value preset is \c {Qt Modbus Server}.
+        \row
+            \li \l QModbusServer::DeviceIdentification
+            \li Sets the server's physical and functional description. By default
+                there is no additional device identification data set.
         \row
             \li \l QModbusServer::UserOption
             \li Sets the value of a user option to \a newValue.
@@ -362,6 +373,11 @@ bool QModbusServer::setValue(int option, const QVariant &newValue)
         d->m_serverOptions.insert(option, additionalData);
         return true;
     }
+    case DeviceIdentification:
+        if (!newValue.canConvert<QModbusDeviceIdentification>())
+            return false;
+        d->m_serverOptions.insert(option, newValue);
+        return true;
     default:
         break;
     };
@@ -653,9 +669,8 @@ QModbusResponse QModbusServerPrivate::processRequest(const QModbusPdu &request)
         return processReadWriteMultipleRegistersRequest(request);
     case QModbusRequest::ReadFifoQueue:
         return processReadFifoQueueRequest(request);
-    case QModbusRequest::EncapsulatedInterfaceTransport:    // TODO: Implement.
-        return QModbusExceptionResponse(request.functionCode(),
-            QModbusExceptionResponse::IllegalFunction);
+    case QModbusRequest::EncapsulatedInterfaceTransport:
+        return processEncapsulatedInterfaceTransportRequest(request);
     default:
         break;
     }
@@ -1172,6 +1187,118 @@ QModbusResponse QModbusServerPrivate::processReadFifoQueueRequest(const QModbusR
 
     return QModbusResponse(request.functionCode(), quint16((fifoCount * 2) + 2u), fifoCount,
                            fifoRegisters.values());
+}
+
+QModbusResponse QModbusServerPrivate::processEncapsulatedInterfaceTransportRequest(
+                                                                     const QModbusRequest &request)
+{
+    CHECK_SIZE_LESS_THAN(request);
+    quint8 MEIType;
+    request.decodeData(&MEIType);
+
+    switch (MEIType) {
+        case EncapsulatedInterfaceTransport::CanOpenGeneralReference:
+            break;
+        case EncapsulatedInterfaceTransport::ReadDeviceIdentification: {
+            if (request.dataSize() != 3u) {
+                return QModbusExceptionResponse(request.functionCode(),
+                    QModbusExceptionResponse::IllegalDataValue);
+            }
+
+            const QVariant tmp = q_func()->value(QModbusServer::DeviceIdentification);
+            if (tmp.isNull() || (!tmp.isValid())) {
+                // TODO: Is this correct?
+                return QModbusExceptionResponse(request.functionCode(),
+                    QModbusExceptionResponse::ServerDeviceFailure);
+            }
+
+            QModbusDeviceIdentification objectPool = tmp.value<QModbusDeviceIdentification>();
+            if (!objectPool.isValid()) {
+                // TODO: Is this correct?
+                return QModbusExceptionResponse(request.functionCode(),
+                    QModbusExceptionResponse::ServerDeviceFailure);
+            }
+
+            quint8 readDeviceIdCode, objectId;
+            request.decodeData(&MEIType, &readDeviceIdCode, &objectId);
+            if (!objectPool.contains(objectId)) {
+                // Individual access requires the object Id to be present, so we will always fail.
+                // For all other cases we will reevaluate object Id after we reset it as per spec.
+                objectId = QModbusDeviceIdentification::VendorNameObjectId;
+                if (readDeviceIdCode == QModbusDeviceIdentification::IndividualReadDeviceIdCode
+                    || !objectPool.contains(objectId)) {
+                    return QModbusExceptionResponse(request.functionCode(),
+                        QModbusExceptionResponse::IllegalDataAddress);
+                }
+            }
+
+            auto payload = [MEIType, readDeviceIdCode, objectId, objectPool](int lastObjectId) {
+                // TODO: Take conformity level into account.
+                QByteArray payload(6, Qt::Uninitialized);
+                payload[0] = MEIType;
+                payload[1] = readDeviceIdCode;
+                payload[2] = quint8(objectPool.conformityLevel());
+                payload[3] = quint8(0x00); // no more follows
+                payload[4] = quint8(0x00); // next object id
+                payload[5] = quint8(0x00); // number of objects
+
+                const QList<int> objectIds = objectPool.objectIds();
+                foreach (int id, objectIds) {
+                    if (id < objectId)
+                        continue;
+                    if (id > lastObjectId)
+                        break;
+                    const QByteArray object = objectPool.value(id);
+                    QByteArray objectData(2, Qt::Uninitialized);
+                    objectData[0] = id;
+                    objectData[1] = quint8(object.size());
+                    objectData += object;
+                    if (payload.size() + objectData.size() > 253) {
+                        payload[3] = quint8(0xff); // more follows
+                        payload[4] = id; // next object id
+                        break;
+                    }
+                    payload.append(objectData);
+                    payload[5] = payload[5] + 1u; // number of objects
+                }
+                return payload;
+            };
+
+            switch (readDeviceIdCode) {
+            case QModbusDeviceIdentification::BasicReadDeviceIdCode:
+                // TODO: How to handle a valid Id <> VendorName ... MajorMinorRevision
+                return QModbusResponse(request.functionCode(),
+                    payload(QModbusDeviceIdentification::MajorMinorRevisionObjectId));
+            case QModbusDeviceIdentification::RegularReadDeviceIdCode:
+                // TODO: How to handle a valid Id <> VendorUrl ... UserApplicationName
+                return QModbusResponse(request.functionCode(),
+                    payload(QModbusDeviceIdentification::UserApplicationNameObjectId));
+            case QModbusDeviceIdentification::ExtendedReadDeviceIdCode:
+                // TODO: How to handle a valid Id < ProductDependent
+                return QModbusResponse(request.functionCode(),
+                    payload(QModbusDeviceIdentification::UndefinedObjectId));
+            case QModbusDeviceIdentification::IndividualReadDeviceIdCode: {
+                // TODO: Take conformity level into account.
+                const QByteArray object = objectPool.value(objectId);
+                QByteArray header(8, Qt::Uninitialized);
+                header[0] = MEIType;
+                header[1] = readDeviceIdCode;
+                header[2] = quint8(objectPool.conformityLevel());
+                header[3] = quint8(0x00); // no more follows
+                header[4] = quint8(0x00); // next object id
+                header[5] = quint8(0x01); // number of objects
+                header[6] = objectId;
+                header[7] = quint8(object.length());
+                return QModbusResponse(request.functionCode(), QByteArray(header + object));
+            }
+            default:
+                return QModbusExceptionResponse(request.functionCode(),
+                    QModbusExceptionResponse::IllegalDataValue);
+            }
+        }   break;
+    }
+    return QModbusExceptionResponse(request.functionCode(),
+        QModbusExceptionResponse::IllegalFunction);
 }
 
 void QModbusServerPrivate::storeModbusCommEvent(const QModbusCommEvent &eventByte)

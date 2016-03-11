@@ -111,6 +111,7 @@ public:
     QModbusResponse processMaskWriteRegisterRequest(const QModbusRequest &request);
     QModbusResponse processReadWriteMultipleRegistersRequest(const QModbusRequest &request);
     QModbusResponse processReadFifoQueueRequest(const QModbusRequest &request);
+    QModbusResponse processEncapsulatedInterfaceTransportRequest(const QModbusRequest &request);
 
     void storeModbusCommEvent(const QModbusCommEvent &eventByte);
 

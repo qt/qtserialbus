@@ -146,7 +146,8 @@ QVariant QModbusDevice::connectionParameter(int parameter) const
 
 /*!
     Sets the value of \a parameter to \a value. If the \a parameter already
-    exists, the previous value is overwritten.
+    exists, the previous value is overwritten. A active or running connection
+    is not affected by such parameter changes.
 
     \sa ConnectionParameter
     \sa connectionParameter()

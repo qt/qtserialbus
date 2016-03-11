@@ -4,7 +4,7 @@ project                 = QtSerialBus
 description             = Qt Serial Bus Reference Documentation
 version                 = $QT_VERSION
 
-examplesinstallpath     = serialbus
+examplesinstallpath     = qtserialbus/serialbus
 
 qhp.projects            = QtSerialBus
 
@@ -35,10 +35,9 @@ headerdirs  += ..
 
 sourcedirs  += ..
 
-examplesinstallpath = serialbus
-
 exampledirs += ../../../examples/serialbus \
-               snippets/
+               snippets/ \
+               ../../plugins/canbus/socketcan
 
 imagedirs   += images
 

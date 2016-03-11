@@ -76,6 +76,38 @@ QModbusRtuSerialMaster::~QModbusRtuSerialMaster()
 }
 
 /*!
+    \since 5.7
+
+    Returns the amount of \a microseconds for the silent interval between two
+    consecutive Modbus messages.
+
+    \sa setInterFrameDelay()
+*/
+int QModbusRtuSerialMaster::interFrameDelay() const
+{
+    Q_D(const QModbusRtuSerialMaster);
+    return d->m_interFrameDelayMilliseconds * 1000;
+}
+
+/*!
+    \since 5.7
+
+    Sets the amount of \a microseconds for the silent interval between two
+    consecutive Modbus messages. By default, the class implementation will use
+    a pre-calculated value according to the Modbus specification. A active or
+    running connection is not affected by such delay changes.
+
+    \note If \a microseconds is set to -1 or \a microseconds is less than the
+    pre-calculated delay then this pre-calculated value is used as frame delay.
+*/
+void QModbusRtuSerialMaster::setInterFrameDelay(int microseconds)
+{
+    Q_D(QModbusRtuSerialMaster);
+    d->m_interFrameDelayMilliseconds = qCeil(qreal(microseconds) / 1000.);
+    d->calculateInterFrameDelay();
+}
+
+/*!
     \internal
 */
 QModbusRtuSerialMaster::QModbusRtuSerialMaster(QModbusRtuSerialMasterPrivate &dd, QObject *parent)
@@ -87,6 +119,9 @@ QModbusRtuSerialMaster::QModbusRtuSerialMaster(QModbusRtuSerialMasterPrivate &dd
 
 /*!
      \reimp
+
+     \note When calling this function, existing buffered data is removed from
+     the serial port.
 */
 bool QModbusRtuSerialMaster::open()
 {
@@ -94,15 +129,12 @@ bool QModbusRtuSerialMaster::open()
         return true;
 
     Q_D(QModbusRtuSerialMaster);
-
-    d->responseBuffer.clear();
-
-    d->updateSerialPortConnectionInfo();
-    if (d->m_serialPort->open(QIODevice::ReadWrite))
+    if (d->m_serialPort->open(QIODevice::ReadWrite)) {
+        d->setupEnvironment();
         setState(QModbusDevice::ConnectedState);
-    else
+    } else {
         setError(d->m_serialPort->errorString(), QModbusDevice::ConnectionError);
-
+    }
     return (state() == QModbusDevice::ConnectedState);
 }
 
@@ -115,7 +147,6 @@ void QModbusRtuSerialMaster::close()
         return;
 
     Q_D(QModbusRtuSerialMaster);
-
     if (d->m_serialPort->isOpen())
         d->m_serialPort->close();
 

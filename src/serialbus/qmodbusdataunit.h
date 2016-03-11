@@ -54,7 +54,7 @@ public:
         HoldingRegisters
     };
 
-    QModbusDataUnit() Q_DECL_EQ_DEFAULT;
+    QModbusDataUnit() = default;
 
     explicit QModbusDataUnit(RegisterType type)
         : QModbusDataUnit(type, 0, 0)

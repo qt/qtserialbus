@@ -84,19 +84,15 @@ public:
         UndefinedFunctionCode = 0x100
     };
 
-    QModbusPdu() Q_DECL_EQ_DEFAULT;
-    virtual ~QModbusPdu() Q_DECL_EQ_DEFAULT;
+    QModbusPdu() = default;
+    virtual ~QModbusPdu() = default;
 
     bool isValid() const {
         return (m_code >= ReadCoils && m_code < UndefinedFunctionCode)
                 && (m_data.size() < 253);
     }
 
-#ifdef Q_QDOC
-    static const quint8 ExceptionByte;
-#else
     static const quint8 ExceptionByte = 0x80;
-#endif
     ExceptionCode exceptionCode() const {
         if (!m_data.size() || !isException())
             return ExtendedException;
@@ -115,7 +111,6 @@ public:
     QByteArray data() const { return m_data; }
     void setData(const QByteArray &newData) { m_data = newData; }
 
-#ifndef Q_QDOC
     template <typename ... Args> void encodeData(Args ... newData) {
         encode(std::forward<Args>(newData)...);
     }
@@ -123,30 +118,16 @@ public:
     template <typename ... Args> void decodeData(Args && ... newData) const {
         decode(std::forward<Args>(newData)...);
     }
-#else
-    // slightly modified signature to permit qdoc to have some notion of what's going on
-
-    template <typename ... Args> void encodeData(Args newData) {
-        encode(std::forward<Args>(newData)...);
-    }
-
-    template <typename ... Args> void decodeData(Args newData) const
-    {
-        decode(std::forward<Args>(newData)...);
-    }
-#endif
 
 protected:
-
     QModbusPdu(FunctionCode code, const QByteArray &newData)
         : m_code(code)
         , m_data(newData)
     {}
 
-    QModbusPdu(const QModbusPdu &) Q_DECL_EQ_DEFAULT;
-    QModbusPdu &operator=(const QModbusPdu &) Q_DECL_EQ_DEFAULT;
+    QModbusPdu(const QModbusPdu &) = default;
+    QModbusPdu &operator=(const QModbusPdu &) = default;
 
-    // qdoc cannot deal with variadic templates
     template <typename ... Args>
     QModbusPdu(FunctionCode code, Args ... newData)
         : m_code(code)
@@ -178,6 +159,7 @@ private:
     }
 
     template<typename ... Args> void encode(Args ... newData) {
+        m_data.clear();
         if (sizeof...(Args)) {
             QDataStream stream(&m_data, QIODevice::WriteOnly);
             char tmp[1024] = { (encode(&stream, newData), void(), '0')... };
@@ -204,7 +186,7 @@ Q_SERIALBUS_EXPORT QDataStream &operator<<(QDataStream &stream, const QModbusPdu
 class QModbusRequest : public QModbusPdu
 {
 public:
-    QModbusRequest() Q_DECL_EQ_DEFAULT;
+    QModbusRequest() = default;
     QModbusRequest(const QModbusPdu &pdu)
         : QModbusPdu(pdu)
     {}
@@ -213,10 +195,9 @@ public:
         : QModbusPdu(code, newData)
     {}
 
-    Q_SERIALBUS_EXPORT static int minimumDataSize(const QModbusPdu &pdu);
-    Q_SERIALBUS_EXPORT static int calculateDataSize(const QModbusPdu &pdu, const QByteArray &data);
+    Q_SERIALBUS_EXPORT static int minimumDataSize(const QModbusRequest &pdu);
+    Q_SERIALBUS_EXPORT static int calculateDataSize(const QModbusRequest &pdu);
 
-    // TODO currently no way to document -> qdoc issue due to template usage
     template <typename ... Args>
     QModbusRequest(FunctionCode code, Args ... newData)
         : QModbusPdu(code, newData...)
@@ -227,7 +208,7 @@ Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &stream, QModbusRequest &
 class QModbusResponse : public QModbusPdu
 {
 public:
-    QModbusResponse() Q_DECL_EQ_DEFAULT;
+    QModbusResponse() = default;
     QModbusResponse(const QModbusPdu &pdu)
         : QModbusPdu(pdu)
     {}
@@ -236,10 +217,9 @@ public:
         : QModbusPdu(code, newData)
     {}
 
-    Q_SERIALBUS_EXPORT static int minimumDataSize(const QModbusPdu &pdu);
-    Q_SERIALBUS_EXPORT static int calculateDataSize(const QModbusPdu &pdu, const QByteArray &data);
+    Q_SERIALBUS_EXPORT static int minimumDataSize(const QModbusResponse &pdu);
+    Q_SERIALBUS_EXPORT static int calculateDataSize(const QModbusResponse &pdu);
 
-    // TODO currently no way to document -> qdoc issue due to template usage
     template <typename ... Args>
     QModbusResponse(FunctionCode code, Args ... newData)
         : QModbusPdu(code, newData...)
@@ -249,7 +229,7 @@ public:
 class QModbusExceptionResponse : public QModbusResponse
 {
 public:
-    QModbusExceptionResponse() Q_DECL_EQ_DEFAULT;
+    QModbusExceptionResponse() = default;
     QModbusExceptionResponse(const QModbusPdu &pdu)
         : QModbusResponse(pdu)
     {}

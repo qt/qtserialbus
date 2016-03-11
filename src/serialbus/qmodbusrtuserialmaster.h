@@ -52,6 +52,9 @@ public:
     explicit QModbusRtuSerialMaster(QObject *parent = Q_NULLPTR);
     ~QModbusRtuSerialMaster();
 
+    int interFrameDelay() const;
+    void setInterFrameDelay(int microseconds);
+
 protected:
     QModbusRtuSerialMaster(QModbusRtuSerialMasterPrivate &dd, QObject *parent = Q_NULLPTR);
 
