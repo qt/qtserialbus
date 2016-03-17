@@ -71,7 +71,7 @@ public:
                             QModbusDevice::WriteError);
                 return false;
             }
-            qCDebug(QT_MODBUS_LOW) << "Sent TCP ADU:" << buffer.toHex();
+            qDebug() << "Sent TCP ADU:" << buffer.toHex();
             qDebug() << "Sent TCP PDU:" << request << "with tId:" << hex << m_tId;
             return true;
         };
