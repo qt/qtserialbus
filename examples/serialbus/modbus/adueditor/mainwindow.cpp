@@ -115,8 +115,9 @@ void MainWindow::on_sendButton_clicked()
             pduData[0]), pduData.mid(1)), address);
     } else {
         qDebug() << "Send: Sending PDU with predefined function code.";
-        reply = m_device->sendRawRequest(QModbusRequest(QModbusRequest::FunctionCode((isSerial
-            ? fcSerialDrop : fcTcpDrop)->currentIndex()), pduData), address);
+        quint16 fc = (isSerial ? fcSerialDrop : fcTcpDrop)->currentText().left(4).toShort(0, 16);
+        reply = m_device->sendRawRequest(QModbusRequest(QModbusRequest::FunctionCode(fc), pduData),
+            address);
     }
 
     if (reply) {
