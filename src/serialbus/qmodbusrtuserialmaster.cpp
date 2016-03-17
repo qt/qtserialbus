@@ -78,7 +78,7 @@ QModbusRtuSerialMaster::~QModbusRtuSerialMaster()
 /*!
     \since 5.7
 
-    Returns the amount of \a microseconds for the silent interval between two
+    Returns the amount of microseconds for the silent interval between two
     consecutive Modbus messages.
 
     \sa setInterFrameDelay()
