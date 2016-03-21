@@ -160,9 +160,10 @@ private:
 
     template<typename ... Args> void encode(Args ... newData) {
         m_data.clear();
-        if (sizeof...(Args)) {
+        Q_CONSTEXPR quint32 argCount = sizeof...(Args);
+        if (argCount > 0) {
             QDataStream stream(&m_data, QIODevice::WriteOnly);
-            char tmp[1024] = { (encode(&stream, newData), void(), '0')... };
+            char tmp[argCount] = { (encode(&stream, newData), void(), '0')... };
             Q_UNUSED(tmp)
         }
     }
@@ -170,7 +171,7 @@ private:
         Q_CONSTEXPR quint32 argCount = sizeof...(Args);
         if (argCount > 0 && !m_data.isEmpty()) {
             QDataStream stream(m_data);
-            char tmp[1024] = { (decode(&stream, newData), void(), '0')... };
+            char tmp[argCount] = { (decode(&stream, newData), void(), '0')... };
             Q_UNUSED(tmp)
         }
     }
