@@ -216,10 +216,7 @@ void MainWindow::sendMessage() const
 
     QCanBusFrame frame;
     const int maxPayload = m_ui->fdBox->checkState() ? 64 : 8;
-    int size = writings.size();
-    if (size > maxPayload)
-        size = maxPayload;
-    writings = writings.left(size);
+    writings.truncate(maxPayload);
     frame.setPayload(writings);
 
     qint32 id = m_ui->idEdit->displayText().toInt();
