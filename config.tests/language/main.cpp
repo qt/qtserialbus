@@ -97,11 +97,10 @@ int total(int a, int i) { return a + i; }
 
 int main(int /*argc*/, char** /*argv*/)
 {
-    // unique_ptr and nullptr
-    std::unique_ptr<Test> t = nullptr;
-
-    // make_unique and delegating ctor
-    t = std::make_unique<Test>(155);
+    // nullptr
+    Test *t = nullptr;
+    Test stackT(155);
+    t = &stackT;
 
     // variadics
     t->setValues(1, 2, 3, 4, 5);
