@@ -269,6 +269,22 @@ static int channelIndexFromName(const QString &interfaceName)
         return PCAN_USBBUS7;
     else if (interfaceName == QStringLiteral("usbbus8"))
         return PCAN_USBBUS8;
+    else if (interfaceName == QStringLiteral("pcibus1"))
+        return PCAN_PCIBUS1;
+    else if (interfaceName == QStringLiteral("pcibus2"))
+        return PCAN_PCIBUS2;
+    else if (interfaceName == QStringLiteral("pcibus3"))
+        return PCAN_PCIBUS3;
+    else if (interfaceName == QStringLiteral("pcibus4"))
+        return PCAN_PCIBUS4;
+    else if (interfaceName == QStringLiteral("pcibus5"))
+        return PCAN_PCIBUS5;
+    else if (interfaceName == QStringLiteral("pcibus6"))
+        return PCAN_PCIBUS6;
+    else if (interfaceName == QStringLiteral("pcibus7"))
+        return PCAN_PCIBUS7;
+    else if (interfaceName == QStringLiteral("pcibus8"))
+        return PCAN_PCIBUS8;
     else // TODO: Add other indexes here
         return PCAN_NONEBUS;
 }
