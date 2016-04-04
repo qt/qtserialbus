@@ -26,12 +26,16 @@
          <item row="0" column="0">
           <widget class="QLabel" name="label">
            <property name="text">
-            <string>Id</string>
+            <string>ID (hex)</string>
            </property>
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QLineEdit" name="idEdit"/>
+          <widget class="QLineEdit" name="idEdit">
+           <property name="placeholderText">
+            <string>123</string>
+           </property>
+          </widget>
          </item>
          <item row="0" column="2" rowspan="3">
           <widget class="QGroupBox" name="groupBox">
@@ -92,12 +96,16 @@
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QLineEdit" name="lineEdit"/>
+          <widget class="QLineEdit" name="lineEdit">
+           <property name="placeholderText">
+            <string>12 34 AB CE</string>
+           </property>
+          </widget>
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="label_2">
            <property name="text">
-            <string>Data</string>
+            <string>Data (hex)</string>
            </property>
           </widget>
          </item>

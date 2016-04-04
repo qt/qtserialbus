@@ -172,6 +172,16 @@ void MainWindow::framesWritten(qint64 count)
     qDebug() << "Number of frames written:" << count;
 }
 
+static QByteArray dataToHex(const QByteArray &data)
+{
+    QByteArray result = data.toHex().toUpper();
+
+    for (int i = 0; i < result.size(); i += 3)
+        result.insert(i, ' ');
+
+    return result;
+}
+
 void MainWindow::checkMessages()
 {
     if (!m_canDevice)
@@ -191,11 +201,11 @@ void MainWindow::checkMessages()
         interpretError(view, frame);
     } else {
         view += QLatin1String("Id: ");
-        view += QString::number(id, 16);
+        view += QString::number(id, 16).toUpper();
         view += QLatin1String(" bytes: ");
         view += QString::number(dataLength, 10);
         view += QLatin1String(" data: ");
-        view += frame.payload().data();
+        view += dataToHex(frame.payload());
     }
 
     if (frame.frameType() == QCanBusFrame::RemoteRequestFrame) {
@@ -207,12 +217,19 @@ void MainWindow::checkMessages()
     }
 }
 
+static QByteArray dataFromHex(const QString &hex)
+{
+    QByteArray line = hex.toLatin1();
+    line.replace(' ', QByteArray());
+    return QByteArray::fromHex(line);
+}
+
 void MainWindow::sendMessage() const
 {
     if (!m_canDevice)
         return;
 
-    QByteArray writings = m_ui->lineEdit->displayText().toUtf8();
+    QByteArray writings = dataFromHex(m_ui->lineEdit->displayText());
 
     QCanBusFrame frame;
     const int maxPayload = m_ui->fdBox->checkState() ? 64 : 8;
@@ -222,7 +239,7 @@ void MainWindow::sendMessage() const
     writings = writings.left(size);
     frame.setPayload(writings);
 
-    qint32 id = m_ui->idEdit->displayText().toInt();
+    qint32 id = m_ui->idEdit->displayText().toInt(nullptr, 16);
     if (!m_ui->EFF->checkState() && id > 2047) //11 bits
         id = 2047;
 
