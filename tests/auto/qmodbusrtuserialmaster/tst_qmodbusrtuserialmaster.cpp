@@ -35,7 +35,6 @@
 ****************************************************************************/
 
 #include <QtSerialBus/qmodbusrtuserialmaster.h>
-#include <QtSerialPort/qserialport.h>
 
 #include <QtTest/QtTest>
 
