@@ -803,6 +803,47 @@ private slots:
             quint8(0xff)); // dummy additional data
         QCOMPARE(QModbusResponse::calculateDataSize(rdi), 22);
     }
+
+    void testCustomCalculator()
+    {
+        // request
+        QModbusRequest request(QModbusRequest::WriteSingleCoil);
+        request.encodeData(quint8(0x00), quint8(0xac), quint8(0xff), quint8(0x00));
+        QCOMPARE(QModbusRequest::calculateDataSize(request), 4);
+
+        QModbusRequest::registerDataSizeCalculator(QModbusRequest::WriteSingleCoil,
+            [](const QModbusRequest &)->int {
+            return 15;
+        });
+        QCOMPARE(QModbusRequest::calculateDataSize(request), 15);
+
+        QModbusRequest::registerDataSizeCalculator(QModbusRequest::WriteSingleCoil, nullptr);
+        QCOMPARE(QModbusRequest::calculateDataSize(request), 4);
+
+        // response
+        QModbusResponse response(QModbusRequest::WriteSingleCoil);
+        response.encodeData(quint8(0x00), quint8(0xac), quint8(0xff), quint8(0x00));
+        QCOMPARE(QModbusResponse::calculateDataSize(request), 4);
+
+        QModbusResponse::registerDataSizeCalculator(QModbusResponse::WriteSingleCoil,
+            [](const QModbusResponse &)->int {
+            return 15;
+        });
+        QCOMPARE(QModbusResponse::calculateDataSize(response), 15);
+
+        QModbusResponse::registerDataSizeCalculator(QModbusResponse::WriteSingleCoil, nullptr);
+        QCOMPARE(QModbusResponse::calculateDataSize(response), 4);
+
+        // custom
+        QModbusPdu::FunctionCode custom = QModbusPdu::FunctionCode(0x30);
+        request.setFunctionCode(custom);
+        QCOMPARE(QModbusRequest::calculateDataSize(request), -1);
+
+        QModbusRequest::registerDataSizeCalculator(custom, [](const QModbusRequest &)->int {
+            return 27;
+        });
+        QCOMPARE(QModbusRequest::calculateDataSize(request), 27);
+    }
 };
 
 QTEST_MAIN(tst_QModbusPdu)

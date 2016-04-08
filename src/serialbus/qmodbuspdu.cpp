@@ -38,8 +38,15 @@
 #include "qmodbus_symbols_p.h"
 
 #include <QtCore/qdebug.h>
+#include <QtCore/qhash.h>
 
 QT_BEGIN_NAMESPACE
+
+using ReqSizeCalc = QHash<quint8, QModbusRequest::CalcFuncPtr>;
+Q_GLOBAL_STATIC(ReqSizeCalc, requestSizeCalculators);
+
+using ResSizeCalc = QHash<quint8, QModbusResponse::CalcFuncPtr>;
+Q_GLOBAL_STATIC(ResSizeCalc, responseSizeCalculators);
 
 namespace Private {
 
@@ -525,9 +532,17 @@ int QModbusRequest::minimumDataSize(const QModbusRequest &request)
     Calculates the expected data size for \a request based on the request's
     function code and data. Returns the full size of the request's data part;
     \c {-1} if the size could not be properly calculated.
+
+    \sa minimumDataSize
+    \sa registerDataSizeCalculator
 */
 int QModbusRequest::calculateDataSize(const QModbusRequest &request)
 {
+    if (requestSizeCalculators.exists()) {
+        if (auto ptr = requestSizeCalculators()->value(request.functionCode(), nullptr))
+            return ptr(request);
+    }
+
     if (request.isException())
         return 1;
 
@@ -566,6 +581,22 @@ int QModbusRequest::calculateDataSize(const QModbusRequest &request)
         break;
     }
     return size;
+}
+
+/*!
+    This function registers a user-defined implementation to calculate the
+    request data size for function code \a fc. It can be used to extend or
+    override the implementation inside \l QModbusRequest::calculateDataSize().
+
+    The \c CalcFuncPtr is a typedef for a pointer to a custom \a calculator
+    function with the following signature:
+    \code
+        int myCalculateDataSize(const QModbusRequest &pdu);
+    \endcode
+*/
+void QModbusRequest::registerDataSizeCalculator(FunctionCode fc, CalcFuncPtr calculator)
+{
+    requestSizeCalculators()->insert(fc, calculator);
 }
 
 /*!
@@ -649,9 +680,17 @@ int QModbusResponse::minimumDataSize(const QModbusResponse &response)
     Calculates the expected data size for \a response, based on the response's
     function code and data. Returns the full size of the response's data part;
     \c {-1} if the size could not be properly calculated.
+
+    \sa minimumDataSize
+    \sa registerDataSizeCalculator
 */
 int QModbusResponse::calculateDataSize(const QModbusResponse &response)
 {
+    if (responseSizeCalculators.exists()) {
+        if (auto ptr = responseSizeCalculators()->value(response.functionCode(), nullptr))
+            return ptr(response);
+    }
+
     if (response.isException())
         return 1;
 
@@ -720,6 +759,22 @@ int QModbusResponse::calculateDataSize(const QModbusResponse &response)
         break;
     }
     return size;
+}
+
+/*!
+    This function registers a user-defined implementation to calculate the
+    response data size for function code \a fc. It can be used to extend or
+    override the implementation inside \l QModbusResponse::calculateDataSize().
+
+    The \c CalcFuncPtr is a typedef for a pointer to a custom \a calculator
+    function with the following signature:
+    \code
+        int myCalculateDataSize(const QModbusResponse &pdu);
+    \endcode
+*/
+void QModbusResponse::registerDataSizeCalculator(FunctionCode fc, CalcFuncPtr calculator)
+{
+    responseSizeCalculators()->insert(fc, calculator);
 }
 
 /*!

@@ -39,6 +39,9 @@
 int main()
 {
     canfd_frame frame;
+    int fd_payload = CANFD_MAX_DLEN;
+    fd_payload = CAN_RAW_FD_FRAMES;
+    fd_payload = CANFD_MTU;
     return 0;
 }
 
