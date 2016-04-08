@@ -91,7 +91,7 @@ void MainWindow::initActionsConnections()
 
     connect(m_ui->actionConnect, &QAction::triggered, this, &MainWindow::connectDevice);
     connect(m_ui->actionDisconnect, &QAction::triggered, this, &MainWindow::disconnectDevice);
-    connect(m_ui->actionQuit, SIGNAL(triggered()), this, SLOT(close()));
+    connect(m_ui->actionQuit, &QAction::triggered, this, &QWidget::close);
     connect(m_ui->actionConfigure, &QAction::triggered, m_settings, &SettingsDialog::show);
     connect(m_ui->actionAboutQt, &QAction::triggered, qApp, &QApplication::aboutQt);
 }

@@ -9,8 +9,10 @@ config.tests/libmodbus_byteswap/libmodbus_byteswap
 config.tests/libmodbus_tiocmrts/libmodbus_tiocmrts
 config.tests/libmodbus_strlcpy/libmodbus_strlcpy
 config.tests/libmodbus_rs485/libmodbus_rs485
+config.tests/language/language
 config.tests/socketcan/socketcan
 config.tests/socketcan_fd/socketcan_fd
+examples/serialbus/modbus/adueditor/adueditor
 examples/serialbus/modbus/master/modbusmaster
 examples/serialbus/modbus/slave/modbusslave
 *.moc
@@ -34,6 +36,7 @@ tests/auto/qmodbusserver/tst_qmodbusserver
 *.exe
 *.ipch
 *_wrapper.bat
+*_wrapper.sh
 
 # Visual Studio generated files
 *.ib_pdb_index
