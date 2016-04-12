@@ -41,6 +41,9 @@
 
 #include <QtCore/qdebug.h>
 #include <QtCore/qdatastream.h>
+#include <QtCore/qeventloop.h>
+#include <QtCore/qscopedvaluerollback.h>
+#include <QtCore/qtimer.h>
 
 #define SOCKET_CAN_MTU 72
 
@@ -408,6 +411,108 @@ qint64 QCanBusDevice::framesAvailable() const
 qint64 QCanBusDevice::framesToWrite() const
 {
     return d_func()->outgoingFrames.size();
+}
+
+/*!
+    For buffered devices, this function waits until all buffered frames
+    have been written to the device and the \a bytesWritten() signal has been emitted,
+    or until \a msecs milliseconds have passed. If \a msecs is -1,
+    this function will not time out. For unbuffered devices, it returns immediately with \c false
+    as \l writeFrame() does not require a write buffer.
+
+    Returns \c true if the \l framesWritten() signal is emitted;
+    otherwise returns \c false (i.e. if the operation timed out, or if an error occurred).
+
+    \note This function will start a local event loop. This may lead to scenarios whereby
+    other application slots may be called while the execution of this function scope is blocking.
+    To avoid problems, the signals for this class should not be connected to slots.
+    Similarly this function must never be called in response to the \l framesWritten()
+    or \l errorOccurred() signals.
+
+    \sa waitForFramesReceived()
+    \since 5.8
+ */
+bool QCanBusDevice::waitForFramesWritten(int msecs)
+{
+    // do not enter this function recursively
+    if (d_func()->waitForWrittenEntered) {
+        qWarning("QCanBusDevice::waitForFramesWritten() must not be called "
+                 "recursively. Check that no slot containing waitForFramesReceived() "
+                 "is called in response to framesWritten(qint64) or errorOccurred(CanBusError)"
+                 "signals\n");
+        return false;
+    }
+
+    QScopedValueRollback<bool> guard(d_func()->waitForWrittenEntered);
+    d_func()->waitForWrittenEntered = true;
+
+    if (d_func()->state != ConnectedState)
+        return false;
+
+    if (!framesToWrite())
+        return false; // nothing pending, nothing to wait upon
+
+    QEventLoop loop;
+    connect(this, &QCanBusDevice::framesWritten, &loop, [&]() { loop.exit(0); });
+    connect(this, &QCanBusDevice::errorOccurred, &loop, [&]() { loop.exit(1); });
+    if (msecs >= 0)
+        QTimer::singleShot(msecs, &loop, [&]() { loop.exit(2); });
+
+    int result = 0;
+    while (framesToWrite() > 0) {
+        // wait till all written or time out
+        result = loop.exec(QEventLoop::ExcludeUserInputEvents);
+        if (result > 0)
+            return false;
+    }
+    return true;
+}
+
+/*!
+    Blocks until new frames are available for reading and the \l framesReceived()
+    signal has been emitted, or until \a msecs milliseconds have passed. If
+    \a msecs is \c -1, this function will not time out.
+
+    Returns \c true if new frames are available for reading and the \l framesReceived()
+    signal is emitted; otherwise returns \c false (if the operation timed out
+    or if an error occurred).
+
+    \note This function will start a local event loop. This may lead to scenarios whereby
+    other application slots may be called while the execution of this function scope is blocking.
+    To avoid problems, the signals for this class should not be connected to slots.
+    Similarly this function must never be called in response to the \l framesReceived()
+    or \l errorOccurred() signals.
+
+    \sa waitForFramesWritten()
+    \since 5.8
+ */
+bool QCanBusDevice::waitForFramesReceived(int msecs)
+{
+    // do not enter this function recursively
+    if (d_func()->waitForReceivedEntered) {
+        qWarning("QCanBusDevice::waitForFramesReceived() must not be called "
+                 "recursively. Check that no slot containing waitForFramesReceived() "
+                 "is called in response to framesReceived() or errorOccurred(CanBusError) "
+                 "signals\n");
+        return false;
+    }
+
+    QScopedValueRollback<bool> guard(d_func()->waitForReceivedEntered);
+    d_func()->waitForReceivedEntered = true;
+
+    if (d_func()->state != ConnectedState)
+        return false;
+
+    QEventLoop loop;
+
+    connect(this, &QCanBusDevice::framesReceived, &loop, [&]() { loop.exit(0); });
+    connect(this, &QCanBusDevice::errorOccurred, &loop, [&]() { loop.exit(1); });
+    if (msecs >= 0)
+        QTimer::singleShot(msecs, &loop, [&]() { loop.exit(2); });
+
+    int result = loop.exec(QEventLoop::ExcludeUserInputEvents);
+
+    return result == 0;
 }
 
 /*!

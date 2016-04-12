@@ -107,6 +107,9 @@ public:
     qint64 framesAvailable() const;
     qint64 framesToWrite() const;
 
+    virtual bool waitForFramesWritten(int msecs);
+    virtual bool waitForFramesReceived(int msecs);
+
     // TODO rename these once QIODevice dependency has been removed
     bool connectDevice();
     void disconnectDevice();

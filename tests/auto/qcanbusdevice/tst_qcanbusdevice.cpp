@@ -40,12 +40,14 @@
 #include <QtTest/QtTest>
 #include <QSignalSpy>
 
+#include <memory>
+
 class tst_Backend : public QCanBusDevice
 {
     Q_OBJECT
 public:
     tst_Backend() :
-        firstOpen(true)
+        firstOpen(true), writeBufferUsed(true)
     {
         referenceFrame.setFrameId(5);
         referenceFrame.setPayload(QByteArray("FOOBAR"));
@@ -54,11 +56,17 @@ public:
         stamp.setMicroSeconds(23);
         referenceFrame.setTimeStamp(stamp);
         referenceFrame.setExtendedFrameFormat(1);
+    }
 
-        // this test assumes that each readFrame() call returns referenceFrame
-        // fill the buffer with frames
-        for (int i = 0; i < 5; i++)
-            enqueueReceivedFrames(QVector<QCanBusFrame>() << referenceFrame);
+    bool triggerNewFrame()
+    {
+        if (state() != QCanBusDevice::ConnectedState)
+            return false;
+
+        // line below triggers framesReceived() signal
+        enqueueReceivedFrames(QVector<QCanBusFrame>() << referenceFrame);
+
+        return true;
     }
 
     bool open()
@@ -76,12 +84,17 @@ public:
         setState(QCanBusDevice::UnconnectedState);
     }
 
-    bool writeFrame(const QCanBusFrame &/*data*/)
+    bool writeFrame(const QCanBusFrame &data)
     {
         if (state() != QCanBusDevice::ConnectedState)
             return false;
 
-        emit written();
+        if (writeBufferUsed) {
+            enqueueOutgoingFrame(data);
+            QTimer::singleShot(2000, this, [this](){ triggerDelayedWrites(); });
+        } else {
+            emit framesWritten(1);
+        }
         return true;
     }
 
@@ -95,12 +108,30 @@ public:
         return QString();
     }
 
-signals:
-    void written();
+    bool isWriteBuffered() const { return writeBufferUsed; }
+    void setWriteBuffered(bool isBuffered)
+    {
+        // permits switching between buffered and unbuffered write mode
+        writeBufferUsed = isBuffered;
+    }
+
+public slots:
+    void triggerDelayedWrites()
+    {
+        if (framesToWrite() == 0)
+            return;
+
+        dequeueOutgoingFrame();
+        emit framesWritten(1);
+
+        if (framesToWrite() > 0)
+            QTimer::singleShot(2000, this, [this](){ triggerDelayedWrites(); });
+    }
 
 private:
     QCanBusFrame referenceFrame;
     bool firstOpen;
+    bool writeBufferUsed;
 };
 
 class tst_QCanBusDevice : public QObject
@@ -117,9 +148,12 @@ private slots:
     void error();
     void cleanupTestCase();
     void tst_filtering();
+    void tst_bufferingAttribute();
 
+    void tst_waitForFramesReceived();
+    void tst_waitForFramesWritten();
 private:
-    QPointer<QCanBusDevice> device;
+    QPointer<tst_Backend> device;
 };
 
 tst_QCanBusDevice::tst_QCanBusDevice()
@@ -180,7 +214,11 @@ void tst_QCanBusDevice::conf()
 
 void tst_QCanBusDevice::write()
 {
-    QSignalSpy spy(device, SIGNAL(written()));
+    // we assume unbuffered writing in this function
+    device->setWriteBuffered(false);
+    QCOMPARE(device->isWriteBuffered(), false);
+
+    QSignalSpy spy(device, SIGNAL(framesWritten(qint64)));
     QSignalSpy stateSpy(device,
                         SIGNAL(stateChanged(QCanBusDevice::CanBusDeviceState)));
 
@@ -235,6 +273,7 @@ void tst_QCanBusDevice::read()
     QCOMPARE(stateSpy[1].at(0).value<QCanBusDevice::CanBusDeviceState>(),
              QCanBusDevice::ConnectedState);
 
+    device->triggerNewFrame();
     const QCanBusFrame frame2 = device->readFrame();
     QVERIFY(!frame1.frameId());
     QVERIFY(!frame1.isValid());
@@ -338,6 +377,162 @@ void tst_QCanBusDevice::tst_filtering()
               != QCanBusDevice::Filter::MatchBaseAndExtendedFormat);
     QVERIFY(newFilter.at(1).format & QCanBusDevice::Filter::MatchBaseFormat);
     QVERIFY(!(newFilter.at(1).format & QCanBusDevice::Filter::MatchExtendedFormat));
+}
+
+void tst_QCanBusDevice::tst_bufferingAttribute()
+{
+    std::unique_ptr<tst_Backend> canDevice(new tst_Backend);
+    QVERIFY((bool)canDevice);
+    // by default buffered set to true
+    QCOMPARE(canDevice->isWriteBuffered(), true);
+
+    canDevice->setWriteBuffered(false);
+    QCOMPARE(canDevice->isWriteBuffered(), false);
+    canDevice->setWriteBuffered(true);
+    QCOMPARE(canDevice->isWriteBuffered(), true);
+}
+
+void tst_QCanBusDevice::tst_waitForFramesReceived()
+{
+    if (device->state() != QCanBusDevice::ConnectedState) {
+        QVERIFY(device->connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(device->state() == QCanBusDevice::ConnectedState,
+                                 5000);
+    }
+
+    QVERIFY(!device->framesAvailable());
+    QVERIFY(device->triggerNewFrame());
+    QVERIFY(device->framesAvailable());
+
+    // frame is available, function blocks and times out
+    bool result = device->waitForFramesReceived(2000);
+    QVERIFY(!result);
+
+    QCanBusFrame frame = device->readFrame();
+    QVERIFY(frame.isValid());
+    QCOMPARE(frame.payload(), QByteArray("FOOBAR"));
+    QVERIFY(!device->framesAvailable());
+
+    QElapsedTimer elapsed;
+    elapsed.start();
+    // no pending frame (should trigger active wait & timeout)
+    result = device->waitForFramesReceived(5000);
+    QVERIFY(elapsed.hasExpired(4000)); // should have caused time elapse
+    QVERIFY(!result);
+
+    QTimer::singleShot(2000, [&]() { device->triggerNewFrame(); });
+    elapsed.restart();
+    // frame will be inserted after 2s
+    result = device->waitForFramesReceived(8000);
+    QVERIFY(!elapsed.hasExpired(8000));
+    QVERIFY(result);
+
+    frame = device->readFrame();
+    QVERIFY(frame.isValid());
+    QCOMPARE(frame.payload(), QByteArray("FOOBAR"));
+    QVERIFY(!device->framesAvailable());
+
+    QTimer::singleShot(2000, [&]() {
+        device->emulateError(QString("TriggerError"), QCanBusDevice::ReadError);
+    });
+    elapsed.restart();
+    // error will be inserted after 2s
+    result = device->waitForFramesReceived(8000);
+    QVERIFY(!elapsed.hasExpired(8000));
+    QVERIFY(!result);
+    QCOMPARE(device->errorString(), QString("TriggerError"));
+    QCOMPARE(device->error(), QCanBusDevice::ReadError);
+
+    // test recursive calling of waitForFramesReceived() behavior
+    int handleCounter = 0;
+    QTimer::singleShot(1000, [&]() {
+        device->triggerNewFrame();
+        device->triggerNewFrame();
+    });
+    QTimer::singleShot(2000, [&]() { device->triggerNewFrame(); });
+    QObject::connect(device.data(), &QCanBusDevice::framesReceived, [this, &handleCounter]() {
+        handleCounter++;
+        //this should trigger a recursion which we want to catch
+        device->waitForFramesReceived(5000);
+    });
+    result = device->waitForFramesReceived(8000);
+    QVERIFY(result);
+    QTRY_COMPARE_WITH_TIMEOUT(handleCounter, 3, 5000);
+}
+
+void tst_QCanBusDevice::tst_waitForFramesWritten()
+{
+    if (device->state() != QCanBusDevice::ConnectedState) {
+        QVERIFY(device->connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(device->state() == QCanBusDevice::ConnectedState,
+                                 5000);
+    }
+
+    device->setWriteBuffered(false);
+    bool result = device->waitForFramesWritten(1000);
+    QVERIFY(!result); //no buffer, wait not possible
+
+    device->setWriteBuffered(true);
+
+    QVERIFY(device->framesToWrite() == 0);
+    result = device->waitForFramesWritten(1000);
+    QVERIFY(!result); //nothing in buffer, nothing to wait for
+
+    QCanBusFrame frame;
+    frame.setPayload(QByteArray("testData"));
+
+    // test error case
+    QTimer::singleShot(500, [&]() {
+        device->emulateError(QString("TriggerWriteError"), QCanBusDevice::ReadError);
+    });
+    device->writeFrame(frame);
+    QElapsedTimer elapsed;
+    elapsed.start();
+
+    // error will be triggered
+    result = device->waitForFramesWritten(8000);
+    QVERIFY(!elapsed.hasExpired(8000));
+    QVERIFY(!result);
+    QCOMPARE(device->errorString(), QString("TriggerWriteError"));
+    QCOMPARE(device->error(), QCanBusDevice::ReadError);
+
+    // flush remaining frames out to reset the test
+    QTRY_VERIFY_WITH_TIMEOUT(device->framesToWrite() == 0, 10000);
+
+    // test timeout
+    device->writeFrame(frame);
+    result = device->waitForFramesWritten(500);
+    QVERIFY(elapsed.hasExpired(500));
+    QVERIFY(!result);
+
+    // flush remaining frames out to reset the test
+    QTRY_VERIFY_WITH_TIMEOUT(device->framesToWrite() == 0, 10000);
+
+    device->writeFrame(frame);
+    device->writeFrame(frame);
+    elapsed.restart();
+    result = device->waitForFramesWritten(8000);
+    QVERIFY(!elapsed.hasExpired(8000));
+    QVERIFY(result);
+
+    // flush remaining frames out to reset the test
+    QTRY_VERIFY_WITH_TIMEOUT(device->framesToWrite() == 0, 10000);
+
+    // test recursive calling of waitForFramesWritten() behavior
+    int handleCounter = 0;
+    device->writeFrame(frame);
+    QTimer::singleShot(1000, [&]() { device->writeFrame(frame); });
+    QTimer::singleShot(2000, [&]() { device->writeFrame(frame); });
+    QObject::connect(device.data(), &QCanBusDevice::framesWritten, [this, &handleCounter]() {
+        handleCounter++;
+        //this should trigger a recursion which we want to catch
+        device->waitForFramesWritten(5000);
+    });
+    result = device->waitForFramesWritten(8000);
+    QVERIFY(result);
+    QTRY_COMPARE_WITH_TIMEOUT(handleCounter, 3, 5000);
+
+    device->setWriteBuffered(false);
 }
 
 QTEST_MAIN(tst_QCanBusDevice)

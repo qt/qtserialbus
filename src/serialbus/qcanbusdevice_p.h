@@ -75,6 +75,9 @@ public:
     QMutex incomingFramesGuard;
     QVector<QCanBusFrame> outgoingFrames;
     QVector<ConfigEntry> configOptions;
+
+    bool waitForReceivedEntered = false;
+    bool waitForWrittenEntered = false;
 };
 
 QT_END_NAMESPACE
