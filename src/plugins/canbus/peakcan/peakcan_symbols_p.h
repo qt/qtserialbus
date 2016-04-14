@@ -35,8 +35,8 @@
 **
 ****************************************************************************/
 
-#ifndef REAKCAN_SYMBOLS_P_H
-#define REAKCAN_SYMBOLS_P_H
+#ifndef PEAKCAN_SYMBOLS_P_H
+#define PEAKCAN_SYMBOLS_P_H
 
 //
 //  W A R N I N G
@@ -308,4 +308,4 @@ inline bool resolveSymbols(QLibrary *pcanLibrary)
 
 #endif
 
-#endif // REAKCAN_SYMBOLS_P_H
+#endif // PEAKCAN_SYMBOLS_P_H
