@@ -110,6 +110,8 @@ void ConnectDialog::backendChanged(const QString &backend)
         m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("usb0"));
     else if (backend == QStringLiteral("socketcan"))
         m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("can0"));
+    else if (backend == QStringLiteral("systeccan"))
+        m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("can0.0"));
     else if (backend == QStringLiteral("tinycan"))
         m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("can0.0"));
     else if (backend == QStringLiteral("vectorcan"))

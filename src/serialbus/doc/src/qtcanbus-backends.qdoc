@@ -61,6 +61,10 @@
             \li \l {Using SocketCAN Plugin}{SocketCAN} (\c socketcan)
             \li CAN bus plugin using Linux sockets and open source drivers.
         \row
+            \li SYS TEC electronic
+            \li \l {Using SystecCAN Backend}{SystecCAN} (\c systeccan)
+            \li CAN bus backend using the SYS TEC CAN adapters.
+        \row
             \li PEAK-System
             \li \l {Using PeakCAN Plugin}{PeakCAN} (\c peakcan)
             \li CAN bus plugin using the PEAK CAN adapters.
