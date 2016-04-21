@@ -14,3 +14,6 @@ FORMS   += mainwindow.ui \
     settingsdialog.ui
 
 RESOURCES += can.qrc
+
+target.path = $$[QT_INSTALL_EXAMPLES]/serialbus/can
+INSTALLS += target
