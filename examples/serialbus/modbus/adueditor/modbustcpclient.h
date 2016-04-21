@@ -53,13 +53,13 @@ class ModbusTcpClient : public QModbusTcpClient
     Q_DECLARE_PRIVATE(ModbusTcpClient)
 
 public:
-    ModbusTcpClient(QObject *parent = Q_NULLPTR);
+    ModbusTcpClient(QObject *parent = nullptr);
 
 public slots:
     void valueChanged(int value);
 
 private:
-    ModbusTcpClient(ModbusTcpClientPrivate &dd, QObject *parent = Q_NULLPTR);
+    ModbusTcpClient(ModbusTcpClientPrivate &dd, QObject *parent = nullptr);
 };
 
 #endif // MODBUSTCPCLIENT_H

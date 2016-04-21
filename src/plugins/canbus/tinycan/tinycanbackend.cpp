@@ -175,7 +175,7 @@ bool TinyCanBackendPrivate::open()
         return false;
     }
 
-    if (int ret = ::CanDeviceOpen(channelIndex, Q_NULLPTR) < 0) {
+    if (int ret = ::CanDeviceOpen(channelIndex, nullptr) < 0) {
         q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
         return false;
     }
@@ -427,7 +427,7 @@ void TinyCanBackendPrivate::startupDriver()
     Q_Q(TinyCanBackend);
 
     if (driverRefCount == 0) {
-        if (int ret = ::CanInitDriver(Q_NULLPTR) < 0) {
+        if (int ret = ::CanInitDriver(nullptr) < 0) {
             q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
             return;
         }

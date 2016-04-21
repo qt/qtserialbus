@@ -176,7 +176,7 @@ public:
 
         const int tId = transactionId();
         if (!writeToSocket(tId, request, serverAddress))
-            return Q_NULLPTR;
+            return nullptr;
 
         Q_Q(QModbusTcpClient);
         QModbusReply *const reply = new QModbusReply(type, serverAddress, q);
@@ -254,7 +254,7 @@ public:
     inline void incrementTransactionId() { m_transactionId++; }
     inline int transactionId() const { return m_transactionId; }
 
-    QTcpSocket *m_socket = Q_NULLPTR;
+    QTcpSocket *m_socket = nullptr;
     QByteArray responseBuffer;
     QHash<quint16, QueueElement> m_transactionStore;
     int mbpaHeaderSize = 7;

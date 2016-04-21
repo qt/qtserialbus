@@ -95,7 +95,7 @@ public:
         FormatFilter format = MatchBaseAndExtendedFormat;
     };
 
-    explicit QCanBusDevice(QObject *parent = Q_NULLPTR);
+    explicit QCanBusDevice(QObject *parent = nullptr);
 
     virtual void setConfigurationParameter(int key,
                                            const QVariant &value);

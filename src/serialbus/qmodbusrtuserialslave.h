@@ -49,13 +49,13 @@ class Q_SERIALBUS_EXPORT QModbusRtuSerialSlave : public QModbusServer
     Q_DECLARE_PRIVATE(QModbusRtuSerialSlave)
 
 public:
-    explicit QModbusRtuSerialSlave(QObject *parent = Q_NULLPTR);
+    explicit QModbusRtuSerialSlave(QObject *parent = nullptr);
     ~QModbusRtuSerialSlave();
 
     bool processesBroadcast() const Q_DECL_OVERRIDE;
 
 protected:
-    QModbusRtuSerialSlave(QModbusRtuSerialSlavePrivate &dd, QObject *parent = Q_NULLPTR);
+    QModbusRtuSerialSlave(QModbusRtuSerialSlavePrivate &dd, QObject *parent = nullptr);
 
     bool open() Q_DECL_OVERRIDE;
     void close() Q_DECL_OVERRIDE;

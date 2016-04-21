@@ -56,7 +56,7 @@ public:
         QString errorReason;
         if (!PeakCanBackend::canCreate(&errorReason)) {
             qWarning("%s", qPrintable(errorReason));
-            return Q_NULLPTR;
+            return nullptr;
         }
 
         QCanBusDevice *device = new PeakCanBackend(interfaceName);

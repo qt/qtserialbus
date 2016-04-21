@@ -47,7 +47,7 @@ class CanBusUtil : public QObject
 {
     Q_OBJECT
 public:
-    explicit CanBusUtil(QTextStream& output, QCoreApplication& app, QObject *parent = Q_NULLPTR);
+    explicit CanBusUtil(QTextStream& output, QCoreApplication& app, QObject *parent = nullptr);
 
     bool start(int argc, char *argv[]);
 

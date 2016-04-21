@@ -56,7 +56,7 @@ class TinyCanBackend : public QCanBusDevice
     Q_DECLARE_PRIVATE(TinyCanBackend)
     Q_DISABLE_COPY(TinyCanBackend)
 public:
-    explicit TinyCanBackend(const QString &name, QObject *parent = 0);
+    explicit TinyCanBackend(const QString &name, QObject *parent = nullptr);
     ~TinyCanBackend();
 
     bool open() Q_DECL_OVERRIDE;

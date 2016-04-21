@@ -77,7 +77,7 @@ public:
         };
 
         if (!writeToSocket(request))
-            return Q_NULLPTR;
+            return nullptr;
 
         Q_Q(ModbusTcpClient);
         QModbusReply *const reply = new QModbusReply(type, m_uId, q);

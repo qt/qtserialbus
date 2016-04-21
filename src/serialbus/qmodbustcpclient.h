@@ -49,11 +49,11 @@ class Q_SERIALBUS_EXPORT QModbusTcpClient : public QModbusClient
     Q_DECLARE_PRIVATE(QModbusTcpClient)
 
 public:
-    explicit QModbusTcpClient(QObject *parent = Q_NULLPTR);
+    explicit QModbusTcpClient(QObject *parent = nullptr);
     ~QModbusTcpClient();
 
 protected:
-    QModbusTcpClient(QModbusTcpClientPrivate &dd, QObject *parent = Q_NULLPTR);
+    QModbusTcpClient(QModbusTcpClientPrivate &dd, QObject *parent = nullptr);
 
     bool open() Q_DECL_OVERRIDE;
     void close() Q_DECL_OVERRIDE;

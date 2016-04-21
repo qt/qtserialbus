@@ -69,7 +69,7 @@ public:
         bool useConfigurationEnabled;
     };
 
-    explicit SettingsDialog(QWidget *parent = 0);
+    explicit SettingsDialog(QWidget *parent = nullptr);
     ~SettingsDialog();
 
     Settings settings() const;

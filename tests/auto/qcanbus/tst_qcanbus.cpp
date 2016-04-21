@@ -70,7 +70,7 @@ void tst_QCanBus::initTestCase()
                                      + QStringLiteral("/../../../../plugins"));
 #endif
     bus = QCanBus::instance();
-    QVERIFY(bus != 0);
+    QVERIFY(bus);
     QPointer<QCanBus> sameInstance;
     sameInstance = QCanBus::instance();
     QCOMPARE(bus, sameInstance);

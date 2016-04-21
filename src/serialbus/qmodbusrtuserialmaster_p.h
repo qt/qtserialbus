@@ -381,7 +381,7 @@ public:
     QByteArray responseBuffer;
 
     QQueue<QueueElement> m_queue;
-    QSerialPort *m_serialPort = Q_NULLPTR;
+    QSerialPort *m_serialPort = nullptr;
 
     int m_timeoutThreeDotFiveMs = 2; // A approximated value of 1.750 msec.
 };

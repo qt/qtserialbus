@@ -55,7 +55,7 @@ class PeakCanBackend : public QCanBusDevice
     Q_DECLARE_PRIVATE(PeakCanBackend)
     Q_DISABLE_COPY(PeakCanBackend)
 public:
-    explicit PeakCanBackend(const QString &name, QObject *parent = 0);
+    explicit PeakCanBackend(const QString &name, QObject *parent = nullptr);
     ~PeakCanBackend();
 
     bool open() Q_DECL_OVERRIDE;

@@ -49,11 +49,11 @@ class Q_SERIALBUS_EXPORT QModbusRtuSerialMaster : public QModbusClient
     Q_DECLARE_PRIVATE(QModbusRtuSerialMaster)
 
 public:
-    explicit QModbusRtuSerialMaster(QObject *parent = Q_NULLPTR);
+    explicit QModbusRtuSerialMaster(QObject *parent = nullptr);
     ~QModbusRtuSerialMaster();
 
 protected:
-    QModbusRtuSerialMaster(QModbusRtuSerialMasterPrivate &dd, QObject *parent = Q_NULLPTR);
+    QModbusRtuSerialMaster(QModbusRtuSerialMasterPrivate &dd, QObject *parent = nullptr);
 
     void close() Q_DECL_OVERRIDE;
     bool open() Q_DECL_OVERRIDE;

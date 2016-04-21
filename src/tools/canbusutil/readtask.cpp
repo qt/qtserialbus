@@ -44,7 +44,7 @@ ReadTask::ReadTask(QTextStream& output, QObject *parent)
 
 void ReadTask::checkMessages() {
     QCanBusDevice* canDevice = qobject_cast<QCanBusDevice*>(QObject::sender());
-    if (canDevice == Q_NULLPTR) {
+    if (canDevice == nullptr) {
         qWarning() << "ReadTask::checkMessages: Unknown sender";
         return;
     }
@@ -82,7 +82,7 @@ void ReadTask::checkMessages() {
 
 void ReadTask::receiveError(QCanBusDevice::CanBusError /*error*/) {
     QCanBusDevice* canDevice = qobject_cast<QCanBusDevice*>(QObject::sender());
-    if (canDevice == Q_NULLPTR) {
+    if (canDevice == nullptr) {
         qWarning() << "ReadTask::receiveError: Unknown sender";
         return;
     }

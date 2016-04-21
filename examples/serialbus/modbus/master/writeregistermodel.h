@@ -50,7 +50,7 @@ class WriteRegisterModel : public QAbstractTableModel
     Q_OBJECT
 
 public:
-    WriteRegisterModel(QObject* parent = 0);
+    WriteRegisterModel(QObject* parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
     int columnCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;

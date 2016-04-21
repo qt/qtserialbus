@@ -57,8 +57,8 @@ enum ModbusConnection {
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , lastRequest(Q_NULLPTR)
-    , modbusDevice(Q_NULLPTR)
+    , lastRequest(nullptr)
+    , modbusDevice(nullptr)
 {
     ui->setupUi(this);
 
@@ -139,7 +139,7 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
     if (modbusDevice) {
         modbusDevice->disconnectDevice();
         delete modbusDevice;
-        modbusDevice = Q_NULLPTR;
+        modbusDevice = nullptr;
     }
 
     ModbusConnection type = static_cast<ModbusConnection> (index);

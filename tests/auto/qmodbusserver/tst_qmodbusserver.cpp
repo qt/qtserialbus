@@ -1107,7 +1107,7 @@ private slots:
         }
         QCOMPARE(s_msg, QString("QModbusServer::data() call did end in the expected OVERRIDE."));
         {
-            s.data(QModbusDataUnit::Coils, 0u, Q_NULLPTR);
+            s.data(QModbusDataUnit::Coils, 0u, nullptr);
         }
         QCOMPARE(s_msg, QString("QModbusServer::data() call did end in the expected OVERRIDE."));
         {

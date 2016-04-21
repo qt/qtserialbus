@@ -148,8 +148,8 @@ PeakCanBackendPrivate::PeakCanBackendPrivate(PeakCanBackend *q)
     : q_ptr(q)
     , isOpen(false)
     , channelIndex(PCAN_NONEBUS)
-    , outgoingEventNotifier(Q_NULLPTR)
-    , incomingEventNotifier(Q_NULLPTR)
+    , outgoingEventNotifier(nullptr)
+    , incomingEventNotifier(nullptr)
 #if defined(Q_OS_WIN32)
     , incomingEventHandle(INVALID_HANDLE_VALUE)
 #else
@@ -229,7 +229,7 @@ void PeakCanBackendPrivate::close()
 
     if (outgoingEventNotifier) {
         delete outgoingEventNotifier;
-        outgoingEventNotifier = Q_NULLPTR;
+        outgoingEventNotifier = nullptr;
     }
 
     if (TPCANStatus st = ::CAN_Uninitialize(channelIndex) != PCAN_ERROR_OK)
@@ -367,7 +367,7 @@ bool PeakCanBackendPrivate::acquireReadNotification()
 
 #if defined(Q_OS_WIN32)
     if (incomingEventHandle == INVALID_HANDLE_VALUE) {
-        incomingEventHandle = ::CreateEvent(Q_NULLPTR, FALSE, FALSE, Q_NULLPTR);
+        incomingEventHandle = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
         if (!incomingEventHandle) {
             q->setError(qt_error_string(::GetLastError()), QCanBusDevice::ReadError);
             return false;
@@ -399,7 +399,7 @@ void PeakCanBackendPrivate::releaseReadNotification()
 
     if (incomingEventNotifier) {
         delete incomingEventNotifier;
-        incomingEventNotifier = Q_NULLPTR;
+        incomingEventNotifier = nullptr;
     }
 
 #if defined(Q_OS_WIN32)

@@ -52,7 +52,7 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     m_ui(new Ui::MainWindow),
-    m_canDevice(Q_NULLPTR)
+    m_canDevice(nullptr)
 {
     m_ui->setupUi(this);
 
@@ -134,7 +134,7 @@ void MainWindow::connectDevice()
 
     if (!m_canDevice->connectDevice()) {
         delete m_canDevice;
-        m_canDevice = Q_NULLPTR;
+        m_canDevice = nullptr;
 
         showStatusMessage(tr("Connection error"));
     } else {
@@ -156,7 +156,7 @@ void MainWindow::disconnectDevice()
 
     m_canDevice->disconnectDevice();
     delete m_canDevice;
-    m_canDevice = Q_NULLPTR;
+    m_canDevice = nullptr;
 
     m_ui->actionConnect->setEnabled(true);
     m_ui->actionDisconnect->setEnabled(false);

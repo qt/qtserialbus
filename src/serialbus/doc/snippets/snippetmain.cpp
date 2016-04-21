@@ -43,7 +43,7 @@
 
 int main(int /*argc*/, char ** /*argv*/)
 {
-    QCanBusDevice * device = Q_NULLPTR;
+    QCanBusDevice * device = nullptr;
 
     //! [Filter Examples]
     QCanBusDevice::Filter filter;
