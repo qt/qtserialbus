@@ -40,7 +40,7 @@
 
 QPointer<SigTermHandler> SigTermHandler::instance()
 {
-    static SigTermHandler *inst = new SigTermHandler();
+    static auto inst = new SigTermHandler();
     return inst;
 }
 

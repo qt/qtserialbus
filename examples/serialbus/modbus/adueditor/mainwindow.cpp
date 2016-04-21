@@ -137,7 +137,7 @@ void MainWindow::on_sendButton_clicked()
 void MainWindow::on_connectButton_clicked()
 {
     if (tcpRadio->isChecked()) {
-        ModbusTcpClient *device = new ModbusTcpClient;
+        auto device = new ModbusTcpClient;
         using signature = void (QSpinBox::*)(int);
         connect(ti1Spin, static_cast<signature>(&QSpinBox::valueChanged), device,
             &ModbusTcpClient::valueChanged);

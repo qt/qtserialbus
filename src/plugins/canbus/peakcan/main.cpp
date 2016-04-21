@@ -59,7 +59,7 @@ public:
             return nullptr;
         }
 
-        QCanBusDevice *device = new PeakCanBackend(interfaceName);
+        auto device = new PeakCanBackend(interfaceName);
         return device;
     }
 };

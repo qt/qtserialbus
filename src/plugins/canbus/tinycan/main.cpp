@@ -59,7 +59,7 @@ public:
             return nullptr;
         }
 
-        QCanBusDevice *device = new TinyCanBackend(interfaceName);
+        auto device = new TinyCanBackend(interfaceName);
         return device;
     }
 };

@@ -247,7 +247,7 @@ void tst_QCanBusDevice::error()
     QSignalSpy spy(device, SIGNAL(errorOccurred(QCanBusDevice::CanBusError)));
     QString testString(QStringLiteral("testString"));
 
-    tst_Backend *backend = qobject_cast<tst_Backend *>(device);
+    auto backend = qobject_cast<tst_Backend *>(device);
     QVERIFY(backend);
 
     //NoError

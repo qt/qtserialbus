@@ -262,7 +262,7 @@ public:
     {
         Q_Q(QModbusRtuSerialMaster);
 
-        QModbusReply *reply = new QModbusReply(type, serverAddress, q);
+        auto reply = new QModbusReply(type, serverAddress, q);
         QueueElement element(reply, request, unit, m_numberOfRetries + 1);
         element.adu = QModbusSerialAdu::create(QModbusSerialAdu::Rtu, serverAddress, request);
         m_queue.enqueue(element);

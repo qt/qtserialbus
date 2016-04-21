@@ -179,8 +179,8 @@ public:
             return nullptr;
 
         Q_Q(QModbusTcpClient);
-        QModbusReply *const reply = new QModbusReply(type, serverAddress, q);
-        const QueueElement element = QueueElement{ reply, request, unit, m_numberOfRetries,
+        auto reply = new QModbusReply(type, serverAddress, q);
+        const auto element = QueueElement{ reply, request, unit, m_numberOfRetries,
             m_responseTimeoutDuration };
         m_transactionStore.insert(tId, element);
 

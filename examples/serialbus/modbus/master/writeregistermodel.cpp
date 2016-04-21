@@ -113,7 +113,7 @@ bool WriteRegisterModel::setData(const QModelIndex &index, const QVariant &value
     Q_ASSERT(m_holdingRegisters.count() == ROW_COUNT);
 
     if (index.column() == COLUMN_COILS && role == Qt::CheckStateRole) { // coils
-        Qt::CheckState s = static_cast<Qt::CheckState>(value.toUInt());
+        auto s = static_cast<Qt::CheckState>(value.toUInt());
         s == Qt::Checked ? m_coils.setBit(index.row()) : m_coils.clearBit(index.row());
         emit dataChanged(index, index);
         return true;

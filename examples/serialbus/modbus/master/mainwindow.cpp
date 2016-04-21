@@ -83,7 +83,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->connectType->setCurrentIndex(0);
     on_connectType_currentIndexChanged(0);
 
-    QStandardItemModel *model = new QStandardItemModel(10, 1, this);
+    auto model = new QStandardItemModel(10, 1, this);
     for (int i = 0; i < 10; ++i)
         model->setItem(i, new QStandardItem(QStringLiteral("%1").arg(i + 1)));
     ui->writeSize->setModel(model);
@@ -142,7 +142,7 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
         modbusDevice = nullptr;
     }
 
-    ModbusConnection type = static_cast<ModbusConnection> (index);
+    auto type = static_cast<ModbusConnection> (index);
     if (type == Serial) {
         modbusDevice = new QModbusRtuSerialMaster(this);
     } else if (type == Tcp) {
@@ -236,7 +236,7 @@ void MainWindow::on_readButton_clicked()
 
 void MainWindow::readReady()
 {
-    QModbusReply *reply = qobject_cast<QModbusReply *>(sender());
+    auto reply = qobject_cast<QModbusReply *>(sender());
     if (!reply)
         return;
 
@@ -341,7 +341,7 @@ void MainWindow::on_writeTable_currentIndexChanged(int index)
 
 QModbusDataUnit MainWindow::readRequest() const
 {
-    const QModbusDataUnit::RegisterType table =
+    const auto table =
         static_cast<QModbusDataUnit::RegisterType> (ui->writeTable->currentData().toInt());
 
     int startAddress = ui->readAddress->value();
@@ -354,7 +354,7 @@ QModbusDataUnit MainWindow::readRequest() const
 
 QModbusDataUnit MainWindow::writeRequest() const
 {
-    const QModbusDataUnit::RegisterType table =
+    const auto table =
         static_cast<QModbusDataUnit::RegisterType> (ui->writeTable->currentData().toInt());
 
     int startAddress = ui->writeAddress->value();
