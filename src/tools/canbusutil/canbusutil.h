@@ -47,7 +47,7 @@ class CanBusUtil : public QObject
 {
     Q_OBJECT
 public:
-    explicit CanBusUtil(QTextStream& output, QCoreApplication& app, QObject *parent = nullptr);
+    explicit CanBusUtil(QTextStream &output, QCoreApplication &app, QObject *parent = nullptr);
 
     bool start(int argc, char *argv[]);
 
@@ -64,8 +64,8 @@ private:
 
 private:
     QPointer<QCanBus> canBus;
-    QTextStream& output;
-    QCoreApplication& app;
+    QTextStream &output;
+    QCoreApplication &app;
     bool listening;
     QString pluginName;
     QString deviceName;

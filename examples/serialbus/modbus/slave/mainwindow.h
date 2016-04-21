@@ -87,11 +87,11 @@ private:
     void setupWidgetContainers();
 
     Ui::MainWindow *ui;
-    QModbusServer* modbusDevice;
+    QModbusServer *modbusDevice;
 
     QButtonGroup coilButtons;
     QButtonGroup discreteButtons;
-    QHash<QString, QLineEdit*> registers;
+    QHash<QString, QLineEdit *> registers;
     SettingsDialog *m_settingsDialog;
 };
 

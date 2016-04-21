@@ -87,8 +87,8 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QModbusReply* lastRequest;
-    QModbusClient* modbusDevice;
+    QModbusReply *lastRequest;
+    QModbusClient *modbusDevice;
     SettingsDialog *m_settingsDialog;
     WriteRegisterModel *writeModel;
 };

@@ -300,19 +300,19 @@ void MainWindow::setupWidgetContainers()
     discreteButtons.setExclusive(false);
 
     QRegularExpression regexp(QStringLiteral("coils_(?<ID>\\d+)"));
-    const QList<QCheckBox*> coils = findChildren<QCheckBox*>(regexp);
+    const QList<QCheckBox *> coils = findChildren<QCheckBox *>(regexp);
     foreach (QCheckBox *cbx, coils)
         coilButtons.addButton(cbx, regexp.match(cbx->objectName()).captured("ID").toInt());
     connect(&coilButtons, SIGNAL(buttonClicked(int)), this, SLOT(coilChanged(int)));
 
     regexp.setPattern(QStringLiteral("disc_(?<ID>\\d+)"));
-    const QList<QCheckBox*> discs = findChildren<QCheckBox*>(regexp);
+    const QList<QCheckBox *> discs = findChildren<QCheckBox *>(regexp);
     foreach (QCheckBox *cbx, discs)
         discreteButtons.addButton(cbx, regexp.match(cbx->objectName()).captured("ID").toInt());
     connect(&discreteButtons, SIGNAL(buttonClicked(int)), this, SLOT(discreteInputChanged(int)));
 
     regexp.setPattern(QLatin1String("(in|hold)Reg_(?<ID>\\d+)"));
-    const QList<QLineEdit*> qle = findChildren<QLineEdit*>(regexp);
+    const QList<QLineEdit *> qle = findChildren<QLineEdit *>(regexp);
     foreach (QLineEdit *lineEdit, qle) {
         registers.insert(lineEdit->objectName(), lineEdit);
         lineEdit->setProperty("ID", regexp.match(lineEdit->objectName()).captured("ID").toInt());

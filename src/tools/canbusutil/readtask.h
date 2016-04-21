@@ -45,7 +45,7 @@ class ReadTask : public QObject
 {
     Q_OBJECT
 public:
-    explicit ReadTask(QTextStream& output, QObject *parent = nullptr);
+    explicit ReadTask(QTextStream &output, QObject *parent = nullptr);
 
 signals:
     void sigTermSignal();
@@ -55,7 +55,7 @@ public slots:
     void receiveError(QCanBusDevice::CanBusError /*error*/);
 
 private:
-    QTextStream& output;
+    QTextStream &output;
 };
 
 #endif // READTASK_H

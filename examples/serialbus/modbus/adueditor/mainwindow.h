@@ -72,7 +72,7 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    static MainWindow* instance();
+    static MainWindow *instance();
     void appendToLog(const QString &msg) {
         logTextEdit->appendPlainText(msg);
     }

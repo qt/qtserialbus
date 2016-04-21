@@ -55,7 +55,7 @@
 
 QT_USE_NAMESPACE
 
-MainWindow* s_instance = nullptr;
+MainWindow *s_instance = nullptr;
 
 static void HandlerFunction(QtMsgType, const QMessageLogContext &, const QString &msg)
 {
@@ -90,7 +90,7 @@ MainWindow::~MainWindow()
     s_instance = nullptr;
 }
 
-MainWindow* MainWindow::instance()
+MainWindow *MainWindow::instance()
 {
     return s_instance;
 }

@@ -39,7 +39,7 @@
 static const qint8 MAXNORMALPAYLOADSIZE = 8;
 static const qint8 MAXEXTENDEDPAYLOADSIZE = 64;
 
-CanBusUtil::CanBusUtil(QTextStream& output, QCoreApplication& app, QObject *parent)
+CanBusUtil::CanBusUtil(QTextStream &output, QCoreApplication &app, QObject *parent)
   : QObject(parent),
     canBus(QCanBus::instance()),
     output(output),
@@ -131,7 +131,7 @@ bool CanBusUtil::parseArgs(int argc, char *argv[])
     return true;
 }
 
-bool CanBusUtil::parseDataField(qint32& id, QString& payload)
+bool CanBusUtil::parseDataField(qint32 &id, QString &payload)
 {
     int hashMarkPos = data.indexOf('#');
     if (hashMarkPos < 0) {
@@ -150,8 +150,8 @@ bool CanBusUtil::parseDataField(qint32& id, QString& payload)
     return true;
 }
 
-bool CanBusUtil::parsePayloadField(QString payload, bool& rtrFrame,
-                                   bool& fdFrame, QByteArray& bytes)
+bool CanBusUtil::parsePayloadField(QString payload, bool &rtrFrame,
+                                   bool &fdFrame, QByteArray &bytes)
 {
     fdFrame = false;
     rtrFrame = false;
