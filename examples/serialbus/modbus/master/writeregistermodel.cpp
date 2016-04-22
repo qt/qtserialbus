@@ -40,44 +40,39 @@
 
 #include "writeregistermodel.h"
 
-#define ROW_COUNT 10
-#define COLUMN_COUNT 3
-
-#define COLUMN_NUM 0
-#define COLUMN_COILS 1
-#define COLUMN_HOLDING 2
+enum { NumColumn = 0, CoilsColumn = 1, HoldingColumn = 2, ColumnCount = 3, RowCount = 10 };
 
 WriteRegisterModel::WriteRegisterModel(QObject *parent)
     : QAbstractTableModel(parent),
-      m_coils(10, false), m_holdingRegisters(10, 0u)
+      m_coils(RowCount, false), m_holdingRegisters(RowCount, 0u)
 {
 }
 
 int WriteRegisterModel::rowCount(const QModelIndex &/*parent*/) const
 {
-    return ROW_COUNT;
+    return RowCount;
 }
 
 int WriteRegisterModel::columnCount(const QModelIndex &/*parent*/) const
 {
-    return COLUMN_COUNT;
+    return ColumnCount;
 }
 
 QVariant WriteRegisterModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || index.row() >= ROW_COUNT || index.column() >= COLUMN_COUNT)
+    if (!index.isValid() || index.row() >= RowCount || index.column() >= ColumnCount)
         return QVariant();
 
-    Q_ASSERT(m_coils.count() == ROW_COUNT);
-    Q_ASSERT(m_holdingRegisters.count() == ROW_COUNT);
+    Q_ASSERT(m_coils.count() == RowCount);
+    Q_ASSERT(m_holdingRegisters.count() == RowCount);
 
-    if (index.column() == COLUMN_NUM && role == Qt::DisplayRole)
+    if (index.column() == NumColumn && role == Qt::DisplayRole)
         return QString::number(index.row());
 
-    if (index.column() == COLUMN_COILS && role == Qt::CheckStateRole) // coils
+    if (index.column() == CoilsColumn && role == Qt::CheckStateRole) // coils
         return m_coils.at(index.row()) ? Qt::Checked : Qt::Unchecked;
 
-    else if (index.column() == COLUMN_HOLDING && role == Qt::DisplayRole) //holding registers
+    else if (index.column() == HoldingColumn && role == Qt::DisplayRole) //holding registers
         return QString("0x%1").arg(QString::number(m_holdingRegisters.at(index.row()), 16));
 
     return QVariant();
@@ -91,11 +86,11 @@ QVariant WriteRegisterModel::headerData(int section, Qt::Orientation orientation
 
     if (orientation == Qt::Horizontal) {
         switch (section) {
-        case COLUMN_NUM:
+        case NumColumn:
             return QStringLiteral("#");
-        case COLUMN_COILS:
+        case CoilsColumn:
             return QStringLiteral("Coils  ");
-        case COLUMN_HOLDING:
+        case HoldingColumn:
             return QStringLiteral("Holding Registers");
         default:
             break;
@@ -106,20 +101,20 @@ QVariant WriteRegisterModel::headerData(int section, Qt::Orientation orientation
 
 bool WriteRegisterModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if (!index.isValid() ||  index.row() >= ROW_COUNT || index.column() >= COLUMN_COUNT)
+    if (!index.isValid() ||  index.row() >= RowCount || index.column() >= ColumnCount)
         return false;
 
-    Q_ASSERT(m_coils.count() == ROW_COUNT);
-    Q_ASSERT(m_holdingRegisters.count() == ROW_COUNT);
+    Q_ASSERT(m_coils.count() == RowCount);
+    Q_ASSERT(m_holdingRegisters.count() == RowCount);
 
-    if (index.column() == COLUMN_COILS && role == Qt::CheckStateRole) { // coils
+    if (index.column() == CoilsColumn && role == Qt::CheckStateRole) { // coils
         auto s = static_cast<Qt::CheckState>(value.toUInt());
         s == Qt::Checked ? m_coils.setBit(index.row()) : m_coils.clearBit(index.row());
         emit dataChanged(index, index);
         return true;
     }
 
-    if (index.column() == COLUMN_HOLDING && Qt::EditRole) { // holding registers
+    if (index.column() == HoldingColumn && Qt::EditRole) { // holding registers
         bool result = false;
         quint16 newValue = value.toString().toUShort(&result, 16);
         if (result)
@@ -134,16 +129,16 @@ bool WriteRegisterModel::setData(const QModelIndex &index, const QVariant &value
 
 Qt::ItemFlags WriteRegisterModel::flags(const QModelIndex &index) const
 {
-    if (!index.isValid() || index.row() >= ROW_COUNT || index.column() >= COLUMN_COUNT)
+    if (!index.isValid() || index.row() >= RowCount || index.column() >= ColumnCount)
         return QAbstractTableModel::flags(index);
 
     Qt::ItemFlags flags = QAbstractTableModel::flags(index);
     if ((index.row() < m_address) || (index.row() >= (m_address + m_number)))
         flags &= ~Qt::ItemIsEnabled;
 
-    if (index.column() == COLUMN_COILS) //coils
+    if (index.column() == CoilsColumn) //coils
         return flags | Qt::ItemIsUserCheckable;
-    if (index.column() == COLUMN_HOLDING) //holding registers
+    if (index.column() == HoldingColumn) //holding registers
         return flags | Qt::ItemIsEditable;
 
     return flags;
