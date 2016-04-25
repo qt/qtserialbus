@@ -82,7 +82,7 @@ public:
     }
 
 protected:
-    void timerEvent(QTimerEvent *e) Q_DECL_OVERRIDE
+    void timerEvent(QTimerEvent *e) override
     {
         if (e->timerId() == timerId()) {
             dptr->canWriteNotification();

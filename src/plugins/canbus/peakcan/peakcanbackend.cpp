@@ -84,7 +84,7 @@ public:
     }
 
 protected:
-    bool event(QEvent *e) Q_DECL_OVERRIDE
+    bool event(QEvent *e) override
     {
         if (e->type() == QEvent::WinEventAct) {
             dptr->canReadNotification();
@@ -107,7 +107,7 @@ public:
     }
 
 protected:
-    bool event(QEvent *e) Q_DECL_OVERRIDE
+    bool event(QEvent *e) override
     {
         if (e->type() == QEvent::SockAct) {
             dptr->canReadNotification();
@@ -131,7 +131,7 @@ public:
     }
 
 protected:
-    void timerEvent(QTimerEvent *e) Q_DECL_OVERRIDE
+    void timerEvent(QTimerEvent *e) override
     {
         if (e->timerId() == timerId()) {
             dptr->canWriteNotification();

@@ -153,7 +153,7 @@ public:
 
     QModbusReply *enqueueRequest(const QModbusRequest &request, int serverAddress,
                                  const QModbusDataUnit &unit,
-                                 QModbusReply::ReplyType type) Q_DECL_OVERRIDE
+                                 QModbusReply::ReplyType type) override
     {
         auto writeToSocket = [this](quint16 tId, const QModbusRequest &request, int address) {
             QByteArray buffer;
@@ -226,7 +226,7 @@ public:
     }
 
     // TODO: Review once we have a transport layer in place.
-    bool isOpen() const Q_DECL_OVERRIDE
+    bool isOpen() const override
     {
         if (m_socket)
             return m_socket->isOpen();

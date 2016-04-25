@@ -55,8 +55,8 @@ public:
 protected:
     QModbusRtuSerialMaster(QModbusRtuSerialMasterPrivate &dd, QObject *parent = nullptr);
 
-    void close() Q_DECL_OVERRIDE;
-    bool open() Q_DECL_OVERRIDE;
+    void close() override;
+    bool open() override;
 };
 
 QT_END_NAMESPACE

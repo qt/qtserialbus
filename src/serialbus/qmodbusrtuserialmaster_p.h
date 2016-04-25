@@ -258,7 +258,7 @@ public:
     }
 
     QModbusReply *enqueueRequest(const QModbusRequest &request, int serverAddress,
-        const QModbusDataUnit &unit, QModbusReply::ReplyType type) Q_DECL_OVERRIDE
+        const QModbusDataUnit &unit, QModbusReply::ReplyType type) override
     {
         Q_Q(QModbusRtuSerialMaster);
 
@@ -367,7 +367,7 @@ public:
         return true;
     }
 
-    bool isOpen() const Q_DECL_OVERRIDE
+    bool isOpen() const override
     {
         if (m_serialPort)
             return m_serialPort->isOpen();

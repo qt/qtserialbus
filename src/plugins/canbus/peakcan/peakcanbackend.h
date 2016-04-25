@@ -58,14 +58,14 @@ public:
     explicit PeakCanBackend(const QString &name, QObject *parent = nullptr);
     ~PeakCanBackend();
 
-    bool open() Q_DECL_OVERRIDE;
-    void close() Q_DECL_OVERRIDE;
+    bool open() override;
+    void close() override;
 
-    void setConfigurationParameter(int key, const QVariant &value) Q_DECL_OVERRIDE;
+    void setConfigurationParameter(int key, const QVariant &value) override;
 
-    bool writeFrame(const QCanBusFrame &newData) Q_DECL_OVERRIDE;
+    bool writeFrame(const QCanBusFrame &newData) override;
 
-    QString interpretErrorFrame(const QCanBusFrame &errorFrame) Q_DECL_OVERRIDE;
+    QString interpretErrorFrame(const QCanBusFrame &errorFrame) override;
 
     static bool canCreate(QString *errorReason);
 

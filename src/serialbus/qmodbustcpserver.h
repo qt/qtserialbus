@@ -56,10 +56,10 @@ public:
 protected:
     QModbusTcpServer(QModbusTcpServerPrivate &dd, QObject *parent = nullptr);
 
-    bool open() Q_DECL_OVERRIDE;
-    void close() Q_DECL_OVERRIDE;
+    bool open() override;
+    void close() override;
 
-    QModbusResponse processRequest(const QModbusPdu &request) Q_DECL_OVERRIDE;
+    QModbusResponse processRequest(const QModbusPdu &request) override;
 };
 
 QT_END_NAMESPACE

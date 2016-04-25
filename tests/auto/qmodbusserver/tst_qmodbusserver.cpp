@@ -48,14 +48,14 @@ public:
         qRegisterMetaType<QModbusDataUnit::RegisterType>();
     }
 
-    bool open() Q_DECL_OVERRIDE {
+    bool open() override {
         setState(QModbusDevice::ConnectedState);
         return true;
     }
-    void close() Q_DECL_OVERRIDE {
+    void close() override {
         setState(QModbusDevice::UnconnectedState);
     }
-    QModbusResponse processRequest(const QModbusPdu &request) Q_DECL_OVERRIDE
+    QModbusResponse processRequest(const QModbusPdu &request) override
     {
         return QModbusServer::processRequest(request);
     }
@@ -1086,14 +1086,14 @@ private slots:
         class InheritanceTestServer : public QModbusServer
         {
         public:
-            void close() Q_DECL_OVERRIDE {}
-            bool open() Q_DECL_OVERRIDE { return true; }
+            void close() override {}
+            bool open() override { return true; }
 
-            bool readData(QModbusDataUnit *) const Q_DECL_OVERRIDE {
+            bool readData(QModbusDataUnit *) const override {
                 qDebug() << "QModbusServer::data() call did end in the expected OVERRIDE.";
                 return false;
             }
-            bool writeData(const QModbusDataUnit &) Q_DECL_OVERRIDE {
+            bool writeData(const QModbusDataUnit &) override {
                 qDebug() << "QModbusServer::setData() call did end in the expected OVERRIDE.";
                 return false;
             }
@@ -1141,7 +1141,7 @@ private slots:
         class ModbusTcpServer : public QModbusTcpServer
         {
         public:
-            QModbusResponse processRequest(const QModbusPdu &request) Q_DECL_OVERRIDE {
+            QModbusResponse processRequest(const QModbusPdu &request) override {
                 return QModbusTcpServer::processRequest(request);
             }
 
