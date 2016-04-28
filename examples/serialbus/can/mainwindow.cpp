@@ -40,10 +40,11 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "settingsdialog.h"
+#include "connectdialog.h"
 
 #include <QCanBusFrame>
 #include <QCanBus>
+#include <QTimer>
 
 #include <QtCore/qbytearray.h>
 #include <QtCore/qvariant.h>
@@ -56,7 +57,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     m_ui->setupUi(this);
 
-    m_settings = new SettingsDialog;
+    m_connectDialog = new ConnectDialog;
 
     m_status = new QLabel;
     m_ui->statusBar->addWidget(m_status);
@@ -64,6 +65,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->sendMessagesBox->setEnabled(false);
 
     initActionsConnections();
+    QTimer::singleShot(50, m_connectDialog, &ConnectDialog::show);
 
     connect(m_ui->sendButton, &QPushButton::clicked, this, &MainWindow::sendMessage);
 }
@@ -72,7 +74,7 @@ MainWindow::~MainWindow()
 {
     delete m_canDevice;
 
-    delete m_settings;
+    delete m_connectDialog;
     delete m_ui;
 }
 
@@ -86,12 +88,11 @@ void MainWindow::initActionsConnections()
     m_ui->actionConnect->setEnabled(true);
     m_ui->actionDisconnect->setEnabled(false);
     m_ui->actionQuit->setEnabled(true);
-    m_ui->actionConfigure->setEnabled(true);
 
-    connect(m_ui->actionConnect, &QAction::triggered, this, &MainWindow::connectDevice);
+    connect(m_ui->actionConnect, &QAction::triggered, m_connectDialog, &ConnectDialog::show);
+    connect(m_connectDialog, &QDialog::accepted, this, &MainWindow::connectDevice);
     connect(m_ui->actionDisconnect, &QAction::triggered, this, &MainWindow::disconnectDevice);
     connect(m_ui->actionQuit, &QAction::triggered, this, &QWidget::close);
-    connect(m_ui->actionConfigure, &QAction::triggered, m_settings, &SettingsDialog::show);
     connect(m_ui->actionAboutQt, &QAction::triggered, qApp, &QApplication::aboutQt);
 }
 
@@ -111,7 +112,7 @@ void MainWindow::receiveError(QCanBusDevice::CanBusError error) const
 
 void MainWindow::connectDevice()
 {
-    const SettingsDialog::Settings p = m_settings->settings();
+    const ConnectDialog::Settings p = m_connectDialog->settings();
 
     m_canDevice = QCanBus::instance()->createDevice(p.backendName.toLocal8Bit(), p.deviceInterfaceName);
     if (!m_canDevice) {
@@ -127,7 +128,7 @@ void MainWindow::connectDevice()
             this, &MainWindow::framesWritten);
 
     if (p.useConfigurationEnabled) {
-        foreach (const SettingsDialog::ConfigurationItem &item, p.configurations)
+        foreach (const ConnectDialog::ConfigurationItem &item, p.configurations)
             m_canDevice->setConfigurationParameter(item.first, item.second);
     }
 
@@ -139,7 +140,6 @@ void MainWindow::connectDevice()
     } else {
         m_ui->actionConnect->setEnabled(false);
         m_ui->actionDisconnect->setEnabled(true);
-        m_ui->actionConfigure->setEnabled(false);
 
         m_ui->sendMessagesBox->setEnabled(true);
 
@@ -159,7 +159,6 @@ void MainWindow::disconnectDevice()
 
     m_ui->actionConnect->setEnabled(true);
     m_ui->actionDisconnect->setEnabled(false);
-    m_ui->actionConfigure->setEnabled(true);
 
     m_ui->sendMessagesBox->setEnabled(false);
 

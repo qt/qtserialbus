@@ -38,8 +38,8 @@
 **
 ****************************************************************************/
 
-#ifndef SETTINGSDIALOG_H
-#define SETTINGSDIALOG_H
+#ifndef CONNECTDIALOG_H
+#define CONNECTDIALOG_H
 
 #include <QCanBusDevice>
 
@@ -48,14 +48,14 @@
 QT_BEGIN_NAMESPACE
 
 namespace Ui {
-class SettingsDialog;
+class ConnectDialog;
 }
 
 class QIntValidator;
 
 QT_END_NAMESPACE
 
-class SettingsDialog : public QDialog
+class ConnectDialog : public QDialog
 {
     Q_OBJECT
 
@@ -69,24 +69,27 @@ public:
         bool useConfigurationEnabled;
     };
 
-    explicit SettingsDialog(QWidget *parent = nullptr);
-    ~SettingsDialog();
+    explicit ConnectDialog(QWidget *parent = nullptr);
+    ~ConnectDialog();
 
     Settings settings() const;
 
 private slots:
     void checkCustomSpeedPolicy(int idx);
-    void apply();
+    void ok();
+    void cancel();
 
 private:
+    QString configurationValue(QCanBusDevice::ConfigurationKey key);
+    void revertSettings();
     void updateSettings();
     void fillBackends();
     void fillSpeeds();
 
 private:
-    Ui::SettingsDialog *m_ui;
+    Ui::ConnectDialog *m_ui;
     QIntValidator *m_customSpeedValidator;
     Settings m_currentSettings;
 };
 
-#endif // SETTINGSDIALOG_H
+#endif // CONNECTDIALOG_H

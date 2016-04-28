@@ -3,7 +3,6 @@
         <file>images/connect.png</file>
         <file>images/disconnect.png</file>
         <file>images/application-exit.png</file>
-        <file>images/settings.png</file>
         <file>images/clear.png</file>
     </qresource>
 </RCC>

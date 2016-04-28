@@ -38,15 +38,15 @@
 **
 ****************************************************************************/
 
-#include "settingsdialog.h"
-#include "ui_settingsdialog.h"
+#include "connectdialog.h"
+#include "ui_connectdialog.h"
 
 #include <QCanBus>
 #include <QDebug>
 
-SettingsDialog::SettingsDialog(QWidget *parent) :
+ConnectDialog::ConnectDialog(QWidget *parent) :
     QDialog(parent),
-    m_ui(new Ui::SettingsDialog),
+    m_ui(new Ui::ConnectDialog),
     m_customSpeedValidator(0)
 {
     m_ui->setupUi(this);
@@ -62,11 +62,15 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     m_ui->receiveOwnBox->addItem(tr("false"), QVariant(false));
     m_ui->receiveOwnBox->addItem(tr("true"), QVariant(true));
 
-    connect(m_ui->applyButton, &QPushButton::clicked, this, &SettingsDialog::apply);
+    m_ui->canFdBox->addItem(tr("false"), QVariant(false));
+    m_ui->canFdBox->addItem(tr("true"), QVariant(true));
+
+    connect(m_ui->okButton, &QPushButton::clicked, this, &ConnectDialog::ok);
+    connect(m_ui->cancelButton, &QPushButton::clicked, this, &ConnectDialog::cancel);
     connect(m_ui->useConfigurationBox, &QCheckBox::clicked, m_ui->configurationBox, &QGroupBox::setEnabled);
 
     connect(m_ui->speedBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-            this, &SettingsDialog::checkCustomSpeedPolicy);
+            this, &ConnectDialog::checkCustomSpeedPolicy);
 
     m_ui->rawFilterEdit->hide();
     m_ui->rawFilterLabel->hide();
@@ -77,17 +81,17 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     updateSettings();
 }
 
-SettingsDialog::~SettingsDialog()
+ConnectDialog::~ConnectDialog()
 {
     delete m_ui;
 }
 
-SettingsDialog::Settings SettingsDialog::settings() const
+ConnectDialog::Settings ConnectDialog::settings() const
 {
     return m_currentSettings;
 }
 
-void SettingsDialog::checkCustomSpeedPolicy(int idx)
+void ConnectDialog::checkCustomSpeedPolicy(int idx)
 {
     const bool isCustomSpeed = !m_ui->speedBox->itemData(idx).isValid();
     m_ui->speedBox->setEditable(isCustomSpeed);
@@ -98,13 +102,61 @@ void SettingsDialog::checkCustomSpeedPolicy(int idx)
     }
 }
 
-void SettingsDialog::apply()
+void ConnectDialog::ok()
 {
     updateSettings();
-    hide();
+    accept();
 }
 
-void SettingsDialog::updateSettings()
+void ConnectDialog::cancel()
+{
+    revertSettings();
+    reject();
+}
+
+QString ConnectDialog::configurationValue(QCanBusDevice::ConfigurationKey key)
+{
+    QVariant result;
+
+    foreach (const ConfigurationItem &item, m_currentSettings.configurations) {
+        if (item.first == key) {
+            result = item.second;
+            break;
+        }
+    }
+
+    if (result.isNull() && (
+                key == QCanBusDevice::LoopbackKey ||
+                key == QCanBusDevice::ReceiveOwnKey)) {
+        return tr("unspecified");
+    }
+
+    return result.toString();
+}
+
+void ConnectDialog::revertSettings()
+{
+    m_ui->backendListBox->setCurrentText(m_currentSettings.backendName);
+    m_ui->interfaceNameEdit->setText(m_currentSettings.deviceInterfaceName);
+    m_ui->useConfigurationBox->setChecked(m_currentSettings.useConfigurationEnabled);
+
+    QString value = configurationValue(QCanBusDevice::LoopbackKey);
+    m_ui->loopbackBox->setCurrentText(value);
+
+    value = configurationValue(QCanBusDevice::ReceiveOwnKey);
+    m_ui->receiveOwnBox->setCurrentText(value);
+
+    value = configurationValue(QCanBusDevice::ErrorFilterKey);
+    m_ui->errorFilterEdit->setText(value);
+
+    value = configurationValue(QCanBusDevice::BitRateKey);
+    m_ui->speedBox->setCurrentText(value);
+
+    value = configurationValue(QCanBusDevice::CanFdKey);
+    m_ui->canFdBox->setCurrentText(value);
+}
+
+void ConnectDialog::updateSettings()
 {
     m_currentSettings.backendName = m_ui->backendListBox->currentText();
     m_currentSettings.deviceInterfaceName = m_ui->interfaceNameEdit->text();
@@ -164,18 +216,18 @@ void SettingsDialog::updateSettings()
         // process CAN FD setting
         ConfigurationItem fdItem;
         fdItem.first = QCanBusDevice::CanFdKey;
-        fdItem.second  = QVariant(m_ui->canFdBox->currentIndex() == 1); // 0 -> no, 1 - yes
+        fdItem.second = m_ui->canFdBox->currentData();
         m_currentSettings.configurations.append(fdItem);
     }
 }
 
-void SettingsDialog::fillBackends()
+void ConnectDialog::fillBackends()
 {
     foreach (const QByteArray &backend, QCanBus::instance()->plugins())
         m_ui->backendListBox->addItem(backend);
 }
 
-void SettingsDialog::fillSpeeds()
+void ConnectDialog::fillSpeeds()
 {
     m_ui->speedBox->addItem(QStringLiteral("10000"), 10000);
     m_ui->speedBox->addItem(QStringLiteral("20000"), 20000);
