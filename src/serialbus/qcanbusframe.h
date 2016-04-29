@@ -116,7 +116,7 @@ public:
         if (!isExtendedFrame && (canId & 0x1FFFF800U))
             return false;
 
-        // maximum permitted payload size in CANFD
+        // maximum permitted payload size in CAN FD
         if (load.length() > 64)
             return false;
 

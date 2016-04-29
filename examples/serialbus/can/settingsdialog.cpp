@@ -161,7 +161,7 @@ void SettingsDialog::updateSettings()
             m_currentSettings.configurations.append(item);
         }
 
-        // process CanFD setting
+        // process CAN FD setting
         ConfigurationItem fdItem;
         fdItem.first = QCanBusDevice::CanFdKey;
         fdItem.second  = QVariant(m_ui->canFdBox->currentIndex() == 1); // 0 -> no, 1 - yes

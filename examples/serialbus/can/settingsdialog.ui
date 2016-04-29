@@ -123,7 +123,7 @@
       <item row="5" column="0">
        <widget class="QLabel" name="canFdLabel">
         <property name="text">
-         <string>CanFD</string>
+         <string>CAN FD</string>
         </property>
        </widget>
       </item>
