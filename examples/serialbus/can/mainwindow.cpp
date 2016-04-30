@@ -208,10 +208,13 @@ void MainWindow::checkMessages()
 
     if (frame.frameType() == QCanBusFrame::RemoteRequestFrame) {
         m_ui->requestList->addItem(view);
+        m_ui->requestList->scrollToBottom();
     } else if (frame.frameType() == QCanBusFrame::ErrorFrame) {
         m_ui->errorList->addItem(view);
+        m_ui->errorList->scrollToBottom();
     } else {
         m_ui->receiveList->addItem(view);
+        m_ui->receiveList->scrollToBottom();
     }
 }
 
