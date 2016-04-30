@@ -277,6 +277,31 @@ QT_BEGIN_NAMESPACE
     \sa TimeStamp::microSeconds
 */
 
+/*!
+    \fn QCanBusFrame::toString()
+
+    Returns the CAN frame as a formatted string.
+
+    The output contains the CAN identfier in hexadecimal format, right
+    adjusted to 32 bit, followed by the data length in square brackets
+    and the payload in hexadecimal format.
+
+    Standard identifiers are filled with spaces while extended identifiers
+    are filled with zeros.
+
+    Typical outputs are:
+
+    \code
+        (Error)                               - error frame
+             7FF [1] 01                       - data frame with standard identifier
+        1FFFFFFF [8] 01 23 45 67 89 AB CD EF  - data frame with extended identifier
+             123 [5] Remote Request           - remote frame with standard identifier
+        00000234 [0] Remote Request           - remote frame with extended identifier
+    \endcode
+
+    \since 5.8
+*/
+
 #ifndef QT_NO_DATASTREAM
 
 /*! \relates QCanBusFrame

@@ -170,16 +170,6 @@ void MainWindow::framesWritten(qint64 count)
     qDebug() << "Number of frames written:" << count;
 }
 
-static QByteArray dataToHex(const QByteArray &data)
-{
-    QByteArray result = data.toHex().toUpper();
-
-    for (int i = 0; i < result.size(); i += 3)
-        result.insert(i, ' ');
-
-    return result;
-}
-
 void MainWindow::checkMessages()
 {
     if (!m_canDevice)
@@ -187,21 +177,11 @@ void MainWindow::checkMessages()
 
     const QCanBusFrame frame = m_canDevice->readFrame();
 
-    const qint8 dataLength = frame.payload().size();
-
-    const qint32 id = frame.frameId();
-
     QString view;
-    if (frame.frameType() == QCanBusFrame::ErrorFrame) {
+    if (frame.frameType() == QCanBusFrame::ErrorFrame)
         interpretError(view, frame);
-    } else {
-        view += QLatin1String("Id: ");
-        view += QString::number(id, 16).toUpper();
-        view += QLatin1String(" bytes: ");
-        view += QString::number(dataLength, 10);
-        view += QLatin1String(" data: ");
-        view += dataToHex(frame.payload());
-    }
+    else
+        view = frame.toString();
 
     if (frame.frameType() == QCanBusFrame::RemoteRequestFrame) {
         m_ui->requestList->addItem(view);

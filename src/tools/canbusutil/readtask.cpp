@@ -51,33 +51,13 @@ void ReadTask::checkMessages() {
 
     const QCanBusFrame frame = canDevice->readFrame();
 
-    const qint32 id = frame.frameId();
-    const qint8 dataLength = frame.payload().size();
-
     QString view;
-    if (frame.frameType() == QCanBusFrame::ErrorFrame) {
+    if (frame.frameType() == QCanBusFrame::ErrorFrame)
         view = canDevice->interpretErrorFrame(frame);
-    } else {
-        view += QLatin1String("Id: ");
-        view += QString::number(id, 16);
-        view += QLatin1String(" bytes: ");
-        view += QString::number(dataLength, 10);
-        view += QLatin1String(" data:");
-        QByteArray array = frame.payload();
-        for (int i=0; i < array.size(); i++) {
-            view += QLatin1String(" 0x");
-            quint8 number = array[i];
-            view += QString::number(number, 16);
-        }
-    }
+    else
+        view = frame.toString();
 
-    if (frame.frameType() == QCanBusFrame::RemoteRequestFrame) {
-        output << "RTR: " << view << endl;
-    } else if (frame.frameType() == QCanBusFrame::ErrorFrame) {
-        output << "ERR: " << view << endl;
-    } else {
-        output << view << endl;
-    }
+    output << view << endl;
 }
 
 void ReadTask::receiveError(QCanBusDevice::CanBusError /*error*/) {

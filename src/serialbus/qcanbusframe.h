@@ -190,6 +190,35 @@ public:
         canId = (e & AnyError);
     }
 
+    QString toString() const
+    {
+        const FrameType type = frameType();
+
+        if (type == InvalidFrame)
+            return QStringLiteral("(Invalid)");
+
+        if (type == ErrorFrame)
+            return QStringLiteral("(Error)");
+
+        if (type == UnknownFrame)
+            return QStringLiteral("(Unknown)");
+
+        const char *formatStr = hasExtendedFrameFormat() ? "%08X [%d]" : "     %03X [%d]";
+        QString result = QString::asprintf(formatStr, static_cast<uint>(frameId()),
+                                           payload().size());
+
+        if (type == RemoteRequestFrame) {
+            result.append(QLatin1String(" Remote Request"));
+        } else {
+            QByteArray data = payload().toHex().toUpper();
+            for (int i = 0; i < data.size(); i += 3)
+                data.insert(i, ' ');
+            result.append(QLatin1String(data));
+        }
+
+        return result;
+    }
+
 #ifndef QT_NO_DATASTREAM
     friend Q_SERIALBUS_EXPORT QDataStream &operator<<(QDataStream &, const QCanBusFrame &);
     friend Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &, QCanBusFrame &);

@@ -75,7 +75,7 @@ void DummyBackend::sendMessage()
 
 bool DummyBackend::writeFrame(const QCanBusFrame &data)
 {
-    qDebug() << "DummyBackend::writeFrame: " << data.payload();
+    qDebug() << "DummyBackend::writeFrame: " << data.toString();
     return true;
 }
 
