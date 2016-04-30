@@ -73,10 +73,10 @@ private:
     bool connectSocket();
     bool applyConfigurationParameter(int key, const QVariant &value);
 
-    qint64 canSocket;
-    QSocketNotifier *notifier;
+    qint64 canSocket = -1;
+    QSocketNotifier *notifier = nullptr;
     QString canSocketName;
-    bool canFdOptionEnabled;
+    bool canFdOptionEnabled = false;
 };
 
 QT_END_NAMESPACE

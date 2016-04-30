@@ -39,6 +39,7 @@
 #define TINYCANBACKEND_P_H
 
 #include "tinycanbackend.h"
+#include "tinycan_symbols_p.h"
 
 //
 //  W A R N I N G
@@ -78,9 +79,10 @@ public:
     bool setBitRate(int bitrate);
 
     TinyCanBackend * const q_ptr;
-    bool isOpen;
-    int channelIndex;
-    QTimer *writeNotifier;
+
+    bool isOpen = false;
+    int channelIndex = INDEX_INVALID;
+    QTimer *writeNotifier = nullptr;
 };
 
 QT_END_NAMESPACE

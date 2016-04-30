@@ -51,14 +51,14 @@
 
 QT_BEGIN_NAMESPACE
 
-struct QCanBusPrivate
+class QCanBusPrivate
 {
 public:
-    QCanBusPrivate() : factory(nullptr), index(-1) { }
+    QCanBusPrivate() { }
 
     QJsonObject meta;
-    QCanBusFactory *factory;
-    int index;
+    QCanBusFactory *factory = nullptr;
+    int index = -1;
 };
 
 Q_GLOBAL_STATIC_WITH_ARGS(QFactoryLoader, qFactoryLoader,

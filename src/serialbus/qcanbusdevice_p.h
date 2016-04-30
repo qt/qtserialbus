@@ -61,14 +61,10 @@ class QCanBusDevicePrivate : public QObjectPrivate
 {
     Q_DECLARE_PUBLIC(QCanBusDevice)
 public:
-    QCanBusDevicePrivate()
-        : lastError(QCanBusDevice::CanBusError::NoError),
-          state(QCanBusDevice::UnconnectedState)
-    {
-    }
+    QCanBusDevicePrivate() {}
 
-    QCanBusDevice::CanBusError lastError;
-    QCanBusDevice::CanBusDeviceState state;
+    QCanBusDevice::CanBusError lastError = QCanBusDevice::CanBusError::NoError;
+    QCanBusDevice::CanBusDeviceState state = QCanBusDevice::UnconnectedState;
     QString errorText;
 
     QVector<QCanBusFrame> incomingFrames;

@@ -148,7 +148,6 @@ private:
 
 VectorCanBackendPrivate::VectorCanBackendPrivate(VectorCanBackend *q)
     : q_ptr(q)
-    , portHandle(XL_INVALID_PORTHANDLE)
 {
     startupDriver();
 }

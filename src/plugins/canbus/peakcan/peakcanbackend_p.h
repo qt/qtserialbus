@@ -39,6 +39,7 @@
 #define PEAKCANBACKEND_P_H
 
 #include "peakcanbackend.h"
+#include "peakcan_symbols_p.h"
 
 #if defined(Q_OS_WIN32)
 #  include <qt_windows.h>
@@ -81,16 +82,16 @@ public:
 
     PeakCanBackend * const q_ptr;
 
-    bool isOpen;
-    int channelIndex;
-    QTimer *writeNotifier;
+    bool isOpen = false;
+    int channelIndex = PCAN_NONEBUS;
+    QTimer *writeNotifier = nullptr;
 
 #if defined(Q_OS_WIN32)
-    QWinEventNotifier *readNotifier;
-    HANDLE readHandle;
+    QWinEventNotifier *readNotifier = nullptr;
+    HANDLE readHandle  = INVALID_HANDLE_VALUE;
 #else
-    QSocketNotifier *readNotifier;
-    int readHandle;
+    QSocketNotifier *readNotifier = nullptr;
+    int readHandle = -1;
 #endif
 };
 

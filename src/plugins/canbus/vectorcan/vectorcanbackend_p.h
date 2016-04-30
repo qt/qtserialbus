@@ -84,7 +84,7 @@ public:
 
     VectorCanBackend * const q_ptr;
 
-    long portHandle;
+    long portHandle = XL_INVALID_PORTHANDLE;
     quint64 channelMask = 0;
     HANDLE readHandle = INVALID_HANDLE_VALUE;
     QTimer *writeNotifier = nullptr;

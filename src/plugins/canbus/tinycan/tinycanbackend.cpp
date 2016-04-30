@@ -119,9 +119,6 @@ static void DRV_CALLBACK_TYPE canRxEventCallback(quint32 index, TCanMsg *frame, 
 
 TinyCanBackendPrivate::TinyCanBackendPrivate(TinyCanBackend *q)
     : q_ptr(q)
-    , isOpen(false)
-    , channelIndex(INDEX_INVALID)
-    , writeNotifier(nullptr)
 {
     startupDriver();
 

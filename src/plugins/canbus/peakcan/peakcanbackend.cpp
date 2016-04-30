@@ -208,15 +208,6 @@ private:
 
 PeakCanBackendPrivate::PeakCanBackendPrivate(PeakCanBackend *q)
     : q_ptr(q)
-    , isOpen(false)
-    , channelIndex(PCAN_NONEBUS)
-    , writeNotifier(nullptr)
-    , readNotifier(nullptr)
-#if defined(Q_OS_WIN32)
-    , readHandle(INVALID_HANDLE_VALUE)
-#else
-    , readHandle(-1)
-#endif
 {
 }
 

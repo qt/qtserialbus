@@ -142,10 +142,7 @@ QList<QCanBusDeviceInfo> SocketCanBackend::interfaces()
 }
 
 SocketCanBackend::SocketCanBackend(const QString &name) :
-    canSocket(-1),
-    notifier(nullptr),
-    canSocketName(name),
-    canFdOptionEnabled(false)
+    canSocketName(name)
 {
     resetConfigurations();
 }
