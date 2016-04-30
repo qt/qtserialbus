@@ -212,7 +212,7 @@ void MainWindow::checkMessages()
     } else if (frame.frameType() == QCanBusFrame::ErrorFrame) {
         m_ui->errorList->addItem(view);
     } else {
-        m_ui->listWidget->addItem(view);
+        m_ui->receiveList->addItem(view);
     }
 }
 
