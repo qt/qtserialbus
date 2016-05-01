@@ -70,8 +70,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    if (m_canDevice)
-        delete m_canDevice;
+    delete m_canDevice;
 
     delete m_settings;
     delete m_ui;
