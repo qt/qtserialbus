@@ -53,7 +53,7 @@
     interface:
 
     \code
-        QCanBusDevice *device = QCanBus::createDevice("socketcan", QStringLiteral("can0"));
+        QCanBusDevice *device = QCanBus::instance()->createDevice("socketcan", QStringLiteral("can0"));
         device->connectDevice();
     \endcode
 

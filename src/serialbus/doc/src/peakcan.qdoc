@@ -52,7 +52,7 @@
     interface:
 
     \code
-        QCanBusDevice *device = QCanBus::createDevice("peakcan", QStringLiteral("usbbus1"));
+        QCanBusDevice *device = QCanBus::instance()->createDevice("peakcan", QStringLiteral("usbbus1"));
         device->connectDevice();
     \endcode
 
