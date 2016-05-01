@@ -239,11 +239,11 @@ void MainWindow::sendMessage() const
     frame.setPayload(writings);
 
     qint32 id = m_ui->idEdit->displayText().toInt(nullptr, 16);
-    if (!m_ui->EFF->checkState() && id > 2047) //11 bits
+    if (!m_ui->effBox->checkState() && id > 2047) //11 bits
         id = 2047;
 
     frame.setFrameId(id);
-    frame.setExtendedFrameFormat(m_ui->EFF->checkState());
+    frame.setExtendedFrameFormat(m_ui->effBox->checkState());
 
     if (m_ui->remoteFrame->isChecked())
         frame.setFrameType(QCanBusFrame::RemoteRequestFrame);

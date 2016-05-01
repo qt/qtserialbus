@@ -82,9 +82,14 @@
           </widget>
          </item>
          <item row="1" column="3">
-          <widget class="QCheckBox" name="EFF">
+          <widget class="QCheckBox" name="effBox">
+           <property name="toolTip">
+            <string>Allow extended frames with 29 bit identifier.
+Otherwise, the standard format with 11 bit idenfier is used.</string>
+           </property>
            <property name="text">
-            <string>EFF</string>
+            <string>Extended Frame
+(29 bit identifier)</string>
            </property>
           </widget>
          </item>
