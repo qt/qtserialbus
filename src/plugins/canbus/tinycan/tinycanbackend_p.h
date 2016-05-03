@@ -82,7 +82,7 @@ public:
     TinyCanBackend * const q_ptr;
     bool isOpen;
     int channelIndex;
-    QPointer<QTimer> outgoingEventNotifier;
+    QTimer *outgoingEventNotifier;
 };
 
 QT_END_NAMESPACE

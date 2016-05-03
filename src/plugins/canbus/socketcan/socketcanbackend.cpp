@@ -77,7 +77,7 @@ QT_BEGIN_NAMESPACE
 
 SocketCanBackend::SocketCanBackend(const QString &name) :
     canSocket(-1),
-    notifier(0),
+    notifier(nullptr),
     canSocketName(name),
     canFdOptionEnabled(false)
 {
@@ -285,7 +285,7 @@ bool SocketCanBackend::connectSocket()
     delete notifier;
 
     notifier = new QSocketNotifier(canSocket, QSocketNotifier::Read, this);
-    connect(notifier.data(), &QSocketNotifier::activated,
+    connect(notifier, &QSocketNotifier::activated,
             this, &SocketCanBackend::readSocket);
 
     //apply all stored configurations

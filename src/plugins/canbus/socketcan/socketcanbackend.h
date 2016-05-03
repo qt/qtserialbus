@@ -40,7 +40,6 @@
 #include <QtSerialBus/qcanbusframe.h>
 #include <QtSerialBus/qcanbusdevice.h>
 
-#include <QtCore/qpointer.h>
 #include <QtCore/qsocketnotifier.h>
 #include <QtCore/qstring.h>
 #include <QtCore/qvariant.h>
@@ -72,7 +71,7 @@ private:
     bool applyConfigurationParameter(int key, const QVariant &value);
 
     qint64 canSocket;
-    QPointer<QSocketNotifier> notifier;
+    QSocketNotifier *notifier;
     QString canSocketName;
     bool canFdOptionEnabled;
 };

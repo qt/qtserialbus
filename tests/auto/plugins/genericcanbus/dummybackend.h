@@ -40,7 +40,6 @@
 #include <QtSerialBus/qcanbusdevice.h>
 
 #include <QtCore/qbytearray.h>
-#include <QtCore/qpointer.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -63,7 +62,7 @@ public Q_SLOTS:
     void sendMessage();
 
 private:
-    QPointer<QTimer> sendTimer;
+    QTimer *sendTimer;
     QByteArray byteArray;
 };
 

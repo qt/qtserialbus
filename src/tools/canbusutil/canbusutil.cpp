@@ -62,7 +62,7 @@ bool CanBusUtil::start(int argc, char *argv[])
         return false;
 
     if (listening) {
-        connect(canDevice.data(), &QCanBusDevice::framesReceived, readTask.data(), &ReadTask::checkMessages);
+        connect(canDevice.data(), &QCanBusDevice::framesReceived, readTask, &ReadTask::checkMessages);
     } else {
         if (!sendData())
             return false;
@@ -227,12 +227,12 @@ bool CanBusUtil::connectCanDevice()
     for (int i = 0; i < plugins.size(); i++)
     {
         if (plugins.at(i) == pluginName) {
-            canDevice = canBus->createDevice(plugins.at(i), deviceName);
+            canDevice.reset(canBus->createDevice(plugins.at(i), deviceName));
             if (!canDevice) {
                 output << "Unable to create QCanBusDevice with device name: " << deviceName << endl;
                 return false;
             }
-            connect(canDevice.data(), &QCanBusDevice::errorOccurred, readTask.data(), &ReadTask::receiveError);
+            connect(canDevice.data(), &QCanBusDevice::errorOccurred, readTask, &ReadTask::receiveError);
             if (!canDevice->connectDevice()) {
                 output << "Unable to connect QCanBusDevice with device name: " << deviceName << endl;
                 return false;

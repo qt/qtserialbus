@@ -115,6 +115,7 @@ TinyCanBackendPrivate::TinyCanBackendPrivate(TinyCanBackend *q)
     : q_ptr(q)
     , isOpen(false)
     , channelIndex(INDEX_INVALID)
+    , outgoingEventNotifier(nullptr)
 {
     startupDriver();
 
