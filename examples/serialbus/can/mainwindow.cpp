@@ -187,9 +187,6 @@ void MainWindow::checkMessages()
 
     const QCanBusFrame frame = m_canDevice->readFrame();
 
-    if (frame.payload().isEmpty())
-        return;
-
     const qint8 dataLength = frame.payload().size();
 
     const qint32 id = frame.frameId();
