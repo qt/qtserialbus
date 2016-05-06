@@ -69,10 +69,10 @@ class MainWindow : public QMainWindow, private Ui::MainWindow
     friend class ModbusTcpClient;
 
 public:
-    explicit MainWindow(QWidget *parent = Q_NULLPTR);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    static MainWindow* instance();
+    static MainWindow *instance();
     void appendToLog(const QString &msg) {
         logTextEdit->appendPlainText(msg);
     }
@@ -88,7 +88,7 @@ private:
 
 private:
     DebugHandler m_debugHandler;
-    QModbusClient *m_device = Q_NULLPTR;
+    QModbusClient *m_device = nullptr;
 };
 
 #endif // MAINWINDOW_H

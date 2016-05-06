@@ -49,17 +49,17 @@ class Q_SERIALBUS_EXPORT QModbusRtuSerialMaster : public QModbusClient
     Q_DECLARE_PRIVATE(QModbusRtuSerialMaster)
 
 public:
-    explicit QModbusRtuSerialMaster(QObject *parent = Q_NULLPTR);
+    explicit QModbusRtuSerialMaster(QObject *parent = nullptr);
     ~QModbusRtuSerialMaster();
 
     int interFrameDelay() const;
     void setInterFrameDelay(int microseconds);
 
 protected:
-    QModbusRtuSerialMaster(QModbusRtuSerialMasterPrivate &dd, QObject *parent = Q_NULLPTR);
+    QModbusRtuSerialMaster(QModbusRtuSerialMasterPrivate &dd, QObject *parent = nullptr);
 
-    void close() Q_DECL_OVERRIDE;
-    bool open() Q_DECL_OVERRIDE;
+    void close() override;
+    bool open() override;
 };
 
 QT_END_NAMESPACE

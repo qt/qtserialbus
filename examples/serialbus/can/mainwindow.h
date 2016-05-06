@@ -45,7 +45,7 @@
 
 #include <QMainWindow>
 
-class SettingsDialog;
+class ConnectDialog;
 
 QT_BEGIN_NAMESPACE
 
@@ -63,7 +63,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
 private Q_SLOTS:
@@ -81,7 +81,7 @@ private:
 
     Ui::MainWindow *m_ui;
     QLabel *m_status;
-    SettingsDialog *m_settings;
+    ConnectDialog *m_connectDialog;
     QCanBusDevice *m_canDevice;
 };
 

@@ -13,3 +13,6 @@ HEADERS  += mainwindow.h settingsdialog.h
 FORMS    += mainwindow.ui settingsdialog.ui
 
 RESOURCES += slave.qrc
+
+target.path = $$[QT_INSTALL_EXAMPLES]/serialbus/modbus/slave
+INSTALLS += target

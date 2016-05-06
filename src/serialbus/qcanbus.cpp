@@ -54,7 +54,7 @@ QT_BEGIN_NAMESPACE
 struct QCanBusPrivate
 {
 public:
-    QCanBusPrivate() : factory(Q_NULLPTR), index(-1) { }
+    QCanBusPrivate() : factory(nullptr), index(-1) { }
 
     QJsonObject meta;
     QCanBusFactory *factory;
@@ -67,7 +67,7 @@ Q_GLOBAL_STATIC_WITH_ARGS(QFactoryLoader, qFactoryLoader,
 typedef QMap<QByteArray, QCanBusPrivate> QCanBusPluginStore;
 Q_GLOBAL_STATIC(QCanBusPluginStore, qCanBusPlugins)
 
-static QCanBus *globalInstance = Q_NULLPTR;
+static QCanBus *globalInstance = nullptr;
 
 static void loadPlugins()
 {
@@ -126,19 +126,19 @@ QCanBusDevice *QCanBus::createDevice(const QByteArray &plugin,
                                      const QString &interfaceName) const
 {
     if (!qCanBusPlugins()->contains(plugin))
-        return Q_NULLPTR;
+        return nullptr;
 
     QCanBusPrivate d = qCanBusPlugins()->value(plugin);
     if (!d.factory) {
         d.factory
             = qobject_cast<QCanBusFactory *>(qFactoryLoader->instance(d.index));
         if (!d.factory)
-            return Q_NULLPTR;
+            return nullptr;
 
         qCanBusPlugins()->insert(plugin, d);
     }
     if (!d.factory)
-        return Q_NULLPTR;
+        return nullptr;
 
     return d.factory->createDevice(interfaceName);
 }

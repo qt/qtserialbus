@@ -148,7 +148,7 @@ private:
     }
     template <typename T> void decode(QDataStream *stream, T &t) const {
         static_assert(std::is_pod<T>::value, "Only POD types supported.");
-        static_assert(IsType<T, quint8*, quint16*>::value, "Only quint8* and quint16* supported.");
+        static_assert(IsType<T, quint8 *, quint16 *>::value, "Only quint8* and quint16* supported.");
         (*stream) >> *t;
     }
     template <typename T> void encode(QDataStream *stream, const QVector<T> &vector) {

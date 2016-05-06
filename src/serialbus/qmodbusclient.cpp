@@ -87,7 +87,7 @@ QModbusClient::~QModbusClient()
 /*!
     Sends a request to read the contents of the data pointed by \a read.
     Returns a new valid \l QModbusReply object if no error occurred, otherwise
-    Q_NULLPTR. Modbus network may have multiple servers, each server has unique
+    nullptr. Modbus network may have multiple servers, each server has unique
     \a serverAddress.
 */
 QModbusReply *QModbusClient::sendReadRequest(const QModbusDataUnit &read, int serverAddress)
@@ -99,7 +99,7 @@ QModbusReply *QModbusClient::sendReadRequest(const QModbusDataUnit &read, int se
 /*!
     Sends a request to modify the contents of the data pointed by \a write.
     Returns a new valid \l QModbusReply object if no error occurred, otherwise
-    Q_NULLPTR. Modbus network may have multiple servers, each server has unique
+    nullptr. Modbus network may have multiple servers, each server has unique
     \a serverAddress.
 */
 QModbusReply *QModbusClient::sendWriteRequest(const QModbusDataUnit &write, int serverAddress)
@@ -113,7 +113,7 @@ QModbusReply *QModbusClient::sendWriteRequest(const QModbusDataUnit &write, int 
     modify the contents of the data pointed by \a write using Modbus function
     code \l QModbusPdu::ReadWriteMultipleRegisters.
     Returns a new valid \l QModbusReply object if no error occurred, otherwise
-    Q_NULLPTR. Modbus network may have multiple servers, each server has unique
+    nullptr. Modbus network may have multiple servers, each server has unique
     \a serverAddress.
 
     \note: Sending this kind of request is only valid of both \a read and
@@ -131,14 +131,14 @@ QModbusReply *QModbusClient::sendReadWriteRequest(const QModbusDataUnit &read,
     fits inside the Modbus PDU data section and has a valid function code.
     The only check performed before sending is therefore the validity check,
     see \l QModbusPdu::isValid. If no error occurred the function returns a
-    a new valid \l QModbusReply; Q_NULLPTR otherwise. Modbus networks may have
+    a new valid \l QModbusReply; nullptr otherwise. Modbus networks may have
     multiple servers, each server has a unique \a serverAddress.
 
     \sa QModbusReply::rawResult()
 */
 QModbusReply *QModbusClient::sendRawRequest(const QModbusRequest &request, int serverAddress)
 {
-    return d_func()->sendRequest(request, serverAddress, Q_NULLPTR);
+    return d_func()->sendRequest(request, serverAddress, nullptr);
 }
 
 /*!
@@ -249,13 +249,13 @@ QModbusReply *QModbusClientPrivate::sendRequest(const QModbusRequest &request, i
     if (!isOpen() || q->state() != QModbusDevice::ConnectedState) {
         qCWarning(QT_MODBUS) << "(Client) Device is not connected";
         q->setError(QModbusClient::tr("Device not connected."), QModbusDevice::ConnectionError);
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     if (!request.isValid()) {
         qCWarning(QT_MODBUS) << "(Client) Refuse to send invalid request.";
         q->setError(QModbusClient::tr("Invalid Modbus request."), QModbusDevice::ProtocolError);
-        return Q_NULLPTR;
+        return nullptr;
     }
 
     if (unit)

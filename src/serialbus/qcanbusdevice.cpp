@@ -99,7 +99,7 @@ QT_BEGIN_NAMESPACE
     \value ReceiveOwnKey    This key defines whether this CAN device can send messages.
                             The expected value for this key is \c bool.
     \value BitRateKey       This key defines the bitrate in bits per second.
-    \value CanFdKey         This key defines whether sending and receiving of CANFD frames
+    \value CanFdKey         This key defines whether sending and receiving of CAN FD frames
                             should be enabled. The expected value for this key is \c bool.
     \value UserKey          This key defines the range where custom keys start. It's most
                             common purpose is to permit platform-specific configuration

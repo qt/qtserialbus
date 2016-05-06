@@ -5,12 +5,15 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     mainwindow.cpp \
-    settingsdialog.cpp
+    connectdialog.cpp
 
 HEADERS += mainwindow.h \
-    settingsdialog.h
+    connectdialog.h
 
 FORMS   += mainwindow.ui \
-    settingsdialog.ui
+    connectdialog.ui
 
 RESOURCES += can.qrc
+
+target.path = $$[QT_INSTALL_EXAMPLES]/serialbus/can
+INSTALLS += target

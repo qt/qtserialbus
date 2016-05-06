@@ -82,7 +82,7 @@ public:
     }
 
 protected:
-    void timerEvent(QTimerEvent *e) Q_DECL_OVERRIDE
+    void timerEvent(QTimerEvent *e) override
     {
         if (e->timerId() == timerId()) {
             dptr->canWriteNotification();
@@ -115,6 +115,7 @@ TinyCanBackendPrivate::TinyCanBackendPrivate(TinyCanBackend *q)
     : q_ptr(q)
     , isOpen(false)
     , channelIndex(INDEX_INVALID)
+    , outgoingEventNotifier(nullptr)
 {
     startupDriver();
 
@@ -175,7 +176,7 @@ bool TinyCanBackendPrivate::open()
         return false;
     }
 
-    if (int ret = ::CanDeviceOpen(channelIndex, Q_NULLPTR) < 0) {
+    if (int ret = ::CanDeviceOpen(channelIndex, nullptr) < 0) {
         q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
         return false;
     }
@@ -427,7 +428,7 @@ void TinyCanBackendPrivate::startupDriver()
     Q_Q(TinyCanBackend);
 
     if (driverRefCount == 0) {
-        if (int ret = ::CanInitDriver(Q_NULLPTR) < 0) {
+        if (int ret = ::CanInitDriver(nullptr) < 0) {
             q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
             return;
         }
@@ -554,9 +555,9 @@ bool TinyCanBackend::writeFrame(const QCanBusFrame &newData)
         return false;
     }
 
-    // canFd frame format not supported at this stage
+    // CAN FD frame format not supported at this stage
     if (newData.payload().size() > 8) {
-        setError(tr("CanFD frame format not supported."), QCanBusDevice::WriteError);
+        setError(tr("CAN FD frame format not supported."), QCanBusDevice::WriteError);
         return false;
     }
 

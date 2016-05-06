@@ -40,7 +40,6 @@
 #include <QtSerialBus/qcanbusframe.h>
 #include <QtSerialBus/qcanbusdevice.h>
 
-#include <QtCore/qpointer.h>
 #include <QtCore/qsocketnotifier.h>
 #include <QtCore/qstring.h>
 #include <QtCore/qvariant.h>
@@ -54,14 +53,14 @@ public:
     explicit SocketCanBackend(const QString &name);
     ~SocketCanBackend();
 
-    bool open() Q_DECL_OVERRIDE;
-    void close() Q_DECL_OVERRIDE;
+    bool open() override;
+    void close() override;
 
-    void setConfigurationParameter(int key, const QVariant &value) Q_DECL_OVERRIDE;
+    void setConfigurationParameter(int key, const QVariant &value) override;
 
-    bool writeFrame(const QCanBusFrame &newData) Q_DECL_OVERRIDE;
+    bool writeFrame(const QCanBusFrame &newData) override;
 
-    QString interpretErrorFrame(const QCanBusFrame &errorFrame) Q_DECL_OVERRIDE;
+    QString interpretErrorFrame(const QCanBusFrame &errorFrame) override;
 
 private Q_SLOTS:
     void readSocket();
@@ -72,7 +71,7 @@ private:
     bool applyConfigurationParameter(int key, const QVariant &value);
 
     qint64 canSocket;
-    QPointer<QSocketNotifier> notifier;
+    QSocketNotifier *notifier;
     QString canSocketName;
     bool canFdOptionEnabled;
 };

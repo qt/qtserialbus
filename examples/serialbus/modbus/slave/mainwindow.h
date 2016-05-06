@@ -63,7 +63,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
 private Q_SLOTS:
@@ -87,11 +87,11 @@ private:
     void setupWidgetContainers();
 
     Ui::MainWindow *ui;
-    QModbusServer* modbusDevice;
+    QModbusServer *modbusDevice;
 
     QButtonGroup coilButtons;
     QButtonGroup discreteButtons;
-    QHash<QString, QLineEdit*> registers;
+    QHash<QString, QLineEdit *> registers;
     SettingsDialog *m_settingsDialog;
 };
 

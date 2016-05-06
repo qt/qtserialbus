@@ -41,7 +41,6 @@
 #include <QtSerialBus/qcanbusframe.h>
 #include <QtSerialBus/qcanbusdevice.h>
 
-#include <QtCore/qpointer.h>
 #include <QtCore/qvariant.h>
 #include <QtCore/qvector.h>
 #include <QtCore/qlist.h>
@@ -56,17 +55,17 @@ class TinyCanBackend : public QCanBusDevice
     Q_DECLARE_PRIVATE(TinyCanBackend)
     Q_DISABLE_COPY(TinyCanBackend)
 public:
-    explicit TinyCanBackend(const QString &name, QObject *parent = 0);
+    explicit TinyCanBackend(const QString &name, QObject *parent = nullptr);
     ~TinyCanBackend();
 
-    bool open() Q_DECL_OVERRIDE;
-    void close() Q_DECL_OVERRIDE;
+    bool open() override;
+    void close() override;
 
-    void setConfigurationParameter(int key, const QVariant &value) Q_DECL_OVERRIDE;
+    void setConfigurationParameter(int key, const QVariant &value) override;
 
-    bool writeFrame(const QCanBusFrame &newData) Q_DECL_OVERRIDE;
+    bool writeFrame(const QCanBusFrame &newData) override;
 
-    QString interpretErrorFrame(const QCanBusFrame &errorFrame) Q_DECL_OVERRIDE;
+    QString interpretErrorFrame(const QCanBusFrame &errorFrame) override;
 
     static bool canCreate(QString *errorReason);
 

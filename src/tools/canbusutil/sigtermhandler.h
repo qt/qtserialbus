@@ -38,13 +38,12 @@
 #define SIGTERMHANDLER_H
 
 #include <QObject>
-#include <QPointer>
 
 class SigTermHandler : public QObject
 {
     Q_OBJECT
 public:
-    static QPointer<SigTermHandler> instance();
+    static SigTermHandler *instance();
     static void handle(int s);
 
     virtual ~SigTermHandler();
@@ -52,7 +51,7 @@ signals:
     void sigTermSignal();
 
 private:
-    explicit SigTermHandler(QObject *parent = Q_NULLPTR);
+    explicit SigTermHandler(QObject *parent = nullptr);
 };
 
 #endif // SIGTERMHANDLER_H

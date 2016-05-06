@@ -56,7 +56,7 @@ class ModbusTcpClientPrivate : private QModbusTcpClientPrivate
 
 public:
     QModbusReply *enqueueRequest(const QModbusRequest &request, int, const QModbusDataUnit &unit,
-                                 QModbusReply::ReplyType type) Q_DECL_OVERRIDE
+                                 QModbusReply::ReplyType type) override
     {
         auto writeToSocket = [this](const QModbusRequest &request) {
             QByteArray buffer;
@@ -77,11 +77,11 @@ public:
         };
 
         if (!writeToSocket(request))
-            return Q_NULLPTR;
+            return nullptr;
 
         Q_Q(ModbusTcpClient);
-        QModbusReply *const reply = new QModbusReply(type, m_uId, q);
-        const QueueElement element = QueueElement{ reply, request, unit, m_numberOfRetries,
+        auto reply = new QModbusReply(type, m_uId, q);
+        const auto element = QueueElement{ reply, request, unit, m_numberOfRetries,
             m_responseTimeoutDuration };
         m_transactionStore.insert(m_tId, element);
 

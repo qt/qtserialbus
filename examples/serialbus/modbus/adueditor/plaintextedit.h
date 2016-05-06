@@ -50,7 +50,7 @@ class PlainTextEdit : public QPlainTextEdit
     Q_DISABLE_COPY(PlainTextEdit)
 
 public:
-    explicit PlainTextEdit(QWidget *parent = Q_NULLPTR)
+    explicit PlainTextEdit(QWidget *parent = nullptr)
         : QPlainTextEdit(parent)
     {}
 

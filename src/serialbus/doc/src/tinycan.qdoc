@@ -52,7 +52,7 @@
     interface:
 
     \code
-        QCanBusDevice *device = QCanBus::createDevice("tinycan", QStringLiteral("channela"));
+        QCanBusDevice *device = QCanBus::instance()->createDevice("tinycan", QStringLiteral("channela"));
         device->connectDevice();
     \endcode
 
