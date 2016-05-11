@@ -5,3 +5,4 @@ config_socketcan {
 }
 
 SUBDIRS += peakcan tinycan
+win32:SUBDIRS += vectorcan
