@@ -70,9 +70,7 @@ public:
     QString systemErrorString(int errorCode);
     void setupChannel(const QString &interfaceName);
     void setupDefaultConfigurations();
-    void enableWriteNotification(bool enable);
     void startWrite();
-    bool enableReadNotification();
     void startRead();
     void startupDriver();
     void cleanupDriver();

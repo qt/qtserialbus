@@ -188,6 +188,9 @@ bool TinyCanBackendPrivate::open()
         return false;
     }
 
+    writeNotifier = new WriteNotifier(this, q);
+    writeNotifier->setInterval(0);
+
     isOpen = true;
     return true;
 }
@@ -195,6 +198,9 @@ bool TinyCanBackendPrivate::open()
 void TinyCanBackendPrivate::close()
 {
     Q_Q(TinyCanBackend);
+
+    delete writeNotifier;
+    writeNotifier = nullptr;
 
     if (int ret = ::CanDeviceClose(channelIndex) < 0)
         q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
@@ -309,30 +315,12 @@ void TinyCanBackendPrivate::setupDefaultConfigurations()
     q->setConfigurationParameter(QCanBusDevice::BitRateKey, 500000);
 }
 
-void TinyCanBackendPrivate::enableWriteNotification(bool enable)
-{
-    Q_Q(TinyCanBackend);
-
-    if (writeNotifier) {
-        if (enable) {
-            if (!writeNotifier->isActive())
-                writeNotifier->start();
-        } else {
-            writeNotifier->stop();
-        }
-    } else if (enable) {
-        writeNotifier = new WriteNotifier(this, q);
-        writeNotifier->setInterval(0);
-        writeNotifier->start();
-    }
-}
-
 void TinyCanBackendPrivate::startWrite()
 {
     Q_Q(TinyCanBackend);
 
     if (!q->hasOutgoingFrames()) {
-        enableWriteNotification(false);
+        writeNotifier->stop();
         return;
     }
 
@@ -360,16 +348,8 @@ void TinyCanBackendPrivate::startWrite()
             emit q->framesWritten(messagesToWrite);
     }
 
-    if (q->hasOutgoingFrames())
-        enableWriteNotification(true);
-}
-
-bool TinyCanBackendPrivate::enableReadNotification()
-{
-    ::CanSetRxEventCallback(&canRxEventCallback);
-    ::CanSetEvents(EVENT_ENABLE_RX_MESSAGES);
-
-    return true;
+    if (q->hasOutgoingFrames() && !writeNotifier->isActive())
+        writeNotifier->start();
 }
 
 // this method is called from the different thread!
@@ -434,7 +414,8 @@ void TinyCanBackendPrivate::startupDriver()
             return;
         }
 
-        enableReadNotification();
+        ::CanSetRxEventCallback(&canRxEventCallback);
+        ::CanSetEvents(EVENT_ENABLE_RX_MESSAGES);
 
     } else if (driverRefCount < 0) {
         qCritical("Wrong reference counter: %d", driverRefCount);
@@ -563,7 +544,9 @@ bool TinyCanBackend::writeFrame(const QCanBusFrame &newData)
     }
 
     enqueueOutgoingFrame(newData);
-    d->enableWriteNotification(true);
+
+    if (!d->writeNotifier->isActive())
+        d->writeNotifier->start();
 
     return true;
 }
