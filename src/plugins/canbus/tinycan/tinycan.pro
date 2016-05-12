@@ -12,7 +12,7 @@ PRIVATE_HEADERS += \
 SOURCES += main.cpp \
     tinycanbackend.cpp
 
-OTHER_FILES = plugin.json
+DISTFILES = plugin.json
 
 HEADERS += $$PUBLIC_HEADERS $$PRIVATE_HEADERS
 

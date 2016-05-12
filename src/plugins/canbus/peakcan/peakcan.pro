@@ -13,7 +13,7 @@ SOURCES += \
     main.cpp \
     peakcanbackend.cpp
 
-OTHER_FILES = plugin.json
+DISTFILES = plugin.json
 
 HEADERS += $$PUBLIC_HEADERS $$PRIVATE_HEADERS
 

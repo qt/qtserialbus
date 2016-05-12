@@ -7,8 +7,7 @@ HEADERS += \
 
 SOURCES += main.cpp \
     dummybackend.cpp
-
-OTHER_FILES = plugin.json
+DISTFILES = plugin.json
 
 PLUGIN_TYPE = canbus
 PLUGIN_EXTENDS = -
