@@ -2,10 +2,8 @@ TARGET = qtpeakcanbus
 
 QT = core-private serialbus
 
-PUBLIC_HEADERS += \
-    peakcanbackend.h
-
-PRIVATE_HEADERS += \
+HEADERS += \
+    peakcanbackend.h \
     peakcanbackend_p.h \
     peakcan_symbols_p.h
 
@@ -14,8 +12,6 @@ SOURCES += \
     peakcanbackend.cpp
 
 DISTFILES = plugin.json
-
-HEADERS += $$PUBLIC_HEADERS $$PRIVATE_HEADERS
 
 PLUGIN_TYPE = canbus
 PLUGIN_EXTENDS = serialbus
