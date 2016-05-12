@@ -75,10 +75,7 @@ public:
     void setupChannel(const QString &interfaceName);
     void setupDefaultConfigurations();
     QString systemErrorString(int errorCode);
-    void enableWriteNotification(bool enable);
     void startWrite();
-    bool acquireReadNotification();
-    void releaseReadNotification();
     void startRead();
     bool verifyBitRate(int bitrate);
 
