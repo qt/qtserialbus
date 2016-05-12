@@ -72,10 +72,11 @@ Q_GLOBAL_STATIC(QList<TinyCanBackendPrivate *>, qChannels)
 
 static QMutex channelsGuard(QMutex::NonRecursive);
 
-class OutgoingEventNotifier : public QTimer
+class WriteNotifier : public QTimer
 {
+    // no Q_OBJECT macro!
 public:
-    OutgoingEventNotifier(TinyCanBackendPrivate *d, QObject *parent)
+    WriteNotifier(TinyCanBackendPrivate *d, QObject *parent)
         : QTimer(parent)
         , dptr(d)
     {
@@ -85,7 +86,7 @@ protected:
     void timerEvent(QTimerEvent *e) override
     {
         if (e->timerId() == timerId()) {
-            dptr->canWriteNotification();
+            dptr->startWrite();
             return;
         }
         QTimer::timerEvent(e);
@@ -105,7 +106,7 @@ static void DRV_CALLBACK_TYPE canRxEventCallback(quint32 index, TCanMsg *frame, 
     QMutexLocker lock(&channelsGuard);
     foreach (TinyCanBackendPrivate *p, *qChannels()) {
         if (p->channelIndex == int(index)) {
-            p->canReadNotification();
+            p->startRead();
             return;
         }
     }
@@ -115,7 +116,7 @@ TinyCanBackendPrivate::TinyCanBackendPrivate(TinyCanBackend *q)
     : q_ptr(q)
     , isOpen(false)
     , channelIndex(INDEX_INVALID)
-    , outgoingEventNotifier(nullptr)
+    , writeNotifier(nullptr)
 {
     startupDriver();
 
@@ -312,21 +313,21 @@ void TinyCanBackendPrivate::enableWriteNotification(bool enable)
 {
     Q_Q(TinyCanBackend);
 
-    if (outgoingEventNotifier) {
+    if (writeNotifier) {
         if (enable) {
-            if (!outgoingEventNotifier->isActive())
-                outgoingEventNotifier->start();
+            if (!writeNotifier->isActive())
+                writeNotifier->start();
         } else {
-            outgoingEventNotifier->stop();
+            writeNotifier->stop();
         }
     } else if (enable) {
-        outgoingEventNotifier = new OutgoingEventNotifier(this, q);
-        outgoingEventNotifier->setInterval(0);
-        outgoingEventNotifier->start();
+        writeNotifier = new WriteNotifier(this, q);
+        writeNotifier->setInterval(0);
+        writeNotifier->start();
     }
 }
 
-void TinyCanBackendPrivate::canWriteNotification()
+void TinyCanBackendPrivate::startWrite()
 {
     Q_Q(TinyCanBackend);
 
@@ -372,7 +373,7 @@ bool TinyCanBackendPrivate::enableReadNotification()
 }
 
 // this method is called from the different thread!
-void TinyCanBackendPrivate::canReadNotification()
+void TinyCanBackendPrivate::startRead()
 {
     Q_Q(TinyCanBackend);
 
