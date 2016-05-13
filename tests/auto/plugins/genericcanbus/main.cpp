@@ -53,7 +53,7 @@ public:
     QCanBusDevice *createDevice(const QString &interfaceName) const
     {
         Q_UNUSED(interfaceName)
-        QCanBusDevice *device = new DummyBackend();
+        auto device = new DummyBackend();
         return device;
     }
 };

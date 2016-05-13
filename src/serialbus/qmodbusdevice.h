@@ -86,7 +86,7 @@ public:
     };
     Q_ENUM(ConnectionParameter)
 
-    explicit QModbusDevice(QObject *parent = Q_NULLPTR);
+    explicit QModbusDevice(QObject *parent = nullptr);
     ~QModbusDevice();
 
     QVariant connectionParameter(int parameter) const;
@@ -105,7 +105,7 @@ Q_SIGNALS:
     void stateChanged(QModbusDevice::State state);
 
 protected:
-    QModbusDevice(QModbusDevicePrivate &dd, QObject *parent = Q_NULLPTR);
+    QModbusDevice(QModbusDevicePrivate &dd, QObject *parent = nullptr);
 
     void setState(QModbusDevice::State newState);
     void setError(const QString &errorText, QModbusDevice::Error error);

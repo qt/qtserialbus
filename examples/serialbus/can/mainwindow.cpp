@@ -40,10 +40,11 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "settingsdialog.h"
+#include "connectdialog.h"
 
 #include <QCanBusFrame>
 #include <QCanBus>
+#include <QTimer>
 
 #include <QtCore/qbytearray.h>
 #include <QtCore/qvariant.h>
@@ -52,11 +53,11 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     m_ui(new Ui::MainWindow),
-    m_canDevice(Q_NULLPTR)
+    m_canDevice(nullptr)
 {
     m_ui->setupUi(this);
 
-    m_settings = new SettingsDialog;
+    m_connectDialog = new ConnectDialog;
 
     m_status = new QLabel;
     m_ui->statusBar->addWidget(m_status);
@@ -64,16 +65,16 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->sendMessagesBox->setEnabled(false);
 
     initActionsConnections();
+    QTimer::singleShot(50, m_connectDialog, &ConnectDialog::show);
 
     connect(m_ui->sendButton, &QPushButton::clicked, this, &MainWindow::sendMessage);
 }
 
 MainWindow::~MainWindow()
 {
-    if (m_canDevice)
-        delete m_canDevice;
+    delete m_canDevice;
 
-    delete m_settings;
+    delete m_connectDialog;
     delete m_ui;
 }
 
@@ -87,12 +88,11 @@ void MainWindow::initActionsConnections()
     m_ui->actionConnect->setEnabled(true);
     m_ui->actionDisconnect->setEnabled(false);
     m_ui->actionQuit->setEnabled(true);
-    m_ui->actionConfigure->setEnabled(true);
 
-    connect(m_ui->actionConnect, &QAction::triggered, this, &MainWindow::connectDevice);
+    connect(m_ui->actionConnect, &QAction::triggered, m_connectDialog, &ConnectDialog::show);
+    connect(m_connectDialog, &QDialog::accepted, this, &MainWindow::connectDevice);
     connect(m_ui->actionDisconnect, &QAction::triggered, this, &MainWindow::disconnectDevice);
     connect(m_ui->actionQuit, &QAction::triggered, this, &QWidget::close);
-    connect(m_ui->actionConfigure, &QAction::triggered, m_settings, &SettingsDialog::show);
     connect(m_ui->actionAboutQt, &QAction::triggered, qApp, &QApplication::aboutQt);
 }
 
@@ -112,7 +112,7 @@ void MainWindow::receiveError(QCanBusDevice::CanBusError error) const
 
 void MainWindow::connectDevice()
 {
-    const SettingsDialog::Settings p = m_settings->settings();
+    const ConnectDialog::Settings p = m_connectDialog->settings();
 
     m_canDevice = QCanBus::instance()->createDevice(p.backendName.toLocal8Bit(), p.deviceInterfaceName);
     if (!m_canDevice) {
@@ -128,19 +128,18 @@ void MainWindow::connectDevice()
             this, &MainWindow::framesWritten);
 
     if (p.useConfigurationEnabled) {
-        foreach (const SettingsDialog::ConfigurationItem &item, p.configurations)
+        foreach (const ConnectDialog::ConfigurationItem &item, p.configurations)
             m_canDevice->setConfigurationParameter(item.first, item.second);
     }
 
     if (!m_canDevice->connectDevice()) {
         delete m_canDevice;
-        m_canDevice = Q_NULLPTR;
+        m_canDevice = nullptr;
 
         showStatusMessage(tr("Connection error"));
     } else {
         m_ui->actionConnect->setEnabled(false);
         m_ui->actionDisconnect->setEnabled(true);
-        m_ui->actionConfigure->setEnabled(false);
 
         m_ui->sendMessagesBox->setEnabled(true);
 
@@ -156,11 +155,10 @@ void MainWindow::disconnectDevice()
 
     m_canDevice->disconnectDevice();
     delete m_canDevice;
-    m_canDevice = Q_NULLPTR;
+    m_canDevice = nullptr;
 
     m_ui->actionConnect->setEnabled(true);
     m_ui->actionDisconnect->setEnabled(false);
-    m_ui->actionConfigure->setEnabled(true);
 
     m_ui->sendMessagesBox->setEnabled(false);
 
@@ -172,15 +170,22 @@ void MainWindow::framesWritten(qint64 count)
     qDebug() << "Number of frames written:" << count;
 }
 
+static QByteArray dataToHex(const QByteArray &data)
+{
+    QByteArray result = data.toHex().toUpper();
+
+    for (int i = 0; i < result.size(); i += 3)
+        result.insert(i, ' ');
+
+    return result;
+}
+
 void MainWindow::checkMessages()
 {
     if (!m_canDevice)
         return;
 
     const QCanBusFrame frame = m_canDevice->readFrame();
-
-    if (frame.payload().isEmpty())
-        return;
 
     const qint8 dataLength = frame.payload().size();
 
@@ -191,20 +196,30 @@ void MainWindow::checkMessages()
         interpretError(view, frame);
     } else {
         view += QLatin1String("Id: ");
-        view += QString::number(id, 16);
+        view += QString::number(id, 16).toUpper();
         view += QLatin1String(" bytes: ");
         view += QString::number(dataLength, 10);
         view += QLatin1String(" data: ");
-        view += frame.payload().data();
+        view += dataToHex(frame.payload());
     }
 
     if (frame.frameType() == QCanBusFrame::RemoteRequestFrame) {
         m_ui->requestList->addItem(view);
+        m_ui->requestList->scrollToBottom();
     } else if (frame.frameType() == QCanBusFrame::ErrorFrame) {
         m_ui->errorList->addItem(view);
+        m_ui->errorList->scrollToBottom();
     } else {
-        m_ui->listWidget->addItem(view);
+        m_ui->receiveList->addItem(view);
+        m_ui->receiveList->scrollToBottom();
     }
+}
+
+static QByteArray dataFromHex(const QString &hex)
+{
+    QByteArray line = hex.toLatin1();
+    line.replace(' ', QByteArray());
+    return QByteArray::fromHex(line);
 }
 
 void MainWindow::sendMessage() const
@@ -212,19 +227,19 @@ void MainWindow::sendMessage() const
     if (!m_canDevice)
         return;
 
-    QByteArray writings = m_ui->lineEdit->displayText().toUtf8();
+    QByteArray writings = dataFromHex(m_ui->lineEdit->displayText());
 
     QCanBusFrame frame;
     const int maxPayload = m_ui->fdBox->checkState() ? 64 : 8;
     writings.truncate(maxPayload);
     frame.setPayload(writings);
 
-    qint32 id = m_ui->idEdit->displayText().toInt();
-    if (!m_ui->EFF->checkState() && id > 2047) //11 bits
+    qint32 id = m_ui->idEdit->displayText().toInt(nullptr, 16);
+    if (!m_ui->effBox->checkState() && id > 2047) //11 bits
         id = 2047;
 
     frame.setFrameId(id);
-    frame.setExtendedFrameFormat(m_ui->EFF->checkState());
+    frame.setExtendedFrameFormat(m_ui->effBox->checkState());
 
     if (m_ui->remoteFrame->isChecked())
         frame.setFrameType(QCanBusFrame::RemoteRequestFrame);

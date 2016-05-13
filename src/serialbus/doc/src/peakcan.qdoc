@@ -52,14 +52,15 @@
     interface:
 
     \code
-        QCanBusDevice *device = QCanBus::createDevice("peakcan", QStringLiteral("usbbus1"));
+        QCanBusDevice *device = QCanBus::instance()->createDevice("peakcan", QStringLiteral("usbbus1"));
         device->connectDevice();
     \endcode
 
-    Where, \e usbbus1 is the active CAN interface name. The PCAN API provides only eight
-    interfaces from \e usbbus1 to \e usbbus8.
+    Where, \e usbbus1 is the active CAN interface name. The PCAN API support eight USB
+    interfaces from \e usbbus1 to \e usbbus8 and eight PCI interfaces from \e pcibus1 to
+    \e pcibus8.
 
-    \note Only the USB adapters are currently supported by this backend.
+    \note Only the USB and PCI adapters are currently supported by this backend.
 
     The device is now open and can be written and read:
 

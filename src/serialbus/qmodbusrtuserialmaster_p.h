@@ -267,11 +267,11 @@ public:
     }
 
     QModbusReply *enqueueRequest(const QModbusRequest &request, int serverAddress,
-        const QModbusDataUnit &unit, QModbusReply::ReplyType type) Q_DECL_OVERRIDE
+        const QModbusDataUnit &unit, QModbusReply::ReplyType type) override
     {
         Q_Q(QModbusRtuSerialMaster);
 
-        QModbusReply *reply = new QModbusReply(type, serverAddress, q);
+        auto reply = new QModbusReply(type, serverAddress, q);
         QueueElement element(reply, request, unit, m_numberOfRetries + 1);
         element.adu = QModbusSerialAdu::create(QModbusSerialAdu::Rtu, serverAddress, request);
         m_queue.enqueue(element);
@@ -376,7 +376,7 @@ public:
         return true;
     }
 
-    bool isOpen() const Q_DECL_OVERRIDE
+    bool isOpen() const override
     {
         if (m_serialPort)
             return m_serialPort->isOpen();
@@ -390,7 +390,7 @@ public:
     QByteArray responseBuffer;
 
     QQueue<QueueElement> m_queue;
-    QSerialPort *m_serialPort = Q_NULLPTR;
+    QSerialPort *m_serialPort = nullptr;
 
     int m_interFrameDelayMilliseconds = 2; // A approximated value of 1.750 msec.
 };

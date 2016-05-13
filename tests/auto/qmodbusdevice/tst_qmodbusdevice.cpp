@@ -49,8 +49,8 @@ public:
     }
 
 protected:
-    bool open() Q_DECL_OVERRIDE { return openState; }
-    void close() Q_DECL_OVERRIDE {}
+    bool open() override { return openState; }
+    void close() override {}
 
     bool openState = false;
 };

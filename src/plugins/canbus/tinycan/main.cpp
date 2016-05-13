@@ -56,10 +56,10 @@ public:
         QString errorReason;
         if (!TinyCanBackend::canCreate(&errorReason)) {
             qWarning("%s", qPrintable(errorReason));
-            return Q_NULLPTR;
+            return nullptr;
         }
 
-        QCanBusDevice *device = new TinyCanBackend(interfaceName);
+        auto device = new TinyCanBackend(interfaceName);
         return device;
     }
 };

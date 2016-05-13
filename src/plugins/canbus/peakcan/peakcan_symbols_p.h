@@ -35,8 +35,8 @@
 **
 ****************************************************************************/
 
-#ifndef REAKCAN_SYMBOLS_P_H
-#define REAKCAN_SYMBOLS_P_H
+#ifndef PEAKCAN_SYMBOLS_P_H
+#define PEAKCAN_SYMBOLS_P_H
 
 //
 //  W A R N I N G
@@ -266,8 +266,8 @@ GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Initialize, TPCANHandle, TPCANBaudrate
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Uninitialize, TPCANHandle)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Reset, TPCANHandle)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_GetStatus, TPCANHandle)
-GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Read, TPCANHandle, TPCANMsg*, TPCANTimestamp*)
-GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Write, TPCANHandle, TPCANMsg*)
+GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Read, TPCANHandle, TPCANMsg *, TPCANTimestamp *)
+GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Write, TPCANHandle, TPCANMsg *)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_FilterMessages, TPCANHandle, quint32, quint32, TPCANMode)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_GetValue, TPCANHandle, TPCANParameter, void *, quint32)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_SetValue, TPCANHandle, TPCANParameter, void *, quint32)
@@ -308,4 +308,4 @@ inline bool resolveSymbols(QLibrary *pcanLibrary)
 
 #endif
 
-#endif // REAKCAN_SYMBOLS_P_H
+#endif // PEAKCAN_SYMBOLS_P_H

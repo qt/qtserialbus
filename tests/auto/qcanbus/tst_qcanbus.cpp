@@ -51,7 +51,7 @@ private slots:
     void createDevice();
 
 private:
-    QPointer<QCanBus> bus;
+    QCanBus *bus;
 };
 
 tst_QCanBus::tst_QCanBus()
@@ -70,9 +70,8 @@ void tst_QCanBus::initTestCase()
                                      + QStringLiteral("/../../../../plugins"));
 #endif
     bus = QCanBus::instance();
-    QVERIFY(bus != 0);
-    QPointer<QCanBus> sameInstance;
-    sameInstance = QCanBus::instance();
+    QVERIFY(bus);
+    QCanBus *sameInstance = QCanBus::instance();
     QCOMPARE(bus, sameInstance);
 }
 

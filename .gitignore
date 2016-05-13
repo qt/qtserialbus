@@ -3,12 +3,6 @@ Makefile*
 *.pro.user
 .qmake.cache
 *.obj
-config.tests/libmodbus_systemlib/libmodbus_systemlib
-config.tests/libmodbus_accept4/libmodbus_accept4
-config.tests/libmodbus_byteswap/libmodbus_byteswap
-config.tests/libmodbus_tiocmrts/libmodbus_tiocmrts
-config.tests/libmodbus_strlcpy/libmodbus_strlcpy
-config.tests/libmodbus_rs485/libmodbus_rs485
 config.tests/language/language
 config.tests/socketcan/socketcan
 config.tests/socketcan_fd/socketcan_fd

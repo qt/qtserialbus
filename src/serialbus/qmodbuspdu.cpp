@@ -106,7 +106,7 @@ static int minimumDataSize(const QModbusPdu &pdu, Type type)
 static QDataStream &pduFromStream(QDataStream &stream, QModbusPdu &pdu, Type type)
 {
     QModbusPdu::FunctionCode code = QModbusPdu::Invalid;
-    if (stream.readRawData((char*) (&code), sizeof(quint8)) != sizeof(quint8))
+    if (stream.readRawData((char *) (&code), sizeof(quint8)) != sizeof(quint8))
         return stream;
     pdu.setFunctionCode(code);
 
@@ -298,7 +298,7 @@ static QDataStream &pduFromStream(QDataStream &stream, QModbusPdu &pdu, Type typ
 */
 
 /*!
-    \fn QModbusPdu& QModbusPdu::operator=(const QModbusPdu& other)
+    \fn QModbusPdu &QModbusPdu::operator=(const QModbusPdu &other)
 
     Makes a copy of the \a other and assigns it to this QModbusPdu object.
 */

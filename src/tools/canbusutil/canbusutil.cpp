@@ -39,7 +39,7 @@
 static const qint8 MAXNORMALPAYLOADSIZE = 8;
 static const qint8 MAXEXTENDEDPAYLOADSIZE = 64;
 
-CanBusUtil::CanBusUtil(QTextStream& output, QCoreApplication& app, QObject *parent)
+CanBusUtil::CanBusUtil(QTextStream &output, QCoreApplication &app, QObject *parent)
   : QObject(parent),
     canBus(QCanBus::instance()),
     output(output),
@@ -62,7 +62,7 @@ bool CanBusUtil::start(int argc, char *argv[])
         return false;
 
     if (listening) {
-        connect(canDevice.data(), &QCanBusDevice::framesReceived, readTask.data(), &ReadTask::checkMessages);
+        connect(canDevice.data(), &QCanBusDevice::framesReceived, readTask, &ReadTask::checkMessages);
     } else {
         if (!sendData())
             return false;
@@ -131,7 +131,7 @@ bool CanBusUtil::parseArgs(int argc, char *argv[])
     return true;
 }
 
-bool CanBusUtil::parseDataField(qint32& id, QString& payload)
+bool CanBusUtil::parseDataField(qint32 &id, QString &payload)
 {
     int hashMarkPos = data.indexOf('#');
     if (hashMarkPos < 0) {
@@ -150,8 +150,8 @@ bool CanBusUtil::parseDataField(qint32& id, QString& payload)
     return true;
 }
 
-bool CanBusUtil::parsePayloadField(QString payload, bool& rtrFrame,
-                                   bool& fdFrame, QByteArray& bytes)
+bool CanBusUtil::parsePayloadField(QString payload, bool &rtrFrame,
+                                   bool &fdFrame, QByteArray &bytes)
 {
     fdFrame = false;
     rtrFrame = false;
@@ -227,12 +227,12 @@ bool CanBusUtil::connectCanDevice()
     for (int i = 0; i < plugins.size(); i++)
     {
         if (plugins.at(i) == pluginName) {
-            canDevice = canBus->createDevice(plugins.at(i), deviceName);
+            canDevice.reset(canBus->createDevice(plugins.at(i), deviceName));
             if (!canDevice) {
                 output << "Unable to create QCanBusDevice with device name: " << deviceName << endl;
                 return false;
             }
-            connect(canDevice.data(), &QCanBusDevice::errorOccurred, readTask.data(), &ReadTask::receiveError);
+            connect(canDevice.data(), &QCanBusDevice::errorOccurred, readTask, &ReadTask::receiveError);
             if (!canDevice->connectDevice()) {
                 output << "Unable to connect QCanBusDevice with device name: " << deviceName << endl;
                 return false;

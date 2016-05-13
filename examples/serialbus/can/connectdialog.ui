@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SettingsDialog</class>
- <widget class="QDialog" name="SettingsDialog">
+ <class>ConnectDialog</class>
+ <widget class="QDialog" name="ConnectDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>406</width>
-    <height>254</height>
+    <width>441</width>
+    <height>281</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Settings</string>
+   <string>Connect</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="4" column="0" colspan="2">
@@ -30,9 +30,25 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="applyButton">
+      <widget class="QPushButton" name="cancelButton">
        <property name="text">
-        <string>Apply</string>
+        <string>Cancel</string>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="okButton">
+       <property name="text">
+        <string>OK</string>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+       <property name="default">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -123,23 +139,12 @@
       <item row="5" column="0">
        <widget class="QLabel" name="canFdLabel">
         <property name="text">
-         <string>CanFD</string>
+         <string>CAN FD</string>
         </property>
        </widget>
       </item>
       <item row="5" column="1">
-       <widget class="QComboBox" name="canFdBox">
-        <item>
-         <property name="text">
-          <string>no</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>yes</string>
-         </property>
-        </item>
-       </widget>
+       <widget class="QComboBox" name="canFdBox"/>
       </item>
      </layout>
     </widget>

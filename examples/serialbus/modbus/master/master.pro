@@ -18,3 +18,6 @@ FORMS    += mainwindow.ui \
 
 RESOURCES += \
     master.qrc
+
+target.path = $$[QT_INSTALL_EXAMPLES]/serialbus/modbus/master
+INSTALLS += target

@@ -125,7 +125,7 @@ public:
 
             connections.append(socket);
 
-            QByteArray *buffer = new QByteArray();
+            auto buffer = new QByteArray();
 
             QObject::connect(socket, &QObject::destroyed, [buffer]() {
                 // cleanup buffer

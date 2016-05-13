@@ -48,7 +48,7 @@ class TestClient : public QModbusClient
         Q_DECLARE_PUBLIC(TestClient)
 
     public:
-        bool isOpen() const Q_DECL_OVERRIDE { return m_open; }
+        bool isOpen() const override { return m_open; }
 
     private:
         bool m_open = false;
@@ -58,12 +58,12 @@ public:
     TestClient()
         : QModbusClient(*new TestClientPrivate)
     {}
-    bool open() Q_DECL_OVERRIDE {
+    bool open() override {
         d_func()->m_open = true;
         setState(QModbusDevice::ConnectedState);
         return true;
     }
-    void close() Q_DECL_OVERRIDE {
+    void close() override {
         d_func()->m_open = true;
         setState(QModbusDevice::UnconnectedState);
     }

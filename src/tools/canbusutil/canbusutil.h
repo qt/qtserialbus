@@ -40,6 +40,7 @@
 #include <QObject>
 #include <QTextStream>
 #include <QCoreApplication>
+#include <QScopedPointer>
 
 #include "readtask.h"
 
@@ -47,7 +48,7 @@ class CanBusUtil : public QObject
 {
     Q_OBJECT
 public:
-    explicit CanBusUtil(QTextStream& output, QCoreApplication& app, QObject *parent = Q_NULLPTR);
+    explicit CanBusUtil(QTextStream &output, QCoreApplication &app, QObject *parent = nullptr);
 
     bool start(int argc, char *argv[]);
 
@@ -63,15 +64,15 @@ private:
     bool sendData();
 
 private:
-    QPointer<QCanBus> canBus;
-    QTextStream& output;
-    QCoreApplication& app;
+    QCanBus *canBus;
+    QTextStream &output;
+    QCoreApplication &app;
     bool listening;
     QString pluginName;
     QString deviceName;
     QString data;
-    QPointer<QCanBusDevice> canDevice;
-    QPointer<ReadTask> readTask;
+    QScopedPointer<QCanBusDevice> canDevice;
+    ReadTask *readTask;
 };
 
 #endif // CANBUSUTIL_H

@@ -40,7 +40,6 @@
 #include <QtSerialBus/qcanbusdevice.h>
 
 #include <QtCore/qbytearray.h>
-#include <QtCore/qpointer.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -52,18 +51,18 @@ class DummyBackend : public QCanBusDevice
 public:
     explicit DummyBackend();
 
-    bool open() Q_DECL_OVERRIDE;
-    void close() Q_DECL_OVERRIDE;
+    bool open() override;
+    void close() override;
 
-    bool writeFrame(const QCanBusFrame &data) Q_DECL_OVERRIDE;
+    bool writeFrame(const QCanBusFrame &data) override;
 
-    QString interpretErrorFrame(const QCanBusFrame &) Q_DECL_OVERRIDE;
+    QString interpretErrorFrame(const QCanBusFrame &) override;
 
 public Q_SLOTS:
     void sendMessage();
 
 private:
-    QPointer<QTimer> sendTimer;
+    QTimer *sendTimer;
     QByteArray byteArray;
 };
 

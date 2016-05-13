@@ -36,6 +36,7 @@
 
 #include <QCoreApplication>
 #include <QTextStream>
+#include <QScopedPointer>
 
 #include <signal.h>
 
@@ -46,7 +47,7 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-    QPointer<SigTermHandler> s = SigTermHandler::instance();
+    QScopedPointer<SigTermHandler> s(SigTermHandler::instance());
     if (signal(SIGINT, SigTermHandler::handle) == SIG_ERR)
         return -1;
     QObject::connect(s.data(), &SigTermHandler::sigTermSignal, &a, &QCoreApplication::quit);

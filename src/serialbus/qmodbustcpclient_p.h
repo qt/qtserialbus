@@ -153,7 +153,7 @@ public:
 
     QModbusReply *enqueueRequest(const QModbusRequest &request, int serverAddress,
                                  const QModbusDataUnit &unit,
-                                 QModbusReply::ReplyType type) Q_DECL_OVERRIDE
+                                 QModbusReply::ReplyType type) override
     {
         auto writeToSocket = [this](quint16 tId, const QModbusRequest &request, int address) {
             QByteArray buffer;
@@ -176,11 +176,11 @@ public:
 
         const int tId = transactionId();
         if (!writeToSocket(tId, request, serverAddress))
-            return Q_NULLPTR;
+            return nullptr;
 
         Q_Q(QModbusTcpClient);
-        QModbusReply *const reply = new QModbusReply(type, serverAddress, q);
-        const QueueElement element = QueueElement{ reply, request, unit, m_numberOfRetries,
+        auto reply = new QModbusReply(type, serverAddress, q);
+        const auto element = QueueElement{ reply, request, unit, m_numberOfRetries,
             m_responseTimeoutDuration };
         m_transactionStore.insert(tId, element);
 
@@ -226,7 +226,7 @@ public:
     }
 
     // TODO: Review once we have a transport layer in place.
-    bool isOpen() const Q_DECL_OVERRIDE
+    bool isOpen() const override
     {
         if (m_socket)
             return m_socket->isOpen();
@@ -254,7 +254,7 @@ public:
     inline void incrementTransactionId() { m_transactionId++; }
     inline int transactionId() const { return m_transactionId; }
 
-    QTcpSocket *m_socket = Q_NULLPTR;
+    QTcpSocket *m_socket = nullptr;
     QByteArray responseBuffer;
     QHash<quint16, QueueElement> m_transactionStore;
     int mbpaHeaderSize = 7;

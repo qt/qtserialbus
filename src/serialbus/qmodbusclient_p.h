@@ -94,7 +94,7 @@ public:
 
     virtual QModbusReply *enqueueRequest(const QModbusRequest &, int, const QModbusDataUnit &,
                                          QModbusReply::ReplyType) {
-        return Q_NULLPTR;
+        return nullptr;
     }
     // TODO: Review once we have a transport layer in place.
     virtual bool isOpen() const { return false; }

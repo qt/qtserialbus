@@ -68,7 +68,7 @@ public:
     };
     Q_ENUM(Option)
 
-    explicit QModbusServer(QObject *parent = Q_NULLPTR);
+    explicit QModbusServer(QObject *parent = nullptr);
     ~QModbusServer();
 
     int serverAddress() const;
@@ -90,7 +90,7 @@ Q_SIGNALS:
     void dataWritten(QModbusDataUnit::RegisterType table, int address, int size);
 
 protected:
-    QModbusServer(QModbusServerPrivate &dd, QObject *parent = Q_NULLPTR);
+    QModbusServer(QModbusServerPrivate &dd, QObject *parent = nullptr);
 
     virtual bool writeData(const QModbusDataUnit &unit);
     virtual bool readData(QModbusDataUnit *newData) const;

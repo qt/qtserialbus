@@ -154,13 +154,13 @@ void tst_QCanBusFrame::tst_isValid_data()
     QTest::newRow("unknown frame")
                  << QCanBusFrame::UnknownFrame << true
                  << QByteArray() << 0u << false;
-    QTest::newRow("data frame can max payload")
+    QTest::newRow("data frame CAN max payload")
                  << QCanBusFrame::DataFrame << true
                  << QByteArray(8, 0) << 0u << false;
-    QTest::newRow("data frame canfd max payload")
+    QTest::newRow("data frame CAN FD max payload")
                  << QCanBusFrame::DataFrame << true
                  << QByteArray(64, 0) << 0u << false;
-    QTest::newRow("data frame can too much payload")
+    QTest::newRow("data frame CAN too much payload")
                  << QCanBusFrame::DataFrame << false
                  << QByteArray(65, 0) << 0u << false;
     QTest::newRow("data frame short id")

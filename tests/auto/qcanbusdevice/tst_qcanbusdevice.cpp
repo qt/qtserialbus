@@ -39,6 +39,7 @@
 
 #include <QtTest/QtTest>
 #include <QSignalSpy>
+#include <QScopedPointer>
 
 #include <memory>
 
@@ -153,7 +154,7 @@ private slots:
     void tst_waitForFramesReceived();
     void tst_waitForFramesWritten();
 private:
-    QPointer<tst_Backend> device;
+    QScopedPointer<tst_Backend> device;
 };
 
 tst_QCanBusDevice::tst_QCanBusDevice()
@@ -164,7 +165,7 @@ tst_QCanBusDevice::tst_QCanBusDevice()
 
 void tst_QCanBusDevice::initTestCase()
 {
-    device = new tst_Backend();
+    device.reset(new tst_Backend());
     QVERIFY(device);
 
     QSignalSpy stateSpy(device.data(),
@@ -218,8 +219,8 @@ void tst_QCanBusDevice::write()
     device->setWriteBuffered(false);
     QCOMPARE(device->isWriteBuffered(), false);
 
-    QSignalSpy spy(device, SIGNAL(framesWritten(qint64)));
-    QSignalSpy stateSpy(device,
+    QSignalSpy spy(device.data(), SIGNAL(framesWritten(qint64)));
+    QSignalSpy stateSpy(device.data(),
                         SIGNAL(stateChanged(QCanBusDevice::CanBusDeviceState)));
 
     QCanBusFrame frame;
@@ -255,7 +256,7 @@ void tst_QCanBusDevice::write()
 
 void tst_QCanBusDevice::read()
 {
-    QSignalSpy stateSpy(device,
+    QSignalSpy stateSpy(device.data(),
                         SIGNAL(stateChanged(QCanBusDevice::CanBusDeviceState)));
 
     device->disconnectDevice();
@@ -283,10 +284,10 @@ void tst_QCanBusDevice::read()
 
 void tst_QCanBusDevice::error()
 {
-    QSignalSpy spy(device, SIGNAL(errorOccurred(QCanBusDevice::CanBusError)));
+    QSignalSpy spy(device.data(), SIGNAL(errorOccurred(QCanBusDevice::CanBusError)));
     QString testString(QStringLiteral("testString"));
 
-    tst_Backend *backend = qobject_cast<tst_Backend *>(device);
+    auto backend = qobject_cast<tst_Backend *>(device.data());
     QVERIFY(backend);
 
     //NoError

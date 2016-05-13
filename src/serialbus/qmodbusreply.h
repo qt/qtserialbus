@@ -57,7 +57,7 @@ public:
     };
     Q_ENUM(ReplyType)
 
-    QModbusReply(ReplyType type, int serverAddress, QObject *parent = Q_NULLPTR);
+    QModbusReply(ReplyType type, int serverAddress, QObject *parent = nullptr);
 
     ReplyType type() const;
     int serverAddress() const;

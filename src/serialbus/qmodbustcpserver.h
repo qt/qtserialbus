@@ -50,16 +50,16 @@ class Q_SERIALBUS_EXPORT QModbusTcpServer : public QModbusServer
     Q_DECLARE_PRIVATE(QModbusTcpServer)
 
 public:
-    explicit QModbusTcpServer(QObject *parent = Q_NULLPTR);
+    explicit QModbusTcpServer(QObject *parent = nullptr);
     ~QModbusTcpServer();
 
 protected:
-    QModbusTcpServer(QModbusTcpServerPrivate &dd, QObject *parent = Q_NULLPTR);
+    QModbusTcpServer(QModbusTcpServerPrivate &dd, QObject *parent = nullptr);
 
-    bool open() Q_DECL_OVERRIDE;
-    void close() Q_DECL_OVERRIDE;
+    bool open() override;
+    void close() override;
 
-    QModbusResponse processRequest(const QModbusPdu &request) Q_DECL_OVERRIDE;
+    QModbusResponse processRequest(const QModbusPdu &request) override;
 };
 
 QT_END_NAMESPACE

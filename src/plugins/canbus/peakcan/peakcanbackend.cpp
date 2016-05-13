@@ -84,7 +84,7 @@ public:
     }
 
 protected:
-    bool event(QEvent *e) Q_DECL_OVERRIDE
+    bool event(QEvent *e) override
     {
         if (e->type() == QEvent::WinEventAct) {
             dptr->canReadNotification();
@@ -107,7 +107,7 @@ public:
     }
 
 protected:
-    bool event(QEvent *e) Q_DECL_OVERRIDE
+    bool event(QEvent *e) override
     {
         if (e->type() == QEvent::SockAct) {
             dptr->canReadNotification();
@@ -131,7 +131,7 @@ public:
     }
 
 protected:
-    void timerEvent(QTimerEvent *e) Q_DECL_OVERRIDE
+    void timerEvent(QTimerEvent *e) override
     {
         if (e->timerId() == timerId()) {
             dptr->canWriteNotification();
@@ -148,8 +148,8 @@ PeakCanBackendPrivate::PeakCanBackendPrivate(PeakCanBackend *q)
     : q_ptr(q)
     , isOpen(false)
     , channelIndex(PCAN_NONEBUS)
-    , outgoingEventNotifier(Q_NULLPTR)
-    , incomingEventNotifier(Q_NULLPTR)
+    , outgoingEventNotifier(nullptr)
+    , incomingEventNotifier(nullptr)
 #if defined(Q_OS_WIN32)
     , incomingEventHandle(INVALID_HANDLE_VALUE)
 #else
@@ -229,7 +229,7 @@ void PeakCanBackendPrivate::close()
 
     if (outgoingEventNotifier) {
         delete outgoingEventNotifier;
-        outgoingEventNotifier = Q_NULLPTR;
+        outgoingEventNotifier = nullptr;
     }
 
     if (TPCANStatus st = ::CAN_Uninitialize(channelIndex) != PCAN_ERROR_OK)
@@ -269,6 +269,22 @@ static int channelIndexFromName(const QString &interfaceName)
         return PCAN_USBBUS7;
     else if (interfaceName == QStringLiteral("usbbus8"))
         return PCAN_USBBUS8;
+    else if (interfaceName == QStringLiteral("pcibus1"))
+        return PCAN_PCIBUS1;
+    else if (interfaceName == QStringLiteral("pcibus2"))
+        return PCAN_PCIBUS2;
+    else if (interfaceName == QStringLiteral("pcibus3"))
+        return PCAN_PCIBUS3;
+    else if (interfaceName == QStringLiteral("pcibus4"))
+        return PCAN_PCIBUS4;
+    else if (interfaceName == QStringLiteral("pcibus5"))
+        return PCAN_PCIBUS5;
+    else if (interfaceName == QStringLiteral("pcibus6"))
+        return PCAN_PCIBUS6;
+    else if (interfaceName == QStringLiteral("pcibus7"))
+        return PCAN_PCIBUS7;
+    else if (interfaceName == QStringLiteral("pcibus8"))
+        return PCAN_PCIBUS8;
     else // TODO: Add other indexes here
         return PCAN_NONEBUS;
 }
@@ -351,7 +367,7 @@ bool PeakCanBackendPrivate::acquireReadNotification()
 
 #if defined(Q_OS_WIN32)
     if (incomingEventHandle == INVALID_HANDLE_VALUE) {
-        incomingEventHandle = ::CreateEvent(Q_NULLPTR, FALSE, FALSE, Q_NULLPTR);
+        incomingEventHandle = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
         if (!incomingEventHandle) {
             q->setError(qt_error_string(::GetLastError()), QCanBusDevice::ReadError);
             return false;
@@ -383,7 +399,7 @@ void PeakCanBackendPrivate::releaseReadNotification()
 
     if (incomingEventNotifier) {
         delete incomingEventNotifier;
-        incomingEventNotifier = Q_NULLPTR;
+        incomingEventNotifier = nullptr;
     }
 
 #if defined(Q_OS_WIN32)
@@ -529,9 +545,9 @@ bool PeakCanBackend::writeFrame(const QCanBusFrame &newData)
         return false;
     }
 
-    // canFD frame format not implemented at this stage
+    // CAN FD frame format not implemented at this stage
     if (newData.payload().size() > 8) {
-        setError(tr("CanFD frame format not supported."), QCanBusDevice::WriteError);
+        setError(tr("CAN FD frame format not supported."), QCanBusDevice::WriteError);
         return false;
     }
 
