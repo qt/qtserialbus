@@ -167,7 +167,7 @@ public:
     inline void setFrameId(quint32 newFrameId)
     {
         canId = (newFrameId & 0x1FFFFFFFU);
-        setExtendedFrameFormat(newFrameId & 0x1FFFF800U);
+        setExtendedFrameFormat(isExtendedFrame || (newFrameId & 0x1FFFF800U));
     }
 
     inline void setPayload(const QByteArray &data) { load = data; }
