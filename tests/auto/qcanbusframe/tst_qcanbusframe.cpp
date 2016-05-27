@@ -98,17 +98,25 @@ void tst_QCanBusFrame::id()
 {
     QCanBusFrame frame;
     QVERIFY(!frame.frameId());
+    frame.setExtendedFrameFormat(false);
     frame.setFrameId(2047u);
     QCOMPARE(frame.frameId(), 2047u);
     QVERIFY(frame.hasExtendedFrameFormat() == false);
     // id > 2^11 -> extended format
+    frame.setExtendedFrameFormat(false);
     frame.setFrameId(2048u);
     QCOMPARE(frame.frameId(), 2048u);
     QVERIFY(frame.hasExtendedFrameFormat() == true);
     // id < 2^11 -> no extended format
+    frame.setExtendedFrameFormat(false);
     frame.setFrameId(512u);
     QCOMPARE(frame.frameId(), 512u);
     QVERIFY(frame.hasExtendedFrameFormat() == false);
+    // id < 2^11 -> keep extended format
+    frame.setExtendedFrameFormat(true);
+    frame.setFrameId(512u);
+    QCOMPARE(frame.frameId(), 512u);
+    QVERIFY(frame.hasExtendedFrameFormat() == true);
 }
 
 void tst_QCanBusFrame::payload()

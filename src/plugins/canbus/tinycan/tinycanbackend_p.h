@@ -71,9 +71,9 @@ public:
     void setupChannel(const QString &interfaceName);
     void setupDefaultConfigurations();
     void enableWriteNotification(bool enable);
-    void canWriteNotification();
+    void startWrite();
     bool enableReadNotification();
-    void canReadNotification();
+    void startRead();
     void startupDriver();
     void cleanupDriver();
 
@@ -82,7 +82,7 @@ public:
     TinyCanBackend * const q_ptr;
     bool isOpen;
     int channelIndex;
-    QTimer *outgoingEventNotifier;
+    QTimer *writeNotifier;
 };
 
 QT_END_NAMESPACE

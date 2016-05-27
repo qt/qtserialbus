@@ -76,24 +76,24 @@ public:
     void setupDefaultConfigurations();
     QString systemErrorString(int errorCode);
     void enableWriteNotification(bool enable);
-    void canWriteNotification();
+    void startWrite();
     bool acquireReadNotification();
     void releaseReadNotification();
-    void canReadNotification();
+    void startRead();
     bool verifyBitRate(int bitrate);
 
     PeakCanBackend * const q_ptr;
 
     bool isOpen;
     int channelIndex;
-    QTimer *outgoingEventNotifier;
+    QTimer *writeNotifier;
 
 #if defined(Q_OS_WIN32)
-    QWinEventNotifier *incomingEventNotifier;
-    HANDLE incomingEventHandle;
+    QWinEventNotifier *readNotifier;
+    HANDLE readHandle;
 #else
-    QSocketNotifier *incomingEventNotifier;
-    int incomingEventHandle;
+    QSocketNotifier *readNotifier;
+    int readHandle;
 #endif
 };
 

@@ -4,7 +4,7 @@ project                 = QtSerialBus
 description             = Qt Serial Bus Reference Documentation
 version                 = $QT_VERSION
 
-examplesinstallpath     = qtserialbus/serialbus
+examplesinstallpath     = serialbus
 
 qhp.projects            = QtSerialBus
 

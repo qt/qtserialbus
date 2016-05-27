@@ -2,19 +2,15 @@ TARGET = qttinycanbus
 
 QT = core-private serialbus
 
-PUBLIC_HEADERS += \
-    tinycanbackend.h
-
-PRIVATE_HEADERS += \
+HEADERS += \
+    tinycanbackend.h \
     tinycanbackend_p.h \
     tinycan_symbols_p.h
 
 SOURCES += main.cpp \
     tinycanbackend.cpp
 
-OTHER_FILES = plugin.json
-
-HEADERS += $$PUBLIC_HEADERS $$PRIVATE_HEADERS
+DISTFILES = plugin.json
 
 PLUGIN_TYPE = canbus
 PLUGIN_EXTENDS = serialbus

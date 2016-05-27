@@ -73,21 +73,22 @@ bool PeakCanBackend::canCreate(QString *errorReason)
 }
 
 #if defined(Q_OS_WIN32)
-class IncomingEventNotifier : public QWinEventNotifier
+class ReadNotifier : public QWinEventNotifier
 {
+    // no Q_OBJECT macro!
 public:
-    explicit IncomingEventNotifier(PeakCanBackendPrivate *d, QObject *parent)
+    explicit ReadNotifier(PeakCanBackendPrivate *d, QObject *parent)
         : QWinEventNotifier(parent)
         , dptr(d)
     {
-        setHandle(dptr->incomingEventHandle);
+        setHandle(dptr->readHandle);
     }
 
 protected:
     bool event(QEvent *e) override
     {
         if (e->type() == QEvent::WinEventAct) {
-            dptr->canReadNotification();
+            dptr->startRead();
             return true;
         }
         return QWinEventNotifier::event(e);
@@ -97,11 +98,12 @@ private:
     PeakCanBackendPrivate *dptr;
 };
 #else
-class IncomingEventNotifier : public QSocketNotifier
+class ReadNotifier : public QSocketNotifier
 {
+    // no Q_OBJECT macro!
 public:
-    explicit IncomingEventNotifier(PeakCanBackendPrivate *d, QObject *parent)
-        : QSocketNotifier(d->incomingEventHandle, QSocketNotifier::Read, parent)
+    explicit ReadNotifier(PeakCanBackendPrivate *d, QObject *parent)
+        : QSocketNotifier(d->readHandle, QSocketNotifier::Read, parent)
         , dptr(d)
     {
     }
@@ -110,7 +112,7 @@ protected:
     bool event(QEvent *e) override
     {
         if (e->type() == QEvent::SockAct) {
-            dptr->canReadNotification();
+            dptr->startRead();
             return true;
         }
         return QSocketNotifier::event(e);
@@ -121,10 +123,11 @@ private:
 };
 #endif
 
-class OutgoingEventNotifier : public QTimer
+class WriteNotifier : public QTimer
 {
+    // no Q_OBJECT macro!
 public:
-    OutgoingEventNotifier(PeakCanBackendPrivate *d, QObject *parent)
+    WriteNotifier(PeakCanBackendPrivate *d, QObject *parent)
         : QTimer(parent)
         , dptr(d)
     {
@@ -134,7 +137,7 @@ protected:
     void timerEvent(QTimerEvent *e) override
     {
         if (e->timerId() == timerId()) {
-            dptr->canWriteNotification();
+            dptr->startWrite();
             return;
         }
         QTimer::timerEvent(e);
@@ -148,12 +151,12 @@ PeakCanBackendPrivate::PeakCanBackendPrivate(PeakCanBackend *q)
     : q_ptr(q)
     , isOpen(false)
     , channelIndex(PCAN_NONEBUS)
-    , outgoingEventNotifier(nullptr)
-    , incomingEventNotifier(nullptr)
+    , writeNotifier(nullptr)
+    , readNotifier(nullptr)
 #if defined(Q_OS_WIN32)
-    , incomingEventHandle(INVALID_HANDLE_VALUE)
+    , readHandle(INVALID_HANDLE_VALUE)
 #else
-    , incomingEventHandle(-1)
+    , readHandle(-1)
 #endif
 {
 }
@@ -227,9 +230,9 @@ void PeakCanBackendPrivate::close()
     enableWriteNotification(false);
     releaseReadNotification();
 
-    if (outgoingEventNotifier) {
-        delete outgoingEventNotifier;
-        outgoingEventNotifier = nullptr;
+    if (writeNotifier) {
+        delete writeNotifier;
+        writeNotifier = nullptr;
     }
 
     if (TPCANStatus st = ::CAN_Uninitialize(channelIndex) != PCAN_ERROR_OK)
@@ -314,21 +317,21 @@ void PeakCanBackendPrivate::enableWriteNotification(bool enable)
 {
     Q_Q(PeakCanBackend);
 
-    if (outgoingEventNotifier) {
+    if (writeNotifier) {
         if (enable) {
-            if (!outgoingEventNotifier->isActive())
-                outgoingEventNotifier->start();
+            if (!writeNotifier->isActive())
+                writeNotifier->start();
         } else {
-            outgoingEventNotifier->stop();
+            writeNotifier->stop();
         }
     } else if (enable) {
-        outgoingEventNotifier = new OutgoingEventNotifier(this, q);
-        outgoingEventNotifier->setInterval(0);
-        outgoingEventNotifier->start();
+        writeNotifier = new WriteNotifier(this, q);
+        writeNotifier->setInterval(0);
+        writeNotifier->start();
     }
 }
 
-void PeakCanBackendPrivate::canWriteNotification()
+void PeakCanBackendPrivate::startWrite()
 {
     Q_Q(PeakCanBackend);
 
@@ -366,24 +369,24 @@ bool PeakCanBackendPrivate::acquireReadNotification()
     Q_Q(PeakCanBackend);
 
 #if defined(Q_OS_WIN32)
-    if (incomingEventHandle == INVALID_HANDLE_VALUE) {
-        incomingEventHandle = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
-        if (!incomingEventHandle) {
+    if (readHandle == INVALID_HANDLE_VALUE) {
+        readHandle = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
+        if (!readHandle) {
             q->setError(qt_error_string(::GetLastError()), QCanBusDevice::ReadError);
             return false;
         }
     }
 #endif
 
-    if (TPCANStatus st = ::CAN_SetValue(channelIndex, PCAN_RECEIVE_EVENT, &incomingEventHandle, sizeof(incomingEventHandle))
+    if (TPCANStatus st = ::CAN_SetValue(channelIndex, PCAN_RECEIVE_EVENT, &readHandle, sizeof(readHandle))
             != PCAN_ERROR_OK) {
         q->setError(systemErrorString(st), QCanBusDevice::ReadError);
         return false;
     }
 
-    if (!incomingEventNotifier) {
-        incomingEventNotifier = new IncomingEventNotifier(this, q);
-        incomingEventNotifier->setEnabled(true);
+    if (!readNotifier) {
+        readNotifier = new ReadNotifier(this, q);
+        readNotifier->setEnabled(true);
     }
 
     return true;
@@ -397,23 +400,23 @@ void PeakCanBackendPrivate::releaseReadNotification()
     if (TPCANStatus st = ::CAN_SetValue(channelIndex, PCAN_RECEIVE_EVENT, &value, sizeof(value)) != PCAN_ERROR_OK)
         q->setError(systemErrorString(st), QCanBusDevice::ConnectionError);
 
-    if (incomingEventNotifier) {
-        delete incomingEventNotifier;
-        incomingEventNotifier = nullptr;
+    if (readNotifier) {
+        delete readNotifier;
+        readNotifier = nullptr;
     }
 
 #if defined(Q_OS_WIN32)
-    if (incomingEventHandle && (incomingEventHandle != INVALID_HANDLE_VALUE)) {
-        if (!::CloseHandle(incomingEventHandle))
+    if (readHandle && (readHandle != INVALID_HANDLE_VALUE)) {
+        if (!::CloseHandle(readHandle))
             q->setError(qt_error_string(::GetLastError()), QCanBusDevice::ConnectionError);
-        incomingEventHandle = INVALID_HANDLE_VALUE;
+        readHandle = INVALID_HANDLE_VALUE;
     }
 #else
-    incomingEventHandle = -1;
+    readHandle = -1;
 #endif
 }
 
-void PeakCanBackendPrivate::canReadNotification()
+void PeakCanBackendPrivate::startRead()
 {
     Q_Q(PeakCanBackend);
 
