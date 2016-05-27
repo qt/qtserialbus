@@ -77,7 +77,7 @@ void tst_QCanBus::initTestCase()
 
 void tst_QCanBus::plugins()
 {
-    QList<QByteArray> pluginList = bus->plugins();
+    const QStringList pluginList = bus->plugins();
     QVERIFY(!pluginList.isEmpty());
     QVERIFY(pluginList.contains("generic"));
 

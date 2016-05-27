@@ -64,7 +64,7 @@ public:
 Q_GLOBAL_STATIC_WITH_ARGS(QFactoryLoader, qFactoryLoader,
     (QCanBusFactory_iid, QLatin1String("/canbus")))
 
-typedef QMap<QByteArray, QCanBusPrivate> QCanBusPluginStore;
+typedef QMap<QString, QCanBusPrivate> QCanBusPluginStore;
 Q_GLOBAL_STATIC(QCanBusPluginStore, qCanBusPlugins)
 
 static QCanBus *globalInstance = nullptr;
@@ -80,8 +80,7 @@ static void loadPlugins()
         QCanBusPrivate d;
         d.index = i;
         d.meta = obj;
-        qCanBusPlugins()->insert(
-                    obj.value(QStringLiteral("Key")).toString().toLatin1(), d);
+        qCanBusPlugins()->insert(obj.value(QStringLiteral("Key")).toString(), d);
     }
 }
 
@@ -108,22 +107,25 @@ QCanBus *QCanBus::instance()
 }
 
 /*!
+    \since 5.8
+
     Returns a list of identifiers for all loaded plugins.
 */
-QList<QByteArray> QCanBus::plugins() const
+QStringList QCanBus::plugins() const
 {
     return qCanBusPlugins()->keys();
 }
 
 /*!
+    \since 5.8
+
     Creates a CAN bus device. \a plugin is the name of the plugin as returned by the \l plugins()
     method. \a interfaceName is the CAN bus interface name.
 
     Ownership of the returned backend is transferred to the caller.
     Returns \c null if no suitable device can be found.
 */
-QCanBusDevice *QCanBus::createDevice(const QByteArray &plugin,
-                                     const QString &interfaceName) const
+QCanBusDevice *QCanBus::createDevice(const QString &plugin, const QString &interfaceName) const
 {
     if (!qCanBusPlugins()->contains(plugin))
         return nullptr;

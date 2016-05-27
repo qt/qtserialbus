@@ -89,7 +89,7 @@ void CanBusUtil::printUsage()
 
 void CanBusUtil::printPlugins()
 {
-    QList<QByteArray> plugins = canBus->plugins();
+    const QStringList plugins = canBus->plugins();
     output << "Plugins: " << endl;
     for (int i = 0; i < plugins.size(); i++)
         output << plugins.at(i) << endl;
@@ -223,7 +223,7 @@ bool CanBusUtil::parsePayloadField(QString payload, bool &rtrFrame,
 bool CanBusUtil::connectCanDevice()
 {
     bool foundPlugin = false;
-    QList<QByteArray> plugins = canBus->plugins();
+    const QStringList plugins = canBus->plugins();
     for (int i = 0; i < plugins.size(); i++)
     {
         if (plugins.at(i) == pluginName) {

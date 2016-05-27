@@ -223,7 +223,7 @@ void ConnectDialog::updateSettings()
 
 void ConnectDialog::fillBackends()
 {
-    foreach (const QByteArray &backend, QCanBus::instance()->plugins())
+    foreach (const QString &backend, QCanBus::instance()->plugins())
         m_ui->backendListBox->addItem(backend);
 }
 
