@@ -53,8 +53,9 @@ class SocketCanBusPlugin : public QObject, public QCanBusFactory
 
 
 public:
-    QCanBusDevice *createDevice(const QString &interfaceName) const
+    QCanBusDevice *createDevice(const QString &interfaceName, QString *errorMessage) const
     {
+        Q_UNUSED(errorMessage);
         auto device = new SocketCanBackend(interfaceName);
         return device;
     }

@@ -51,11 +51,13 @@ class PeakCanBusPlugin : public QObject, public QCanBusFactory
 
 
 public:
-    QCanBusDevice *createDevice(const QString &interfaceName) const
+    QCanBusDevice *createDevice(const QString &interfaceName, QString *errorMessage) const
     {
         QString errorReason;
         if (!PeakCanBackend::canCreate(&errorReason)) {
             qWarning("%s", qPrintable(errorReason));
+            if (errorMessage)
+                *errorMessage = errorReason;
             return nullptr;
         }
 

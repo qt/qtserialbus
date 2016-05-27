@@ -50,9 +50,15 @@ class GenericBusPlugin : public QObject, public QCanBusFactory
     Q_INTERFACES(QCanBusFactory)
 
 public:
-    QCanBusDevice *createDevice(const QString &interfaceName) const
+    QCanBusDevice *createDevice(const QString &interfaceName,
+                                QString *errorMessage) const
     {
-        Q_UNUSED(interfaceName)
+        if (interfaceName == QStringLiteral("invalid")) {
+            if (errorMessage)
+                *errorMessage = tr("No such interface: '%1'").arg(interfaceName);
+
+            return nullptr;
+        }
         auto device = new DummyBackend();
         return device;
     }

@@ -85,12 +85,19 @@ void tst_QCanBus::plugins()
 
 void tst_QCanBus::createDevice()
 {
+    QString error, error2;
     QCanBusDevice *dummy = bus->createDevice("generic", "unused");
     QCanBusDevice *dummy2 = bus->createDevice("generic", "unused");
-    QCanBusDevice *faulty = bus->createDevice("faulty", "faulty");
+    QCanBusDevice *faulty = bus->createDevice("generic", "invalid", &error);
+    QCanBusDevice *faulty2 = bus->createDevice("faulty", "faulty", &error2);
     QVERIFY(dummy);
     QVERIFY(dummy2);
+
     QVERIFY(!faulty);
+    QCOMPARE(error, tr("No such interface: 'invalid'"));
+
+    QVERIFY(!faulty2);
+    QCOMPARE(error2, tr("No such plugin: 'faulty'"));
 
     delete dummy;
     delete dummy2;

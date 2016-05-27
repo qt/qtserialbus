@@ -116,33 +116,46 @@ QStringList QCanBus::plugins() const
     return qCanBusPlugins()->keys();
 }
 
+static void setErrorMessage(QString *result, const QString &message)
+{
+    if (!result)
+        return;
+
+    *result = message;
+}
+
 /*!
     \since 5.8
 
     Creates a CAN bus device. \a plugin is the name of the plugin as returned by the \l plugins()
-    method. \a interfaceName is the CAN bus interface name.
+    method. \a interfaceName is the CAN bus interface name. In case of failure, the optional
+    parameter errorMessage returns a textual error description.
 
     Ownership of the returned backend is transferred to the caller.
     Returns \c null if no suitable device can be found.
 */
-QCanBusDevice *QCanBus::createDevice(const QString &plugin, const QString &interfaceName) const
+QCanBusDevice *QCanBus::createDevice(const QString &plugin, const QString &interfaceName,
+                                     QString *errorMessage) const
 {
-    if (!qCanBusPlugins()->contains(plugin))
+    if (!qCanBusPlugins()->contains(plugin)) {
+        setErrorMessage(errorMessage, tr("No such plugin: '%1'").arg(plugin));
         return nullptr;
+    }
 
     QCanBusPrivate d = qCanBusPlugins()->value(plugin);
     if (!d.factory) {
         d.factory
             = qobject_cast<QCanBusFactory *>(qFactoryLoader->instance(d.index));
-        if (!d.factory)
-            return nullptr;
 
-        qCanBusPlugins()->insert(plugin, d);
+        if (d.factory)
+            qCanBusPlugins()->insert(plugin, d);
     }
-    if (!d.factory)
+    if (!d.factory) {
+        setErrorMessage(errorMessage, tr("No factory for plugin: '%1'").arg(plugin));
         return nullptr;
+    }
 
-    return d.factory->createDevice(interfaceName);
+    return d.factory->createDevice(interfaceName, errorMessage);
 }
 
 QCanBus::QCanBus(QObject *parent) :

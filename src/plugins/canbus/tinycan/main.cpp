@@ -51,11 +51,13 @@ class TinyCanBusPlugin : public QObject, public QCanBusFactory
 
 
 public:
-    QCanBusDevice *createDevice(const QString &interfaceName) const
+    QCanBusDevice *createDevice(const QString &interfaceName, QString *errorMessage) const
     {
         QString errorReason;
         if (!TinyCanBackend::canCreate(&errorReason)) {
             qWarning("%s", qPrintable(errorReason));
+            if (errorMessage)
+                *errorMessage = errorReason;
             return nullptr;
         }
 

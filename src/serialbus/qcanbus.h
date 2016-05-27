@@ -54,7 +54,8 @@ public:
     QStringList plugins() const;
 
     QCanBusDevice *createDevice(const QString &plugin,
-                                const QString &interfaceName) const;
+                                const QString &interfaceName,
+                                QString *errorMessage = nullptr) const;
 
 private:
     QCanBus(QObject *parent = nullptr);
