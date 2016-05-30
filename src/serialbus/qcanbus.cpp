@@ -120,7 +120,7 @@ QList<QByteArray> QCanBus::plugins() const
     method. \a interfaceName is the CAN bus interface name.
 
     Ownership of the returned backend is transferred to the caller.
-    Returns \c null if no suitable device can be found.
+    Returns \c nullptr if no suitable device can be found.
 */
 QCanBusDevice *QCanBus::createDevice(const QByteArray &plugin,
                                      const QString &interfaceName) const
