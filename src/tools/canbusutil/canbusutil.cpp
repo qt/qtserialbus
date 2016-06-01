@@ -140,7 +140,7 @@ bool CanBusUtil::parseDataField(qint32 &id, QString &payload)
         return false;
     }
 
-    id = data.left(hashMarkPos).toInt();
+    id = data.left(hashMarkPos).toInt(nullptr, 16);
     payload = data.right(data.length() - hashMarkPos - 1);
 
     return true;
