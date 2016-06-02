@@ -38,11 +38,8 @@
     At first it is necessary to check that QCanBus provides the desired backend:
 
     \code
-        foreach (const QByteArray &backend, QCanBus::instance()->plugins()) {
-            if (backend == "tinycan") {
-                // were found
-                break;
-            }
+        if (QCanBus::instance()->plugins().contains(QStringLiteral("tinycan"))) {
+            // backend available
         }
     \endcode
 
@@ -52,7 +49,8 @@
     interface:
 
     \code
-        QCanBusDevice *device = QCanBus::instance()->createDevice("tinycan", QStringLiteral("channela"));
+        QCanBusDevice *device = QCanBus::instance()->createDevice(
+            QStringLiteral("tinycan"), QStringLiteral("channela"));
         device->connectDevice();
     \endcode
 
