@@ -282,9 +282,7 @@ public:
             m_current.bytesWritten = 0;
             m_current.numberOfRetries--;
             m_serialPort->write(m_current.adu);
-            // Example: 9600 baud, 11 bit per packet -> 872 char/sec
-            // so: 1000 ms / 872 char = 1.147 ms/char * 3.5 character
-            m_sendTimer.start((1000. / (qreal(m_baudRate) / 11.)) * m_current.adu.size());
+            m_sendTimer.start(m_timeoutThreeDotFiveMs);
 
             qCDebug(QT_MODBUS) << "(RTU client) Sent Serial PDU:" << m_current.requestPdu;
             qCDebug(QT_MODBUS_LOW).noquote() << "(RTU client) Sent Serial ADU: 0x" + m_current.adu
