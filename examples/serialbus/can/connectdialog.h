@@ -83,7 +83,6 @@ private:
     QString configurationValue(QCanBusDevice::ConfigurationKey key);
     void revertSettings();
     void updateSettings();
-    void fillBackends();
     void fillSpeeds();
 
 private:

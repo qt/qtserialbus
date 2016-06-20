@@ -75,7 +75,7 @@ ConnectDialog::ConnectDialog(QWidget *parent) :
     m_ui->rawFilterEdit->hide();
     m_ui->rawFilterLabel->hide();
 
-    fillBackends();
+    m_ui->backendListBox->addItems(QCanBus::instance()->plugins());
     fillSpeeds();
 
     updateSettings();
@@ -219,12 +219,6 @@ void ConnectDialog::updateSettings()
         fdItem.second = m_ui->canFdBox->currentData();
         m_currentSettings.configurations.append(fdItem);
     }
-}
-
-void ConnectDialog::fillBackends()
-{
-    foreach (const QString &backend, QCanBus::instance()->plugins())
-        m_ui->backendListBox->addItem(backend);
 }
 
 void ConnectDialog::fillSpeeds()
