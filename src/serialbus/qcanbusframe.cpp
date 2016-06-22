@@ -320,7 +320,7 @@ QDataStream &operator>>(QDataStream &in, QCanBusFrame &frame)
 
     frame.setFrameType(static_cast<QCanBusFrame::FrameType>(frameType));
     frame.setExtendedFrameFormat(extendedFrameFormat);
-        frame.setPayload(payload);
+    frame.setPayload(payload);
 
     frame.setTimeStamp(QCanBusFrame::TimeStamp(seconds, microSeconds));
 
