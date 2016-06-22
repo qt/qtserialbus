@@ -144,8 +144,15 @@ void MainWindow::connectDevice()
 
         m_ui->sendMessagesBox->setEnabled(true);
 
-        showStatusMessage(tr("Backend: %1, Connected to: %2")
-                          .arg(p.backendName).arg(p.deviceInterfaceName));
+        QVariant bitRate = m_canDevice->configurationParameter(QCanBusDevice::BitRateKey);
+        if (bitRate.isValid()) {
+            showStatusMessage(tr("Backend: %1, connected to %2 at %3 kBit/s")
+                    .arg(p.backendName).arg(p.deviceInterfaceName)
+                    .arg(bitRate.toInt() / 1000));
+        } else {
+            showStatusMessage(tr("Backend: %1, connected to %2")
+                    .arg(p.backendName).arg(p.deviceInterfaceName));
+        }
     }
 }
 
