@@ -206,8 +206,10 @@ void MainWindow::checkMessages()
         view += QString::number(id, 16).toUpper();
         view += QLatin1String(" bytes: ");
         view += QString::number(dataLength, 10);
-        view += QLatin1String(" data: ");
-        view += dataToHex(frame.payload());
+        if (frame.frameType() != QCanBusFrame::RemoteRequestFrame) {
+            view += QLatin1String(" data: ");
+            view += dataToHex(frame.payload());
+        }
     }
 
     if (frame.frameType() == QCanBusFrame::RemoteRequestFrame) {

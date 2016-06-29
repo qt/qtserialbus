@@ -62,12 +62,14 @@ void ReadTask::checkMessages() {
         view += QString::number(id, 16);
         view += QLatin1String(" bytes: ");
         view += QString::number(dataLength, 10);
-        view += QLatin1String(" data:");
-        QByteArray array = frame.payload();
-        for (int i=0; i < array.size(); i++) {
-            view += QLatin1String(" 0x");
-            quint8 number = array[i];
-            view += QString::number(number, 16);
+        if (frame.frameType() != QCanBusFrame::RemoteRequestFrame) {
+            view += QLatin1String(" data:");
+            QByteArray array = frame.payload();
+            for (int i=0; i < array.size(); i++) {
+                view += QLatin1String(" 0x");
+                quint8 number = array[i];
+                view += QString::number(number, 16);
+            }
         }
     }
 
