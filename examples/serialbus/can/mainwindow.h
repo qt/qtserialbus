@@ -74,6 +74,9 @@ private Q_SLOTS:
     void disconnectDevice();
     void framesWritten(qint64);
 
+protected:
+    void closeEvent(QCloseEvent *event);
+
 private:
     void showStatusMessage(const QString &message);
     void initActionsConnections();

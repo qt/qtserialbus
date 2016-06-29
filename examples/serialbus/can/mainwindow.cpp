@@ -44,6 +44,7 @@
 
 #include <QCanBusFrame>
 #include <QCanBus>
+#include <QCloseEvent>
 #include <QTimer>
 
 #include <QtCore/qbytearray.h>
@@ -168,6 +169,12 @@ void MainWindow::disconnectDevice()
 void MainWindow::framesWritten(qint64 count)
 {
     qDebug() << "Number of frames written:" << count;
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    m_connectDialog->close();
+    event->accept();
 }
 
 static QByteArray dataToHex(const QByteArray &data)
