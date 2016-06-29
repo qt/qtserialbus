@@ -28,7 +28,7 @@
 /*! \example can
     \title CAN Bus example
 
-    \brief The example sends and received CAN bus frames.
+    \brief The example sends and receives CAN bus frames.
 
     The example sends and receives CAN bus frames. Incoming frames
     are ordered according to their type. A connect dialog is

@@ -71,7 +71,8 @@ ConnectDialog::ConnectDialog(QWidget *parent) :
 
     connect(m_ui->speedBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
             this, &ConnectDialog::checkCustomSpeedPolicy);
-
+    connect(m_ui->backendListBox, &QComboBox::currentTextChanged,
+            this, &ConnectDialog::backendChanged);
     m_ui->rawFilterEdit->hide();
     m_ui->rawFilterLabel->hide();
 
@@ -100,6 +101,18 @@ void ConnectDialog::checkCustomSpeedPolicy(int idx)
         QLineEdit *edit = m_ui->speedBox->lineEdit();
         edit->setValidator(m_customSpeedValidator);
     }
+}
+
+void ConnectDialog::backendChanged(const QString &backend)
+{
+    if (backend == QStringLiteral("generic"))
+        m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("can0"));
+    else if (backend == QStringLiteral("peakcan"))
+        m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("usbbus1"));
+    else if (backend == QStringLiteral("socketcan"))
+        m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("can0"));
+    else if (backend == QStringLiteral("tinycan"))
+        m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("channela"));
 }
 
 void ConnectDialog::ok()
