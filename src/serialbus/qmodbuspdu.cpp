@@ -723,7 +723,7 @@ int QModbusResponse::calculateDataSize(const QModbusResponse &response)
         if (response.dataSize() < minimum)
             break;  // can't calculate, let's return -1 to indicate error
 
-        quint8 meiType;
+        quint8 meiType = 0;
         response.decodeData(&meiType);
 
         // update size, header 6 bytes: mei type + read device id + conformity level + more follows

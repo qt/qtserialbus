@@ -52,8 +52,7 @@ protected:
     virtual ~QCanBusFactory() {}
 };
 
-Q_DECLARE_INTERFACE(QCanBusFactory,
-                    "org.qt-project.Qt.QCanBusFactory")
+Q_DECLARE_INTERFACE(QCanBusFactory, "org.qt-project.Qt.QCanBusFactory")
 
 QT_END_NAMESPACE
 

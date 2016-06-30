@@ -116,7 +116,7 @@ void MainWindow::connectDevice()
 
     m_canDevice = QCanBus::instance()->createDevice(p.backendName.toLocal8Bit(), p.deviceInterfaceName);
     if (!m_canDevice) {
-        showStatusMessage(tr("Connection error"));
+        showStatusMessage(tr("Error creating device: %1").arg(p.backendName));
         return;
     }
 
@@ -133,10 +133,10 @@ void MainWindow::connectDevice()
     }
 
     if (!m_canDevice->connectDevice()) {
+        showStatusMessage(tr("Connection error: %1").arg(m_canDevice->errorString()));
+
         delete m_canDevice;
         m_canDevice = nullptr;
-
-        showStatusMessage(tr("Connection error"));
     } else {
         m_ui->actionConnect->setEnabled(false);
         m_ui->actionDisconnect->setEnabled(true);

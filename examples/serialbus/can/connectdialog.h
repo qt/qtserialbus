@@ -76,6 +76,7 @@ public:
 
 private slots:
     void checkCustomSpeedPolicy(int idx);
+    void backendChanged(const QString &backend);
     void ok();
     void cancel();
 

@@ -140,13 +140,9 @@ bool CanBusUtil::parseDataField(qint32 &id, QString &payload)
         return false;
     }
 
-    id = data.left(hashMarkPos).toInt();
+    id = data.left(hashMarkPos).toInt(nullptr, 16);
     payload = data.right(data.length() - hashMarkPos - 1);
-    if (payload.size() == 0) {
-        output << "Payload size zero!" << endl;
-        printDataUsage();
-        return false;
-    }
+
     return true;
 }
 
@@ -156,7 +152,10 @@ bool CanBusUtil::parsePayloadField(QString payload, bool &rtrFrame,
     fdFrame = false;
     rtrFrame = false;
 
-    if (payload[0].toUpper() == 'R') {
+     if (payload.size() == 0)
+        return true;
+
+     if (payload[0].toUpper() == 'R') {
         rtrFrame = true;
         bool validPayloadLength = false;
         if (payload.size() > 1) {

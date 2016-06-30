@@ -132,7 +132,7 @@ static void setErrorMessage(QString *result, const QString &message)
     parameter errorMessage returns a textual error description.
 
     Ownership of the returned backend is transferred to the caller.
-    Returns \c null if no suitable device can be found.
+    Returns \c nullptr if no suitable device can be found.
 */
 QCanBusDevice *QCanBus::createDevice(const QString &plugin, const QString &interfaceName,
                                      QString *errorMessage) const
