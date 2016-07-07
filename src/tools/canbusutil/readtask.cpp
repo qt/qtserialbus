@@ -58,8 +58,9 @@ void ReadTask::checkMessages() {
     if (frame.frameType() == QCanBusFrame::ErrorFrame) {
         view = canDevice->interpretErrorFrame(frame);
     } else {
-        view += QLatin1String("Id: ");
-        view += QString::number(id, 16);
+        const char *format =
+                frame.hasExtendedFrameFormat() ? "Id: %08X" : "Id:      %03X";
+        view += QString::asprintf(format, static_cast<uint>(id));
         view += QLatin1String(" bytes: ");
         view += QString::number(dataLength, 10);
         if (frame.frameType() != QCanBusFrame::RemoteRequestFrame) {

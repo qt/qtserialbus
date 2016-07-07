@@ -202,8 +202,9 @@ void MainWindow::checkMessages()
     if (frame.frameType() == QCanBusFrame::ErrorFrame) {
         interpretError(view, frame);
     } else {
-        view += QLatin1String("Id: ");
-        view += QString::number(id, 16).toUpper();
+        const char *format =
+                frame.hasExtendedFrameFormat() ? "Id: %08X" : "Id:      %03X";
+        view += QString::asprintf(format, static_cast<uint>(id));
         view += QLatin1String(" bytes: ");
         view += QString::number(dataLength, 10);
         if (frame.frameType() != QCanBusFrame::RemoteRequestFrame) {
