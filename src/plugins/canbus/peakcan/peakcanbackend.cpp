@@ -205,13 +205,15 @@ bool PeakCanBackendPrivate::open()
     const int bitrate = q->configurationParameter(QCanBusDevice::BitRateKey).toInt();
     const int bitrateCode = bitrateCodeFromBitrate(bitrate);
 
-    if (TPCANStatus st = ::CAN_Initialize(channelIndex, bitrateCode, 0, 0, 0) != PCAN_ERROR_OK) {
+    const TPCANStatus st = ::CAN_Initialize(channelIndex, bitrateCode, 0, 0, 0);
+    if (st != PCAN_ERROR_OK) {
         q->setError(systemErrorString(st), QCanBusDevice::ConnectionError);
         return false;
     }
 
     if (!acquireReadNotification()) {
-        if (TPCANStatus st = ::CAN_Uninitialize(channelIndex) != PCAN_ERROR_OK)
+        const TPCANStatus st = ::CAN_Uninitialize(channelIndex);
+        if (st != PCAN_ERROR_OK)
             q->setError(systemErrorString(st), QCanBusDevice::ConnectionError);
         return false;
     }
@@ -232,7 +234,8 @@ void PeakCanBackendPrivate::close()
         outgoingEventNotifier = nullptr;
     }
 
-    if (TPCANStatus st = ::CAN_Uninitialize(channelIndex) != PCAN_ERROR_OK)
+    const TPCANStatus st = ::CAN_Uninitialize(channelIndex);
+    if (st != PCAN_ERROR_OK)
         emit q->setError(systemErrorString(st), QCanBusDevice::ConnectionError);
 
     isOpen = false;
@@ -352,7 +355,8 @@ void PeakCanBackendPrivate::canWriteNotification()
     else
         ::memcpy(message.DATA, payload.constData(), sizeof(message.DATA));
 
-    if (TPCANStatus st = ::CAN_Write(channelIndex, &message) != PCAN_ERROR_OK)
+    const TPCANStatus st = ::CAN_Write(channelIndex, &message);
+    if (st != PCAN_ERROR_OK)
         q->setError(systemErrorString(st), QCanBusDevice::WriteError);
     else
         emit q->framesWritten(qint64(1));
@@ -375,8 +379,9 @@ bool PeakCanBackendPrivate::acquireReadNotification()
     }
 #endif
 
-    if (TPCANStatus st = ::CAN_SetValue(channelIndex, PCAN_RECEIVE_EVENT, &incomingEventHandle, sizeof(incomingEventHandle))
-            != PCAN_ERROR_OK) {
+    const TPCANStatus st = ::CAN_SetValue(channelIndex, PCAN_RECEIVE_EVENT,
+                                          &incomingEventHandle, sizeof(incomingEventHandle));
+    if (st != PCAN_ERROR_OK) {
         q->setError(systemErrorString(st), QCanBusDevice::ReadError);
         return false;
     }
@@ -394,7 +399,8 @@ void PeakCanBackendPrivate::releaseReadNotification()
     Q_Q(PeakCanBackend);
 
     quint32 value = 0;
-    if (TPCANStatus st = ::CAN_SetValue(channelIndex, PCAN_RECEIVE_EVENT, &value, sizeof(value)) != PCAN_ERROR_OK)
+    const TPCANStatus st = ::CAN_SetValue(channelIndex, PCAN_RECEIVE_EVENT, &value, sizeof(value));
+    if (st != PCAN_ERROR_OK)
         q->setError(systemErrorString(st), QCanBusDevice::ConnectionError);
 
     if (incomingEventNotifier) {
@@ -425,7 +431,8 @@ void PeakCanBackendPrivate::canReadNotification()
         TPCANTimestamp timestamp;
         ::memset(&timestamp, 0, sizeof(timestamp));
 
-        if (TPCANStatus st = ::CAN_Read(channelIndex, &message, &timestamp) != PCAN_ERROR_OK) {
+        const TPCANStatus st = ::CAN_Read(channelIndex, &message, &timestamp);
+        if (st != PCAN_ERROR_OK) {
             if (st != PCAN_ERROR_XMTFULL)
                 q->setError(systemErrorString(st), QCanBusDevice::ReadError);
             break;
