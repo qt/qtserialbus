@@ -136,40 +136,39 @@ bool VectorCanBackendPrivate::open()
 {
     Q_Q(VectorCanBackend);
 
-    XLaccess permissionMask = channelMask;
-    const quint32 queueSize = 256;
-    if (const XLstatus status = ::xlOpenPort(
-                &portHandle,
-                const_cast<char *>(qPrintable(qApp->applicationName())),
-                channelMask,
-                &permissionMask,
-                queueSize,
-                XL_INTERFACE_VERSION,
-                XL_BUS_TYPE_CAN) != XL_SUCCESS
-            || portHandle == XL_INVALID_PORTHANDLE) {
-        q->setError(systemErrorString(status),
-                    QCanBusDevice::ConnectionError);
-        return false;
+    {
+        XLaccess permissionMask = channelMask;
+        const quint32 queueSize = 256;
+        const XLstatus status = ::xlOpenPort(&portHandle,
+                                             const_cast<char *>(qPrintable(qApp->applicationName())),
+                                             channelMask, &permissionMask, queueSize,
+                                             XL_INTERFACE_VERSION, XL_BUS_TYPE_CAN);
+
+        if (status != XL_SUCCESS || portHandle == XL_INVALID_PORTHANDLE) {
+            q->setError(systemErrorString(status),
+                        QCanBusDevice::ConnectionError);
+            return false;
+        }
     }
 
-    if (const XLstatus status = ::xlActivateChannel(
-                portHandle,
-                channelMask,
-                XL_BUS_TYPE_CAN,
-                XL_ACTIVATE_RESET_CLOCK) != XL_SUCCESS) {
-        q->setError(systemErrorString(status),
-                    QCanBusDevice::CanBusError::ConnectionError);
-        return false;
+    {
+        const XLstatus status = ::xlActivateChannel(portHandle, channelMask,
+                                                    XL_BUS_TYPE_CAN, XL_ACTIVATE_RESET_CLOCK);
+        if (status != XL_SUCCESS) {
+            q->setError(systemErrorString(status),
+                        QCanBusDevice::CanBusError::ConnectionError);
+            return false;
+        }
     }
 
-    const int queueLevel = 1;
-    if (const XLstatus status = ::xlSetNotification(
-                portHandle,
-                &readHandle,
-                queueLevel) != XL_SUCCESS) {
-        q->setError(systemErrorString(status),
-                    QCanBusDevice::ConnectionError);
-        return false;
+    {
+        const int queueLevel = 1;
+        const XLstatus status = ::xlSetNotification(portHandle, &readHandle, queueLevel);
+        if (status != XL_SUCCESS) {
+            q->setError(systemErrorString(status),
+                        QCanBusDevice::ConnectionError);
+            return false;
+        }
     }
 
     readNotifier = new ReadNotifier(this, q);
@@ -190,16 +189,20 @@ void VectorCanBackendPrivate::close()
     delete writeNotifier;
     writeNotifier = nullptr;
 
-    if (const XLstatus status = ::xlDeactivateChannel(
-                portHandle,
-                channelMask) != XL_SUCCESS) {
-        q->setError(systemErrorString(status),
-                    QCanBusDevice::CanBusError::ConfigurationError);
+    {
+        const XLstatus status = ::xlDeactivateChannel(portHandle, channelMask);
+        if (status != XL_SUCCESS) {
+            q->setError(systemErrorString(status),
+                        QCanBusDevice::CanBusError::ConfigurationError);
+        }
     }
 
-    if (const XLstatus status = ::xlClosePort(portHandle) != XL_SUCCESS) {
-        q->setError(systemErrorString(status),
-                    QCanBusDevice::ConnectionError);
+    {
+        const XLstatus status = ::xlClosePort(portHandle);
+        if (status != XL_SUCCESS) {
+            q->setError(systemErrorString(status),
+                        QCanBusDevice::ConnectionError);
+        }
     }
 
     portHandle = XL_INVALID_PORTHANDLE;
@@ -281,10 +284,9 @@ void VectorCanBackendPrivate::startWrite()
         ::memcpy(msg.data, payload.constData(), sizeof(msg.data));
 
     quint32 eventCount = 1;
-    if (const XLstatus status = ::xlCanTransmit(
-                portHandle,
-                channelMask,
-                &eventCount, &event) != XL_SUCCESS) {
+    const XLstatus status = ::xlCanTransmit(portHandle, channelMask,
+                                            &eventCount, &event);
+    if (status != XL_SUCCESS) {
         q->setError(systemErrorString(status),
                     QCanBusDevice::WriteError);
     } else {
@@ -306,11 +308,8 @@ void VectorCanBackendPrivate::startRead()
         XLevent event;
         ::memset(&event, 0, sizeof(event));
 
-        if (const XLstatus status = ::xlReceive(
-                    portHandle,
-                    &eventCount,
-                    &event) != XL_SUCCESS) {
-            qDebug() << "status:" << status;
+        const XLstatus status = ::xlReceive(portHandle, &eventCount, &event);
+        if (status != XL_SUCCESS) {
             if (status != XL_ERR_QUEUE_IS_EMPTY) {
                 q->setError(systemErrorString(status),
                             QCanBusDevice::ReadError);
@@ -344,7 +343,8 @@ void VectorCanBackendPrivate::startupDriver()
     Q_Q(VectorCanBackend);
 
     if (driverRefCount == 0) {
-        if (const XLstatus status = ::xlOpenDriver() != XL_SUCCESS) {
+        const XLstatus status = ::xlOpenDriver();
+        if (status != XL_SUCCESS) {
             q->setError(systemErrorString(status),
                         QCanBusDevice::CanBusError::ConnectionError);
             return;
@@ -374,10 +374,8 @@ bool VectorCanBackendPrivate::setBitRate(quint32 bitrate)
     Q_Q(VectorCanBackend);
 
     if (q->state() != QCanBusDevice::UnconnectedState) {
-        if (const XLstatus status = ::xlCanSetChannelBitrate(
-                    portHandle,
-                    channelMask,
-                    bitrate) != XL_SUCCESS) {
+        const XLstatus status = ::xlCanSetChannelBitrate(portHandle, channelMask, bitrate);
+        if (status != XL_SUCCESS) {
             q->setError(systemErrorString(status),
                         QCanBusDevice::CanBusError::ConfigurationError);
             return false;
