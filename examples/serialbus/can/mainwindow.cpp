@@ -114,9 +114,12 @@ void MainWindow::connectDevice()
 {
     const ConnectDialog::Settings p = m_connectDialog->settings();
 
-    m_canDevice = QCanBus::instance()->createDevice(p.backendName, p.deviceInterfaceName);
+    QString errorString;
+    m_canDevice = QCanBus::instance()->createDevice(p.backendName, p.deviceInterfaceName,
+                                                    &errorString);
     if (!m_canDevice) {
-        showStatusMessage(tr("Error creating device: %1").arg(p.backendName));
+        showStatusMessage(tr("Error creating device '%1', reason: '%2'")
+                          .arg(p.backendName).arg(errorString));
         return;
     }
 
