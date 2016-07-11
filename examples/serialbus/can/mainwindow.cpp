@@ -186,16 +186,11 @@ void MainWindow::checkMessages()
     else
         view = frame.toString();
 
-    if (frame.frameType() == QCanBusFrame::RemoteRequestFrame) {
-        m_ui->requestList->addItem(view);
-        m_ui->requestList->scrollToBottom();
-    } else if (frame.frameType() == QCanBusFrame::ErrorFrame) {
-        m_ui->errorList->addItem(view);
-        m_ui->errorList->scrollToBottom();
-    } else {
-        m_ui->receiveList->addItem(view);
-        m_ui->receiveList->scrollToBottom();
-    }
+    const QString time = QString::fromLatin1("%1.%2 ")
+            .arg(frame.timeStamp().seconds(), 6, 10, QLatin1Char(' '))
+            .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char('0'));
+
+    m_ui->receivedMessagesEdit->append(time + view);
 }
 
 static QByteArray dataFromHex(const QString &hex)
