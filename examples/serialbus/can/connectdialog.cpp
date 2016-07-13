@@ -113,6 +113,8 @@ void ConnectDialog::backendChanged(const QString &backend)
         m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("can0"));
     else if (backend == QStringLiteral("tinycan"))
         m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("channela"));
+    else if (backend == QStringLiteral("vectorcan"))
+        m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("channel0"));
 }
 
 void ConnectDialog::ok()
