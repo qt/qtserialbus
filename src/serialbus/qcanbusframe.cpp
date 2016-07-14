@@ -278,7 +278,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \fn QCanBusFrame::toString()
+    \fn QString QCanBusFrame::toString() const
 
     Returns the CAN frame as a formatted string.
 

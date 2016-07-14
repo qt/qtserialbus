@@ -50,13 +50,17 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \fn QCanBusDevice *QCanBusFactory::createDevice(const QString &interfaceName) const
+    \fn QCanBusDevice *QCanBusFactory::createDevice(const QString &interfaceName,
+                                                    QString *errorMessage) const
 
-    Creates a new QCanBusDevice.
-    \a interfaceName is the network/CAN interface name. The caller must take
-    ownership of the returned pointer.
+    Creates a new QCanBusDevice. The caller must take ownership of the returned pointer.
 
-    If the factory cannot create a backend, it returns 0.
+    \a interfaceName is the network/CAN interface name.
+    \a errorMessage contains an error description in case of failure.
+
+    If the factory cannot create a backend, it returns \c nullptr.
+
+    \since 5.8
 */
 
 /*!

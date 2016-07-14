@@ -129,7 +129,7 @@ static void setErrorMessage(QString *result, const QString &message)
 
     Creates a CAN bus device. \a plugin is the name of the plugin as returned by the \l plugins()
     method. \a interfaceName is the CAN bus interface name. In case of failure, the optional
-    parameter errorMessage returns a textual error description.
+    parameter \a errorMessage returns a textual error description.
 
     Ownership of the returned backend is transferred to the caller.
     Returns \c nullptr if no suitable device can be found.

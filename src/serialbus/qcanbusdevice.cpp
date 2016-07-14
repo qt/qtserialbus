@@ -415,7 +415,7 @@ qint64 QCanBusDevice::framesToWrite() const
 
 /*!
     For buffered devices, this function waits until all buffered frames
-    have been written to the device and the \a bytesWritten() signal has been emitted,
+    have been written to the device and the \l framesWritten() signal has been emitted,
     or until \a msecs milliseconds have passed. If \a msecs is -1,
     this function will not time out. For unbuffered devices, it returns immediately with \c false
     as \l writeFrame() does not require a write buffer.
