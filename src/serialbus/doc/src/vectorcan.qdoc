@@ -26,12 +26,12 @@
 ****************************************************************************/
 /*!
     \page qtserialbus-vectorcan-overview.html
-    \title Using Vector CAN Backend
+    \title Using VectorCAN Backend
 
-    \brief Overview of how to use the Vector CAN backend.
+    \brief Overview of how to use the VectorCAN backend.
 
-    The Vector CAN backend encapsulates the low-level API to work with the
-    \l{http://www.vector.com/}{Vector CAN} adapters.
+    The VectorCAN backend encapsulates the low-level API to work with the
+    \l{http://www.vector.com/}{Vector Informatik} CAN adapters.
 
     \section1 Creating CAN Bus Devices
 
@@ -43,10 +43,9 @@
         }
     \endcode
 
-    Where, \e vectorcan is the backend name.
+    Where \e vectorcan is the backend name.
 
-    Further, it is necessary to request from QCanBus the device with the active
-    Vector CAN interface:
+    Next, a connection to a specific interface can be established:
 
     \code
         QCanBusDevice *device = QCanBus::instance()->createDevice(
@@ -54,12 +53,13 @@
         device->connectDevice();
     \endcode
 
-    Where, \e channel0 is the active CAN channel name. The Vector CAN API provides 64
-    channels from \e channel0 to \e channel63. Some of these channels can be virtual,
-    and they can be used without actual CAN hardware. To know which of them are virtual,
-    use additional tools from Vector's driver package.
+    Where \e channel0 is the active CAN channel name. The VectorCAN backend provides
+    64 channels from \e channel0 to \e channel63. Some of these channels can be virtual,
+    and therefore can be used without actual CAN hardware. To find out the virtual
+    channels, the program "Vector Hardware Config" (vcanconf.exe) can be used,
+    which is included in Vector's driver package.
 
-    The device is now open and can be written and read:
+    The device is now open for writing and reading CAN frames:
 
     \code
         QCanBusFrame frame;
@@ -77,7 +77,7 @@
         QCanBusFrame frame = device->readFrame();
     \endcode
 
-    Vector CAN supports the following configurations that can be controlled through
+    VectorCAN supports the following configurations that can be controlled through
     \l {QCanBusDevice::}{setConfigurationParameter()}:
 
     \table
@@ -85,7 +85,7 @@
             \li Configuration parameter key
             \li Description
         \row
-            \li QDCanBusDevice::BitRateKey
+            \li QCanBusDevice::BitRateKey
             \li Determines the bit rate of the CAN bus connection.
    \endtable
 */

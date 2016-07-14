@@ -66,8 +66,8 @@
             \li \l {Using TinyCAN Backend}{TinyCAN} (\c tinycan)
             \li CAN bus backend using the Tiny-CAN adapters.
         \row
-            \li Vector
-            \li \l {Using Vector CAN Backend}{VectorCAN} (\c vectorcan)
+            \li Vector Informatik
+            \li \l {Using VectorCAN Backend}{VectorCAN} (\c vectorcan)
             \li CAN bus backend using the Vector CAN adapters.
     \endtable
 
