@@ -64,7 +64,7 @@
         \row
             \li MHS Elektronik
             \li \l {Using TinyCAN Backend}{TinyCAN} (\c tinycan)
-            \li CAN bus backend using the Tiny-CAN adapters.
+            \li CAN bus backend using the MHS CAN adapters.
     \endtable
 
     \section1 Implementing a Custom CAN Plugin
