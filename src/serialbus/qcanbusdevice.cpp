@@ -520,8 +520,11 @@ bool QCanBusDevice::connectDevice()
 {
     Q_D(QCanBusDevice);
 
-    if (d->state != QCanBusDevice::UnconnectedState)
+    if (d->state != QCanBusDevice::UnconnectedState) {
+        setError(tr("Can not connect an already connected device"),
+                 QCanBusDevice::ConnectionError);
         return false;
+    }
 
     setState(ConnectingState);
 
@@ -542,6 +545,14 @@ bool QCanBusDevice::connectDevice()
 */
 void QCanBusDevice::disconnectDevice()
 {
+    Q_D(QCanBusDevice);
+
+    if (d->state == QCanBusDevice::UnconnectedState
+            || d->state == QCanBusDevice::ClosingState) {
+        qWarning("Can not disconnect an unconnected device");
+        return;
+    }
+
     setState(QCanBusDevice::ClosingState);
 
     //Unconnected is set by backend -> might be delayed by event loop
