@@ -203,9 +203,11 @@ public:
         if (type == UnknownFrame)
             return QStringLiteral("(Unknown)");
 
-        const char *formatStr = hasExtendedFrameFormat() ? "%08X [%d]" : "     %03X [%d]";
-        QString result = QString::asprintf(formatStr, static_cast<uint>(frameId()),
-                                           payload().size());
+        const char *idFormat = hasExtendedFrameFormat() ? "%08X" : "     %03X";
+        const char *dlcFormat = payload().size() < 10 ? "  [%d]" : " [%d]";
+        QString result;
+        result.append(QString::asprintf(idFormat, static_cast<uint>(frameId())));
+        result.append(QString::asprintf(dlcFormat, payload().size()));
 
         if (type == RemoteRequestFrame) {
             result.append(QLatin1String(" Remote Request"));

@@ -292,11 +292,12 @@ QT_BEGIN_NAMESPACE
     Typical outputs are:
 
     \code
-        (Error)                               - error frame
-             7FF [1] 01                       - data frame with standard identifier
-        1FFFFFFF [8] 01 23 45 67 89 AB CD EF  - data frame with extended identifier
-             123 [5] Remote Request           - remote frame with standard identifier
-        00000234 [0] Remote Request           - remote frame with extended identifier
+        (Error)                                - error frame
+             7FF  [1] 01                       - data frame with standard identifier
+        1FFFFFFF  [8] 01 23 45 67 89 AB CD EF  - data frame with extended identifier
+             400 [10] 01 23 45 67 ... EF 01 23 - CAN FD frame
+             123  [5] Remote Request           - remote frame with standard identifier
+        00000234  [0] Remote Request           - remote frame with extended identifier
     \endcode
 
     \since 5.8
