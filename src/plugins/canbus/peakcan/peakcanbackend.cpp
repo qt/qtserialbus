@@ -493,10 +493,8 @@ bool PeakCanBackend::open()
     Q_D(PeakCanBackend);
 
     if (!d->isOpen) {
-        if (!d->open()) {
-            close(); // sets UnconnectedState
+        if (!d->open())
             return false;
-        }
 
         // apply all stored configurations except bitrate, because
         // the bitrate can not be applied after opening of device
