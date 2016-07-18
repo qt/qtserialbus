@@ -249,7 +249,8 @@ bool PeakCanBackendPrivate::setConfigurationParameter(int key, const QVariant &v
     case QCanBusDevice::BitRateKey:
         return verifyBitRate(value.toInt());
     default:
-        q->setError(PeakCanBackend::tr("Unsupported configuration key"), QCanBusDevice::ConfigurationError);
+        q->setError(PeakCanBackend::tr("Unsupported configuration key: %1").arg(key),
+                    QCanBusDevice::ConfigurationError);
         return false;
     }
 }
