@@ -236,7 +236,7 @@ void PeakCanBackendPrivate::close()
 
     const TPCANStatus st = ::CAN_Uninitialize(channelIndex);
     if (st != PCAN_ERROR_OK)
-        emit q->setError(systemErrorString(st), QCanBusDevice::ConnectionError);
+        q->setError(systemErrorString(st), QCanBusDevice::ConnectionError);
 
     isOpen = false;
 }
