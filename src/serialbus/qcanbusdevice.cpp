@@ -42,8 +42,6 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qdatastream.h>
 
-#define SOCKET_CAN_MTU 72
-
 QT_BEGIN_NAMESPACE
 
 /*!
