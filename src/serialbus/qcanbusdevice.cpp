@@ -296,8 +296,7 @@ bool QCanBusDevice::hasOutgoingFrames() const
 
     \sa configurationParameter()
 */
-void QCanBusDevice::setConfigurationParameter(int key,
-                                              const QVariant &value)
+void QCanBusDevice::setConfigurationParameter(int key, const QVariant &value)
 {
     Q_D(QCanBusDevice);
 
