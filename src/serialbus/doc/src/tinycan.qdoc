@@ -53,8 +53,9 @@
         device->connectDevice();
     \endcode
 
-    Where \e channela is the active CAN interface name. The TinyCAN backend
-    provides two interfaces, \e channela and \e channelb.
+    Where \e can0.0 is the active CAN interface name. TinyCAN provides the
+    interfaces \e can0.0 and \e can0.1, which maps to INDEX_CAN_KANAL_A resp.
+    INDEX_CAN_KANAL_B in the TinyCAN backend.
 
     \note Only the USB adapters are currently supported by this backend.
 

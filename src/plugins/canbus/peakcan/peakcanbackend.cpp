@@ -288,37 +288,37 @@ bool PeakCanBackendPrivate::setConfigurationParameter(int key, const QVariant &v
 
 static int channelIndexFromName(const QString &interfaceName)
 {
-    if (interfaceName == QStringLiteral("usbbus1"))
+    if (interfaceName == QStringLiteral("usb0"))
         return PCAN_USBBUS1;
-    else if (interfaceName == QStringLiteral("usbbus2"))
+    else if (interfaceName == QStringLiteral("usb1"))
         return PCAN_USBBUS2;
-    else if (interfaceName == QStringLiteral("usbbus3"))
+    else if (interfaceName == QStringLiteral("usb2"))
         return PCAN_USBBUS3;
-    else if (interfaceName == QStringLiteral("usbbus4"))
+    else if (interfaceName == QStringLiteral("usb3"))
         return PCAN_USBBUS4;
-    else if (interfaceName == QStringLiteral("usbbus5"))
+    else if (interfaceName == QStringLiteral("usb4"))
         return PCAN_USBBUS5;
-    else if (interfaceName == QStringLiteral("usbbus6"))
+    else if (interfaceName == QStringLiteral("usb5"))
         return PCAN_USBBUS6;
-    else if (interfaceName == QStringLiteral("usbbus7"))
+    else if (interfaceName == QStringLiteral("usb6"))
         return PCAN_USBBUS7;
-    else if (interfaceName == QStringLiteral("usbbus8"))
+    else if (interfaceName == QStringLiteral("usb7"))
         return PCAN_USBBUS8;
-    else if (interfaceName == QStringLiteral("pcibus1"))
+    else if (interfaceName == QStringLiteral("pci0"))
         return PCAN_PCIBUS1;
-    else if (interfaceName == QStringLiteral("pcibus2"))
+    else if (interfaceName == QStringLiteral("pci1"))
         return PCAN_PCIBUS2;
-    else if (interfaceName == QStringLiteral("pcibus3"))
+    else if (interfaceName == QStringLiteral("pci2"))
         return PCAN_PCIBUS3;
-    else if (interfaceName == QStringLiteral("pcibus4"))
+    else if (interfaceName == QStringLiteral("pci3"))
         return PCAN_PCIBUS4;
-    else if (interfaceName == QStringLiteral("pcibus5"))
+    else if (interfaceName == QStringLiteral("pci4"))
         return PCAN_PCIBUS5;
-    else if (interfaceName == QStringLiteral("pcibus6"))
+    else if (interfaceName == QStringLiteral("pci5"))
         return PCAN_PCIBUS6;
-    else if (interfaceName == QStringLiteral("pcibus7"))
+    else if (interfaceName == QStringLiteral("pci6"))
         return PCAN_PCIBUS7;
-    else if (interfaceName == QStringLiteral("pcibus8"))
+    else if (interfaceName == QStringLiteral("pci7"))
         return PCAN_PCIBUS8;
     else // TODO: Add other indexes here
         return PCAN_NONEBUS;

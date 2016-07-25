@@ -224,8 +224,8 @@ bool VectorCanBackendPrivate::setConfigurationParameter(int key, const QVariant 
 
 void VectorCanBackendPrivate::setupChannel(const QString &interfaceName)
 {
-    if (interfaceName.startsWith(QStringLiteral("channel"))) {
-        const QStringRef ref = interfaceName.midRef(7);
+    if (interfaceName.startsWith(QStringLiteral("can"))) {
+        const QStringRef ref = interfaceName.midRef(3);
         bool ok = false;
         const int channelIndex = ref.toInt(&ok);
         if (ok && (channelIndex >= 0 && channelIndex < XL_CONFIG_MAX_CHANNELS)) {
