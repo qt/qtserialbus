@@ -130,10 +130,14 @@ Otherwise, the standard format with 11 bit idenfier is used.</string>
          <property name="font">
           <font>
            <family>Courier</family>
+           <kerning>false</kerning>
           </font>
          </property>
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
          <property name="text">
-          <string>Timestamp         CAN-ID DLC Data</string>
+          <string>Timestamp     CAN-ID  DLC Data</string>
          </property>
         </widget>
        </item>
@@ -142,7 +146,11 @@ Otherwise, the standard format with 11 bit idenfier is used.</string>
          <property name="font">
           <font>
            <family>Courier</family>
+           <kerning>false</kerning>
           </font>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
          </property>
          <property name="undoRedoEnabled">
           <bool>false</bool>
