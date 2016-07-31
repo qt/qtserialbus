@@ -285,7 +285,7 @@ typedef void (DRV_CALLBACK_TYPE *CanRxEventCallback)(
     static fp_##symbolName symbolName;
 
 #define RESOLVE_SYMBOL(symbolName) \
-    symbolName = (fp_##symbolName)resolveSymbol(mhstcanLibrary, #symbolName); \
+    symbolName = (fp_##symbolName)mhstcanLibrary->resolve(#symbolName); \
     if (!symbolName) \
         return false;
 
@@ -317,23 +317,12 @@ GENERATE_SYMBOL_VARIABLE(void, CanSetRxEventCallback, CanRxEventCallback)
 GENERATE_SYMBOL_VARIABLE(void, CanSetEvents, quint16)
 GENERATE_SYMBOL_VARIABLE(quint32, CanEventStatus, void)
 
-inline QFunctionPointer resolveSymbol(QLibrary *mhstcanLibrary, const char *symbolName)
-{
-    QFunctionPointer symbolFunctionPointer = mhstcanLibrary->resolve(symbolName);
-    if (!symbolFunctionPointer)
-        qWarning("Failed to resolve the mhstcan symbol: %s", symbolName);
-
-    return symbolFunctionPointer;
-}
-
 inline bool resolveSymbols(QLibrary *mhstcanLibrary)
 {
     if (!mhstcanLibrary->isLoaded()) {
         mhstcanLibrary->setFileName(QStringLiteral("mhstcan"));
-        if (!mhstcanLibrary->load()) {
-            qWarning("Failed to load the library: %s", qPrintable(mhstcanLibrary->fileName()));
+        if (!mhstcanLibrary->load())
             return false;
-        }
     }
 
     RESOLVE_SYMBOL(CanInitDriver)
