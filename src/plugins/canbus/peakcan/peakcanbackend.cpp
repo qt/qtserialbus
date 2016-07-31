@@ -65,7 +65,7 @@ bool PeakCanBackend::canCreate(QString *errorReason)
 #else
     static bool symbolsResolved = resolveSymbols(pcanLibrary());
     if (!symbolsResolved) {
-        *errorReason = tr("The PCAN runtime library is not found");
+        *errorReason = pcanLibrary()->errorString();
         return false;
     }
     return true;
