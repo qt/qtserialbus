@@ -60,7 +60,7 @@ bool VectorCanBackend::canCreate(QString *errorReason)
 #else
     static bool symbolsResolved = resolveSymbols(vectorcanLibrary());
     if (!symbolsResolved) {
-        *errorReason = tr("The Vector CAN runtime library is not found");
+        *errorReason = vectorcanLibrary()->errorString();
         return false;
     }
     return true;
