@@ -50,8 +50,7 @@ class GenericBusPlugin : public QObject, public QCanBusFactory
     Q_INTERFACES(QCanBusFactory)
 
 public:
-    QCanBusDevice *createDevice(const QString &interfaceName,
-                                QString *errorMessage) const
+    QCanBusDevice *createDevice(const QString &interfaceName, QString *errorMessage) const override
     {
         if (interfaceName == QStringLiteral("invalid")) {
             if (errorMessage)

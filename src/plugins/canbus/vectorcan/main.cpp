@@ -49,7 +49,7 @@ class VectorCanBusPlugin : public QObject, public QCanBusFactory
     Q_INTERFACES(QCanBusFactory)
 
 public:
-    QCanBusDevice *createDevice(const QString &interfaceName, QString *errorMessage) const
+    QCanBusDevice *createDevice(const QString &interfaceName, QString *errorMessage) const override
     {
         QString errorReason;
         if (!VectorCanBackend::canCreate(&errorReason)) {
