@@ -36,8 +36,10 @@
 
 #include "socketcanbackend.h"
 
-#include <QtCore/qdebug.h>
 #include <QtCore/qdatastream.h>
+#include <QtCore/qdebug.h>
+#include <QtCore/qdiriterator.h>
+#include <QtCore/qfile.h>
 #include <QtCore/qsocketnotifier.h>
 
 #include <linux/can/error.h>
@@ -73,6 +75,71 @@ struct canfd_frame {
 #endif
 
 QT_BEGIN_NAMESPACE
+
+const char sysClassNetC[] = "/sys/class/net/";
+const char flagsC[]       = "/flags";
+const char mtuC[]         = "/mtu";
+const char typeC[]        = "/type";
+const char virtualC[]     = "virtual";
+
+enum {
+    CanFlexibleDataRateMtu = 72,
+    TypeSocketCan = 280,
+    DeviceIsActive = 1
+};
+
+static QByteArray fileContent(const QString &fileName)
+{
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly))
+        return QByteArray();
+
+    return file.readAll().trimmed();
+}
+
+static bool isFlexibleDataRateCapable(const QString &canDevice)
+{
+    const QString path = QLatin1String(sysClassNetC) + canDevice + QLatin1String(mtuC);
+    const int mtu = fileContent(path).toInt();
+    return mtu == CanFlexibleDataRateMtu;
+}
+
+static bool isVirtual(const QString &canDevice)
+{
+    const QFileInfo fi(QLatin1String(sysClassNetC) + canDevice);
+    return fi.canonicalPath().contains(QLatin1String(virtualC));
+}
+
+static quint32 flags(const QString &canDevice)
+{
+    const QString path = QLatin1String(sysClassNetC) + canDevice + QLatin1String(flagsC);
+    const quint32 result = fileContent(path).toUInt(nullptr, 0);
+    return result;
+}
+
+QList<QCanBusDeviceInfo> SocketCanBackend::interfaces()
+{
+    QList<QCanBusDeviceInfo> result;
+    QDirIterator it(sysClassNetC,
+                    QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot,
+                    QDirIterator::Subdirectories);
+
+    while (it.hasNext()) {
+        const QString dirEntry = it.next();
+        if (fileContent(dirEntry + QLatin1String(typeC)).toInt() != TypeSocketCan)
+            continue;
+
+        const QString deviceName = dirEntry.mid(strlen(sysClassNetC));
+        if (!(flags(deviceName) & DeviceIsActive))
+            continue;
+
+        auto info = createDeviceInfo(deviceName, isVirtual(deviceName),
+                                     isFlexibleDataRateCapable(deviceName));
+        result.append(info);
+    }
+
+    return result;
+}
 
 SocketCanBackend::SocketCanBackend(const QString &name) :
     canSocket(-1),

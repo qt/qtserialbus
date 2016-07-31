@@ -60,6 +60,35 @@ bool SystecCanBackend::canCreate(QString *errorReason)
     return true;
 }
 
+static void DRV_CALLBACK_TYPE ucanEnumCallback(DWORD index, BOOL isUsed,
+                                               tUcanHardwareInfoEx *hardwareInfo,
+                                               tUcanHardwareInitInfo *initInfo,
+                                               void *args)
+{
+    auto result = static_cast<QStringList *>(args);
+
+    Q_UNUSED(isUsed);
+    Q_UNUSED(hardwareInfo);
+    Q_UNUSED(initInfo);
+
+    result->append(QString::fromLatin1("can%1.0").arg(index));
+    if (USBCAN_CHECK_SUPPORT_TWO_CHANNEL(hardwareInfo))
+        result->append(QString::fromLatin1("can%1.1").arg(index));
+}
+
+QList<QCanBusDeviceInfo> SystecCanBackend::interfaces()
+{
+    QList<QCanBusDeviceInfo> result;
+
+    QStringList devices;
+    ::UcanEnumerateHardware(&ucanEnumCallback, &devices, false,
+                                                0, ~0, 0, ~0, 0, ~0);
+
+    for (const QString &s : qAsConst(devices))
+        result.append(createDeviceInfo(s, false, false));
+    return result;
+}
+
 class OutgoingEventNotifier : public QTimer
 {
 public:

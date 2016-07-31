@@ -8,6 +8,7 @@ QMAKE_DOCS = $$PWD/doc/qtserialbus.qdocconf
 
 PUBLIC_HEADERS += \
     qcanbusdevice.h \
+    qcanbusdeviceinfo.h \
     qcanbusfactory.h \
     qcanbusframe.h \
     qcanbus.h \
@@ -26,6 +27,7 @@ PUBLIC_HEADERS += \
 
 PRIVATE_HEADERS += \
     qcanbusdevice_p.h \
+    qcanbusdeviceinfo_p.h \
     qmodbusserver_p.h \
     qmodbusclient_p.h \
     qmodbusdevice_p.h \
@@ -39,6 +41,7 @@ PRIVATE_HEADERS += \
 
 SOURCES += \
     qcanbusdevice.cpp \
+    qcanbusdeviceinfo.cpp \
     qcanbus.cpp \
     qcanbusfactory.cpp \
     qcanbusframe.cpp \

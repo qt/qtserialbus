@@ -51,6 +51,14 @@ class PeakCanBusPlugin : public QObject, public QCanBusFactory
 
 
 public:
+    QList<QCanBusDeviceInfo> availableDevices(QString *errorMessage) const override
+    {
+        if (Q_UNLIKELY(!PeakCanBackend::canCreate(errorMessage)))
+            return QList<QCanBusDeviceInfo>();
+
+        return PeakCanBackend::interfaces();
+    }
+
     QCanBusDevice *createDevice(const QString &interfaceName, QString *errorMessage) const override
     {
         QString errorReason;

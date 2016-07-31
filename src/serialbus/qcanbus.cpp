@@ -122,6 +122,50 @@ static void setErrorMessage(QString *result, const QString &message)
     *result = message;
 }
 
+static QCanBusFactory *canBusFactory(const QString &plugin, QString *errorMessage)
+{
+    if (Q_UNLIKELY(!qCanBusPlugins()->contains(plugin))) {
+        setErrorMessage(errorMessage, QCanBus::tr("No such plugin: '%1'").arg(plugin));
+        return nullptr;
+    }
+
+    QCanBusPrivate d = qCanBusPlugins()->value(plugin);
+    if (!d.factory) {
+        d.factory = qobject_cast<QCanBusFactory *>(qFactoryLoader->instance(d.index));
+
+        if (d.factory)
+            qCanBusPlugins()->insert(plugin, d);
+    }
+
+    if (Q_UNLIKELY(!d.factory))
+        setErrorMessage(errorMessage, QCanBus::tr("No factory for plugin: '%1'").arg(plugin));
+
+    return d.factory;
+}
+
+/*!
+    \since 5.9
+
+    Returns the available interfaces for \a plugin. In case of failure, the optional
+    parameter \a errorMessage returns a textual error description.
+
+    \note Some plugins might not or only partially support this function.
+
+    \sa createDevice()
+*/
+QList<QCanBusDeviceInfo> QCanBus::availableDevices(const QString &plugin, QString *errorMessage) const
+{
+    const QCanBusFactory *factory = canBusFactory(plugin, errorMessage);
+    if (Q_UNLIKELY(!factory))
+        return QList<QCanBusDeviceInfo>();
+
+    QString errorString;
+    QList<QCanBusDeviceInfo> result = factory->availableDevices(&errorString);
+
+    setErrorMessage(errorMessage, errorString);
+    return result;
+}
+
 /*!
     Creates a CAN bus device. \a plugin is the name of the plugin as returned by the \l plugins()
     method. \a interfaceName is the CAN bus interface name. In case of failure, the optional
@@ -139,30 +183,19 @@ static void setErrorMessage(QString *result, const QString &message)
     \endcode
 
     \note The \a interfaceName is plugin-dependent. See the corresponding plugin documentation
-    for more information: \l {CAN Bus Plugins}.
+    for more information: \l {CAN Bus Plugins}. To get a list of available interfaces,
+    \l availableDevices() can be used.
+
+    \sa availableDevices()
 */
 QCanBusDevice *QCanBus::createDevice(const QString &plugin, const QString &interfaceName,
                                      QString *errorMessage) const
 {
-    if (!qCanBusPlugins()->contains(plugin)) {
-        setErrorMessage(errorMessage, tr("No such plugin: '%1'").arg(plugin));
+    const QCanBusFactory *factory = canBusFactory(plugin, errorMessage);
+    if (Q_UNLIKELY(!factory))
         return nullptr;
-    }
 
-    QCanBusPrivate d = qCanBusPlugins()->value(plugin);
-    if (!d.factory) {
-        d.factory
-            = qobject_cast<QCanBusFactory *>(qFactoryLoader->instance(d.index));
-
-        if (d.factory)
-            qCanBusPlugins()->insert(plugin, d);
-    }
-    if (!d.factory) {
-        setErrorMessage(errorMessage, tr("No factory for plugin: '%1'").arg(plugin));
-        return nullptr;
-    }
-
-    return d.factory->createDevice(interfaceName, errorMessage);
+    return factory->createDevice(interfaceName, errorMessage);
 }
 
 QCanBus::QCanBus(QObject *parent) :

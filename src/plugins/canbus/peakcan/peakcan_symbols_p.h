@@ -178,6 +178,9 @@ extern "C"
 #define PCAN_TRACE_SIZE          0x13  // Configuration of the maximum file size of a CAN trace
 #define PCAN_TRACE_CONFIGURE     0x14  // Configuration of the trace file storing mode (TRACE_FILE_***)
 #define PCAN_CHANNEL_IDENTIFYING 0x15  // Phisical identification of a USB based PCAN-Channel by blinking its associated LED
+#define PCAN_CHANNEL_FEATURES    0x16  // Capabilities of a PCAN device (FEATURE_***)
+
+#define FEATURE_FD_CAPABLE       0x01  // Device supports flexible data-rate (CAN-FD)
 
 // PCAN parameter values
 #define PCAN_PARAMETER_OFF       0x00  // The PCAN parameter is not set (inactive)

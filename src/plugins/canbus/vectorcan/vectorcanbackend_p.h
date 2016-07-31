@@ -37,6 +37,7 @@
 #ifndef VECTORCANBACKEND_P_H
 #define VECTORCANBACKEND_P_H
 
+#include "vectorcan_symbols_p.h"
 #include "vectorcanbackend.h"
 
 #if defined(Q_OS_WIN32)
@@ -76,8 +77,9 @@ public:
     QString systemErrorString(int errorCode) const;
     void startWrite();
     void startRead();
+    static XLstatus loadDriver();
     void startupDriver();
-    void cleanupDriver();
+    static void cleanupDriver();
     bool setBitRate(quint32 bitrate);
 
     VectorCanBackend * const q_ptr;

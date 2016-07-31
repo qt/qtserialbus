@@ -49,6 +49,14 @@ class VectorCanBusPlugin : public QObject, public QCanBusFactory
     Q_INTERFACES(QCanBusFactory)
 
 public:
+    QList<QCanBusDeviceInfo> availableDevices(QString *errorMessage) const override
+    {
+        if (Q_UNLIKELY(!VectorCanBackend::canCreate(errorMessage)))
+            return QList<QCanBusDeviceInfo>();
+
+        return VectorCanBackend::interfaces();
+    }
+
     QCanBusDevice *createDevice(const QString &interfaceName, QString *errorMessage) const override
     {
         QString errorReason;

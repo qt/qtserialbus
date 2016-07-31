@@ -53,6 +53,12 @@ class SocketCanBusPlugin : public QObject, public QCanBusFactory
 
 
 public:
+    QList<QCanBusDeviceInfo> availableDevices(QString *errorMessage) const override
+    {
+        Q_UNUSED(errorMessage);
+        return SocketCanBackend::interfaces();
+    }
+
     QCanBusDevice *createDevice(const QString &interfaceName, QString *errorMessage) const override
     {
         Q_UNUSED(errorMessage);

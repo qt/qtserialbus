@@ -72,6 +72,8 @@ ConnectDialog::ConnectDialog(QWidget *parent) :
             this, &ConnectDialog::checkCustomSpeedPolicy);
     connect(m_ui->backendListBox, &QComboBox::currentTextChanged,
             this, &ConnectDialog::backendChanged);
+    connect(m_ui->interfaceListBox, &QComboBox::currentTextChanged,
+            this, &ConnectDialog::interfaceChanged);
     m_ui->rawFilterEdit->hide();
     m_ui->rawFilterLabel->hide();
 
@@ -104,18 +106,24 @@ void ConnectDialog::checkCustomSpeedPolicy(int idx)
 
 void ConnectDialog::backendChanged(const QString &backend)
 {
-    if (backend == QStringLiteral("generic"))
-        m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("can0"));
-    else if (backend == QStringLiteral("peakcan"))
-        m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("usb0"));
-    else if (backend == QStringLiteral("socketcan"))
-        m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("can0"));
-    else if (backend == QStringLiteral("systeccan"))
-        m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("can0.0"));
-    else if (backend == QStringLiteral("tinycan"))
-        m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("can0.0"));
-    else if (backend == QStringLiteral("vectorcan"))
-        m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("can0"));
+    m_ui->interfaceListBox->clear();
+    m_interfaces = QCanBus::instance()->availableDevices(backend);
+    for (const QCanBusDeviceInfo &info : qAsConst(m_interfaces))
+        m_ui->interfaceListBox->addItem(info.name());
+}
+
+void ConnectDialog::interfaceChanged(const QString &interface)
+{
+    m_ui->isVirtual->setChecked(false);
+    m_ui->isFlexibleDataRateCapable->setChecked(false);
+
+    for (const QCanBusDeviceInfo &info : qAsConst(m_interfaces)) {
+        if (info.name() == interface) {
+            m_ui->isVirtual->setChecked(info.isVirtual());
+            m_ui->isFlexibleDataRateCapable->setChecked(info.hasFlexibleDataRate());
+            break;
+        }
+    }
 }
 
 void ConnectDialog::ok()
@@ -153,7 +161,7 @@ QString ConnectDialog::configurationValue(QCanBusDevice::ConfigurationKey key)
 void ConnectDialog::revertSettings()
 {
     m_ui->backendListBox->setCurrentText(m_currentSettings.backendName);
-    m_ui->interfaceNameEdit->setText(m_currentSettings.deviceInterfaceName);
+    m_ui->interfaceListBox->setCurrentText(m_currentSettings.deviceInterfaceName);
     m_ui->useConfigurationBox->setChecked(m_currentSettings.useConfigurationEnabled);
 
     QString value = configurationValue(QCanBusDevice::LoopbackKey);
@@ -175,7 +183,7 @@ void ConnectDialog::revertSettings()
 void ConnectDialog::updateSettings()
 {
     m_currentSettings.backendName = m_ui->backendListBox->currentText();
-    m_currentSettings.deviceInterfaceName = m_ui->interfaceNameEdit->text();
+    m_currentSettings.deviceInterfaceName = m_ui->interfaceListBox->currentText();
     m_currentSettings.useConfigurationEnabled = m_ui->useConfigurationBox->isChecked();
 
     if (m_currentSettings.useConfigurationEnabled) {

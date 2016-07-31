@@ -39,6 +39,7 @@
 
 #include <QtSerialBus/qcanbusframe.h>
 #include <QtSerialBus/qcanbusdevice.h>
+#include <QtSerialBus/qcanbusdeviceinfo.h>
 
 #include <QtCore/qsocketnotifier.h>
 #include <QtCore/qstring.h>
@@ -61,6 +62,8 @@ public:
     bool writeFrame(const QCanBusFrame &newData) override;
 
     QString interpretErrorFrame(const QCanBusFrame &errorFrame) override;
+
+    static QList<QCanBusDeviceInfo> interfaces();
 
 private Q_SLOTS:
     void readSocket();

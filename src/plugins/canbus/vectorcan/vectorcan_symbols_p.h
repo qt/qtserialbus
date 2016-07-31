@@ -362,6 +362,9 @@ typedef long XLportHandle, *pXLportHandle;
 // defines for special DeviceStatus
 #define XL_SPECIAL_DEVICE_STAT_FPGA_UPDATE_DONE 0x01 // automatic driver FPGA flashing done
 
+#define XL_HWTYPE_NONE                           0
+#define XL_HWTYPE_VIRTUAL                        1
+
 typedef struct s_xl_channel_config {
     char name[XL_MAX_LENGTH + 1];
     quint8 hwType; // HWTYPE_xxxx (see above)

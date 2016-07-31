@@ -48,6 +48,7 @@ public:
 private slots:
     void initTestCase();
     void plugins();
+    void interfaces();
     void createDevice();
 
 private:
@@ -81,6 +82,15 @@ void tst_QCanBus::plugins()
     QVERIFY(!pluginList.isEmpty());
     QVERIFY(pluginList.contains("generic"));
 
+}
+
+void tst_QCanBus::interfaces()
+{
+    const QList<QCanBusDeviceInfo> pluginList = bus->availableDevices("generic");
+    QCOMPARE(1, pluginList.size());
+    QCOMPARE(QString("can0"), pluginList.at(0).name());
+    QVERIFY(pluginList.at(0).isVirtual());
+    QVERIFY(pluginList.at(0).hasFlexibleDataRate());
 }
 
 void tst_QCanBus::createDevice()

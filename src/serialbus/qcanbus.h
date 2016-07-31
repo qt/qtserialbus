@@ -40,6 +40,7 @@
 #include <QtCore/qobject.h>
 #include <QtSerialBus/qserialbusglobal.h>
 #include <QtSerialBus/qcanbusdevice.h>
+#include <QtSerialBus/qcanbusdeviceinfo.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -52,6 +53,8 @@ class Q_SERIALBUS_EXPORT QCanBus : public QObject
 public:
     static QCanBus *instance();
     QStringList plugins() const;
+
+    QList<QCanBusDeviceInfo> availableDevices(const QString &plugin, QString *errorMessage = nullptr) const;
 
     QCanBusDevice *createDevice(const QString &plugin,
                                 const QString &interfaceName,

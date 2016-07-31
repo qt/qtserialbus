@@ -42,6 +42,7 @@
 #define CONNECTDIALOG_H
 
 #include <QCanBusDevice>
+#include <QCanBusDeviceInfo>
 
 #include <QDialog>
 
@@ -77,6 +78,7 @@ public:
 private slots:
     void checkCustomSpeedPolicy(int idx);
     void backendChanged(const QString &backend);
+    void interfaceChanged(const QString &interface);
     void ok();
     void cancel();
 
@@ -89,6 +91,7 @@ private:
     Ui::ConnectDialog *m_ui = nullptr;
     QIntValidator *m_customSpeedValidator = nullptr;
     Settings m_currentSettings;
+    QList<QCanBusDeviceInfo> m_interfaces;
 };
 
 #endif // CONNECTDIALOG_H

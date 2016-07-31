@@ -112,6 +112,25 @@ PcanChannel pcanChannels[] = {
     { "none",  PCAN_NONEBUS  }
 };
 
+QList<QCanBusDeviceInfo> PeakCanBackend::interfaces()
+{
+    QList<QCanBusDeviceInfo> result;
+
+    for (int i = 0; pcanChannels[i].index != PCAN_NONEBUS; ++i) {
+        int value;
+        const TPCANStatus stat = ::CAN_GetValue(pcanChannels[i].index, PCAN_CHANNEL_CONDITION,
+                                                &value, sizeof(value));
+        if ((stat == PCAN_ERROR_OK) && (value & PCAN_CHANNEL_AVAILABLE)) {
+            const TPCANStatus fdStat = ::CAN_GetValue(pcanChannels[i].index, PCAN_CHANNEL_FEATURES,
+                                                      &value, sizeof(value));
+            const bool isFd = (fdStat == PCAN_ERROR_OK) && (value & FEATURE_FD_CAPABLE);
+            result.append(createDeviceInfo(QLatin1String(pcanChannels[i].name), false, isFd));
+        }
+    }
+
+    return result;
+}
+
 #if defined(Q_OS_WIN32)
 class ReadNotifier : public QWinEventNotifier
 {

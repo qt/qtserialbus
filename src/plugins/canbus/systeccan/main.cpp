@@ -49,6 +49,14 @@ class SystecCanBusPlugin : public QObject, public QCanBusFactory
     Q_INTERFACES(QCanBusFactory)
 
 public:
+    QList<QCanBusDeviceInfo> availableDevices(QString *errorMessage) const override
+    {
+        if (Q_UNLIKELY(!SystecCanBackend::canCreate(errorMessage)))
+            return QList<QCanBusDeviceInfo>();
+
+        return SystecCanBackend::interfaces();
+    }
+
     QCanBusDevice *createDevice(const QString &interfaceName, QString *errorMessage) const override
     {
         QString errorReason;

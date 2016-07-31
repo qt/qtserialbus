@@ -39,6 +39,7 @@
 
 #include <QtCore/qobject.h>
 #include <QtSerialBus/qcanbusframe.h>
+#include <QtSerialBus/qcanbusdeviceinfo.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -140,6 +141,10 @@ protected:
     //      Can be folded into one call to connectDevice() & disconnectDevice()
     virtual bool open() = 0;
     virtual void close() = 0;
+
+    static QCanBusDeviceInfo createDeviceInfo(const QString &name,
+                                              bool isVirtual = false,
+                                              bool isFlexibleDataRateCapable = false);
 };
 
 Q_DECLARE_TYPEINFO(QCanBusDevice::CanBusError, Q_PRIMITIVE_TYPE);

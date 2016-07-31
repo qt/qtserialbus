@@ -38,6 +38,7 @@
 
 #include <QtSerialBus/qcanbus.h>
 #include <QtSerialBus/qcanbusfactory.h>
+#include "../../../../src/serialbus/qcanbusdeviceinfo_p.h"
 
 #include <QtCore/qfile.h>
 
@@ -50,6 +51,17 @@ class GenericBusPlugin : public QObject, public QCanBusFactory
     Q_INTERFACES(QCanBusFactory)
 
 public:
+    QList<QCanBusDeviceInfo> availableDevices(QString *errorMessage) const override
+    {
+        Q_UNUSED(errorMessage);
+
+        QCanBusDeviceInfoPrivate info;
+        info.name = QStringLiteral("can0");
+        info.hasFlexibleDataRate = true;
+        info.isVirtual = true;
+        return { QCanBusDeviceInfo(info) };
+    }
+
     QCanBusDevice *createDevice(const QString &interfaceName, QString *errorMessage) const override
     {
         if (interfaceName == QStringLiteral("invalid")) {

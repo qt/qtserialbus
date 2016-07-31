@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
+** Copyright (C) 2017 Andre Hartmann <aha_1980@gmx.de>
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the QtSerialBus module of the Qt Toolkit.
@@ -34,29 +34,39 @@
 **
 ****************************************************************************/
 
-#ifndef QCANBUSFACTORY_H
-#define QCANBUSFACTORY_H
+#ifndef QCANBUSDEVICEINFO_P_H
+#define QCANBUSDEVICEINFO_P_H
 
-#include <QtCore/qstringlist.h>
-#include <QtSerialBus/qserialbusglobal.h>
-#include <QtSerialBus/qcanbusdevice.h>
-#include <QtSerialBus/qcanbusdeviceinfo.h>
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qt API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
+
+#include <QtCore/qshareddata.h>
+#include <QtCore/qstring.h>
 
 QT_BEGIN_NAMESPACE
 
-class Q_SERIALBUS_EXPORT QCanBusFactory
-{
+class QCanBusDeviceInfoPrivate : public QSharedData {
 public:
-    virtual QList<QCanBusDeviceInfo> availableDevices(QString *errorMessage) const = 0;
-    virtual QCanBusDevice *createDevice(const QString &interfaceName,
-                                        QString *errorMessage) const = 0;
-protected:
-    virtual ~QCanBusFactory() {}
-};
+    QCanBusDeviceInfoPrivate() { }
 
-Q_DECLARE_INTERFACE(QCanBusFactory, "org.qt-project.Qt.QCanBusFactory")
+    ~QCanBusDeviceInfoPrivate()
+    {
+    }
+
+    QString name;
+    QString serialNumber;
+    bool hasFlexibleDataRate = false;
+    bool isVirtual = false;
+};
 
 QT_END_NAMESPACE
 
-#endif // QCANBUSFACTORY_H
-
+#endif // QCANBUSDEVICEINFO_P_H

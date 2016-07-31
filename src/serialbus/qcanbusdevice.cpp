@@ -36,6 +36,7 @@
 
 #include "qcanbusdevice.h"
 #include "qcanbusdevice_p.h"
+#include "qcanbusdeviceinfo_p.h"
 
 #include "qcanbusframe.h"
 
@@ -692,6 +693,21 @@ void QCanBusDevice::setState(QCanBusDevice::CanBusDeviceState newState)
 
     d->state = newState;
     emit stateChanged(newState);
+}
+
+/*!
+ * Returns a QCanBusDeviceInfo created from the given parameters \a name,
+ * \a isVirtual, and \a isFlexibleDataRateCapable.
+ * \internal
+ */
+QCanBusDeviceInfo QCanBusDevice::createDeviceInfo(const QString &name, bool isVirtual,
+                                                  bool isFlexibleDataRateCapable)
+{
+    QCanBusDeviceInfoPrivate info;
+    info.name = name;
+    info.isVirtual = isVirtual;
+    info.hasFlexibleDataRate = isFlexibleDataRateCapable;
+    return QCanBusDeviceInfo(info);
 }
 
 QT_END_NAMESPACE

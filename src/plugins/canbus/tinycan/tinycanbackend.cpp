@@ -68,6 +68,11 @@ bool TinyCanBackend::canCreate(QString *errorReason)
 #endif
 }
 
+QList<QCanBusDeviceInfo> TinyCanBackend::interfaces()
+{
+    return { createDeviceInfo(QStringLiteral("can0.0")), createDeviceInfo(QStringLiteral("can0.1")) };
+}
+
 Q_GLOBAL_STATIC(QList<TinyCanBackendPrivate *>, qChannels)
 
 static QMutex channelsGuard(QMutex::NonRecursive);

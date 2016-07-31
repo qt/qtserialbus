@@ -220,6 +220,37 @@ typedef struct _tUcanHardwareInfoEx {
 #define USBCAN_HWINFO_SIZE_V2           0x22    // size with m_adwDeviceId[]
 #define USBCAN_HWINFO_SIZE_V3           0x26    // size with m_adwDeviceId[] and m_dwFlags
 
+// definitions for product code in structure tUcanHardwareInfoEx
+#define USBCAN_PRODCODE_MASK_DID            0xFFFF0000L
+#define USBCAN_PRODCODE_MASK_MFU            0x00008000L
+#define USBCAN_PRODCODE_PID_TWO_CHA         0x00000001L
+#define USBCAN_PRODCODE_PID_TERM            0x00000001L
+#define USBCAN_PRODCODE_PID_RBUSER          0x00000001L
+#define USBCAN_PRODCODE_PID_RBCAN           0x00000001L
+#define USBCAN_PRODCODE_PID_G4              0x00000020L
+#define USBCAN_PRODCODE_PID_RESVD           0x00000040L
+#define USBCAN_PRODCODE_MASK_PID            0x00007FFFL
+#define USBCAN_PRODCODE_MASK_PIDG3          (USBCAN_PRODCODE_MASK_PID & ~USBCAN_PRODCODE_PID_RESVD)
+
+#define USBCAN_PRODCODE_PID_GW001           0x00001100L     // order code GW-001 "USB-CANmodul" outdated
+#define USBCAN_PRODCODE_PID_GW002           0x00001102L     // order code GW-002 "USB-CANmodul" outdated
+#define USBCAN_PRODCODE_PID_MULTIPORT       0x00001103L     // order code 3004006/3404000/3404001 "Multiport CAN-to-USB"
+#define USBCAN_PRODCODE_PID_BASIC           0x00001104L     // order code 3204000/3204001 "USB-CANmodul1"
+#define USBCAN_PRODCODE_PID_ADVANCED        0x00001105L     // order code 3204002/3204003 "USB-CANmodul2"
+#define USBCAN_PRODCODE_PID_USBCAN8         0x00001107L     // order code 3404000 "USB-CANmodul8"
+#define USBCAN_PRODCODE_PID_USBCAN16        0x00001109L     // order code 3404001 "USB-CANmodul16"
+#define USBCAN_PRODCODE_PID_RESERVED3       0x00001110L
+#define USBCAN_PRODCODE_PID_ADVANCED_G4     0x00001121L     // order code ------- "USB-CANmodul2" 4th generation
+#define USBCAN_PRODCODE_PID_BASIC_G4        0x00001122L     // order code 3204000 "USB-CANmodul1" 4th generation
+#define USBCAN_PRODCODE_PID_RESERVED1       0x00001144L
+#define USBCAN_PRODCODE_PID_RESERVED2       0x00001145L
+#define USBCAN_PRODCODE_PID_RESERVED4       0x00001162L
+
+// checks if the module supports two CAN channels (at logical device)
+#define USBCAN_CHECK_SUPPORT_TWO_CHANNEL(pHwInfoEx) \
+    ((((pHwInfoEx)->m_dwProductCode & USBCAN_PRODCODE_MASK_PID) >= USBCAN_PRODCODE_PID_MULTIPORT) && \
+     (((pHwInfoEx)->m_dwProductCode & USBCAN_PRODCODE_PID_TWO_CHA) != 0)                             )
+
 typedef struct _tUcanHardwareInitInfo {
     DWORD           m_dwSize;                   // [IN]  size of this structure
     BOOL            m_fDoInitialize;            // [IN]  specifies if the found module should be initialized by the DLL
@@ -239,8 +270,7 @@ typedef void (DRV_CALLBACK_TYPE *tUcanEnumCallback) (
 #pragma pack(pop)
 
 GENERATE_SYMBOL_VARIABLE(quint32, UcanEnumerateHardware,
-                         tUcanEnumCallback /* callback */, void * /* args */,
-                         BOOL /* used */,
+                         tUcanEnumCallback /* callback */, void * /* args */, BOOL /* used */,
                          quint8, quint8 /* device number low and high */,
                          quint32, quint32, /* serial low and high */
                          quint32, quint32 /* product code low and high */)
@@ -264,6 +294,7 @@ inline bool resolveSymbols(QLibrary *systecLibrary)
             return false;
     }
 
+    RESOLVE_SYMBOL(UcanEnumerateHardware);
     RESOLVE_SYMBOL(UcanInitHardwareEx);
     RESOLVE_SYMBOL(UcanDeinitHardware);
     RESOLVE_SYMBOL(UcanInitCanEx2);

@@ -39,6 +39,7 @@
 
 #include <QtSerialBus/qcanbusframe.h>
 #include <QtSerialBus/qcanbusdevice.h>
+#include <QtSerialBus/qcanbusdeviceinfo.h>
 
 #include <QtCore/qvariant.h>
 #include <QtCore/qlist.h>
@@ -65,6 +66,7 @@ public:
 
     QString interpretErrorFrame(const QCanBusFrame &errorFrame) override;
 
+    static QList<QCanBusDeviceInfo> interfaces();
     static bool canCreate(QString *errorReason);
 
 private:

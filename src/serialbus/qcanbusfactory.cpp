@@ -50,6 +50,16 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
+    \fn QList<QCanBusDeviceInfo> QCanBusFactory::availableDevices(QString *errorMessage) const
+
+    Returns the list of available devices and their capabilities for the QCanBusDevice.
+
+    \a errorMessage contains an error description in case of failure.
+
+    \since 5.9
+*/
+
+/*!
     \fn QCanBusDevice *QCanBusFactory::createDevice(const QString &interfaceName,
                                                     QString *errorMessage) const
 
@@ -66,6 +76,5 @@ QT_BEGIN_NAMESPACE
 
     \fn QCanBusFactory::~QCanBusFactory()
 */
-
 
 QT_END_NAMESPACE

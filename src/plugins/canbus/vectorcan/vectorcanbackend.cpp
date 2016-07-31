@@ -67,6 +67,32 @@ bool VectorCanBackend::canCreate(QString *errorReason)
 #endif
 }
 
+QList<QCanBusDeviceInfo> VectorCanBackend::interfaces()
+{
+    QList<QCanBusDeviceInfo> result;
+
+    if (Q_UNLIKELY(VectorCanBackendPrivate::loadDriver() != XL_SUCCESS))
+        return result;
+
+    XLdriverConfig config;
+    if (Q_UNLIKELY(::xlGetDriverConfig(&config) != XL_SUCCESS)) {
+        VectorCanBackendPrivate::cleanupDriver();
+        return result;
+    }
+
+    for (uint i = 0; i < config.channelCount; ++i) {
+        if (config.channel[i].hwType == XL_HWTYPE_NONE)
+            continue;
+
+        const bool isVirtual = config.channel[i].hwType == XL_HWTYPE_VIRTUAL;
+        const bool isFd = config.channel[i].channelCapabilities & XL_CHANNEL_FLAG_CANFD_SUPPORT;
+        result.append(createDeviceInfo(QStringLiteral("can") + QString::number(i), isVirtual, isFd));
+    }
+
+    VectorCanBackendPrivate::cleanupDriver();
+    return result;
+}
+
 static int driverRefCount = 0;
 
 class ReadNotifier : public QWinEventNotifier
@@ -338,23 +364,31 @@ void VectorCanBackendPrivate::startRead()
     q->enqueueReceivedFrames(newFrames);
 }
 
+XLstatus VectorCanBackendPrivate::loadDriver()
+{
+    if (driverRefCount == 0) {
+        const XLstatus status = ::xlOpenDriver();
+        if (Q_UNLIKELY(status != XL_SUCCESS))
+            return status;
+
+    } else if (Q_UNLIKELY(driverRefCount < 0)) {
+        qCritical("Wrong reference counter: %d", driverRefCount);
+        return XL_ERR_CANNOT_OPEN_DRIVER;
+    }
+
+    ++driverRefCount;
+    return XL_SUCCESS;
+}
+
 void VectorCanBackendPrivate::startupDriver()
 {
     Q_Q(VectorCanBackend);
 
-    if (driverRefCount == 0) {
-        const XLstatus status = ::xlOpenDriver();
-        if (status != XL_SUCCESS) {
-            q->setError(systemErrorString(status),
-                        QCanBusDevice::CanBusError::ConnectionError);
-            return;
-        }
-    } else if (driverRefCount < 0) {
-        qCritical("Wrong reference counter: %d", driverRefCount);
-        return;
+    const XLstatus status = loadDriver();
+    if (Q_UNLIKELY(status != XL_SUCCESS)) {
+        q->setError(systemErrorString(status),
+                    QCanBusDevice::CanBusError::ConnectionError);
     }
-
-    ++driverRefCount;
 }
 
 void VectorCanBackendPrivate::cleanupDriver()
