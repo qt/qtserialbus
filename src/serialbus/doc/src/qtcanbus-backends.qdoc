@@ -60,11 +60,11 @@
         \row
             \li PEAK-System
             \li \l {Using PeakCAN Backend}{PeakCAN} (\c peakcan)
-            \li CAN bus backend using the PCAN adapters.
+            \li CAN bus backend using the PEAK CAN adapters.
         \row
             \li MHS Elektronik
             \li \l {Using TinyCAN Backend}{TinyCAN} (\c tinycan)
-            \li CAN bus backend using the Tiny-CAN adapters.
+            \li CAN bus backend using the MHS CAN adapters.
         \row
             \li Vector Informatik
             \li \l {Using VectorCAN Backend}{VectorCAN} (\c vectorcan)

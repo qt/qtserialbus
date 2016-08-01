@@ -171,21 +171,30 @@ bool TinyCanBackendPrivate::open()
 {
     Q_Q(TinyCanBackend);
 
-    char options[] = "AutoConnect=1;AutoReopen=0";
-    if (int ret = ::CanSetOptions(options) < 0) {
-        q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
-        return false;
+    {
+        char options[] = "AutoConnect=1;AutoReopen=0";
+        const int ret = ::CanSetOptions(options);
+        if (ret < 0) {
+            q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
+            return false;
+        }
     }
 
-    if (int ret = ::CanDeviceOpen(channelIndex, nullptr) < 0) {
-        q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
-        return false;
+    {
+        const int ret = ::CanDeviceOpen(channelIndex, nullptr);
+        if (ret < 0) {
+            q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
+            return false;
+        }
     }
 
-    if (int ret = ::CanSetMode(channelIndex, OP_CAN_START, CAN_CMD_ALL_CLEAR) < 0) {
-        q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
-        ::CanDeviceClose(channelIndex);
-        return false;
+    {
+        const int ret = ::CanSetMode(channelIndex, OP_CAN_START, CAN_CMD_ALL_CLEAR);
+        if (ret < 0) {
+            q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
+            ::CanDeviceClose(channelIndex);
+            return false;
+        }
     }
 
     writeNotifier = new WriteNotifier(this, q);
@@ -202,7 +211,8 @@ void TinyCanBackendPrivate::close()
     delete writeNotifier;
     writeNotifier = nullptr;
 
-    if (int ret = ::CanDeviceClose(channelIndex) < 0)
+    const int ret = ::CanDeviceClose(channelIndex);
+    if (ret < 0)
         q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
 
     isOpen = false;
@@ -216,7 +226,8 @@ bool TinyCanBackendPrivate::setConfigurationParameter(int key, const QVariant &v
     case QCanBusDevice::BitRateKey:
         return setBitRate(value.toInt());
     default:
-        q->setError(TinyCanBackend::tr("Unsupported configuration key"), QCanBusDevice::ConfigurationError);
+        q->setError(TinyCanBackend::tr("Unsupported configuration key: %1").arg(key),
+                    QCanBusDevice::ConfigurationError);
         return false;
     }
 }
@@ -342,7 +353,8 @@ void TinyCanBackendPrivate::startWrite()
 
         const qint32 messagesToWrite = 1;
         ::memcpy(message.Data.Bytes, payload.constData(), sizeof(message.Data.Bytes));
-        if (int ret = ::CanTransmit(channelIndex, &message, messagesToWrite) < 0)
+        const int ret = ::CanTransmit(channelIndex, &message, messagesToWrite);
+        if (ret < 0)
             q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::WriteError);
         else
             emit q->framesWritten(messagesToWrite);
@@ -367,7 +379,8 @@ void TinyCanBackendPrivate::startRead()
         ::memset(&message, 0, sizeof(message));
 
         const int messagesToRead = 1;
-        if (int ret = ::CanReceive(channelIndex, &message, messagesToRead) < 0) {
+        const int ret = ::CanReceive(channelIndex, &message, messagesToRead);
+        if (ret < 0) {
             q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ReadError);
 
             TDeviceStatus status;
@@ -409,7 +422,8 @@ void TinyCanBackendPrivate::startupDriver()
     Q_Q(TinyCanBackend);
 
     if (driverRefCount == 0) {
-        if (int ret = ::CanInitDriver(nullptr) < 0) {
+        const int ret = ::CanInitDriver(nullptr);
+        if (ret < 0) {
             q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
             return;
         }
@@ -450,7 +464,8 @@ bool TinyCanBackendPrivate::setBitRate(int bitrate)
     }
 
     if (isOpen) {
-        if (int ret = ::CanSetSpeed(channelIndex, bitrateCode) < 0) {
+        const int ret = ::CanSetSpeed(channelIndex, bitrateCode);
+        if (ret < 0) {
             q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConfigurationError);
             return false;
         }

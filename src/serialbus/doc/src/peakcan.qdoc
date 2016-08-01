@@ -31,7 +31,7 @@
     \brief Overview of how to use the PeakCAN backend.
 
     The PeakCAN backend encapsulates the low-level API to work with the
-    \l{http://www.peak-system.com/}{PCAN} adapters.
+    \l{http://www.peak-system.com/}{PEAK-System} CAN adapters.
 
     \section1 Creating CAN Bus Devices
 
@@ -43,10 +43,9 @@
         }
     \endcode
 
-    Where, \e peakcan is the backend name.
+    Where \e peakcan is the backend name.
 
-    Further, it is necessary to request from QCanBus the device with the active PeakCan
-    interface:
+    Next, a connection to a specific interface can be established:
 
     \code
         QCanBusDevice *device = QCanBus::instance()->createDevice(
@@ -54,13 +53,13 @@
         device->connectDevice();
     \endcode
 
-    Where, \e usbbus1 is the active CAN interface name. The PCAN API support eight USB
-    interfaces from \e usbbus1 to \e usbbus8 and eight PCI interfaces from \e pcibus1 to
-    \e pcibus8.
+    Where \e usbbus1 is the active CAN interface name. The PeakCAN backend supports
+    eight USB interfaces from \e usbbus1 to \e usbbus8 and eight PCI interfaces from
+    \e pcibus1 to \e pcibus8.
 
     \note Only the USB and PCI adapters are currently supported by this backend.
 
-    The device is now open and can be written and read:
+    The device is now open for writing and reading CAN frames:
 
     \code
         QCanBusFrame frame;
@@ -86,7 +85,7 @@
             \li Configuration parameter key
             \li Description
         \row
-            \li QDCanBusDevice::BitRateKey
+            \li QCanBusDevice::BitRateKey
             \li Determines the bit rate of the CAN bus connection. The following bit rates
                 are supported: 5000, 10000, 20000, 33000, 47000, 50000, 83000, 95000,
                 100000, 125000, 250000, 500000, 800000, 1000000. Note that this configuration

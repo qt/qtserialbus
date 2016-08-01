@@ -31,7 +31,7 @@
     \brief Overview of how to use the TinyCAN backend.
 
     The TinyCAN backend encapsulates the low-level API to work with the
-    \l{http://www.mhs-elektronik.de/}{Tiny-CAN} adapters.
+    \l{http://www.mhs-elektronik.de/}{MHS Elektronik} CAN adapters.
 
     \section1 Creating CAN Bus Devices
 
@@ -43,10 +43,9 @@
         }
     \endcode
 
-    Where, \e tinycan is the backend name.
+    Where \e tinycan is the backend name.
 
-    Further, it is necessary to request from QCanBus the device with the active Tiny-CAN
-    interface:
+    Next, a connection to a specific interface can be established:
 
     \code
         QCanBusDevice *device = QCanBus::instance()->createDevice(
@@ -54,12 +53,12 @@
         device->connectDevice();
     \endcode
 
-    Where, \e channela is the active CAN interface name. The Tiny-CAN API provides only two
-    interfaces \e channela and \e channelb.
+    Where \e channela is the active CAN interface name. The TinyCAN backend
+    provides two interfaces, \e channela and \e channelb.
 
     \note Only the USB adapters are currently supported by this backend.
 
-    The device is now open and can be written and read:
+    The device is now open for writing and reading CAN frames:
 
     \code
         QCanBusFrame frame;
@@ -77,7 +76,7 @@
     QCanBusFrame frame = device->readFrame();
     \endcode
 
-    Tiny-CAN supports the following configurations that can be controlled through
+    TinyCAN supports the following configurations that can be controlled through
     \l {QCanBusDevice::}{setConfigurationParameter()}:
 
     \table
@@ -85,7 +84,7 @@
             \li Configuration parameter key
             \li Description
         \row
-            \li QDCanBusDevice::BitRateKey
+            \li QCanBusDevice::BitRateKey
             \li Determines the bit rate of the CAN bus connection. The following bit rates
                 are supported: 10000, 20000, 50000, 100000, 125000, 250000, 500000, 800000, 1000000.
    \endtable
