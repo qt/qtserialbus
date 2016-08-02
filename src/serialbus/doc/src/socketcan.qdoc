@@ -44,10 +44,9 @@
         }
     \endcode
 
-    Where, \e socketcan is the backend name.
+    Where \e socketcan is the backend name.
 
-    Further, it is necessary to request from QCanBus the device with the active SocketCAN
-    interface:
+    Next, a connection to a specific interface can be established:
 
     \code
         QCanBusDevice *device = QCanBus::instance()->createDevice(
@@ -55,10 +54,10 @@
         device->connectDevice();
     \endcode
 
-    Where, \e can0 is the active CAN interface name. CAN interfaces act like regular network interfaces
-    on Linux systems and can be discovered using \c ifconfig.
+    Where \e can0 is the active CAN interface name. CAN interfaces act like regular
+    network interfaces on Linux systems and can be discovered using \c ifconfig.
 
-    The device is now open and can be written and read:
+    The device is now open for writing and reading CAN frames:
 
     \code
         QCanBusFrame frame;
@@ -104,7 +103,8 @@
         \row
             \li QCanBusDevice::BitRateKey
             \li This configuration is not supported by the socketcan backend. However
-            it is possible to set the rate when configuring the CAN network interface using the \c {ip link} command.
+                it is possible to set the rate when configuring the CAN network interface using
+                the \c {ip link} command.
         \row
             \li QCanBusDevice::CanFdKey
             \li This configuration option determines whether CANFD frames may be sent or received.
@@ -116,5 +116,5 @@
 
     \snippet snippetmain.cpp SocketCan Filter Example
 
-    Efficient frame format and flexible data-rate are supported in SocketCAN.
+    Extended frame format and flexible data-rate are supported in SocketCAN.
  */

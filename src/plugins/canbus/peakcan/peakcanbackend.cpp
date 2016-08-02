@@ -208,7 +208,8 @@ bool PeakCanBackendPrivate::open()
     const int bitrate = q->configurationParameter(QCanBusDevice::BitRateKey).toInt();
     const int bitrateCode = bitrateCodeFromBitrate(bitrate);
 
-    if (TPCANStatus st = ::CAN_Initialize(channelIndex, bitrateCode, 0, 0, 0) != PCAN_ERROR_OK) {
+    const TPCANStatus st = ::CAN_Initialize(channelIndex, bitrateCode, 0, 0, 0);
+    if (st != PCAN_ERROR_OK) {
         q->setError(systemErrorString(st), QCanBusDevice::ConnectionError);
         return false;
     }
@@ -223,9 +224,9 @@ bool PeakCanBackendPrivate::open()
     }
 #endif
 
-    if (TPCANStatus st = ::CAN_SetValue(channelIndex, PCAN_RECEIVE_EVENT, &readHandle, sizeof(readHandle))
-            != PCAN_ERROR_OK) {
-        q->setError(systemErrorString(st), QCanBusDevice::ConnectionError);
+    const TPCANStatus err = ::CAN_SetValue(channelIndex, PCAN_RECEIVE_EVENT, &readHandle, sizeof(readHandle));
+    if (err != PCAN_ERROR_OK) {
+        q->setError(systemErrorString(err), QCanBusDevice::ConnectionError);
         return false;
     }
 
@@ -250,13 +251,13 @@ void PeakCanBackendPrivate::close()
     writeNotifier = nullptr;
 
     quint32 value = 0;
-    if (TPCANStatus st = ::CAN_SetValue(channelIndex, PCAN_RECEIVE_EVENT, &value, sizeof(value))
-            != PCAN_ERROR_OK) {
-        emit q->setError(systemErrorString(st), QCanBusDevice::ConnectionError);
-    }
+    const TPCANStatus err = ::CAN_SetValue(channelIndex, PCAN_RECEIVE_EVENT, &value, sizeof(value));
+    if (err != PCAN_ERROR_OK)
+        emit q->setError(systemErrorString(err), QCanBusDevice::ConnectionError);
 
-    if (TPCANStatus st = ::CAN_Uninitialize(channelIndex) != PCAN_ERROR_OK)
-        emit q->setError(systemErrorString(st), QCanBusDevice::ConnectionError);
+    const TPCANStatus st = ::CAN_Uninitialize(channelIndex);
+    if (st != PCAN_ERROR_OK)
+        q->setError(systemErrorString(st), QCanBusDevice::ConnectionError);
 
 #if defined(Q_OS_WIN32)
     if (readHandle && (readHandle != INVALID_HANDLE_VALUE)) {
@@ -279,7 +280,8 @@ bool PeakCanBackendPrivate::setConfigurationParameter(int key, const QVariant &v
     case QCanBusDevice::BitRateKey:
         return verifyBitRate(value.toInt());
     default:
-        q->setError(PeakCanBackend::tr("Unsupported configuration key"), QCanBusDevice::ConfigurationError);
+        q->setError(PeakCanBackend::tr("Unsupported configuration key: %1").arg(key),
+                    QCanBusDevice::ConfigurationError);
         return false;
     }
 }
@@ -367,7 +369,8 @@ void PeakCanBackendPrivate::startWrite()
     else
         ::memcpy(message.DATA, payload.constData(), sizeof(message.DATA));
 
-    if (TPCANStatus st = ::CAN_Write(channelIndex, &message) != PCAN_ERROR_OK)
+    const TPCANStatus st = ::CAN_Write(channelIndex, &message);
+    if (st != PCAN_ERROR_OK)
         q->setError(systemErrorString(st), QCanBusDevice::WriteError);
     else
         emit q->framesWritten(qint64(1));
@@ -388,7 +391,8 @@ void PeakCanBackendPrivate::startRead()
         TPCANTimestamp timestamp;
         ::memset(&timestamp, 0, sizeof(timestamp));
 
-        if (TPCANStatus st = ::CAN_Read(channelIndex, &message, &timestamp) != PCAN_ERROR_OK) {
+        const TPCANStatus st = ::CAN_Read(channelIndex, &message, &timestamp);
+        if (st != PCAN_ERROR_OK) {
             if (st != PCAN_ERROR_XMTFULL)
                 q->setError(systemErrorString(st), QCanBusDevice::ReadError);
             break;
@@ -449,10 +453,8 @@ bool PeakCanBackend::open()
     Q_D(PeakCanBackend);
 
     if (!d->isOpen) {
-        if (!d->open()) {
-            close(); // sets UnconnectedState
+        if (!d->open())
             return false;
-        }
 
         // apply all stored configurations except bitrate, because
         // the bitrate can not be applied after opening of device

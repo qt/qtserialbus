@@ -44,6 +44,7 @@
 
 #include <QCanBusFrame>
 #include <QCanBus>
+#include <QCloseEvent>
 #include <QTimer>
 
 #include <QtCore/qbytearray.h>
@@ -146,8 +147,15 @@ void MainWindow::connectDevice()
 
         m_ui->sendMessagesBox->setEnabled(true);
 
-        showStatusMessage(tr("Backend: %1, Connected to: %2")
-                          .arg(p.backendName).arg(p.deviceInterfaceName));
+        QVariant bitRate = m_canDevice->configurationParameter(QCanBusDevice::BitRateKey);
+        if (bitRate.isValid()) {
+            showStatusMessage(tr("Backend: %1, connected to %2 at %3 kBit/s")
+                    .arg(p.backendName).arg(p.deviceInterfaceName)
+                    .arg(bitRate.toInt() / 1000));
+        } else {
+            showStatusMessage(tr("Backend: %1, connected to %2")
+                    .arg(p.backendName).arg(p.deviceInterfaceName));
+        }
     }
 }
 
@@ -171,6 +179,12 @@ void MainWindow::disconnectDevice()
 void MainWindow::framesWritten(qint64 count)
 {
     qDebug() << "Number of frames written:" << count;
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    m_connectDialog->close();
+    event->accept();
 }
 
 void MainWindow::checkMessages()

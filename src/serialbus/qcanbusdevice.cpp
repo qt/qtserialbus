@@ -45,8 +45,6 @@
 #include <QtCore/qscopedvaluerollback.h>
 #include <QtCore/qtimer.h>
 
-#define SOCKET_CAN_MTU 72
-
 QT_BEGIN_NAMESPACE
 
 /*!
@@ -301,8 +299,7 @@ bool QCanBusDevice::hasOutgoingFrames() const
 
     \sa configurationParameter()
 */
-void QCanBusDevice::setConfigurationParameter(int key,
-                                              const QVariant &value)
+void QCanBusDevice::setConfigurationParameter(int key, const QVariant &value)
 {
     Q_D(QCanBusDevice);
 
@@ -628,8 +625,11 @@ bool QCanBusDevice::connectDevice()
 {
     Q_D(QCanBusDevice);
 
-    if (d->state != QCanBusDevice::UnconnectedState)
+    if (d->state != QCanBusDevice::UnconnectedState) {
+        setError(tr("Can not connect an already connected device"),
+                 QCanBusDevice::ConnectionError);
         return false;
+    }
 
     setState(ConnectingState);
 
@@ -650,6 +650,14 @@ bool QCanBusDevice::connectDevice()
 */
 void QCanBusDevice::disconnectDevice()
 {
+    Q_D(QCanBusDevice);
+
+    if (d->state == QCanBusDevice::UnconnectedState
+            || d->state == QCanBusDevice::ClosingState) {
+        qWarning("Can not disconnect an unconnected device");
+        return;
+    }
+
     setState(QCanBusDevice::ClosingState);
 
     //Unconnected is set by backend -> might be delayed by event loop
