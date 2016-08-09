@@ -265,7 +265,7 @@ bool SocketCanBackend::connectSocket()
         return false;
     }
 
-    strcpy(interface.ifr_name, canSocketName.toLatin1().data());
+    qstrncpy(interface.ifr_name, canSocketName.toLatin1().constData(), sizeof(interface.ifr_name));
     if (ioctl(canSocket, SIOCGIFINDEX, &interface) < 0) {
         setError(qt_error_string(errno),
                  QCanBusDevice::CanBusError::ConnectionError);
