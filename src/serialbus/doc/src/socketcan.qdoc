@@ -179,9 +179,13 @@
                 By default, the connection is configured to accept any CAN bus message.
         \row
             \li QCanBusDevice::BitRateKey
-            \li This configuration is not supported by the socketcan plugin. However
-                it is possible to set the rate when configuring the CAN network interface using
-                the \c {ip link} command.
+            \li Determines the bit rate of the CAN bus connection. The following bit rates
+                are supported: 5000, 10000, 20000, 33000, 47000, 50000, 83000, 95000,
+                100000, 125000, 250000, 500000, 800000, 1000000. Note that this configuration
+                parameter can only be adjusted while the QCanBusDevice is not connected. To set
+                this configuration parameter, the library libsocketcan is needed at runtime
+                http://www.pengutronix.de/software/libsocketcan
+                Usually, root rights are needed to set the CAN bus bitrate.
         \row
             \li QCanBusDevice::CanFdKey
             \li This configuration option determines whether CANFD frames may be sent or received.
