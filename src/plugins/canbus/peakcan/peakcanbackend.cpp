@@ -434,7 +434,7 @@ void PeakCanBackendPrivate::canReadNotification()
 
         const TPCANStatus st = ::CAN_Read(channelIndex, &message, &timestamp);
         if (st != PCAN_ERROR_OK) {
-            if (st != PCAN_ERROR_XMTFULL)
+            if (st != PCAN_ERROR_QRCVEMPTY)
                 q->setError(systemErrorString(st), QCanBusDevice::ReadError);
             break;
         }
