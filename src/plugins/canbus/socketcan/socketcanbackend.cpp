@@ -35,7 +35,6 @@
 ****************************************************************************/
 
 #include "socketcanbackend.h"
-#include <QtSerialBus/qcanbusdevice.h>
 
 #include <QtCore/qdebug.h>
 #include <QtCore/qdatastream.h>
