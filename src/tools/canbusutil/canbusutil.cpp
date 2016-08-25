@@ -48,15 +48,17 @@ CanBusUtil::CanBusUtil(QTextStream &output, QCoreApplication &app, QObject *pare
 {
 }
 
-bool CanBusUtil::start(int argc, char *argv[])
+bool CanBusUtil::start(const QString &pluginName, const QString &deviceName, const QString &data)
 {
     if (!m_canBus) {
         m_output << "Unable to create QCanBus" << endl;
         return false;
     }
 
-    if (!parseArgs(argc, argv))
-        return false;
+    m_pluginName = pluginName;
+    m_deviceName = deviceName;
+    m_data = data;
+    m_listening = data.isEmpty();
 
     if (!connectCanDevice())
         return false;
@@ -70,21 +72,6 @@ bool CanBusUtil::start(int argc, char *argv[])
     }
 
     return true;
-}
-
-void CanBusUtil::printUsage()
-{
-    m_output << "Usage: canbusutil [options] <plugin> <device> [data]" << endl
-           << "-l             start listening CAN data on device" << endl
-           << "--list-plugins lists all available plugins" << endl
-           << "<plugin>       plugin name to use. See --list-plugins." << endl
-           << "<device>       device to use" << endl
-           << "[data]         Data to send if -l is not specified. Format: " << endl
-           << "                   <id>#{payload}   (CAN 2.0 data frames)," << endl
-           << "                   <id>#Rxx         (CAN 2.0 RTR frames with xx bytes data length)," << endl
-           << "                   <id>##{payload}  (CAN FD data frames)," << endl
-           << "               where {payload} has 0..8 (0..64 CAN FD) ASCII hex-value pairs," << endl
-           << "               e.g. 1#1a2b3c" << endl;
 }
 
 void CanBusUtil::printPlugins()
@@ -102,33 +89,6 @@ void CanBusUtil::printDataUsage()
            << "    <id>#Rxx         (CAN 2.0 RTR frames with xx bytes data length)," << endl
            << "    <id>##{payload}  (CAN FD data frames)," << endl
            << "{payload} has 0..8 (0..64 CAN FD) ASCII hex-value pairs" << endl;
-}
-
-
-bool CanBusUtil::parseArgs(int argc, char *argv[])
-{
-    QString arg1(argv[1]);
-
-    if (arg1 == QStringLiteral("--list-plugins")) {
-        printPlugins();
-        return false;
-    }
-
-    if (argc != 4) {
-        printUsage();
-        return false;
-    }
-
-    m_listening = arg1 == QStringLiteral("-l");
-    if (m_listening) {
-        m_pluginName = QString(argv[2]);
-        m_deviceName = QString(argv[3]);
-    } else {
-        m_pluginName = QString(arg1);
-        m_deviceName = QString(argv[2]);
-        m_data = QString(argv[3]);
-    }
-    return true;
 }
 
 bool CanBusUtil::parseDataField(qint32 &id, QString &payload)
