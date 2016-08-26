@@ -82,21 +82,11 @@ void CanBusUtil::printPlugins()
         m_output << plugins.at(i) << endl;
 }
 
-void CanBusUtil::printDataUsage()
-{
-    m_output << "Invalid [data] field, use format: " << endl
-           << "    <id>#{payload}   (CAN 2.0 data frames)," << endl
-           << "    <id>#Rxx         (CAN 2.0 RTR frames with xx bytes data length)," << endl
-           << "    <id>##{payload}  (CAN FD data frames)," << endl
-           << "{payload} has 0..8 (0..64 CAN FD) ASCII hex-value pairs" << endl;
-}
-
 bool CanBusUtil::parseDataField(qint32 &id, QString &payload)
 {
     int hashMarkPos = m_data.indexOf('#');
     if (hashMarkPos < 0) {
-        m_output << "No hash mark found!" << endl;
-        printDataUsage();
+        m_output << "Data field invalid: No hash mark found!" << endl;
         return false;
     }
 
@@ -133,8 +123,7 @@ bool CanBusUtil::parsePayloadField(QString payload, bool &rtrFrame,
         }
 
         if (!validPayloadLength) {
-            m_output << "RTR data frame length not specified/valid." << endl;
-            printDataUsage();
+            m_output << "Data field invalid: RTR data frame length not specified/valid." << endl;
         }
 
         return validPayloadLength;
@@ -148,15 +137,15 @@ bool CanBusUtil::parsePayloadField(QString payload, bool &rtrFrame,
             bool numberConverOk = true;
             quint8 high = QString(payload[i]).toInt(&numberConverOk, 16);
             if (!numberConverOk) {
-                m_output << "Could not convert '" << QString(payload[i]) << "' to a number"<< endl;
-                printDataUsage();
+                m_output << "Data field invalid: Could not convert '"
+                    << QString(payload[i]) << "' to a number"<< endl;
                 return false;
             }
 
             quint8 low = QString(payload[i+1]).toInt(&numberConverOk, 16);
             if (!numberConverOk) {
-                m_output << "Could not convert '" << QString(payload[i+1]) << "' to a number" << endl;
-                printDataUsage();
+                m_output << "Data field invalid: Could not convert '"
+                    << QString(payload[i+1]) << "' to a number" << endl;
                 return false;
             }
 
@@ -172,8 +161,7 @@ bool CanBusUtil::parsePayloadField(QString payload, bool &rtrFrame,
             bytes = bytes.left(size);
         }
     } else {
-        m_output << "Payload size not multiple of two!" << endl;
-        printDataUsage();
+        m_output << "Data field invalid: Payload size not multiple of two!" << endl;
         return false;
     }
     return true;

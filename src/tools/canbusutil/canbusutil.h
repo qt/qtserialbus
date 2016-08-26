@@ -52,7 +52,6 @@ public:
 
     bool start(const QString &pluginName, const QString &deviceName, const QString &data = QString());
     void printPlugins();
-    void printDataUsage();
 
 private:
     bool parseDataField(qint32 &id, QString &payload);
