@@ -85,7 +85,8 @@ public:
             m_responseTimeoutDuration };
         m_transactionStore.insert(m_tId, element);
 
-        q->connect(q, &QModbusClient::timeoutChanged, element.timer.data(), &QTimer::setInterval);
+        q->connect(q, &QModbusClient::timeoutChanged,
+                   element.timer.data(), QOverload<int>::of(&QTimer::setInterval));
         QObject::connect(element.timer.data(), &QTimer::timeout, [this, writeToSocket]() {
             if (!m_transactionStore.contains(m_tId))
                 return;
