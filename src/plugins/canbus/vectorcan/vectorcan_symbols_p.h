@@ -440,7 +440,7 @@ typedef struct _XLacceptance {
 #define RESOLVE_SYMBOL(symbolName) \
     symbolName = (fp_##symbolName)resolveSymbol(vectorcanLibrary, #symbolName); \
     if (!symbolName) \
-    return false;
+        return false;
 
 GENERATE_SYMBOL_VARIABLE(XLstatus, xlOpenDriver, void)
 GENERATE_SYMBOL_VARIABLE(XLstatus, xlCloseDriver, void)
