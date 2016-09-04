@@ -46,7 +46,7 @@ DummyBackend::DummyBackend() :
 {
     sendTimer->setInterval(1000);
     sendTimer->setSingleShot(false);
-    connect(sendTimer, SIGNAL(timeout()), this, SLOT(sendMessage()));
+    connect(sendTimer, &QTimer::timeout, this, &DummyBackend::sendMessage);
     sendTimer->start();
 }
 
