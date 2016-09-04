@@ -36,6 +36,7 @@
 
 #include "dummybackend.h"
 
+#include <QtCore/qdatetime.h>
 #include <QtCore/qdebug.h>
 #include <QtCore/qtimer.h>
 
@@ -63,9 +64,11 @@ void DummyBackend::close()
 
 void DummyBackend::sendMessage()
 {
+    quint64 timeStamp = QDateTime::currentDateTime().toMSecsSinceEpoch();
     QCanBusFrame dummyFrame;
     dummyFrame.setFrameId(12);
     dummyFrame.setPayload(QByteArray("def"));
+    dummyFrame.setTimeStamp(QCanBusFrame::TimeStamp(timeStamp / 1000, (timeStamp % 1000) * 1000));
 
     enqueueReceivedFrames(QVector<QCanBusFrame>() << dummyFrame);
 }
