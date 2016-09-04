@@ -44,8 +44,7 @@
 QT_BEGIN_NAMESPACE
 
 DummyBackend::DummyBackend() :
-    sendTimer(new QTimer(this)),
-    byteArray("abc")
+    sendTimer(new QTimer(this))
 {
     sendTimer->setInterval(1000);
     sendTimer->setSingleShot(false);
