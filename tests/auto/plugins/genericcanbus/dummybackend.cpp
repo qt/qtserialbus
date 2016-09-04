@@ -39,8 +39,6 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qtimer.h>
 
-#include <QtSerialBus/qcanbusdevice.h>
-
 QT_BEGIN_NAMESPACE
 
 DummyBackend::DummyBackend() :
