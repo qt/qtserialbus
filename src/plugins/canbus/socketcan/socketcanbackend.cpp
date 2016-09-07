@@ -599,10 +599,7 @@ void SocketCanBackend::readSocket()
             timeStamp.tv_usec = 0;
         }
 
-        QCanBusFrame::TimeStamp stamp;
-        stamp.setSeconds(timeStamp.tv_sec);
-        stamp.setMicroSeconds(timeStamp.tv_usec);
-
+        const QCanBusFrame::TimeStamp stamp(timeStamp.tv_sec, timeStamp.tv_usec);
         QCanBusFrame bufferedFrame;
         bufferedFrame.setTimeStamp(stamp);
 
