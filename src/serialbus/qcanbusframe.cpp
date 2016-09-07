@@ -243,6 +243,19 @@ QT_BEGIN_NAMESPACE
     \fn TimeStamp::TimeStamp(qint64 s, qint64 usec)
 
     Constructs a TimeStamp in seconds, \a s, and microseconds, \a usec.
+
+    \note The TimeStamp is not normalized, i.e. microseconds greater 1000000 are not
+    converted to seconds.
+*/
+
+/*!
+    \fn static TimeStamp TimeStamp::fromMicroSeconds(qint64 usec)
+    \since 5.8
+
+    Constructs a normalized TimeStamp from microseconds \a usec.
+
+    The created TimeStamp is normalized, i.e. microsconds greater 1000000 are converted
+    to seconds.
 */
 
 /*!

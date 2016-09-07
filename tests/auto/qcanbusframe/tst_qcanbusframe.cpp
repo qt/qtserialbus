@@ -140,6 +140,21 @@ void tst_QCanBusFrame::timeStamp()
     timeStamp.setSeconds(4);
     QCOMPARE(timeStamp.seconds(), 4);
     QCOMPARE(timeStamp.microSeconds(), 5);
+
+    // fromMicroSeconds: no microsecond overflow
+    timeStamp = QCanBusFrame::TimeStamp::fromMicroSeconds(999999);
+    QCOMPARE(timeStamp.seconds(), 0);
+    QCOMPARE(timeStamp.microSeconds(), 999999);
+
+    // fromMicroSeconds: microsecond overflow
+    timeStamp = QCanBusFrame::TimeStamp::fromMicroSeconds(1000000);
+    QCOMPARE(timeStamp.seconds(), 1);
+    QCOMPARE(timeStamp.microSeconds(), 0);
+
+    // fromMicroSeconds: microsecond overflow
+    timeStamp = QCanBusFrame::TimeStamp::fromMicroSeconds(2000001);
+    QCOMPARE(timeStamp.seconds(), 2);
+    QCOMPARE(timeStamp.microSeconds(), 1);
 }
 
 void tst_QCanBusFrame::tst_isValid_data()
