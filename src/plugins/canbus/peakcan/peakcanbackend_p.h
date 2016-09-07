@@ -72,7 +72,7 @@ public:
     bool open();
     void close();
     bool setConfigurationParameter(int key, const QVariant &value);
-    void setupChannel(const QString &interfaceName);
+    void setupChannel(const QByteArray &interfaceName);
     void setupDefaultConfigurations();
     QString systemErrorString(int errorCode);
     void startWrite();

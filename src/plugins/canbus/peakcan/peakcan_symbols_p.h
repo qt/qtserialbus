@@ -83,23 +83,39 @@ extern "C"
 
 #define PCAN_DNGBUS1             0x31  // PCAN-Dongle/LPT interface, channel 1
 
-#define PCAN_PCIBUS1             0x41  // PCAN-PCI interface, channel 1
-#define PCAN_PCIBUS2             0x42  // PCAN-PCI interface, channel 2
-#define PCAN_PCIBUS3             0x43  // PCAN-PCI interface, channel 3
-#define PCAN_PCIBUS4             0x44  // PCAN-PCI interface, channel 4
-#define PCAN_PCIBUS5             0x45  // PCAN-PCI interface, channel 5
-#define PCAN_PCIBUS6             0x46  // PCAN-PCI interface, channel 6
-#define PCAN_PCIBUS7             0x47  // PCAN-PCI interface, channel 7
-#define PCAN_PCIBUS8             0x48  // PCAN-PCI interface, channel 8
+#define PCAN_PCIBUS1             0x41   // PCAN-PCI interface, channel 1
+#define PCAN_PCIBUS2             0x42   // PCAN-PCI interface, channel 2
+#define PCAN_PCIBUS3             0x43   // PCAN-PCI interface, channel 3
+#define PCAN_PCIBUS4             0x44   // PCAN-PCI interface, channel 4
+#define PCAN_PCIBUS5             0x45   // PCAN-PCI interface, channel 5
+#define PCAN_PCIBUS6             0x46   // PCAN-PCI interface, channel 6
+#define PCAN_PCIBUS7             0x47   // PCAN-PCI interface, channel 7
+#define PCAN_PCIBUS8             0x48   // PCAN-PCI interface, channel 8
+#define PCAN_PCIBUS9             0x409  // PCAN-PCI interface, channel 9
+#define PCAN_PCIBUS10            0x40A  // PCAN-PCI interface, channel 10
+#define PCAN_PCIBUS11            0x40B  // PCAN-PCI interface, channel 11
+#define PCAN_PCIBUS12            0x40C  // PCAN-PCI interface, channel 12
+#define PCAN_PCIBUS13            0x40D  // PCAN-PCI interface, channel 13
+#define PCAN_PCIBUS14            0x40E  // PCAN-PCI interface, channel 14
+#define PCAN_PCIBUS15            0x40F  // PCAN-PCI interface, channel 15
+#define PCAN_PCIBUS16            0x410  // PCAN-PCI interface, channel 16
 
-#define PCAN_USBBUS1             0x51  // PCAN-USB interface, channel 1
-#define PCAN_USBBUS2             0x52  // PCAN-USB interface, channel 2
-#define PCAN_USBBUS3             0x53  // PCAN-USB interface, channel 3
-#define PCAN_USBBUS4             0x54  // PCAN-USB interface, channel 4
-#define PCAN_USBBUS5             0x55  // PCAN-USB interface, channel 5
-#define PCAN_USBBUS6             0x56  // PCAN-USB interface, channel 6
-#define PCAN_USBBUS7             0x57  // PCAN-USB interface, channel 7
-#define PCAN_USBBUS8             0x58  // PCAN-USB interface, channel 8
+#define PCAN_USBBUS1             0x51   // PCAN-USB interface, channel 1
+#define PCAN_USBBUS2             0x52   // PCAN-USB interface, channel 2
+#define PCAN_USBBUS3             0x53   // PCAN-USB interface, channel 3
+#define PCAN_USBBUS4             0x54   // PCAN-USB interface, channel 4
+#define PCAN_USBBUS5             0x55   // PCAN-USB interface, channel 5
+#define PCAN_USBBUS6             0x56   // PCAN-USB interface, channel 6
+#define PCAN_USBBUS7             0x57   // PCAN-USB interface, channel 7
+#define PCAN_USBBUS8             0x58   // PCAN-USB interface, channel 8
+#define PCAN_USBBUS9             0x509  // PCAN-USB interface, channel 9
+#define PCAN_USBBUS10            0x50A  // PCAN-USB interface, channel 10
+#define PCAN_USBBUS11            0x50B  // PCAN-USB interface, channel 11
+#define PCAN_USBBUS12            0x50C  // PCAN-USB interface, channel 12
+#define PCAN_USBBUS13            0x50D  // PCAN-USB interface, channel 13
+#define PCAN_USBBUS14            0x50E  // PCAN-USB interface, channel 14
+#define PCAN_USBBUS15            0x50F  // PCAN-USB interface, channel 15
+#define PCAN_USBBUS16            0x510  // PCAN-USB interface, channel 16
 
 #define PCAN_PCCBUS1             0x61  // PCAN-PC Card interface, channel 1
 #define PCAN_PCCBUS2             0x62  // PCAN-PC Card interface, channel 2
@@ -225,7 +241,7 @@ extern "C"
 #define PCAN_TYPE_DNG_SJA_EPP    0x06  // PCAN-Dongle EPP SJA1000
 
 // Type definitions
-#define TPCANHandle              quint8  // Represents a PCAN hardware channel handle
+#define TPCANHandle              quint16 // Represents a PCAN hardware channel handle
 #define TPCANStatus              quint32 // Represents a PCAN status/error code
 #define TPCANParameter           quint8  // Represents a PCAN parameter to be read or set
 #define TPCANDevice              quint8  // Represents a PCAN device

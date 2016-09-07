@@ -72,6 +72,46 @@ bool PeakCanBackend::canCreate(QString *errorReason)
 #endif
 }
 
+struct PcanChannel{
+    char        name[6];
+    TPCANHandle index;
+};
+PcanChannel pcanChannels[] = {
+    { "usb0",  PCAN_USBBUS1  },
+    { "usb1",  PCAN_USBBUS2  },
+    { "usb2",  PCAN_USBBUS3  },
+    { "usb3",  PCAN_USBBUS4  },
+    { "usb4",  PCAN_USBBUS5  },
+    { "usb5",  PCAN_USBBUS6  },
+    { "usb6",  PCAN_USBBUS7  },
+    { "usb7",  PCAN_USBBUS8  },
+    { "usb8",  PCAN_USBBUS9  },
+    { "usb9",  PCAN_USBBUS10 },
+    { "usb10", PCAN_USBBUS11 },
+    { "usb11", PCAN_USBBUS12 },
+    { "usb12", PCAN_USBBUS13 },
+    { "usb13", PCAN_USBBUS14 },
+    { "usb14", PCAN_USBBUS15 },
+    { "usb15", PCAN_USBBUS16 },
+    { "pci0",  PCAN_PCIBUS1  },
+    { "pci1",  PCAN_PCIBUS2  },
+    { "pci2",  PCAN_PCIBUS3  },
+    { "pci3",  PCAN_PCIBUS4  },
+    { "pci4",  PCAN_PCIBUS5  },
+    { "pci5",  PCAN_PCIBUS6  },
+    { "pci6",  PCAN_PCIBUS7  },
+    { "pci7",  PCAN_PCIBUS8  },
+    { "pci8",  PCAN_PCIBUS9  },
+    { "pci9",  PCAN_PCIBUS10 },
+    { "pci10", PCAN_PCIBUS11 },
+    { "pci11", PCAN_PCIBUS12 },
+    { "pci12", PCAN_PCIBUS13 },
+    { "pci13", PCAN_PCIBUS14 },
+    { "pci14", PCAN_PCIBUS15 },
+    { "pci15", PCAN_PCIBUS16 },
+    { "none",  PCAN_NONEBUS  }
+};
+
 #if defined(Q_OS_WIN32)
 class ReadNotifier : public QWinEventNotifier
 {
@@ -286,47 +326,12 @@ bool PeakCanBackendPrivate::setConfigurationParameter(int key, const QVariant &v
     }
 }
 
-static int channelIndexFromName(const QString &interfaceName)
+void PeakCanBackendPrivate::setupChannel(const QByteArray &interfaceName)
 {
-    if (interfaceName == QStringLiteral("usb0"))
-        return PCAN_USBBUS1;
-    else if (interfaceName == QStringLiteral("usb1"))
-        return PCAN_USBBUS2;
-    else if (interfaceName == QStringLiteral("usb2"))
-        return PCAN_USBBUS3;
-    else if (interfaceName == QStringLiteral("usb3"))
-        return PCAN_USBBUS4;
-    else if (interfaceName == QStringLiteral("usb4"))
-        return PCAN_USBBUS5;
-    else if (interfaceName == QStringLiteral("usb5"))
-        return PCAN_USBBUS6;
-    else if (interfaceName == QStringLiteral("usb6"))
-        return PCAN_USBBUS7;
-    else if (interfaceName == QStringLiteral("usb7"))
-        return PCAN_USBBUS8;
-    else if (interfaceName == QStringLiteral("pci0"))
-        return PCAN_PCIBUS1;
-    else if (interfaceName == QStringLiteral("pci1"))
-        return PCAN_PCIBUS2;
-    else if (interfaceName == QStringLiteral("pci2"))
-        return PCAN_PCIBUS3;
-    else if (interfaceName == QStringLiteral("pci3"))
-        return PCAN_PCIBUS4;
-    else if (interfaceName == QStringLiteral("pci4"))
-        return PCAN_PCIBUS5;
-    else if (interfaceName == QStringLiteral("pci5"))
-        return PCAN_PCIBUS6;
-    else if (interfaceName == QStringLiteral("pci6"))
-        return PCAN_PCIBUS7;
-    else if (interfaceName == QStringLiteral("pci7"))
-        return PCAN_PCIBUS8;
-    else // TODO: Add other indexes here
-        return PCAN_NONEBUS;
-}
-
-void PeakCanBackendPrivate::setupChannel(const QString &interfaceName)
-{
-    channelIndex = channelIndexFromName(interfaceName);
+    const PcanChannel *chn = pcanChannels;
+    while (chn->index != PCAN_NONEBUS && chn->name != interfaceName)
+        ++chn;
+    channelIndex = chn->index;
 }
 
 // Calls only when the device is closed
@@ -434,7 +439,7 @@ PeakCanBackend::PeakCanBackend(const QString &name, QObject *parent)
 {
     Q_D(PeakCanBackend);
 
-    d->setupChannel(name);
+    d->setupChannel(name.toLatin1());
     d->setupDefaultConfigurations();
 }
 
