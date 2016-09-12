@@ -36,20 +36,18 @@
 
 #include "dummybackend.h"
 
+#include <QtCore/qdatetime.h>
 #include <QtCore/qdebug.h>
 #include <QtCore/qtimer.h>
-
-#include <QtSerialBus/qcanbusdevice.h>
 
 QT_BEGIN_NAMESPACE
 
 DummyBackend::DummyBackend() :
-    sendTimer(new QTimer(this)),
-    byteArray("abc")
+    sendTimer(new QTimer(this))
 {
     sendTimer->setInterval(1000);
     sendTimer->setSingleShot(false);
-    connect(sendTimer, SIGNAL(timeout()), this, SLOT(sendMessage()));
+    connect(sendTimer, &QTimer::timeout, this, &DummyBackend::sendMessage);
     sendTimer->start();
 }
 
@@ -66,9 +64,11 @@ void DummyBackend::close()
 
 void DummyBackend::sendMessage()
 {
+    quint64 timeStamp = QDateTime::currentDateTime().toMSecsSinceEpoch();
     QCanBusFrame dummyFrame;
     dummyFrame.setFrameId(12);
     dummyFrame.setPayload(QByteArray("def"));
+    dummyFrame.setTimeStamp(QCanBusFrame::TimeStamp(timeStamp / 1000, (timeStamp % 1000) * 1000));
 
     enqueueReceivedFrames(QVector<QCanBusFrame>() << dummyFrame);
 }

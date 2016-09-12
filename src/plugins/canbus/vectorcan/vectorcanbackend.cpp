@@ -224,8 +224,8 @@ bool VectorCanBackendPrivate::setConfigurationParameter(int key, const QVariant 
 
 void VectorCanBackendPrivate::setupChannel(const QString &interfaceName)
 {
-    if (interfaceName.startsWith(QStringLiteral("channel"))) {
-        const QStringRef ref = interfaceName.midRef(7);
+    if (interfaceName.startsWith(QStringLiteral("can"))) {
+        const QStringRef ref = interfaceName.midRef(3);
         bool ok = false;
         const int channelIndex = ref.toInt(&ok);
         if (ok && (channelIndex >= 0 && channelIndex < XL_CONFIG_MAX_CHANNELS)) {
@@ -324,7 +324,8 @@ void VectorCanBackendPrivate::startRead()
 
         QCanBusFrame frame(msg.id, QByteArray(reinterpret_cast<const char *>(msg.data),
                                               int(msg.dlc)));
-        frame.setTimeStamp(QCanBusFrame::TimeStamp(0, event.timeStamp));
+        const quint64 usecs = event.timeStamp / 1000;
+        frame.setTimeStamp(QCanBusFrame::TimeStamp(usecs / 1000000, usecs % 1000000));
         frame.setExtendedFrameFormat(msg.id & XL_CAN_EXT_MSG_ID);
         frame.setFrameType((msg.flags & XL_CAN_MSG_FLAG_REMOTE_FRAME)
                            ? QCanBusFrame::RemoteRequestFrame

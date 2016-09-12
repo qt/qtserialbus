@@ -201,7 +201,7 @@ void MainWindow::checkMessages()
         view = frame.toString();
 
     const QString time = QString::fromLatin1("%1.%2 ")
-            .arg(frame.timeStamp().seconds(), 6, 10, QLatin1Char(' '))
+            .arg(frame.timeStamp().seconds(), 10, 10, QLatin1Char(' '))
             .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char('0'));
 
     m_ui->receivedMessagesEdit->append(time + view);

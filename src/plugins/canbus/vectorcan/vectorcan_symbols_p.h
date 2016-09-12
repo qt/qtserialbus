@@ -438,9 +438,9 @@ typedef struct _XLacceptance {
     static fp_##symbolName symbolName;
 
 #define RESOLVE_SYMBOL(symbolName) \
-    symbolName = (fp_##symbolName)resolveSymbol(vectorcanLibrary, #symbolName); \
+    symbolName = (fp_##symbolName)vectorcanLibrary->resolve(#symbolName); \
     if (!symbolName) \
-    return false;
+        return false;
 
 GENERATE_SYMBOL_VARIABLE(XLstatus, xlOpenDriver, void)
 GENERATE_SYMBOL_VARIABLE(XLstatus, xlCloseDriver, void)
@@ -455,23 +455,12 @@ GENERATE_SYMBOL_VARIABLE(XLstatus, xlReceive, XLportHandle, quint32 *, XLevent *
 GENERATE_SYMBOL_VARIABLE(XLstatus, xlSetNotification, XLportHandle, XLhandle *, int)
 GENERATE_SYMBOL_VARIABLE(char *, xlGetErrorString, XLstatus)
 
-inline QFunctionPointer resolveSymbol(QLibrary *vectorcanLibrary, const char *symbolName)
-{
-    QFunctionPointer symbolFunctionPointer = vectorcanLibrary->resolve(symbolName);
-    if (!symbolFunctionPointer)
-        qWarning("Failed to resolve the vxlapi symbol: %s", symbolName);
-
-    return symbolFunctionPointer;
-}
-
 inline bool resolveSymbols(QLibrary *vectorcanLibrary)
 {
     if (!vectorcanLibrary->isLoaded()) {
         vectorcanLibrary->setFileName(QStringLiteral("vxlapi"));
-        if (!vectorcanLibrary->load()) {
-            qWarning("Failed to load the library: %s", qPrintable(vectorcanLibrary->fileName()));
+        if (!vectorcanLibrary->load())
             return false;
-        }
     }
 
     RESOLVE_SYMBOL(xlOpenDriver)

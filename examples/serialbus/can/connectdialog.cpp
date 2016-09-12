@@ -108,13 +108,13 @@ void ConnectDialog::backendChanged(const QString &backend)
     if (backend == QStringLiteral("generic"))
         m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("can0"));
     else if (backend == QStringLiteral("peakcan"))
-        m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("usbbus1"));
+        m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("usb0"));
     else if (backend == QStringLiteral("socketcan"))
         m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("can0"));
     else if (backend == QStringLiteral("tinycan"))
-        m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("channela"));
+        m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("can0.0"));
     else if (backend == QStringLiteral("vectorcan"))
-        m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("channel0"));
+        m_ui->interfaceNameEdit->setPlaceholderText(QStringLiteral("can0"));
 }
 
 void ConnectDialog::ok()

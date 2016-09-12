@@ -258,7 +258,7 @@ typedef struct tagTPCANTimestamp
     static fp_##symbolName symbolName;
 
 #define RESOLVE_SYMBOL(symbolName) \
-    symbolName = (fp_##symbolName)resolveSymbol(pcanLibrary, #symbolName); \
+    symbolName = (fp_##symbolName)pcanLibrary->resolve(#symbolName); \
     if (!symbolName) \
         return false;
 
@@ -273,23 +273,12 @@ GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_GetValue, TPCANHandle, TPCANParameter,
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_SetValue, TPCANHandle, TPCANParameter, void *, quint32)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_GetErrorText, TPCANStatus, quint16, char *)
 
-inline QFunctionPointer resolveSymbol(QLibrary *pcanLibrary, const char *symbolName)
-{
-    QFunctionPointer symbolFunctionPointer = pcanLibrary->resolve(symbolName);
-    if (!symbolFunctionPointer)
-        qWarning("Failed to resolve the pcanbasic symbol: %s", symbolName);
-
-    return symbolFunctionPointer;
-}
-
 inline bool resolveSymbols(QLibrary *pcanLibrary)
 {
     if (!pcanLibrary->isLoaded()) {
         pcanLibrary->setFileName(QStringLiteral("pcanbasic"));
-        if (!pcanLibrary->load()) {
-            qWarning("Failed to load the library: %s", qPrintable(pcanLibrary->fileName()));
+        if (!pcanLibrary->load())
             return false;
-        }
     }
 
     RESOLVE_SYMBOL(CAN_Initialize)

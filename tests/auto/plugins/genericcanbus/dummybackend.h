@@ -39,8 +39,6 @@
 
 #include <QtSerialBus/qcanbusdevice.h>
 
-#include <QtCore/qbytearray.h>
-
 QT_BEGIN_NAMESPACE
 
 class QTimer;
@@ -63,7 +61,6 @@ public Q_SLOTS:
 
 private:
     QTimer *sendTimer;
-    QByteArray byteArray;
 };
 
 QT_END_NAMESPACE

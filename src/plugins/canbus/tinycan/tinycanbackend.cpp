@@ -305,9 +305,9 @@ QString TinyCanBackendPrivate::systemErrorString(int errorCode)
 
 static int channelIndexFromName(const QString &interfaceName)
 {
-    if (interfaceName == QStringLiteral("channela"))
+    if (interfaceName == QStringLiteral("can0.0"))
         return INDEX_CAN_KANAL_A;
-    else if (interfaceName == QStringLiteral("channelb"))
+    else if (interfaceName == QStringLiteral("can0.1"))
         return INDEX_CAN_KANAL_B;
     else
         return INDEX_INVALID;

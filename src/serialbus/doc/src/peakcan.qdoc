@@ -49,13 +49,13 @@
 
     \code
         QCanBusDevice *device = QCanBus::instance()->createDevice(
-            QStringLiteral("peakcan"), QStringLiteral("usbbus1"));
+            QStringLiteral("peakcan"), QStringLiteral("usb0"));
         device->connectDevice();
     \endcode
 
-    Where \e usbbus1 is the active CAN interface name. The PeakCAN backend supports
-    eight USB interfaces from \e usbbus1 to \e usbbus8 and eight PCI interfaces from
-    \e pcibus1 to \e pcibus8.
+    Where \e usb0 is the active CAN interface name. The PeakCAN backend supports
+    eight USB interfaces from \e usb0 to \e usb7 and eight PCI interfaces from
+    \e pci0 to \e pci7.
 
     \note Only the USB and PCI adapters are currently supported by this backend.
 

@@ -49,15 +49,16 @@
 
     \code
         QCanBusDevice *device = QCanBus::instance()->createDevice(
-            QStringLiteral("vectorcan"), QStringLiteral("channel0"));
+            QStringLiteral("vectorcan"), QStringLiteral("can0"));
         device->connectDevice();
     \endcode
 
-    Where \e channel0 is the active CAN channel name. The VectorCAN backend provides
-    64 channels from \e channel0 to \e channel63. Some of these channels can be virtual,
-    and therefore can be used without actual CAN hardware. To find out the virtual
-    channels, the program "Vector Hardware Config" (vcanconf.exe) can be used,
-    which is included in Vector's driver package.
+    Where \e can0 is the active CAN channel name. The VectorCAN backend provides
+    64 channels (defined by XL_CONFIG_MAX_CHANNELS in the Vector API) from \e can0
+    to \e can63. Some of these channels can be virtual, and therefore can be used
+    without actual CAN hardware. To find out the virtual channels, the program
+    "Vector Hardware Config" (vcanconf.exe) can be used, which is included in
+    Vector's driver package.
 
     The device is now open for writing and reading CAN frames:
 
