@@ -52,10 +52,7 @@ public:
     {
         referenceFrame.setFrameId(5);
         referenceFrame.setPayload(QByteArray("FOOBAR"));
-        QCanBusFrame::TimeStamp stamp;
-        stamp.setSeconds(22);
-        stamp.setMicroSeconds(23);
-        referenceFrame.setTimeStamp(stamp);
+        referenceFrame.setTimeStamp({ 22, 23 });
         referenceFrame.setExtendedFrameFormat(1);
     }
 

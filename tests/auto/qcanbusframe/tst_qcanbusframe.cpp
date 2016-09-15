@@ -136,10 +136,6 @@ void tst_QCanBusFrame::timeStamp()
     QCanBusFrame::TimeStamp timeStamp = frame.timeStamp();
     QVERIFY(!timeStamp.seconds());
     QVERIFY(!timeStamp.microSeconds());
-    timeStamp.setMicroSeconds(5);
-    timeStamp.setSeconds(4);
-    QCOMPARE(timeStamp.seconds(), 4);
-    QCOMPARE(timeStamp.microSeconds(), 5);
 
     // fromMicroSeconds: no microsecond overflow
     timeStamp = QCanBusFrame::TimeStamp::fromMicroSeconds(999999);

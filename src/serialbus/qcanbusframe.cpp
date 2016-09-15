@@ -262,32 +262,12 @@ QT_BEGIN_NAMESPACE
     \fn qint64 TimeStamp::seconds() const
 
     Returns the seconds of the timestamp.
-
-    \sa TimeStamp::setSeconds()
 */
 
 /*!
     \fn qint64 TimeStamp::microSeconds() const
 
     Returns the microseconds of the timestamp.
-
-    \sa TimeStamp::setMicroSeconds
-*/
-
-/*!
-    \fn TimeStamp::setSeconds(qint64 s)
-
-    Sets the seconds in the timestamp type to \a s.
-
-    \sa TimeStamp::seconds()
-*/
-
-/*!
-    \fn TimeStamp::setMicroSeconds(qint64 usec)
-
-    Sets the microseconds in the timestamp type to \a usec.
-
-    \sa TimeStamp::microSeconds
 */
 
 /*!

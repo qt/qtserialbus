@@ -59,8 +59,6 @@ public:
         Q_DECL_CONSTEXPR qint64 seconds() const Q_DECL_NOTHROW { return secs; }
         Q_DECL_CONSTEXPR qint64 microSeconds() const Q_DECL_NOTHROW { return usecs; }
 
-        Q_DECL_RELAXED_CONSTEXPR void setSeconds(qint64 s) Q_DECL_NOTHROW { secs = s; }
-        Q_DECL_RELAXED_CONSTEXPR void setMicroSeconds(qint64 usec) Q_DECL_NOTHROW { usecs = usec; }
     private:
         qint64 secs;
         qint64 usecs;
