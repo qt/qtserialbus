@@ -613,7 +613,7 @@ void SocketCanBackend::readSocket()
 
         bufferedFrame.setFrameId(frame.can_id & CAN_EFF_MASK);
 
-        QByteArray load(reinterpret_cast<char *>(frame.data), frame.len);
+        const QByteArray load(reinterpret_cast<char *>(frame.data), frame.len);
         bufferedFrame.setPayload(load);
 
         newFrames.append(bufferedFrame);
