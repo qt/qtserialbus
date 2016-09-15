@@ -595,8 +595,7 @@ void SocketCanBackend::readSocket()
         if (ioctl(canSocket, SIOCGSTAMP, &timeStamp) < 0) {
             setError(qt_error_string(errno),
                      QCanBusDevice::CanBusError::ReadError);
-            timeStamp.tv_sec = 0;
-            timeStamp.tv_usec = 0;
+            memset(&timeStamp, 0, sizeof(timeStamp));
         }
 
         const QCanBusFrame::TimeStamp stamp(timeStamp.tv_sec, timeStamp.tv_usec);
