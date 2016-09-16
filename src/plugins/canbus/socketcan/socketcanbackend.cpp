@@ -616,7 +616,7 @@ void SocketCanBackend::readSocket()
         const QByteArray load(reinterpret_cast<char *>(frame.data), frame.len);
         bufferedFrame.setPayload(load);
 
-        newFrames.append(bufferedFrame);
+        newFrames.append(std::move(bufferedFrame));
     }
 
     enqueueReceivedFrames(newFrames);
