@@ -440,8 +440,8 @@ void PeakCanBackendPrivate::canReadNotification()
         }
 
         QCanBusFrame frame(message.ID, QByteArray(reinterpret_cast<const char *>(message.DATA), int(message.LEN)));
-        const quint64 millis = timestamp.millis + 0xFFFFFFFFU * timestamp.millis_overflow;
-        const quint64 micros = 1000 * (millis % 1000) + timestamp.micros;
+        const quint64 millis = timestamp.millis + Q_UINT64_C(0xFFFFFFFF) * timestamp.millis_overflow;
+        const quint64 micros = Q_UINT64_C(1000) * (millis % 1000) + timestamp.micros;
         frame.setTimeStamp(QCanBusFrame::TimeStamp(millis / 1000, micros));
         frame.setExtendedFrameFormat(message.MSGTYPE & PCAN_MESSAGE_EXTENDED);
         frame.setFrameType((message.MSGTYPE & PCAN_MESSAGE_RTR) ? QCanBusFrame::RemoteRequestFrame : QCanBusFrame::DataFrame);
