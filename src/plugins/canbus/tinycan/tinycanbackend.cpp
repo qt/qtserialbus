@@ -61,7 +61,7 @@ bool TinyCanBackend::canCreate(QString *errorReason)
 #else
     static bool symbolsResolved = resolveSymbols(mhstcanLibrary());
     if (!symbolsResolved) {
-        *errorReason = tr("The MHSTCAN runtime library is not found");
+        *errorReason = mhstcanLibrary()->errorString();
         return false;
     }
     return true;
