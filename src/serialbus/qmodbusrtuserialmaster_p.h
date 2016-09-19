@@ -216,8 +216,9 @@ public:
 
         QObject::connect(m_serialPort, &QSerialPort::aboutToClose, q, [this]() {
             Q_Q(QModbusRtuSerialMaster);
-            if (q->state() != QModbusDevice::ClosingState)
-                q->close();
+            Q_UNUSED(q); // To avoid unused variable warning in release mode
+            Q_ASSERT(q->state() == QModbusDevice::ClosingState);
+
             m_sendTimer.stop();
             m_responseTimer.stop();
         });

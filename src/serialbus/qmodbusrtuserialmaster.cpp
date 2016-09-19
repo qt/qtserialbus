@@ -112,10 +112,15 @@ bool QModbusRtuSerialMaster::open()
 */
 void QModbusRtuSerialMaster::close()
 {
-    if (state() == QModbusDevice::UnconnectedState)
+    if (state() == QModbusDevice::UnconnectedState ||
+        state() == QModbusDevice::ClosingState) {
         return;
+    }
+
+    setState(QModbusDevice::ClosingState);
 
     Q_D(QModbusRtuSerialMaster);
+
     if (d->m_serialPort->isOpen())
         d->m_serialPort->close();
 
