@@ -43,3 +43,4 @@ imagedirs   += images
 
 navigation.landingpage = "Qt Serial Bus"
 navigation.cppclassespage = "Qt Serial Bus C++ Classes"
+navigation.homepage       = "Qt Documentation (Technology Preview)"

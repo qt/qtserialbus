@@ -65,7 +65,7 @@ bool PeakCanBackend::canCreate(QString *errorReason)
 #else
     static bool symbolsResolved = resolveSymbols(pcanLibrary());
     if (!symbolsResolved) {
-        *errorReason = tr("The PCAN runtime library is not found");
+        *errorReason = pcanLibrary()->errorString();
         return false;
     }
     return true;
@@ -393,13 +393,15 @@ void PeakCanBackendPrivate::startRead()
 
         const TPCANStatus st = ::CAN_Read(channelIndex, &message, &timestamp);
         if (st != PCAN_ERROR_OK) {
-            if (st != PCAN_ERROR_XMTFULL)
+            if (st != PCAN_ERROR_QRCVEMPTY)
                 q->setError(systemErrorString(st), QCanBusDevice::ReadError);
             break;
         }
 
         QCanBusFrame frame(message.ID, QByteArray(reinterpret_cast<const char *>(message.DATA), int(message.LEN)));
-        frame.setTimeStamp(QCanBusFrame::TimeStamp(timestamp.millis / 1000, timestamp.micros));
+        const quint64 millis = timestamp.millis + Q_UINT64_C(0xFFFFFFFF) * timestamp.millis_overflow;
+        const quint64 micros = Q_UINT64_C(1000) * (millis % 1000) + timestamp.micros;
+        frame.setTimeStamp(QCanBusFrame::TimeStamp(millis / 1000, micros));
         frame.setExtendedFrameFormat(message.MSGTYPE & PCAN_MESSAGE_EXTENDED);
         frame.setFrameType((message.MSGTYPE & PCAN_MESSAGE_RTR) ? QCanBusFrame::RemoteRequestFrame : QCanBusFrame::DataFrame);
 
