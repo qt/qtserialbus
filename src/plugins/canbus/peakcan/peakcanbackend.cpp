@@ -403,7 +403,7 @@ void PeakCanBackendPrivate::startRead()
         frame.setExtendedFrameFormat(message.MSGTYPE & PCAN_MESSAGE_EXTENDED);
         frame.setFrameType((message.MSGTYPE & PCAN_MESSAGE_RTR) ? QCanBusFrame::RemoteRequestFrame : QCanBusFrame::DataFrame);
 
-        newFrames.append(frame);
+        newFrames.append(std::move(frame));
     }
 
     q->enqueueReceivedFrames(newFrames);
