@@ -54,13 +54,15 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \fn QCanBusFrame::QCanBusFrame(QCanBusFrame::FrameType type)
+    \fn QCanBusFrame::QCanBusFrame(QCanBusFrame::FrameType type = DataFrame)
+    \since 5.8
 
     Constructs a CAN frame of the specified \a type.
 */
 
 /*!
     \fn QCanBusFrame::QCanBusFrame(quint32 identifier, const QByteArray &data)
+    \since 5.8
 
     Constructs a CAN frame using \a identifier as the frame identifier and \a data as the payload.
 */

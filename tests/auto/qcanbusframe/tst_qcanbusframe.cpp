@@ -366,7 +366,7 @@ void tst_QCanBusFrame::streaming()
 
 void tst_QCanBusFrame::tst_error()
 {
-    QCanBusFrame frame(1);
+    QCanBusFrame frame(1, QByteArray());
     QCOMPARE(frame.frameType(), QCanBusFrame::DataFrame);
     QCOMPARE(frame.frameId(), 1u);
     QCOMPARE(frame.error(), QCanBusFrame::NoError);

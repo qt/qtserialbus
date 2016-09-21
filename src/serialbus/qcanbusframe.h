@@ -72,7 +72,7 @@ public:
         InvalidFrame        = 0x4
     };
 
-    explicit QCanBusFrame(QCanBusFrame::FrameType type) :
+    explicit QCanBusFrame(QCanBusFrame::FrameType type = DataFrame) :
         canId(0x0),
         isExtendedFrame(0x0),
         version(0x0)
@@ -98,7 +98,7 @@ public:
     Q_DECLARE_FLAGS(FrameErrors, FrameError)
     Q_FLAGS(FrameErrors)
 
-    explicit QCanBusFrame(quint32 identifier = 0, const QByteArray &data = QByteArray()) :
+    explicit QCanBusFrame(quint32 identifier, const QByteArray &data) :
         canId(identifier & 0x1FFFFFFFU),
         format(DataFrame),
         isExtendedFrame((identifier & 0x1FFFF800U) ? 0x1 : 0x0),
