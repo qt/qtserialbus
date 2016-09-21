@@ -73,10 +73,10 @@ public:
     };
 
     explicit QCanBusFrame(FrameType type = DataFrame) Q_DECL_NOTHROW :
-        canId(0x0),
         isExtendedFrame(0x0),
         version(0x0)
     {
+        setFrameId(0x0);
         setFrameType(type);
     }
 
@@ -99,14 +99,15 @@ public:
     Q_FLAGS(FrameErrors)
 
     explicit QCanBusFrame(quint32 identifier, const QByteArray &data) :
-        canId(identifier & 0x1FFFFFFFU),
         format(DataFrame),
-        isExtendedFrame((identifier & 0x1FFFF800U) ? 0x1 : 0x0),
+        isExtendedFrame(0x0),
         version(0x0),
         load(data)
     {
         Q_UNUSED(extra);
         Q_UNUSED(reserved);
+
+        setFrameId(identifier);
     }
 
     bool isValid() const Q_DECL_NOTHROW
@@ -116,6 +117,9 @@ public:
 
         // long id used, but extended flag not set
         if (!isExtendedFrame && (canId & 0x1FFFF800U))
+            return false;
+
+        if (!isValidFrameId)
             return false;
 
         // maximum permitted payload size in CAN FD
@@ -168,8 +172,14 @@ public:
     }
     void setFrameId(quint32 newFrameId)
     {
-        canId = (newFrameId & 0x1FFFFFFFU);
-        setExtendedFrameFormat(isExtendedFrame || (newFrameId & 0x1FFFF800U));
+        if (newFrameId < 0x20000000U) {
+            isValidFrameId = true;
+            canId = newFrameId;
+            setExtendedFrameFormat(isExtendedFrame || (newFrameId & 0x1FFFF800U));
+        } else {
+            isValidFrameId = false;
+            canId = 0;
+        }
     }
 
     void setPayload(const QByteArray &data) { load = data; }
@@ -239,7 +249,8 @@ private:
 
     quint8 isExtendedFrame:1;
     quint8 version:5;
-    quint8 extra: 2; // unused
+    quint8 isValidFrameId:1;
+    quint8 extra: 1; // unused
 
     // reserved for future use
     quint8 reserved[3];

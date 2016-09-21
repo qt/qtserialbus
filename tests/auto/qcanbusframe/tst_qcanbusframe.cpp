@@ -104,22 +104,32 @@ void tst_QCanBusFrame::id()
     frame.setExtendedFrameFormat(false);
     frame.setFrameId(2047u);
     QCOMPARE(frame.frameId(), 2047u);
-    QVERIFY(frame.hasExtendedFrameFormat() == false);
+    QVERIFY(frame.isValid());
+    QVERIFY(!frame.hasExtendedFrameFormat());
     // id > 2^11 -> extended format
     frame.setExtendedFrameFormat(false);
     frame.setFrameId(2048u);
     QCOMPARE(frame.frameId(), 2048u);
-    QVERIFY(frame.hasExtendedFrameFormat() == true);
+    QVERIFY(frame.isValid());
+    QVERIFY(frame.hasExtendedFrameFormat());
     // id < 2^11 -> no extended format
     frame.setExtendedFrameFormat(false);
     frame.setFrameId(512u);
     QCOMPARE(frame.frameId(), 512u);
-    QVERIFY(frame.hasExtendedFrameFormat() == false);
+    QVERIFY(frame.isValid());
+    QVERIFY(!frame.hasExtendedFrameFormat());
     // id < 2^11 -> keep extended format
     frame.setExtendedFrameFormat(true);
     frame.setFrameId(512u);
     QCOMPARE(frame.frameId(), 512u);
-    QVERIFY(frame.hasExtendedFrameFormat() == true);
+    QVERIFY(frame.isValid());
+    QVERIFY(frame.hasExtendedFrameFormat());
+    // id >= 2^29 -> invalid
+    frame.setExtendedFrameFormat(false);
+    frame.setFrameId(536870912u);
+    QCOMPARE(frame.frameId(), 0u);
+    QVERIFY(!frame.isValid());
+    QVERIFY(!frame.hasExtendedFrameFormat());
 }
 
 void tst_QCanBusFrame::payload()
