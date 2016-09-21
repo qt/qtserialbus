@@ -110,7 +110,8 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \fn QCanBusFrame::setTimeStamp(const TimeStamp &ts)
+    \fn QCanBusFrame::setTimeStamp(TimeStamp ts)
+    \since 5.8
 
     Sets \a ts as the timestamp for the CAN frame. Usually, this function is not needed, because the
     timestamp is created during the read operation and not needed during the write operation.

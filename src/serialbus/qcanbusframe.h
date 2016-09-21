@@ -173,7 +173,7 @@ public:
     }
 
     inline void setPayload(const QByteArray &data) { load = data; }
-    inline void setTimeStamp(const TimeStamp &ts) { stamp = ts; }
+    inline void setTimeStamp(TimeStamp ts) { stamp = ts; }
 
     QByteArray payload() const { return load; }
     TimeStamp timeStamp() const { return stamp; }
