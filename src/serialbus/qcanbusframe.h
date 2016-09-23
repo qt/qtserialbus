@@ -214,10 +214,12 @@ public:
         if (type == RemoteRequestFrame) {
             result.append(QLatin1String(" Remote Request"));
         } else {
-            QByteArray data = payload().toHex().toUpper();
-            for (int i = 0; i < data.size(); i += 3)
-                data.insert(i, ' ');
-            result.append(QLatin1String(data));
+            const QByteArray data = payload().toHex().toUpper();
+            const QLatin1String l1(data.data(), data.size());
+            for (int i = 0, e = data.size(); i < e; i += 2) {
+                result.append(QLatin1Char(' '));
+                result.append(l1.mid(i, 2));
+            }
         }
 
         return result;
