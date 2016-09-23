@@ -336,7 +336,7 @@ QVariant QCanBusDevice::configurationParameter(int key) const
 {
     Q_D(const QCanBusDevice);
 
-    foreach (const ConfigEntry &e, d->configOptions) {
+    for (const ConfigEntry &e : d->configOptions) {
         if (e.first == key)
             return e.second;
     }
@@ -356,7 +356,7 @@ QVector<int> QCanBusDevice::configurationKeys() const
     Q_D(const QCanBusDevice);
 
     QVector<int> result;
-    foreach (const ConfigEntry &e, d->configOptions)
+    for (const ConfigEntry &e : d->configOptions)
         result.append(e.first);
 
     return result;

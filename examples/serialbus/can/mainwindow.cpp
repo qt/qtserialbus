@@ -129,7 +129,7 @@ void MainWindow::connectDevice()
             this, &MainWindow::framesWritten);
 
     if (p.useConfigurationEnabled) {
-        foreach (const ConnectDialog::ConfigurationItem &item, p.configurations)
+        for (const ConnectDialog::ConfigurationItem &item : p.configurations)
             m_canDevice->setConfigurationParameter(item.first, item.second);
     }
 

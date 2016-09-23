@@ -283,7 +283,7 @@ void MainWindow::setupDeviceData()
     }
 
     bool ok;
-    foreach (QLineEdit *widget, registers) {
+    for (QLineEdit *widget : qAsConst(registers)) {
         if (widget->objectName().startsWith(QStringLiteral("inReg"))) {
             modbusDevice->setData(QModbusDataUnit::InputRegisters, widget->property("ID").toInt(),
                 widget->text().toInt(&ok, 16));
@@ -301,19 +301,19 @@ void MainWindow::setupWidgetContainers()
 
     QRegularExpression regexp(QStringLiteral("coils_(?<ID>\\d+)"));
     const QList<QCheckBox *> coils = findChildren<QCheckBox *>(regexp);
-    foreach (QCheckBox *cbx, coils)
+    for (QCheckBox *cbx : coils)
         coilButtons.addButton(cbx, regexp.match(cbx->objectName()).captured("ID").toInt());
     connect(&coilButtons, SIGNAL(buttonClicked(int)), this, SLOT(coilChanged(int)));
 
     regexp.setPattern(QStringLiteral("disc_(?<ID>\\d+)"));
     const QList<QCheckBox *> discs = findChildren<QCheckBox *>(regexp);
-    foreach (QCheckBox *cbx, discs)
+    for (QCheckBox *cbx : discs)
         discreteButtons.addButton(cbx, regexp.match(cbx->objectName()).captured("ID").toInt());
     connect(&discreteButtons, SIGNAL(buttonClicked(int)), this, SLOT(discreteInputChanged(int)));
 
     regexp.setPattern(QLatin1String("(in|hold)Reg_(?<ID>\\d+)"));
     const QList<QLineEdit *> qle = findChildren<QLineEdit *>(regexp);
-    foreach (QLineEdit *lineEdit, qle) {
+    for (QLineEdit *lineEdit : qle) {
         registers.insert(lineEdit->objectName(), lineEdit);
         lineEdit->setProperty("ID", regexp.match(lineEdit->objectName()).captured("ID").toInt());
         lineEdit->setValidator(new QRegExpValidator(QRegExp(QStringLiteral("[0-9a-f]{0,4}"),

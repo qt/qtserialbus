@@ -109,7 +109,7 @@ static void DRV_CALLBACK_TYPE canRxEventCallback(quint32 index, TCanMsg *frame, 
     Q_UNUSED(count);
 
     QMutexLocker lock(&channelsGuard);
-    foreach (TinyCanBackendPrivate *p, *qChannels()) {
+    for (TinyCanBackendPrivate *p : qAsConst(*qChannels())) {
         if (p->channelIndex == int(index)) {
             p->startRead();
             return;
@@ -506,7 +506,8 @@ bool TinyCanBackend::open()
         }
 
         // apply all stored configurations
-        foreach (int key, configurationKeys()) {
+        const auto keys = configurationKeys();
+        for (int key : keys) {
             const QVariant param = configurationParameter(key);
             const bool success = d->setConfigurationParameter(key, param);
             if (!success) {

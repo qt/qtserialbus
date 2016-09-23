@@ -355,7 +355,8 @@ bool SocketCanBackend::connectSocket()
             this, &SocketCanBackend::readSocket);
 
     //apply all stored configurations
-    foreach (int key, configurationKeys()) {
+    const auto keys = configurationKeys();
+    for (int key : keys) {
         const QVariant param = configurationParameter(key);
         bool success = applyConfigurationParameter(key, param);
         if (!success) {
@@ -372,9 +373,8 @@ void SocketCanBackend::setConfigurationParameter(int key, const QVariant &value)
     if (key == QCanBusDevice::RawFilterKey) {
         //verify valid/supported filters
 
-        QList<QCanBusDevice::Filter> filters
-                = value.value<QList<QCanBusDevice::Filter> >();
-        foreach (QCanBusDevice::Filter f, filters) {
+        const auto filters = value.value<QList<QCanBusDevice::Filter> >();
+        for (QCanBusDevice::Filter f : filters) {
             switch (f.type) {
             case QCanBusFrame::UnknownFrame:
 

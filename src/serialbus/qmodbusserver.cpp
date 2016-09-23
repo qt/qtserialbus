@@ -994,7 +994,7 @@ QModbusResponse QModbusServerPrivate::processWriteMultipleCoilsRequest(const QMo
     // range is numberOfCoils and therefore index too.
     quint16 coil = numberOfCoils;
     qint32 currentBit = 8 - ((byteCount * 8) - numberOfCoils);
-    foreach (const auto &currentByte, bytes) {
+    for (const auto &currentByte : qAsConst(bytes)) {
         for (currentBit -= 1; currentBit >= 0; --currentBit)
             coils.setValue(--coil, currentByte[currentBit]);
         currentBit = 8;
@@ -1243,7 +1243,7 @@ QModbusResponse QModbusServerPrivate::processEncapsulatedInterfaceTransportReque
                 payload[5] = quint8(0x00); // number of objects
 
                 const QList<int> objectIds = objectPool.objectIds();
-                foreach (int id, objectIds) {
+                for (int id : objectIds) {
                     if (id < objectId)
                         continue;
                     if (id > lastObjectId)

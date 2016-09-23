@@ -242,14 +242,13 @@ public:
 
         qCDebug(QT_MODBUS) << "(TCP client) Cleanup of pending requests";
 
-        foreach (auto tid, m_transactionStore.keys()) {
-            const QueueElement elem = m_transactionStore.take(tid);
+        for (const auto &elem : qAsConst(m_transactionStore)) {
             if (elem.reply.isNull())
                 continue;
-
             elem.reply->setError(QModbusDevice::ReplyAbortedError,
                                  QModbusClient::tr("Reply aborted due to connection closure."));
         }
+        m_transactionStore.clear();
     }
 
     // This doesn't overflow, it rather "wraps around". Expected.

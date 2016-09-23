@@ -70,7 +70,8 @@ MainWindow::MainWindow(QWidget *parent)
     setupUi(this);
     s_instance = this;
 
-    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
+    const auto ports = QSerialPortInfo::availablePorts();
+    for (const QSerialPortInfo &info : ports)
         serialPortCombo->addItem(info.portName(), false);
     serialPortCombo->insertSeparator(serialPortCombo->count());
     serialPortCombo->addItem(QStringLiteral("Add port..."), true);

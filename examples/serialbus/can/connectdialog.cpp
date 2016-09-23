@@ -141,7 +141,7 @@ QString ConnectDialog::configurationValue(QCanBusDevice::ConfigurationKey key)
 {
     QVariant result;
 
-    foreach (const ConfigurationItem &item, m_currentSettings.configurations) {
+    for (const ConfigurationItem &item : qAsConst(m_currentSettings.configurations)) {
         if (item.first == key) {
             result = item.second;
             break;

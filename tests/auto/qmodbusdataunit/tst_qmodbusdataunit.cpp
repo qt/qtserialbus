@@ -65,10 +65,12 @@ void tst_QModbusDataUnit::constructors()
     QModbusDataUnit coils(QModbusDataUnit::Coils, 15, 20);
     QCOMPARE(coils.registerType(), QModbusDataUnit::Coils);
     QCOMPARE(coils.startAddress(), 15);
-    QCOMPARE(coils.values().size(), 20);
-    QCOMPARE(coils.values(), QVector<quint16>(20));
-    foreach (auto val, coils.values())
+    const auto values = coils.values();
+    QCOMPARE(values.size(), 20);
+    QCOMPARE(values, QVector<quint16>(20));
+    for (auto val : values) {
         QCOMPARE(val, quint16(0));
+    }
     QCOMPARE(coils.valueCount(), 20u);
 
     QModbusDataUnit unit2(QModbusDataUnit::HoldingRegisters, 3, QVector<quint16>() << 9);
