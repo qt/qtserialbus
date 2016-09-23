@@ -35,7 +35,6 @@
 ****************************************************************************/
 
 #include "socketcanbackend.h"
-#include <QtSerialBus/qcanbusdevice.h>
 
 #include <QtCore/qdebug.h>
 #include <QtCore/qdatastream.h>
@@ -266,7 +265,7 @@ bool SocketCanBackend::connectSocket()
         return false;
     }
 
-    strcpy(interface.ifr_name, canSocketName.toLatin1().data());
+    qstrncpy(interface.ifr_name, canSocketName.toLatin1().constData(), sizeof(interface.ifr_name));
     if (ioctl(canSocket, SIOCGIFINDEX, &interface) < 0) {
         setError(qt_error_string(errno),
                  QCanBusDevice::CanBusError::ConnectionError);
@@ -595,8 +594,7 @@ void SocketCanBackend::readSocket()
         if (ioctl(canSocket, SIOCGSTAMP, &timeStamp) < 0) {
             setError(qt_error_string(errno),
                      QCanBusDevice::CanBusError::ReadError);
-            timeStamp.tv_sec = 0;
-            timeStamp.tv_usec = 0;
+            memset(&timeStamp, 0, sizeof(timeStamp));
         }
 
         const QCanBusFrame::TimeStamp stamp(timeStamp.tv_sec, timeStamp.tv_usec);
@@ -613,10 +611,10 @@ void SocketCanBackend::readSocket()
 
         bufferedFrame.setFrameId(frame.can_id & CAN_EFF_MASK);
 
-        QByteArray load(reinterpret_cast<char *>(frame.data), frame.len);
+        const QByteArray load(reinterpret_cast<char *>(frame.data), frame.len);
         bufferedFrame.setPayload(load);
 
-        newFrames.append(bufferedFrame);
+        newFrames.append(std::move(bufferedFrame));
     }
 
     enqueueReceivedFrames(newFrames);

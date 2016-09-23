@@ -324,8 +324,7 @@ void VectorCanBackendPrivate::startRead()
 
         QCanBusFrame frame(msg.id, QByteArray(reinterpret_cast<const char *>(msg.data),
                                               int(msg.dlc)));
-        const quint64 usecs = event.timeStamp / 1000;
-        frame.setTimeStamp(QCanBusFrame::TimeStamp(usecs / 1000000, usecs % 1000000));
+        frame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(event.timeStamp / 1000));
         frame.setExtendedFrameFormat(msg.id & XL_CAN_EXT_MSG_ID);
         frame.setFrameType((msg.flags & XL_CAN_MSG_FLAG_REMOTE_FRAME)
                            ? QCanBusFrame::RemoteRequestFrame
@@ -333,7 +332,7 @@ void VectorCanBackendPrivate::startRead()
                              ? QCanBusFrame::ErrorFrame
                              : QCanBusFrame::DataFrame);
 
-        newFrames.append(frame);
+        newFrames.append(std::move(frame));
     }
 
     q->enqueueReceivedFrames(newFrames);

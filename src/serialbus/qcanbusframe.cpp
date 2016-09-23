@@ -54,13 +54,15 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \fn QCanBusFrame::QCanBusFrame(QCanBusFrame::FrameType type)
+    \fn QCanBusFrame::QCanBusFrame(QCanBusFrame::FrameType type = DataFrame)
+    \since 5.8
 
     Constructs a CAN frame of the specified \a type.
 */
 
 /*!
     \fn QCanBusFrame::QCanBusFrame(quint32 identifier, const QByteArray &data)
+    \since 5.8
 
     Constructs a CAN frame using \a identifier as the frame identifier and \a data as the payload.
 */
@@ -108,7 +110,8 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \fn QCanBusFrame::setTimeStamp(const TimeStamp &ts)
+    \fn QCanBusFrame::setTimeStamp(TimeStamp ts)
+    \since 5.8
 
     Sets \a ts as the timestamp for the CAN frame. Usually, this function is not needed, because the
     timestamp is created during the read operation and not needed during the write operation.
@@ -243,38 +246,31 @@ QT_BEGIN_NAMESPACE
     \fn TimeStamp::TimeStamp(qint64 s, qint64 usec)
 
     Constructs a TimeStamp in seconds, \a s, and microseconds, \a usec.
+
+    \note The TimeStamp is not normalized, i.e. microseconds greater 1000000 are not
+    converted to seconds.
+*/
+
+/*!
+    \fn static TimeStamp TimeStamp::fromMicroSeconds(qint64 usec)
+    \since 5.8
+
+    Constructs a normalized TimeStamp from microseconds \a usec.
+
+    The created TimeStamp is normalized, i.e. microsconds greater 1000000 are converted
+    to seconds.
 */
 
 /*!
     \fn qint64 TimeStamp::seconds() const
 
     Returns the seconds of the timestamp.
-
-    \sa TimeStamp::setSeconds()
 */
 
 /*!
     \fn qint64 TimeStamp::microSeconds() const
 
     Returns the microseconds of the timestamp.
-
-    \sa TimeStamp::setMicroSeconds
-*/
-
-/*!
-    \fn TimeStamp::setSeconds(qint64 s)
-
-    Sets the seconds in the timestamp type to \a s.
-
-    \sa TimeStamp::seconds()
-*/
-
-/*!
-    \fn TimeStamp::setMicroSeconds(qint64 usec)
-
-    Sets the microseconds in the timestamp type to \a usec.
-
-    \sa TimeStamp::microSeconds
 */
 
 /*!

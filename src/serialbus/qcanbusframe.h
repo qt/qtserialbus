@@ -52,11 +52,13 @@ public:
     public:
         Q_DECL_CONSTEXPR TimeStamp(qint64 s = 0, qint64 usec = 0) Q_DECL_NOTHROW
             : secs(s), usecs(usec) {}
+
+        Q_DECL_CONSTEXPR static TimeStamp fromMicroSeconds(qint64 usec) Q_DECL_NOTHROW
+        { return TimeStamp(usec / 1000000, usec % 1000000); }
+
         Q_DECL_CONSTEXPR qint64 seconds() const Q_DECL_NOTHROW { return secs; }
         Q_DECL_CONSTEXPR qint64 microSeconds() const Q_DECL_NOTHROW { return usecs; }
 
-        Q_DECL_RELAXED_CONSTEXPR void setSeconds(qint64 s) Q_DECL_NOTHROW { secs = s; }
-        Q_DECL_RELAXED_CONSTEXPR void setMicroSeconds(qint64 usec) Q_DECL_NOTHROW { usecs = usec; }
     private:
         qint64 secs;
         qint64 usecs;
@@ -70,7 +72,7 @@ public:
         InvalidFrame        = 0x4
     };
 
-    explicit QCanBusFrame(QCanBusFrame::FrameType type) :
+    explicit QCanBusFrame(QCanBusFrame::FrameType type = DataFrame) :
         canId(0x0),
         isExtendedFrame(0x0),
         version(0x0)
@@ -96,7 +98,7 @@ public:
     Q_DECLARE_FLAGS(FrameErrors, FrameError)
     Q_FLAGS(FrameErrors)
 
-    explicit QCanBusFrame(quint32 identifier = 0, const QByteArray &data = QByteArray()) :
+    explicit QCanBusFrame(quint32 identifier, const QByteArray &data) :
         canId(identifier & 0x1FFFFFFFU),
         format(DataFrame),
         isExtendedFrame((identifier & 0x1FFFF800U) ? 0x1 : 0x0),
@@ -171,7 +173,7 @@ public:
     }
 
     inline void setPayload(const QByteArray &data) { load = data; }
-    inline void setTimeStamp(const TimeStamp &ts) { stamp = ts; }
+    inline void setTimeStamp(TimeStamp ts) { stamp = ts; }
 
     QByteArray payload() const { return load; }
     TimeStamp timeStamp() const { return stamp; }

@@ -34,6 +34,51 @@
     This API is a set of open source CAN drivers and a networking stack contributed by
     Volkswagen Research to the Linux kernel.
 
+    \section1 SocketCAN usage
+
+    To list all (including unconfigured) network interfaces, the command
+    \c{ifconfig -a} can be used.
+
+    To use SocketCAN, the corresponding Linux Kernel modules must be loaded
+    and the network interface must be configured.
+
+    \section2 Setting up real CAN hardware
+
+    This section assumes, that the device driver is already loaded
+    (most likely automatically when connecting the CAN hardware).
+
+    To set the device can0 to a bitrate of 250 kBit/s:
+    \code
+        sudo ip link set can0 type can bitrate 250000
+        sudo ip link set up can0
+    \endcode
+
+    \section2 Setting up a virtual CAN bus
+
+    \note For CAN FD usage, the MTU (Maximum Transmission Unit) has to be set
+    to 72 byte.
+
+    \code
+        sudo modprobe vcan
+        sudo ip link add dev vcan0 type vcan
+        sudo ip link set vcan0 mtu 72
+        sudo ip link set up vcan0
+    \endcode
+
+    The command line test programs used in the following are from
+    the \l{https://github.com/linux-can/can-utils}{can-utils} package:
+
+    \code
+        # Display received CAN messages
+        candump vcan0
+
+        # Send a CAN message
+        cansend vcan0 123##3112233445566778899aabbccddeeff
+
+        # Generate random CAN messages
+        cangen vcan0
+    \endcode
+
     \section1 Creating CAN Bus Devices
 
     At first it is necessary to check that QCanBus provides the desired backend:

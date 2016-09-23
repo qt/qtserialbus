@@ -136,10 +136,21 @@ void tst_QCanBusFrame::timeStamp()
     QCanBusFrame::TimeStamp timeStamp = frame.timeStamp();
     QVERIFY(!timeStamp.seconds());
     QVERIFY(!timeStamp.microSeconds());
-    timeStamp.setMicroSeconds(5);
-    timeStamp.setSeconds(4);
-    QCOMPARE(timeStamp.seconds(), 4);
-    QCOMPARE(timeStamp.microSeconds(), 5);
+
+    // fromMicroSeconds: no microsecond overflow
+    timeStamp = QCanBusFrame::TimeStamp::fromMicroSeconds(999999);
+    QCOMPARE(timeStamp.seconds(), 0);
+    QCOMPARE(timeStamp.microSeconds(), 999999);
+
+    // fromMicroSeconds: microsecond overflow
+    timeStamp = QCanBusFrame::TimeStamp::fromMicroSeconds(1000000);
+    QCOMPARE(timeStamp.seconds(), 1);
+    QCOMPARE(timeStamp.microSeconds(), 0);
+
+    // fromMicroSeconds: microsecond overflow
+    timeStamp = QCanBusFrame::TimeStamp::fromMicroSeconds(2000001);
+    QCOMPARE(timeStamp.seconds(), 2);
+    QCOMPARE(timeStamp.microSeconds(), 1);
 }
 
 void tst_QCanBusFrame::tst_isValid_data()
@@ -355,7 +366,7 @@ void tst_QCanBusFrame::streaming()
 
 void tst_QCanBusFrame::tst_error()
 {
-    QCanBusFrame frame(1);
+    QCanBusFrame frame(1, QByteArray());
     QCOMPARE(frame.frameType(), QCanBusFrame::DataFrame);
     QCOMPARE(frame.frameId(), 1u);
     QCOMPARE(frame.error(), QCanBusFrame::NoError);
