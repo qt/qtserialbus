@@ -58,7 +58,7 @@ QT_BEGIN_NAMESPACE
     \a interfaceName is the network/CAN interface name.
     \a errorMessage contains an error description in case of failure.
 
-    If the factory cannot create a backend, it returns \c nullptr.
+    If the factory cannot create a plugin, it returns \c nullptr.
 
     \since 5.8
 */

@@ -54,8 +54,8 @@ QT_BEGIN_NAMESPACE
 
     \brief The QCanBusDevice class is the interface class for CAN bus.
 
-    QCanBusDevice communicates with a CAN backend providing users with a convenient API.
-    The CAN backend must be specified during the object creation.
+    QCanBusDevice communicates with a CAN plugin providing users with a convenient API.
+    The CAN plugin must be specified during the object creation.
 */
 
 /*!
@@ -65,7 +65,7 @@ QT_BEGIN_NAMESPACE
     \value NoError              No errors have occurred.
     \value ReadError            An error occurred during a read operation.
     \value WriteError           An error occurred during a write operation.
-    \value ConnectionError      An error occurred when attempting to open the backend.
+    \value ConnectionError      An error occurred when attempting to open the plugin.
     \value ConfigurationError   An error occurred when attempting to set a configuration
                                 parameter.
     \value UnknownError         An unknown error occurred.

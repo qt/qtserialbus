@@ -26,24 +26,24 @@
 ****************************************************************************/
 /*!
     \page qtserialbus-peakcan-overview.html
-    \title Using PeakCAN Backend
+    \title Using PeakCAN Plugin
 
-    \brief Overview of how to use the PeakCAN backend.
+    \brief Overview of how to use the PeakCAN plugin.
 
-    The PeakCAN backend encapsulates the low-level API to work with the
+    The PeakCAN plugin encapsulates the low-level API to work with the
     \l{http://www.peak-system.com/}{PEAK-System} CAN adapters.
 
     \section1 Creating CAN Bus Devices
 
-    At first it is necessary to check that QCanBus provides the desired backend:
+    At first it is necessary to check that QCanBus provides the desired plugin:
 
     \code
         if (QCanBus::instance()->plugins().contains(QStringLiteral("peakcan"))) {
-            // backend available
+            // plugin available
         }
     \endcode
 
-    Where \e peakcan is the backend name.
+    Where \e peakcan is the plugin name.
 
     Next, a connection to a specific interface can be established:
 
@@ -53,11 +53,11 @@
         device->connectDevice();
     \endcode
 
-    Where \e usb0 is the active CAN interface name. The PeakCAN backend supports
+    Where \e usb0 is the active CAN interface name. The PeakCAN plugin supports
     eight USB interfaces from \e usb0 to \e usb7 and eight PCI interfaces from
     \e pci0 to \e pci7.
 
-    \note Only the USB and PCI adapters are currently supported by this backend.
+    \note Only the USB and PCI adapters are currently supported by this plugin.
 
     The device is now open for writing and reading CAN frames:
 

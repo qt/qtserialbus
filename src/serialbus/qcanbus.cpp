@@ -89,9 +89,9 @@ static void loadPlugins()
     \inmodule QtSerialBus
     \since 5.6
 
-    \brief The QCanBus class handles registration and creation of bus backends.
+    \brief The QCanBus class handles registration and creation of bus plugins.
 
-    QCanBus loads Qt CAN Bus plugins at runtime. The ownership of serial bus backends is
+    QCanBus loads Qt CAN Bus plugins at runtime. The ownership of serial bus plugins is
     transferred to the loader.
 */
 
@@ -131,8 +131,19 @@ static void setErrorMessage(QString *result, const QString &message)
     method. \a interfaceName is the CAN bus interface name. In case of failure, the optional
     parameter \a errorMessage returns a textual error description.
 
-    Ownership of the returned backend is transferred to the caller.
+    Ownership of the returned plugin is transferred to the caller.
     Returns \c nullptr if no suitable device can be found.
+
+    For example, the following call would connect to the SocketCAN interface vcan0:
+
+    \code
+        QCanBusDevice *device = QCanBus::instance()->createDevice(
+            QStringLiteral("socketcan"), QStringLiteral("vcan0"));
+        device->connectDevice();
+    \endcode
+
+    \note The \a interfaceName is plugin-dependent. See the corresponding plugin documentation
+    for more information: \l {CAN Bus Plugins}.
 */
 QCanBusDevice *QCanBus::createDevice(const QString &plugin, const QString &interfaceName,
                                      QString *errorMessage) const
