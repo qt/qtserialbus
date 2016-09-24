@@ -107,7 +107,7 @@
     \endlist
 
     The \l {QCanBusDevice::open()}{open()} and \l {QCanBusDevice::close()}{close()}
-    methods are used in conjuntion with \l QCanBusDevice::connectDevice() and
+    methods are used in conjunction with \l QCanBusDevice::connectDevice() and
     \l QCanBusDevice::disconnectDevice() respectively. Check the
     function documentation for implementation details.
 
