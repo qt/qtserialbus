@@ -221,30 +221,23 @@ bool CanBusUtil::parsePayloadField(QString payload, bool &rtrFrame,
 
 bool CanBusUtil::connectCanDevice()
 {
-    bool foundPlugin = false;
-    const QStringList plugins = m_canBus->plugins();
-    for (int i = 0; i < plugins.size(); i++)
-    {
-        if (plugins.at(i) == m_pluginName) {
-            m_canDevice.reset(m_canBus->createDevice(plugins.at(i), m_deviceName));
-            if (!m_canDevice) {
-                m_output << "Unable to create QCanBusDevice with device name: " << m_deviceName << endl;
-                return false;
-            }
-            connect(m_canDevice.data(), &QCanBusDevice::errorOccurred, m_readTask, &ReadTask::receiveError);
-            if (!m_canDevice->connectDevice()) {
-                m_output << "Unable to connect QCanBusDevice with device name: " << m_deviceName << endl;
-                return false;
-            }
-            foundPlugin = true;
-        }
-    }
-
-    if (!foundPlugin) {
+    if (!m_canBus->plugins().contains(m_pluginName)) {
         m_output << "Could not find suitable plugin." << endl;
         printPlugins();
         return false;
     }
+
+    m_canDevice.reset(m_canBus->createDevice(m_pluginName, m_deviceName));
+    if (!m_canDevice) {
+        m_output << "Unable to create QCanBusDevice with device name: " << m_deviceName << endl;
+        return false;
+    }
+    connect(m_canDevice.data(), &QCanBusDevice::errorOccurred, m_readTask, &ReadTask::receiveError);
+    if (!m_canDevice->connectDevice()) {
+        m_output << "Unable to connect QCanBusDevice with device name: " << m_deviceName << endl;
+        return false;
+    }
+
     return true;
 }
 
