@@ -36,9 +36,6 @@
 
 #include "canbusutil.h"
 
-static const qint8 MAXNORMALPAYLOADSIZE = 8;
-static const qint8 MAXEXTENDEDPAYLOADSIZE = 64;
-
 CanBusUtil::CanBusUtil(QTextStream &output, QCoreApplication &app, QObject *parent)
   : QObject(parent),
     m_canBus(QCanBus::instance()),
@@ -102,10 +99,7 @@ bool CanBusUtil::parsePayloadField(QString payload, bool &rtrFrame,
     fdFrame = false;
     rtrFrame = false;
 
-     if (payload.size() == 0)
-        return true;
-
-     if (payload[0].toUpper() == 'R') {
+    if (!payload.isEmpty() && payload.at(0).toUpper() == 'R') {
         rtrFrame = true;
         bool validPayloadLength = false;
         if (payload.size() > 1) {
@@ -127,43 +121,30 @@ bool CanBusUtil::parsePayloadField(QString payload, bool &rtrFrame,
         }
 
         return validPayloadLength;
-    } else if (payload[0] == '#') {
+    } else if (!payload.isEmpty() && payload.at(0) == '#') {
         fdFrame = true;
         payload = payload.mid(1);
     }
 
-    if (payload.size() % 2 == 0) {
-        for (int i=0; i < payload.size(); i+=2) {
-            bool numberConverOk = true;
-            quint8 high = QString(payload[i]).toInt(&numberConverOk, 16);
-            if (!numberConverOk) {
-                m_output << "Data field invalid: Could not convert '"
-                    << QString(payload[i]) << "' to a number"<< endl;
-                return false;
-            }
-
-            quint8 low = QString(payload[i+1]).toInt(&numberConverOk, 16);
-            if (!numberConverOk) {
-                m_output << "Data field invalid: Could not convert '"
-                    << QString(payload[i+1]) << "' to a number" << endl;
-                return false;
-            }
-
-            quint8 byte = (high << 4) | (low);
-            bytes.append(byte);
-        }
-        qint8 size = bytes.size();
-        qint8 maxsize = fdFrame ? MAXEXTENDEDPAYLOADSIZE : MAXNORMALPAYLOADSIZE;
-        if (size > maxsize) {
-            m_output << "Warning! payload size too great. Size: " << size << ", max allowed size in frame: " << maxsize << endl
-                   << "Clipping payload to fit frame..." << endl;
-            size = maxsize;
-            bytes = bytes.left(size);
-        }
-    } else {
-        m_output << "Data field invalid: Payload size not multiple of two!" << endl;
+    if (payload.size() % 2 != 0) {
+        m_output << "Data field invalid: Size is not multiple of two." << endl;
         return false;
     }
+
+    const QRegularExpression re(QStringLiteral("^[0-9A-Fa-f]*$"));
+    if (!re.match(payload).hasMatch()) {
+        m_output << "Data field invalid: Only hex numbers allowed." << endl;
+        return false;
+    }
+
+    bytes = QByteArray::fromHex(payload.toLatin1());
+
+    const int maxSize = fdFrame ? 64 : 8;
+    if (bytes.size() > maxSize) {
+        m_output << "Warning: Truncating payload at max. size of " << maxSize << " bytes." << endl;
+        bytes.truncate(maxSize);
+    }
+
     return true;
 }
 
