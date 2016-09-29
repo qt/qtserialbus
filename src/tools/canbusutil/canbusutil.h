@@ -64,15 +64,15 @@ private:
     bool sendData();
 
 private:
-    QCanBus *canBus;
-    QTextStream &output;
-    QCoreApplication &app;
-    bool listening;
-    QString pluginName;
-    QString deviceName;
-    QString data;
-    QScopedPointer<QCanBusDevice> canDevice;
-    ReadTask *readTask;
+    QCanBus *m_canBus;
+    QTextStream &m_output;
+    QCoreApplication &m_app;
+    bool m_listening;
+    QString m_pluginName;
+    QString m_deviceName;
+    QString m_data;
+    QScopedPointer<QCanBusDevice> m_canDevice;
+    ReadTask *m_readTask;
 };
 
 #endif // CANBUSUTIL_H

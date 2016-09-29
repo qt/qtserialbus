@@ -41,17 +41,17 @@ static const qint8 MAXEXTENDEDPAYLOADSIZE = 64;
 
 CanBusUtil::CanBusUtil(QTextStream &output, QCoreApplication &app, QObject *parent)
   : QObject(parent),
-    canBus(QCanBus::instance()),
-    output(output),
-    app(app),
-    readTask(new ReadTask(output, this))
+    m_canBus(QCanBus::instance()),
+    m_output(output),
+    m_app(app),
+    m_readTask(new ReadTask(output, this))
 {
 }
 
 bool CanBusUtil::start(int argc, char *argv[])
 {
-    if (!canBus) {
-        output << "Unable to create QCanBus" << endl;
+    if (!m_canBus) {
+        m_output << "Unable to create QCanBus" << endl;
         return false;
     }
 
@@ -61,12 +61,12 @@ bool CanBusUtil::start(int argc, char *argv[])
     if (!connectCanDevice())
         return false;
 
-    if (listening) {
-        connect(canDevice.data(), &QCanBusDevice::framesReceived, readTask, &ReadTask::checkMessages);
+    if (m_listening) {
+        connect(m_canDevice.data(), &QCanBusDevice::framesReceived, m_readTask, &ReadTask::checkMessages);
     } else {
         if (!sendData())
             return false;
-        QTimer::singleShot(0, &app, SLOT(quit()));
+        QTimer::singleShot(0, &m_app, SLOT(quit()));
     }
 
     return true;
@@ -74,7 +74,7 @@ bool CanBusUtil::start(int argc, char *argv[])
 
 void CanBusUtil::printUsage()
 {
-    output << "Usage: canbusutil [options] <plugin> <device> [data]" << endl
+    m_output << "Usage: canbusutil [options] <plugin> <device> [data]" << endl
            << "-l             start listening CAN data on device" << endl
            << "--list-plugins lists all available plugins" << endl
            << "<plugin>       plugin name to use. See --list-plugins." << endl
@@ -89,15 +89,15 @@ void CanBusUtil::printUsage()
 
 void CanBusUtil::printPlugins()
 {
-    const QStringList plugins = canBus->plugins();
-    output << "Plugins: " << endl;
+    const QStringList plugins = m_canBus->plugins();
+    m_output << "Plugins: " << endl;
     for (int i = 0; i < plugins.size(); i++)
-        output << plugins.at(i) << endl;
+        m_output << plugins.at(i) << endl;
 }
 
 void CanBusUtil::printDataUsage()
 {
-    output << "Invalid [data] field, use format: " << endl
+    m_output << "Invalid [data] field, use format: " << endl
            << "    <id>#{payload}   (CAN 2.0 data frames)," << endl
            << "    <id>#Rxx         (CAN 2.0 RTR frames with xx bytes data length)," << endl
            << "    <id>##{payload}  (CAN FD data frames)," << endl
@@ -119,29 +119,29 @@ bool CanBusUtil::parseArgs(int argc, char *argv[])
         return false;
     }
 
-    listening = arg1 == QStringLiteral("-l");
-    if (listening) {
-        pluginName = QString(argv[2]);
-        deviceName = QString(argv[3]);
+    m_listening = arg1 == QStringLiteral("-l");
+    if (m_listening) {
+        m_pluginName = QString(argv[2]);
+        m_deviceName = QString(argv[3]);
     } else {
-        pluginName = QString(arg1);
-        deviceName = QString(argv[2]);
-        data = QString(argv[3]);
+        m_pluginName = QString(arg1);
+        m_deviceName = QString(argv[2]);
+        m_data = QString(argv[3]);
     }
     return true;
 }
 
 bool CanBusUtil::parseDataField(qint32 &id, QString &payload)
 {
-    int hashMarkPos = data.indexOf('#');
+    int hashMarkPos = m_data.indexOf('#');
     if (hashMarkPos < 0) {
-        output << "No hash mark found!" << endl;
+        m_output << "No hash mark found!" << endl;
         printDataUsage();
         return false;
     }
 
-    id = data.left(hashMarkPos).toInt(nullptr, 16);
-    payload = data.right(data.length() - hashMarkPos - 1);
+    id = m_data.left(hashMarkPos).toInt(nullptr, 16);
+    payload = m_data.right(m_data.length() - hashMarkPos - 1);
 
     return true;
 }
@@ -167,13 +167,13 @@ bool CanBusUtil::parsePayloadField(QString payload, bool &rtrFrame,
                 if (rtrFrameLength > 8)
                     fdFrame = true;
             } else if (validPayloadLength) {
-                output << "The length must be larger than 0 and not exceed 64." << endl;
+                m_output << "The length must be larger than 0 and not exceed 64." << endl;
                 validPayloadLength = false;
             }
         }
 
         if (!validPayloadLength) {
-            output << "RTR data frame length not specified/valid." << endl;
+            m_output << "RTR data frame length not specified/valid." << endl;
             printDataUsage();
         }
 
@@ -188,14 +188,14 @@ bool CanBusUtil::parsePayloadField(QString payload, bool &rtrFrame,
             bool numberConverOk = true;
             quint8 high = QString(payload[i]).toInt(&numberConverOk, 16);
             if (!numberConverOk) {
-                output << "Could not convert '" << QString(payload[i]) << "' to a number"<< endl;
+                m_output << "Could not convert '" << QString(payload[i]) << "' to a number"<< endl;
                 printDataUsage();
                 return false;
             }
 
             quint8 low = QString(payload[i+1]).toInt(&numberConverOk, 16);
             if (!numberConverOk) {
-                output << "Could not convert '" << QString(payload[i+1]) << "' to a number" << endl;
+                m_output << "Could not convert '" << QString(payload[i+1]) << "' to a number" << endl;
                 printDataUsage();
                 return false;
             }
@@ -206,13 +206,13 @@ bool CanBusUtil::parsePayloadField(QString payload, bool &rtrFrame,
         qint8 size = bytes.size();
         qint8 maxsize = fdFrame ? MAXEXTENDEDPAYLOADSIZE : MAXNORMALPAYLOADSIZE;
         if (size > maxsize) {
-            output << "Warning! payload size too great. Size: " << size << ", max allowed size in frame: " << maxsize << endl
+            m_output << "Warning! payload size too great. Size: " << size << ", max allowed size in frame: " << maxsize << endl
                    << "Clipping payload to fit frame..." << endl;
             size = maxsize;
             bytes = bytes.left(size);
         }
     } else {
-        output << "Payload size not multiple of two!" << endl;
+        m_output << "Payload size not multiple of two!" << endl;
         printDataUsage();
         return false;
     }
@@ -222,18 +222,18 @@ bool CanBusUtil::parsePayloadField(QString payload, bool &rtrFrame,
 bool CanBusUtil::connectCanDevice()
 {
     bool foundPlugin = false;
-    const QStringList plugins = canBus->plugins();
+    const QStringList plugins = m_canBus->plugins();
     for (int i = 0; i < plugins.size(); i++)
     {
-        if (plugins.at(i) == pluginName) {
-            canDevice.reset(canBus->createDevice(plugins.at(i), deviceName));
-            if (!canDevice) {
-                output << "Unable to create QCanBusDevice with device name: " << deviceName << endl;
+        if (plugins.at(i) == m_pluginName) {
+            m_canDevice.reset(m_canBus->createDevice(plugins.at(i), m_deviceName));
+            if (!m_canDevice) {
+                m_output << "Unable to create QCanBusDevice with device name: " << m_deviceName << endl;
                 return false;
             }
-            connect(canDevice.data(), &QCanBusDevice::errorOccurred, readTask, &ReadTask::receiveError);
-            if (!canDevice->connectDevice()) {
-                output << "Unable to connect QCanBusDevice with device name: " << deviceName << endl;
+            connect(m_canDevice.data(), &QCanBusDevice::errorOccurred, m_readTask, &ReadTask::receiveError);
+            if (!m_canDevice->connectDevice()) {
+                m_output << "Unable to connect QCanBusDevice with device name: " << m_deviceName << endl;
                 return false;
             }
             foundPlugin = true;
@@ -241,7 +241,7 @@ bool CanBusUtil::connectCanDevice()
     }
 
     if (!foundPlugin) {
-        output << "Could not find suitable plugin." << endl;
+        m_output << "Could not find suitable plugin." << endl;
         printPlugins();
         return false;
     }
@@ -265,7 +265,7 @@ bool CanBusUtil::sendData()
 
     if (id < 0 || id > 0x1FFFFFFF) { // 29 bits
         id = 0x1FFFFFFF;
-        output << "Warning! Id does not fit into Extended Frame Format, setting id to: " << id << endl;
+        m_output << "Warning! Id does not fit into Extended Frame Format, setting id to: " << id << endl;
     }
 
     if (rtrFrame)
@@ -275,7 +275,7 @@ bool CanBusUtil::sendData()
     frame.setFrameId(id);
 
     if (fdFrame)
-        canDevice->setConfigurationParameter(QCanBusDevice::CanFdKey, true);
+        m_canDevice->setConfigurationParameter(QCanBusDevice::CanFdKey, true);
 
-    return canDevice->writeFrame(frame);
+    return m_canDevice->writeFrame(frame);
 }
