@@ -102,16 +102,18 @@ bool CanBusUtil::parsePayloadField(QString payload, bool &rtrFrame,
     if (!payload.isEmpty() && payload.at(0).toUpper() == 'R') {
         rtrFrame = true;
         bool validPayloadLength = false;
-        if (payload.size() > 1) {
+        if (fdFrame) {
+            m_output << "CAN FD RTR data frames are not valid." << endl;
+        } else if (payload.size() == 1) { // payload = "R"
+            validPayloadLength = true;
+        } else if (payload.size() > 1) { // payload = "R8"
             payload = payload.mid(1);
             int rtrFrameLength = payload.toInt(&validPayloadLength);
 
-            if (validPayloadLength && rtrFrameLength > 0 && rtrFrameLength <= 64) {
+            if (validPayloadLength && rtrFrameLength >= 0 && rtrFrameLength <= 8) {
                 bytes = QByteArray(rtrFrameLength, 0);
-                if (rtrFrameLength > 8)
-                    fdFrame = true;
             } else if (validPayloadLength) {
-                m_output << "The length must be larger than 0 and not exceed 64." << endl;
+                m_output << "The length must be between 0 and 8 (including)." << endl;
                 validPayloadLength = false;
             }
         }
