@@ -73,8 +73,10 @@ public:
     explicit QCanBusFrame(QCanBusFrame::FrameType type) :
         canId(0x0),
         isExtendedFrame(0x0),
-        version(0x0)
+        version(0x0),
+        extra(0x0)
     {
+        memset(reserved, 0, sizeof(reserved));
         setFrameType(type);
     }
 
@@ -101,10 +103,11 @@ public:
         format(DataFrame),
         isExtendedFrame((identifier & 0x1FFFF800U) ? 0x1 : 0x0),
         version(0x0),
+        extra(0x0),
         load(data)
     {
         Q_UNUSED(extra);
-        Q_UNUSED(reserved);
+        memset(reserved, 0, sizeof(reserved));
     }
 
     bool isValid() const
