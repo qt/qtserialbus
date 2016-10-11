@@ -41,34 +41,37 @@
     The CAN Bus API provides some common API to access the CAN devices:
 
     \list
+        \li QCanBus provides an API to create a QCanBusDevice from a chosen plugin.
         \li QCanBusDevice provides an API for direct access to the CAN device.
         \li QCanBusFrame defines a CAN frame that can be written and read from QCanBusDevice.
     \endlist
 
+    \section1 CAN Bus Plugins
+
     Multiple vendors provide CAN devices with varying APIs for access. The QtSerialBus module
-    supports the following sets of CAN bus backends:
+    supports the following sets of CAN bus plugins:
 
     \table
         \header
             \li Vendor
-            \li Backend (key)
+            \li Plugin (key)
             \li Brief description
         \row
             \li CAN over Linux sockets
-            \li \l {Using SocketCAN Backend}{SocketCAN} (\c socketcan)
-            \li CAN bus backend using Linux sockets and open source drivers.
+            \li \l {Using SocketCAN Plugin}{SocketCAN} (\c socketcan)
+            \li CAN bus plugin using Linux sockets and open source drivers.
         \row
             \li PEAK-System
-            \li \l {Using PeakCAN Backend}{PeakCAN} (\c peakcan)
-            \li CAN bus backend using the PEAK CAN adapters.
+            \li \l {Using PeakCAN Plugin}{PeakCAN} (\c peakcan)
+            \li CAN bus plugin using the PEAK CAN adapters.
         \row
             \li MHS Elektronik
-            \li \l {Using TinyCAN Backend}{TinyCAN} (\c tinycan)
-            \li CAN bus backend using the MHS CAN adapters.
+            \li \l {Using TinyCAN Plugin}{TinyCAN} (\c tinycan)
+            \li CAN bus plugin using the MHS CAN adapters.
         \row
             \li Vector Informatik
-            \li \l {Using VectorCAN Backend}{VectorCAN} (\c vectorcan)
-            \li CAN bus backend using the Vector CAN adapters.
+            \li \l {Using VectorCAN Plugin}{VectorCAN} (\c vectorcan)
+            \li CAN bus plugin using the Vector CAN adapters.
     \endtable
 
     \section1 Implementing a Custom CAN Plugin
@@ -107,7 +110,7 @@
     \endlist
 
     The \l {QCanBusDevice::open()}{open()} and \l {QCanBusDevice::close()}{close()}
-    methods are used in conjuntion with \l QCanBusDevice::connectDevice() and
+    methods are used in conjunction with \l QCanBusDevice::connectDevice() and
     \l QCanBusDevice::disconnectDevice() respectively. Check the
     function documentation for implementation details.
 

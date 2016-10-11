@@ -26,24 +26,24 @@
 ****************************************************************************/
 /*!
     \page qtserialbus-vectorcan-overview.html
-    \title Using VectorCAN Backend
+    \title Using VectorCAN Plugin
 
-    \brief Overview of how to use the VectorCAN backend.
+    \brief Overview of how to use the VectorCAN plugin.
 
-    The VectorCAN backend encapsulates the low-level API to work with the
+    The VectorCAN plugin encapsulates the low-level API to work with the
     \l{http://www.vector.com/}{Vector Informatik} CAN adapters.
 
     \section1 Creating CAN Bus Devices
 
-    At first it is necessary to check that QCanBus provides the desired backend:
+    At first it is necessary to check that QCanBus provides the desired plugin:
 
     \code
         if (QCanBus::instance()->plugins().contains(QStringLiteral("vectorcan"))) {
-            // backend available
+            // plugin available
         }
     \endcode
 
-    Where \e vectorcan is the backend name.
+    Where \e vectorcan is the plugin name.
 
     Next, a connection to a specific interface can be established:
 
@@ -53,7 +53,7 @@
         device->connectDevice();
     \endcode
 
-    Where \e can0 is the active CAN channel name. The VectorCAN backend provides
+    Where \e can0 is the active CAN channel name. The VectorCAN plugin provides
     64 channels (defined by XL_CONFIG_MAX_CHANNELS in the Vector API) from \e can0
     to \e can63. Some of these channels can be virtual, and therefore can be used
     without actual CAN hardware. To find out the virtual channels, the program

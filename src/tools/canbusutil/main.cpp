@@ -34,6 +34,7 @@
 **
 ****************************************************************************/
 
+#include <QCommandLineParser>
 #include <QCoreApplication>
 #include <QTextStream>
 #include <QScopedPointer>
@@ -43,19 +44,71 @@
 #include "canbusutil.h"
 #include "sigtermhandler.h"
 
+#define PROGRAMNAME "canbusutil"
+
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    QCoreApplication app(argc, argv);
+    QCoreApplication::setApplicationName(QStringLiteral(PROGRAMNAME));
+    QCoreApplication::setApplicationVersion(QStringLiteral(QT_VERSION_STR));
 
     QScopedPointer<SigTermHandler> s(SigTermHandler::instance());
     if (signal(SIGINT, SigTermHandler::handle) == SIG_ERR)
         return -1;
-    QObject::connect(s.data(), &SigTermHandler::sigTermSignal, &a, &QCoreApplication::quit);
+    QObject::connect(s.data(), &SigTermHandler::sigTermSignal, &app, &QCoreApplication::quit);
 
     QTextStream output(stdout);
-    CanBusUtil util(output, a);
-    if (!util.start(argc, argv))
+    CanBusUtil util(output, app);
+
+    QCommandLineParser parser;
+    parser.setApplicationDescription(CanBusUtil::tr(
+        "Sends arbitrary CAN bus frames.\n"
+        "If the -l option is set, all received CAN bus packages are dumped."));
+    parser.addHelpOption();
+    parser.addVersionOption();
+
+    parser.addPositionalArgument(QStringLiteral("plugin"),
+            CanBusUtil::tr("Plugin name to use. See --list-plugins."));
+
+    parser.addPositionalArgument(QStringLiteral("device"),
+            CanBusUtil::tr("Device to use."));
+
+    parser.addPositionalArgument(QStringLiteral("data"),
+            CanBusUtil::tr(
+                "Data to send if -l is not specified. Format:\n"
+                "\t\t<id>#{payload}   (CAN 2.0 data frames),\n"
+                "\t\t<id>#Rxx         (CAN 2.0 RTR frames with xx bytes data length),\n"
+                "\t\t<id>##{payload}  (CAN FD data frames),\n"
+                "where {payload} has 0..8 (0..64 CAN FD) ASCII hex-value pairs, "
+                "e.g. 1#1a2b3c\n"), QStringLiteral("[data]"));
+
+    const QCommandLineOption listeningOption({"l", "listen"},
+            CanBusUtil::tr("Start listening CAN data on device."));
+    parser.addOption(listeningOption);
+
+    const QCommandLineOption listOption({"L", "list-plugins"},
+            CanBusUtil::tr("List all available plugins."));
+    parser.addOption(listOption);
+
+    parser.process(app);
+
+    if (parser.isSet(listOption)) {
+        util.printPlugins();
+        return 0;
+    }
+
+    QString data;
+    const QStringList args = parser.positionalArguments();
+    if (!parser.isSet(listeningOption) && args.size() == 3) {
+        data = args[2];
+    } else if (!parser.isSet(listeningOption) || args.size() != 2) {
+        fprintf(stderr, "Invalid number of arguments (%d given).\n\n%s",
+            args.size(), qPrintable(parser.helpText()));
+        return 1;
+    }
+
+    if (!util.start(args[0], args[1], data))
         return -1;
 
-    return a.exec();
+    return app.exec();
 }

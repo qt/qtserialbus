@@ -72,7 +72,7 @@ public:
         InvalidFrame        = 0x4
     };
 
-    explicit QCanBusFrame(QCanBusFrame::FrameType type = DataFrame) :
+    explicit QCanBusFrame(FrameType type = DataFrame) Q_DECL_NOTHROW :
         canId(0x0),
         isExtendedFrame(0x0),
         version(0x0)
@@ -109,7 +109,7 @@ public:
         Q_UNUSED(reserved);
     }
 
-    bool isValid() const
+    bool isValid() const Q_DECL_NOTHROW
     {
         if (format == InvalidFrame)
             return false;
@@ -125,7 +125,7 @@ public:
         return true;
     }
 
-    FrameType frameType() const
+    FrameType frameType() const Q_DECL_NOTHROW
     {
         switch (format) {
         case 0x1: return DataFrame;
@@ -138,7 +138,7 @@ public:
         return UnknownFrame;
     }
 
-    void setFrameType(FrameType newFormat)
+    void setFrameType(FrameType newFormat) Q_DECL_NOTHROW
     {
         switch (newFormat) {
         case DataFrame:
@@ -154,38 +154,38 @@ public:
         }
     }
 
-    inline bool hasExtendedFrameFormat() const { return (isExtendedFrame & 0x1); }
-    inline void setExtendedFrameFormat(bool isExtended)
+    bool hasExtendedFrameFormat() const Q_DECL_NOTHROW { return (isExtendedFrame & 0x1); }
+    void setExtendedFrameFormat(bool isExtended) Q_DECL_NOTHROW
     {
         isExtendedFrame = (isExtended & 0x1);
     }
 
-    inline quint32 frameId() const
+    quint32 frameId() const Q_DECL_NOTHROW
     {
         if (format == ErrorFrame)
             return 0;
         return (canId & 0x1FFFFFFFU);
     }
-    inline void setFrameId(quint32 newFrameId)
+    void setFrameId(quint32 newFrameId)
     {
         canId = (newFrameId & 0x1FFFFFFFU);
         setExtendedFrameFormat(isExtendedFrame || (newFrameId & 0x1FFFF800U));
     }
 
-    inline void setPayload(const QByteArray &data) { load = data; }
-    inline void setTimeStamp(TimeStamp ts) { stamp = ts; }
+    void setPayload(const QByteArray &data) { load = data; }
+    void setTimeStamp(TimeStamp ts) Q_DECL_NOTHROW { stamp = ts; }
 
     QByteArray payload() const { return load; }
-    TimeStamp timeStamp() const { return stamp; }
+    TimeStamp timeStamp() const Q_DECL_NOTHROW { return stamp; }
 
-    QCanBusFrame::FrameErrors error() const
+    FrameErrors error() const Q_DECL_NOTHROW
     {
         if (format != ErrorFrame)
-            return QCanBusFrame::FrameErrors(QCanBusFrame::NoError);
+            return NoError;
 
         return FrameErrors(canId & 0x1FFFFFFFU);
     }
-    void setError(QCanBusFrame::FrameErrors e)
+    void setError(FrameErrors e)
     {
         if (format != ErrorFrame)
             return;
@@ -214,10 +214,12 @@ public:
         if (type == RemoteRequestFrame) {
             result.append(QLatin1String(" Remote Request"));
         } else {
-            QByteArray data = payload().toHex().toUpper();
-            for (int i = 0; i < data.size(); i += 3)
-                data.insert(i, ' ');
-            result.append(QLatin1String(data));
+            const QByteArray data = payload().toHex().toUpper();
+            const QLatin1String l1(data.data(), data.size());
+            for (int i = 0, e = data.size(); i < e; i += 2) {
+                result.append(QLatin1Char(' '));
+                result.append(l1.mid(i, 2));
+            }
         }
 
         return result;

@@ -1,2 +1,3 @@
 TEMPLATE = subdirs
-SUBDIRS += canbusutil
+
+!android|android_app: SUBDIRS += canbusutil

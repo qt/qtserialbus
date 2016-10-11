@@ -50,13 +50,10 @@ class CanBusUtil : public QObject
 public:
     explicit CanBusUtil(QTextStream &output, QCoreApplication &app, QObject *parent = nullptr);
 
-    bool start(int argc, char *argv[]);
+    bool start(const QString &pluginName, const QString &deviceName, const QString &data = QString());
+    void printPlugins();
 
 private:
-    void printUsage();
-    void printPlugins();
-    void printDataUsage();
-    bool parseArgs(int argc, char *argv[]);
     bool parseDataField(qint32 &id, QString &payload);
     bool parsePayloadField(QString payload, bool &rtrFrame, bool &fdFrame, QByteArray &bytes);
     bool connectCanDevice();
@@ -64,15 +61,15 @@ private:
     bool sendData();
 
 private:
-    QCanBus *canBus;
-    QTextStream &output;
-    QCoreApplication &app;
-    bool listening;
-    QString pluginName;
-    QString deviceName;
-    QString data;
-    QScopedPointer<QCanBusDevice> canDevice;
-    ReadTask *readTask;
+    QCanBus *m_canBus;
+    QTextStream &m_output;
+    QCoreApplication &m_app;
+    bool m_listening;
+    QString m_pluginName;
+    QString m_deviceName;
+    QString m_data;
+    QScopedPointer<QCanBusDevice> m_canDevice;
+    ReadTask *m_readTask;
 };
 
 #endif // CANBUSUTIL_H
