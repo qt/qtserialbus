@@ -42,6 +42,11 @@ ReadTask::ReadTask(QTextStream &output, QObject *parent)
     : QObject(parent),
       output(output) { }
 
+void ReadTask::setShowTimeStamp(bool showTimeStamp)
+{
+    m_showTimeStamp = showTimeStamp;
+}
+
 void ReadTask::checkMessages() {
     auto canDevice = qobject_cast<QCanBusDevice *>(QObject::sender());
     if (canDevice == nullptr) {
@@ -52,10 +57,17 @@ void ReadTask::checkMessages() {
     const QCanBusFrame frame = canDevice->readFrame();
 
     QString view;
+
+    if (m_showTimeStamp) {
+        view = QString::fromLatin1("%1.%2 ")
+                .arg(frame.timeStamp().seconds(), 10, 10, QLatin1Char(' '))
+                .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char('0'));
+    }
+
     if (frame.frameType() == QCanBusFrame::ErrorFrame)
-        view = canDevice->interpretErrorFrame(frame);
+        view += canDevice->interpretErrorFrame(frame);
     else
-        view = frame.toString();
+        view += frame.toString();
 
     output << view << endl;
 }

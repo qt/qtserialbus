@@ -50,6 +50,7 @@ class CanBusUtil : public QObject
 public:
     explicit CanBusUtil(QTextStream &output, QCoreApplication &app, QObject *parent = nullptr);
 
+    void setShowTimeStamp(bool showTimeStamp);
     bool start(const QString &pluginName, const QString &deviceName, const QString &data = QString());
     void printPlugins();
 

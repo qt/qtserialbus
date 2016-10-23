@@ -45,6 +45,11 @@ CanBusUtil::CanBusUtil(QTextStream &output, QCoreApplication &app, QObject *pare
 {
 }
 
+void CanBusUtil::setShowTimeStamp(bool showTimeStamp)
+{
+    m_readTask->setShowTimeStamp(showTimeStamp);
+}
+
 bool CanBusUtil::start(const QString &pluginName, const QString &deviceName, const QString &data)
 {
     if (!m_canBus) {
