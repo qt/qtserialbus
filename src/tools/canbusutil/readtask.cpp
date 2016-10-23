@@ -36,8 +36,6 @@
 
 #include "readtask.h"
 
-using namespace std;
-
 ReadTask::ReadTask(QTextStream &output, QObject *parent)
     : QObject(parent),
       output(output) { }
