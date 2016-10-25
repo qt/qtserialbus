@@ -242,39 +242,39 @@ void tst_QCanBusFrame::tst_toString_data()
     QTest::newRow("remote request frame")
             << QCanBusFrame::RemoteRequestFrame << 0x123u << false
             << QByteArray::fromHex("01") // fake data to get a DLC > 0
-            << QString("     123  [1] Remote Request");
+            << QString("     123   [1]  Remote Request");
     QTest::newRow("data frame min std id")
             << QCanBusFrame::DataFrame << 0x0u << false
             << QByteArray()
-            << QString("     000  [0]");
+            << QString("     000   [0]");
     QTest::newRow("data frame max std id")
             << QCanBusFrame::DataFrame << 0x7FFu << false
             << QByteArray()
-            << QString("     7FF  [0]");
+            << QString("     7FF   [0]");
     QTest::newRow("data frame min ext id")
             << QCanBusFrame::DataFrame << 0x0u << true
             << QByteArray()
-            << QString("00000000  [0]");
+            << QString("00000000   [0]");
     QTest::newRow("data frame max ext id")
             << QCanBusFrame::DataFrame << 0x1FFFFFFFu << true
             << QByteArray()
-            << QString("1FFFFFFF  [0]");
+            << QString("1FFFFFFF   [0]");
     QTest::newRow("data frame minimal size")
             << QCanBusFrame::DataFrame << 0x7FFu << false
             << QByteArray::fromHex("01")
-            << QString("     7FF  [1] 01");
+            << QString("     7FF   [1]  01");
     QTest::newRow("data frame maximal size")
             << QCanBusFrame::DataFrame << 0x1FFFFFFFu << true
             << QByteArray::fromHex("0123456789ABCDEF")
-            << QString("1FFFFFFF  [8] 01 23 45 67 89 AB CD EF");
+            << QString("1FFFFFFF   [8]  01 23 45 67 89 AB CD EF");
     QTest::newRow("short data frame FD")
             << QCanBusFrame::DataFrame << 0x123u << false
             << QByteArray::fromHex("001122334455667788")
-            << QString("     123  [9] 00 11 22 33 44 55 66 77 88");
+            << QString("     123   [9]  00 11 22 33 44 55 66 77 88");
     QTest::newRow("long data frame FD")
             << QCanBusFrame::DataFrame << 0x123u << false
             << QByteArray::fromHex("00112233445566778899")
-            << QString("     123 [10] 00 11 22 33 44 55 66 77 88 99");
+            << QString("     123  [10]  00 11 22 33 44 55 66 77 88 99");
 }
 
 void tst_QCanBusFrame::tst_toString()
