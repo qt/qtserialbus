@@ -79,7 +79,6 @@ bool CanBusUtil::start(const QString &pluginName, const QString &deviceName, con
 void CanBusUtil::printPlugins()
 {
     const QStringList plugins = m_canBus->plugins();
-    m_output << "Plugins: " << endl;
     for (int i = 0; i < plugins.size(); i++)
         m_output << plugins.at(i) << endl;
 }
@@ -159,6 +158,7 @@ bool CanBusUtil::connectCanDevice()
 {
     if (!m_canBus->plugins().contains(m_pluginName)) {
         m_output << "Could not find suitable plugin." << endl;
+        m_output << "Available plugins:" << endl;
         printPlugins();
         return false;
     }
