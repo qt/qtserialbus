@@ -257,7 +257,7 @@ QT_BEGIN_NAMESPACE
 
     Constructs a normalized TimeStamp from microseconds \a usec.
 
-    The created TimeStamp is normalized, i.e. microsconds greater 1000000 are converted
+    The created TimeStamp is normalized, i.e. microseconds greater 1000000 are converted
     to seconds.
 */
 
