@@ -208,6 +208,8 @@ public:
     {}
 };
 Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu);
+inline QDataStream &operator<<(QDataStream &stream, const QModbusRequest &pdu)
+{ return stream << static_cast<const QModbusPdu &>(pdu); }
 
 class QModbusResponse : public QModbusPdu
 {
@@ -250,6 +252,8 @@ public:
     void setExceptionCode(ExceptionCode ec) { QModbusPdu::encodeData(quint8(ec)); }
 };
 Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &stream, QModbusResponse &pdu);
+inline QDataStream &operator<<(QDataStream &stream, const QModbusResponse &pdu)
+{ return stream << static_cast<const QModbusPdu &>(pdu); }
 
 Q_DECLARE_TYPEINFO(QModbusPdu, Q_MOVABLE_TYPE);
 Q_DECLARE_TYPEINFO(QModbusPdu::ExceptionCode, Q_PRIMITIVE_TYPE);
