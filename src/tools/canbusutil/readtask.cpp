@@ -57,7 +57,7 @@ void ReadTask::checkMessages() {
     QString view;
 
     if (m_showTimeStamp) {
-        view = QString::fromLatin1("%1.%2 ")
+        view = QString::fromLatin1("%1.%2  ")
                 .arg(frame.timeStamp().seconds(), 10, 10, QLatin1Char(' '))
                 .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char('0'));
     }
