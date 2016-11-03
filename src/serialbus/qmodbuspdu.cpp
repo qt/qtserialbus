@@ -540,18 +540,18 @@ int QModbusRequest::calculateDataSize(const QModbusRequest &request)
     case QModbusPdu::WriteMultipleCoils:
         minimum -= 1; // first payload payload byte
         if (request.dataSize() >= minimum)
-            size = minimum + request.data()[minimum - 1] /*byte count*/;
+            size = minimum + quint8(request.data()[minimum - 1]) /*byte count*/;
         break;
     case QModbusPdu::WriteMultipleRegisters:
     case QModbusPdu::ReadWriteMultipleRegisters:
         minimum -= 2; // first 2 payload payload bytes
         if (request.dataSize() >= minimum)
-            size = minimum + request.data()[minimum - 1] /*byte count*/;
+            size = minimum + quint8(request.data()[minimum - 1]) /*byte count*/;
         break;
     case QModbusPdu::ReadFileRecord:
     case QModbusPdu::WriteFileRecord:
         if (request.dataSize() >= 1)
-            size = 1 /*byte count*/ + request.data()[0] /*actual bytes*/;
+            size = 1 /*byte count*/ + quint8(request.data()[0]) /*actual bytes*/;
         break;
     case QModbusPdu::EncapsulatedInterfaceTransport: {
         if (request.dataSize() < minimum)
@@ -671,7 +671,7 @@ int QModbusResponse::calculateDataSize(const QModbusResponse &response)
     case QModbusResponse::ReadWriteMultipleRegisters:
     case QModbusResponse::ReportServerId:
         if (response.dataSize() >= 1)
-            size = 1 /*byte count*/ + response.data()[0] /*actual bytes*/;
+            size = 1 /*byte count*/ + quint8(response.data()[0]) /*actual bytes*/;
         break;
     case QModbusResponse::ReadFifoQueue: {
         if (response.dataSize() >= 2) {

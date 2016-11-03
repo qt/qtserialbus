@@ -803,6 +803,25 @@ private slots:
             quint8(0xff)); // dummy additional data
         QCOMPARE(QModbusResponse::calculateDataSize(rdi), 22);
     }
+
+    void testCalculateLongDataSize()
+    {
+        QByteArray longData = QByteArray(128, ' ');
+        longData[0] = longData.size();
+        const QModbusResponse response(QModbusResponse::ReadCoils, longData);
+        QCOMPARE(QModbusResponse::calculateDataSize(response), 1 + longData.size());
+
+        const QModbusRequest wfrRequest(QModbusPdu::WriteFileRecord, longData);
+        QCOMPARE(QModbusRequest::calculateDataSize(wfrRequest), 1 + longData.size());
+
+        longData = QByteArray(4 + 128, ' ');
+        longData[4] = 128;
+        const QModbusRequest wmcRequest(QModbusPdu::WriteMultipleCoils, longData);
+        QCOMPARE(QModbusRequest::calculateDataSize(wmcRequest), 1 + longData.size());
+
+        const QModbusRequest wmrRequest(QModbusPdu::WriteMultipleRegisters, longData);
+        QCOMPARE(QModbusRequest::calculateDataSize(wmrRequest), 1 + longData.size());
+    }
 };
 
 QTEST_MAIN(tst_QModbusPdu)
