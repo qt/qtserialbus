@@ -42,14 +42,11 @@
 #include "ui_mainwindow.h"
 #include "connectdialog.h"
 
-#include <QCanBusFrame>
 #include <QCanBus>
+#include <QCanBusFrame>
 #include <QCloseEvent>
+#include <QtDebug>
 #include <QTimer>
-
-#include <QtCore/qbytearray.h>
-#include <QtCore/qvariant.h>
-#include <QtCore/qdebug.h>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
