@@ -274,8 +274,6 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \fn QString QCanBusFrame::toString() const
-
     Returns the CAN frame as a formatted string.
 
     The output contains the CAN identfier in hexadecimal format, right
@@ -298,6 +296,41 @@ QT_BEGIN_NAMESPACE
 
     \since 5.8
 */
+QString QCanBusFrame::toString() const
+{
+    const FrameType type = frameType();
+
+    if (type == InvalidFrame)
+        return QStringLiteral("(Invalid)");
+
+    if (type == ErrorFrame)
+        return QStringLiteral("(Error)");
+
+    if (type == UnknownFrame)
+        return QStringLiteral("(Unknown)");
+
+    const char *idFormat = hasExtendedFrameFormat() ? "%08X" : "     %03X";
+    const char *dlcFormat = payload().size() < 10 ? "   [%d]" : "  [%d]";
+    QString result;
+    result.append(QString::asprintf(idFormat, static_cast<uint>(frameId())));
+    result.append(QString::asprintf(dlcFormat, payload().size()));
+
+    if (type == RemoteRequestFrame) {
+        result.append(QLatin1String("  Remote Request"));
+    } else {
+        const QByteArray data = payload().toHex().toUpper();
+        const QLatin1String l1(data.data(), data.size());
+        const int length = data.size();
+        if (length)
+            result.append(QLatin1Char(' '));
+        for (int i = 0; i < length; i += 2) {
+            result.append(QLatin1Char(' '));
+            result.append(l1.mid(i, 2));
+        }
+    }
+
+    return result;
+}
 
 #ifndef QT_NO_DATASTREAM
 
