@@ -94,15 +94,17 @@ QT_BEGIN_NAMESPACE
     \value ErrorFilterKey   This key defines the type of error that should be
                             forwarded via the current connection. The associated
                             value should be of type \l QCanBusFrame::FrameErrors.
-    \value LoopbackKey      This key defines whether the CAN bus device should
-                            operate in loopback mode. The expected value for this
-                            key is \c bool.
-    \value ReceiveOwnKey    This key defines whether this CAN device can send messages.
+    \value LoopbackKey      This key defines whether the CAN bus device should operate in loopback
+                            mode. Loopback means, whenever a CAN frame is transmitted on the CAN
+                            bus, a local echo of this frame is sent to all applications connected to
+                            this CAN device. The expected value for this key is \c bool.
+    \value ReceiveOwnKey    This key defines whether this CAN device receives its own send messages.
+                            This can be used to check if the transmission was successful.
                             The expected value for this key is \c bool.
     \value BitRateKey       This key defines the bitrate in bits per second.
     \value CanFdKey         This key defines whether sending and receiving of CAN FD frames
                             should be enabled. The expected value for this key is \c bool.
-    \value UserKey          This key defines the range where custom keys start. It's most
+    \value UserKey          This key defines the range where custom keys start. Its most
                             common purpose is to permit platform-specific configuration
                             options.
 

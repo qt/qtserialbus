@@ -70,11 +70,11 @@
     \endcode
 
     The reading can be done using the \l {QCanBusDevice::}{readFrame()} method. The
-    \l {QCanBusDevice::}{framesReceived()} signal is emitted when new frames are available
-    for reading:
+    \l {QCanBusDevice::}{framesReceived()} signal is emitted when at least one new frame
+    is available for reading:
 
     \code
-    QCanBusFrame frame = device->readFrame();
+        QCanBusFrame frame = device->readFrame();
     \endcode
 
     TinyCAN supports the following configurations that can be controlled through
