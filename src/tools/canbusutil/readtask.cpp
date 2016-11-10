@@ -52,22 +52,24 @@ void ReadTask::checkMessages() {
         return;
     }
 
-    const QCanBusFrame frame = canDevice->readFrame();
+    while (canDevice->framesAvailable()) {
+        const QCanBusFrame frame = canDevice->readFrame();
 
-    QString view;
+        QString view;
 
-    if (m_showTimeStamp) {
-        view = QString::fromLatin1("%1.%2  ")
-                .arg(frame.timeStamp().seconds(), 10, 10, QLatin1Char(' '))
-                .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char('0'));
+        if (m_showTimeStamp) {
+            view = QString::fromLatin1("%1.%2  ")
+                    .arg(frame.timeStamp().seconds(), 10, 10, QLatin1Char(' '))
+                    .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char('0'));
+        }
+
+        if (frame.frameType() == QCanBusFrame::ErrorFrame)
+            view += canDevice->interpretErrorFrame(frame);
+        else
+            view += frame.toString();
+
+        output << view << endl;
     }
-
-    if (frame.frameType() == QCanBusFrame::ErrorFrame)
-        view += canDevice->interpretErrorFrame(frame);
-    else
-        view += frame.toString();
-
-    output << view << endl;
 }
 
 void ReadTask::receiveError(QCanBusDevice::CanBusError /*error*/) {

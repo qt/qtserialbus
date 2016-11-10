@@ -190,19 +190,21 @@ void MainWindow::checkMessages()
     if (!m_canDevice)
         return;
 
-    const QCanBusFrame frame = m_canDevice->readFrame();
+    while (m_canDevice->framesAvailable()) {
+        const QCanBusFrame frame = m_canDevice->readFrame();
 
-    QString view;
-    if (frame.frameType() == QCanBusFrame::ErrorFrame)
-        interpretError(view, frame);
-    else
-        view = frame.toString();
+        QString view;
+        if (frame.frameType() == QCanBusFrame::ErrorFrame)
+            interpretError(view, frame);
+        else
+            view = frame.toString();
 
-    const QString time = QString::fromLatin1("%1.%2  ")
-            .arg(frame.timeStamp().seconds(), 10, 10, QLatin1Char(' '))
-            .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char('0'));
+        const QString time = QString::fromLatin1("%1.%2  ")
+                .arg(frame.timeStamp().seconds(), 10, 10, QLatin1Char(' '))
+                .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char('0'));
 
-    m_ui->receivedMessagesEdit->append(time + view);
+        m_ui->receivedMessagesEdit->append(time + view);
+    }
 }
 
 static QByteArray dataFromHex(const QString &hex)
