@@ -97,15 +97,16 @@ bool CanBusUtil::parseDataField(qint32 &id, QString &payload)
     return true;
 }
 
-bool CanBusUtil::parsePayloadField(QString payload, bool &rtrFrame,
-                                   bool &fdFrame, QByteArray &bytes)
+bool CanBusUtil::setFrameFromPayload(QString payload, QCanBusFrame *frame,
+                                   bool &fdFrame)
 {
     fdFrame = false;
-    rtrFrame = false;
 
     if (!payload.isEmpty() && payload.at(0).toUpper() == 'R') {
-        rtrFrame = true;
         bool validPayloadLength = false;
+
+        frame->setFrameType(QCanBusFrame::RemoteRequestFrame);
+
         if (payload.size() == 1) { // payload = "R"
             validPayloadLength = true;
         } else if (payload.size() > 1) { // payload = "R8"
@@ -113,7 +114,7 @@ bool CanBusUtil::parsePayloadField(QString payload, bool &rtrFrame,
             int rtrFrameLength = payload.toInt(&validPayloadLength);
 
             if (validPayloadLength && rtrFrameLength >= 0 && rtrFrameLength <= 8) {
-                bytes = QByteArray(rtrFrameLength, 0);
+                frame->setPayload(QByteArray(rtrFrameLength, 0));
             } else if (validPayloadLength) {
                 m_output << "The length must be between 0 and 8 (including)." << endl;
                 validPayloadLength = false;
@@ -141,13 +142,15 @@ bool CanBusUtil::parsePayloadField(QString payload, bool &rtrFrame,
         return false;
     }
 
-    bytes = QByteArray::fromHex(payload.toLatin1());
+    QByteArray bytes = QByteArray::fromHex(payload.toLatin1());
 
     const int maxSize = fdFrame ? 64 : 8;
     if (bytes.size() > maxSize) {
         m_output << "Warning: Truncating payload at max. size of " << maxSize << " bytes." << endl;
         bytes.truncate(maxSize);
     }
+
+    frame->setPayload(bytes);
 
     return true;
 }
@@ -179,15 +182,13 @@ bool CanBusUtil::sendData()
 {
     qint32 id;
     QString payload;
-    bool rtrFrame;
     bool fdFrame;
-    QByteArray bytes;
     QCanBusFrame frame;
 
     if (parseDataField(id, payload) == false)
         return false;
 
-    if (parsePayloadField(payload, rtrFrame, fdFrame, bytes) == false)
+    if (setFrameFromPayload(payload, &frame, fdFrame) == false)
         return false;
 
     if (id < 0 || id > 0x1FFFFFFF) { // 29 bits
@@ -195,10 +196,6 @@ bool CanBusUtil::sendData()
         m_output << "Warning! Id does not fit into Extended Frame Format, setting id to: " << id << endl;
     }
 
-    if (rtrFrame)
-        frame.setFrameType(QCanBusFrame::RemoteRequestFrame);
-
-    frame.setPayload(bytes);
     frame.setFrameId(id);
 
     if (fdFrame)

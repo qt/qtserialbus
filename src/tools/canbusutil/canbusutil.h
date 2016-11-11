@@ -44,6 +44,12 @@
 
 #include "readtask.h"
 
+QT_BEGIN_NAMESPACE
+
+class QCanBusFrame;
+
+QT_END_NAMESPACE
+
 class CanBusUtil : public QObject
 {
     Q_OBJECT
@@ -56,7 +62,7 @@ public:
 
 private:
     bool parseDataField(qint32 &id, QString &payload);
-    bool parsePayloadField(QString payload, bool &rtrFrame, bool &fdFrame, QByteArray &bytes);
+    bool setFrameFromPayload(QString payload, QCanBusFrame *frame, bool &fdFrame);
     bool connectCanDevice();
     bool startListeningOnCanDevice();
     bool sendData();
