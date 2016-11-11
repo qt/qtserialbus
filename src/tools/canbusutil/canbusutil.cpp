@@ -106,9 +106,7 @@ bool CanBusUtil::parsePayloadField(QString payload, bool &rtrFrame,
     if (!payload.isEmpty() && payload.at(0).toUpper() == 'R') {
         rtrFrame = true;
         bool validPayloadLength = false;
-        if (fdFrame) {
-            m_output << "CAN FD RTR data frames are not valid." << endl;
-        } else if (payload.size() == 1) { // payload = "R"
+        if (payload.size() == 1) { // payload = "R"
             validPayloadLength = true;
         } else if (payload.size() > 1) { // payload = "R8"
             payload = payload.mid(1);
