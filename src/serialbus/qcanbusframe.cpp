@@ -342,13 +342,16 @@ QString QCanBusFrame::toString() const
         result.append(QLatin1String("  Remote Request"));
     } else {
         const QByteArray data = payload().toHex().toUpper();
-        const QLatin1String l1(data.data(), data.size());
         const int length = data.size();
-        if (length)
+        if (length) {
+            const QLatin1String l1(data.data(), data.size());
+
             result.append(QLatin1Char(' '));
-        for (int i = 0; i < length; i += 2) {
-            result.append(QLatin1Char(' '));
-            result.append(l1.mid(i, 2));
+
+            for (int i = 0; i < length; i += 2) {
+                result.append(QLatin1Char(' '));
+                result.append(l1.mid(i, 2));
+            }
         }
     }
 
