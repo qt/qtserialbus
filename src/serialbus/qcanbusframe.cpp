@@ -321,14 +321,16 @@ QString QCanBusFrame::toString() const
 {
     const FrameType type = frameType();
 
-    if (type == InvalidFrame)
+    switch (type) {
+    case InvalidFrame:
         return QStringLiteral("(Invalid)");
-
-    if (type == ErrorFrame)
+    case ErrorFrame:
         return QStringLiteral("(Error)");
-
-    if (type == UnknownFrame)
+    case UnknownFrame:
         return QStringLiteral("(Unknown)");
+    default:
+        break;
+    }
 
     const char *idFormat = hasExtendedFrameFormat() ? "%08X" : "     %03X";
     const char *dlcFormat = hasFlexibleDataRateFormat() ? "  [%02d]" : "   [%d]";
