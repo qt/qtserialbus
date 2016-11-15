@@ -43,7 +43,7 @@ QT_BEGIN_NAMESPACE
 /*!
     \class QCanBusFrame
     \inmodule QtSerialBus
-    \since 5.6
+    \since 5.8
 
     \brief QCanBusFrame is a container class representing a single CAN frame.
 
@@ -55,14 +55,12 @@ QT_BEGIN_NAMESPACE
 
 /*!
     \fn QCanBusFrame::QCanBusFrame(QCanBusFrame::FrameType type = DataFrame)
-    \since 5.8
 
     Constructs a CAN frame of the specified \a type.
 */
 
 /*!
     \fn QCanBusFrame::QCanBusFrame(quint32 identifier, const QByteArray &data)
-    \since 5.8
 
     Constructs a CAN frame using \a identifier as the frame identifier and \a data as the payload.
 */
@@ -113,7 +111,6 @@ QT_BEGIN_NAMESPACE
 
 /*!
     \fn QCanBusFrame::setTimeStamp(TimeStamp ts)
-    \since 5.8
 
     Sets \a ts as the timestamp for the CAN frame. Usually, this function is not needed, because the
     timestamp is created during the read operation and not needed during the write operation.
@@ -258,7 +255,7 @@ QT_BEGIN_NAMESPACE
 /*!
     \class QCanBusFrame::TimeStamp
     \inmodule QtSerialBus
-    \since 5.6
+    \since 5.8
 
     \brief The TimeStamp class provides timestamp information with microsecond precision.
 */
@@ -274,7 +271,6 @@ QT_BEGIN_NAMESPACE
 
 /*!
     \fn static TimeStamp TimeStamp::fromMicroSeconds(qint64 usec)
-    \since 5.8
 
     Constructs a normalized TimeStamp from microseconds \a usec.
 
@@ -314,8 +310,6 @@ QT_BEGIN_NAMESPACE
              123   [5]  Remote Request           - remote frame with standard identifier
         00000234   [0]  Remote Request           - remote frame with extended identifier
     \endcode
-
-    \since 5.8
 */
 QString QCanBusFrame::toString() const
 {

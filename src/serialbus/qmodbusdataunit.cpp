@@ -41,7 +41,7 @@ QT_BEGIN_NAMESPACE
 /*!
     \class QModbusDataUnit
     \inmodule QtSerialBus
-    \since 5.6
+    \since 5.8
 
     \brief QModbusDataUnit is a container class representing single bit and
     \c 16 bit word entries in the Modbus register.
@@ -206,7 +206,7 @@ QT_BEGIN_NAMESPACE
 /*!
     \typedef QModbusDataUnitMap
     \relates QModbusDataUnit
-    \since 5.6
+    \since 5.8
 
     Synonym for QMap<QModbusDataUnit::RegisterType, QModbusDataUnit>.
 */

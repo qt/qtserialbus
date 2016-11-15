@@ -44,7 +44,7 @@ QT_BEGIN_NAMESPACE
 /*!
     \class QModbusRtuSerialSlave
     \inmodule QtSerialBus
-    \since 5.6
+    \since 5.8
 
     \brief The QModbusRtuSerialSlave class represents a Modbus server
     that uses a serial port for its communication with the Modbus client.

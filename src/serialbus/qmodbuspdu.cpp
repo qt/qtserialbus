@@ -184,7 +184,7 @@ static QDataStream &pduFromStream(QDataStream &stream, QModbusPdu &pdu, Type typ
 /*!
     \class QModbusPdu
     \inmodule QtSerialBus
-    \since 5.6
+    \since 5.8
 
     \brief QModbusPdu is a abstract container class containing the function code and
     payload that is stored inside a Modbus ADU.
@@ -464,7 +464,7 @@ QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu)
 /*!
     \class QModbusRequest
     \inmodule QtSerialBus
-    \since 5.6
+    \since 5.8
 
     \brief QModbusRequest is a container class containing the function code and payload that is
     stored inside a Modbus ADU.
@@ -618,7 +618,7 @@ QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu)
 /*!
     \class QModbusResponse
     \inmodule QtSerialBus
-    \since 5.6
+    \since 5.8
 
     \brief QModbusResponse is a container class containing the function code and payload that is
         stored inside a Modbus ADU.
@@ -796,7 +796,7 @@ QDataStream &operator>>(QDataStream &stream, QModbusResponse &pdu)
 /*!
     \class QModbusExceptionResponse
     \inmodule QtSerialBus
-    \since 5.6
+    \since 5.8
 
     \brief QModbusExceptionResponse is a container class containing the function and error code
         inside a Modbus ADU.

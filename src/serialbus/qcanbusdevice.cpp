@@ -50,7 +50,7 @@ QT_BEGIN_NAMESPACE
 /*!
     \class QCanBusDevice
     \inmodule QtSerialBus
-    \since 5.6
+    \since 5.8
 
     \brief The QCanBusDevice class is the interface class for CAN bus.
 
@@ -114,7 +114,7 @@ QT_BEGIN_NAMESPACE
 /*!
     \class QCanBusDevice::Filter
     \inmodule QtSerialBus
-    \since 5.6
+    \since 5.8
 
     \brief The QCanBusDevice::Filter struct defines a filter for CAN bus messages.
 
@@ -429,7 +429,6 @@ qint64 QCanBusDevice::framesToWrite() const
     or \l errorOccurred() signals.
 
     \sa waitForFramesReceived()
-    \since 5.8
  */
 bool QCanBusDevice::waitForFramesWritten(int msecs)
 {
@@ -483,7 +482,6 @@ bool QCanBusDevice::waitForFramesWritten(int msecs)
     or \l errorOccurred() signals.
 
     \sa waitForFramesWritten()
-    \since 5.8
  */
 bool QCanBusDevice::waitForFramesReceived(int msecs)
 {
