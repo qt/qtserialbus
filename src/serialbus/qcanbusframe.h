@@ -77,6 +77,7 @@ public:
         version(0x0),
         isFlexibleDataRate(0x0)
     {
+        memset(reserved, 0, sizeof(reserved));
         setFrameId(0x0);
         setFrameType(type);
     }
@@ -106,8 +107,7 @@ public:
         isFlexibleDataRate(data.length() > 8 ? 0x1 : 0x0),
         load(data)
     {
-        Q_UNUSED(reserved);
-
+        memset(reserved, 0, sizeof(reserved));
         setFrameId(identifier);
     }
 
