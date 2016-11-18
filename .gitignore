@@ -31,6 +31,7 @@ tests/auto/qmodbusserver/tst_qmodbusserver
 *.ipch
 *_wrapper.bat
 *_wrapper.sh
+qtserialbus-config.pri
 
 # Visual Studio generated files
 *.ib_pdb_index
