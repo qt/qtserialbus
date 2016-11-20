@@ -338,7 +338,7 @@ QString QCanBusFrame::toString() const
         const QByteArray data = payload().toHex().toUpper();
         const int length = data.size();
         if (length) {
-            const QLatin1String l1(data.data(), data.size());
+            const QLatin1String l1(data.data(), length);
 
             result.append(QLatin1Char(' '));
 
