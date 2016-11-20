@@ -98,7 +98,7 @@ QT_BEGIN_NAMESPACE
                             mode. Loopback means, whenever a CAN frame is transmitted on the CAN
                             bus, a local echo of this frame is sent to all applications connected to
                             this CAN device. The expected value for this key is \c bool.
-    \value ReceiveOwnKey    This key defines whether this CAN device receives its own send messages.
+    \value ReceiveOwnKey    This key defines whether this CAN device receives its own send frames.
                             This can be used to check if the transmission was successful.
                             The expected value for this key is \c bool.
     \value BitRateKey       This key defines the bitrate in bits per second.
@@ -116,10 +116,10 @@ QT_BEGIN_NAMESPACE
     \inmodule QtSerialBus
     \since 5.8
 
-    \brief The QCanBusDevice::Filter struct defines a filter for CAN bus messages.
+    \brief The QCanBusDevice::Filter struct defines a filter for CAN bus frames.
 
     A list of QCanBusDevice::Filter instances is passed to
-    \l QCanBusDevice::setConfigurationParameter() to enable filtering. If a received CAN message
+    \l QCanBusDevice::setConfigurationParameter() to enable filtering. If a received CAN frame
     matches at least one of the filters in the list, the QCanBusDevice will accept it.
 
     The example below demonstrates how to use the struct:
@@ -130,20 +130,20 @@ QT_BEGIN_NAMESPACE
 /*!
     \enum QCanBusDevice::Filter::FormatFilter
     This enum describes the format pattern, which is used to filter incoming
-    CAN bus messages.
+    CAN bus frames.
 
-    \value MatchBaseFormat              The CAN bus message must use the base message format
+    \value MatchBaseFormat              The CAN bus frame must use the base frame format
                                         (11 bit identifier).
-    \value MatchExtendedFormat          The CAN bus message must use the extended message format
+    \value MatchExtendedFormat          The CAN bus frame must use the extended frame format
                                         (29 bit identifier).
-    \value MatchBaseAndExtendedFormat   The CAN bus message can have a base or an extended
-                                        message format.
+    \value MatchBaseAndExtendedFormat   The CAN bus frame can have a base or an extended
+                                        frame format.
 */
 
 /*!
     \variable QCanBusDevice::Filter::frameId
 
-    \brief the frame id used to filter the incoming messages.
+    \brief The frame id used to filter the incoming frames.
 
     The frameId is used in conjunction with \a frameIdMask.
     The matching is successful if the following evaluates to \c true:
@@ -160,7 +160,7 @@ QT_BEGIN_NAMESPACE
 /*!
     \variable QCanBusDevice::Filter::frameIdMask
 
-    \brief the bit mask that is applied to the frame id of the filter and the received message.
+    \brief The bit mask that is applied to the frame id of the filter and the received frame.
 
     The two frame ids are matching if the following evaluates to \c true:
 
@@ -176,9 +176,9 @@ QT_BEGIN_NAMESPACE
 /*!
     \variable QCanBusDevice::Filter::type
 
-    \brief the type of the message to be filtered.
+    \brief The type of the frame to be filtered.
 
-    Any CAN bus message type can be matched by setting this variable
+    Any CAN bus frame type can be matched by setting this variable
     to \l QCanBusFrame::InvalidFrame. The filter object is invalid if
     type is equal to \l QCanBusFrame::UnknownFrame.
 
@@ -190,7 +190,7 @@ QT_BEGIN_NAMESPACE
 /*!
     \variable QCanBusDevice::Filter::format
 
-    \brief the message format of the matching CAN bus message.
+    \brief The frame format of the matching CAN bus frame.
 
     By default this field is set to \l QCanBusDevice::Filter::MatchBaseAndExtendedFormat.
 */
@@ -388,8 +388,6 @@ QString QCanBusDevice::errorString() const
 }
 
 /*!
-    \fn qint64 QCanBusDevice::framesAvailable() const
-
     Returns the number of available frames. If no frames are available,
     this function returns 0.
 
@@ -401,8 +399,6 @@ qint64 QCanBusDevice::framesAvailable() const
 }
 
 /*!
-    \fn qint64 QCanBusDevice::framesToWrite() const
-
     Returns the number of frames waiting to be written.
 
     \sa writeFrame()
@@ -598,7 +594,7 @@ QCanBusFrame QCanBusDevice::readFrame()
 
     As per CAN bus specification, frames of type
     \l {QCanBusFrame::RemoteRequestFrame} {remote transfer request (RTR)}
-    do not have a payload but require a size larger than zero. This size indicates
+    do not have a payload, but a length from 0 to 8 (including). This length indicates
     the expected response payload length from the remote party. Therefore when sending a RTR frame using
     this function it may still be required to set an arbitrary payload on \a frame. The length of
     the arbitrary payload is what is set as size expectation for the RTR frame.
