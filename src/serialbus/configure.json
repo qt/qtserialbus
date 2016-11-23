@@ -31,12 +31,12 @@
     "report": [
         {
             "type": "note",
-            "condition": "!features.socketcan",
-            "message": "QtSerialBus: Cannot find linux.can.h and linux/can/raw.h Linux headers for socketCAN support."
+            "condition": "config.linux && !features.socketcan",
+            "message": "QtSerialBus: Cannot find linux/can.h and linux/can/raw.h Linux headers for socketCAN support."
         },
         {
             "type": "note",
-            "condition": "features.socketcan && !features.socketcan_fd",
+            "condition": "config.linux && features.socketcan && !features.socketcan_fd",
             "message": "QtSerialBus: Newer kernel needed for flexible data-rate frame support (canfd_frame)."
         }
     ],
