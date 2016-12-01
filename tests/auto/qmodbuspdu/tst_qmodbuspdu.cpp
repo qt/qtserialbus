@@ -856,7 +856,7 @@ private slots:
         QCOMPARE(QModbusRequest::calculateDataSize(wfrRequest), 1 + longData.size());
 
         longData = QByteArray(4 + 128, ' ');
-        longData[4] = 128;
+        longData[4] = quint8(128);
         const QModbusRequest wmcRequest(QModbusPdu::WriteMultipleCoils, longData);
         QCOMPARE(QModbusRequest::calculateDataSize(wmcRequest), 1 + longData.size());
 
