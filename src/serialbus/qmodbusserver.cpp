@@ -1254,7 +1254,7 @@ QModbusResponse QModbusServerPrivate::processEncapsulatedInterfaceTransportReque
                     objectData[1] = quint8(object.size());
                     objectData += object;
                     if (payload.size() + objectData.size() > 253) {
-                        payload[3] = quint8(0xff); // more follows
+                        payload[3] = char(0xff); // more follows
                         payload[4] = id; // next object id
                         break;
                     }
