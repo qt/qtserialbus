@@ -49,8 +49,7 @@
 
     To set the device can0 to a bitrate of 250 kBit/s:
     \code
-        sudo ip link set can0 type can bitrate 250000
-        sudo ip link set up can0
+        sudo ip link set up can0 type can bitrate 250000
     \endcode
 
     \section2 Setting up a virtual CAN bus
@@ -61,8 +60,7 @@
     \code
         sudo modprobe vcan
         sudo ip link add dev vcan0 type vcan
-        sudo ip link set vcan0 mtu 72
-        sudo ip link set up vcan0
+        sudo ip link set up vcan0 mtu 72
     \endcode
 
     The command line test programs used in the following are from
