@@ -41,8 +41,8 @@ QtSerialBus
      and setFlexibleDataRateFormat() function were added. It permits easier
      identification of CAN FD frames.
    * Changed the signature of two constructors.
-   * [QTBUG-51845] Cleaned up the usage of inline and nothrow throughout the class
-   * Improved validity checking for frame ids larger than 2^29
+   * [QTBUG-51845] Cleaned up the usage of inline and nothrow throughout the class.
+   * Improved validity checking for frame ids larger than 2^29.
 
  - QCanBusFrame::TimeStamp:
    * Added TimeStamp::fromMicroSeconds() time stamps with normalized
@@ -50,11 +50,11 @@ QtSerialBus
    * Removed the setSeconds() and setMicroSeconds() functions to avoid
      confusion about unnormalized time stamps.
 
- - Added basic support for Vector CAN devices
- - Improved the implementation of the PeakCAN and TinyCAN implementation.
+ - Added basic support for Vector CAN devices.
+ - Improved the implementation of the PeakCAN and TinyCAN plugins.
  - Improved and fixed the CAN examples. In particular the examples were adjusted to
    the various API changes.
- - Improved the module and class documentation substantially
+ - Improved the module and class documentation substantially.
  - Unified the interface names of the different plugins to follow a common rule:
    The prefixes were unified, the numbering always starts with zero now.
  - [QTBUG-55747] Fixed C+11 related code sections which failed to compile on OSX 10.11.6.
@@ -63,7 +63,7 @@ QtSerialBus
  - [QTBUG-56331] Fixed module build on Android. The canbusutil tool was removed from
    Android builds.
  - [QTBUG-56886] Fixed handling of frameReceived() signals throughout all CAN examples.
- - Converted the module to use the Qt Lite based configure changes in Qt
+ - Converted the module to use the Qt Lite based configure changes in Qt.
  - [QTBUG-54834] Fixed handling of packets with payloads longer than 127
    bytes by QModbusResponse.
  - Added missing QDataStream operator<< for QModbus{Request,Response}.
