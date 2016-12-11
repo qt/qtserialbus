@@ -66,7 +66,7 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private Q_SLOTS:
+private slots:
     void checkMessages();
     void sendMessage() const;
     void receiveError(QCanBusDevice::CanBusError) const;
@@ -75,17 +75,16 @@ private Q_SLOTS:
     void framesWritten(qint64);
 
 protected:
-    void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent *event) override;
 
 private:
     void showStatusMessage(const QString &message);
     void initActionsConnections();
-    void interpretError(QString &, const QCanBusFrame &);
 
-    Ui::MainWindow *m_ui;
-    QLabel *m_status;
-    ConnectDialog *m_connectDialog;
-    QCanBusDevice *m_canDevice;
+    Ui::MainWindow *m_ui = nullptr;
+    QLabel *m_status = nullptr;
+    ConnectDialog *m_connectDialog = nullptr;
+    QCanBusDevice *m_canDevice = nullptr;
 };
 
 #endif // MAINWINDOW_H

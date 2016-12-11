@@ -46,8 +46,7 @@
 
 ConnectDialog::ConnectDialog(QWidget *parent) :
     QDialog(parent),
-    m_ui(new Ui::ConnectDialog),
-    m_customSpeedValidator(0)
+    m_ui(new Ui::ConnectDialog)
 {
     m_ui->setupUi(this);
 
@@ -67,8 +66,8 @@ ConnectDialog::ConnectDialog(QWidget *parent) :
 
     connect(m_ui->okButton, &QPushButton::clicked, this, &ConnectDialog::ok);
     connect(m_ui->cancelButton, &QPushButton::clicked, this, &ConnectDialog::cancel);
-    connect(m_ui->useConfigurationBox, &QCheckBox::clicked, m_ui->configurationBox, &QGroupBox::setEnabled);
-
+    connect(m_ui->useConfigurationBox, &QCheckBox::clicked,
+            m_ui->configurationBox, &QGroupBox::setEnabled);
     connect(m_ui->speedBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
             this, &ConnectDialog::checkCustomSpeedPolicy);
     connect(m_ui->backendListBox, &QComboBox::currentTextChanged,

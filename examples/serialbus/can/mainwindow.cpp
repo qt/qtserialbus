@@ -53,8 +53,7 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    m_ui(new Ui::MainWindow),
-    m_canDevice(nullptr)
+    m_ui(new Ui::MainWindow)
 {
     m_ui->setupUi(this);
 
@@ -196,7 +195,7 @@ void MainWindow::checkMessages()
 
     QString view;
     if (frame.frameType() == QCanBusFrame::ErrorFrame)
-        interpretError(view, frame);
+        view = m_canDevice->interpretErrorFrame(frame);
     else
         view = frame.toString();
 
@@ -241,12 +240,4 @@ void MainWindow::sendMessage() const
         frame.setFrameType(QCanBusFrame::DataFrame);
 
     m_canDevice->writeFrame(frame);
-}
-
-void MainWindow::interpretError(QString &view, const QCanBusFrame &frame)
-{
-    if (!m_canDevice)
-        return;
-
-    view = m_canDevice->interpretErrorFrame(frame);
 }

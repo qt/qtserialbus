@@ -66,7 +66,7 @@ public:
         QString backendName;
         QString deviceInterfaceName;
         QList<ConfigurationItem> configurations;
-        bool useConfigurationEnabled;
+        bool useConfigurationEnabled = false;
     };
 
     explicit ConnectDialog(QWidget *parent = nullptr);
@@ -86,9 +86,8 @@ private:
     void updateSettings();
     void fillSpeeds();
 
-private:
-    Ui::ConnectDialog *m_ui;
-    QIntValidator *m_customSpeedValidator;
+    Ui::ConnectDialog *m_ui = nullptr;
+    QIntValidator *m_customSpeedValidator = nullptr;
     Settings m_currentSettings;
 };
 
