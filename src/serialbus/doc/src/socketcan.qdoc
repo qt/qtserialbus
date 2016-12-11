@@ -52,6 +52,12 @@
         sudo ip link set up can0 type can bitrate 250000
     \endcode
 
+    To automatically recover from "bus off" errors after 100 milliseconds,
+    the following command can be used:
+    \code
+        sudo ip link set up can0 type can bitrate 250000 restart-ms 100
+    \endcode
+
     \section2 Setting up a virtual CAN bus
 
     \note For CAN FD usage, the MTU (Maximum Transmission Unit) has to be set
