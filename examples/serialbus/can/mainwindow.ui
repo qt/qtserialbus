@@ -143,7 +143,7 @@ Otherwise, the standard format with 11 bit idenfier is used.</string>
           <enum>QFrame::StyledPanel</enum>
          </property>
          <property name="text">
-          <string>Timestamp         CAN-ID  DLC Data</string>
+          <string>Timestamp          CAN-ID   DLC  Data</string>
          </property>
         </widget>
        </item>
@@ -190,6 +190,8 @@ Otherwise, the standard format with 11 bit idenfier is used.</string>
     <addaction name="actionConnect"/>
     <addaction name="actionDisconnect"/>
     <addaction name="separator"/>
+    <addaction name="actionClearLog"/>
+    <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -210,6 +212,8 @@ Otherwise, the standard format with 11 bit idenfier is used.</string>
    </attribute>
    <addaction name="actionConnect"/>
    <addaction name="actionDisconnect"/>
+   <addaction name="separator"/>
+   <addaction name="actionClearLog"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionConnect">
@@ -242,6 +246,15 @@ Otherwise, the standard format with 11 bit idenfier is used.</string>
   <action name="actionAboutQt">
    <property name="text">
     <string>&amp;About Qt</string>
+   </property>
+  </action>
+  <action name="actionClearLog">
+   <property name="icon">
+    <iconset resource="can.qrc">
+     <normaloff>:/images/clear.png</normaloff>:/images/clear.png</iconset>
+   </property>
+   <property name="text">
+    <string>Clear &amp;Log</string>
    </property>
   </action>
  </widget>

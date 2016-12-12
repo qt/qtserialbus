@@ -42,14 +42,11 @@
 #include "ui_mainwindow.h"
 #include "connectdialog.h"
 
-#include <QCanBusFrame>
 #include <QCanBus>
+#include <QCanBusFrame>
 #include <QCloseEvent>
+#include <QtDebug>
 #include <QTimer>
-
-#include <QtCore/qbytearray.h>
-#include <QtCore/qvariant.h>
-#include <QtCore/qdebug.h>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -94,6 +91,7 @@ void MainWindow::initActionsConnections()
     connect(m_ui->actionDisconnect, &QAction::triggered, this, &MainWindow::disconnectDevice);
     connect(m_ui->actionQuit, &QAction::triggered, this, &QWidget::close);
     connect(m_ui->actionAboutQt, &QAction::triggered, qApp, &QApplication::aboutQt);
+    connect(m_ui->actionClearLog, &QAction::triggered, m_ui->receivedMessagesEdit, &QTextEdit::clear);
 }
 
 void MainWindow::receiveError(QCanBusDevice::CanBusError error) const
@@ -191,19 +189,21 @@ void MainWindow::checkMessages()
     if (!m_canDevice)
         return;
 
-    const QCanBusFrame frame = m_canDevice->readFrame();
+    while (m_canDevice->framesAvailable()) {
+        const QCanBusFrame frame = m_canDevice->readFrame();
 
-    QString view;
-    if (frame.frameType() == QCanBusFrame::ErrorFrame)
-        view = m_canDevice->interpretErrorFrame(frame);
-    else
-        view = frame.toString();
+        QString view;
+        if (frame.frameType() == QCanBusFrame::ErrorFrame)
+            view = m_canDevice->interpretErrorFrame(frame);
+        else
+            view = frame.toString();
 
-    const QString time = QString::fromLatin1("%1.%2 ")
-            .arg(frame.timeStamp().seconds(), 10, 10, QLatin1Char(' '))
-            .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char('0'));
+        const QString time = QString::fromLatin1("%1.%2  ")
+                .arg(frame.timeStamp().seconds(), 10, 10, QLatin1Char(' '))
+                .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char('0'));
 
-    m_ui->receivedMessagesEdit->append(time + view);
+        m_ui->receivedMessagesEdit->append(time + view);
+    }
 }
 
 static QByteArray dataFromHex(const QString &hex)
@@ -231,6 +231,7 @@ void MainWindow::sendMessage() const
 
     frame.setFrameId(id);
     frame.setExtendedFrameFormat(m_ui->effBox->checkState());
+    frame.setFlexibleDataRateFormat(m_ui->fdBox->checkState());
 
     if (m_ui->remoteFrame->isChecked())
         frame.setFrameType(QCanBusFrame::RemoteRequestFrame);

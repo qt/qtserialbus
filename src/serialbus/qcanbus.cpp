@@ -87,7 +87,7 @@ static void loadPlugins()
 /*!
     \class QCanBus
     \inmodule QtSerialBus
-    \since 5.6
+    \since 5.8
 
     \brief The QCanBus class handles registration and creation of bus plugins.
 
@@ -107,8 +107,6 @@ QCanBus *QCanBus::instance()
 }
 
 /*!
-    \since 5.8
-
     Returns a list of identifiers for all loaded plugins.
 */
 QStringList QCanBus::plugins() const
@@ -125,8 +123,6 @@ static void setErrorMessage(QString *result, const QString &message)
 }
 
 /*!
-    \since 5.8
-
     Creates a CAN bus device. \a plugin is the name of the plugin as returned by the \l plugins()
     method. \a interfaceName is the CAN bus interface name. In case of failure, the optional
     parameter \a errorMessage returns a textual error description.

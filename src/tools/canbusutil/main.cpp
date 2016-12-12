@@ -90,6 +90,10 @@ int main(int argc, char *argv[])
             CanBusUtil::tr("List all available plugins."));
     parser.addOption(listOption);
 
+    const QCommandLineOption showTimeStampOption({"t", "timestamp"},
+            CanBusUtil::tr("Show timestamp for each received message."));
+    parser.addOption(showTimeStampOption);
+
     parser.process(app);
 
     if (parser.isSet(listOption)) {
@@ -107,6 +111,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    util.setShowTimeStamp(parser.isSet(showTimeStampOption));
     if (!util.start(args[0], args[1], data))
         return -1;
 

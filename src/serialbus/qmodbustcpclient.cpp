@@ -44,7 +44,7 @@ QT_BEGIN_NAMESPACE
 /*!
     \class QModbusTcpClient
     \inmodule QtSerialBus
-    \since 5.6
+    \since 5.8
 
     \brief The QModbusTcpClient class is the interface class for Modbus TCP client device.
 

@@ -184,7 +184,7 @@ static QDataStream &pduFromStream(QDataStream &stream, QModbusPdu &pdu, Type typ
 /*!
     \class QModbusPdu
     \inmodule QtSerialBus
-    \since 5.6
+    \since 5.8
 
     \brief QModbusPdu is a abstract container class containing the function code and
     payload that is stored inside a Modbus ADU.
@@ -464,7 +464,7 @@ QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu)
 /*!
     \class QModbusRequest
     \inmodule QtSerialBus
-    \since 5.6
+    \since 5.8
 
     \brief QModbusRequest is a container class containing the function code and payload that is
     stored inside a Modbus ADU.
@@ -555,18 +555,18 @@ int QModbusRequest::calculateDataSize(const QModbusRequest &request)
     case QModbusPdu::WriteMultipleCoils:
         minimum -= 1; // first payload payload byte
         if (request.dataSize() >= minimum)
-            size = minimum + request.data()[minimum - 1] /*byte count*/;
+            size = minimum + quint8(request.data()[minimum - 1]) /*byte count*/;
         break;
     case QModbusPdu::WriteMultipleRegisters:
     case QModbusPdu::ReadWriteMultipleRegisters:
         minimum -= 2; // first 2 payload payload bytes
         if (request.dataSize() >= minimum)
-            size = minimum + request.data()[minimum - 1] /*byte count*/;
+            size = minimum + quint8(request.data()[minimum - 1]) /*byte count*/;
         break;
     case QModbusPdu::ReadFileRecord:
     case QModbusPdu::WriteFileRecord:
         if (request.dataSize() >= 1)
-            size = 1 /*byte count*/ + request.data()[0] /*actual bytes*/;
+            size = 1 /*byte count*/ + quint8(request.data()[0]) /*actual bytes*/;
         break;
     case QModbusPdu::EncapsulatedInterfaceTransport: {
         if (request.dataSize() < minimum)
@@ -618,7 +618,7 @@ QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu)
 /*!
     \class QModbusResponse
     \inmodule QtSerialBus
-    \since 5.6
+    \since 5.8
 
     \brief QModbusResponse is a container class containing the function code and payload that is
         stored inside a Modbus ADU.
@@ -710,7 +710,7 @@ int QModbusResponse::calculateDataSize(const QModbusResponse &response)
     case QModbusResponse::ReadWriteMultipleRegisters:
     case QModbusResponse::ReportServerId:
         if (response.dataSize() >= 1)
-            size = 1 /*byte count*/ + response.data()[0] /*actual bytes*/;
+            size = 1 /*byte count*/ + quint8(response.data()[0]) /*actual bytes*/;
         break;
     case QModbusResponse::ReadFifoQueue: {
         if (response.dataSize() >= 2) {
@@ -796,7 +796,7 @@ QDataStream &operator>>(QDataStream &stream, QModbusResponse &pdu)
 /*!
     \class QModbusExceptionResponse
     \inmodule QtSerialBus
-    \since 5.6
+    \since 5.8
 
     \brief QModbusExceptionResponse is a container class containing the function and error code
         inside a Modbus ADU.

@@ -50,7 +50,7 @@ Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
 /*!
     \class QModbusClient
     \inmodule QtSerialBus
-    \since 5.6
+    \since 5.8
 
     \brief The QModbusClient class is the interface to send Modbus requests.
 

@@ -58,7 +58,7 @@ public:
 /*!
     \class QModbusReply
     \inmodule QtSerialBus
-    \since 5.6
+    \since 5.8
 
     \brief The QModbusReply class contains the data for a request sent with
     a \l QModbusClient derived class.

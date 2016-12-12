@@ -43,7 +43,7 @@ QT_BEGIN_NAMESPACE
 /*!
     \class QCanBusFrame
     \inmodule QtSerialBus
-    \since 5.6
+    \since 5.8
 
     \brief QCanBusFrame is a container class representing a single CAN frame.
 
@@ -55,14 +55,12 @@ QT_BEGIN_NAMESPACE
 
 /*!
     \fn QCanBusFrame::QCanBusFrame(QCanBusFrame::FrameType type = DataFrame)
-    \since 5.8
 
     Constructs a CAN frame of the specified \a type.
 */
 
 /*!
     \fn QCanBusFrame::QCanBusFrame(quint32 identifier, const QByteArray &data)
-    \since 5.8
 
     Constructs a CAN frame using \a identifier as the frame identifier and \a data as the payload.
 */
@@ -72,7 +70,9 @@ QT_BEGIN_NAMESPACE
 
     Returns \c false if the \l frameType() is \l InvalidFrame,
     the \l hasExtendedFrameFormat() is not set although \l frameId() is longer than 11 bit or
-    the payload is longer than the maximal permitted payload length of 64 byte.
+    the payload is longer than the maximal permitted payload length of 64 byte if \e {Flexible
+    Data-Rate} mode is enabled or 8 byte if it is disabled. If \l frameType() is \l RemoteRequestFrame
+    and the \e {Flexible Data-Rate} mode is enabled at the same time \c false is also returned.
 
     Otherwise this function returns \c true.
 */
@@ -91,7 +91,8 @@ QT_BEGIN_NAMESPACE
     \fn QCanBusFrame::setPayload(const QByteArray &data)
 
     Sets \a data as the payload for the CAN frame. The maximum size of payload is 8 bytes, which can
-    be extended up to 64 bytes by supporting \e {Flexible Data-Rate}. Flexible Data-Rate has to be
+    be extended up to 64 bytes by supporting \e {Flexible Data-Rate}. If \a data contains more than
+    8 byte the \e {Flexible Data-Rate} flag is automatically set. Flexible Data-Rate has to be
     enabled on the \l QCanBusDevice by setting the \l QCanBusDevice::CanFdKey.
 
     Frames of type \l RemoteRequestFrame (RTR) do not have a payload. However they have to
@@ -105,13 +106,11 @@ QT_BEGIN_NAMESPACE
         frame.setPayload(QByteArray(expectedResponseLength, 0));
     \endcode
 
-
-    \sa payload()
+    \sa payload(), hasFlexibleDataRateFormat()
 */
 
 /*!
     \fn QCanBusFrame::setTimeStamp(TimeStamp ts)
-    \since 5.8
 
     Sets \a ts as the timestamp for the CAN frame. Usually, this function is not needed, because the
     timestamp is created during the read operation and not needed during the write operation.
@@ -235,9 +234,28 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
+    \fn bool QCanBusFrame::hasFlexibleDataRateFormat() const
+
+    Returns \c true if the CAN frame uses \e {Flexible Data-Rate} which allows up to 64 data bytes,
+    otherwise \c false, implying at most 8 byte of payload.
+
+    \sa setFlexibleDataRateFormat(), payload()
+*/
+
+/*!
+    \fn  void QCanBusFrame::setFlexibleDataRateFormat(bool isFlexibleData)
+
+    Sets the \e {Flexible Data-Rate} flag to \a isFlexibleData. Those frames can be sent using
+    a higher speed on supporting controllers. Additionally the payload length limit is raised to
+    64 byte.
+
+    \sa hasFlexibleDataRateFormat()
+*/
+
+/*!
     \class QCanBusFrame::TimeStamp
     \inmodule QtSerialBus
-    \since 5.6
+    \since 5.8
 
     \brief The TimeStamp class provides timestamp information with microsecond precision.
 */
@@ -253,11 +271,10 @@ QT_BEGIN_NAMESPACE
 
 /*!
     \fn static TimeStamp TimeStamp::fromMicroSeconds(qint64 usec)
-    \since 5.8
 
     Constructs a normalized TimeStamp from microseconds \a usec.
 
-    The created TimeStamp is normalized, i.e. microsconds greater 1000000 are converted
+    The created TimeStamp is normalized, i.e. microseconds greater 1000000 are converted
     to seconds.
 */
 
@@ -274,8 +291,6 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \fn QString QCanBusFrame::toString() const
-
     Returns the CAN frame as a formatted string.
 
     The output contains the CAN identfier in hexadecimal format, right
@@ -288,16 +303,54 @@ QT_BEGIN_NAMESPACE
     Typical outputs are:
 
     \code
-        (Error)                                - error frame
-             7FF  [1] 01                       - data frame with standard identifier
-        1FFFFFFF  [8] 01 23 45 67 89 AB CD EF  - data frame with extended identifier
-             400 [10] 01 23 45 67 ... EF 01 23 - CAN FD frame
-             123  [5] Remote Request           - remote frame with standard identifier
-        00000234  [0] Remote Request           - remote frame with extended identifier
+        (Error)                                  - error frame
+             7FF   [1]  01                       - data frame with standard identifier
+        1FFFFFFF   [8]  01 23 45 67 89 AB CD EF  - data frame with extended identifier
+             400  [10]  01 23 45 67 ... EF 01 23 - CAN FD frame
+             123   [5]  Remote Request           - remote frame with standard identifier
+        00000234   [0]  Remote Request           - remote frame with extended identifier
     \endcode
-
-    \since 5.8
 */
+QString QCanBusFrame::toString() const
+{
+    const FrameType type = frameType();
+
+    switch (type) {
+    case InvalidFrame:
+        return QStringLiteral("(Invalid)");
+    case ErrorFrame:
+        return QStringLiteral("(Error)");
+    case UnknownFrame:
+        return QStringLiteral("(Unknown)");
+    default:
+        break;
+    }
+
+    const char *idFormat = hasExtendedFrameFormat() ? "%08X" : "     %03X";
+    const char *dlcFormat = hasFlexibleDataRateFormat() ? "  [%02d]" : "   [%d]";
+    QString result;
+    result.append(QString::asprintf(idFormat, static_cast<uint>(frameId())));
+    result.append(QString::asprintf(dlcFormat, payload().size()));
+
+    if (type == RemoteRequestFrame) {
+        result.append(QLatin1String("  Remote Request"));
+    } else {
+        const QByteArray data = payload().toHex().toUpper();
+        const int length = data.size();
+        if (length) {
+            const QLatin1String l1(data.data(), length);
+
+            result.append(QLatin1Char(' '));
+
+            for (int i = 0; i < length; i += 2) {
+                result.append(QLatin1Char(' '));
+                result.append(l1.mid(i, 2));
+            }
+        }
+    }
+
+    return result;
+}
 
 #ifndef QT_NO_DATASTREAM
 
@@ -312,6 +365,7 @@ QDataStream &operator<<(QDataStream &out, const QCanBusFrame &frame)
     out << static_cast<quint8>(frame.frameType());
     out << static_cast<quint8>(frame.version);
     out << frame.hasExtendedFrameFormat();
+    out << frame.hasFlexibleDataRateFormat();
     out << frame.payload();
     const QCanBusFrame::TimeStamp stamp = frame.timeStamp();
     out << stamp.seconds();
@@ -330,11 +384,12 @@ QDataStream &operator>>(QDataStream &in, QCanBusFrame &frame)
     quint8 frameType;
     quint8 version;
     bool extendedFrameFormat;
+    bool flexibleDataRate;
     QByteArray payload;
     qint64 seconds;
     qint64 microSeconds;
 
-    in >> frameId >> frameType >> version >> extendedFrameFormat
+    in >> frameId >> frameType >> version >> extendedFrameFormat >> flexibleDataRate
        >> payload >> seconds >> microSeconds;
 
     frame.setFrameId(frameId);
@@ -342,6 +397,7 @@ QDataStream &operator>>(QDataStream &in, QCanBusFrame &frame)
 
     frame.setFrameType(static_cast<QCanBusFrame::FrameType>(frameType));
     frame.setExtendedFrameFormat(extendedFrameFormat);
+    frame.setFlexibleDataRateFormat(flexibleDataRate);
     frame.setPayload(payload);
 
     frame.setTimeStamp(QCanBusFrame::TimeStamp(seconds, microSeconds));

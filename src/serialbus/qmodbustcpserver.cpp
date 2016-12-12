@@ -44,7 +44,7 @@ QT_BEGIN_NAMESPACE
 /*!
     \class QModbusTcpServer
     \inmodule QtSerialBus
-    \since 5.6
+    \since 5.8
 
     \brief The QModbusTcpServer class represents a Modbus server that uses a
     TCP server for its communication with the Modbus client.

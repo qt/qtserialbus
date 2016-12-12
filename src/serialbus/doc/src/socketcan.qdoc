@@ -111,11 +111,11 @@
     \endcode
 
     The reading can be done using the \l {QCanBusDevice::}{readFrame()} method. The
-    \l {QCanBusDevice::}{framesReceived()} signal is emitted when a new frame is available
-    for reading:
+    \l {QCanBusDevice::}{framesReceived()} signal is emitted when at least one new frame
+    is available for reading:
 
     \code
-    QCanBusFrame frame = device->readFrame();
+        QCanBusFrame frame = device->readFrame();
     \endcode
 
     SocketCAN supports the following configurations that can be controlled through
@@ -128,10 +128,14 @@
         \row
             \li QCanBusDevice::LoopbackKey
             \li To meet the multiple-user needs, the local loopback is enabled by default.
+                This means, whenever a CAN frame is transmitted on the CAN bus, a local
+                echo of this frame is sent to all applications connected to this CAN device.
         \row
             \li QCanBusDevice::ReceiveOwnKey
             \li The reception of the CAN frames on the same socket that was sending the CAN frame
-                is disabled by default.
+                is disabled by default. When enabling this option, all CAN frames sent to the CAN
+                bus immediately appear in the receive buffer. This can be used to check if sending
+                was successful.
         \row
             \li QCanBusDevice::ErrorFilterKey
             \li A CAN interface driver can generate so called \e {Error Message Frames} that can
@@ -151,7 +155,7 @@
         \row
             \li QCanBusDevice::CanFdKey
             \li This configuration option determines whether CANFD frames may be sent or received.
-                By default, this option is disabled. It controls controls the CAN_RAW_FD_FRAMES
+                By default, this option is disabled. It controls the CAN_RAW_FD_FRAMES
                 option of the CAN socket.
     \endtable
 

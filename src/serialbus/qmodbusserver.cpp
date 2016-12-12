@@ -53,7 +53,7 @@ Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
 /*!
     \class QModbusServer
     \inmodule QtSerialBus
-    \since 5.6
+    \since 5.8
 
     \brief The QModbusServer class is the interface to receive and process Modbus requests.
 

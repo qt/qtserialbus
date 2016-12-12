@@ -36,11 +36,14 @@
 
 #include "readtask.h"
 
-using namespace std;
-
 ReadTask::ReadTask(QTextStream &output, QObject *parent)
     : QObject(parent),
       output(output) { }
+
+void ReadTask::setShowTimeStamp(bool showTimeStamp)
+{
+    m_showTimeStamp = showTimeStamp;
+}
 
 void ReadTask::checkMessages() {
     auto canDevice = qobject_cast<QCanBusDevice *>(QObject::sender());
@@ -49,15 +52,24 @@ void ReadTask::checkMessages() {
         return;
     }
 
-    const QCanBusFrame frame = canDevice->readFrame();
+    while (canDevice->framesAvailable()) {
+        const QCanBusFrame frame = canDevice->readFrame();
 
-    QString view;
-    if (frame.frameType() == QCanBusFrame::ErrorFrame)
-        view = canDevice->interpretErrorFrame(frame);
-    else
-        view = frame.toString();
+        QString view;
 
-    output << view << endl;
+        if (m_showTimeStamp) {
+            view = QString::fromLatin1("%1.%2  ")
+                    .arg(frame.timeStamp().seconds(), 10, 10, QLatin1Char(' '))
+                    .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char('0'));
+        }
+
+        if (frame.frameType() == QCanBusFrame::ErrorFrame)
+            view += canDevice->interpretErrorFrame(frame);
+        else
+            view += frame.toString();
+
+        output << view << endl;
+    }
 }
 
 void ReadTask::receiveError(QCanBusDevice::CanBusError /*error*/) {

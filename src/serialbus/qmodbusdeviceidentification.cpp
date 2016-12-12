@@ -42,7 +42,7 @@ QT_BEGIN_NAMESPACE
 /*!
     \class QModbusDeviceIdentification
     \inmodule QtSerialBus
-    \since 5.7
+    \since 5.8
 
     \brief The QModbusDeviceIdentification is a container class representing
     the physical and functional description of a Modbus server.

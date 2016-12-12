@@ -44,18 +44,25 @@
 
 #include "readtask.h"
 
+QT_BEGIN_NAMESPACE
+
+class QCanBusFrame;
+
+QT_END_NAMESPACE
+
 class CanBusUtil : public QObject
 {
     Q_OBJECT
 public:
     explicit CanBusUtil(QTextStream &output, QCoreApplication &app, QObject *parent = nullptr);
 
+    void setShowTimeStamp(bool showTimeStamp);
     bool start(const QString &pluginName, const QString &deviceName, const QString &data = QString());
     void printPlugins();
 
 private:
     bool parseDataField(qint32 &id, QString &payload);
-    bool parsePayloadField(QString payload, bool &rtrFrame, bool &fdFrame, QByteArray &bytes);
+    bool setFrameFromPayload(QString payload, QCanBusFrame *frame);
     bool connectCanDevice();
     bool startListeningOnCanDevice();
     bool sendData();

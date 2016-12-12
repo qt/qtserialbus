@@ -45,6 +45,11 @@ CanBusUtil::CanBusUtil(QTextStream &output, QCoreApplication &app, QObject *pare
 {
 }
 
+void CanBusUtil::setShowTimeStamp(bool showTimeStamp)
+{
+    m_readTask->setShowTimeStamp(showTimeStamp);
+}
+
 bool CanBusUtil::start(const QString &pluginName, const QString &deviceName, const QString &data)
 {
     if (!m_canBus) {
@@ -74,7 +79,6 @@ bool CanBusUtil::start(const QString &pluginName, const QString &deviceName, con
 void CanBusUtil::printPlugins()
 {
     const QStringList plugins = m_canBus->plugins();
-    m_output << "Plugins: " << endl;
     for (int i = 0; i < plugins.size(); i++)
         m_output << plugins.at(i) << endl;
 }
@@ -93,25 +97,21 @@ bool CanBusUtil::parseDataField(qint32 &id, QString &payload)
     return true;
 }
 
-bool CanBusUtil::parsePayloadField(QString payload, bool &rtrFrame,
-                                   bool &fdFrame, QByteArray &bytes)
+bool CanBusUtil::setFrameFromPayload(QString payload, QCanBusFrame *frame)
 {
-    fdFrame = false;
-    rtrFrame = false;
-
     if (!payload.isEmpty() && payload.at(0).toUpper() == 'R') {
-        rtrFrame = true;
         bool validPayloadLength = false;
-        if (fdFrame) {
-            m_output << "CAN FD RTR data frames are not valid." << endl;
-        } else if (payload.size() == 1) { // payload = "R"
+
+        frame->setFrameType(QCanBusFrame::RemoteRequestFrame);
+
+        if (payload.size() == 1) { // payload = "R"
             validPayloadLength = true;
         } else if (payload.size() > 1) { // payload = "R8"
             payload = payload.mid(1);
             int rtrFrameLength = payload.toInt(&validPayloadLength);
 
             if (validPayloadLength && rtrFrameLength >= 0 && rtrFrameLength <= 8) {
-                bytes = QByteArray(rtrFrameLength, 0);
+                frame->setPayload(QByteArray(rtrFrameLength, 0));
             } else if (validPayloadLength) {
                 m_output << "The length must be between 0 and 8 (including)." << endl;
                 validPayloadLength = false;
@@ -124,7 +124,7 @@ bool CanBusUtil::parsePayloadField(QString payload, bool &rtrFrame,
 
         return validPayloadLength;
     } else if (!payload.isEmpty() && payload.at(0) == '#') {
-        fdFrame = true;
+        frame->setFlexibleDataRateFormat(true);
         payload = payload.mid(1);
     }
 
@@ -139,13 +139,15 @@ bool CanBusUtil::parsePayloadField(QString payload, bool &rtrFrame,
         return false;
     }
 
-    bytes = QByteArray::fromHex(payload.toLatin1());
+    QByteArray bytes = QByteArray::fromHex(payload.toLatin1());
 
-    const int maxSize = fdFrame ? 64 : 8;
+    const int maxSize = frame->hasFlexibleDataRateFormat() ? 64 : 8;
     if (bytes.size() > maxSize) {
         m_output << "Warning: Truncating payload at max. size of " << maxSize << " bytes." << endl;
         bytes.truncate(maxSize);
     }
+
+    frame->setPayload(bytes);
 
     return true;
 }
@@ -154,6 +156,7 @@ bool CanBusUtil::connectCanDevice()
 {
     if (!m_canBus->plugins().contains(m_pluginName)) {
         m_output << "Could not find suitable plugin." << endl;
+        m_output << "Available plugins:" << endl;
         printPlugins();
         return false;
     }
@@ -176,15 +179,12 @@ bool CanBusUtil::sendData()
 {
     qint32 id;
     QString payload;
-    bool rtrFrame;
-    bool fdFrame;
-    QByteArray bytes;
     QCanBusFrame frame;
 
     if (parseDataField(id, payload) == false)
         return false;
 
-    if (parsePayloadField(payload, rtrFrame, fdFrame, bytes) == false)
+    if (setFrameFromPayload(payload, &frame) == false)
         return false;
 
     if (id < 0 || id > 0x1FFFFFFF) { // 29 bits
@@ -192,13 +192,9 @@ bool CanBusUtil::sendData()
         m_output << "Warning! Id does not fit into Extended Frame Format, setting id to: " << id << endl;
     }
 
-    if (rtrFrame)
-        frame.setFrameType(QCanBusFrame::RemoteRequestFrame);
-
-    frame.setPayload(bytes);
     frame.setFrameId(id);
 
-    if (fdFrame)
+    if (frame.hasFlexibleDataRateFormat())
         m_canDevice->setConfigurationParameter(QCanBusDevice::CanFdKey, true);
 
     return m_canDevice->writeFrame(frame);

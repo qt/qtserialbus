@@ -41,7 +41,7 @@ QT_BEGIN_NAMESPACE
 /*!
     \class QCanBusFactory
     \inmodule QtSerialBus
-    \since 5.6
+    \since 5.8
 
     \brief The QCanBusFactory class is a factory class used as the
     plugin interface for CAN bus plugins.
@@ -59,8 +59,6 @@ QT_BEGIN_NAMESPACE
     \a errorMessage contains an error description in case of failure.
 
     If the factory cannot create a plugin, it returns \c nullptr.
-
-    \since 5.8
 */
 
 /*!

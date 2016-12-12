@@ -45,7 +45,7 @@ QT_BEGIN_NAMESPACE
 
 class QDataStream;
 
-class QCanBusFrame
+class Q_SERIALBUS_EXPORT QCanBusFrame
 {
 public:
     class TimeStamp {
@@ -73,10 +73,12 @@ public:
     };
 
     explicit QCanBusFrame(FrameType type = DataFrame) Q_DECL_NOTHROW :
-        canId(0x0),
         isExtendedFrame(0x0),
-        version(0x0)
+        version(0x0),
+        isFlexibleDataRate(0x0)
     {
+        memset(reserved, 0, sizeof(reserved));
+        setFrameId(0x0);
         setFrameType(type);
     }
 
@@ -99,14 +101,14 @@ public:
     Q_FLAGS(FrameErrors)
 
     explicit QCanBusFrame(quint32 identifier, const QByteArray &data) :
-        canId(identifier & 0x1FFFFFFFU),
         format(DataFrame),
-        isExtendedFrame((identifier & 0x1FFFF800U) ? 0x1 : 0x0),
+        isExtendedFrame(0x0),
         version(0x0),
+        isFlexibleDataRate(data.length() > 8 ? 0x1 : 0x0),
         load(data)
     {
-        Q_UNUSED(extra);
-        Q_UNUSED(reserved);
+        memset(reserved, 0, sizeof(reserved));
+        setFrameId(identifier);
     }
 
     bool isValid() const Q_DECL_NOTHROW
@@ -118,9 +120,19 @@ public:
         if (!isExtendedFrame && (canId & 0x1FFFF800U))
             return false;
 
-        // maximum permitted payload size in CAN FD
-        if (load.length() > 64)
+        if (!isValidFrameId)
             return false;
+
+        // maximum permitted payload size in CAN or CAN FD
+        if (isFlexibleDataRate) {
+            if (load.length() > 64)
+                return false;
+            if (format == RemoteRequestFrame)
+                return false;
+        } else {
+            if (load.length() > 8)
+                return false;
+        }
 
         return true;
     }
@@ -168,11 +180,22 @@ public:
     }
     void setFrameId(quint32 newFrameId)
     {
-        canId = (newFrameId & 0x1FFFFFFFU);
-        setExtendedFrameFormat(isExtendedFrame || (newFrameId & 0x1FFFF800U));
+        if (newFrameId < 0x20000000U) {
+            isValidFrameId = true;
+            canId = newFrameId;
+            setExtendedFrameFormat(isExtendedFrame || (newFrameId & 0x1FFFF800U));
+        } else {
+            isValidFrameId = false;
+            canId = 0;
+        }
     }
 
-    void setPayload(const QByteArray &data) { load = data; }
+    void setPayload(const QByteArray &data)
+    {
+        load = data;
+        if (data.length() > 8)
+            isFlexibleDataRate = 0x1;
+    }
     void setTimeStamp(TimeStamp ts) Q_DECL_NOTHROW { stamp = ts; }
 
     QByteArray payload() const { return load; }
@@ -192,37 +215,12 @@ public:
         canId = (e & AnyError);
     }
 
-    QString toString() const
+    QString toString() const;
+
+    bool hasFlexibleDataRateFormat() const Q_DECL_NOTHROW { return (isFlexibleDataRate & 0x1); }
+    void setFlexibleDataRateFormat(bool isFlexibleData) Q_DECL_NOTHROW
     {
-        const FrameType type = frameType();
-
-        if (type == InvalidFrame)
-            return QStringLiteral("(Invalid)");
-
-        if (type == ErrorFrame)
-            return QStringLiteral("(Error)");
-
-        if (type == UnknownFrame)
-            return QStringLiteral("(Unknown)");
-
-        const char *idFormat = hasExtendedFrameFormat() ? "%08X" : "     %03X";
-        const char *dlcFormat = payload().size() < 10 ? "  [%d]" : " [%d]";
-        QString result;
-        result.append(QString::asprintf(idFormat, static_cast<uint>(frameId())));
-        result.append(QString::asprintf(dlcFormat, payload().size()));
-
-        if (type == RemoteRequestFrame) {
-            result.append(QLatin1String(" Remote Request"));
-        } else {
-            const QByteArray data = payload().toHex().toUpper();
-            const QLatin1String l1(data.data(), data.size());
-            for (int i = 0, e = data.size(); i < e; i += 2) {
-                result.append(QLatin1Char(' '));
-                result.append(l1.mid(i, 2));
-            }
-        }
-
-        return result;
+        isFlexibleDataRate = (isFlexibleData & 0x1);
     }
 
 #ifndef QT_NO_DATASTREAM
@@ -236,7 +234,8 @@ private:
 
     quint8 isExtendedFrame:1;
     quint8 version:5;
-    quint8 extra: 2; // unused
+    quint8 isValidFrameId:1;
+    quint8 isFlexibleDataRate:1;
 
     // reserved for future use
     quint8 reserved[3];

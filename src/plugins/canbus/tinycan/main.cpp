@@ -55,7 +55,7 @@ public:
     {
         QString errorReason;
         if (!TinyCanBackend::canCreate(&errorReason)) {
-            qWarning("%s", qUtf8Printable(errorReason));
+            qWarning("%ls", qUtf16Printable(errorReason));
             if (errorMessage)
                 *errorMessage = errorReason;
             return nullptr;

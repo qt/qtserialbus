@@ -46,6 +46,7 @@ class ReadTask : public QObject
     Q_OBJECT
 public:
     explicit ReadTask(QTextStream &output, QObject *parent = nullptr);
+    void setShowTimeStamp(bool showStamp);
 
 signals:
     void sigTermSignal();
@@ -56,6 +57,7 @@ public slots:
 
 private:
     QTextStream &output;
+    bool m_showTimeStamp = false;
 };
 
 #endif // READTASK_H
