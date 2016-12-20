@@ -334,19 +334,10 @@ QString QCanBusFrame::toString() const
 
     if (type == RemoteRequestFrame) {
         result.append(QLatin1String("  Remote Request"));
-    } else {
-        const QByteArray data = payload().toHex().toUpper();
-        const int length = data.size();
-        if (length) {
-            const QLatin1String l1(data.data(), length);
-
-            result.append(QLatin1Char(' '));
-
-            for (int i = 0; i < length; i += 2) {
-                result.append(QLatin1Char(' '));
-                result.append(l1.mid(i, 2));
-            }
-        }
+    } else if (!payload().isEmpty()) {
+        const QByteArray data = payload().toHex(' ').toUpper();
+        result.append(QLatin1String("  "));
+        result.append(QLatin1String(data));
     }
 
     return result;
