@@ -94,7 +94,7 @@ public:
                 qCWarning(QT_MODBUS) << "(RTU server) Incomplete ADU received, ignoring";
 
                 // The quantity of CRC errors encountered by the remote device since its last
-                // restart, clear counters operation, or power–up. In case of a message
+                // restart, clear counters operation, or power-up. In case of a message
                 // length < 4 bytes, the receiving device is not able to calculate the CRC.
                 incrementCounter(QModbusServerPrivate::Counter::BusCommunicationError);
                 storeModbusCommEvent(event | QModbusCommEvent::ReceiveFlag::CommunicationError);
@@ -113,7 +113,7 @@ public:
                 qCWarning(QT_MODBUS) << "(RTU server) ADU does not match expected size, ignoring";
                 // The quantity of messages addressed to the remote device that it could not
                 // handle due to a character overrun condition, since its last restart, clear
-                // counters operation, or power–up. A character overrun is caused by data
+                // counters operation, or power-up. A character overrun is caused by data
                 // characters arriving at the port faster than they can be stored, or by the loss
                 // of a character due to a hardware malfunction.
                 incrementCounter(QModbusServerPrivate::Counter::BusCharacterOverrun);
@@ -130,14 +130,14 @@ public:
                                      << adu.checksum<quint16>() << ", calculated CRC:"
                                      << QModbusSerialAdu::calculateCRC(adu.data(), adu.size());
                 // The quantity of CRC errors encountered by the remote device since its last
-                // restart, clear counters operation, or power–up.
+                // restart, clear counters operation, or power-up.
                 incrementCounter(QModbusServerPrivate::Counter::BusCommunicationError);
                 storeModbusCommEvent(event | QModbusCommEvent::ReceiveFlag::CommunicationError);
                 return;
             }
 
             // The quantity of messages that the remote device has detected on the communications
-            // system since its last restart, clear counters operation, or power–up.
+            // system since its last restart, clear counters operation, or power-up.
             incrementCounter(QModbusServerPrivate::Counter::BusMessage);
 
             // If we do not process a Broadcast ...
@@ -159,14 +159,14 @@ public:
             if (q->value(QModbusServer::DeviceBusy).value<quint16>() == 0xffff) {
                 // is busy, update the quantity of messages addressed to the remote device for
                 // which it returned a Server Device Busy exception response, since its last
-                // restart, clear counters operation, or power–up.
+                // restart, clear counters operation, or power-up.
                 incrementCounter(QModbusServerPrivate::Counter::ServerBusy);
                 response = QModbusExceptionResponse(req.functionCode(),
                     QModbusExceptionResponse::ServerDeviceBusy);
             } else {
                 // is not busy, update the quantity of messages addressed to the remote device,
                 // or broadcast, that the remote device has processed since its last restart,
-                // clear counters operation, or power–up.
+                // clear counters operation, or power-up.
                 incrementCounter(QModbusServerPrivate::Counter::ServerMessage);
                 response = q->processRequest(req);
             }
@@ -181,7 +181,7 @@ public:
                 || q->value(QModbusServer::ListenOnlyMode).toBool()) {
                 // The quantity of messages addressed to the remote device for which it has
                 // returned no response (neither a normal response nor an exception response),
-                // since its last restart, clear counters operation, or power–up.
+                // since its last restart, clear counters operation, or power-up.
                 incrementCounter(QModbusServerPrivate::Counter::ServerNoResponse);
                 storeModbusCommEvent(event);
                 return;
@@ -227,7 +227,7 @@ public:
                 case QModbusExceptionResponse::ServerDeviceBusy:
                     // The quantity of messages addressed to the remote device for which it
                     // returned a server device busy exception response, since its last restart,
-                    // clear counters operation, or power–up.
+                    // clear counters operation, or power-up.
                     incrementCounter(QModbusServerPrivate::Counter::ServerBusy);
                     event |= QModbusCommEvent::SendFlag::ServerBusyExceptionSent;
                     break;
@@ -235,7 +235,7 @@ public:
                 case  QModbusExceptionResponse::NegativeAcknowledge:
                     // The quantity of messages addressed to the remote device for which it
                     // returned a negative acknowledge (NAK) exception response, since its last
-                    // restart, clear counters operation, or power–up.
+                    // restart, clear counters operation, or power-up.
                     incrementCounter(QModbusServerPrivate::Counter::ServerNAK);
                     event |= QModbusCommEvent::SendFlag::ServerProgramNAKExceptionSent;
                     break;
@@ -244,7 +244,7 @@ public:
                     break;
                 }
                 // The quantity of Modbus exception responses returned by the remote device since
-                // its last restart, clear counters operation, or power–up.
+                // its last restart, clear counters operation, or power-up.
                 incrementCounter(QModbusServerPrivate::Counter::BusExceptionError);
             } else {
                 switch (quint16(req.functionCode())) {
