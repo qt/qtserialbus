@@ -399,7 +399,12 @@ qint64 QCanBusDevice::framesAvailable() const
 }
 
 /*!
-    Returns the number of frames waiting to be written.
+    For buffered devices, this function returns the number of frames waiting to be written.
+    For unbuffered devices, this function always returns zero.
+
+    \note There may be additional buffering in the CAN driver and CAN hardware layer.
+    Therefore, if this function returns zero, that does not mean all CAN frames are
+    already written to the CAN bus.
 
     \sa writeFrame()
 */
