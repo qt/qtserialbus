@@ -55,7 +55,7 @@ class VectorCanBackend : public QCanBusDevice
     Q_DISABLE_COPY(VectorCanBackend)
 public:
     explicit VectorCanBackend(const QString &name, QObject *parent = nullptr);
-    ~VectorCanBackend() override;
+    ~VectorCanBackend();
 
     bool open() override;
     void close() override;
