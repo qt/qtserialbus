@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
+** Copyright (C) 2017 Andre Hartmann <aha_1980@gmx.de>
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the examples of the QtSerialBus module.
@@ -38,55 +38,32 @@
 **
 ****************************************************************************/
 
-#ifndef CONNECTDIALOG_H
-#define CONNECTDIALOG_H
+#ifndef BITRATEBOX_H
+#define BITRATEBOX_H
 
-#include <QCanBusDevice>
-#include <QCanBusDeviceInfo>
+#include <QComboBox>
 
-#include <QDialog>
+class QIntValidator;
 
-QT_BEGIN_NAMESPACE
-
-namespace Ui {
-class ConnectDialog;
-}
-
-QT_END_NAMESPACE
-
-class ConnectDialog : public QDialog
+class BitRateBox : public QComboBox
 {
-    Q_OBJECT
-
 public:
-    typedef QPair<QCanBusDevice::ConfigurationKey, QVariant> ConfigurationItem;
+    BitRateBox(QWidget *parent = nullptr);
+    ~BitRateBox();
 
-    struct Settings {
-        QString backendName;
-        QString deviceInterfaceName;
-        QList<ConfigurationItem> configurations;
-        bool useConfigurationEnabled = false;
-    };
+    int bitRate() const;
 
-    explicit ConnectDialog(QWidget *parent = nullptr);
-    ~ConnectDialog();
-
-    Settings settings() const;
+    bool isFlexibleDataRateEnabled() const;
+    void setFlexibleDateRateEnabled(bool enabled);
 
 private slots:
-    void backendChanged(const QString &backend);
-    void interfaceChanged(const QString &interface);
-    void ok();
-    void cancel();
+    void checkCustomSpeedPolicy(int idx);
 
 private:
-    QString configurationValue(QCanBusDevice::ConfigurationKey key);
-    void revertSettings();
-    void updateSettings();
+    void fillBitRates();
 
-    Ui::ConnectDialog *m_ui = nullptr;
-    Settings m_currentSettings;
-    QList<QCanBusDeviceInfo> m_interfaces;
+    int m_isFlexibleDataRateEnabled = false;
+    QIntValidator *m_customSpeedValidator = nullptr;
 };
 
-#endif // CONNECTDIALOG_H
+#endif // BITRATEBOX_H

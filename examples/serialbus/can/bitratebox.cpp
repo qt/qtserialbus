@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
+** Copyright (C) 2017 Andre Hartmann <aha_1980@gmx.de>
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the examples of the QtSerialBus module.
@@ -38,55 +38,74 @@
 **
 ****************************************************************************/
 
-#ifndef CONNECTDIALOG_H
-#define CONNECTDIALOG_H
+#include "bitratebox.h"
 
-#include <QCanBusDevice>
-#include <QCanBusDeviceInfo>
+#include <QLineEdit>
 
-#include <QDialog>
+BitRateBox::BitRateBox(QWidget *parent) :
+    QComboBox(parent),
+    m_customSpeedValidator(new QIntValidator(0, 1000000, this))
+{
+    fillBitRates();
 
-QT_BEGIN_NAMESPACE
-
-namespace Ui {
-class ConnectDialog;
+    connect(this, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+            this, &BitRateBox::checkCustomSpeedPolicy);
 }
 
-QT_END_NAMESPACE
-
-class ConnectDialog : public QDialog
+BitRateBox::~BitRateBox()
 {
-    Q_OBJECT
+    delete m_customSpeedValidator;
+}
 
-public:
-    typedef QPair<QCanBusDevice::ConfigurationKey, QVariant> ConfigurationItem;
+int BitRateBox::bitRate() const
+{
+    if (currentIndex() == (count() - 1))
+        return currentText().toInt();
 
-    struct Settings {
-        QString backendName;
-        QString deviceInterfaceName;
-        QList<ConfigurationItem> configurations;
-        bool useConfigurationEnabled = false;
+    return itemData(currentIndex()).toInt();
+}
+
+bool BitRateBox::isFlexibleDataRateEnabled() const
+{
+    return m_isFlexibleDataRateEnabled;
+}
+
+void BitRateBox::setFlexibleDateRateEnabled(bool enabled)
+{
+    m_isFlexibleDataRateEnabled = enabled;
+    m_customSpeedValidator->setTop(enabled ? 10000000 : 1000000);
+    fillBitRates();
+}
+
+void BitRateBox::checkCustomSpeedPolicy(int idx)
+{
+    const bool isCustomSpeed = !itemData(idx).isValid();
+    setEditable(isCustomSpeed);
+    if (isCustomSpeed) {
+        clearEditText();
+        lineEdit()->setValidator(m_customSpeedValidator);
+    }
+}
+
+void BitRateBox::fillBitRates()
+{
+    const QList<int> rates = {
+        10000, 20000, 50000, 100000, 125000, 250000, 500000, 800000, 1000000
+    };
+    const QList<int> dataRates = {
+        2000000, 4000000, 8000000
     };
 
-    explicit ConnectDialog(QWidget *parent = nullptr);
-    ~ConnectDialog();
+    clear();
 
-    Settings settings() const;
+    for (int rate : rates)
+        addItem(QString::number(rate), rate);
 
-private slots:
-    void backendChanged(const QString &backend);
-    void interfaceChanged(const QString &interface);
-    void ok();
-    void cancel();
+    if (isFlexibleDataRateEnabled()) {
+        for (int rate : dataRates)
+            addItem(QString::number(rate), rate);
+    }
 
-private:
-    QString configurationValue(QCanBusDevice::ConfigurationKey key);
-    void revertSettings();
-    void updateSettings();
-
-    Ui::ConnectDialog *m_ui = nullptr;
-    Settings m_currentSettings;
-    QList<QCanBusDeviceInfo> m_interfaces;
-};
-
-#endif // CONNECTDIALOG_H
+    addItem(tr("Custom"));
+    setCurrentIndex(6); // default is 500000 bits/sec
+}

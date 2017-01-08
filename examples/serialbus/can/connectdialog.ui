@@ -127,14 +127,14 @@
        <widget class="QComboBox" name="receiveOwnBox"/>
       </item>
       <item row="4" column="0">
-       <widget class="QLabel" name="speedLabel">
+       <widget class="QLabel" name="bitrateLabel">
         <property name="text">
-         <string>Speed</string>
+         <string>Bitrate</string>
         </property>
        </widget>
       </item>
       <item row="4" column="1">
-       <widget class="QComboBox" name="speedBox"/>
+       <widget class="BitRateBox" name="bitrateBox"/>
       </item>
       <item row="5" column="0">
        <widget class="QLabel" name="canFdLabel">
@@ -200,6 +200,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>BitRateBox</class>
+   <extends>QComboBox</extends>
+   <header>bitratebox.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

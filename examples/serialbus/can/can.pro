@@ -3,12 +3,16 @@ QT += serialbus widgets
 TARGET = can
 TEMPLATE = app
 
-SOURCES += main.cpp \
+SOURCES += \
+    bitratebox.cpp \
+    connectdialog.cpp \
+    main.cpp \
     mainwindow.cpp \
-    connectdialog.cpp
 
-HEADERS += mainwindow.h \
-    connectdialog.h
+HEADERS += \
+    bitratebox.h \
+    connectdialog.h \
+    mainwindow.h \
 
 FORMS   += mainwindow.ui \
     connectdialog.ui

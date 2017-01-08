@@ -49,7 +49,6 @@ ConnectDialog::ConnectDialog(QWidget *parent) :
 {
     m_ui->setupUi(this);
 
-    m_customSpeedValidator = new QIntValidator(0, 1000000, this);
     m_ui->errorFilterEdit->setValidator(new QIntValidator(0, 0x1FFFFFFFU, this));
 
     m_ui->loopbackBox->addItem(tr("unspecified"), QVariant());
@@ -67,8 +66,6 @@ ConnectDialog::ConnectDialog(QWidget *parent) :
     connect(m_ui->cancelButton, &QPushButton::clicked, this, &ConnectDialog::cancel);
     connect(m_ui->useConfigurationBox, &QCheckBox::clicked,
             m_ui->configurationBox, &QGroupBox::setEnabled);
-    connect(m_ui->speedBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-            this, &ConnectDialog::checkCustomSpeedPolicy);
     connect(m_ui->backendListBox, &QComboBox::currentTextChanged,
             this, &ConnectDialog::backendChanged);
     connect(m_ui->interfaceListBox, &QComboBox::currentTextChanged,
@@ -77,7 +74,6 @@ ConnectDialog::ConnectDialog(QWidget *parent) :
     m_ui->rawFilterLabel->hide();
 
     m_ui->backendListBox->addItems(QCanBus::instance()->plugins());
-    fillSpeeds();
 
     updateSettings();
 }
@@ -90,17 +86,6 @@ ConnectDialog::~ConnectDialog()
 ConnectDialog::Settings ConnectDialog::settings() const
 {
     return m_currentSettings;
-}
-
-void ConnectDialog::checkCustomSpeedPolicy(int idx)
-{
-    const bool isCustomSpeed = !m_ui->speedBox->itemData(idx).isValid();
-    m_ui->speedBox->setEditable(isCustomSpeed);
-    if (isCustomSpeed) {
-        m_ui->speedBox->clearEditText();
-        QLineEdit *edit = m_ui->speedBox->lineEdit();
-        edit->setValidator(m_customSpeedValidator);
-    }
 }
 
 void ConnectDialog::backendChanged(const QString &backend)
@@ -173,7 +158,7 @@ void ConnectDialog::revertSettings()
     m_ui->errorFilterEdit->setText(value);
 
     value = configurationValue(QCanBusDevice::BitRateKey);
-    m_ui->speedBox->setCurrentText(value);
+    m_ui->bitrateBox->setCurrentText(value);
 
     value = configurationValue(QCanBusDevice::CanFdKey);
     m_ui->canFdBox->setCurrentText(value);
@@ -222,17 +207,9 @@ void ConnectDialog::updateSettings()
         }
 
         // process bitrate
-        bool ok = false;
-        int bitrate = 0;
-        if (m_ui->speedBox->currentIndex() == (m_ui->speedBox->count() - 1))
-            bitrate = m_ui->speedBox->currentText().toInt(&ok);
-        else
-            bitrate = m_ui->speedBox->itemData(m_ui->speedBox->currentIndex()).toInt(&ok);
-
-        if (ok && (bitrate > 0)) {
-            ConfigurationItem item;
-            item.first = QCanBusDevice::BitRateKey;
-            item.second = QVariant(bitrate);
+        const int bitrate = m_ui->bitrateBox->bitRate();
+        if (bitrate > 0) {
+            const ConfigurationItem item(QCanBusDevice::BitRateKey, QVariant(bitrate));
             m_currentSettings.configurations.append(item);
         }
 
@@ -242,20 +219,4 @@ void ConnectDialog::updateSettings()
         fdItem.second = m_ui->canFdBox->currentData();
         m_currentSettings.configurations.append(fdItem);
     }
-}
-
-void ConnectDialog::fillSpeeds()
-{
-    m_ui->speedBox->addItem(QStringLiteral("10000"), 10000);
-    m_ui->speedBox->addItem(QStringLiteral("20000"), 20000);
-    m_ui->speedBox->addItem(QStringLiteral("50000"), 50000);
-    m_ui->speedBox->addItem(QStringLiteral("100000"), 100000);
-    m_ui->speedBox->addItem(QStringLiteral("125000"), 125000);
-    m_ui->speedBox->addItem(QStringLiteral("250000"), 250000);
-    m_ui->speedBox->addItem(QStringLiteral("500000"), 500000);
-    m_ui->speedBox->addItem(QStringLiteral("800000"), 800000);
-    m_ui->speedBox->addItem(QStringLiteral("1000000"), 1000000);
-    m_ui->speedBox->addItem(tr("Custom"));
-
-    m_ui->speedBox->setCurrentIndex(6); // setup 500000 bits/sec by default
 }
