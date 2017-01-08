@@ -42,7 +42,6 @@
 #include "ui_connectdialog.h"
 
 #include <QCanBus>
-#include <QDebug>
 
 ConnectDialog::ConnectDialog(QWidget *parent) :
     QDialog(parent),
