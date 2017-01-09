@@ -380,6 +380,7 @@ bool SocketCanBackend::writeFrame(const QCanBusFrame &newData)
     qint64 bytesWritten = 0;
     if (canFdOptionEnabled) {
         canfd_frame frame;
+        memset(&frame, 0, sizeof(frame));
         frame.len = newData.payload().size();
         frame.can_id = canId;
         ::memcpy(frame.data, newData.payload().constData(), frame.len);
@@ -387,6 +388,7 @@ bool SocketCanBackend::writeFrame(const QCanBusFrame &newData)
         bytesWritten = ::write(canSocket, &frame, sizeof(frame));
     } else {
         can_frame frame;
+        memset(&frame, 0, sizeof(frame));
         frame.can_dlc = newData.payload().size();
         frame.can_id = canId;
         ::memcpy(frame.data, newData.payload().constData(), frame.can_dlc);
