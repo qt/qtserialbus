@@ -148,6 +148,21 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
+    \enum QCanBusFrame::Version
+    \internal
+
+    This enum describes the version of the QCanBusFrame.
+
+    With newer Qt versions, new features may be added to QCanBusFrame. To support serializing and
+    deserializing of frames with different features, the version needs to be incremented every
+    time a new feature appears. This enum describes, at which Qt version a specific QCanBusFrame
+    version appeared.
+
+    \value Qt_5_8               This frame is the initial version introduced in Qt 5.8
+    \value Qt_5_9               This frame version was introduced in Qt 5.9
+*/
+
+/*!
     \enum QCanBusFrame::FrameType
 
     This enum describes the type of the CAN frame.
@@ -250,6 +265,26 @@ QT_BEGIN_NAMESPACE
     64 byte.
 
     \sa hasFlexibleDataRateFormat()
+*/
+
+/*!
+    \fn QCanBusFrame::hasBitrateSwitch() const
+    \since 5.9
+
+    Returns \c true if the CAN uses \e {Flexible Data-Rate} with \e {Bitrate Switch},
+    to transfer the payload data at a higher data bitrate.
+
+    \sa setBitrateSwitch() QCanBusDevice::DataBitRateKey
+*/
+
+/*!
+    \fn void QCanBusFrame::setBitrateSwitch(bool bitrateSwitch)
+    \since 5.9
+
+    Set the \e {Flexible Data-Rate} flag \e {Bitrate Switch} flag to \a bitrateSwitch.
+    The data field of frames with this flag is transferred at a higher data bitrate.
+
+    \sa hasBitrateSwitch() QCanBusDevice::DataBitRateKey
 */
 
 /*!
@@ -361,6 +396,8 @@ QDataStream &operator<<(QDataStream &out, const QCanBusFrame &frame)
     const QCanBusFrame::TimeStamp stamp = frame.timeStamp();
     out << stamp.seconds();
     out << stamp.microSeconds();
+    if (frame.version >= QCanBusFrame::Version::Qt_5_9)
+        out << frame.hasBitrateSwitch();
     return out;
 }
 
@@ -376,6 +413,7 @@ QDataStream &operator>>(QDataStream &in, QCanBusFrame &frame)
     quint8 version;
     bool extendedFrameFormat;
     bool flexibleDataRate;
+    bool bitrateSwitch = false;
     QByteArray payload;
     qint64 seconds;
     qint64 microSeconds;
@@ -383,12 +421,16 @@ QDataStream &operator>>(QDataStream &in, QCanBusFrame &frame)
     in >> frameId >> frameType >> version >> extendedFrameFormat >> flexibleDataRate
        >> payload >> seconds >> microSeconds;
 
+    if (version >= QCanBusFrame::Version::Qt_5_9)
+        in >> bitrateSwitch;
+
     frame.setFrameId(frameId);
     frame.version = version;
 
     frame.setFrameType(static_cast<QCanBusFrame::FrameType>(frameType));
     frame.setExtendedFrameFormat(extendedFrameFormat);
     frame.setFlexibleDataRateFormat(flexibleDataRate);
+    frame.setBitrateSwitch(bitrateSwitch);
     frame.setPayload(payload);
 
     frame.setTimeStamp(QCanBusFrame::TimeStamp(seconds, microSeconds));

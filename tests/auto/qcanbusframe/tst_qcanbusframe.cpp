@@ -48,6 +48,7 @@ private slots:
     void id();
     void payload();
     void timeStamp();
+    void bitRateSwitch();
 
     void tst_isValid_data();
     void tst_isValid();
@@ -178,6 +179,47 @@ void tst_QCanBusFrame::timeStamp()
     timeStamp = QCanBusFrame::TimeStamp::fromMicroSeconds(2000001);
     QCOMPARE(timeStamp.seconds(), 2);
     QCOMPARE(timeStamp.microSeconds(), 1);
+}
+
+void tst_QCanBusFrame::bitRateSwitch()
+{
+     QCanBusFrame frame(QCanBusFrame::DataFrame);
+     QVERIFY(!frame.hasBitrateSwitch());
+
+     // set CAN FD does not set BRS
+     frame.setFlexibleDataRateFormat(true);
+     QVERIFY(frame.hasFlexibleDataRateFormat());
+     QVERIFY(!frame.hasBitrateSwitch());
+
+     // set BRS keeps CAN FD
+     frame.setBitrateSwitch(true);
+     QVERIFY(frame.hasFlexibleDataRateFormat());
+     QVERIFY(frame.hasBitrateSwitch());
+
+     // clear BRS keeps CAN FD
+     frame.setBitrateSwitch(false);
+     QVERIFY(frame.hasFlexibleDataRateFormat());
+     QVERIFY(!frame.hasBitrateSwitch());
+
+     // clear CAN FD
+     frame.setFlexibleDataRateFormat(false);
+     QVERIFY(!frame.hasFlexibleDataRateFormat());
+     QVERIFY(!frame.hasBitrateSwitch());
+
+     // set BRS sets CAN FD
+     frame.setBitrateSwitch(true);
+     QVERIFY(frame.hasFlexibleDataRateFormat());
+     QVERIFY(frame.hasBitrateSwitch());
+
+     // clear CAN FD clears BRS
+     frame.setFlexibleDataRateFormat(false);
+     QVERIFY(!frame.hasFlexibleDataRateFormat());
+     QVERIFY(!frame.hasBitrateSwitch());
+
+     // default constructed CAN FD frame has no BRS
+     const QCanBusFrame frame2(0x123, QByteArray(10, 0x55));
+     QVERIFY(frame2.hasFlexibleDataRateFormat());
+     QVERIFY(!frame2.hasBitrateSwitch());
 }
 
 void tst_QCanBusFrame::tst_isValid_data()
@@ -346,33 +388,37 @@ void tst_QCanBusFrame::streaming_data()
     QTest::addColumn<qint64>("microSeconds");
     QTest::addColumn<bool>("isExtended");
     QTest::addColumn<bool>("isFlexibleDataRate");
+    QTest::addColumn<bool>("isBitrateSwitch");
     QTest::addColumn<QCanBusFrame::FrameType>("frameType");
 
 
     QTest::newRow("emptyFrame") << quint32(0) << QByteArray()
                                 << qint64(0) << qint64(0)
-                                << false << false << QCanBusFrame::DataFrame;
+                                << false << false << false << QCanBusFrame::DataFrame;
     QTest::newRow("fullFrame1") << quint32(123) << QByteArray("abcde1")
                                << qint64(456) << qint64(784)
-                               << true << false << QCanBusFrame::DataFrame;
+                               << true << false << false << QCanBusFrame::DataFrame;
     QTest::newRow("fullFrame2") << quint32(123) << QByteArray("abcde2")
                                << qint64(457) << qint64(785)
-                               << false << false << QCanBusFrame::DataFrame;
+                               << false << false << false << QCanBusFrame::DataFrame;
     QTest::newRow("fullFrameFD") << quint32(123) << QByteArray("abcdfd")
                                 << qint64(457) << qint64(785)
-                                << false << true << QCanBusFrame::DataFrame;
+                                << false << true << false << QCanBusFrame::DataFrame;
+    QTest::newRow("fullFrameBRS") << quint32(123) << QByteArray("abcdfd")
+                                << qint64(457) << qint64(785)
+                                << false << true << true << QCanBusFrame::DataFrame;
     QTest::newRow("fullFrame3") << quint32(123) << QByteArray("abcde3")
                                << qint64(458) << qint64(786)
-                               << true << false << QCanBusFrame::RemoteRequestFrame;
+                               << true << false << false << QCanBusFrame::RemoteRequestFrame;
     QTest::newRow("fullFrame4") << quint32(123) << QByteArray("abcde4")
                                << qint64(459) << qint64(787)
-                               << false << false << QCanBusFrame::RemoteRequestFrame;
+                               << false << false << false << QCanBusFrame::RemoteRequestFrame;
     QTest::newRow("fullFrame5") << quint32(123) << QByteArray("abcde5")
                                << qint64(460) << qint64(789)
-                               << true << false << QCanBusFrame::ErrorFrame;
+                               << true << false << false << QCanBusFrame::ErrorFrame;
     QTest::newRow("fullFrame6") << quint32(123) << QByteArray("abcde6")
                                << qint64(453) << qint64(788)
-                               << false << false << QCanBusFrame::ErrorFrame;
+                               << false << false << false << QCanBusFrame::ErrorFrame;
 }
 
 void tst_QCanBusFrame::streaming()
@@ -383,6 +429,7 @@ void tst_QCanBusFrame::streaming()
     QFETCH(qint64, microSeconds);
     QFETCH(bool, isExtended);
     QFETCH(bool, isFlexibleDataRate);
+    QFETCH(bool, isBitrateSwitch);
     QFETCH(QCanBusFrame::FrameType, frameType);
 
     QCanBusFrame originalFrame(frameId, payload);
@@ -391,6 +438,7 @@ void tst_QCanBusFrame::streaming()
 
     originalFrame.setExtendedFrameFormat(isExtended);
     originalFrame.setFlexibleDataRateFormat(isFlexibleDataRate);
+    originalFrame.setBitrateSwitch(isBitrateSwitch);
     originalFrame.setFrameType(frameType);
 
     QByteArray buffer;
@@ -413,6 +461,8 @@ void tst_QCanBusFrame::streaming()
              originalFrame.hasExtendedFrameFormat());
     QCOMPARE(restoredFrame.hasFlexibleDataRateFormat(),
              originalFrame.hasFlexibleDataRateFormat());
+    QCOMPARE(restoredFrame.hasBitrateSwitch(),
+             originalFrame.hasBitrateSwitch());
 }
 
 void tst_QCanBusFrame::tst_error()

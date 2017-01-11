@@ -47,6 +47,8 @@
     This section assumes, that the device driver is already loaded
     (most likely automatically when connecting the CAN hardware).
 
+    \section3 Default settings
+
     To set the device can0 to a bitrate of 250 kBit/s:
     \code
         sudo ip link set up can0 type can bitrate 250000
@@ -56,6 +58,13 @@
     the following command can be used:
     \code
         sudo ip link set up can0 type can bitrate 250000 restart-ms 100
+
+    \section3 CAN FD settings
+
+    To set the device can0 to an arbitration bitrate of 500 kBit/s and a data
+    bitrate of 4 MBit/s (for frames with bitrate switch flag):
+    \code
+        sudo ip link set can0 up type can bitrate 500000 dbitrate 4000000 fd on
     \endcode
 
     \section2 Setting up a virtual CAN bus
@@ -73,10 +82,10 @@
     the \l{https://github.com/linux-can/can-utils}{can-utils} package:
 
     \code
-        # Display received CAN messages
-        candump vcan0
+        # Display received CAN messages with absolute timestamps and flags
+        candump -ta -x vcan0
 
-        # Send a CAN message
+        # Send a CAN FD message with flags BRS and EFI set
         cansend vcan0 123##3112233445566778899aabbccddeeff
 
         # Generate random CAN messages
@@ -163,6 +172,11 @@
             \li This configuration option determines whether CANFD frames may be sent or received.
                 By default, this option is disabled. It controls the CAN_RAW_FD_FRAMES
                 option of the CAN socket.
+        \row
+            \li QCanBusDevice::DataBitRateKey
+            \li This configuration is not supported by the socketcan plugin. However
+                it is possible to set the data rate when configuring the CAN network interface
+                using the \c {ip link} command.
     \endtable
 
     For example:

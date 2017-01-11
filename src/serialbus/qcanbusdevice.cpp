@@ -102,9 +102,18 @@ QT_BEGIN_NAMESPACE
     \value ReceiveOwnKey    This key defines whether this CAN device receives its own send frames.
                             This can be used to check if the transmission was successful.
                             The expected value for this key is \c bool.
-    \value BitRateKey       This key defines the bitrate in bits per second.
+    \value BitRateKey       This key defines the CAN bitrate in bits per second. With CAN FD,
+                            the payload can be transmitted at a higher data bitrate,
+                            if \l QCanBusFrame::hasBitrateSwitch() is set. In this case,
+                            \c QCanBusDevice::BitRateKey is only used for the CAN ID arbitration
+                            phase. See also \c QCanBusDevice::DataBitRateKey
     \value CanFdKey         This key defines whether sending and receiving of CAN FD frames
                             should be enabled. The expected value for this key is \c bool.
+    \value DataBitRateKey   This key defines the CAN FD payload bitrate in bits per second.
+                            CAN FD allows to transmit the payload of frames with
+                            \l QCanBusFrame::hasBitrateSwitch() flag at a higher data bitrate,
+                            after the arbitration phase at the nominal bitrate is finished.
+                            See also \c QCanBusDevice::BitRateKey
     \value UserKey          This key defines the range where custom keys start. Its most
                             common purpose is to permit platform-specific configuration
                             options.

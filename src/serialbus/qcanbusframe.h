@@ -74,9 +74,12 @@ public:
 
     explicit QCanBusFrame(FrameType type = DataFrame) Q_DECL_NOTHROW :
         isExtendedFrame(0x0),
-        version(0x0),
-        isFlexibleDataRate(0x0)
+        version(Qt_5_9),
+        isFlexibleDataRate(0x0),
+        isBitrateSwitch(0x0),
+        reserved0(0x0)
     {
+        Q_UNUSED(reserved0);
         memset(reserved, 0, sizeof(reserved));
         setFrameId(0x0);
         setFrameType(type);
@@ -103,8 +106,10 @@ public:
     explicit QCanBusFrame(quint32 identifier, const QByteArray &data) :
         format(DataFrame),
         isExtendedFrame(0x0),
-        version(0x0),
+        version(Qt_5_9),
         isFlexibleDataRate(data.length() > 8 ? 0x1 : 0x0),
+        isBitrateSwitch(0x0),
+        reserved0(0x0),
         load(data)
     {
         memset(reserved, 0, sizeof(reserved));
@@ -221,6 +226,16 @@ public:
     void setFlexibleDataRateFormat(bool isFlexibleData) Q_DECL_NOTHROW
     {
         isFlexibleDataRate = (isFlexibleData & 0x1);
+        if (!isFlexibleData)
+            isBitrateSwitch = 0x0;
+    }
+
+    bool hasBitrateSwitch() const Q_DECL_NOTHROW { return (isBitrateSwitch & 0x1); }
+    void setBitrateSwitch(bool bitrateSwitch) Q_DECL_NOTHROW
+    {
+        isBitrateSwitch = (bitrateSwitch & 0x1);
+        if (bitrateSwitch)
+            isFlexibleDataRate = 0x1;
     }
 
 #ifndef QT_NO_DATASTREAM
@@ -229,6 +244,11 @@ public:
 #endif
 
 private:
+    enum Version {
+        Qt_5_8 = 0x0,
+        Qt_5_9 = 0x1
+    };
+
     quint32 canId:29; // acts as container for error codes too
     quint8 format:3; // max of 8 frame types
 
@@ -237,8 +257,11 @@ private:
     quint8 isValidFrameId:1;
     quint8 isFlexibleDataRate:1;
 
+    quint8 isBitrateSwitch:1;
+    quint8 reserved0:7;
+
     // reserved for future use
-    quint8 reserved[3];
+    quint8 reserved[2];
 
     QByteArray load;
     TimeStamp stamp;

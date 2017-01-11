@@ -202,7 +202,10 @@ void MainWindow::checkMessages()
                 .arg(frame.timeStamp().seconds(), 10, 10, QLatin1Char(' '))
                 .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char('0'));
 
-        m_ui->receivedMessagesEdit->append(time + view);
+        const QString flags = frame.hasBitrateSwitch()
+                ? QStringLiteral(" B - ") :  QStringLiteral(" - - ");
+
+        m_ui->receivedMessagesEdit->append(time + flags + view);
     }
 }
 
@@ -232,6 +235,7 @@ void MainWindow::sendMessage() const
     frame.setFrameId(id);
     frame.setExtendedFrameFormat(m_ui->effBox->checkState());
     frame.setFlexibleDataRateFormat(m_ui->fdBox->checkState());
+    frame.setBitrateSwitch(m_ui->bitrateSwitchBox->checkState());
 
     if (m_ui->remoteFrame->isChecked())
         frame.setFrameType(QCanBusFrame::RemoteRequestFrame);

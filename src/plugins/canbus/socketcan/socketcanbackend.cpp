@@ -449,6 +449,7 @@ bool SocketCanBackend::writeFrame(const QCanBusFrame &newData)
         canfd_frame frame;
         frame.len = newData.payload().size();
         frame.can_id = canId;
+        frame.flags = newData.hasBitrateSwitch() ? CANFD_BRS : 0;
         ::memcpy(frame.data, newData.payload().constData(), frame.len);
 
         bytesWritten = ::write(canSocket, &frame, sizeof(frame));
@@ -676,6 +677,8 @@ void SocketCanBackend::readSocket()
             bufferedFrame.setFrameType(QCanBusFrame::RemoteRequestFrame);
         if (frame.can_id & CAN_ERR_FLAG)
             bufferedFrame.setFrameType(QCanBusFrame::ErrorFrame);
+        if (frame.flags & CANFD_BRS)
+            bufferedFrame.setBitrateSwitch(true);
 
         bufferedFrame.setFrameId(frame.can_id & CAN_EFF_MASK);
 

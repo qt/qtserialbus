@@ -62,6 +62,8 @@ ConnectDialog::ConnectDialog(QWidget *parent) :
     m_ui->canFdBox->addItem(tr("false"), QVariant(false));
     m_ui->canFdBox->addItem(tr("true"), QVariant(true));
 
+    m_ui->dataBitrateBox->setFlexibleDateRateEnabled(true);
+
     connect(m_ui->okButton, &QPushButton::clicked, this, &ConnectDialog::ok);
     connect(m_ui->cancelButton, &QPushButton::clicked, this, &ConnectDialog::cancel);
     connect(m_ui->useConfigurationBox, &QCheckBox::clicked,
@@ -162,6 +164,9 @@ void ConnectDialog::revertSettings()
 
     value = configurationValue(QCanBusDevice::CanFdKey);
     m_ui->canFdBox->setCurrentText(value);
+
+    value = configurationValue(QCanBusDevice::DataBitRateKey);
+    m_ui->dataBitrateBox->setCurrentText(value);
 }
 
 void ConnectDialog::updateSettings()
@@ -218,5 +223,12 @@ void ConnectDialog::updateSettings()
         fdItem.first = QCanBusDevice::CanFdKey;
         fdItem.second = m_ui->canFdBox->currentData();
         m_currentSettings.configurations.append(fdItem);
+
+        // process data bitrate
+        const int dataBitrate = m_ui->dataBitrateBox->bitRate();
+        if (dataBitrate > 0) {
+            const ConfigurationItem item(QCanBusDevice::DataBitRateKey, QVariant(dataBitrate));
+            m_currentSettings.configurations.append(item);
+        }
     }
 }

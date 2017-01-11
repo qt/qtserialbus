@@ -77,6 +77,7 @@ public:
         ReceiveOwnKey,
         BitRateKey,
         CanFdKey,
+        DataBitRateKey,
         UserKey = 30
     };
     Q_ENUM(ConfigurationKey)
