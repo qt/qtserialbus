@@ -49,6 +49,7 @@ private slots:
     void payload();
     void timeStamp();
     void bitRateSwitch();
+    void errorStateIndicator();
 
     void tst_isValid_data();
     void tst_isValid();
@@ -220,6 +221,47 @@ void tst_QCanBusFrame::bitRateSwitch()
      const QCanBusFrame frame2(0x123, QByteArray(10, 0x55));
      QVERIFY(frame2.hasFlexibleDataRateFormat());
      QVERIFY(!frame2.hasBitrateSwitch());
+}
+
+void tst_QCanBusFrame::errorStateIndicator()
+{
+    QCanBusFrame frame(QCanBusFrame::DataFrame);
+    QVERIFY(!frame.hasErrorStateIndicator());
+
+    // set CAN FD does not set ESI
+    frame.setFlexibleDataRateFormat(true);
+    QVERIFY(frame.hasFlexibleDataRateFormat());
+    QVERIFY(!frame.hasErrorStateIndicator());
+
+    // set ESI keeps CAN FD
+    frame.setErrorStateIndicator(true);
+    QVERIFY(frame.hasFlexibleDataRateFormat());
+    QVERIFY(frame.hasErrorStateIndicator());
+
+    // clear ESI keeps CAN FD
+    frame.setErrorStateIndicator(false);
+    QVERIFY(frame.hasFlexibleDataRateFormat());
+    QVERIFY(!frame.hasErrorStateIndicator());
+
+    // clear CAN FD
+    frame.setFlexibleDataRateFormat(false);
+    QVERIFY(!frame.hasFlexibleDataRateFormat());
+    QVERIFY(!frame.hasErrorStateIndicator());
+
+    // set ESI sets CAN FD
+    frame.setErrorStateIndicator(true);
+    QVERIFY(frame.hasFlexibleDataRateFormat());
+    QVERIFY(frame.hasErrorStateIndicator());
+
+    // clear CAN FD clears ESI
+    frame.setFlexibleDataRateFormat(false);
+    QVERIFY(!frame.hasFlexibleDataRateFormat());
+    QVERIFY(!frame.hasErrorStateIndicator());
+
+    // default constructed CAN FD frame has no ESI
+    const QCanBusFrame frame2(0x123, QByteArray(10, 0x55));
+    QVERIFY(frame2.hasFlexibleDataRateFormat());
+    QVERIFY(!frame2.hasErrorStateIndicator());
 }
 
 void tst_QCanBusFrame::tst_isValid_data()

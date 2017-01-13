@@ -288,6 +288,30 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
+    \fn QCanBusFrame::hasErrorStateIndicator() const
+    \since 5.9
+
+    Returns \c true if the CAN uses \e {Flexible Data-Rate} with \e {Error State Indicator} set.
+
+    This flag is set by the transmitter's CAN FD hardware to indicate the transmitter's error state.
+
+    \sa setErrorStateIndicator()
+*/
+
+/*!
+    \fn void QCanBusFrame::setErrorStateIndicator(bool errorStateIndicator)
+    \since 5.9
+
+    Set the \e {Flexible Data-Rate} flag \e {Error State Indicator} flag to \a errorStateIndicator.
+
+    When sending CAN FD frames, this flag is automatically set by the CAN FD hardware.
+    \c QCanBusFrame::setErrorStateIndicator() should only be used for application testing,
+    e.g. on virtual CAN FD busses.
+
+    \sa hasErrorStateIndicator()
+*/
+
+/*!
     \class QCanBusFrame::TimeStamp
     \inmodule QtSerialBus
     \since 5.8
@@ -397,7 +421,7 @@ QDataStream &operator<<(QDataStream &out, const QCanBusFrame &frame)
     out << stamp.seconds();
     out << stamp.microSeconds();
     if (frame.version >= QCanBusFrame::Version::Qt_5_9)
-        out << frame.hasBitrateSwitch();
+        out << frame.hasBitrateSwitch() << frame.hasErrorStateIndicator();
     return out;
 }
 
@@ -414,6 +438,7 @@ QDataStream &operator>>(QDataStream &in, QCanBusFrame &frame)
     bool extendedFrameFormat;
     bool flexibleDataRate;
     bool bitrateSwitch = false;
+    bool errorStateIndicator = false;
     QByteArray payload;
     qint64 seconds;
     qint64 microSeconds;
@@ -422,7 +447,7 @@ QDataStream &operator>>(QDataStream &in, QCanBusFrame &frame)
        >> payload >> seconds >> microSeconds;
 
     if (version >= QCanBusFrame::Version::Qt_5_9)
-        in >> bitrateSwitch;
+        in >> bitrateSwitch >> errorStateIndicator;
 
     frame.setFrameId(frameId);
     frame.version = version;
@@ -431,6 +456,7 @@ QDataStream &operator>>(QDataStream &in, QCanBusFrame &frame)
     frame.setExtendedFrameFormat(extendedFrameFormat);
     frame.setFlexibleDataRateFormat(flexibleDataRate);
     frame.setBitrateSwitch(bitrateSwitch);
+    frame.setErrorStateIndicator(errorStateIndicator);
     frame.setPayload(payload);
 
     frame.setTimeStamp(QCanBusFrame::TimeStamp(seconds, microSeconds));

@@ -184,6 +184,17 @@ void MainWindow::closeEvent(QCloseEvent *event)
     event->accept();
 }
 
+static QString frameFlags(const QCanBusFrame &frame)
+{
+    if (frame.hasBitrateSwitch() && frame.hasErrorStateIndicator())
+        return QStringLiteral(" B E ");
+    if (frame.hasBitrateSwitch())
+        return QStringLiteral(" B - ");
+    if (frame.hasErrorStateIndicator())
+        return QStringLiteral(" - E ");
+    return QStringLiteral(" - - ");
+}
+
 void MainWindow::checkMessages()
 {
     if (!m_canDevice)
@@ -202,8 +213,7 @@ void MainWindow::checkMessages()
                 .arg(frame.timeStamp().seconds(), 10, 10, QLatin1Char(' '))
                 .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char('0'));
 
-        const QString flags = frame.hasBitrateSwitch()
-                ? QStringLiteral(" B - ") :  QStringLiteral(" - - ");
+        const QString flags = frameFlags(frame);
 
         m_ui->receivedMessagesEdit->append(time + flags + view);
     }

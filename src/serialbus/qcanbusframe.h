@@ -77,6 +77,7 @@ public:
         version(Qt_5_9),
         isFlexibleDataRate(0x0),
         isBitrateSwitch(0x0),
+        isErrorStateIndicator(0x0),
         reserved0(0x0)
     {
         Q_UNUSED(reserved0);
@@ -109,6 +110,7 @@ public:
         version(Qt_5_9),
         isFlexibleDataRate(data.length() > 8 ? 0x1 : 0x0),
         isBitrateSwitch(0x0),
+        isErrorStateIndicator(0x0),
         reserved0(0x0),
         load(data)
     {
@@ -226,8 +228,10 @@ public:
     void setFlexibleDataRateFormat(bool isFlexibleData) Q_DECL_NOTHROW
     {
         isFlexibleDataRate = (isFlexibleData & 0x1);
-        if (!isFlexibleData)
+        if (!isFlexibleData) {
             isBitrateSwitch = 0x0;
+            isErrorStateIndicator = 0x0;
+        }
     }
 
     bool hasBitrateSwitch() const Q_DECL_NOTHROW { return (isBitrateSwitch & 0x1); }
@@ -235,6 +239,14 @@ public:
     {
         isBitrateSwitch = (bitrateSwitch & 0x1);
         if (bitrateSwitch)
+            isFlexibleDataRate = 0x1;
+    }
+
+    bool hasErrorStateIndicator() const Q_DECL_NOTHROW { return (isErrorStateIndicator & 0x1); }
+    void setErrorStateIndicator(bool errorStateIndicator) Q_DECL_NOTHROW
+    {
+        isErrorStateIndicator = (errorStateIndicator & 0x1);
+        if (errorStateIndicator)
             isFlexibleDataRate = 0x1;
     }
 
@@ -258,7 +270,8 @@ private:
     quint8 isFlexibleDataRate:1;
 
     quint8 isBitrateSwitch:1;
-    quint8 reserved0:7;
+    quint8 isErrorStateIndicator:1;
+    quint8 reserved0:6;
 
     // reserved for future use
     quint8 reserved[2];
