@@ -33,6 +33,10 @@
     The TinyCAN plugin encapsulates the low-level API to work with the
     \l{http://www.mhs-elektronik.de/}{MHS Elektronik} CAN adapters.
 
+    \note The TinyCAN adapters use virtual serial ports. To communicate with
+    TinyCAN adapters in Linux, the user must have appropriate access rights.
+    Usually these rights are given to all users in the group "dialout".
+
     \section1 Creating CAN Bus Devices
 
     At first it is necessary to check that QCanBus provides the desired plugin:
