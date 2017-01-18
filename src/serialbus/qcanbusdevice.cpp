@@ -251,7 +251,7 @@ void QCanBusDevice::enqueueReceivedFrames(const QVector<QCanBusFrame> &newFrames
 {
     Q_D(QCanBusDevice);
 
-    if (newFrames.isEmpty())
+    if (Q_UNLIKELY(newFrames.isEmpty()))
         return;
 
     d->incomingFramesGuard.lock();
@@ -282,7 +282,7 @@ QCanBusFrame QCanBusDevice::dequeueOutgoingFrame()
 {
     Q_D(QCanBusDevice);
 
-    if (d->outgoingFrames.isEmpty())
+    if (Q_UNLIKELY(d->outgoingFrames.isEmpty()))
         return QCanBusFrame(QCanBusFrame::InvalidFrame);
     return d->outgoingFrames.takeFirst();
 }
@@ -439,7 +439,7 @@ qint64 QCanBusDevice::framesToWrite() const
 bool QCanBusDevice::waitForFramesWritten(int msecs)
 {
     // do not enter this function recursively
-    if (d_func()->waitForWrittenEntered) {
+    if (Q_UNLIKELY(d_func()->waitForWrittenEntered)) {
         qWarning("QCanBusDevice::waitForFramesWritten() must not be called "
                  "recursively. Check that no slot containing waitForFramesReceived() "
                  "is called in response to framesWritten(qint64) or errorOccurred(CanBusError)"
@@ -492,7 +492,7 @@ bool QCanBusDevice::waitForFramesWritten(int msecs)
 bool QCanBusDevice::waitForFramesReceived(int msecs)
 {
     // do not enter this function recursively
-    if (d_func()->waitForReceivedEntered) {
+    if (Q_UNLIKELY(d_func()->waitForReceivedEntered)) {
         qWarning("QCanBusDevice::waitForFramesReceived() must not be called "
                  "recursively. Check that no slot containing waitForFramesReceived() "
                  "is called in response to framesReceived() or errorOccurred(CanBusError) "
@@ -571,12 +571,12 @@ QCanBusFrame QCanBusDevice::readFrame()
 {
     Q_D(QCanBusDevice);
 
-    if (d->state != ConnectedState)
+    if (Q_UNLIKELY(d->state != ConnectedState))
         return QCanBusFrame(QCanBusFrame::InvalidFrame);
 
     QMutexLocker locker(&d->incomingFramesGuard);
 
-    if (d->incomingFrames.isEmpty())
+    if (Q_UNLIKELY(d->incomingFrames.isEmpty()))
         return QCanBusFrame(QCanBusFrame::InvalidFrame);
 
     return d->incomingFrames.takeFirst();
@@ -631,7 +631,7 @@ bool QCanBusDevice::connectDevice()
 {
     Q_D(QCanBusDevice);
 
-    if (d->state != QCanBusDevice::UnconnectedState) {
+    if (Q_UNLIKELY(d->state != QCanBusDevice::UnconnectedState)) {
         setError(tr("Can not connect an already connected device"),
                  QCanBusDevice::ConnectionError);
         return false;
@@ -658,8 +658,8 @@ void QCanBusDevice::disconnectDevice()
 {
     Q_D(QCanBusDevice);
 
-    if (d->state == QCanBusDevice::UnconnectedState
-            || d->state == QCanBusDevice::ClosingState) {
+    if (Q_UNLIKELY(d->state == QCanBusDevice::UnconnectedState
+            || d->state == QCanBusDevice::ClosingState)) {
         qWarning("Can not disconnect an unconnected device");
         return;
     }

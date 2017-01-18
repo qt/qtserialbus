@@ -48,7 +48,7 @@ void ReadTask::setShowTimeStamp(bool showTimeStamp)
 void ReadTask::checkMessages() {
     auto canDevice = qobject_cast<QCanBusDevice *>(QObject::sender());
     if (canDevice == nullptr) {
-        qWarning() << "ReadTask::checkMessages: Unknown sender";
+        qWarning("ReadTask::checkMessages: Unknown sender");
         return;
     }
 
@@ -75,7 +75,7 @@ void ReadTask::checkMessages() {
 void ReadTask::receiveError(QCanBusDevice::CanBusError /*error*/) {
     auto canDevice = qobject_cast<QCanBusDevice *>(QObject::sender());
     if (canDevice == nullptr) {
-        qWarning() << "ReadTask::receiveError: Unknown sender";
+        qWarning("ReadTask::receiveError: Unknown sender");
         return;
     }
 

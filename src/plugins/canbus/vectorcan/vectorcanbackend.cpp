@@ -59,7 +59,7 @@ bool VectorCanBackend::canCreate(QString *errorReason)
     return true;
 #else
     static bool symbolsResolved = resolveSymbols(vectorcanLibrary());
-    if (!symbolsResolved) {
+    if (Q_UNLIKELY(!symbolsResolved)) {
         *errorReason = vectorcanLibrary()->errorString();
         return false;
     }
@@ -169,7 +169,7 @@ bool VectorCanBackendPrivate::open()
                                              channelMask, &permissionMask, queueSize,
                                              XL_INTERFACE_VERSION, XL_BUS_TYPE_CAN);
 
-        if (status != XL_SUCCESS || portHandle == XL_INVALID_PORTHANDLE) {
+        if (Q_UNLIKELY(status != XL_SUCCESS || portHandle == XL_INVALID_PORTHANDLE)) {
             q->setError(systemErrorString(status),
                         QCanBusDevice::ConnectionError);
             return false;
@@ -179,7 +179,7 @@ bool VectorCanBackendPrivate::open()
     {
         const XLstatus status = ::xlActivateChannel(portHandle, channelMask,
                                                     XL_BUS_TYPE_CAN, XL_ACTIVATE_RESET_CLOCK);
-        if (status != XL_SUCCESS) {
+        if (Q_UNLIKELY(status != XL_SUCCESS)) {
             q->setError(systemErrorString(status),
                         QCanBusDevice::CanBusError::ConnectionError);
             return false;
@@ -189,7 +189,7 @@ bool VectorCanBackendPrivate::open()
     {
         const int queueLevel = 1;
         const XLstatus status = ::xlSetNotification(portHandle, &readHandle, queueLevel);
-        if (status != XL_SUCCESS) {
+        if (Q_UNLIKELY(status != XL_SUCCESS)) {
             q->setError(systemErrorString(status),
                         QCanBusDevice::ConnectionError);
             return false;
@@ -216,7 +216,7 @@ void VectorCanBackendPrivate::close()
 
     {
         const XLstatus status = ::xlDeactivateChannel(portHandle, channelMask);
-        if (status != XL_SUCCESS) {
+        if (Q_UNLIKELY(status != XL_SUCCESS)) {
             q->setError(systemErrorString(status),
                         QCanBusDevice::CanBusError::ConfigurationError);
         }
@@ -224,7 +224,7 @@ void VectorCanBackendPrivate::close()
 
     {
         const XLstatus status = ::xlClosePort(portHandle);
-        if (status != XL_SUCCESS) {
+        if (Q_UNLIKELY(status != XL_SUCCESS)) {
             q->setError(systemErrorString(status),
                         QCanBusDevice::ConnectionError);
         }
@@ -249,7 +249,7 @@ bool VectorCanBackendPrivate::setConfigurationParameter(int key, const QVariant 
 
 void VectorCanBackendPrivate::setupChannel(const QString &interfaceName)
 {
-    if (interfaceName.startsWith(QStringLiteral("can"))) {
+    if (Q_LIKELY(interfaceName.startsWith(QStringLiteral("can")))) {
         const QStringRef ref = interfaceName.midRef(3);
         bool ok = false;
         const int channelIndex = ref.toInt(&ok);
@@ -259,7 +259,7 @@ void VectorCanBackendPrivate::setupChannel(const QString &interfaceName)
         }
     }
 
-    qCritical() << "Unable to parse the channel from an interface";
+    qCritical("Unable to parse the channel %ls", qUtf16Printable(interfaceName));
 }
 
 void VectorCanBackendPrivate::setupDefaultConfigurations()
@@ -271,7 +271,8 @@ void VectorCanBackendPrivate::setupDefaultConfigurations()
 
 QString VectorCanBackendPrivate::systemErrorString(int errorCode) const
 {
-    if (const char *string = ::xlGetErrorString(errorCode))
+    const char *string = ::xlGetErrorString(errorCode);
+    if (Q_LIKELY(string))
         return QString::fromUtf8(string);
     return VectorCanBackend::tr("Unable to retrieve an error string");
 }
@@ -311,7 +312,7 @@ void VectorCanBackendPrivate::startWrite()
     quint32 eventCount = 1;
     const XLstatus status = ::xlCanTransmit(portHandle, channelMask,
                                             &eventCount, &event);
-    if (status != XL_SUCCESS) {
+    if (Q_UNLIKELY(status != XL_SUCCESS)) {
         q->setError(systemErrorString(status),
                     QCanBusDevice::WriteError);
     } else {
@@ -334,7 +335,7 @@ void VectorCanBackendPrivate::startRead()
         ::memset(&event, 0, sizeof(event));
 
         const XLstatus status = ::xlReceive(portHandle, &eventCount, &event);
-        if (status != XL_SUCCESS) {
+        if (Q_UNLIKELY(status != XL_SUCCESS)) {
             if (status != XL_ERR_QUEUE_IS_EMPTY) {
                 q->setError(systemErrorString(status),
                             QCanBusDevice::ReadError);
@@ -394,7 +395,7 @@ void VectorCanBackendPrivate::cleanupDriver()
 {
     --driverRefCount;
 
-    if (driverRefCount < 0) {
+    if (Q_UNLIKELY(driverRefCount < 0)) {
         qCritical("Wrong reference counter: %d", driverRefCount);
         driverRefCount = 0;
     } else if (driverRefCount == 0) {
@@ -408,7 +409,7 @@ bool VectorCanBackendPrivate::setBitRate(quint32 bitrate)
 
     if (q->state() != QCanBusDevice::UnconnectedState) {
         const XLstatus status = ::xlCanSetChannelBitrate(portHandle, channelMask, bitrate);
-        if (status != XL_SUCCESS) {
+        if (Q_UNLIKELY(status != XL_SUCCESS)) {
             q->setError(systemErrorString(status),
                         QCanBusDevice::CanBusError::ConfigurationError);
             return false;
@@ -450,8 +451,8 @@ bool VectorCanBackend::open()
         const QVariant param = configurationParameter(key);
         const bool success = d->setConfigurationParameter(key, param);
         if (!success) {
-            qWarning() << "Cannot apply parameter:" << key
-                       << "with value:" << param;
+            qWarning("Cannot apply parameter: %d with value: %ls",
+                     key, param.toString());
         }
     }
 
@@ -483,22 +484,22 @@ bool VectorCanBackend::writeFrame(const QCanBusFrame &newData)
     if (state() != QCanBusDevice::ConnectedState)
         return false;
 
-    if (!newData.isValid()) {
+    if (Q_UNLIKELY(!newData.isValid())) {
         setError(tr("Cannot write invalid QCanBusFrame"),
                  QCanBusDevice::WriteError);
         return false;
     }
 
-    if (newData.frameType() != QCanBusFrame::DataFrame
+    if (Q_UNLIKELY(newData.frameType() != QCanBusFrame::DataFrame
             && newData.frameType() != QCanBusFrame::RemoteRequestFrame
-            && newData.frameType() != QCanBusFrame::ErrorFrame) {
+            && newData.frameType() != QCanBusFrame::ErrorFrame)) {
         setError(tr("Unable to write a frame with unacceptable type"),
                  QCanBusDevice::WriteError);
         return false;
     }
 
     // CAN FD frame format not implemented at this stage
-    if (newData.payload().size() > MAX_MSG_LEN) {
+    if (Q_UNLIKELY(newData.payload().size() > MAX_MSG_LEN)) {
         setError(tr("CAN FD frame format not supported."),
                  QCanBusDevice::WriteError);
         return false;

@@ -181,13 +181,13 @@ public:
 
     quint32 frameId() const Q_DECL_NOTHROW
     {
-        if (format == ErrorFrame)
+        if (Q_UNLIKELY(format == ErrorFrame))
             return 0;
         return (canId & 0x1FFFFFFFU);
     }
     void setFrameId(quint32 newFrameId)
     {
-        if (newFrameId < 0x20000000U) {
+        if (Q_LIKELY(newFrameId < 0x20000000U)) {
             isValidFrameId = true;
             canId = newFrameId;
             setExtendedFrameFormat(isExtendedFrame || (newFrameId & 0x1FFFF800U));

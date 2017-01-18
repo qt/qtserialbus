@@ -194,7 +194,8 @@ bool SocketCanBackend::applyConfigurationParameter(int key, const QVariant &valu
     case QCanBusDevice::LoopbackKey:
     {
         const int loopback = value.toBool() ? 1 : 0;
-        if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_LOOPBACK, &loopback, sizeof(loopback)) < 0) {
+        if (Q_UNLIKELY(setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_LOOPBACK,
+                                  &loopback, sizeof(loopback)) < 0)) {
             setError(qt_error_string(errno),
                      QCanBusDevice::CanBusError::ConfigurationError);
             break;
@@ -205,8 +206,8 @@ bool SocketCanBackend::applyConfigurationParameter(int key, const QVariant &valu
     case QCanBusDevice::ReceiveOwnKey:
     {
         const int receiveOwnMessages = value.toBool() ? 1 : 0;
-        if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_RECV_OWN_MSGS,
-                       &receiveOwnMessages, sizeof(receiveOwnMessages)) < 0) {
+        if (Q_UNLIKELY(setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_RECV_OWN_MSGS,
+                                  &receiveOwnMessages, sizeof(receiveOwnMessages)) < 0)) {
             setError(qt_error_string(errno),
                      QCanBusDevice::CanBusError::ConfigurationError);
             break;
@@ -217,8 +218,8 @@ bool SocketCanBackend::applyConfigurationParameter(int key, const QVariant &valu
     case QCanBusDevice::ErrorFilterKey:
     {
         const int errorMask = value.value<QCanBusFrame::FrameErrors>();
-        if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_ERR_FILTER,
-                       &errorMask, sizeof(errorMask)) < 0) {
+        if (Q_UNLIKELY(setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_ERR_FILTER,
+                                  &errorMask, sizeof(errorMask)) < 0)) {
             setError(qt_error_string(errno),
                      QCanBusDevice::CanBusError::ConfigurationError);
             break;
@@ -234,9 +235,9 @@ bool SocketCanBackend::applyConfigurationParameter(int key, const QVariant &valu
             // permit every frame - no restrictions (filter reset)
             can_filter filters = {0, 0};
             socklen_t s = sizeof(can_filter);
-            if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_FILTER,
-                           &filters, s) != 0) {
-                qWarning() << "Cannot unset socket filters";
+            if (Q_UNLIKELY(setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_FILTER,
+                           &filters, s) != 0)) {
+                qWarning("Cannot unset socket filters");
                 setError(qt_error_string(errno),
                          QCanBusDevice::CanBusError::ConfigurationError);
                 break;
@@ -288,8 +289,8 @@ bool SocketCanBackend::applyConfigurationParameter(int key, const QVariant &valu
 
             filters[i] = filter;
         }
-        if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_FILTER,
-                       filters.constData(), sizeof(filters[0]) * filters.size()) < 0) {
+        if (Q_UNLIKELY(setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_FILTER,
+                       filters.constData(), sizeof(filters[0]) * filters.size()) < 0)) {
             setError(qt_error_string(errno),
                      QCanBusDevice::CanBusError::ConfigurationError);
             break;
@@ -300,7 +301,8 @@ bool SocketCanBackend::applyConfigurationParameter(int key, const QVariant &valu
     case QCanBusDevice::CanFdKey:
     {
         const int fd_frames = value.toBool() ? 1 : 0;
-        if (setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &fd_frames, sizeof(fd_frames)) < 0) {
+        if (Q_UNLIKELY(setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_FD_FRAMES,
+                                  &fd_frames, sizeof(fd_frames)) < 0)) {
             setError(qt_error_string(errno),
                      QCanBusDevice::CanBusError::ConfigurationError);
             break;
@@ -323,14 +325,14 @@ bool SocketCanBackend::connectSocket()
     struct sockaddr_can address;
     struct ifreq interface;
 
-    if ((canSocket = socket(PF_CAN, SOCK_RAW | SOCK_NONBLOCK, CAN_RAW)) < 0) {
+    if (Q_UNLIKELY((canSocket = socket(PF_CAN, SOCK_RAW | SOCK_NONBLOCK, CAN_RAW)) < 0)) {
         setError(qt_error_string(errno),
                  QCanBusDevice::CanBusError::ConnectionError);
         return false;
     }
 
     qstrncpy(interface.ifr_name, canSocketName.toLatin1().constData(), sizeof(interface.ifr_name));
-    if (ioctl(canSocket, SIOCGIFINDEX, &interface) < 0) {
+    if (Q_UNLIKELY(ioctl(canSocket, SIOCGIFINDEX, &interface) < 0)) {
         setError(qt_error_string(errno),
                  QCanBusDevice::CanBusError::ConnectionError);
         return false;
@@ -339,7 +341,7 @@ bool SocketCanBackend::connectSocket()
     address.can_family  = AF_CAN;
     address.can_ifindex = interface.ifr_ifindex;
 
-    if (bind(canSocket, reinterpret_cast<struct sockaddr *>(&address), sizeof(address)) < 0) {
+    if (Q_UNLIKELY(bind(canSocket, reinterpret_cast<struct sockaddr *>(&address), sizeof(address)) < 0)) {
         setError(qt_error_string(errno),
                  QCanBusDevice::CanBusError::ConnectionError);
         return false;
@@ -356,9 +358,9 @@ bool SocketCanBackend::connectSocket()
     for (int key : keys) {
         const QVariant param = configurationParameter(key);
         bool success = applyConfigurationParameter(key, param);
-        if (!success) {
-            qWarning() << "Cannot apply parameter:" << QCanBusDevice::ConfigurationKey(key)
-                       << "with value:" << param;
+        if (Q_UNLIKELY(!success)) {
+            qWarning("Cannot apply parameter: %d with value: %ls",
+                     key, qUtf16Printable(param.toString()));
         }
     }
 
@@ -409,7 +411,7 @@ bool SocketCanBackend::writeFrame(const QCanBusFrame &newData)
     if (state() != ConnectedState)
         return false;
 
-    if (!newData.isValid()) {
+    if (Q_UNLIKELY(!newData.isValid())) {
         setError(tr("Cannot write invalid QCanBusFrame"), QCanBusDevice::WriteError);
         return false;
     }
@@ -460,7 +462,7 @@ bool SocketCanBackend::writeFrame(const QCanBusFrame &newData)
         bytesWritten = ::write(canSocket, &frame, sizeof(frame));
     }
 
-    if (bytesWritten < 0) {
+    if (Q_UNLIKELY(bytesWritten < 0)) {
         setError(qt_error_string(errno),
                  QCanBusDevice::CanBusError::WriteError);
         return false;
@@ -646,18 +648,18 @@ void SocketCanBackend::readSocket()
 
         if (bytesReceived <= 0) {
             break;
-        } else if (bytesReceived != CANFD_MTU && bytesReceived != CAN_MTU) {
+        } else if (Q_UNLIKELY(bytesReceived != CANFD_MTU && bytesReceived != CAN_MTU)) {
             setError(tr("ERROR SocketCanBackend: incomplete CAN frame"),
                      QCanBusDevice::CanBusError::ReadError);
             continue;
-        } else if (frame.len > bytesReceived - offsetof(canfd_frame, data)) {
+        } else if (Q_UNLIKELY(frame.len > bytesReceived - offsetof(canfd_frame, data))) {
             setError(tr("ERROR SocketCanBackend: invalid CAN frame length"),
                      QCanBusDevice::CanBusError::ReadError);
             continue;
         }
 
         struct timeval timeStamp;
-        if (ioctl(canSocket, SIOCGSTAMP, &timeStamp) < 0) {
+        if (Q_UNLIKELY(ioctl(canSocket, SIOCGSTAMP, &timeStamp) < 0)) {
             setError(qt_error_string(errno),
                      QCanBusDevice::CanBusError::ReadError);
             memset(&timeStamp, 0, sizeof(timeStamp));

@@ -60,7 +60,7 @@ bool TinyCanBackend::canCreate(QString *errorReason)
     return true;
 #else
     static bool symbolsResolved = resolveSymbols(mhstcanLibrary());
-    if (!symbolsResolved) {
+    if (Q_UNLIKELY(!symbolsResolved)) {
         *errorReason = mhstcanLibrary()->errorString();
         return false;
     }
@@ -176,7 +176,7 @@ bool TinyCanBackendPrivate::open()
     {
         char options[] = "AutoConnect=1;AutoReopen=0";
         const int ret = ::CanSetOptions(options);
-        if (ret < 0) {
+        if (Q_UNLIKELY(ret < 0)) {
             q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
             return false;
         }
@@ -184,7 +184,7 @@ bool TinyCanBackendPrivate::open()
 
     {
         const int ret = ::CanDeviceOpen(channelIndex, nullptr);
-        if (ret < 0) {
+        if (Q_UNLIKELY(ret < 0)) {
             q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
             return false;
         }
@@ -192,7 +192,7 @@ bool TinyCanBackendPrivate::open()
 
     {
         const int ret = ::CanSetMode(channelIndex, OP_CAN_START, CAN_CMD_ALL_CLEAR);
-        if (ret < 0) {
+        if (Q_UNLIKELY(ret < 0)) {
             q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
             ::CanDeviceClose(channelIndex);
             return false;
@@ -214,7 +214,7 @@ void TinyCanBackendPrivate::close()
     writeNotifier = nullptr;
 
     const int ret = ::CanDeviceClose(channelIndex);
-    if (ret < 0)
+    if (Q_UNLIKELY(ret < 0))
         q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
 
     isOpen = false;
@@ -343,8 +343,8 @@ void TinyCanBackendPrivate::startWrite()
     TCanMsg message;
     ::memset(&message, 0, sizeof(message));
 
-    if (payload.size() > int(sizeof(message.Data.Bytes))) {
-        qWarning("Impossible to write the message with unacceptable data size %d, ignored", payload.size());
+    if (Q_UNLIKELY(payload.size() > int(sizeof(message.Data.Bytes)))) {
+        qWarning("Can not write frame with payload size %d, ignored", payload.size());
     } else {
         message.Id = frame.frameId();
         message.Flags.Flag.Len = payload.size();
@@ -356,7 +356,7 @@ void TinyCanBackendPrivate::startWrite()
         const qint32 messagesToWrite = 1;
         ::memcpy(message.Data.Bytes, payload.constData(), sizeof(message.Data.Bytes));
         const int ret = ::CanTransmit(channelIndex, &message, messagesToWrite);
-        if (ret < 0)
+        if (Q_UNLIKELY(ret < 0))
             q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::WriteError);
         else
             emit q->framesWritten(messagesToWrite);
@@ -382,7 +382,7 @@ void TinyCanBackendPrivate::startRead()
 
         const int messagesToRead = 1;
         const int ret = ::CanReceive(channelIndex, &message, messagesToRead);
-        if (ret < 0) {
+        if (Q_UNLIKELY(ret < 0)) {
             q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ReadError);
 
             TDeviceStatus status;
@@ -425,7 +425,7 @@ void TinyCanBackendPrivate::startupDriver()
 
     if (driverRefCount == 0) {
         const int ret = ::CanInitDriver(nullptr);
-        if (ret < 0) {
+        if (Q_UNLIKELY(ret < 0)) {
             q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
             return;
         }
@@ -433,7 +433,7 @@ void TinyCanBackendPrivate::startupDriver()
         ::CanSetRxEventCallback(&canRxEventCallback);
         ::CanSetEvents(EVENT_ENABLE_RX_MESSAGES);
 
-    } else if (driverRefCount < 0) {
+    } else if (Q_UNLIKELY(driverRefCount < 0)) {
         qCritical("Wrong reference counter: %d", driverRefCount);
         return;
     }
@@ -445,7 +445,7 @@ void TinyCanBackendPrivate::cleanupDriver()
 {
     --driverRefCount;
 
-    if (driverRefCount < 0) {
+    if (Q_UNLIKELY(driverRefCount < 0)) {
         qCritical("Wrong reference counter: %d", driverRefCount);
         driverRefCount = 0;
     } else if (driverRefCount == 0) {
@@ -459,7 +459,7 @@ bool TinyCanBackendPrivate::setBitRate(int bitrate)
     Q_Q(TinyCanBackend);
 
     const int bitrateCode = bitrateCodeFromBitrate(bitrate);
-    if (bitrateCode == -1) {
+    if (Q_UNLIKELY(bitrateCode == -1)) {
         q->setError(TinyCanBackend::tr("Unsupported bitrate value"),
                     QCanBusDevice::ConfigurationError);
         return false;
@@ -467,7 +467,7 @@ bool TinyCanBackendPrivate::setBitRate(int bitrate)
 
     if (isOpen) {
         const int ret = ::CanSetSpeed(channelIndex, bitrateCode);
-        if (ret < 0) {
+        if (Q_UNLIKELY(ret < 0)) {
             q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConfigurationError);
             return false;
         }
@@ -507,9 +507,9 @@ bool TinyCanBackend::open()
         for (int key : keys) {
             const QVariant param = configurationParameter(key);
             const bool success = d->setConfigurationParameter(key, param);
-            if (!success) {
-                qWarning() << "Cannot apply parameter:" << key
-                           << "with value:" << param;
+            if (Q_UNLIKELY(!success)) {
+                qWarning("Cannot apply parameter: %d with value: %ls",
+                         key, qUtf16Printable(param.toString()));
             }
         }
     }
@@ -539,24 +539,24 @@ bool TinyCanBackend::writeFrame(const QCanBusFrame &newData)
 {
     Q_D(TinyCanBackend);
 
-    if (state() != QCanBusDevice::ConnectedState)
+    if (Q_UNLIKELY(state() != QCanBusDevice::ConnectedState))
         return false;
 
-    if (!newData.isValid()) {
+    if (Q_UNLIKELY(!newData.isValid())) {
         setError(tr("Cannot write invalid QCanBusFrame"), QCanBusDevice::WriteError);
         return false;
     }
 
-    if (newData.frameType() != QCanBusFrame::DataFrame
+    if (Q_UNLIKELY(newData.frameType() != QCanBusFrame::DataFrame
             && newData.frameType() != QCanBusFrame::RemoteRequestFrame
-            && newData.frameType() != QCanBusFrame::ErrorFrame) {
+            && newData.frameType() != QCanBusFrame::ErrorFrame)) {
         setError(tr("Unable to write a frame with unacceptable type"),
                  QCanBusDevice::WriteError);
         return false;
     }
 
     // CAN FD frame format not supported at this stage
-    if (newData.payload().size() > 8) {
+    if (Q_UNLIKELY(newData.payload().size() > 8)) {
         setError(tr("CAN FD frame format not supported."), QCanBusDevice::WriteError);
         return false;
     }
