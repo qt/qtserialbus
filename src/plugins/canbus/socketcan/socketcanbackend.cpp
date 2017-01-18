@@ -250,9 +250,7 @@ bool SocketCanBackend::applyConfigurationParameter(int key, const QVariant &valu
         filters.resize(filterList.size());
         for (int i = 0; i < filterList.size(); i++) {
             const QCanBusDevice::Filter f = filterList.at(i);
-            can_filter filter;
-            filter.can_id = f.frameId;
-            filter.can_mask = f.frameIdMask;
+            can_filter filter = { f.frameId, f.frameIdMask };
 
             // frame type filter
             switch (f.type) {
