@@ -293,7 +293,7 @@ QT_BEGIN_NAMESPACE
 /*!
     Returns the CAN frame as a formatted string.
 
-    The output contains the CAN identfier in hexadecimal format, right
+    The output contains the CAN identifier in hexadecimal format, right
     adjusted to 32 bit, followed by the data length in square brackets
     and the payload in hexadecimal format.
 
