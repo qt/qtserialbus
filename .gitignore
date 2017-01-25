@@ -14,6 +14,7 @@ examples/serialbus/modbus/slave/modbusslave
 *.pch
 .rcc
 src/serialbus/doc/snippets/serialbus_cppsnippet
+src/serialbus/QtSerialBus.version*
 examples/serialbus/can/can
 tests/auto/qcanbus/tst_qcanbus
 tests/auto/qcanbusdevice/tst_qcanbusdevice
@@ -23,8 +24,10 @@ tests/auto/qmodbusclient/tst_qmodbusclient
 tests/auto/qmodbuscommevent/tst_qmodbuscommevent
 tests/auto/qmodbusdataunit/tst_qmodbusdataunit
 tests/auto/qmodbusdevice/tst_qmodbusdevice
+tests/auto/qmodbusdeviceidentification/tst_qmodbusdeviceidentification
 tests/auto/qmodbuspdu/tst_qmodbuspdu
 tests/auto/qmodbusreply/tst_qmodbusreply
+tests/auto/qmodbusrtuserialmaster/tst_qmodbusrtuserialmaster
 tests/auto/qmodbusserver/tst_qmodbusserver
 *_resource.rc
 *.exe
