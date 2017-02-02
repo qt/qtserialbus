@@ -633,7 +633,7 @@ void SocketCanBackend::readSocket()
 {
     QVector<QCanBusFrame> newFrames;
 
-    while (true) {
+    for (;;) {
         struct canfd_frame frame;
         int bytesReceived;
 

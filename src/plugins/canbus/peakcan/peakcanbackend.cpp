@@ -400,7 +400,7 @@ void PeakCanBackendPrivate::startRead()
 
     QVector<QCanBusFrame> newFrames;
 
-    forever {
+    for (;;) {
         TPCANMsg message;
         ::memset(&message, 0, sizeof(message));
         TPCANTimestamp timestamp;
