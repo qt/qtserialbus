@@ -74,10 +74,11 @@ public:
 
     explicit QCanBusFrame(FrameType type = DataFrame) Q_DECL_NOTHROW :
         isExtendedFrame(0x0),
-        version(Qt_5_9),
+        version(Qt_5_10),
         isFlexibleDataRate(0x0),
         isBitrateSwitch(0x0),
         isErrorStateIndicator(0x0),
+        isLocalEcho(0x0),
         reserved0(0x0)
     {
         Q_UNUSED(reserved0);
@@ -107,10 +108,11 @@ public:
     explicit QCanBusFrame(quint32 identifier, const QByteArray &data) :
         format(DataFrame),
         isExtendedFrame(0x0),
-        version(Qt_5_9),
+        version(Qt_5_10),
         isFlexibleDataRate(data.length() > 8 ? 0x1 : 0x0),
         isBitrateSwitch(0x0),
         isErrorStateIndicator(0x0),
+        isLocalEcho(0x0),
         reserved0(0x0),
         load(data)
     {
@@ -249,6 +251,11 @@ public:
         if (errorStateIndicator)
             isFlexibleDataRate = 0x1;
     }
+    bool hasLocalEcho() const Q_DECL_NOTHROW { return (isLocalEcho & 0x1); }
+    void setLocalEcho(bool localEcho) Q_DECL_NOTHROW
+    {
+        isLocalEcho = (localEcho & 0x1);
+    }
 
 #ifndef QT_NO_DATASTREAM
     friend Q_SERIALBUS_EXPORT QDataStream &operator<<(QDataStream &, const QCanBusFrame &);
@@ -258,7 +265,8 @@ public:
 private:
     enum Version {
         Qt_5_8 = 0x0,
-        Qt_5_9 = 0x1
+        Qt_5_9 = 0x1,
+        Qt_5_10 = 0x2
     };
 
     quint32 canId:29; // acts as container for error codes too
@@ -271,7 +279,8 @@ private:
 
     quint8 isBitrateSwitch:1;
     quint8 isErrorStateIndicator:1;
-    quint8 reserved0:6;
+    quint8 isLocalEcho:1;
+    quint8 reserved0:5;
 
     // reserved for future use
     quint8 reserved[2];

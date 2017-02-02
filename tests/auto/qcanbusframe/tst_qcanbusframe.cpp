@@ -50,6 +50,7 @@ private slots:
     void timeStamp();
     void bitRateSwitch();
     void errorStateIndicator();
+    void localEcho();
 
     void tst_isValid_data();
     void tst_isValid();
@@ -264,6 +265,21 @@ void tst_QCanBusFrame::errorStateIndicator()
     QVERIFY(!frame2.hasErrorStateIndicator());
 }
 
+void tst_QCanBusFrame::localEcho()
+{
+    QCanBusFrame frame(QCanBusFrame::DataFrame);
+    QVERIFY(!frame.hasLocalEcho());
+
+    frame.setLocalEcho(true);
+    QVERIFY(frame.hasLocalEcho());
+
+    frame.setLocalEcho(false);
+    QVERIFY(!frame.hasLocalEcho());
+
+    const QCanBusFrame frame2(0x123, QByteArray());
+    QVERIFY(!frame2.hasLocalEcho());
+}
+
 void tst_QCanBusFrame::tst_isValid_data()
 {
     QTest::addColumn<QCanBusFrame::FrameType>("frameType");
@@ -432,39 +448,54 @@ void tst_QCanBusFrame::streaming_data()
     QTest::addColumn<bool>("isFlexibleDataRate");
     QTest::addColumn<bool>("isBitrateSwitch");
     QTest::addColumn<bool>("isErrorStateIndicator");
+    QTest::addColumn<bool>("isLocalEcho");
     QTest::addColumn<QCanBusFrame::FrameType>("frameType");
 
 
     QTest::newRow("emptyFrame") << quint32(0) << QByteArray()
                                 << qint64(0) << qint64(0)
-                                << false << false << false << false << QCanBusFrame::DataFrame;
+                                << false << false << false << false << false
+                                << QCanBusFrame::DataFrame;
     QTest::newRow("fullFrame1") << quint32(123) << QByteArray("abcde1")
                                << qint64(456) << qint64(784)
-                               << true << false << false << false << QCanBusFrame::DataFrame;
+                               << true << false << false << false << false
+                               << QCanBusFrame::DataFrame;
     QTest::newRow("fullFrame2") << quint32(123) << QByteArray("abcde2")
                                << qint64(457) << qint64(785)
-                               << false << false << false << false << QCanBusFrame::DataFrame;
+                               << false << false << false << false << false
+                               << QCanBusFrame::DataFrame;
     QTest::newRow("fullFrameFD") << quint32(123) << QByteArray("abcdfd")
                                 << qint64(457) << qint64(785)
-                                << false << true << false << false << QCanBusFrame::DataFrame;
+                                << false << true << false << false << false
+                                << QCanBusFrame::DataFrame;
     QTest::newRow("fullFrameBRS") << quint32(123) << QByteArray("abcdfd")
                                 << qint64(457) << qint64(785)
-                                << false << true << true << false << QCanBusFrame::DataFrame;
+                                << false << true << true << false << false
+                                << QCanBusFrame::DataFrame;
     QTest::newRow("fullFrameESI") << quint32(123) << QByteArray("abcdfd")
                                   << qint64(457) << qint64(785)
-                                  << false << true << false << true << QCanBusFrame::DataFrame;
+                                  << false << true << false << true << false
+                                  << QCanBusFrame::DataFrame;
+    QTest::newRow("echoFrame") << quint32(123) << QByteArray("abcde7")
+                               << qint64(888) << qint64(777)
+                               << false << false << false << false << true
+                               << QCanBusFrame::DataFrame;
     QTest::newRow("fullFrame3") << quint32(123) << QByteArray("abcde3")
                                << qint64(458) << qint64(786)
-                               << true << false << false << false << QCanBusFrame::RemoteRequestFrame;
+                               << true << false << false << false << false
+                               << QCanBusFrame::RemoteRequestFrame;
     QTest::newRow("fullFrame4") << quint32(123) << QByteArray("abcde4")
                                << qint64(459) << qint64(787)
-                               << false << false << false << false << QCanBusFrame::RemoteRequestFrame;
+                               << false << false << false << false << false
+                               << QCanBusFrame::RemoteRequestFrame;
     QTest::newRow("fullFrame5") << quint32(123) << QByteArray("abcde5")
                                << qint64(460) << qint64(789)
-                               << true << false << false << false << QCanBusFrame::ErrorFrame;
+                               << true << false << false << false << false
+                               << QCanBusFrame::ErrorFrame;
     QTest::newRow("fullFrame6") << quint32(123) << QByteArray("abcde6")
                                << qint64(453) << qint64(788)
-                               << false << false << false << false << QCanBusFrame::ErrorFrame;
+                               << false << false << false << false << false
+                               << QCanBusFrame::ErrorFrame;
 }
 
 void tst_QCanBusFrame::streaming()
@@ -477,6 +508,7 @@ void tst_QCanBusFrame::streaming()
     QFETCH(bool, isFlexibleDataRate);
     QFETCH(bool, isBitrateSwitch);
     QFETCH(bool, isErrorStateIndicator);
+    QFETCH(bool, isLocalEcho);
     QFETCH(QCanBusFrame::FrameType, frameType);
 
     QCanBusFrame originalFrame(frameId, payload);
@@ -487,6 +519,7 @@ void tst_QCanBusFrame::streaming()
     originalFrame.setFlexibleDataRateFormat(isFlexibleDataRate);
     originalFrame.setBitrateSwitch(isBitrateSwitch);
     originalFrame.setErrorStateIndicator(isErrorStateIndicator);
+    originalFrame.setLocalEcho(isLocalEcho);
     originalFrame.setFrameType(frameType);
 
     QByteArray buffer;
@@ -513,6 +546,8 @@ void tst_QCanBusFrame::streaming()
              originalFrame.hasBitrateSwitch());
     QCOMPARE(restoredFrame.hasErrorStateIndicator(),
              originalFrame.hasErrorStateIndicator());
+    QCOMPARE(restoredFrame.hasLocalEcho(),
+             originalFrame.hasLocalEcho());
 }
 
 void tst_QCanBusFrame::tst_error()

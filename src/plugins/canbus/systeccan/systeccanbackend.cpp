@@ -394,6 +394,7 @@ void SystecCanBackendPrivate::readAllReceivedMessages()
         // TODO: Timestamp can also be set to 100 us resolution with kUcanModeHighResTimer
         frame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(message.m_dwTime * 1000));
         frame.setExtendedFrameFormat(message.m_bFF & USBCAN_MSG_FF_EXT);
+        frame.setLocalEcho(message.m_bFF & USBCAN_MSG_FF_ECHO);
         frame.setFrameType((message.m_bFF & USBCAN_MSG_FF_RTR)
                            ? QCanBusFrame::RemoteRequestFrame
                            : QCanBusFrame::DataFrame);

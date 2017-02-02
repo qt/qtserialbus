@@ -190,13 +190,16 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 static QString frameFlags(const QCanBusFrame &frame)
 {
-    if (frame.hasBitrateSwitch() && frame.hasErrorStateIndicator())
-        return QStringLiteral(" B E ");
+    QString result = QLatin1String(" --- ");
+
     if (frame.hasBitrateSwitch())
-        return QStringLiteral(" B - ");
+        result[1] = QLatin1Char('B');
     if (frame.hasErrorStateIndicator())
-        return QStringLiteral(" - E ");
-    return QStringLiteral(" - - ");
+        result[2] = QLatin1Char('E');
+    if (frame.hasLocalEcho())
+        result[3] = QLatin1Char('L');
+
+    return result;
 }
 
 void MainWindow::checkMessages()

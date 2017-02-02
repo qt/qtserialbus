@@ -149,12 +149,15 @@
             \li To meet the multiple-user needs, the local loopback is enabled by default.
                 This means, whenever a CAN frame is transmitted on the CAN bus, a local
                 echo of this frame is sent to all applications connected to this CAN device.
+                If this option is enabled, the therefore received frames are marked with
+                QCanBusFrame::hasLocalEcho()
         \row
             \li QCanBusDevice::ReceiveOwnKey
             \li The reception of the CAN frames on the same socket that was sending the CAN frame
                 is disabled by default. When enabling this option, all CAN frames sent to the CAN
                 bus immediately appear in the receive buffer. This can be used to check if sending
-                was successful.
+                was successful. If this option is enabled, the therefore received frames are marked
+                with QCanBusFrame::hasLocalEcho()
         \row
             \li QCanBusDevice::ErrorFilterKey
             \li A CAN interface driver can generate so called \e {Error Message Frames} that can

@@ -98,6 +98,7 @@
         \row
             \li QCanBusDevice::ReceiveOwnKey
             \li The reception of CAN frames on the same channel that was sending the CAN frame
-                is disabled by default.
+                is disabled by default. If this option is enabled, the therefore received frames
+                are marked with QCanBusFrame::hasLocalEcho()
    \endtable
 */

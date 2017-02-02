@@ -96,6 +96,7 @@
             \li The reception of the CAN frames on the same device that was sending the CAN frame
                 is disabled by default. When enabling this option, all CAN frames sent to the CAN
                 bus immediately appear in the receive buffer. This can be used to check if sending
-                was successful.
+                was successful. If this option is enabled, the therefore received frames are marked
+                with QCanBusFrame::hasLocalEcho()
    \endtable
 */

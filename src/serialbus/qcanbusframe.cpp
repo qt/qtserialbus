@@ -312,6 +312,36 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
+    \fn QCanBusFrame::hasLocalEcho() const
+    \since 5.10
+
+    Returns \c true if the frame is a local echo frame, i.e. a frame that is received as echo when
+    the frame with the same content was successfully sent to the CAN bus. This flag is set for
+    frames sent by the application itself as well as for frames sent by other applications running
+    on the same system.
+
+    QCanBusDevice::ReceiveOwnKey must be set to true to receive echo frames.
+
+    \sa setLocalEcho()
+    \sa QCanBusDevice::ReceiveOwnKey
+    \sa QCanBusDevice::LoopbackKey
+*/
+
+/*!
+    \fn void QCanBusFrame::setLocalEcho(bool echo)
+    \since 5.10
+
+    Marks the frame as local echo frame.
+
+    When sending CAN bus frames with QCanBusDevice::ReceiveOwnKey enabled, all successfully sent
+    frames are echoed to the receive queue and marked as local echo frames.
+    \c QCanBusFrame::setLocalEcho should therefore only be used for application testing,
+    e.g. on virtual CAN busses.
+
+    \sa hasLocalEcho()
+*/
+
+/*!
     \class QCanBusFrame::TimeStamp
     \inmodule QtSerialBus
     \since 5.8
@@ -422,6 +452,8 @@ QDataStream &operator<<(QDataStream &out, const QCanBusFrame &frame)
     out << stamp.microSeconds();
     if (frame.version >= QCanBusFrame::Version::Qt_5_9)
         out << frame.hasBitrateSwitch() << frame.hasErrorStateIndicator();
+    if (frame.version >= QCanBusFrame::Version::Qt_5_10)
+        out << frame.hasLocalEcho();
     return out;
 }
 
@@ -439,6 +471,7 @@ QDataStream &operator>>(QDataStream &in, QCanBusFrame &frame)
     bool flexibleDataRate;
     bool bitrateSwitch = false;
     bool errorStateIndicator = false;
+    bool localEcho = false;
     QByteArray payload;
     qint64 seconds;
     qint64 microSeconds;
@@ -449,6 +482,9 @@ QDataStream &operator>>(QDataStream &in, QCanBusFrame &frame)
     if (version >= QCanBusFrame::Version::Qt_5_9)
         in >> bitrateSwitch >> errorStateIndicator;
 
+    if (version >= QCanBusFrame::Version::Qt_5_10)
+        in >> localEcho;
+
     frame.setFrameId(frameId);
     frame.version = version;
 
@@ -457,6 +493,7 @@ QDataStream &operator>>(QDataStream &in, QCanBusFrame &frame)
     frame.setFlexibleDataRateFormat(flexibleDataRate);
     frame.setBitrateSwitch(bitrateSwitch);
     frame.setErrorStateIndicator(errorStateIndicator);
+    frame.setLocalEcho(localEcho);
     frame.setPayload(payload);
 
     frame.setTimeStamp(QCanBusFrame::TimeStamp(seconds, microSeconds));

@@ -325,7 +325,6 @@ bool SocketCanBackend::applyConfigurationParameter(int key, const QVariant &valu
 
 bool SocketCanBackend::connectSocket()
 {
-    struct sockaddr_can address;
     struct ifreq interface;
 
     if (Q_UNLIKELY((canSocket = socket(PF_CAN, SOCK_RAW | SOCK_NONBLOCK, CAN_RAW)) < 0)) {
@@ -341,14 +340,20 @@ bool SocketCanBackend::connectSocket()
         return false;
     }
 
-    address.can_family  = AF_CAN;
-    address.can_ifindex = interface.ifr_ifindex;
+    m_address.can_family  = AF_CAN;
+    m_address.can_ifindex = interface.ifr_ifindex;
 
-    if (Q_UNLIKELY(bind(canSocket, reinterpret_cast<struct sockaddr *>(&address), sizeof(address)) < 0)) {
+    if (Q_UNLIKELY(bind(canSocket, reinterpret_cast<struct sockaddr *>(&m_address), sizeof(m_address)) < 0)) {
         setError(qt_error_string(errno),
                  QCanBusDevice::CanBusError::ConnectionError);
         return false;
     }
+
+    m_iov.iov_base = &m_frame;
+    m_msg.msg_name = &m_address;
+    m_msg.msg_iov = &m_iov;
+    m_msg.msg_iovlen = 1;
+    m_msg.msg_control = &m_ctrlmsg;
 
     delete notifier;
 
@@ -637,10 +642,13 @@ void SocketCanBackend::readSocket()
     QVector<QCanBusFrame> newFrames;
 
     for (;;) {
-        struct canfd_frame frame;
-        int bytesReceived;
+        memset(&m_frame, 0, sizeof(m_frame));
+        m_iov.iov_len = sizeof(m_frame);
+        m_msg.msg_namelen = sizeof(m_addr);
+        m_msg.msg_controllen = sizeof(m_ctrlmsg);
+        m_msg.msg_flags = 0;
 
-        bytesReceived = ::read(canSocket, &frame, sizeof(frame));
+        const int bytesReceived = ::recvmsg(canSocket, &m_msg, 0);
 
         if (bytesReceived <= 0) {
             break;
@@ -648,7 +656,7 @@ void SocketCanBackend::readSocket()
             setError(tr("ERROR SocketCanBackend: incomplete CAN frame"),
                      QCanBusDevice::CanBusError::ReadError);
             continue;
-        } else if (Q_UNLIKELY(frame.len > bytesReceived - offsetof(canfd_frame, data))) {
+        } else if (Q_UNLIKELY(m_frame.len > bytesReceived - offsetof(canfd_frame, data))) {
             setError(tr("ERROR SocketCanBackend: invalid CAN frame length"),
                      QCanBusDevice::CanBusError::ReadError);
             continue;
@@ -666,21 +674,23 @@ void SocketCanBackend::readSocket()
         bufferedFrame.setTimeStamp(stamp);
         bufferedFrame.setFlexibleDataRateFormat(bytesReceived == CANFD_MTU);
 
-        bufferedFrame.setExtendedFrameFormat(frame.can_id & CAN_EFF_FLAG);
-        Q_ASSERT(frame.len <= CANFD_MAX_DLEN);
+        bufferedFrame.setExtendedFrameFormat(m_frame.can_id & CAN_EFF_FLAG);
+        Q_ASSERT(m_frame.len <= CANFD_MAX_DLEN);
 
-        if (frame.can_id & CAN_RTR_FLAG)
+        if (m_frame.can_id & CAN_RTR_FLAG)
             bufferedFrame.setFrameType(QCanBusFrame::RemoteRequestFrame);
-        if (frame.can_id & CAN_ERR_FLAG)
+        if (m_frame.can_id & CAN_ERR_FLAG)
             bufferedFrame.setFrameType(QCanBusFrame::ErrorFrame);
-        if (frame.flags & CANFD_BRS)
+        if (m_frame.flags & CANFD_BRS)
             bufferedFrame.setBitrateSwitch(true);
-        if (frame.flags & CANFD_ESI)
+        if (m_frame.flags & CANFD_ESI)
             bufferedFrame.setErrorStateIndicator(true);
+        if (m_msg.msg_flags & MSG_CONFIRM)
+            bufferedFrame.setLocalEcho(true);
 
-        bufferedFrame.setFrameId(frame.can_id & CAN_EFF_MASK);
+        bufferedFrame.setFrameId(m_frame.can_id & CAN_EFF_MASK);
 
-        const QByteArray load(reinterpret_cast<char *>(frame.data), frame.len);
+        const QByteArray load(reinterpret_cast<char *>(m_frame.data), m_frame.len);
         bufferedFrame.setPayload(load);
 
         newFrames.append(std::move(bufferedFrame));

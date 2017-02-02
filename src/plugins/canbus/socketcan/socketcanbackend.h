@@ -45,6 +45,12 @@
 #include <QtCore/qstring.h>
 #include <QtCore/qvariant.h>
 
+// The order of the following includes is mandatory, because some
+// distributions use sa_family_t in can.h without including socket.h
+#include <sys/socket.h>
+#include <sys/uio.h>
+#include <linux/can.h>
+
 QT_BEGIN_NAMESPACE
 
 class SocketCanBackend : public QCanBusDevice
@@ -72,6 +78,13 @@ private:
     void resetConfigurations();
     bool connectSocket();
     bool applyConfigurationParameter(int key, const QVariant &value);
+
+    canfd_frame m_frame;
+    sockaddr_can m_address;
+    msghdr m_msg;
+    iovec m_iov;
+    sockaddr_can m_addr;
+    char m_ctrlmsg[CMSG_SPACE(sizeof(timeval)) + CMSG_SPACE(sizeof(__u32))];
 
     qint64 canSocket = -1;
     QSocketNotifier *notifier = nullptr;
