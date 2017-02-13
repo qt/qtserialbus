@@ -458,7 +458,11 @@ GENERATE_SYMBOL_VARIABLE(char *, xlGetErrorString, XLstatus)
 inline bool resolveSymbols(QLibrary *vectorcanLibrary)
 {
     if (!vectorcanLibrary->isLoaded()) {
+#ifdef Q_PROCESSOR_X86_64
+        vectorcanLibrary->setFileName(QStringLiteral("vxlapi64"));
+#else
         vectorcanLibrary->setFileName(QStringLiteral("vxlapi"));
+#endif
         if (!vectorcanLibrary->load())
             return false;
     }
