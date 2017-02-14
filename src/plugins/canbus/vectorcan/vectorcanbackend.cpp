@@ -322,8 +322,8 @@ void VectorCanBackendPrivate::startRead()
 
         const s_xl_can_msg &msg = event.tagData.msg;
 
-        QCanBusFrame frame(msg.id, QByteArray(reinterpret_cast<const char *>(msg.data),
-                                              int(msg.dlc)));
+        QCanBusFrame frame(msg.id & ~XL_CAN_EXT_MSG_ID,
+                           QByteArray(reinterpret_cast<const char *>(msg.data), int(msg.dlc)));
         frame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(event.timeStamp / 1000));
         frame.setExtendedFrameFormat(msg.id & XL_CAN_EXT_MSG_ID);
         frame.setFrameType((msg.flags & XL_CAN_MSG_FLAG_REMOTE_FRAME)

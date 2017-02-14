@@ -214,7 +214,7 @@ typedef HANDLE XLhandle;
 //current version
 #define XL_INTERFACE_VERSION    XL_INTERFACE_VERSION_V3
 
-#define XL_CAN_EXT_MSG_ID   0x80000000
+#define XL_CAN_EXT_MSG_ID   0x80000000U
 
 #define XL_CAN_MSG_FLAG_ERROR_FRAME     0x01
 #define XL_CAN_MSG_FLAG_OVERRUN         0x02 // Overrun in Driver or CAN Controller, previous msgs have been lost.
