@@ -240,6 +240,9 @@ bool VectorCanBackendPrivate::setConfigurationParameter(int key, const QVariant 
     switch (key) {
     case QCanBusDevice::BitRateKey:
         return setBitRate(value.toUInt());
+    case QCanBusDevice::ReceiveOwnKey:
+        transmitEcho = value.toBool();
+        return true;
     default:
         q->setError(VectorCanBackend::tr("Unsupported configuration key"),
                     QCanBusDevice::ConfigurationError);
@@ -347,6 +350,9 @@ void VectorCanBackendPrivate::startRead()
             continue;
 
         const s_xl_can_msg &msg = event.tagData.msg;
+
+        if ((msg.flags & XL_CAN_MSG_FLAG_TX_COMPLETED) && !transmitEcho)
+            continue;
 
         QCanBusFrame frame(msg.id, QByteArray(reinterpret_cast<const char *>(msg.data),
                                               int(msg.dlc)));
