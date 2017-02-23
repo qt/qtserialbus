@@ -452,7 +452,7 @@ bool VectorCanBackend::open()
         const bool success = d->setConfigurationParameter(key, param);
         if (!success) {
             qWarning("Cannot apply parameter: %d with value: %ls",
-                     key, param.toString());
+                     key, qUtf16Printable(param.toString()));
         }
     }
 
