@@ -60,8 +60,8 @@ public:
     QCanBusDevice *createDevice(const QString &interfaceName, QString *errorMessage) const override
     {
         QString errorReason;
-        if (!VectorCanBackend::canCreate(&errorReason)) {
-            qWarning("%s", qPrintable(errorReason));
+        if (Q_UNLIKELY(!VectorCanBackend::canCreate(&errorReason))) {
+            qWarning("%ls", qUtf16Printable(errorReason));
             if (errorMessage)
                 *errorMessage = errorReason;
             return nullptr;
