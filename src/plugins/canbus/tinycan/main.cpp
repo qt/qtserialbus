@@ -43,12 +43,11 @@
 
 QT_BEGIN_NAMESPACE
 
-class TinyCanBusPlugin : public QObject, public QCanBusFactory
+class TinyCanBusPlugin : public QObject, public QCanBusFactoryV2
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QCanBusFactory" FILE "plugin.json")
-    Q_INTERFACES(QCanBusFactory)
-
+    Q_INTERFACES(QCanBusFactoryV2)
 
 public:
     QList<QCanBusDeviceInfo> availableDevices(QString *errorMessage) const override
