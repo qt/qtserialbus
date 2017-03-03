@@ -84,14 +84,12 @@ QCanBusDeviceInfo::~QCanBusDeviceInfo()
 }
 
 /*!
+    \fn void QCanBusDeviceInfo::swap(const QCanBusDeviceInfo &other)
     Swap this instance's shared data pointer with the shared data pointer in
     \a other.
     \internal
 */
-void QCanBusDeviceInfo::swap(QCanBusDeviceInfo other)
-{
-    d_ptr.swap(other.d_ptr);
-}
+
 
 /*!
     Sets the QCanBusDeviceInfo object to be equal to \a other.

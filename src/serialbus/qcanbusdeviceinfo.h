@@ -53,8 +53,17 @@ public:
     QCanBusDeviceInfo(const QCanBusDeviceInfo &other);
     ~QCanBusDeviceInfo();
 
-    void swap(QCanBusDeviceInfo other);
+    void swap(QCanBusDeviceInfo &other) Q_DECL_NOTHROW
+    {
+         qSwap(d_ptr, other.d_ptr);
+    }
+
     QCanBusDeviceInfo &operator=(const QCanBusDeviceInfo &other);
+    QCanBusDeviceInfo &operator=(QCanBusDeviceInfo &&other) Q_DECL_NOTHROW
+    {
+        swap(other);
+        return *this;
+    }
 
     QString name() const;
 
@@ -65,10 +74,12 @@ private:
     friend class QCanBusDevice;
     friend class GenericBusPlugin;
 
-    QCanBusDeviceInfo(QCanBusDeviceInfoPrivate &dd);
+    explicit QCanBusDeviceInfo(QCanBusDeviceInfoPrivate &dd);
 
     QSharedDataPointer<QCanBusDeviceInfoPrivate> d_ptr;
 };
+
+Q_DECLARE_SHARED(QCanBusDeviceInfo)
 
 QT_END_NAMESPACE
 
