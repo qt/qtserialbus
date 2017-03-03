@@ -63,9 +63,9 @@ QT_BEGIN_NAMESPACE
 
 /*!
     \internal
-
-    \fn QCanBusFactory::~QCanBusFactory()
 */
-
+QCanBusFactory::~QCanBusFactory()
+{
+}
 
 QT_END_NAMESPACE
