@@ -37,12 +37,11 @@
 #include "qcanbus.h"
 #include "qcanbusfactory.h"
 
-#include <QtCore/qobject.h>
-#include <QtCore/qpluginloader.h>
-#include <QtCore/qdebug.h>
 #include <QtCore/qcoreapplication.h>
 #include <QtCore/qglobalstatic.h>
 #include <QtCore/qlist.h>
+#include <QtCore/qobject.h>
+#include <QtCore/qpluginloader.h>
 
 #include <private/qfactoryloader_p.h>
 #include <private/qlibrary_p.h>
