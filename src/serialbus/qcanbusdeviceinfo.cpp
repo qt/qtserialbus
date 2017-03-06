@@ -44,14 +44,14 @@ QT_BEGIN_NAMESPACE
     \inmodule QtSerialBus
     \since 5.9
 
-    \brief The QCanBusDeviceInfo provides information about CAN interfaces.
+    \brief The QCanBusDeviceInfo provides information about CAN bus interfaces.
 
     Each plugin may support one or more interfaces with different
     capabilities. This class provides information about available functions.
 */
 
 /*!
-    Constructs a new empty QCanBusDeviceInfo.
+    Constructs an empty QCanBusDeviceInfo.
 */
 QCanBusDeviceInfo::QCanBusDeviceInfo() :
     d_ptr(new QCanBusDeviceInfoPrivate)
@@ -59,7 +59,7 @@ QCanBusDeviceInfo::QCanBusDeviceInfo() :
 }
 
 /*!
-    Constructs a new QCanBusDeviceInfo from \a other.
+    Constructs a copy of \a other.
 */
 QCanBusDeviceInfo::QCanBusDeviceInfo(const QCanBusDeviceInfo &other) :
     d_ptr(other.d_ptr)
@@ -67,7 +67,7 @@ QCanBusDeviceInfo::QCanBusDeviceInfo(const QCanBusDeviceInfo &other) :
 }
 
 /*!
-    Constructs a new QCanBusDeviceInfo from the QCanBusDeviceInfoPrivate \a dd.
+    Constructs a CAN bus device info from QCanBusDeviceInfoPrivate \a dd.
     \internal
 */
 QCanBusDeviceInfo::QCanBusDeviceInfo(QCanBusDeviceInfoPrivate &dd) :
@@ -76,23 +76,22 @@ QCanBusDeviceInfo::QCanBusDeviceInfo(QCanBusDeviceInfoPrivate &dd) :
 }
 
 /*!
-    Destroys the QCanBusDeviceInfo object. References to the values in the
-    object become invalid.
+    Destroys the CAN bus device info.
 */
 QCanBusDeviceInfo::~QCanBusDeviceInfo()
 {
 }
 
 /*!
-    \fn void QCanBusDeviceInfo::swap(const QCanBusDeviceInfo &other)
-    Swap this instance's shared data pointer with the shared data pointer in
-    \a other.
-    \internal
+    \fn void QCanBusDeviceInfo::swap(QCanBusDeviceInfo &other)
+    Swaps this CAN bus device info with \a other. This operation is very fast
+    and never fails.
 */
 
 
 /*!
-    Sets the QCanBusDeviceInfo object to be equal to \a other.
+    Assigns \a other to this CAN bus device info and returns a reference to this
+    CAN bus device info.
 */
 QCanBusDeviceInfo &QCanBusDeviceInfo::operator=(const QCanBusDeviceInfo &other)
 {
