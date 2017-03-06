@@ -45,7 +45,6 @@
 #include <QtCore/qlist.h>
 
 #include <private/qfactoryloader_p.h>
-#include <private/qlibrary_p.h>
 
 #define QCanBusFactory_iid "org.qt-project.Qt.QCanBusFactory"
 

@@ -60,6 +60,7 @@ tst_QCanBus::tst_QCanBus()
 
 void tst_QCanBus::initTestCase()
 {
+#if QT_CONFIG(library)
     /*
      * Set custom path since CI doesn't install test plugins
      */
@@ -69,6 +70,7 @@ void tst_QCanBus::initTestCase()
     QCoreApplication::addLibraryPath(QCoreApplication::applicationDirPath()
                                      + QStringLiteral("/../../../../plugins"));
 #endif
+#endif // QT_CONFIG(library)
     bus = QCanBus::instance();
     QVERIFY(bus);
     QCanBus *sameInstance = QCanBus::instance();

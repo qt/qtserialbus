@@ -6,5 +6,8 @@ qtConfig(socketcan) {
     SUBDIRS += socketcan
 }
 
-SUBDIRS += peakcan tinycan
+qtConfig(library) {
+    SUBDIRS += peakcan tinycan
+}
+
 win32:SUBDIRS += vectorcan
