@@ -54,6 +54,7 @@ class QCanBusPrivate
 {
 public:
     QCanBusPrivate() { }
+    QCanBusPrivate(int index, const QJsonObject &meta) : meta(meta), index(index) {}
 
     QJsonObject meta;
     QObject *factory = nullptr;
@@ -76,10 +77,7 @@ static void loadPlugins()
         if (obj.isEmpty())
             continue;
 
-        QCanBusPrivate d;
-        d.index = i;
-        d.meta = obj;
-        qCanBusPlugins()->insert(obj.value(QLatin1String("Key")).toString(), d);
+        qCanBusPlugins()->insert(obj.value(QLatin1String("Key")).toString(), {i, obj});
     }
 }
 
