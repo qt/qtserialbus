@@ -40,8 +40,6 @@
 #include <QtSerialBus/qcanbusfactory.h>
 #include "../../../../src/serialbus/qcanbusdeviceinfo_p.h"
 
-#include <QtCore/qfile.h>
-
 QT_BEGIN_NAMESPACE
 
 class GenericBusPlugin : public QObject, public QCanBusFactory
