@@ -49,7 +49,7 @@ class QCanBusDeviceInfoPrivateDeleter;
 class Q_SERIALBUS_EXPORT QCanBusDeviceInfo
 {
 public:
-    QCanBusDeviceInfo();
+    QCanBusDeviceInfo() = delete;
     QCanBusDeviceInfo(const QCanBusDeviceInfo &other);
     ~QCanBusDeviceInfo();
 

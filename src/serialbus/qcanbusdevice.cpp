@@ -717,11 +717,11 @@ void QCanBusDevice::setState(QCanBusDevice::CanBusDeviceState newState)
 QCanBusDeviceInfo QCanBusDevice::createDeviceInfo(const QString &name, bool isVirtual,
                                                   bool isFlexibleDataRateCapable)
 {
-    QCanBusDeviceInfoPrivate info;
-    info.name = name;
-    info.isVirtual = isVirtual;
-    info.hasFlexibleDataRate = isFlexibleDataRateCapable;
-    return QCanBusDeviceInfo(info);
+    QScopedPointer<QCanBusDeviceInfoPrivate> info(new QCanBusDeviceInfoPrivate);
+    info->name = name;
+    info->isVirtual = isVirtual;
+    info->hasFlexibleDataRate = isFlexibleDataRateCapable;
+    return QCanBusDeviceInfo(*info.take());
 }
 
 QT_END_NAMESPACE
