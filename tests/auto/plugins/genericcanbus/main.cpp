@@ -55,11 +55,7 @@ public:
     {
         Q_UNUSED(errorMessage);
 
-        QCanBusDeviceInfoPrivate info;
-        info.name = QStringLiteral("can0");
-        info.hasFlexibleDataRate = true;
-        info.isVirtual = true;
-        return { QCanBusDeviceInfo(info) };
+        return DummyBackend::interfaces();
     }
 
     QCanBusDevice *createDevice(const QString &interfaceName, QString *errorMessage) const override

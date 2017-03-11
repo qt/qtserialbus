@@ -56,6 +56,8 @@ public:
 
     QString interpretErrorFrame(const QCanBusFrame &) override;
 
+    static QList<QCanBusDeviceInfo> interfaces();
+
 public Q_SLOTS:
     void sendMessage();
 

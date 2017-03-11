@@ -72,7 +72,6 @@ public:
 
 private:
     friend class QCanBusDevice;
-    friend class GenericBusPlugin;
 
     explicit QCanBusDeviceInfo(QCanBusDeviceInfoPrivate &dd);
 
