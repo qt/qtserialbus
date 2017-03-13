@@ -138,6 +138,11 @@ QList<QCanBusDeviceInfo> SocketCanBackend::interfaces()
         result.append(info);
     }
 
+    std::sort(result.begin(), result.end(),
+              [](const QCanBusDeviceInfo &a, const QCanBusDeviceInfo &b) {
+        return a.name() < b.name();
+    });
+
     return result;
 }
 
