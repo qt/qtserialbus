@@ -114,7 +114,7 @@ bool WriteRegisterModel::setData(const QModelIndex &index, const QVariant &value
         return true;
     }
 
-    if (index.column() == HoldingColumn && Qt::EditRole) { // holding registers
+    if (index.column() == HoldingColumn && role == Qt::EditRole) { // holding registers
         bool result = false;
         quint16 newValue = value.toString().toUShort(&result, 16);
         if (result)
