@@ -76,10 +76,12 @@ int main(int argc, char *argv[])
     parser.addPositionalArgument(QStringLiteral("data"),
             CanBusUtil::tr(
                 "Data to send if -l is not specified. Format:\n"
-                "\t\t<id>#{payload}   (CAN 2.0 data frames),\n"
-                "\t\t<id>#Rxx         (CAN 2.0 RTR frames with xx bytes data length),\n"
-                "\t\t<id>##{payload}  (CAN FD data frames),\n"
+                "\t\t<id>#{payload}          (CAN 2.0 data frames),\n"
+                "\t\t<id>#Rxx                (CAN 2.0 RTR frames with xx bytes data length),\n"
+                "\t\t<id>##[flags]{payload}  (CAN FD data frames),\n"
                 "where {payload} has 0..8 (0..64 CAN FD) ASCII hex-value pairs, "
+                "and flags is one optional ASCII hex char for CAN FD flags: "
+                "1 = Bitrate Switch, 2 = Error State Indicator\n"
                 "e.g. 1#1a2b3c\n"), QStringLiteral("[data]"));
 
     const QCommandLineOption listeningOption({"l", "listen"},
@@ -93,6 +95,10 @@ int main(int argc, char *argv[])
     const QCommandLineOption showTimeStampOption({"t", "timestamp"},
             CanBusUtil::tr("Show timestamp for each received CAN bus frame."));
     parser.addOption(showTimeStampOption);
+
+    const QCommandLineOption showFdFlagsOption({"f", "flags"},
+            CanBusUtil::tr("Show CAN FD flags for each received CAN bus frame."));
+    parser.addOption(showFdFlagsOption);
 
     parser.process(app);
 
@@ -112,6 +118,7 @@ int main(int argc, char *argv[])
     }
 
     util.setShowTimeStamp(parser.isSet(showTimeStampOption));
+    util.setShowFdFlags(parser.isSet(showFdFlagsOption));
     if (!util.start(args[0], args[1], data))
         return -1;
 

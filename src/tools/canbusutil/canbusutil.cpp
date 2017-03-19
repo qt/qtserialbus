@@ -50,6 +50,11 @@ void CanBusUtil::setShowTimeStamp(bool showTimeStamp)
     m_readTask->setShowTimeStamp(showTimeStamp);
 }
 
+void CanBusUtil::setShowFdFlags(bool showFdFlags)
+{
+    m_readTask->setShowFdFlags(showFdFlags);
+}
+
 bool CanBusUtil::start(const QString &pluginName, const QString &deviceName, const QString &data)
 {
     if (!m_canBus) {
@@ -66,6 +71,8 @@ bool CanBusUtil::start(const QString &pluginName, const QString &deviceName, con
         return false;
 
     if (m_listening) {
+        if (m_readTask->isShowFdFlags())
+             m_canDevice->setConfigurationParameter(QCanBusDevice::CanFdKey, true);
         connect(m_canDevice.data(), &QCanBusDevice::framesReceived, m_readTask, &ReadTask::checkMessages);
     } else {
         if (!sendData())
@@ -128,15 +135,23 @@ bool CanBusUtil::setFrameFromPayload(QString payload, QCanBusFrame *frame)
         payload = payload.mid(1);
     }
 
-    if (payload.size() % 2 != 0) {
-        m_output << "Data field invalid: Size is not multiple of two." << endl;
-        return false;
-    }
-
     const QRegularExpression re(QStringLiteral("^[0-9A-Fa-f]*$"));
     if (!re.match(payload).hasMatch()) {
         m_output << "Data field invalid: Only hex numbers allowed." << endl;
         return false;
+    }
+
+    if (payload.size() % 2 != 0) {
+        if (frame->hasFlexibleDataRateFormat()) {
+            enum { BitrateSwitchFlag = 1, ErrorStateIndicatorFlag = 2 };
+            const int flags = payload.left(1).toInt(nullptr, 16);
+            frame->setBitrateSwitch(flags & BitrateSwitchFlag);
+            frame->setErrorStateIndicator(flags & ErrorStateIndicatorFlag);
+            payload.remove(0, 1);
+        } else {
+            m_output << "Data field invalid: Size is not multiple of two." << endl;
+            return false;
+        }
     }
 
     QByteArray bytes = QByteArray::fromHex(payload.toLatin1());
