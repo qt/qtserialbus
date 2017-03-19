@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     QCommandLineParser parser;
     parser.setApplicationDescription(CanBusUtil::tr(
         "Sends arbitrary CAN bus frames.\n"
-        "If the -l option is set, all received CAN bus packages are dumped."));
+        "If the -l option is set, all received CAN bus frames are dumped."));
     parser.addHelpOption();
     parser.addVersionOption();
 
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     parser.addOption(listOption);
 
     const QCommandLineOption showTimeStampOption({"t", "timestamp"},
-            CanBusUtil::tr("Show timestamp for each received message."));
+            CanBusUtil::tr("Show timestamp for each received CAN bus frame."));
     parser.addOption(showTimeStampOption);
 
     parser.process(app);
