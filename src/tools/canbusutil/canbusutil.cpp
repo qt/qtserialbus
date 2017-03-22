@@ -90,6 +90,20 @@ void CanBusUtil::printPlugins()
         m_output << plugins.at(i) << endl;
 }
 
+int CanBusUtil::printDevices(const QString &pluginName)
+{
+    QString errorMessage;
+    const QList<QCanBusDeviceInfo> devices = m_canBus->availableDevices(pluginName, &errorMessage);
+    if (!errorMessage.isEmpty()) {
+        m_output << "Error: " << errorMessage << endl;
+        return 1;
+    }
+
+    for (const QCanBusDeviceInfo &info : devices)
+        m_output << info.name() << endl;
+    return 0;
+}
+
 bool CanBusUtil::parseDataField(qint32 &id, QString &payload)
 {
     int hashMarkPos = m_data.indexOf('#');

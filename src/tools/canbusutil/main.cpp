@@ -100,6 +100,10 @@ int main(int argc, char *argv[])
             CanBusUtil::tr("Show extra info (CAN FD flags) for each received CAN bus frame."));
     parser.addOption(showFdFlagsOption);
 
+    const QCommandLineOption listDevicesOption({"d", "devices"},
+            CanBusUtil::tr("Show available CAN bus devices for the given plugin."));
+    parser.addOption(listDevicesOption);
+
     parser.process(app);
 
     if (parser.isSet(listOption)) {
@@ -109,16 +113,19 @@ int main(int argc, char *argv[])
 
     QString data;
     const QStringList args = parser.positionalArguments();
-    if (!parser.isSet(listeningOption) && args.size() == 3) {
+    if (parser.isSet(listeningOption)) {
+        util.setShowTimeStamp(parser.isSet(showTimeStampOption));
+        util.setShowFdFlags(parser.isSet(showFdFlagsOption));
+    } else if (args.size() == 3) {
         data = args[2];
-    } else if (!parser.isSet(listeningOption) || args.size() != 2) {
+    } else if (args.size() == 1 && parser.isSet(listDevicesOption)) {
+        return util.printDevices(args[0]);
+    } else if (args.size() != 2) {
         fprintf(stderr, "Invalid number of arguments (%d given).\n\n%s",
             args.size(), qPrintable(parser.helpText()));
         return 1;
     }
 
-    util.setShowTimeStamp(parser.isSet(showTimeStampOption));
-    util.setShowFdFlags(parser.isSet(showFdFlagsOption));
     if (!util.start(args[0], args[1], data))
         return -1;
 

@@ -60,6 +60,7 @@ public:
     void setShowFdFlags(bool showFdFlags);
     bool start(const QString &pluginName, const QString &deviceName, const QString &data = QString());
     void printPlugins();
+    int  printDevices(const QString &pluginName);
 
 private:
     bool parseDataField(qint32 &id, QString &payload);
