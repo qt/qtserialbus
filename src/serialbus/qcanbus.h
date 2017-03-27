@@ -44,8 +44,6 @@
 
 QT_BEGIN_NAMESPACE
 
-class QSerialBusBackendFactory;
-
 class Q_SERIALBUS_EXPORT QCanBus : public QObject
 {
     Q_OBJECT
