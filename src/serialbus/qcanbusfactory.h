@@ -49,7 +49,7 @@ public:
     virtual QCanBusDevice *createDevice(const QString &interfaceName,
                                         QString *errorMessage) const = 0;
 protected:
-    virtual ~QCanBusFactory();
+    virtual ~QCanBusFactory() {}
 };
 
 Q_DECLARE_INTERFACE(QCanBusFactory, "org.qt-project.Qt.QCanBusFactory")
