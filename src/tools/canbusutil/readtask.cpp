@@ -74,11 +74,11 @@ void ReadTask::checkMessages() {
         }
 
         if (m_showFdFlags) {
-            QString flags = QLatin1String(" - - ");
+            QString flags = QLatin1String("- -  ");
             if (frame.hasBitrateSwitch())
-                flags[1] = QLatin1Char('B');
+                flags[0] = QLatin1Char('B');
             if (frame.hasErrorStateIndicator())
-                flags[3] = QLatin1Char('E');
+                flags[2] = QLatin1Char('E');
             view += flags;
         }
 
