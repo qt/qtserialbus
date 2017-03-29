@@ -96,8 +96,8 @@ int main(int argc, char *argv[])
             CanBusUtil::tr("Show timestamp for each received CAN bus frame."));
     parser.addOption(showTimeStampOption);
 
-    const QCommandLineOption showFdFlagsOption({"f", "flags"},
-            CanBusUtil::tr("Show CAN FD flags for each received CAN bus frame."));
+    const QCommandLineOption showFdFlagsOption({"i", "info"},
+            CanBusUtil::tr("Show extra info (CAN FD flags) for each received CAN bus frame."));
     parser.addOption(showFdFlagsOption);
 
     parser.process(app);
