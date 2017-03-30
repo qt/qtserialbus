@@ -72,14 +72,14 @@ static void loadPlugins()
 {
     const QList<QJsonObject> meta = qFactoryLoader()->metaData();
     for (int i = 0; i < meta.count(); i++) {
-        const QJsonObject obj = meta.at(i).value(QStringLiteral("MetaData")).toObject();
+        const QJsonObject obj = meta.at(i).value(QLatin1String("MetaData")).toObject();
         if (obj.isEmpty())
             continue;
 
         QCanBusPrivate d;
         d.index = i;
         d.meta = obj;
-        qCanBusPlugins()->insert(obj.value(QStringLiteral("Key")).toString(), d);
+        qCanBusPlugins()->insert(obj.value(QLatin1String("Key")).toString(), d);
     }
 }
 
