@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the QtSerialBus module of the Qt Toolkit.
@@ -61,6 +61,7 @@ tst_QCanBus::tst_QCanBus()
 
 void tst_QCanBus::initTestCase()
 {
+#if QT_CONFIG(library)
     /*
      * Set custom path since CI doesn't install test plugins
      */
@@ -70,6 +71,7 @@ void tst_QCanBus::initTestCase()
     QCoreApplication::addLibraryPath(QCoreApplication::applicationDirPath()
                                      + QStringLiteral("/../../../../plugins"));
 #endif
+#endif // QT_CONFIG(library)
     bus = QCanBus::instance();
     QVERIFY(bus);
     QCanBus *sameInstance = QCanBus::instance();

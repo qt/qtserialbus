@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the QtSerialBus module of the Qt Toolkit.
@@ -44,7 +44,6 @@
 #include <QtCore/qpluginloader.h>
 
 #include <private/qfactoryloader_p.h>
-#include <private/qlibrary_p.h>
 
 #define QCanBusFactory_iid "org.qt-project.Qt.QCanBusFactory"
 

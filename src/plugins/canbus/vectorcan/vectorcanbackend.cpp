@@ -1,6 +1,6 @@
 ﻿/****************************************************************************
 **
-** Copyright (C) 2016 Denis Shienkov <denis.shienkov@gmail.com>
+** Copyright (C) 2017 Denis Shienkov <denis.shienkov@gmail.com>
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the QtSerialBus module of the Qt Toolkit.
@@ -354,8 +354,8 @@ void VectorCanBackendPrivate::startRead()
         if ((msg.flags & XL_CAN_MSG_FLAG_TX_COMPLETED) && !transmitEcho)
             continue;
 
-        QCanBusFrame frame(msg.id, QByteArray(reinterpret_cast<const char *>(msg.data),
-                                              int(msg.dlc)));
+        QCanBusFrame frame(msg.id & ~XL_CAN_EXT_MSG_ID,
+                           QByteArray(reinterpret_cast<const char *>(msg.data), int(msg.dlc)));
         frame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(event.timeStamp / 1000));
         frame.setExtendedFrameFormat(msg.id & XL_CAN_EXT_MSG_ID);
         frame.setFrameType((msg.flags & XL_CAN_MSG_FLAG_REMOTE_FRAME)

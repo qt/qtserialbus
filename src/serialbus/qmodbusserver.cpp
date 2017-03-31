@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the QtSerialBus module of the Qt Toolkit.
@@ -1254,7 +1254,7 @@ QModbusResponse QModbusServerPrivate::processEncapsulatedInterfaceTransportReque
                     objectData[1] = quint8(object.size());
                     objectData += object;
                     if (payload.size() + objectData.size() > 253) {
-                        payload[3] = quint8(0xff); // more follows
+                        payload[3] = char(0xff); // more follows
                         payload[4] = id; // next object id
                         break;
                     }
