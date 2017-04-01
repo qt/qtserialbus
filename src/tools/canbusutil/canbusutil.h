@@ -66,7 +66,6 @@ private:
     bool parseDataField(qint32 &id, QString &payload);
     bool setFrameFromPayload(QString payload, QCanBusFrame *frame);
     bool connectCanDevice();
-    bool startListeningOnCanDevice();
     bool sendData();
 
 private:

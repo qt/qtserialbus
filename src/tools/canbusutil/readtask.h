@@ -50,9 +50,6 @@ public:
     bool isShowFdFlags() const;
     void setShowFdFlags(bool isShowFdFlags);
 
-signals:
-    void sigTermSignal();
-
 public slots:
     void checkMessages();
     void receiveError(QCanBusDevice::CanBusError /*error*/);
