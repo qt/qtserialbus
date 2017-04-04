@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the examples of the QtSerialBus module.
@@ -114,7 +114,7 @@ bool WriteRegisterModel::setData(const QModelIndex &index, const QVariant &value
         return true;
     }
 
-    if (index.column() == HoldingColumn && Qt::EditRole) { // holding registers
+    if (index.column() == HoldingColumn && role == Qt::EditRole) { // holding registers
         bool result = false;
         quint16 newValue = value.toString().toUShort(&result, 16);
         if (result)

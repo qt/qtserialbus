@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the QtSerialBus module of the Qt Toolkit.
@@ -37,15 +37,13 @@
 #include "qcanbus.h"
 #include "qcanbusfactory.h"
 
-#include <QtCore/qobject.h>
-#include <QtCore/qpluginloader.h>
-#include <QtCore/qdebug.h>
 #include <QtCore/qcoreapplication.h>
 #include <QtCore/qglobalstatic.h>
 #include <QtCore/qlist.h>
+#include <QtCore/qobject.h>
+#include <QtCore/qpluginloader.h>
 
 #include <private/qfactoryloader_p.h>
-#include <private/qlibrary_p.h>
 
 #define QCanBusFactory_iid "org.qt-project.Qt.QCanBusFactory"
 
@@ -55,9 +53,10 @@ class QCanBusPrivate
 {
 public:
     QCanBusPrivate() { }
+    QCanBusPrivate(int index, const QJsonObject &meta) : meta(meta), index(index) {}
 
     QJsonObject meta;
-    QCanBusFactory *factory = nullptr;
+    QObject *factory = nullptr;
     int index = -1;
 };
 
@@ -73,14 +72,11 @@ static void loadPlugins()
 {
     const QList<QJsonObject> meta = qFactoryLoader()->metaData();
     for (int i = 0; i < meta.count(); i++) {
-        const QJsonObject obj = meta.at(i).value(QStringLiteral("MetaData")).toObject();
+        const QJsonObject obj = meta.at(i).value(QLatin1String("MetaData")).toObject();
         if (obj.isEmpty())
             continue;
 
-        QCanBusPrivate d;
-        d.index = i;
-        d.meta = obj;
-        qCanBusPlugins()->insert(obj.value(QStringLiteral("Key")).toString(), d);
+        qCanBusPlugins()->insert(obj.value(QLatin1String("Key")).toString(), {i, obj});
     }
 }
 
@@ -122,7 +118,7 @@ static void setErrorMessage(QString *result, const QString &message)
     *result = message;
 }
 
-static QCanBusFactory *canBusFactory(const QString &plugin, QString *errorMessage)
+static QObject *canBusFactory(const QString &plugin, QString *errorMessage)
 {
     if (Q_UNLIKELY(!qCanBusPlugins()->contains(plugin))) {
         setErrorMessage(errorMessage, QCanBus::tr("No such plugin: '%1'").arg(plugin));
@@ -131,7 +127,7 @@ static QCanBusFactory *canBusFactory(const QString &plugin, QString *errorMessag
 
     QCanBusPrivate d = qCanBusPlugins()->value(plugin);
     if (!d.factory) {
-        d.factory = qobject_cast<QCanBusFactory *>(qFactoryLoader->instance(d.index));
+        d.factory = qFactoryLoader->instance(d.index);
 
         if (d.factory)
             qCanBusPlugins()->insert(plugin, d);
@@ -155,12 +151,19 @@ static QCanBusFactory *canBusFactory(const QString &plugin, QString *errorMessag
 */
 QList<QCanBusDeviceInfo> QCanBus::availableDevices(const QString &plugin, QString *errorMessage) const
 {
-    const QCanBusFactory *factory = canBusFactory(plugin, errorMessage);
-    if (Q_UNLIKELY(!factory))
+    const QObject *obj = canBusFactory(plugin, errorMessage);
+    if (Q_UNLIKELY(!obj))
         return QList<QCanBusDeviceInfo>();
 
+    const QCanBusFactoryV2 *factoryV2 = qobject_cast<QCanBusFactoryV2 *>(obj);
+    if (Q_UNLIKELY(!factoryV2)) {
+        setErrorMessage(errorMessage,
+                        tr("The plugin '%1' does not provide this function.").arg(plugin));
+        return QList<QCanBusDeviceInfo>();
+    }
+
     QString errorString;
-    QList<QCanBusDeviceInfo> result = factory->availableDevices(&errorString);
+    QList<QCanBusDeviceInfo> result = factoryV2->availableDevices(&errorString);
 
     setErrorMessage(errorMessage, errorString);
     return result;
@@ -191,11 +194,21 @@ QList<QCanBusDeviceInfo> QCanBus::availableDevices(const QString &plugin, QStrin
 QCanBusDevice *QCanBus::createDevice(const QString &plugin, const QString &interfaceName,
                                      QString *errorMessage) const
 {
-    const QCanBusFactory *factory = canBusFactory(plugin, errorMessage);
-    if (Q_UNLIKELY(!factory))
+    const QObject *obj = canBusFactory(plugin, errorMessage);
+    if (Q_UNLIKELY(!obj))
         return nullptr;
 
-    return factory->createDevice(interfaceName, errorMessage);
+    const QCanBusFactoryV2 *factoryV2 = qobject_cast<QCanBusFactoryV2 *>(obj);
+    if (Q_LIKELY(factoryV2))
+        return factoryV2->createDevice(interfaceName, errorMessage);
+
+    const QCanBusFactory *factory = qobject_cast<QCanBusFactory *>(obj);
+    if (factory)
+        return factory->createDevice(interfaceName, errorMessage);
+
+    setErrorMessage(errorMessage,
+                    tr("The plugin '%1' does not provide this function.").arg(plugin));
+    return nullptr;
 }
 
 QCanBus::QCanBus(QObject *parent) :

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the tools applications of the QtSerialBus module.
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     QCommandLineParser parser;
     parser.setApplicationDescription(CanBusUtil::tr(
         "Sends arbitrary CAN bus frames.\n"
-        "If the -l option is set, all received CAN bus packages are dumped."));
+        "If the -l option is set, all received CAN bus frames are dumped."));
     parser.addHelpOption();
     parser.addVersionOption();
 
@@ -76,10 +76,12 @@ int main(int argc, char *argv[])
     parser.addPositionalArgument(QStringLiteral("data"),
             CanBusUtil::tr(
                 "Data to send if -l is not specified. Format:\n"
-                "\t\t<id>#{payload}   (CAN 2.0 data frames),\n"
-                "\t\t<id>#Rxx         (CAN 2.0 RTR frames with xx bytes data length),\n"
-                "\t\t<id>##{payload}  (CAN FD data frames),\n"
+                "\t\t<id>#{payload}          (CAN 2.0 data frames),\n"
+                "\t\t<id>#Rxx                (CAN 2.0 RTR frames with xx bytes data length),\n"
+                "\t\t<id>##[flags]{payload}  (CAN FD data frames),\n"
                 "where {payload} has 0..8 (0..64 CAN FD) ASCII hex-value pairs, "
+                "and flags is one optional ASCII hex char for CAN FD flags: "
+                "1 = Bitrate Switch, 2 = Error State Indicator\n"
                 "e.g. 1#1a2b3c\n"), QStringLiteral("[data]"));
 
     const QCommandLineOption listeningOption({"l", "listen"},
@@ -91,8 +93,16 @@ int main(int argc, char *argv[])
     parser.addOption(listOption);
 
     const QCommandLineOption showTimeStampOption({"t", "timestamp"},
-            CanBusUtil::tr("Show timestamp for each received message."));
+            CanBusUtil::tr("Show timestamp for each received CAN bus frame."));
     parser.addOption(showTimeStampOption);
+
+    const QCommandLineOption showFdFlagsOption({"i", "info"},
+            CanBusUtil::tr("Show extra info (CAN FD flags) for each received CAN bus frame."));
+    parser.addOption(showFdFlagsOption);
+
+    const QCommandLineOption listDevicesOption({"d", "devices"},
+            CanBusUtil::tr("Show available CAN bus devices for the given plugin."));
+    parser.addOption(listDevicesOption);
 
     parser.process(app);
 
@@ -103,15 +113,19 @@ int main(int argc, char *argv[])
 
     QString data;
     const QStringList args = parser.positionalArguments();
-    if (!parser.isSet(listeningOption) && args.size() == 3) {
+    if (parser.isSet(listeningOption)) {
+        util.setShowTimeStamp(parser.isSet(showTimeStampOption));
+        util.setShowFdFlags(parser.isSet(showFdFlagsOption));
+    } else if (args.size() == 3) {
         data = args[2];
-    } else if (!parser.isSet(listeningOption) || args.size() != 2) {
+    } else if (args.size() == 1 && parser.isSet(listDevicesOption)) {
+        return util.printDevices(args[0]);
+    } else if (args.size() != 2) {
         fprintf(stderr, "Invalid number of arguments (%d given).\n\n%s",
             args.size(), qPrintable(parser.helpText()));
         return 1;
     }
 
-    util.setShowTimeStamp(parser.isSet(showTimeStampOption));
     if (!util.start(args[0], args[1], data))
         return -1;
 

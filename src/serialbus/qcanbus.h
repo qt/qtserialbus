@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the QtSerialBus module of the Qt Toolkit.
@@ -43,8 +43,6 @@
 #include <QtSerialBus/qcanbusdeviceinfo.h>
 
 QT_BEGIN_NAMESPACE
-
-class QSerialBusBackendFactory;
 
 class Q_SERIALBUS_EXPORT QCanBus : public QObject
 {

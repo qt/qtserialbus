@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the QtSerialBus module of the Qt Toolkit.
@@ -40,26 +40,20 @@
 #include <QtSerialBus/qcanbusfactory.h>
 #include "../../../../src/serialbus/qcanbusdeviceinfo_p.h"
 
-#include <QtCore/qfile.h>
-
 QT_BEGIN_NAMESPACE
 
-class GenericBusPlugin : public QObject, public QCanBusFactory
+class GenericBusPlugin : public QObject, public QCanBusFactoryV2
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QCanBusFactory" FILE "plugin.json")
-    Q_INTERFACES(QCanBusFactory)
+    Q_INTERFACES(QCanBusFactoryV2)
 
 public:
     QList<QCanBusDeviceInfo> availableDevices(QString *errorMessage) const override
     {
         Q_UNUSED(errorMessage);
 
-        QCanBusDeviceInfoPrivate info;
-        info.name = QStringLiteral("can0");
-        info.hasFlexibleDataRate = true;
-        info.isVirtual = true;
-        return { QCanBusDeviceInfo(info) };
+        return DummyBackend::interfaces();
     }
 
     QCanBusDevice *createDevice(const QString &interfaceName, QString *errorMessage) const override

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the tools applications of the QtSerialBus module.
@@ -47,9 +47,8 @@ class ReadTask : public QObject
 public:
     explicit ReadTask(QTextStream &output, QObject *parent = nullptr);
     void setShowTimeStamp(bool showStamp);
-
-signals:
-    void sigTermSignal();
+    bool isShowFdFlags() const;
+    void setShowFdFlags(bool isShowFdFlags);
 
 public slots:
     void checkMessages();
@@ -58,6 +57,7 @@ public slots:
 private:
     QTextStream &output;
     bool m_showTimeStamp = false;
+    bool m_showFdFlags = false;
 };
 
 #endif // READTASK_H

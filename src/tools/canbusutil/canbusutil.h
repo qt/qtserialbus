@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the tools applications of the QtSerialBus module.
@@ -57,14 +57,15 @@ public:
     explicit CanBusUtil(QTextStream &output, QCoreApplication &app, QObject *parent = nullptr);
 
     void setShowTimeStamp(bool showTimeStamp);
+    void setShowFdFlags(bool showFdFlags);
     bool start(const QString &pluginName, const QString &deviceName, const QString &data = QString());
     void printPlugins();
+    int  printDevices(const QString &pluginName);
 
 private:
     bool parseDataField(qint32 &id, QString &payload);
     bool setFrameFromPayload(QString payload, QCanBusFrame *frame);
     bool connectCanDevice();
-    bool startListeningOnCanDevice();
     bool sendData();
 
 private:

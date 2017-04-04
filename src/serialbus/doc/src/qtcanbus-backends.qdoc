@@ -95,7 +95,7 @@
     \endcode
 
     This key must be passed to \l {QCanBus::createDevice()} together with the interface name of
-    the CAN bus adapter. QCanBus loads and instantiates the plugin using the QCanBusFactory
+    the CAN bus adapter. QCanBus loads and instantiates the plugin using the QCanBusFactoryV2
     interface which each plugin must implement as central entry point. The interface acts as
     a factory and its sole purpose is to return a \l QCanBusDevice instance. The above mentioned
     interface name is passed on via the factory's \l QCanBusFactory::createDevice() method.

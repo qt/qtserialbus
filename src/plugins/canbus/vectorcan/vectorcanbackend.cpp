@@ -1,6 +1,6 @@
 ﻿/****************************************************************************
 **
-** Copyright (C) 2016 Denis Shienkov <denis.shienkov@gmail.com>
+** Copyright (C) 2017 Denis Shienkov <denis.shienkov@gmail.com>
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the QtSerialBus module of the Qt Toolkit.
@@ -240,6 +240,9 @@ bool VectorCanBackendPrivate::setConfigurationParameter(int key, const QVariant 
     switch (key) {
     case QCanBusDevice::BitRateKey:
         return setBitRate(value.toUInt());
+    case QCanBusDevice::ReceiveOwnKey:
+        transmitEcho = value.toBool();
+        return true;
     default:
         q->setError(VectorCanBackend::tr("Unsupported configuration key"),
                     QCanBusDevice::ConfigurationError);
@@ -348,8 +351,11 @@ void VectorCanBackendPrivate::startRead()
 
         const s_xl_can_msg &msg = event.tagData.msg;
 
-        QCanBusFrame frame(msg.id, QByteArray(reinterpret_cast<const char *>(msg.data),
-                                              int(msg.dlc)));
+        if ((msg.flags & XL_CAN_MSG_FLAG_TX_COMPLETED) && !transmitEcho)
+            continue;
+
+        QCanBusFrame frame(msg.id & ~XL_CAN_EXT_MSG_ID,
+                           QByteArray(reinterpret_cast<const char *>(msg.data), int(msg.dlc)));
         frame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(event.timeStamp / 1000));
         frame.setExtendedFrameFormat(msg.id & XL_CAN_EXT_MSG_ID);
         frame.setFrameType((msg.flags & XL_CAN_MSG_FLAG_REMOTE_FRAME)
@@ -452,7 +458,7 @@ bool VectorCanBackend::open()
         const bool success = d->setConfigurationParameter(key, param);
         if (!success) {
             qWarning("Cannot apply parameter: %d with value: %ls",
-                     key, param.toString());
+                     key, qUtf16Printable(param.toString()));
         }
     }
 

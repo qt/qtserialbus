@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the tools applications of the QtSerialBus module.
@@ -45,6 +45,16 @@ void ReadTask::setShowTimeStamp(bool showTimeStamp)
     m_showTimeStamp = showTimeStamp;
 }
 
+bool ReadTask::isShowFdFlags() const
+{
+    return m_showFdFlags;
+}
+
+void ReadTask::setShowFdFlags(bool showFlags)
+{
+    m_showFdFlags = showFlags;
+}
+
 void ReadTask::checkMessages() {
     auto canDevice = qobject_cast<QCanBusDevice *>(QObject::sender());
     if (canDevice == nullptr) {
@@ -61,6 +71,15 @@ void ReadTask::checkMessages() {
             view = QString::fromLatin1("%1.%2  ")
                     .arg(frame.timeStamp().seconds(), 10, 10, QLatin1Char(' '))
                     .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char('0'));
+        }
+
+        if (m_showFdFlags) {
+            QString flags = QLatin1String("- -  ");
+            if (frame.hasBitrateSwitch())
+                flags[0] = QLatin1Char('B');
+            if (frame.hasErrorStateIndicator())
+                flags[2] = QLatin1Char('E');
+            view += flags;
         }
 
         if (frame.frameType() == QCanBusFrame::ErrorFrame)

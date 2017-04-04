@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 Denis Shienkov <denis.shienkov@gmail.com>
+** Copyright (C) 2017 Denis Shienkov <denis.shienkov@gmail.com>
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the QtSerialBus module of the Qt Toolkit.
@@ -214,7 +214,7 @@ typedef HANDLE XLhandle;
 //current version
 #define XL_INTERFACE_VERSION    XL_INTERFACE_VERSION_V3
 
-#define XL_CAN_EXT_MSG_ID   0x80000000
+#define XL_CAN_EXT_MSG_ID   0x80000000U
 
 #define XL_CAN_MSG_FLAG_ERROR_FRAME     0x01
 #define XL_CAN_MSG_FLAG_OVERRUN         0x02 // Overrun in Driver or CAN Controller, previous msgs have been lost.
@@ -461,7 +461,11 @@ GENERATE_SYMBOL_VARIABLE(char *, xlGetErrorString, XLstatus)
 inline bool resolveSymbols(QLibrary *vectorcanLibrary)
 {
     if (!vectorcanLibrary->isLoaded()) {
+#ifdef Q_PROCESSOR_X86_64
+        vectorcanLibrary->setFileName(QStringLiteral("vxlapi64"));
+#else
         vectorcanLibrary->setFileName(QStringLiteral("vxlapi"));
+#endif
         if (!vectorcanLibrary->load())
             return false;
     }

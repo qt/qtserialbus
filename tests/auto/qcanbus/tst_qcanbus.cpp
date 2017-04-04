@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the QtSerialBus module of the Qt Toolkit.
@@ -61,6 +61,7 @@ tst_QCanBus::tst_QCanBus()
 
 void tst_QCanBus::initTestCase()
 {
+#if QT_CONFIG(library)
     /*
      * Set custom path since CI doesn't install test plugins
      */
@@ -70,6 +71,7 @@ void tst_QCanBus::initTestCase()
     QCoreApplication::addLibraryPath(QCoreApplication::applicationDirPath()
                                      + QStringLiteral("/../../../../plugins"));
 #endif
+#endif // QT_CONFIG(library)
     bus = QCanBus::instance();
     QVERIFY(bus);
     QCanBus *sameInstance = QCanBus::instance();
@@ -81,11 +83,15 @@ void tst_QCanBus::plugins()
     const QStringList pluginList = bus->plugins();
     QVERIFY(!pluginList.isEmpty());
     QVERIFY(pluginList.contains("generic"));
-
+    QVERIFY(pluginList.contains("genericv1"));
 }
 
 void tst_QCanBus::interfaces()
 {
+    // Plugins derived from QCanBusFactory(V1) don't have availableDevices()
+    const QList<QCanBusDeviceInfo> pluginListV1 = bus->availableDevices("genericV1");
+    QVERIFY(pluginListV1.isEmpty());
+
     const QList<QCanBusDeviceInfo> pluginList = bus->availableDevices("generic");
     QCOMPARE(1, pluginList.size());
     QCOMPARE(QString("can0"), pluginList.at(0).name());
@@ -95,6 +101,11 @@ void tst_QCanBus::interfaces()
 
 void tst_QCanBus::createDevice()
 {
+    // Assure we can still create plugins derived from QCanBusFactory(V1)
+    QCanBusDevice *dummyV1 = bus->createDevice("genericv1", "unused");
+    QVERIFY(dummyV1);
+    delete dummyV1;
+
     QString error, error2;
     QCanBusDevice *dummy = bus->createDevice("generic", "unused");
     QCanBusDevice *dummy2 = bus->createDevice("generic", "unused");

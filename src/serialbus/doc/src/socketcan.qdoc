@@ -58,6 +58,7 @@
     the following command can be used:
     \code
         sudo ip link set up can0 type can bitrate 250000 restart-ms 100
+    \endcode
 
     \section3 CAN FD settings
 

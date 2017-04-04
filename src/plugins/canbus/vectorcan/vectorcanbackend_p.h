@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 Denis Shienkov <denis.shienkov@gmail.com>
+** Copyright (C) 2017 Denis Shienkov <denis.shienkov@gmail.com>
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the QtSerialBus module of the Qt Toolkit.
@@ -84,6 +84,7 @@ public:
 
     VectorCanBackend * const q_ptr;
 
+    bool transmitEcho = false;
     long portHandle = XL_INVALID_PORTHANDLE;
     quint64 channelMask = 0;
     HANDLE readHandle = INVALID_HANDLE_VALUE;

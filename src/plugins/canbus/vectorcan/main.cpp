@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 Denis Shienkov <denis.shienkov@gmail.com>
+** Copyright (C) 2017 Denis Shienkov <denis.shienkov@gmail.com>
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the QtSerialBus module of the Qt Toolkit.
@@ -42,11 +42,11 @@
 
 QT_BEGIN_NAMESPACE
 
-class VectorCanBusPlugin : public QObject, public QCanBusFactory
+class VectorCanBusPlugin : public QObject, public QCanBusFactoryV2
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QCanBusFactory" FILE "plugin.json")
-    Q_INTERFACES(QCanBusFactory)
+    Q_INTERFACES(QCanBusFactoryV2)
 
 public:
     QList<QCanBusDeviceInfo> availableDevices(QString *errorMessage) const override
@@ -60,8 +60,8 @@ public:
     QCanBusDevice *createDevice(const QString &interfaceName, QString *errorMessage) const override
     {
         QString errorReason;
-        if (!VectorCanBackend::canCreate(&errorReason)) {
-            qWarning("%s", qPrintable(errorReason));
+        if (Q_UNLIKELY(!VectorCanBackend::canCreate(&errorReason))) {
+            qWarning("%ls", qUtf16Printable(errorReason));
             if (errorMessage)
                 *errorMessage = errorReason;
             return nullptr;

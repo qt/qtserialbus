@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the QtSerialBus module of the Qt Toolkit.
@@ -82,6 +82,11 @@ bool DummyBackend::writeFrame(const QCanBusFrame &data)
 QString DummyBackend::interpretErrorFrame(const QCanBusFrame &/*errorFrame*/)
 {
     return QString();
+}
+
+QList<QCanBusDeviceInfo> DummyBackend::interfaces()
+{
+    return {createDeviceInfo(QStringLiteral("can0"), true, true)};
 }
 
 QT_END_NAMESPACE

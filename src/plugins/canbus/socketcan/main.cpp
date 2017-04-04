@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the QtSerialBus module of the Qt Toolkit.
@@ -45,12 +45,11 @@
 QT_BEGIN_NAMESPACE
 
 //! [SocketCanFactory]
-class SocketCanBusPlugin : public QObject, public QCanBusFactory
+class SocketCanBusPlugin : public QObject, public QCanBusFactoryV2
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QCanBusFactory" FILE "plugin.json")
-    Q_INTERFACES(QCanBusFactory)
-
+    Q_INTERFACES(QCanBusFactoryV2)
 
 public:
     QList<QCanBusDeviceInfo> availableDevices(QString *errorMessage) const override

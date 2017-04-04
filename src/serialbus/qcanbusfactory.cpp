@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
+** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the QtSerialBus module of the Qt Toolkit.
@@ -42,21 +42,16 @@ QT_BEGIN_NAMESPACE
     \class QCanBusFactory
     \inmodule QtSerialBus
     \since 5.8
+    \deprecated
 
     \brief The QCanBusFactory class is a factory class used as the
     plugin interface for CAN bus plugins.
 
     All plugins must implement the functions provided by this factory class.
-*/
 
-/*!
-    \fn QList<QCanBusDeviceInfo> QCanBusFactory::availableDevices(QString *errorMessage) const
+    This class is deprecated, you should use QCanBusFactoryV2 instead.
 
-    Returns the list of available devices and their capabilities for the QCanBusDevice.
-
-    \a errorMessage contains an error description in case of failure.
-
-    \since 5.9
+    \sa QCanBusFactoryV2
 */
 
 /*!
@@ -65,7 +60,7 @@ QT_BEGIN_NAMESPACE
 
     Creates a new QCanBusDevice. The caller must take ownership of the returned pointer.
 
-    \a interfaceName is the network/CAN interface name.
+    \a interfaceName is the CAN interface name and
     \a errorMessage contains an error description in case of failure.
 
     If the factory cannot create a plugin, it returns \c nullptr.
@@ -76,5 +71,43 @@ QT_BEGIN_NAMESPACE
 
     \fn QCanBusFactory::~QCanBusFactory()
 */
+
+/*!
+    \class QCanBusFactoryV2
+    \inmodule QtSerialBus
+    \since 5.9
+
+    \brief The QCanBusFactoryV2 class is a factory class used as the
+    plugin interface for CAN bus plugins.
+
+    All plugins must implement the functions provided by this factory class.
+*/
+
+/*!
+    \fn QCanBusDevice *QCanBusFactoryV2::createDevice(const QString &interfaceName,
+                                                    QString *errorMessage) const
+
+    Creates a new QCanBusDevice. The caller must take ownership of the returned pointer.
+
+    \a interfaceName is the CAN interface name and
+    \a errorMessage contains an error description in case of failure.
+
+    If the factory cannot create a plugin, it returns \c nullptr.
+*/
+
+/*!
+    \fn QList<QCanBusDeviceInfo> QCanBusFactoryV2::availableDevices(QString *errorMessage) const
+
+    Returns the list of available devices and their capabilities for the QCanBusDevice.
+
+    \a errorMessage contains an error description in case of failure.
+*/
+
+/*!
+ * \internal
+ */
+QCanBusFactoryV2::~QCanBusFactoryV2()
+{
+}
 
 QT_END_NAMESPACE
