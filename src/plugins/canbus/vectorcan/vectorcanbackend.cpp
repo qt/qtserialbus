@@ -171,6 +171,7 @@ bool VectorCanBackendPrivate::open()
 
         if (Q_UNLIKELY(status != XL_SUCCESS || portHandle == XL_INVALID_PORTHANDLE)) {
             q->setError(systemErrorString(status), QCanBusDevice::ConnectionError);
+            portHandle = XL_INVALID_PORTHANDLE;
             return false;
         }
     }
@@ -210,6 +211,11 @@ void VectorCanBackendPrivate::close()
 
     delete writeNotifier;
     writeNotifier = nullptr;
+
+    // xlClosePort can crash on systems with vxlapi.dll but no device driver installed.
+    // Therefore avoid calling any close function when the portHandle is invalid anyway.
+    if (portHandle == XL_INVALID_PORTHANDLE)
+        return;
 
     {
         const XLstatus status = ::xlDeactivateChannel(portHandle, channelMask);
