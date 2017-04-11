@@ -218,7 +218,7 @@ void VectorCanBackendPrivate::close()
         const XLstatus status = ::xlDeactivateChannel(portHandle, channelMask);
         if (Q_UNLIKELY(status != XL_SUCCESS)) {
             q->setError(systemErrorString(status),
-                        QCanBusDevice::CanBusError::ConfigurationError);
+                        QCanBusDevice::CanBusError::ConnectionError);
         }
     }
 
