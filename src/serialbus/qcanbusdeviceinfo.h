@@ -44,7 +44,6 @@
 QT_BEGIN_NAMESPACE
 
 class QCanBusDeviceInfoPrivate;
-class QCanBusDeviceInfoPrivateDeleter;
 
 class Q_SERIALBUS_EXPORT QCanBusDeviceInfo
 {
