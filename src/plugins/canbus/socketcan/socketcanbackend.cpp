@@ -319,7 +319,6 @@ bool SocketCanBackend::applyConfigurationParameter(int key, const QVariant &valu
         break;
     }
 
-    //qDebug() << "applyConfiguration" << key << value << success;
     return success;
 }
 
