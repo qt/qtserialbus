@@ -435,7 +435,7 @@ bool SocketCanBackend::writeFrame(const QCanBusFrame &newData)
     }
 
     if (Q_UNLIKELY(!canFdOptionEnabled && newData.hasFlexibleDataRateFormat())) {
-        const QString error = tr("Sending CAN FD frame although CAN FD option not enabled.");
+        const QString error = tr("Cannot write CAN FD frame because CAN FD option is not enabled.");
         qDebug("%ls", qUtf16Printable(error));
         setError(error, QCanBusDevice::WriteError);
         return false;
