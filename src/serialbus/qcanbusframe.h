@@ -82,7 +82,7 @@ public:
         reserved0(0x0)
     {
         Q_UNUSED(reserved0);
-        memset(reserved, 0, sizeof(reserved));
+        ::memset(reserved, 0, sizeof(reserved));
         setFrameId(0x0);
         setFrameType(type);
     }
@@ -116,7 +116,7 @@ public:
         reserved0(0x0),
         load(data)
     {
-        memset(reserved, 0, sizeof(reserved));
+        ::memset(reserved, 0, sizeof(reserved));
         setFrameId(identifier);
     }
 
