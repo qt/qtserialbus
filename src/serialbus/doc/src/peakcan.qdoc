@@ -57,8 +57,8 @@
     \endcode
 
     Where \e usb0 is the active CAN interface name. The PeakCAN plugin supports
-    eight USB interfaces from \e usb0 to \e usb7 and eight PCI interfaces from
-    \e pci0 to \e pci7.
+    16 USB interfaces from \e usb0 to \e usb15 and 16 PCI interfaces from
+    \e pci0 to \e pci15.
 
     \note Only the USB and PCI adapters are currently supported by this plugin.
 
