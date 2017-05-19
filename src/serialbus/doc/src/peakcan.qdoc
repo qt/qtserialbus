@@ -33,6 +33,9 @@
     The PeakCAN plugin encapsulates the low-level API to work with the
     \l{http://www.peak-system.com/}{PEAK-System} CAN adapters.
 
+    This plugin requires the PCAN device drivers and the pcanbasic library
+    (pcanbasic.dll under Windows).
+
     \section1 Creating CAN Bus Devices
 
     At first it is necessary to check that QCanBus provides the desired plugin:

@@ -33,6 +33,9 @@
     The SystecCAN backend encapsulates the low-level API to work with the
     \l{http://www.systec-electronic.com/}{SYS TEC} CAN adapters.
 
+    This plugin requires the SYS TEC CAN device drivers and the usbcan32.dll
+    (usbcan64.dll for 64 bit builds).
+
     \section1 Creating CAN Bus Devices
 
     At first it is necessary to check that QCanBus provides the desired backend:
