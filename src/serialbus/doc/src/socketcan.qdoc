@@ -34,6 +34,9 @@
     This API is a set of open source CAN drivers and a networking stack contributed by
     Volkswagen Research to the Linux kernel.
 
+    This plugin requires a Linux Kernel with SocketCAN support and SocketCAN device
+    drivers for the used CAN hardware.
+
     \section1 SocketCAN usage
 
     To list all (including unconfigured) network interfaces, the command

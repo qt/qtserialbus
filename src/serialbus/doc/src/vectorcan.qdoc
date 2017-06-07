@@ -33,6 +33,9 @@
     The VectorCAN plugin encapsulates the low-level API to work with the
     \l{http://www.vector.com/}{Vector Informatik} CAN adapters.
 
+    This plugin requires the Vector CAN device drivers and the vxlapi.dll
+    (vxlapi64.dll for 64 bit builds).
+
     \section1 Creating CAN Bus Devices
 
     At first it is necessary to check that QCanBus provides the desired plugin:

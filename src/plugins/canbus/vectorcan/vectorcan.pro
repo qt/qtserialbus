@@ -1,6 +1,6 @@
 TARGET = qtvectorcanbus
 
-QT = core-private serialbus
+QT = core serialbus
 
 HEADERS += \
     vectorcanbackend.h \

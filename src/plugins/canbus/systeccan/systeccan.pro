@@ -1,6 +1,6 @@
 TARGET = qtsysteccanbus
 
-QT = core-private serialbus
+QT = core serialbus
 
 HEADERS += \
     systeccanbackend.h \

@@ -51,36 +51,23 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    Constructs an empty QCanBusDeviceInfo.
-*/
-QCanBusDeviceInfo::QCanBusDeviceInfo() :
-    d_ptr(new QCanBusDeviceInfoPrivate)
-{
-}
-
-/*!
     Constructs a copy of \a other.
 */
-QCanBusDeviceInfo::QCanBusDeviceInfo(const QCanBusDeviceInfo &other) :
-    d_ptr(other.d_ptr)
-{
-}
+QCanBusDeviceInfo::QCanBusDeviceInfo(const QCanBusDeviceInfo &) = default;
 
 /*!
     Constructs a CAN bus device info from QCanBusDeviceInfoPrivate \a dd.
     \internal
 */
 QCanBusDeviceInfo::QCanBusDeviceInfo(QCanBusDeviceInfoPrivate &dd) :
-    d_ptr(new QCanBusDeviceInfoPrivate(dd))
+    d_ptr(&dd)
 {
 }
 
 /*!
     Destroys the CAN bus device info.
 */
-QCanBusDeviceInfo::~QCanBusDeviceInfo()
-{
-}
+QCanBusDeviceInfo::~QCanBusDeviceInfo() = default;
 
 /*!
     \fn void QCanBusDeviceInfo::swap(QCanBusDeviceInfo &other)
@@ -88,16 +75,17 @@ QCanBusDeviceInfo::~QCanBusDeviceInfo()
     and never fails.
 */
 
+/*!
+    \fn QCanBusDeviceInfo &QCanBusDeviceInfo::operator=(QCanBusDeviceInfo &&other)
+
+    Move-assigns other to this QCanBusDeviceInfo instance.
+*/
 
 /*!
     Assigns \a other to this CAN bus device info and returns a reference to this
     CAN bus device info.
 */
-QCanBusDeviceInfo &QCanBusDeviceInfo::operator=(const QCanBusDeviceInfo &other)
-{
-    QCanBusDeviceInfo(other).swap(*this);
-    return *this;
-}
+QCanBusDeviceInfo &QCanBusDeviceInfo::operator=(const QCanBusDeviceInfo &) = default;
 
 /*!
     Returns the interface name of this CAN bus interface, e.g. can0.

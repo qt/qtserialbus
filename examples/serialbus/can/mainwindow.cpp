@@ -45,6 +45,7 @@
 #include <QCanBus>
 #include <QCanBusFrame>
 #include <QCloseEvent>
+#include <QDesktopServices>
 #include <QtDebug>
 #include <QTimer>
 
@@ -92,6 +93,9 @@ void MainWindow::initActionsConnections()
     connect(m_ui->actionQuit, &QAction::triggered, this, &QWidget::close);
     connect(m_ui->actionAboutQt, &QAction::triggered, qApp, &QApplication::aboutQt);
     connect(m_ui->actionClearLog, &QAction::triggered, m_ui->receivedMessagesEdit, &QTextEdit::clear);
+    connect(m_ui->actionPluginDocumentation, &QAction::triggered, this, []() {
+        QDesktopServices::openUrl(QUrl("http://doc.qt.io/qt-5/qtcanbus-backends.html#can-bus-plugins"));
+    });
 }
 
 void MainWindow::receiveError(QCanBusDevice::CanBusError error) const

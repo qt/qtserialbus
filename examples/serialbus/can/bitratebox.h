@@ -43,7 +43,9 @@
 
 #include <QComboBox>
 
+QT_BEGIN_NAMESPACE
 class QIntValidator;
+QT_END_NAMESPACE
 
 class BitRateBox : public QComboBox
 {

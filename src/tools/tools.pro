@@ -1,3 +1,3 @@
 TEMPLATE = subdirs
 
-!android|android_app: SUBDIRS += canbusutil
+qtConfig(commandlineparser):!android|android_app: SUBDIRS += canbusutil

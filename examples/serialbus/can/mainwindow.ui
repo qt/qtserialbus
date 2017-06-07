@@ -206,6 +206,7 @@ Otherwise, the standard format with 11 bit idenfier is used.</string>
     <property name="title">
      <string>&amp;Help</string>
     </property>
+    <addaction name="actionPluginDocumentation"/>
     <addaction name="actionAboutQt"/>
    </widget>
    <addaction name="menuCalls"/>
@@ -263,6 +264,14 @@ Otherwise, the standard format with 11 bit idenfier is used.</string>
    </property>
    <property name="text">
     <string>Clear &amp;Log</string>
+   </property>
+  </action>
+  <action name="actionPluginDocumentation">
+   <property name="text">
+    <string>Plugin Documentation</string>
+   </property>
+   <property name="toolTip">
+    <string>Open plugin documentation in Webbrowser</string>
    </property>
   </action>
  </widget>

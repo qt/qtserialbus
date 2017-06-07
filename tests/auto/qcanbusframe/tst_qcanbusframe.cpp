@@ -431,36 +431,40 @@ void tst_QCanBusFrame::streaming_data()
     QTest::addColumn<bool>("isExtended");
     QTest::addColumn<bool>("isFlexibleDataRate");
     QTest::addColumn<bool>("isBitrateSwitch");
+    QTest::addColumn<bool>("isErrorStateIndicator");
     QTest::addColumn<QCanBusFrame::FrameType>("frameType");
 
 
     QTest::newRow("emptyFrame") << quint32(0) << QByteArray()
                                 << qint64(0) << qint64(0)
-                                << false << false << false << QCanBusFrame::DataFrame;
+                                << false << false << false << false << QCanBusFrame::DataFrame;
     QTest::newRow("fullFrame1") << quint32(123) << QByteArray("abcde1")
                                << qint64(456) << qint64(784)
-                               << true << false << false << QCanBusFrame::DataFrame;
+                               << true << false << false << false << QCanBusFrame::DataFrame;
     QTest::newRow("fullFrame2") << quint32(123) << QByteArray("abcde2")
                                << qint64(457) << qint64(785)
-                               << false << false << false << QCanBusFrame::DataFrame;
+                               << false << false << false << false << QCanBusFrame::DataFrame;
     QTest::newRow("fullFrameFD") << quint32(123) << QByteArray("abcdfd")
                                 << qint64(457) << qint64(785)
-                                << false << true << false << QCanBusFrame::DataFrame;
+                                << false << true << false << false << QCanBusFrame::DataFrame;
     QTest::newRow("fullFrameBRS") << quint32(123) << QByteArray("abcdfd")
                                 << qint64(457) << qint64(785)
-                                << false << true << true << QCanBusFrame::DataFrame;
+                                << false << true << true << false << QCanBusFrame::DataFrame;
+    QTest::newRow("fullFrameESI") << quint32(123) << QByteArray("abcdfd")
+                                  << qint64(457) << qint64(785)
+                                  << false << true << false << true << QCanBusFrame::DataFrame;
     QTest::newRow("fullFrame3") << quint32(123) << QByteArray("abcde3")
                                << qint64(458) << qint64(786)
-                               << true << false << false << QCanBusFrame::RemoteRequestFrame;
+                               << true << false << false << false << QCanBusFrame::RemoteRequestFrame;
     QTest::newRow("fullFrame4") << quint32(123) << QByteArray("abcde4")
                                << qint64(459) << qint64(787)
-                               << false << false << false << QCanBusFrame::RemoteRequestFrame;
+                               << false << false << false << false << QCanBusFrame::RemoteRequestFrame;
     QTest::newRow("fullFrame5") << quint32(123) << QByteArray("abcde5")
                                << qint64(460) << qint64(789)
-                               << true << false << false << QCanBusFrame::ErrorFrame;
+                               << true << false << false << false << QCanBusFrame::ErrorFrame;
     QTest::newRow("fullFrame6") << quint32(123) << QByteArray("abcde6")
                                << qint64(453) << qint64(788)
-                               << false << false << false << QCanBusFrame::ErrorFrame;
+                               << false << false << false << false << QCanBusFrame::ErrorFrame;
 }
 
 void tst_QCanBusFrame::streaming()
@@ -472,6 +476,7 @@ void tst_QCanBusFrame::streaming()
     QFETCH(bool, isExtended);
     QFETCH(bool, isFlexibleDataRate);
     QFETCH(bool, isBitrateSwitch);
+    QFETCH(bool, isErrorStateIndicator);
     QFETCH(QCanBusFrame::FrameType, frameType);
 
     QCanBusFrame originalFrame(frameId, payload);
@@ -481,6 +486,7 @@ void tst_QCanBusFrame::streaming()
     originalFrame.setExtendedFrameFormat(isExtended);
     originalFrame.setFlexibleDataRateFormat(isFlexibleDataRate);
     originalFrame.setBitrateSwitch(isBitrateSwitch);
+    originalFrame.setErrorStateIndicator(isErrorStateIndicator);
     originalFrame.setFrameType(frameType);
 
     QByteArray buffer;
@@ -505,6 +511,8 @@ void tst_QCanBusFrame::streaming()
              originalFrame.hasFlexibleDataRateFormat());
     QCOMPARE(restoredFrame.hasBitrateSwitch(),
              originalFrame.hasBitrateSwitch());
+    QCOMPARE(restoredFrame.hasErrorStateIndicator(),
+             originalFrame.hasErrorStateIndicator());
 }
 
 void tst_QCanBusFrame::tst_error()

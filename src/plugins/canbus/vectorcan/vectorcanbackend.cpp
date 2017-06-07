@@ -170,8 +170,8 @@ bool VectorCanBackendPrivate::open()
                                              XL_INTERFACE_VERSION, XL_BUS_TYPE_CAN);
 
         if (Q_UNLIKELY(status != XL_SUCCESS || portHandle == XL_INVALID_PORTHANDLE)) {
-            q->setError(systemErrorString(status),
-                        QCanBusDevice::ConnectionError);
+            q->setError(systemErrorString(status), QCanBusDevice::ConnectionError);
+            portHandle = XL_INVALID_PORTHANDLE;
             return false;
         }
     }
@@ -180,8 +180,7 @@ bool VectorCanBackendPrivate::open()
         const XLstatus status = ::xlActivateChannel(portHandle, channelMask,
                                                     XL_BUS_TYPE_CAN, XL_ACTIVATE_RESET_CLOCK);
         if (Q_UNLIKELY(status != XL_SUCCESS)) {
-            q->setError(systemErrorString(status),
-                        QCanBusDevice::CanBusError::ConnectionError);
+            q->setError(systemErrorString(status), QCanBusDevice::CanBusError::ConnectionError);
             return false;
         }
     }
@@ -190,8 +189,7 @@ bool VectorCanBackendPrivate::open()
         const int queueLevel = 1;
         const XLstatus status = ::xlSetNotification(portHandle, &readHandle, queueLevel);
         if (Q_UNLIKELY(status != XL_SUCCESS)) {
-            q->setError(systemErrorString(status),
-                        QCanBusDevice::ConnectionError);
+            q->setError(systemErrorString(status), QCanBusDevice::ConnectionError);
             return false;
         }
     }
@@ -214,19 +212,22 @@ void VectorCanBackendPrivate::close()
     delete writeNotifier;
     writeNotifier = nullptr;
 
+    // xlClosePort can crash on systems with vxlapi.dll but no device driver installed.
+    // Therefore avoid calling any close function when the portHandle is invalid anyway.
+    if (portHandle == XL_INVALID_PORTHANDLE)
+        return;
+
     {
         const XLstatus status = ::xlDeactivateChannel(portHandle, channelMask);
         if (Q_UNLIKELY(status != XL_SUCCESS)) {
-            q->setError(systemErrorString(status),
-                        QCanBusDevice::CanBusError::ConfigurationError);
+            q->setError(systemErrorString(status), QCanBusDevice::CanBusError::ConnectionError);
         }
     }
 
     {
         const XLstatus status = ::xlClosePort(portHandle);
         if (Q_UNLIKELY(status != XL_SUCCESS)) {
-            q->setError(systemErrorString(status),
-                        QCanBusDevice::ConnectionError);
+            q->setError(systemErrorString(status), QCanBusDevice::ConnectionError);
         }
     }
 
