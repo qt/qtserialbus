@@ -353,7 +353,7 @@ public:
             } else {
                 m_state = Send;
                 m_serialPort->clear(QSerialPort::AllDirections);
-                QTimer::singleShot(m_interFrameDelayMilliseconds, [this, writeAdu]() { writeAdu(); });
+                QTimer::singleShot(m_interFrameDelayMilliseconds, [writeAdu]() { writeAdu(); });
             }
             break;
 
