@@ -60,12 +60,8 @@ MainWindow::MainWindow(QWidget *parent) :
     m_status = new QLabel;
     m_ui->statusBar->addWidget(m_status);
 
-    m_ui->sendMessagesBox->setEnabled(false);
-
     initActionsConnections();
     QTimer::singleShot(50, m_connectDialog, &ConnectDialog::show);
-
-    connect(m_ui->sendButton, &QPushButton::clicked, this, &MainWindow::sendMessage);
 }
 
 MainWindow::~MainWindow()
@@ -84,7 +80,9 @@ void MainWindow::showStatusMessage(const QString &message)
 void MainWindow::initActionsConnections()
 {
     m_ui->actionDisconnect->setEnabled(false);
+    m_ui->sendMessagesBox->setEnabled(false);
 
+    connect(m_ui->sendButton, &QPushButton::clicked, this, &MainWindow::sendMessage);
     connect(m_ui->actionConnect, &QAction::triggered, m_connectDialog, &ConnectDialog::show);
     connect(m_connectDialog, &QDialog::accepted, this, &MainWindow::connectDevice);
     connect(m_ui->actionDisconnect, &QAction::triggered, this, &MainWindow::disconnectDevice);
