@@ -214,19 +214,13 @@ void MainWindow::processReceivedFrames()
     }
 }
 
-static QByteArray dataFromHex(const QString &hex)
-{
-    QByteArray line = hex.toLatin1();
-    line.replace(' ', QByteArray());
-    return QByteArray::fromHex(line);
-}
-
 void MainWindow::sendFrame() const
 {
     if (!m_canDevice)
         return;
 
-    QByteArray writings = dataFromHex(m_ui->lineEdit->displayText());
+    QString payload = m_ui->lineEdit->displayText();
+    QByteArray writings = QByteArray::fromHex(payload.remove(' ').toLatin1());
 
     QCanBusFrame frame;
     const int maxPayload = m_ui->fdBox->checkState() ? 64 : 8;
