@@ -83,9 +83,7 @@ void MainWindow::showStatusMessage(const QString &message)
 
 void MainWindow::initActionsConnections()
 {
-    m_ui->actionConnect->setEnabled(true);
     m_ui->actionDisconnect->setEnabled(false);
-    m_ui->actionQuit->setEnabled(true);
 
     connect(m_ui->actionConnect, &QAction::triggered, m_connectDialog, &ConnectDialog::show);
     connect(m_connectDialog, &QDialog::accepted, this, &MainWindow::connectDevice);
