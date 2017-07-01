@@ -67,12 +67,12 @@ public:
     ~MainWindow();
 
 private slots:
-    void checkMessages();
-    void sendMessage() const;
-    void receiveError(QCanBusDevice::CanBusError) const;
+    void processReceivedFrames();
+    void sendFrame() const;
+    void processErrors(QCanBusDevice::CanBusError) const;
     void connectDevice();
     void disconnectDevice();
-    void framesWritten(qint64);
+    void processFramesWritten(qint64);
 
 protected:
     void closeEvent(QCloseEvent *event) override;

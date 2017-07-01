@@ -77,7 +77,7 @@ void MainWindow::initActionsConnections()
     m_ui->actionDisconnect->setEnabled(false);
     m_ui->sendMessagesBox->setEnabled(false);
 
-    connect(m_ui->sendButton, &QPushButton::clicked, this, &MainWindow::sendMessage);
+    connect(m_ui->sendButton, &QPushButton::clicked, this, &MainWindow::sendFrame);
     connect(m_ui->actionConnect, &QAction::triggered, m_connectDialog, &ConnectDialog::show);
     connect(m_connectDialog, &QDialog::accepted, this, &MainWindow::connectDevice);
     connect(m_ui->actionDisconnect, &QAction::triggered, this, &MainWindow::disconnectDevice);
@@ -89,7 +89,7 @@ void MainWindow::initActionsConnections()
     });
 }
 
-void MainWindow::receiveError(QCanBusDevice::CanBusError error) const
+void MainWindow::processErrors(QCanBusDevice::CanBusError error) const
 {
     switch (error) {
     case QCanBusDevice::ReadError:
@@ -116,12 +116,9 @@ void MainWindow::connectDevice()
         return;
     }
 
-    connect(m_canDevice, &QCanBusDevice::errorOccurred,
-            this, &MainWindow::receiveError);
-    connect(m_canDevice, &QCanBusDevice::framesReceived,
-            this, &MainWindow::checkMessages);
-    connect(m_canDevice, &QCanBusDevice::framesWritten,
-            this, &MainWindow::framesWritten);
+    connect(m_canDevice, &QCanBusDevice::errorOccurred, this, &MainWindow::processErrors);
+    connect(m_canDevice, &QCanBusDevice::framesReceived, this, &MainWindow::processReceivedFrames);
+    connect(m_canDevice, &QCanBusDevice::framesWritten, this, &MainWindow::processFramesWritten);
 
     if (p.useConfigurationEnabled) {
         for (const ConnectDialog::ConfigurationItem &item : p.configurations)
@@ -168,7 +165,7 @@ void MainWindow::disconnectDevice()
     m_status->setText(tr("Disconnected"));
 }
 
-void MainWindow::framesWritten(qint64 count)
+void MainWindow::processFramesWritten(qint64 count)
 {
     qDebug() << "Number of frames written:" << count;
 }
@@ -193,7 +190,7 @@ static QString frameFlags(const QCanBusFrame &frame)
     return result;
 }
 
-void MainWindow::checkMessages()
+void MainWindow::processReceivedFrames()
 {
     if (!m_canDevice)
         return;
@@ -224,7 +221,7 @@ static QByteArray dataFromHex(const QString &hex)
     return QByteArray::fromHex(line);
 }
 
-void MainWindow::sendMessage() const
+void MainWindow::sendFrame() const
 {
     if (!m_canDevice)
         return;
