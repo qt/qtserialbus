@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2017 Andre Hartmann <aha_1980@gmx.de>
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the examples of the QtSerialBus module.
@@ -38,54 +38,63 @@
 **
 ****************************************************************************/
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef SENDFRAMEBOX_H
+#define SENDFRAMEBOX_H
 
-#include <QCanBusDevice> // for CanBusError
-
-#include <QMainWindow>
-
-class ConnectDialog;
-
-QT_BEGIN_NAMESPACE
-
-class QCanBusFrame;
-class QLabel;
+#include <QCanBusFrame>
+#include <QGroupBox>
+#include <QRegularExpression>
+#include <QValidator>
 
 namespace Ui {
-class MainWindow;
+class SendFrameBox;
 }
 
-QT_END_NAMESPACE
+class HexIntegerValidator : public QValidator
+{
+    Q_OBJECT
+public:
+    explicit HexIntegerValidator(QObject *parent = nullptr);
 
-class MainWindow : public QMainWindow
+    QValidator::State validate(QString &input, int &) const;
+
+    void setMaximum(uint maximum);
+
+private:
+    uint m_maximum = 0;
+};
+
+class HexStringValidator : public QValidator
 {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    explicit HexStringValidator(QObject *parent = nullptr);
 
-private slots:
-    void processReceivedFrames();
-    void sendFrame(const QCanBusFrame &frame) const;
-    void processErrors(QCanBusDevice::CanBusError) const;
-    void connectDevice();
-    void disconnectDevice();
-    void processFramesWritten(qint64);
+    QValidator::State validate(QString &input, int &pos) const;
 
-protected:
-    void closeEvent(QCloseEvent *event) override;
+    void setMaxLength(int maxLength);
 
 private:
-    void initActionsConnections();
-
-    qint64 m_numberFramesWritten = 0;
-    Ui::MainWindow *m_ui = nullptr;
-    QLabel *m_status = nullptr;
-    QLabel *m_written = nullptr;
-    ConnectDialog *m_connectDialog = nullptr;
-    QCanBusDevice *m_canDevice = nullptr;
+    int m_maxLength = 0;
 };
 
-#endif // MAINWINDOW_H
+class SendFrameBox : public QGroupBox
+{
+    Q_OBJECT
+
+public:
+    explicit SendFrameBox(QWidget *parent = nullptr);
+    ~SendFrameBox();
+
+signals:
+    void sendFrame(const QCanBusFrame &frame);
+
+private:
+    Ui::SendFrameBox *m_ui = nullptr;
+
+    HexIntegerValidator *m_hexIntegerValidator = nullptr;
+    HexStringValidator *m_hexStringValidator = nullptr;
+};
+
+#endif // SENDFRAMEBOX_H

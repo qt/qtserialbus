@@ -77,9 +77,9 @@ MainWindow::~MainWindow()
 void MainWindow::initActionsConnections()
 {
     m_ui->actionDisconnect->setEnabled(false);
-    m_ui->sendMessagesBox->setEnabled(false);
+    m_ui->sendFrameBox->setEnabled(false);
 
-    connect(m_ui->sendButton, &QPushButton::clicked, this, &MainWindow::sendFrame);
+    connect(m_ui->sendFrameBox, &SendFrameBox::sendFrame, this, &MainWindow::sendFrame);
     connect(m_ui->actionConnect, &QAction::triggered, m_connectDialog, &ConnectDialog::show);
     connect(m_connectDialog, &QDialog::accepted, this, &MainWindow::connectDevice);
     connect(m_ui->actionDisconnect, &QAction::triggered, this, &MainWindow::disconnectDevice);
@@ -138,7 +138,7 @@ void MainWindow::connectDevice()
         m_ui->actionConnect->setEnabled(false);
         m_ui->actionDisconnect->setEnabled(true);
 
-        m_ui->sendMessagesBox->setEnabled(true);
+        m_ui->sendFrameBox->setEnabled(true);
 
         QVariant bitRate = m_canDevice->configurationParameter(QCanBusDevice::BitRateKey);
         if (bitRate.isValid()) {
@@ -164,7 +164,7 @@ void MainWindow::disconnectDevice()
     m_ui->actionConnect->setEnabled(true);
     m_ui->actionDisconnect->setEnabled(false);
 
-    m_ui->sendMessagesBox->setEnabled(false);
+    m_ui->sendFrameBox->setEnabled(false);
 
     m_status->setText(tr("Disconnected"));
 }
@@ -219,34 +219,10 @@ void MainWindow::processReceivedFrames()
     }
 }
 
-void MainWindow::sendFrame() const
+void MainWindow::sendFrame(const QCanBusFrame &frame) const
 {
     if (!m_canDevice)
         return;
-
-    QString payload = m_ui->lineEdit->displayText();
-    QByteArray writings = QByteArray::fromHex(payload.remove(' ').toLatin1());
-
-    QCanBusFrame frame;
-    const int maxPayload = m_ui->fdBox->checkState() ? 64 : 8;
-    writings.truncate(maxPayload);
-    frame.setPayload(writings);
-
-    qint32 id = m_ui->idEdit->displayText().toInt(nullptr, 16);
-    if (!m_ui->effBox->checkState() && id > 2047) //11 bits
-        id = 2047;
-
-    frame.setFrameId(id);
-    frame.setExtendedFrameFormat(m_ui->effBox->checkState());
-    frame.setFlexibleDataRateFormat(m_ui->fdBox->checkState());
-    frame.setBitrateSwitch(m_ui->bitrateSwitchBox->checkState());
-
-    if (m_ui->remoteFrame->isChecked())
-        frame.setFrameType(QCanBusFrame::RemoteRequestFrame);
-    else if (m_ui->errorFrame->isChecked())
-        frame.setFrameType(QCanBusFrame::ErrorFrame);
-    else
-        frame.setFrameType(QCanBusFrame::DataFrame);
 
     m_canDevice->writeFrame(frame);
 }
