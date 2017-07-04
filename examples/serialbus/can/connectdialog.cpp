@@ -68,14 +68,14 @@ ConnectDialog::ConnectDialog(QWidget *parent) :
     connect(m_ui->cancelButton, &QPushButton::clicked, this, &ConnectDialog::cancel);
     connect(m_ui->useConfigurationBox, &QCheckBox::clicked,
             m_ui->configurationBox, &QGroupBox::setEnabled);
-    connect(m_ui->backendListBox, &QComboBox::currentTextChanged,
-            this, &ConnectDialog::backendChanged);
+    connect(m_ui->pluginListBox, &QComboBox::currentTextChanged,
+            this, &ConnectDialog::pluginChanged);
     connect(m_ui->interfaceListBox, &QComboBox::currentTextChanged,
             this, &ConnectDialog::interfaceChanged);
     m_ui->rawFilterEdit->hide();
     m_ui->rawFilterLabel->hide();
 
-    m_ui->backendListBox->addItems(QCanBus::instance()->plugins());
+    m_ui->pluginListBox->addItems(QCanBus::instance()->plugins());
 
     updateSettings();
 }
@@ -90,10 +90,10 @@ ConnectDialog::Settings ConnectDialog::settings() const
     return m_currentSettings;
 }
 
-void ConnectDialog::backendChanged(const QString &backend)
+void ConnectDialog::pluginChanged(const QString &plugin)
 {
     m_ui->interfaceListBox->clear();
-    m_interfaces = QCanBus::instance()->availableDevices(backend);
+    m_interfaces = QCanBus::instance()->availableDevices(plugin);
     for (const QCanBusDeviceInfo &info : qAsConst(m_interfaces))
         m_ui->interfaceListBox->addItem(info.name());
 }
@@ -146,7 +146,7 @@ QString ConnectDialog::configurationValue(QCanBusDevice::ConfigurationKey key)
 
 void ConnectDialog::revertSettings()
 {
-    m_ui->backendListBox->setCurrentText(m_currentSettings.backendName);
+    m_ui->pluginListBox->setCurrentText(m_currentSettings.pluginName);
     m_ui->interfaceListBox->setCurrentText(m_currentSettings.deviceInterfaceName);
     m_ui->useConfigurationBox->setChecked(m_currentSettings.useConfigurationEnabled);
 
@@ -171,7 +171,7 @@ void ConnectDialog::revertSettings()
 
 void ConnectDialog::updateSettings()
 {
-    m_currentSettings.backendName = m_ui->backendListBox->currentText();
+    m_currentSettings.pluginName = m_ui->pluginListBox->currentText();
     m_currentSettings.deviceInterfaceName = m_ui->interfaceListBox->currentText();
     m_currentSettings.useConfigurationEnabled = m_ui->useConfigurationBox->isChecked();
 

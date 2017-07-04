@@ -113,11 +113,11 @@ void MainWindow::connectDevice()
     const ConnectDialog::Settings p = m_connectDialog->settings();
 
     QString errorString;
-    m_canDevice = QCanBus::instance()->createDevice(p.backendName, p.deviceInterfaceName,
+    m_canDevice = QCanBus::instance()->createDevice(p.pluginName, p.deviceInterfaceName,
                                                     &errorString);
     if (!m_canDevice) {
         showStatusMessage(tr("Error creating device '%1', reason: '%2'")
-                          .arg(p.backendName).arg(errorString));
+                          .arg(p.pluginName).arg(errorString));
         return;
     }
 
@@ -146,12 +146,12 @@ void MainWindow::connectDevice()
 
         QVariant bitRate = m_canDevice->configurationParameter(QCanBusDevice::BitRateKey);
         if (bitRate.isValid()) {
-            showStatusMessage(tr("Backend: %1, connected to %2 at %3 kBit/s")
-                    .arg(p.backendName).arg(p.deviceInterfaceName)
+            showStatusMessage(tr("Plugin: %1, connected to %2 at %3 kBit/s")
+                    .arg(p.pluginName).arg(p.deviceInterfaceName)
                     .arg(bitRate.toInt() / 1000));
         } else {
-            showStatusMessage(tr("Backend: %1, connected to %2")
-                    .arg(p.backendName).arg(p.deviceInterfaceName));
+            showStatusMessage(tr("Plugin: %1, connected to %2")
+                    .arg(p.pluginName).arg(p.deviceInterfaceName));
         }
     }
 }

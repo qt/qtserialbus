@@ -62,7 +62,7 @@ public:
     typedef QPair<QCanBusDevice::ConfigurationKey, QVariant> ConfigurationItem;
 
     struct Settings {
-        QString backendName;
+        QString pluginName;
         QString deviceInterfaceName;
         QList<ConfigurationItem> configurations;
         bool useConfigurationEnabled = false;
@@ -74,7 +74,7 @@ public:
     Settings settings() const;
 
 private slots:
-    void backendChanged(const QString &backend);
+    void pluginChanged(const QString &plugin);
     void interfaceChanged(const QString &interface);
     void ok();
     void cancel();

@@ -55,13 +55,13 @@
     </layout>
    </item>
    <item row="0" column="0">
-    <widget class="QGroupBox" name="selectBackendBox">
+    <widget class="QGroupBox" name="selectPluginBox">
      <property name="title">
-      <string>Select CAN backend</string>
+      <string>Select CAN plugin</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
-       <widget class="QComboBox" name="backendListBox"/>
+       <widget class="QComboBox" name="pluginListBox"/>
       </item>
      </layout>
     </widget>
