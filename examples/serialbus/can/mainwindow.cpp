@@ -72,11 +72,6 @@ MainWindow::~MainWindow()
     delete m_ui;
 }
 
-void MainWindow::showStatusMessage(const QString &message)
-{
-    m_status->setText(message);
-}
-
 void MainWindow::initActionsConnections()
 {
     m_ui->actionDisconnect->setEnabled(false);
@@ -116,7 +111,7 @@ void MainWindow::connectDevice()
     m_canDevice = QCanBus::instance()->createDevice(p.pluginName, p.deviceInterfaceName,
                                                     &errorString);
     if (!m_canDevice) {
-        showStatusMessage(tr("Error creating device '%1', reason: '%2'")
+        m_status->setText(tr("Error creating device '%1', reason: '%2'")
                           .arg(p.pluginName).arg(errorString));
         return;
     }
@@ -134,7 +129,7 @@ void MainWindow::connectDevice()
     }
 
     if (!m_canDevice->connectDevice()) {
-        showStatusMessage(tr("Connection error: %1").arg(m_canDevice->errorString()));
+        m_status->setText(tr("Connection error: %1").arg(m_canDevice->errorString()));
 
         delete m_canDevice;
         m_canDevice = nullptr;
@@ -146,11 +141,11 @@ void MainWindow::connectDevice()
 
         QVariant bitRate = m_canDevice->configurationParameter(QCanBusDevice::BitRateKey);
         if (bitRate.isValid()) {
-            showStatusMessage(tr("Plugin: %1, connected to %2 at %3 kBit/s")
+            m_status->setText(tr("Plugin: %1, connected to %2 at %3 kBit/s")
                     .arg(p.pluginName).arg(p.deviceInterfaceName)
                     .arg(bitRate.toInt() / 1000));
         } else {
-            showStatusMessage(tr("Plugin: %1, connected to %2")
+            m_status->setText(tr("Plugin: %1, connected to %2")
                     .arg(p.pluginName).arg(p.deviceInterfaceName));
         }
     }
@@ -170,7 +165,7 @@ void MainWindow::disconnectDevice()
 
     m_ui->sendMessagesBox->setEnabled(false);
 
-    showStatusMessage(tr("Disconnected"));
+    m_status->setText(tr("Disconnected"));
 }
 
 void MainWindow::framesWritten(qint64 count)

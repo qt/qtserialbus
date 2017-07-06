@@ -78,7 +78,6 @@ protected:
     void closeEvent(QCloseEvent *event) override;
 
 private:
-    void showStatusMessage(const QString &message);
     void initActionsConnections();
 
     Ui::MainWindow *m_ui = nullptr;
