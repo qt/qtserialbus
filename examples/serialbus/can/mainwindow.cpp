@@ -46,7 +46,6 @@
 #include <QCanBusFrame>
 #include <QCloseEvent>
 #include <QDesktopServices>
-#include <QtDebug>
 #include <QTimer>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -58,7 +57,10 @@ MainWindow::MainWindow(QWidget *parent) :
     m_connectDialog = new ConnectDialog;
 
     m_status = new QLabel;
-    m_ui->statusBar->addWidget(m_status);
+    m_ui->statusBar->addPermanentWidget(m_status);
+
+    m_written = new QLabel;
+    m_ui->statusBar->addWidget(m_written);
 
     initActionsConnections();
     QTimer::singleShot(50, m_connectDialog, &ConnectDialog::show);
@@ -97,7 +99,7 @@ void MainWindow::processErrors(QCanBusDevice::CanBusError error) const
     case QCanBusDevice::ConnectionError:
     case QCanBusDevice::ConfigurationError:
     case QCanBusDevice::UnknownError:
-        qWarning() << m_canDevice->errorString();
+        m_status->setText(m_canDevice->errorString());
     default:
         break;
     }
@@ -115,6 +117,8 @@ void MainWindow::connectDevice()
                           .arg(p.pluginName).arg(errorString));
         return;
     }
+
+    m_numberFramesWritten = 0;
 
     connect(m_canDevice, &QCanBusDevice::errorOccurred, this, &MainWindow::processErrors);
     connect(m_canDevice, &QCanBusDevice::framesReceived, this, &MainWindow::processReceivedFrames);
@@ -167,7 +171,8 @@ void MainWindow::disconnectDevice()
 
 void MainWindow::processFramesWritten(qint64 count)
 {
-    qDebug() << "Number of frames written:" << count;
+    m_numberFramesWritten += count;
+    m_written->setText(tr("%1 frames written").arg(m_numberFramesWritten));
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
