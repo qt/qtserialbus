@@ -46,9 +46,11 @@
 #include <QRegularExpression>
 #include <QValidator>
 
+QT_BEGIN_NAMESPACE
 namespace Ui {
 class SendFrameBox;
 }
+QT_END_NAMESPACE
 
 class HexIntegerValidator : public QValidator
 {
