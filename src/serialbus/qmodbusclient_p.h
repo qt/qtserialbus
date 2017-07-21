@@ -110,7 +110,7 @@ public:
         {
             if (timeout >= 0) {
                 // always the case for TCP
-                timer.reset(new QTimer);
+                timer = QSharedPointer<QTimer>::create();
                 timer->setSingleShot(true);
                 timer->setInterval(timeout);
             }
