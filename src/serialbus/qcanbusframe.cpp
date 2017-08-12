@@ -385,8 +385,8 @@ QString QCanBusFrame::toString() const
         break;
     }
 
-    const char *idFormat = hasExtendedFrameFormat() ? "%08X" : "     %03X";
-    const char *dlcFormat = hasFlexibleDataRateFormat() ? "  [%02d]" : "   [%d]";
+    const char * const idFormat = hasExtendedFrameFormat() ? "%08X" : "     %03X";
+    const char * const dlcFormat = hasFlexibleDataRateFormat() ? "  [%02d]" : "   [%d]";
     QString result;
     result.append(QString::asprintf(idFormat, static_cast<uint>(frameId())));
     result.append(QString::asprintf(dlcFormat, payload().size()));
