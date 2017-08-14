@@ -151,6 +151,9 @@ public:
                 return;
             }
 
+            if (m_state != State::Receive)
+                return;
+
             m_sendTimer.stop();
             m_responseTimer.stop();
             processQueueElement(response, m_current);
@@ -327,6 +330,7 @@ public:
                         m_current.reply->setError(QModbusDevice::TimeoutError,
                             QModbusClient::tr("Request timeout."));
                     }
+                    m_current = QueueElement();
                     scheduleNextRequest();
                 } else {
                     m_serialPort->clear(QSerialPort::AllDirections);
