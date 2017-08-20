@@ -104,7 +104,7 @@ int CanBusUtil::printDevices(const QString &pluginName)
     return 0;
 }
 
-bool CanBusUtil::parseDataField(qint32 &id, QString &payload)
+bool CanBusUtil::parseDataField(quint32 &id, QString &payload)
 {
     int hashMarkPos = m_data.indexOf('#');
     if (hashMarkPos < 0) {
@@ -112,7 +112,7 @@ bool CanBusUtil::parseDataField(qint32 &id, QString &payload)
         return false;
     }
 
-    id = m_data.left(hashMarkPos).toInt(nullptr, 16);
+    id = m_data.left(hashMarkPos).toUInt(nullptr, 16);
     payload = m_data.right(m_data.length() - hashMarkPos - 1);
 
     return true;
@@ -206,7 +206,7 @@ bool CanBusUtil::connectCanDevice()
 
 bool CanBusUtil::sendData()
 {
-    qint32 id;
+    quint32 id;
     QString payload;
     QCanBusFrame frame;
 
@@ -216,7 +216,7 @@ bool CanBusUtil::sendData()
     if (setFrameFromPayload(payload, &frame) == false)
         return false;
 
-    if (id < 0 || id > 0x1FFFFFFF) { // 29 bits
+    if (id > 0x1FFFFFFF) { // 29 bits
         id = 0x1FFFFFFF;
         m_output << "Warning! Id does not fit into Extended Frame Format, setting id to: " << id << endl;
     }
