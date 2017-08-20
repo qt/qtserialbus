@@ -100,6 +100,7 @@ void MainWindow::processErrors(QCanBusDevice::CanBusError error) const
     case QCanBusDevice::ConfigurationError:
     case QCanBusDevice::UnknownError:
         m_status->setText(m_canDevice->errorString());
+        break;
     default:
         break;
     }
