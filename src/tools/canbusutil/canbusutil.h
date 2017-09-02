@@ -63,7 +63,7 @@ public:
     int  printDevices(const QString &pluginName);
 
 private:
-    bool parseDataField(qint32 &id, QString &payload);
+    bool parseDataField(quint32 &id, QString &payload);
     bool setFrameFromPayload(QString payload, QCanBusFrame *frame);
     bool connectCanDevice();
     bool sendData();
