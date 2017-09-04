@@ -331,7 +331,7 @@ QT_BEGIN_NAMESPACE
     \fn void QCanBusFrame::setLocalEcho(bool echo)
     \since 5.10
 
-    Marks the frame as local echo frame.
+    Set the \e {Local Echo} flag to \a echo.
 
     When sending CAN bus frames with QCanBusDevice::ReceiveOwnKey enabled, all successfully sent
     frames are echoed to the receive queue and marked as local echo frames.
