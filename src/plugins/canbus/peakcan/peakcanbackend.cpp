@@ -270,14 +270,66 @@ static TPCANBaudrate bitrateCodeFromBitrate(int bitrate)
     return where != endtable ? where->code : PCAN_BAUD_INVALID;
 }
 
+static QByteArray nominalBitrateString(int nominalBitrate)
+{
+    switch (nominalBitrate) {
+    case 125000:
+        return "f_clock=80000000, nom_brp=40, nom_tseg1=12, nom_tseg2=3, nom_sjw=1";
+    case 250000:
+        return "f_clock=80000000, nom_brp=20, nom_tseg1=12, nom_tseg2=3, nom_sjw=1";
+    case 500000:
+        return "f_clock=80000000, nom_brp=10, nom_tseg1=12, nom_tseg2=3, nom_sjw=1";
+    case 1000000:
+        return "f_clock=80000000, nom_brp=10, nom_tseg1=5,  nom_tseg2=2, nom_sjw=1";
+    default:
+        return QByteArray();
+    }
+}
+
+static QByteArray dataBitrateString(int dataBitrate)
+{
+    switch (dataBitrate) {
+    case 2000000:
+        return ", data_brp=4, data_tseg1=7, data_tseg2=2, data_sjw=1";
+    case 4000000:
+        return ", data_brp=2, data_tseg1=7, data_tseg2=2, data_sjw=1";
+    case 8000000:
+        return ", data_brp=1, data_tseg1=7, data_tseg2=2, data_sjw=1";
+    case 10000000:
+        return ", data_brp=1, data_tseg1=5, data_tseg2=2, data_sjw=1";
+    default:
+        return QByteArray();
+    }
+}
+
+static QByteArray bitrateStringFromBitrate(int nominalBitrate, int dataBitrate)
+{
+    QByteArray result = nominalBitrateString(nominalBitrate);
+
+    if (result.isEmpty())
+        return QByteArray();
+
+    result += dataBitrateString(dataBitrate);
+
+    return result;
+}
+
 bool PeakCanBackendPrivate::open()
 {
     Q_Q(PeakCanBackend);
 
-    const int bitrate = q->configurationParameter(QCanBusDevice::BitRateKey).toInt();
-    const TPCANBaudrate bitrateCode = bitrateCodeFromBitrate(bitrate);
+    const int nominalBitrate = q->configurationParameter(QCanBusDevice::BitRateKey).toInt();
+    TPCANStatus st = PCAN_ERROR_OK;
 
-    const TPCANStatus st = ::CAN_Initialize(channelIndex, bitrateCode, 0, 0, 0);
+    if (isFlexibleDatarateEnabled) {
+        const int dataBitrate = q->configurationParameter(QCanBusDevice::DataBitRateKey).toInt();
+        const QByteArray bitrateStr = bitrateStringFromBitrate(nominalBitrate, dataBitrate);
+        st = ::CAN_InitializeFD(channelIndex, const_cast<char *>(bitrateStr.data()));
+    } else {
+        const TPCANBaudrate bitrateCode = bitrateCodeFromBitrate(nominalBitrate);
+        st = ::CAN_Initialize(channelIndex, bitrateCode, 0, 0, 0);
+    }
+
     if (Q_UNLIKELY(st != PCAN_ERROR_OK)) {
         q->setError(systemErrorString(st), QCanBusDevice::ConnectionError);
         return false;
@@ -355,6 +407,18 @@ bool PeakCanBackendPrivate::setConfigurationParameter(int key, const QVariant &v
     switch (key) {
     case QCanBusDevice::BitRateKey:
         return verifyBitRate(value.toInt());
+    case QCanBusDevice::CanFdKey:
+        isFlexibleDatarateEnabled = value.toBool();
+        return true;
+    case QCanBusDevice::DataBitRateKey: {
+        const int dataBitrate = value.toInt();
+        if (Q_UNLIKELY(dataBitrateString(dataBitrate).isEmpty())) {
+            q->setError(PeakCanBackend::tr("Unsupported data bitrate value: %1.").arg(dataBitrate),
+                        QCanBusDevice::ConfigurationError);
+            return false;
+        }
+        return true;
+    }
     default:
         q->setError(PeakCanBackend::tr("Unsupported configuration key: %1").arg(key),
                     QCanBusDevice::ConfigurationError);
@@ -386,6 +450,81 @@ QString PeakCanBackendPrivate::systemErrorString(TPCANStatus errorCode)
     return QString::fromLatin1(buffer);
 }
 
+enum CanFrameDlc {
+    Dlc00 =  0,
+    Dlc01 =  1,
+    Dlc02 =  2,
+    Dlc03 =  3,
+    Dlc04 =  4,
+    Dlc05 =  5,
+    Dlc06 =  6,
+    Dlc07 =  7,
+    Dlc08 =  8,
+    Dlc12 =  9,
+    Dlc16 = 10,
+    Dlc20 = 11,
+    Dlc24 = 12,
+    Dlc32 = 13,
+    Dlc48 = 14,
+    Dlc64 = 15
+};
+
+static CanFrameDlc sizeToDlc(int size)
+{
+    switch (size) {
+    case 12:
+        return Dlc12;
+    case 16:
+        return Dlc16;
+    case 20:
+        return Dlc20;
+    case 24:
+        return Dlc24;
+    case 32:
+        return Dlc32;
+    case 48:
+        return Dlc48;
+    case 64:
+        return Dlc64;
+    default:
+        if (size >= 0 && size <= 8)
+            return static_cast<CanFrameDlc>(size);
+
+        return Dlc00;
+    }
+}
+
+static int dlcToSize(CanFrameDlc dlc)
+{
+    switch (dlc) {
+    case Dlc00:
+    case Dlc01:
+    case Dlc02:
+    case Dlc03:
+    case Dlc04:
+    case Dlc05:
+    case Dlc06:
+    case Dlc07:
+    case Dlc08:
+        return static_cast<int>(dlc);
+    case Dlc12:
+        return 12;
+    case Dlc16:
+        return 16;
+    case Dlc20:
+        return 20;
+    case Dlc24:
+        return 24;
+    case Dlc32:
+        return 32;
+    case Dlc48:
+        return 48;
+    case Dlc64:
+        return 64;
+    }
+    return 0;
+}
+
 void PeakCanBackendPrivate::startWrite()
 {
     Q_Q(PeakCanBackend);
@@ -397,20 +536,46 @@ void PeakCanBackendPrivate::startWrite()
 
     const QCanBusFrame frame = q->dequeueOutgoingFrame();
     const QByteArray payload = frame.payload();
+    TPCANStatus st = PCAN_ERROR_OK;
 
-    TPCANMsg message;
-    ::memset(&message, 0, sizeof(message));
+    if (isFlexibleDatarateEnabled) {
+        const int size = payload.size();
+        TPCANMsgFD message;
+        ::memset(&message, 0, sizeof(message));
+        message.ID = frame.frameId();
+        message.DLC = sizeToDlc(size);
+        message.MSGTYPE = frame.hasExtendedFrameFormat() ? PCAN_MESSAGE_EXTENDED
+                                                         : PCAN_MESSAGE_STANDARD;
 
-    message.ID = frame.frameId();
-    message.LEN = static_cast<quint8>(payload.size());
-    message.MSGTYPE = frame.hasExtendedFrameFormat() ? PCAN_MESSAGE_EXTENDED : PCAN_MESSAGE_STANDARD;
+        if (frame.hasFlexibleDataRateFormat())
+            message.MSGTYPE |= PCAN_MESSAGE_FD;
+        if (frame.hasBitrateSwitch())
+            message.MSGTYPE |= PCAN_MESSAGE_BRS;
 
-    if (frame.frameType() == QCanBusFrame::RemoteRequestFrame)
-        message.MSGTYPE |= PCAN_MESSAGE_RTR; // we do not care about the payload
-    else
-        ::memcpy(message.DATA, payload.constData(), sizeof(message.DATA));
+        if (frame.frameType() == QCanBusFrame::RemoteRequestFrame)
+            message.MSGTYPE |= PCAN_MESSAGE_RTR; // we do not care about the payload
+        else
+            ::memcpy(message.DATA, payload.constData(), sizeof(message.DATA));
+        st = ::CAN_WriteFD(channelIndex, &message);
+    } else if (frame.hasFlexibleDataRateFormat()) {
+        q->setError(PeakCanBackend::tr("Cannot send CAN FD frame format as CAN FD is not enabled."),
+                    QCanBusDevice::WriteError);
+    } else {
+        TPCANMsg message;
+        ::memset(&message, 0, sizeof(message));
 
-    const TPCANStatus st = ::CAN_Write(channelIndex, &message);
+        message.ID = frame.frameId();
+        message.LEN = static_cast<quint8>(payload.size());
+        message.MSGTYPE = frame.hasExtendedFrameFormat() ? PCAN_MESSAGE_EXTENDED
+                                                         : PCAN_MESSAGE_STANDARD;
+
+        if (frame.frameType() == QCanBusFrame::RemoteRequestFrame)
+            message.MSGTYPE |= PCAN_MESSAGE_RTR; // we do not care about the payload
+        else
+            ::memcpy(message.DATA, payload.constData(), sizeof(message.DATA));
+        st = ::CAN_Write(channelIndex, &message);
+    }
+
     if (Q_UNLIKELY(st != PCAN_ERROR_OK))
         q->setError(systemErrorString(st), QCanBusDevice::WriteError);
     else
@@ -427,31 +592,66 @@ void PeakCanBackendPrivate::startRead()
     QVector<QCanBusFrame> newFrames;
 
     for (;;) {
-        TPCANMsg message;
-        ::memset(&message, 0, sizeof(message));
-        TPCANTimestamp timestamp;
-        ::memset(&timestamp, 0, sizeof(timestamp));
+        if (isFlexibleDatarateEnabled) {
+            TPCANMsgFD message;
+            ::memset(&message, 0, sizeof(message));
+            TPCANTimestampFD timestamp;
+            ::memset(&timestamp, 0, sizeof(timestamp));
 
-        const TPCANStatus st = ::CAN_Read(channelIndex, &message, &timestamp);
-        if (st != PCAN_ERROR_OK) {
-            if (Q_UNLIKELY(st != PCAN_ERROR_QRCVEMPTY))
-                q->setError(systemErrorString(st), QCanBusDevice::ReadError);
-            break;
+            const TPCANStatus st = ::CAN_ReadFD(channelIndex, &message, &timestamp);
+            if (st != PCAN_ERROR_OK) {
+                if (Q_UNLIKELY(st != PCAN_ERROR_QRCVEMPTY))
+                    q->setError(systemErrorString(st), QCanBusDevice::ReadError);
+                break;
+            }
+
+            // Filter out PCAN status frames, to avoid turning them
+            // into QCanBusFrame::DataFrames with random canId
+            if (Q_UNLIKELY(message.MSGTYPE & PCAN_MESSAGE_STATUS))
+                continue;
+
+            const int size = dlcToSize(static_cast<CanFrameDlc>(message.DLC));
+            QCanBusFrame frame(message.ID,
+                               QByteArray(reinterpret_cast<const char *>(message.DATA), size));
+            frame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(static_cast<qint64>(timestamp)));
+            frame.setExtendedFrameFormat(message.MSGTYPE & PCAN_MESSAGE_EXTENDED);
+            frame.setFrameType((message.MSGTYPE & PCAN_MESSAGE_RTR)
+                               ? QCanBusFrame::RemoteRequestFrame : QCanBusFrame::DataFrame);
+            frame.setFlexibleDataRateFormat(message.MSGTYPE & PCAN_MESSAGE_FD);
+            frame.setBitrateSwitch(message.MSGTYPE & PCAN_MESSAGE_BRS);
+            frame.setErrorStateIndicator(message.MSGTYPE & PCAN_MESSAGE_ESI);
+
+            newFrames.append(std::move(frame));
+        } else {
+            TPCANMsg message;
+            ::memset(&message, 0, sizeof(message));
+            TPCANTimestamp timestamp;
+            ::memset(&timestamp, 0, sizeof(timestamp));
+
+            const TPCANStatus st = ::CAN_Read(channelIndex, &message, &timestamp);
+            if (st != PCAN_ERROR_OK) {
+                if (Q_UNLIKELY(st != PCAN_ERROR_QRCVEMPTY))
+                    q->setError(systemErrorString(st), QCanBusDevice::ReadError);
+                break;
+            }
+
+            // Filter out PCAN status frames, to avoid turning them
+            // into QCanBusFrame::DataFrames with random canId
+            if (Q_UNLIKELY(message.MSGTYPE & PCAN_MESSAGE_STATUS))
+                continue;
+
+            const int size = static_cast<int>(message.LEN);
+            QCanBusFrame frame(message.ID,
+                               QByteArray(reinterpret_cast<const char *>(message.DATA), size));
+            const quint64 millis = timestamp.millis + Q_UINT64_C(0xFFFFFFFF) * timestamp.millis_overflow;
+            const quint64 micros = Q_UINT64_C(1000) * millis + timestamp.micros;
+            frame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(static_cast<qint64>(micros)));
+            frame.setExtendedFrameFormat(message.MSGTYPE & PCAN_MESSAGE_EXTENDED);
+            frame.setFrameType((message.MSGTYPE & PCAN_MESSAGE_RTR)
+                               ? QCanBusFrame::RemoteRequestFrame : QCanBusFrame::DataFrame);
+
+            newFrames.append(std::move(frame));
         }
-
-        // Filter out PCAN status frames, to avoid turning them
-        // into QCanBusFrame::DataFrames with random canId
-        if (Q_UNLIKELY(message.MSGTYPE & PCAN_MESSAGE_STATUS))
-            continue;
-
-        QCanBusFrame frame(message.ID, QByteArray(reinterpret_cast<const char *>(message.DATA), int(message.LEN)));
-        const quint64 millis = timestamp.millis + Q_UINT64_C(0xFFFFFFFF) * timestamp.millis_overflow;
-        const quint64 micros = Q_UINT64_C(1000) * millis + timestamp.micros;
-        frame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(static_cast<qint64>(micros)));
-        frame.setExtendedFrameFormat(message.MSGTYPE & PCAN_MESSAGE_EXTENDED);
-        frame.setFrameType((message.MSGTYPE & PCAN_MESSAGE_RTR) ? QCanBusFrame::RemoteRequestFrame : QCanBusFrame::DataFrame);
-
-        newFrames.append(std::move(frame));
     }
 
     q->enqueueReceivedFrames(newFrames);
@@ -462,18 +662,23 @@ bool PeakCanBackendPrivate::verifyBitRate(int bitrate)
     Q_Q(PeakCanBackend);
 
     if (Q_UNLIKELY(isOpen)) {
-        q->setError(PeakCanBackend::tr("Impossible to reconfigure bitrate for the opened device"),
+        q->setError(PeakCanBackend::tr("Cannot change bitrate for already opened device."),
                     QCanBusDevice::ConfigurationError);
         return false;
     }
 
-    if (Q_UNLIKELY(bitrateCodeFromBitrate(bitrate) == PCAN_BAUD_INVALID)) {
-        q->setError(PeakCanBackend::tr("Unsupported bitrate value"),
+    bool isValidBitrate = false;
+    if (q->configurationParameter(QCanBusDevice::CanFdKey).toBool())
+        isValidBitrate = !nominalBitrateString(bitrate).isEmpty();
+    else
+        isValidBitrate = bitrateCodeFromBitrate(bitrate) != PCAN_BAUD_INVALID;
+
+    if (Q_UNLIKELY(!isValidBitrate)) {
+        q->setError(PeakCanBackend::tr("Unsupported bitrate value: %1.").arg(bitrate),
                     QCanBusDevice::ConfigurationError);
-        return false;
     }
 
-    return true;
+    return isValidBitrate;
 }
 
 PeakCanBackend::PeakCanBackend(const QString &name, QObject *parent)
@@ -556,12 +761,6 @@ bool PeakCanBackend::writeFrame(const QCanBusFrame &newData)
                    && newData.frameType() != QCanBusFrame::RemoteRequestFrame)) {
         setError(tr("Unable to write a frame with unacceptable type"),
                  QCanBusDevice::WriteError);
-        return false;
-    }
-
-    // CAN FD frame format not implemented at this stage
-    if (Q_UNLIKELY(newData.hasFlexibleDataRateFormat())) {
-        setError(tr("CAN FD frame format not supported."), QCanBusDevice::WriteError);
         return false;
     }
 

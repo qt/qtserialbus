@@ -82,6 +82,7 @@ public:
 
     PeakCanBackend * const q_ptr;
 
+    bool isFlexibleDatarateEnabled = false;
     bool isOpen = false;
     TPCANHandle channelIndex = PCAN_NONEBUS;
     QTimer *writeNotifier = nullptr;

@@ -198,10 +198,13 @@
 #define TRACE_FILE_OVERWRITE     0x80  // Causes the overwriting of available traces (same name)
 
 // PCAN message types
-#define PCAN_MESSAGE_STANDARD    0x00  // The PCAN message is a CAN Standard Frame (11-bit identifier)
-#define PCAN_MESSAGE_RTR         0x01  // The PCAN message is a CAN Remote-Transfer-Request Frame
-#define PCAN_MESSAGE_EXTENDED    0x02  // The PCAN message is a CAN Extended Frame (29-bit identifier)
-#define PCAN_MESSAGE_STATUS      0x80  // The PCAN message represents a PCAN status message
+#define PCAN_MESSAGE_STANDARD    0x00U  // The PCAN message is a CAN Standard Frame (11-bit identifier)
+#define PCAN_MESSAGE_RTR         0x01U  // The PCAN message is a CAN Remote-Transfer-Request Frame
+#define PCAN_MESSAGE_EXTENDED    0x02U  // The PCAN message is a CAN Extended Frame (29-bit identifier)
+#define PCAN_MESSAGE_FD          0x04U  // The PCAN message represents a FD frame in terms of CiA Specs
+#define PCAN_MESSAGE_BRS         0x08U  // The PCAN message represents a FD bit rate switch (CAN data at a higher bit rate)
+#define PCAN_MESSAGE_ESI         0x10U  // The PCAN message represents a FD error state indicator(CAN FD transmitter was error active)
+#define PCAN_MESSAGE_STATUS      0x80U  // The PCAN message represents a PCAN status message
 
 // Frame Type / Initialization Mode
 #define PCAN_MODE_STANDARD       PCAN_MESSAGE_STANDARD
@@ -244,6 +247,8 @@
 #define TPCANType                quint8  // Represents the type of PCAN hardware to be initialized
 #define TPCANMode                quint8  // Represents a PCAN filter mode
 #define TPCANBaudrate            quint16  // Represents a PCAN Baud rate register value
+#define TPCANBitrateFD           char *  // Represents a PCAN-FD bit rate string
+#define TPCANTimestampFD         quint64 // Represents a timestamp of a received PCAN FD message
 
 // Represents a PCAN message
 typedef struct tagTPCANMsg
@@ -263,6 +268,14 @@ typedef struct tagTPCANTimestamp
     quint16   micros;             // Microseconds: 0..999
 } TPCANTimestamp;
 
+// Represents a PCAN message from a FD capable hardware
+typedef struct tagTPCANMsgFD
+{
+    quint32           ID;       // 11/29-bit message identifier
+    TPCANMessageType  MSGTYPE;  // Type of the message
+    quint8            DLC;      // Data Length Code of the message (0..15)
+    quint8            DATA[64]; // Data of the message (DATA[0]..DATA[63])
+} TPCANMsgFD;
 
 #define GENERATE_SYMBOL_VARIABLE(returnType, symbolName, ...) \
     typedef returnType (DRV_CALLBACK_TYPE *fp_##symbolName)(__VA_ARGS__); \
@@ -274,11 +287,14 @@ typedef struct tagTPCANTimestamp
         return false;
 
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Initialize, TPCANHandle, TPCANBaudrate, TPCANType, quint32, quint16)
+GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_InitializeFD, TPCANHandle, TPCANBitrateFD)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Uninitialize, TPCANHandle)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Reset, TPCANHandle)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_GetStatus, TPCANHandle)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Read, TPCANHandle, TPCANMsg *, TPCANTimestamp *)
+GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_ReadFD, TPCANHandle, TPCANMsgFD *, TPCANTimestampFD *)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Write, TPCANHandle, TPCANMsg *)
+GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_WriteFD, TPCANHandle, TPCANMsgFD *)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_FilterMessages, TPCANHandle, quint32, quint32, TPCANMode)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_GetValue, TPCANHandle, TPCANParameter, void *, quint32)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_SetValue, TPCANHandle, TPCANParameter, void *, quint32)
@@ -293,11 +309,14 @@ inline bool resolveSymbols(QLibrary *pcanLibrary)
     }
 
     RESOLVE_SYMBOL(CAN_Initialize)
+    RESOLVE_SYMBOL(CAN_InitializeFD)
     RESOLVE_SYMBOL(CAN_Uninitialize)
     RESOLVE_SYMBOL(CAN_Reset)
     RESOLVE_SYMBOL(CAN_GetStatus)
     RESOLVE_SYMBOL(CAN_Read)
+    RESOLVE_SYMBOL(CAN_ReadFD)
     RESOLVE_SYMBOL(CAN_Write)
+    RESOLVE_SYMBOL(CAN_WriteFD)
     RESOLVE_SYMBOL(CAN_FilterMessages)
     RESOLVE_SYMBOL(CAN_GetValue)
     RESOLVE_SYMBOL(CAN_SetValue)
