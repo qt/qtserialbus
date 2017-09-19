@@ -76,7 +76,7 @@ struct PcanChannel{
     char        name[6];
     TPCANHandle index;
 };
-PcanChannel pcanChannels[] = {
+static const PcanChannel pcanChannels[] = {
     { "usb0",  PCAN_USBBUS1  },
     { "usb1",  PCAN_USBBUS2  },
     { "usb2",  PCAN_USBBUS3  },
