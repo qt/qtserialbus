@@ -47,9 +47,9 @@
 #include <algorithm>
 
 #ifdef Q_OS_WIN32
-#include <QtCore/qwineventnotifier.h>
+#   include <QtCore/qwineventnotifier.h>
 #else
-#include <QtCore/qsocketnotifier.h>
+#   include <QtCore/qsocketnotifier.h>
 #endif
 
 QT_BEGIN_NAMESPACE

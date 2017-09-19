@@ -63,10 +63,10 @@ extern "C"
 #include <QtCore/qdebug.h>
 
 #ifdef Q_OS_WIN32
-#include <windows.h>
-#define DRV_CALLBACK_TYPE WINAPI
+#   include <windows.h>
+#   define DRV_CALLBACK_TYPE WINAPI
 #else
-#define DRV_CALLBACK_TYPE
+#   define DRV_CALLBACK_TYPE
 #endif
 
 // Currently defined and supported PCAN channels
