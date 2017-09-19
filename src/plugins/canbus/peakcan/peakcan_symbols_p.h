@@ -234,6 +234,7 @@ extern "C"
 #define PCAN_BAUD_20K            0x532F  //  20 kBit/s
 #define PCAN_BAUD_10K            0x672F  //  10 kBit/s
 #define PCAN_BAUD_5K             0x7F7F  //   5 kBit/s
+#define PCAN_BAUD_INVALID        0xFFFF  // unknown or invalid baudrate
 
 #define PCAN_TYPE_ISA            0x01  // PCAN-ISA 82C200
 #define PCAN_TYPE_ISA_SJA        0x09  // PCAN-ISA SJA1000

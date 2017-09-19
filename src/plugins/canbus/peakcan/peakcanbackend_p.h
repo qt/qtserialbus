@@ -75,7 +75,7 @@ public:
     bool setConfigurationParameter(int key, const QVariant &value);
     void setupChannel(const QByteArray &interfaceName);
     void setupDefaultConfigurations();
-    QString systemErrorString(int errorCode);
+    QString systemErrorString(TPCANStatus errorCode);
     void startWrite();
     void startRead();
     bool verifyBitRate(int bitrate);
@@ -83,7 +83,7 @@ public:
     PeakCanBackend * const q_ptr;
 
     bool isOpen = false;
-    int channelIndex = PCAN_NONEBUS;
+    TPCANHandle channelIndex = PCAN_NONEBUS;
     QTimer *writeNotifier = nullptr;
 
 #if defined(Q_OS_WIN32)

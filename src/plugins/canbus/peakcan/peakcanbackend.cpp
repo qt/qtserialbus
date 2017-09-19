@@ -214,7 +214,7 @@ PeakCanBackendPrivate::PeakCanBackendPrivate(PeakCanBackend *q)
 struct BitrateItem
 {
     int bitrate;
-    int code;
+    TPCANBaudrate code;
 };
 
 struct BitrateLessFunctor
@@ -225,7 +225,7 @@ struct BitrateLessFunctor
     }
 };
 
-static int bitrateCodeFromBitrate(int bitrate)
+static TPCANBaudrate bitrateCodeFromBitrate(int bitrate)
 {
     static const BitrateItem bitratetable[] = {
         { 5000, PCAN_BAUD_5K },
@@ -248,7 +248,7 @@ static int bitrateCodeFromBitrate(int bitrate)
 
     const BitrateItem item = { bitrate , 0 };
     const BitrateItem *where = std::lower_bound(bitratetable, endtable, item, BitrateLessFunctor());
-    return where != endtable ? where->code : -1;
+    return where != endtable ? where->code : PCAN_BAUD_INVALID;
 }
 
 bool PeakCanBackendPrivate::open()
@@ -256,7 +256,7 @@ bool PeakCanBackendPrivate::open()
     Q_Q(PeakCanBackend);
 
     const int bitrate = q->configurationParameter(QCanBusDevice::BitRateKey).toInt();
-    const int bitrateCode = bitrateCodeFromBitrate(bitrate);
+    const TPCANBaudrate bitrateCode = bitrateCodeFromBitrate(bitrate);
 
     const TPCANStatus st = ::CAN_Initialize(channelIndex, bitrateCode, 0, 0, 0);
     if (Q_UNLIKELY(st != PCAN_ERROR_OK)) {
@@ -352,7 +352,7 @@ void PeakCanBackendPrivate::setupDefaultConfigurations()
     q->setConfigurationParameter(QCanBusDevice::BitRateKey, 500000);
 }
 
-QString PeakCanBackendPrivate::systemErrorString(int errorCode)
+QString PeakCanBackendPrivate::systemErrorString(TPCANStatus errorCode)
 {
     QByteArray buffer(256, 0);
     if (Q_UNLIKELY(::CAN_GetErrorText(errorCode, 0, buffer.data()) != PCAN_ERROR_OK))
@@ -376,7 +376,7 @@ void PeakCanBackendPrivate::startWrite()
     ::memset(&message, 0, sizeof(message));
 
     message.ID = frame.frameId();
-    message.LEN = payload.size();
+    message.LEN = static_cast<quint8>(payload.size());
     message.MSGTYPE = frame.hasExtendedFrameFormat() ? PCAN_MESSAGE_EXTENDED : PCAN_MESSAGE_STANDARD;
 
     if (frame.frameType() == QCanBusFrame::RemoteRequestFrame)
@@ -416,7 +416,7 @@ void PeakCanBackendPrivate::startRead()
         QCanBusFrame frame(message.ID, QByteArray(reinterpret_cast<const char *>(message.DATA), int(message.LEN)));
         const quint64 millis = timestamp.millis + Q_UINT64_C(0xFFFFFFFF) * timestamp.millis_overflow;
         const quint64 micros = Q_UINT64_C(1000) * millis + timestamp.micros;
-        frame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(micros));
+        frame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(static_cast<qint64>(micros)));
         frame.setExtendedFrameFormat(message.MSGTYPE & PCAN_MESSAGE_EXTENDED);
         frame.setFrameType((message.MSGTYPE & PCAN_MESSAGE_RTR) ? QCanBusFrame::RemoteRequestFrame : QCanBusFrame::DataFrame);
 
@@ -436,7 +436,7 @@ bool PeakCanBackendPrivate::verifyBitRate(int bitrate)
         return false;
     }
 
-    if (Q_UNLIKELY(bitrateCodeFromBitrate(bitrate) == -1)) {
+    if (Q_UNLIKELY(bitrateCodeFromBitrate(bitrate) == PCAN_BAUD_INVALID)) {
         q->setError(PeakCanBackend::tr("Unsupported bitrate value"),
                     QCanBusDevice::ConfigurationError);
         return false;
