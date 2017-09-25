@@ -272,13 +272,20 @@ bool PeakCanBackendPrivate::open()
             return false;
         }
     }
-#endif
 
     const TPCANStatus err = ::CAN_SetValue(channelIndex, PCAN_RECEIVE_EVENT, &readHandle, sizeof(readHandle));
     if (Q_UNLIKELY(err != PCAN_ERROR_OK)) {
         q->setError(systemErrorString(err), QCanBusDevice::ConnectionError);
         return false;
     }
+
+#else
+    const TPCANStatus err = ::CAN_GetValue(channelIndex, PCAN_RECEIVE_EVENT, &readHandle, sizeof(readHandle));
+    if (Q_UNLIKELY(err != PCAN_ERROR_OK)) {
+        q->setError(systemErrorString(err), QCanBusDevice::ConnectionError);
+        return false;
+    }
+#endif
 
     writeNotifier = new WriteNotifier(this, q);
     writeNotifier->setInterval(0);
