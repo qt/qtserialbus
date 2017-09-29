@@ -420,6 +420,11 @@ void PeakCanBackendPrivate::startRead()
             break;
         }
 
+        // Filter out PCAN status frames, to avoid turning them
+        // into QCanBusFrame::DataFrames with random canId
+        if (Q_UNLIKELY(message.MSGTYPE & PCAN_MESSAGE_STATUS))
+            continue;
+
         QCanBusFrame frame(message.ID, QByteArray(reinterpret_cast<const char *>(message.DATA), int(message.LEN)));
         const quint64 millis = timestamp.millis + Q_UINT64_C(0xFFFFFFFF) * timestamp.millis_overflow;
         const quint64 micros = Q_UINT64_C(1000) * millis + timestamp.micros;
