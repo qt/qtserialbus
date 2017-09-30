@@ -73,7 +73,7 @@ public:
     void customEvent(QEvent *event);
 
 private:
-       SystecCanBackendPrivate *dptr;
+       SystecCanBackendPrivate * const dptr;
 };
 
 class SystecCanBackendPrivate

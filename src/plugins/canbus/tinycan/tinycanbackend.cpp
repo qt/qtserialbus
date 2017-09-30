@@ -98,7 +98,7 @@ protected:
     }
 
 private:
-    TinyCanBackendPrivate *dptr;
+    TinyCanBackendPrivate * const dptr;
 };
 
 static int driverRefCount = 0;

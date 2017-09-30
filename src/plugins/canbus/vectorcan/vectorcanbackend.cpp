@@ -117,7 +117,7 @@ protected:
     }
 
 private:
-    VectorCanBackendPrivate *dptr;
+    VectorCanBackendPrivate * const dptr;
 };
 
 class WriteNotifier : public QTimer
@@ -142,7 +142,7 @@ protected:
     }
 
 private:
-    VectorCanBackendPrivate *dptr;
+    VectorCanBackendPrivate * const dptr;
 };
 
 

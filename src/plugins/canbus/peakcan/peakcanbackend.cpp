@@ -154,7 +154,7 @@ protected:
     }
 
 private:
-    PeakCanBackendPrivate *dptr;
+    PeakCanBackendPrivate * const dptr;
 };
 #else
 class ReadNotifier : public QSocketNotifier
@@ -178,7 +178,7 @@ protected:
     }
 
 private:
-    PeakCanBackendPrivate *dptr;
+    PeakCanBackendPrivate * const dptr;
 };
 #endif
 
@@ -203,7 +203,7 @@ protected:
     }
 
 private:
-    PeakCanBackendPrivate *dptr;
+    PeakCanBackendPrivate * const dptr;
 };
 
 PeakCanBackendPrivate::PeakCanBackendPrivate(PeakCanBackend *q)

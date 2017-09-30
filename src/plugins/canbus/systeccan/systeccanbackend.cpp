@@ -109,7 +109,7 @@ protected:
     }
 
 private:
-    SystecCanBackendPrivate *dptr;
+    SystecCanBackendPrivate * const dptr;
 };
 
 SystecCanBackendPrivate::SystecCanBackendPrivate(SystecCanBackend *q) :
