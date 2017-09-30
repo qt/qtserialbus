@@ -49,15 +49,6 @@
 // We mean it.
 //
 
-#ifdef LINK_LIBPCANBASIC
-
-extern "C"
-{
-#include <pcanbasic.h>
-}
-
-#else
-
 #include <QtCore/qlibrary.h>
 #include <QtCore/qstring.h>
 #include <QtCore/qdebug.h>
@@ -314,7 +305,5 @@ inline bool resolveSymbols(QLibrary *pcanLibrary)
 
     return true;
 }
-
-#endif
 
 #endif // PEAKCAN_SYMBOLS_P_H
