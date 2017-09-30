@@ -441,7 +441,7 @@ typedef struct _XLacceptance {
     static fp_##symbolName symbolName;
 
 #define RESOLVE_SYMBOL(symbolName) \
-    symbolName = (fp_##symbolName)vectorcanLibrary->resolve(#symbolName); \
+    symbolName = reinterpret_cast<fp_##symbolName>(vectorcanLibrary->resolve(#symbolName)); \
     if (!symbolName) \
         return false;
 

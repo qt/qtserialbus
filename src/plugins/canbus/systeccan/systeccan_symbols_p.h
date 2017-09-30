@@ -62,7 +62,7 @@ typedef quint8 tUcanHandle;
     static fp_##symbolName symbolName;
 
 #define RESOLVE_SYMBOL(symbolName) \
-    symbolName = (fp_##symbolName)systecLibrary->resolve(#symbolName); \
+    symbolName = reinterpret_cast<fp_##symbolName>(systecLibrary->resolve(#symbolName)); \
     if (!symbolName) \
         return false;
 

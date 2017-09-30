@@ -285,7 +285,7 @@ typedef void (DRV_CALLBACK_TYPE *CanRxEventCallback)(
     static fp_##symbolName symbolName;
 
 #define RESOLVE_SYMBOL(symbolName) \
-    symbolName = (fp_##symbolName)mhstcanLibrary->resolve(#symbolName); \
+    symbolName = reinterpret_cast<fp_##symbolName>(mhstcanLibrary->resolve(#symbolName)); \
     if (!symbolName) \
         return false;
 

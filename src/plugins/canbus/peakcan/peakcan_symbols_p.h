@@ -278,7 +278,7 @@ typedef struct tagTPCANTimestamp
     static fp_##symbolName symbolName;
 
 #define RESOLVE_SYMBOL(symbolName) \
-    symbolName = (fp_##symbolName)pcanLibrary->resolve(#symbolName); \
+    symbolName = reinterpret_cast<fp_##symbolName>(pcanLibrary->resolve(#symbolName)); \
     if (!symbolName) \
         return false;
 
