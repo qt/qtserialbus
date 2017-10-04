@@ -157,6 +157,15 @@ SendFrameBox::SendFrameBox(QWidget *parent) :
             m_ui->bitrateSwitchBox->setChecked(false);
     });
 
+    auto frameIdTextChanged = [this]() {
+        const bool hasFrameId = !m_ui->frameIdEdit->text().isEmpty();
+        m_ui->sendButton->setEnabled(hasFrameId);
+        m_ui->sendButton->setToolTip(hasFrameId
+                                     ? QString() : tr("Cannot send because no Frame ID was given."));
+    };
+    connect(m_ui->frameIdEdit, &QLineEdit::textChanged, frameIdTextChanged);
+    frameIdTextChanged();
+
     connect(m_ui->sendButton, &QPushButton::clicked, [this]() {
         const uint frameId = m_ui->frameIdEdit->text().toUInt(nullptr, 16);
         QString data = m_ui->payloadEdit->text();
