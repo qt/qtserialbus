@@ -303,7 +303,7 @@ void PeakCanBackendPrivate::close()
     quint32 value = 0;
     const TPCANStatus err = ::CAN_SetValue(channelIndex, PCAN_RECEIVE_EVENT, &value, sizeof(value));
     if (Q_UNLIKELY(err != PCAN_ERROR_OK))
-        emit q->setError(systemErrorString(err), QCanBusDevice::ConnectionError);
+        q->setError(systemErrorString(err), QCanBusDevice::ConnectionError);
 
     const TPCANStatus st = ::CAN_Uninitialize(channelIndex);
     if (Q_UNLIKELY(st != PCAN_ERROR_OK))
