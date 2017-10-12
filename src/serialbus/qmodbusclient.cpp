@@ -486,7 +486,7 @@ bool QModbusClientPrivate::collateBytes(const QModbusPdu &response,
         return false;
 
     // byte count needs to match available bytes
-    const quint8 byteCount = response.data()[0];
+    const quint8 byteCount = quint8(response.data().at(0));
     if ((response.dataSize() - 1) != byteCount)
         return false;
 
