@@ -73,9 +73,16 @@ QList<QCanBusDeviceInfo> TinyCanBackend::interfaces()
     return { createDeviceInfo(QStringLiteral("can0.0")), createDeviceInfo(QStringLiteral("can0.1")) };
 }
 
-Q_GLOBAL_STATIC(QList<TinyCanBackendPrivate *>, qChannels)
+namespace {
 
-static QMutex channelsGuard(QMutex::NonRecursive);
+struct TinyCanGlobal {
+    QList<TinyCanBackendPrivate *> channels;
+    QMutex mutex;
+};
+
+} // namespace
+
+Q_GLOBAL_STATIC(TinyCanGlobal, gTinyCan)
 
 class WriteNotifier : public QTimer
 {
@@ -108,8 +115,8 @@ static void DRV_CALLBACK_TYPE canRxEventCallback(quint32 index, TCanMsg *frame, 
     Q_UNUSED(frame);
     Q_UNUSED(count);
 
-    QMutexLocker lock(&channelsGuard);
-    for (TinyCanBackendPrivate *p : qAsConst(*qChannels())) {
+    QMutexLocker lock(&gTinyCan->mutex);
+    for (TinyCanBackendPrivate *p : qAsConst(gTinyCan->channels)) {
         if (p->channelIndex == int(index)) {
             p->startRead();
             return;
@@ -122,16 +129,16 @@ TinyCanBackendPrivate::TinyCanBackendPrivate(TinyCanBackend *q)
 {
     startupDriver();
 
-    QMutexLocker lock(&channelsGuard);
-    qChannels()->append(this);
+    QMutexLocker lock(&gTinyCan->mutex);
+    gTinyCan->channels.append(this);
 }
 
 TinyCanBackendPrivate::~TinyCanBackendPrivate()
 {
     cleanupDriver();
 
-    QMutexLocker lock(&channelsGuard);
-    qChannels()->removeAll(this);
+    QMutexLocker lock(&gTinyCan->mutex);
+    gTinyCan->channels.removeAll(this);
 }
 
 struct BitrateItem
