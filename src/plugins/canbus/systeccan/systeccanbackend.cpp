@@ -67,13 +67,13 @@ static void DRV_CALLBACK_TYPE ucanEnumCallback(DWORD index, BOOL isUsed,
 {
     auto result = static_cast<QStringList *>(args);
 
+    Q_UNUSED(index);
     Q_UNUSED(isUsed);
-    Q_UNUSED(hardwareInfo);
     Q_UNUSED(initInfo);
 
-    result->append(QString::fromLatin1("can%1.0").arg(index));
+    result->append(QString::fromLatin1("can%1.0").arg(hardwareInfo->m_bDeviceNr));
     if (USBCAN_CHECK_SUPPORT_TWO_CHANNEL(hardwareInfo))
-        result->append(QString::fromLatin1("can%1.1").arg(index));
+        result->append(QString::fromLatin1("can%1.1").arg(hardwareInfo->m_bDeviceNr));
 }
 
 QList<QCanBusDeviceInfo> SystecCanBackend::interfaces()
