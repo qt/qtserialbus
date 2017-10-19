@@ -188,7 +188,7 @@ void MainWindow::on_connectButton_clicked()
         emit disconnectButton->clicked();
     }, Qt::QueuedConnection);
 
-    connect(m_device, &QModbusDevice::stateChanged, [this](QModbusDevice::State state) {
+    connect(m_device, &QModbusDevice::stateChanged, [](QModbusDevice::State state) {
         switch (state) {
         case QModbusDevice::UnconnectedState:
             qDebug().noquote() << QStringLiteral("State: Entered unconnected state.");
