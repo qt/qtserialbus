@@ -50,7 +50,7 @@ QT_END_NAMESPACE
 class BitRateBox : public QComboBox
 {
 public:
-    BitRateBox(QWidget *parent = nullptr);
+    explicit BitRateBox(QWidget *parent = nullptr);
     ~BitRateBox();
 
     int bitRate() const;
