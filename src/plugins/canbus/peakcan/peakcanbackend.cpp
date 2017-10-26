@@ -120,14 +120,30 @@ QList<QCanBusDeviceInfo> PeakCanBackend::interfaces()
     QList<QCanBusDeviceInfo> result;
 
     for (int i = 0; pcanChannels[i].index != PCAN_NONEBUS; ++i) {
-        int value;
-        const TPCANStatus stat = ::CAN_GetValue(pcanChannels[i].index, PCAN_CHANNEL_CONDITION,
+        int value = 0;
+        const TPCANHandle index = pcanChannels[i].index;
+        const TPCANStatus stat = ::CAN_GetValue(index, PCAN_CHANNEL_CONDITION,
                                                 &value, sizeof(value));
         if ((stat == PCAN_ERROR_OK) && (value & PCAN_CHANNEL_AVAILABLE)) {
-            const TPCANStatus fdStat = ::CAN_GetValue(pcanChannels[i].index, PCAN_CHANNEL_FEATURES,
+            const TPCANStatus fdStat = ::CAN_GetValue(index, PCAN_CHANNEL_FEATURES,
                                                       &value, sizeof(value));
             const bool isFd = (fdStat == PCAN_ERROR_OK) && (value & FEATURE_FD_CAPABLE);
-            result.append(createDeviceInfo(QLatin1String(pcanChannels[i].name), false, isFd));
+
+            char description[256] = {0};
+            const TPCANStatus descStat = ::CAN_GetValue(index, PCAN_HARDWARE_NAME,
+                                                        description, sizeof(description));
+            if (descStat != PCAN_ERROR_OK)
+                description[0] = 0;
+
+            int channel = 0;
+            const TPCANStatus chnStat = ::CAN_GetValue(index, PCAN_CONTROLLER_NUMBER,
+                                                       &channel, sizeof(channel));
+            if (chnStat != PCAN_ERROR_OK)
+                channel = 0;
+
+            result.append(std::move(createDeviceInfo(QLatin1String(pcanChannels[i].name),
+                                                     QString(), QLatin1String(description),
+                                                     channel, false, isFd)));
         }
     }
 

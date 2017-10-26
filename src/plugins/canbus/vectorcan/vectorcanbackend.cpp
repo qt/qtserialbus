@@ -89,7 +89,12 @@ QList<QCanBusDeviceInfo> VectorCanBackend::interfaces()
 
         const bool isVirtual = config.channel[i].hwType == XL_HWTYPE_VIRTUAL;
         const bool isFd = config.channel[i].channelCapabilities & XL_CHANNEL_FLAG_CANFD_SUPPORT;
-        result.append(createDeviceInfo(QStringLiteral("can") + QString::number(i), isVirtual, isFd));
+        const int channel = config.channel[i].hwChannel;
+        const QString name = QStringLiteral("can") + QString::number(i);
+        const QString serial = QString::number(config.channel[i].serialNumber);
+        const QString description = QLatin1String(config.channel[i].name);
+        result.append(std::move(createDeviceInfo(name, serial, description, channel,
+                                                 isVirtual, isFd)));
     }
 
     VectorCanBackendPrivate::cleanupDriver();

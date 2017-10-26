@@ -62,7 +62,9 @@ public:
     }
 
     QString name;
+    QString description;
     QString serialNumber;
+    int  channel = 0;
     bool hasFlexibleDataRate = false;
     bool isVirtual = false;
 };

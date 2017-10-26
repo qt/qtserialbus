@@ -96,6 +96,38 @@ QString QCanBusDeviceInfo::name() const
 }
 
 /*!
+    \since 5.11
+    Returns a textual description of the CAN bus interface, if available.
+    Example output: "PCAN USB Pro FD". If no description is available,
+    an empty string is returned.
+*/
+QString QCanBusDeviceInfo::description() const
+{
+    return d_ptr->description;
+}
+
+/*!
+    \since 5.11
+    Returns the serial number of the CAN bus interface as string, if available.
+    Otherwise, an empty string is returned.
+*/
+QString QCanBusDeviceInfo::serialNumber() const
+{
+    return d_ptr->serialNumber;
+}
+
+/*!
+    \since 5.11
+    Returns the sequential channel number of the CAN bus interface, starting
+    with zero. If the interface has only one channel or if no information about
+    the channel is available, zero is returned.
+*/
+int QCanBusDeviceInfo::channel() const
+{
+    return d_ptr->channel;
+}
+
+/*!
     Returns true, if the CAN bus interface is CAN FD (flexible data rate) capable.
 
     If this information is not available, false is returned.

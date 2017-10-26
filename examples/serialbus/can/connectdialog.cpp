@@ -115,6 +115,12 @@ void ConnectDialog::interfaceChanged(const QString &interface)
 
     for (const QCanBusDeviceInfo &info : qAsConst(m_interfaces)) {
         if (info.name() == interface) {
+            m_ui->descriptionLabel->setText(info.description());
+            QString serialNumber = info.serialNumber();
+            if (serialNumber.isEmpty())
+                serialNumber = tr("n/a");
+            m_ui->serialNumberLabel->setText(tr("Serial: %1").arg(serialNumber));
+            m_ui->channelLabel->setText(tr("Channel: %1").arg(info.channel()));
             m_ui->isVirtual->setChecked(info.isVirtual());
             m_ui->isFlexibleDataRateCapable->setChecked(info.hasFlexibleDataRate());
             break;

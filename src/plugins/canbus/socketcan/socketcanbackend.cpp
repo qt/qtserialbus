@@ -80,6 +80,8 @@ QT_BEGIN_NAMESPACE
 Q_DECLARE_LOGGING_CATEGORY(QT_CANBUS_PLUGINS_SOCKETCAN)
 
 const char sysClassNetC[] = "/sys/class/net/";
+const char interfaceC[]   = "/device/interface";
+const char devIdC[]       = "/dev_id";
 const char flagsC[]       = "/flags";
 const char mtuC[]         = "/mtu";
 const char typeC[]        = "/type";
@@ -120,6 +122,23 @@ static quint32 flags(const QString &canDevice)
     return result;
 }
 
+static QString deviceDescription(const QString &canDevice)
+{
+    const QString path = QLatin1String(sysClassNetC) + canDevice + QLatin1String(interfaceC);
+    const QByteArray content = fileContent(path);
+    if (content.isEmpty() && isVirtual(canDevice))
+        return QStringLiteral("Virtual CAN");
+
+    return QString::fromUtf8(content);
+}
+
+static int deviceChannel(const QString &canDevice)
+{
+    const QString path = QLatin1String(sysClassNetC) + canDevice + QLatin1String(devIdC);
+    const QByteArray content = fileContent(path);
+    return content.toInt(nullptr, 0);
+}
+
 QList<QCanBusDeviceInfo> SocketCanBackend::interfaces()
 {
     QList<QCanBusDeviceInfo> result;
@@ -136,9 +155,12 @@ QList<QCanBusDeviceInfo> SocketCanBackend::interfaces()
         if (!(flags(deviceName) & DeviceIsActive))
             continue;
 
-        auto info = createDeviceInfo(deviceName, isVirtual(deviceName),
-                                     isFlexibleDataRateCapable(deviceName));
-        result.append(info);
+        const QString serial;
+        const QString description = deviceDescription(deviceName);
+        const int channel = deviceChannel(deviceName);
+        result.append(std::move(createDeviceInfo(deviceName, serial, description,
+                                                 channel, isVirtual(deviceName),
+                                                 isFlexibleDataRateCapable(deviceName))));
     }
 
     std::sort(result.begin(), result.end(),

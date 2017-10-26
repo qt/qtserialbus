@@ -727,10 +727,27 @@ void QCanBusDevice::setState(QCanBusDevice::CanBusDeviceState newState)
 QCanBusDeviceInfo QCanBusDevice::createDeviceInfo(const QString &name, bool isVirtual,
                                                   bool isFlexibleDataRateCapable)
 {
+    return createDeviceInfo(name, QString(), QString(), 0, isVirtual, isFlexibleDataRateCapable);
+}
+
+/*!
+    \since 5.11
+    Returns a QCanBusDeviceInfo created from the given parameters \a name,
+    \a serialNumber, \a description, \a channel, \a isVirtual, and \a
+    isFlexibleDataRateCapable.
+    \internal
+ */
+QCanBusDeviceInfo QCanBusDevice::createDeviceInfo(const QString &name, const QString &serialNumber,
+                                                  const QString &description, int channel,
+                                                  bool isVirtual, bool isFlexibleDataRateCapable)
+{
     QScopedPointer<QCanBusDeviceInfoPrivate> info(new QCanBusDeviceInfoPrivate);
     info->name = name;
-    info->isVirtual = isVirtual;
+    info->serialNumber = serialNumber;
+    info->description = description;
+    info->channel = channel;
     info->hasFlexibleDataRate = isFlexibleDataRateCapable;
+    info->isVirtual = isVirtual;
     return QCanBusDeviceInfo(*info.take());
 }
 

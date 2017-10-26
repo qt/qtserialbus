@@ -69,6 +69,12 @@ public:
     static QList<QCanBusDeviceInfo> interfaces();
     static bool canCreate(QString *errorReason);
 
+    // This function needs to be public as it is accessed by a callback
+    static QCanBusDeviceInfo createDeviceInfo(const QString &serialNumber,
+                                              const QString &description,
+                                              uint deviceNumber,
+                                              int channelNumber);
+
 private:
     SystecCanBackendPrivate * const d_ptr;
 };
