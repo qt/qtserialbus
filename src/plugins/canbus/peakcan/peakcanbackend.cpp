@@ -272,13 +272,20 @@ bool PeakCanBackendPrivate::open()
             return false;
         }
     }
-#endif
 
     const TPCANStatus err = ::CAN_SetValue(channelIndex, PCAN_RECEIVE_EVENT, &readHandle, sizeof(readHandle));
     if (Q_UNLIKELY(err != PCAN_ERROR_OK)) {
         q->setError(systemErrorString(err), QCanBusDevice::ConnectionError);
         return false;
     }
+
+#else
+    const TPCANStatus err = ::CAN_GetValue(channelIndex, PCAN_RECEIVE_EVENT, &readHandle, sizeof(readHandle));
+    if (Q_UNLIKELY(err != PCAN_ERROR_OK)) {
+        q->setError(systemErrorString(err), QCanBusDevice::ConnectionError);
+        return false;
+    }
+#endif
 
     writeNotifier = new WriteNotifier(this, q);
     writeNotifier->setInterval(0);
@@ -412,6 +419,11 @@ void PeakCanBackendPrivate::startRead()
                 q->setError(systemErrorString(st), QCanBusDevice::ReadError);
             break;
         }
+
+        // Filter out PCAN status frames, to avoid turning them
+        // into QCanBusFrame::DataFrames with random canId
+        if (Q_UNLIKELY(message.MSGTYPE & PCAN_MESSAGE_STATUS))
+            continue;
 
         QCanBusFrame frame(message.ID, QByteArray(reinterpret_cast<const char *>(message.DATA), int(message.LEN)));
         const quint64 millis = timestamp.millis + Q_UINT64_C(0xFFFFFFFF) * timestamp.millis_overflow;
