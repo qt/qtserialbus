@@ -54,6 +54,8 @@ private slots:
 
     void tst_isValid_data();
     void tst_isValid();
+    void tst_isValidSize_data();
+    void tst_isValidSize();
 
     void tst_toString_data();
     void tst_toString();
@@ -330,7 +332,7 @@ void tst_QCanBusFrame::tst_isValid_data()
                  << QByteArray(9, 0) << 512u << false << false;
     QTest::newRow("data frame CAN FD long payload")
                  << QCanBusFrame::DataFrame << true
-                 << QByteArray(9, 0) << 512u << false << true;
+                 << QByteArray(12, 0) << 512u << false << true;
     QTest::newRow("data frame CAN FD too long payload")
                  << QCanBusFrame::DataFrame << false
                  << QByteArray(65, 0) << 512u << false << true;
@@ -360,6 +362,46 @@ void tst_QCanBusFrame::tst_isValid()
     frame.setFrameType(QCanBusFrame::InvalidFrame);
     QCOMPARE(frame.isValid(), false);
     QCOMPARE(QCanBusFrame::InvalidFrame, frame.frameType());
+}
+
+void tst_QCanBusFrame::tst_isValidSize_data()
+{
+    QTest::addColumn<int>("payloadLength");
+    QTest::addColumn<bool>("isFlexibleDataRate");
+    QTest::addColumn<bool>("isValid");
+
+    QTest::newRow("2.0-0") << 0  << false << true;
+    QTest::newRow("2.0-8") << 8  << false << true;
+    QTest::newRow("2.0-9") << 9  << false << false;
+
+    QTest::newRow("FD-0")  << 0  << true << true;
+    QTest::newRow("FD-8")  << 8  << true << true;
+    QTest::newRow("FD-9")  << 9  << true << false;
+    QTest::newRow("FD-11") << 11 << true << false;
+    QTest::newRow("FD-12") << 12 << true << true;
+    QTest::newRow("FD-13") << 13 << true << false;
+    QTest::newRow("FD-16") << 16 << true << true;
+
+    QTest::newRow("FD-20") << 20 << true << true;
+    QTest::newRow("FD-24") << 24 << true << true;
+    QTest::newRow("FD-32") << 32 << true << true;
+    QTest::newRow("FD-48") << 48 << true << true;
+
+    QTest::newRow("FD-63") << 63 << true << false;
+    QTest::newRow("FD-64") << 64 << true << true;
+    QTest::newRow("FD-65") << 65 << true << false;
+}
+
+void tst_QCanBusFrame::tst_isValidSize()
+{
+    QFETCH(int,  payloadLength);
+    QFETCH(bool, isFlexibleDataRate);
+    QFETCH(bool, isValid);
+
+    QCanBusFrame frame(0, QByteArray(payloadLength, ' '));
+    frame.setFlexibleDataRateFormat(isFlexibleDataRate);
+
+    QCOMPARE(frame.isValid(), isValid);
 }
 
 void tst_QCanBusFrame::tst_toString_data()

@@ -133,17 +133,16 @@ public:
             return false;
 
         // maximum permitted payload size in CAN or CAN FD
+        const int length = load.length();
         if (isFlexibleDataRate) {
-            if (load.length() > 64)
-                return false;
             if (format == RemoteRequestFrame)
                 return false;
-        } else {
-            if (load.length() > 8)
-                return false;
+
+            return length <= 8 || length == 12 || length == 16 || length == 20
+                    || length == 24 || length == 32 || length == 48 || length == 64;
         }
 
-        return true;
+        return length <= 8;
     }
 
     FrameType frameType() const Q_DECL_NOTHROW
