@@ -43,12 +43,16 @@
 QT_BEGIN_NAMESPACE
 
 DummyBackend::DummyBackend() :
-    sendTimer(new QTimer(this))
+    simulateReceivingTimer(new QTimer(this))
 {
-    sendTimer->setInterval(1000);
-    sendTimer->setSingleShot(false);
-    connect(sendTimer, &QTimer::timeout, this, &DummyBackend::sendMessage);
-    sendTimer->start();
+    connect(simulateReceivingTimer, &QTimer::timeout, [this]() {
+        const quint64 timeStamp = QDateTime::currentDateTime().toMSecsSinceEpoch();
+        QCanBusFrame dummyFrame(12, "def");
+        dummyFrame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(timeStamp * 1000));
+
+        enqueueReceivedFrames({dummyFrame});
+    });
+    simulateReceivingTimer->start(1000);
 }
 
 bool DummyBackend::open()
@@ -62,20 +66,9 @@ void DummyBackend::close()
     setState(QCanBusDevice::UnconnectedState);
 }
 
-void DummyBackend::sendMessage()
-{
-    quint64 timeStamp = QDateTime::currentDateTime().toMSecsSinceEpoch();
-    QCanBusFrame dummyFrame;
-    dummyFrame.setFrameId(12);
-    dummyFrame.setPayload(QByteArray("def"));
-    dummyFrame.setTimeStamp(QCanBusFrame::TimeStamp(timeStamp / 1000, (timeStamp % 1000) * 1000));
-
-    enqueueReceivedFrames(QVector<QCanBusFrame>() << dummyFrame);
-}
-
 bool DummyBackend::writeFrame(const QCanBusFrame &data)
 {
-    qDebug() << "DummyBackend::writeFrame: " << data.toString();
+    qDebug("DummyBackend::writeFrame: %ls", qUtf16Printable(data.toString()));
     return true;
 }
 

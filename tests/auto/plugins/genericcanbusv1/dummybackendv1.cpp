@@ -43,16 +43,16 @@
 QT_BEGIN_NAMESPACE
 
 DummyBackendV1::DummyBackendV1() :
-    sendTimer(new QTimer(this))
+    simulateReceivingTimer(new QTimer(this))
 {
-    connect(sendTimer, &QTimer::timeout, [this]() {
+    connect(simulateReceivingTimer, &QTimer::timeout, [this]() {
         const quint64 timeStamp = QDateTime::currentDateTime().toMSecsSinceEpoch();
         QCanBusFrame dummyFrame(11, "abc");
         dummyFrame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(timeStamp * 1000));
 
         enqueueReceivedFrames({dummyFrame});
     });
-    sendTimer->start(1000);
+    simulateReceivingTimer->start(1000);
 }
 
 bool DummyBackendV1::open()

@@ -38,7 +38,6 @@
 
 #include <QtSerialBus/qcanbus.h>
 #include <QtSerialBus/qcanbusfactory.h>
-#include "../../../../src/serialbus/qcanbusdeviceinfo_p.h"
 
 QT_BEGIN_NAMESPACE
 

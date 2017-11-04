@@ -58,11 +58,8 @@ public:
 
     static QList<QCanBusDeviceInfo> interfaces();
 
-public Q_SLOTS:
-    void sendMessage();
-
 private:
-    QTimer *sendTimer;
+    QTimer *simulateReceivingTimer = nullptr;
 };
 
 QT_END_NAMESPACE

@@ -57,7 +57,7 @@ public:
     QString interpretErrorFrame(const QCanBusFrame &) override;
 
 private:
-    QTimer *sendTimer;
+    QTimer *simulateReceivingTimer = nullptr;
 };
 
 QT_END_NAMESPACE
