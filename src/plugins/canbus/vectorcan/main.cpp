@@ -40,7 +40,11 @@
 #include <QtSerialBus/qcanbusdevice.h>
 #include <QtSerialBus/qcanbusfactory.h>
 
+#include <QtCore/qloggingcategory.h>
+
 QT_BEGIN_NAMESPACE
+
+Q_LOGGING_CATEGORY(QT_CANBUS_PLUGINS_VECTORCAN, "qt.canbus.plugins.vectorcan")
 
 class VectorCanBusPlugin : public QObject, public QCanBusFactoryV2
 {
@@ -61,7 +65,7 @@ public:
     {
         QString errorReason;
         if (Q_UNLIKELY(!VectorCanBackend::canCreate(&errorReason))) {
-            qWarning("%ls", qUtf16Printable(errorReason));
+            qCWarning(QT_CANBUS_PLUGINS_VECTORCAN, "%ls", qUtf16Printable(errorReason));
             if (errorMessage)
                 *errorMessage = errorReason;
             return nullptr;

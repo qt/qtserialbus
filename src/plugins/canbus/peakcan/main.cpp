@@ -41,7 +41,11 @@
 #include <QtSerialBus/qcanbusdevice.h>
 #include <QtSerialBus/qcanbusfactory.h>
 
+#include <QtCore/qloggingcategory.h>
+
 QT_BEGIN_NAMESPACE
+
+Q_LOGGING_CATEGORY(QT_CANBUS_PLUGINS_PEAKCAN, "qt.canbus.plugins.peakcan")
 
 class PeakCanBusPlugin : public QObject, public QCanBusFactoryV2
 {
@@ -62,7 +66,7 @@ public:
     {
         QString errorReason;
         if (!PeakCanBackend::canCreate(&errorReason)) {
-            qWarning("%ls", qUtf16Printable(errorReason));
+            qCWarning(QT_CANBUS_PLUGINS_PEAKCAN, "%ls", qUtf16Printable(errorReason));
             if (errorMessage)
                 *errorMessage = errorReason;
             return nullptr;

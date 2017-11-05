@@ -43,10 +43,13 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qdatastream.h>
 #include <QtCore/qeventloop.h>
+#include <QtCore/qloggingcategory.h>
 #include <QtCore/qscopedvaluerollback.h>
 #include <QtCore/qtimer.h>
 
 QT_BEGIN_NAMESPACE
+
+Q_LOGGING_CATEGORY(QT_CANBUS, "qt.canbus")
 
 /*!
     \class QCanBusDevice
@@ -445,10 +448,10 @@ bool QCanBusDevice::waitForFramesWritten(int msecs)
 {
     // do not enter this function recursively
     if (Q_UNLIKELY(d_func()->waitForWrittenEntered)) {
-        qWarning("QCanBusDevice::waitForFramesWritten() must not be called "
-                 "recursively. Check that no slot containing waitForFramesReceived() "
-                 "is called in response to framesWritten(qint64) or errorOccurred(CanBusError)"
-                 "signals\n");
+        qCWarning(QT_CANBUS, "QCanBusDevice::waitForFramesWritten() must not be called "
+                             "recursively. Check that no slot containing waitForFramesReceived() "
+                             "is called in response to framesWritten(qint64) or "
+                             "errorOccurred(CanBusError) signals.");
         return false;
     }
 
@@ -498,10 +501,10 @@ bool QCanBusDevice::waitForFramesReceived(int msecs)
 {
     // do not enter this function recursively
     if (Q_UNLIKELY(d_func()->waitForReceivedEntered)) {
-        qWarning("QCanBusDevice::waitForFramesReceived() must not be called "
-                 "recursively. Check that no slot containing waitForFramesReceived() "
-                 "is called in response to framesReceived() or errorOccurred(CanBusError) "
-                 "signals\n");
+        qCWarning(QT_CANBUS, "QCanBusDevice::waitForFramesReceived() must not be called "
+                             "recursively. Check that no slot containing waitForFramesReceived() "
+                             "is called in response to framesReceived() or "
+                             "errorOccurred(CanBusError) signals.");
         return false;
     }
 
@@ -665,7 +668,7 @@ void QCanBusDevice::disconnectDevice()
 
     if (Q_UNLIKELY(d->state == QCanBusDevice::UnconnectedState
             || d->state == QCanBusDevice::ClosingState)) {
-        qWarning("Can not disconnect an unconnected device");
+        qCWarning(QT_CANBUS, "Can not disconnect an unconnected device.");
         return;
     }
 

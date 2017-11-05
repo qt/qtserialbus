@@ -42,12 +42,15 @@
 
 #include <QtCore/qtimer.h>
 #include <QtCore/qcoreevent.h>
+#include <QtCore/qloggingcategory.h>
 #include <QtCore/qwineventnotifier.h>
 #include <QtCore/qcoreapplication.h>
 
 #include <algorithm>
 
 QT_BEGIN_NAMESPACE
+
+Q_DECLARE_LOGGING_CATEGORY(QT_CANBUS_PLUGINS_VECTORCAN)
 
 #ifndef LINK_LIBVECTORCAN
 Q_GLOBAL_STATIC(QLibrary, vectorcanLibrary)
@@ -459,8 +462,8 @@ bool VectorCanBackend::open()
         const QVariant param = configurationParameter(key);
         const bool success = d->setConfigurationParameter(key, param);
         if (!success) {
-            qWarning("Cannot apply parameter: %d with value: %ls",
-                     key, qUtf16Printable(param.toString()));
+            qCWarning(QT_CANBUS_PLUGINS_VECTORCAN, "Cannot apply parameter: %d with value: %ls.",
+                      key, qUtf16Printable(param.toString()));
         }
     }
 

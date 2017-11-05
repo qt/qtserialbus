@@ -43,10 +43,13 @@
 #include <QtCore/qcoreapplication.h>
 #include <QtCore/qcoreevent.h>
 #include <QtCore/qdebug.h>
+#include <QtCore/qloggingcategory.h>
 #include <QtCore/qregularexpression.h>
 #include <QtCore/qtimer.h>
 
 QT_BEGIN_NAMESPACE
+
+Q_DECLARE_LOGGING_CATEGORY(QT_CANBUS_PLUGINS_SYSTECCAN)
 
 Q_GLOBAL_STATIC(QLibrary, systecLibrary)
 
@@ -458,8 +461,8 @@ bool SystecCanBackend::open()
         const QVariant param = configurationParameter(key);
         const bool success = d->setConfigurationParameter(key, param);
         if (Q_UNLIKELY(!success)) {
-            qWarning("Cannot apply parameter %d with value %ls.",
-                     key, qUtf16Printable(param.toString()));
+            qCWarning(QT_CANBUS_PLUGINS_SYSTECCAN, "Cannot apply parameter %d with value %ls.",
+                      key, qUtf16Printable(param.toString()));
         }
     }
 

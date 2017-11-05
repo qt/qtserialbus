@@ -41,7 +41,11 @@
 #include <QtSerialBus/qcanbusdevice.h>
 #include <QtSerialBus/qcanbusfactory.h>
 
+#include <QtCore/qloggingcategory.h>
+
 QT_BEGIN_NAMESPACE
+
+Q_LOGGING_CATEGORY(QT_CANBUS_PLUGINS_TINYCAN, "qt.canbus.plugins.tinycan")
 
 class TinyCanBusPlugin : public QObject, public QCanBusFactoryV2
 {
@@ -60,7 +64,7 @@ public:
     {
         QString errorReason;
         if (!TinyCanBackend::canCreate(&errorReason)) {
-            qWarning("%ls", qUtf16Printable(errorReason));
+            qCWarning(QT_CANBUS_PLUGINS_TINYCAN, "%ls", qUtf16Printable(errorReason));
             if (errorMessage)
                 *errorMessage = errorReason;
             return nullptr;

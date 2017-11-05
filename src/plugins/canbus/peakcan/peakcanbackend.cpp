@@ -43,6 +43,7 @@
 
 #include <QtCore/qtimer.h>
 #include <QtCore/qcoreevent.h>
+#include <QtCore/qloggingcategory.h>
 
 #include <algorithm>
 
@@ -53,6 +54,8 @@
 #endif
 
 QT_BEGIN_NAMESPACE
+
+Q_DECLARE_LOGGING_CATEGORY(QT_CANBUS_PLUGINS_PEAKCAN)
 
 #ifndef LINK_LIBPCANBASIC
 Q_GLOBAL_STATIC(QLibrary, pcanLibrary)
@@ -482,8 +485,8 @@ bool PeakCanBackend::open()
             const QVariant param = configurationParameter(key);
             const bool success = d->setConfigurationParameter(key, param);
             if (Q_UNLIKELY(!success)) {
-                qWarning("Cannot apply parameter: %d with value: %ls.",
-                         key, qUtf16Printable(param.toString()));
+                qCWarning(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot apply parameter: %d with value: %ls.",
+                          key, qUtf16Printable(param.toString()));
             }
         }
     }

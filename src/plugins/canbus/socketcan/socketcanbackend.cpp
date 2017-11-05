@@ -40,6 +40,7 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qdiriterator.h>
 #include <QtCore/qfile.h>
+#include <QtCore/qloggingcategory.h>
 #include <QtCore/qsocketnotifier.h>
 
 #include <linux/can/error.h>
@@ -75,6 +76,8 @@ struct canfd_frame {
 #endif
 
 QT_BEGIN_NAMESPACE
+
+Q_DECLARE_LOGGING_CATEGORY(QT_CANBUS_PLUGINS_SOCKETCAN)
 
 const char sysClassNetC[] = "/sys/class/net/";
 const char flagsC[]       = "/flags";
@@ -242,7 +245,7 @@ bool SocketCanBackend::applyConfigurationParameter(int key, const QVariant &valu
             socklen_t s = sizeof(can_filter);
             if (Q_UNLIKELY(setsockopt(canSocket, SOL_CAN_RAW, CAN_RAW_FILTER,
                            &filters, s) != 0)) {
-                qWarning("Cannot unset socket filters");
+                qCWarning(QT_CANBUS_PLUGINS_SOCKETCAN, "Cannot unset socket filters.");
                 setError(qt_error_string(errno),
                          QCanBusDevice::CanBusError::ConfigurationError);
                 break;
@@ -366,8 +369,8 @@ bool SocketCanBackend::connectSocket()
         const QVariant param = configurationParameter(key);
         bool success = applyConfigurationParameter(key, param);
         if (Q_UNLIKELY(!success)) {
-            qWarning("Cannot apply parameter: %d with value: %ls",
-                     key, qUtf16Printable(param.toString()));
+            qCWarning(QT_CANBUS_PLUGINS_SOCKETCAN, "Cannot apply parameter: %d with value: %ls.",
+                      key, qUtf16Printable(param.toString()));
         }
     }
 
@@ -436,7 +439,7 @@ bool SocketCanBackend::writeFrame(const QCanBusFrame &newData)
 
     if (Q_UNLIKELY(!canFdOptionEnabled && newData.hasFlexibleDataRateFormat())) {
         const QString error = tr("Cannot write CAN FD frame because CAN FD option is not enabled.");
-        qDebug("%ls", qUtf16Printable(error));
+        qCWarning(QT_CANBUS_PLUGINS_SOCKETCAN, "%ls", qUtf16Printable(error));
         setError(error, QCanBusDevice::WriteError);
         return false;
     }
