@@ -74,6 +74,13 @@ struct canfd_frame {
 
 #endif
 
+#ifndef CANFD_BRS
+#   define CANFD_BRS 0x01 /* bit rate switch (second bitrate for payload data) */
+#endif
+#ifndef CANFD_ESI
+#   define CANFD_ESI 0x02 /* error state indicator of the transmitting node */
+#endif
+
 QT_BEGIN_NAMESPACE
 
 const char sysClassNetC[] = "/sys/class/net/";
