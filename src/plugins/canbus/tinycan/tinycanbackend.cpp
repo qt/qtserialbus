@@ -559,7 +559,7 @@ bool TinyCanBackend::writeFrame(const QCanBusFrame &newData)
     }
 
     // CAN FD frame format not supported at this stage
-    if (Q_UNLIKELY(newData.payload().size() > 8)) {
+    if (Q_UNLIKELY(newData.hasFlexibleDataRateFormat())) {
         setError(tr("CAN FD frame format not supported."), QCanBusDevice::WriteError);
         return false;
     }

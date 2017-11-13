@@ -510,7 +510,7 @@ bool VectorCanBackend::writeFrame(const QCanBusFrame &newData)
     }
 
     // CAN FD frame format not implemented at this stage
-    if (Q_UNLIKELY(newData.payload().size() > MAX_MSG_LEN)) {
+    if (Q_UNLIKELY(newData.hasFlexibleDataRateFormat())) {
         setError(tr("CAN FD frame format not supported."),
                  QCanBusDevice::WriteError);
         return false;
