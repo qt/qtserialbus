@@ -147,6 +147,17 @@ static QObject *canBusFactory(const QString &plugin, QString *errorMessage)
 
     \note Some plugins might not or only partially support this function.
 
+    For example, the following call returns a list of all available SocketCAN
+    interfaces (which can be used for \l createDevice()):
+
+    \code
+        QString errorString;
+        const QList<QCanBusDeviceInfo> devices = QCanBus::instance()->availableDevices(
+            QStringLiteral("socketcan"), &errorString);
+        if (!errorString.isEmpty())
+            qDebug() << errorString;
+    \endcode
+
     \sa createDevice()
 */
 QList<QCanBusDeviceInfo> QCanBus::availableDevices(const QString &plugin, QString *errorMessage) const
@@ -180,9 +191,13 @@ QList<QCanBusDeviceInfo> QCanBus::availableDevices(const QString &plugin, QStrin
     For example, the following call would connect to the SocketCAN interface vcan0:
 
     \code
+        QString errorString;
         QCanBusDevice *device = QCanBus::instance()->createDevice(
-            QStringLiteral("socketcan"), QStringLiteral("vcan0"));
-        device->connectDevice();
+            QStringLiteral("socketcan"), QStringLiteral("vcan0"), &errorString);
+        if (!device)
+            qDebug() << errorString;
+        else
+            device->connectDevice();
     \endcode
 
     \note The \a interfaceName is plugin-dependent. See the corresponding plugin documentation
