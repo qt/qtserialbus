@@ -37,7 +37,7 @@
 #include <QtSerialBus/qcanbus.h>
 #include <QtSerialBus/qcanbusfactory.h>
 
-#include <QtTest/QtTest>
+#include <QtTest/qtest.h>
 
 class tst_QCanBus : public QObject
 {
@@ -52,7 +52,7 @@ private slots:
     void createDevice();
 
 private:
-    QCanBus *bus;
+    QCanBus *bus = nullptr;
 };
 
 tst_QCanBus::tst_QCanBus()
@@ -89,12 +89,12 @@ void tst_QCanBus::plugins()
 void tst_QCanBus::interfaces()
 {
     // Plugins derived from QCanBusFactory(V1) don't have availableDevices()
-    const QList<QCanBusDeviceInfo> pluginListV1 = bus->availableDevices("genericV1");
-    QVERIFY(pluginListV1.isEmpty());
+    const QList<QCanBusDeviceInfo> deviceListV1 = bus->availableDevices("genericV1");
+    QVERIFY(deviceListV1.isEmpty());
 
     const QList<QCanBusDeviceInfo> pluginList = bus->availableDevices("generic");
-    QCOMPARE(1, pluginList.size());
-    QCOMPARE(QString("can0"), pluginList.at(0).name());
+    QCOMPARE(pluginList.size(), 1);
+    QCOMPARE(pluginList.at(0).name(), QStringLiteral("can0"));
     QVERIFY(pluginList.at(0).isVirtual());
     QVERIFY(pluginList.at(0).hasFlexibleDataRate());
 }

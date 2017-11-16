@@ -34,8 +34,10 @@
 **
 ****************************************************************************/
 
-#include <QtTest/QtTest>
-#include <QtSerialBus/QCanBusFrame>
+#include <QtSerialBus/qcanbusframe.h>
+
+#include <QtCore/qdatastream.h>
+#include <QtTest/qtest.h>
 
 class tst_QCanBusFrame : public QObject
 {
@@ -610,7 +612,7 @@ void tst_QCanBusFrame::tst_error()
     QCOMPARE(frame.frameId(), 0u); //id of Error frame always 0
     QCOMPARE(frame.error(), QCanBusFrame::TransmissionTimeoutError);
 
-    frame.setError(QCanBusFrame::FrameErrors(QCanBusFrame::ControllerError|QCanBusFrame::ProtocolViolationError));
+    frame.setError(QCanBusFrame::FrameErrors(QCanBusFrame::ControllerError | QCanBusFrame::ProtocolViolationError));
     QCOMPARE(frame.frameType(), QCanBusFrame::ErrorFrame);
     QCOMPARE(frame.frameId(), 0u); //id of Error frame always 0
     QCOMPARE(frame.error(),
@@ -618,7 +620,7 @@ void tst_QCanBusFrame::tst_error()
 
     frame.setFrameType(QCanBusFrame::RemoteRequestFrame);
     QCOMPARE(frame.frameType(), QCanBusFrame::RemoteRequestFrame);
-    QCOMPARE(frame.frameId(), (uint)(QCanBusFrame::ControllerError|QCanBusFrame::ProtocolViolationError));
+    QCOMPARE(frame.frameId(), uint(QCanBusFrame::ControllerError | QCanBusFrame::ProtocolViolationError));
     QCOMPARE(frame.error(), QCanBusFrame::NoError);
 }
 
