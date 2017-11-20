@@ -634,6 +634,8 @@ QCanBusFrame QCanBusDevice::readFrame()
     otherwise \c false.
 
     This function calls \l open() as part of its implementation.
+
+    \sa disconnectDevice()
 */
 bool QCanBusDevice::connectDevice()
 {
@@ -661,6 +663,11 @@ bool QCanBusDevice::connectDevice()
     Disconnects the device from the CAN bus.
 
     This function calls \l close() as part of its implementation.
+
+    \note This function should only be called, if connectDevice()
+    returned \c true.
+
+    \sa connectDevice()
 */
 void QCanBusDevice::disconnectDevice()
 {

@@ -10,4 +10,5 @@ HEADERS += \
     canbusutil.h \
     sigtermhandler.h
 
+QMAKE_TARGET_DESCRIPTION = "Qt CAN Bus Util"
 load(qt_tool)

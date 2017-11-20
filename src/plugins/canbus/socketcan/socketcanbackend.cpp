@@ -433,7 +433,7 @@ bool SocketCanBackend::writeFrame(const QCanBusFrame &newData)
     if (newData.frameType() == QCanBusFrame::RemoteRequestFrame) {
         canId |= CAN_RTR_FLAG;
     } else if (newData.frameType() == QCanBusFrame::ErrorFrame) {
-        canId = (uint)(newData.error() & QCanBusFrame::AnyError);
+        canId = static_cast<canid_t>((newData.error() & QCanBusFrame::AnyError));
         canId |= CAN_ERR_FLAG;
     }
 
