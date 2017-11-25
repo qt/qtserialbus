@@ -37,16 +37,16 @@
 #ifndef CANBUSUTIL_H
 #define CANBUSUTIL_H
 
-#include <QObject>
-#include <QTextStream>
-#include <QCoreApplication>
-#include <QScopedPointer>
-
 #include "readtask.h"
+
+#include <QObject>
+#include <QScopedPointer>
 
 QT_BEGIN_NAMESPACE
 
 class QCanBusFrame;
+class QCoreApplication;
+class QTextStream;
 
 QT_END_NAMESPACE
 
@@ -59,7 +59,7 @@ public:
     void setShowTimeStamp(bool showTimeStamp);
     void setShowFdFlags(bool showFdFlags);
     bool start(const QString &pluginName, const QString &deviceName, const QString &data = QString());
-    void printPlugins();
+    int  printPlugins();
     int  printDevices(const QString &pluginName);
 
 private:
@@ -69,15 +69,15 @@ private:
     bool sendData();
 
 private:
-    QCanBus *m_canBus;
+    QCanBus *m_canBus = nullptr;
     QTextStream &m_output;
     QCoreApplication &m_app;
-    bool m_listening;
+    bool m_listening = false;
     QString m_pluginName;
     QString m_deviceName;
     QString m_data;
     QScopedPointer<QCanBusDevice> m_canDevice;
-    ReadTask *m_readTask;
+    ReadTask *m_readTask = nullptr;
 };
 
 #endif // CANBUSUTIL_H

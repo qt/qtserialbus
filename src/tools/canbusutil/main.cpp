@@ -34,6 +34,9 @@
 **
 ****************************************************************************/
 
+#include "canbusutil.h"
+#include "sigtermhandler.h"
+
 #include <QCommandLineParser>
 #include <QCoreApplication>
 #include <QTextStream>
@@ -41,15 +44,10 @@
 
 #include <signal.h>
 
-#include "canbusutil.h"
-#include "sigtermhandler.h"
-
-#define PROGRAMNAME "canbusutil"
-
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
-    QCoreApplication::setApplicationName(QStringLiteral(PROGRAMNAME));
+    QCoreApplication::setApplicationName(QStringLiteral("canbusutil"));
     QCoreApplication::setApplicationVersion(QStringLiteral(QT_VERSION_STR));
 
     QScopedPointer<SigTermHandler> s(SigTermHandler::instance());
@@ -106,10 +104,8 @@ int main(int argc, char *argv[])
 
     parser.process(app);
 
-    if (parser.isSet(listOption)) {
-        util.printPlugins();
-        return 0;
-    }
+    if (parser.isSet(listOption))
+        return util.printPlugins();
 
     QString data;
     const QStringList args = parser.positionalArguments();
@@ -117,16 +113,16 @@ int main(int argc, char *argv[])
         util.setShowTimeStamp(parser.isSet(showTimeStampOption));
         util.setShowFdFlags(parser.isSet(showFdFlagsOption));
     } else if (args.size() == 3) {
-        data = args[2];
+        data = args.at(2);
     } else if (args.size() == 1 && parser.isSet(listDevicesOption)) {
-        return util.printDevices(args[0]);
+        return util.printDevices(args.at(0));
     } else if (args.size() != 2) {
-        fprintf(stderr, "Invalid number of arguments (%d given).\n\n%s",
-            args.size(), qPrintable(parser.helpText()));
+        output << CanBusUtil::tr("Invalid number of arguments (%1 given).").arg(args.size());
+        output << endl << endl << parser.helpText();
         return 1;
     }
 
-    if (!util.start(args[0], args[1], data))
+    if (!util.start(args.at(0), args.at(1), data))
         return -1;
 
     return app.exec();

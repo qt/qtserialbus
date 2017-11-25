@@ -36,8 +36,11 @@
 
 #include "canbusutil.h"
 
-CanBusUtil::CanBusUtil(QTextStream &output, QCoreApplication &app, QObject *parent)
-  : QObject(parent),
+#include <QCoreApplication>
+#include <QTextStream>
+
+CanBusUtil::CanBusUtil(QTextStream &output, QCoreApplication &app, QObject *parent) :
+    QObject(parent),
     m_canBus(QCanBus::instance()),
     m_output(output),
     m_app(app),
@@ -58,7 +61,7 @@ void CanBusUtil::setShowFdFlags(bool showFdFlags)
 bool CanBusUtil::start(const QString &pluginName, const QString &deviceName, const QString &data)
 {
     if (!m_canBus) {
-        m_output << "Unable to create QCanBus" << endl;
+        m_output << tr("Error: Cannot create QCanBus.") << endl;
         return false;
     }
 
@@ -73,29 +76,41 @@ bool CanBusUtil::start(const QString &pluginName, const QString &deviceName, con
     if (m_listening) {
         if (m_readTask->isShowFdFlags())
              m_canDevice->setConfigurationParameter(QCanBusDevice::CanFdKey, true);
-        connect(m_canDevice.data(), &QCanBusDevice::framesReceived, m_readTask, &ReadTask::checkMessages);
+        connect(m_canDevice.data(), &QCanBusDevice::framesReceived,
+                m_readTask, &ReadTask::handleFrames);
     } else {
         if (!sendData())
             return false;
-        QTimer::singleShot(0, &m_app, SLOT(quit()));
+        QTimer::singleShot(0, &m_app, QCoreApplication::quit);
     }
 
     return true;
 }
 
-void CanBusUtil::printPlugins()
+int CanBusUtil::printPlugins()
 {
+    if (!m_canBus) {
+        m_output << tr("Error: Cannot create QCanBus.") << endl;
+        return 1;
+    }
+
     const QStringList plugins = m_canBus->plugins();
-    for (int i = 0; i < plugins.size(); i++)
-        m_output << plugins.at(i) << endl;
+    for (const QString &plugin : plugins)
+        m_output << plugin << endl;
+    return 0;
 }
 
 int CanBusUtil::printDevices(const QString &pluginName)
 {
+    if (!m_canBus) {
+        m_output << tr("Error: Cannot create QCanBus.") << endl;
+        return 1;
+    }
+
     QString errorMessage;
     const QList<QCanBusDeviceInfo> devices = m_canBus->availableDevices(pluginName, &errorMessage);
     if (!errorMessage.isEmpty()) {
-        m_output << "Error: " << errorMessage << endl;
+        m_output << tr("Error gathering available devices: '%1'").arg(errorMessage) << endl;
         return 1;
     }
 
@@ -108,12 +123,12 @@ bool CanBusUtil::parseDataField(quint32 &id, QString &payload)
 {
     int hashMarkPos = m_data.indexOf('#');
     if (hashMarkPos < 0) {
-        m_output << "Data field invalid: No hash mark found!" << endl;
+        m_output << tr("Data field invalid: No hash mark found!") << endl;
         return false;
     }
 
     id = m_data.leftRef(hashMarkPos).toUInt(nullptr, 16);
-    payload = m_data.right(m_data.length() - hashMarkPos - 1);
+    payload = m_data.right(m_data.size() - hashMarkPos - 1);
 
     return true;
 }
@@ -121,37 +136,30 @@ bool CanBusUtil::parseDataField(quint32 &id, QString &payload)
 bool CanBusUtil::setFrameFromPayload(QString payload, QCanBusFrame *frame)
 {
     if (!payload.isEmpty() && payload.at(0).toUpper() == 'R') {
-        bool validPayloadLength = false;
-
         frame->setFrameType(QCanBusFrame::RemoteRequestFrame);
 
-        if (payload.size() == 1) { // payload = "R"
-            validPayloadLength = true;
-        } else if (payload.size() > 1) { // payload = "R8"
-            payload = payload.mid(1);
-            int rtrFrameLength = payload.toInt(&validPayloadLength);
+        if (payload.size() == 1) // payload = "R"
+            return true;
 
-            if (validPayloadLength && rtrFrameLength >= 0 && rtrFrameLength <= 8) {
-                frame->setPayload(QByteArray(rtrFrameLength, 0));
-            } else if (validPayloadLength) {
-                m_output << "The length must be between 0 and 8 (including)." << endl;
-                validPayloadLength = false;
-            }
+        bool ok = false;
+        int rtrFrameLength = payload.midRef(1).toInt(&ok);
+        if (ok && rtrFrameLength >= 0 && rtrFrameLength <= 8) { // payload = "R8"
+            frame->setPayload(QByteArray(rtrFrameLength, 0));
+            return true;
         }
 
-        if (!validPayloadLength) {
-            m_output << "Data field invalid: RTR data frame length not specified/valid." << endl;
-        }
+        m_output << tr("Error: RTR frame length must be between 0 and 8 (including).") << endl;
+        return false;
+    }
 
-        return validPayloadLength;
-    } else if (!payload.isEmpty() && payload.at(0) == '#') {
+    if (!payload.isEmpty() && payload.at(0) == '#') {
         frame->setFlexibleDataRateFormat(true);
-        payload = payload.mid(1);
+        payload.remove(0, 1);
     }
 
     const QRegularExpression re(QStringLiteral("^[0-9A-Fa-f]*$"));
     if (!re.match(payload).hasMatch()) {
-        m_output << "Data field invalid: Only hex numbers allowed." << endl;
+        m_output << tr("Data field invalid: Only hex numbers allowed.") << endl;
         return false;
     }
 
@@ -163,7 +171,7 @@ bool CanBusUtil::setFrameFromPayload(QString payload, QCanBusFrame *frame)
             frame->setErrorStateIndicator(flags & ErrorStateIndicatorFlag);
             payload.remove(0, 1);
         } else {
-            m_output << "Data field invalid: Size is not multiple of two." << endl;
+            m_output << tr("Data field invalid: Size is not multiple of two.") << endl;
             return false;
         }
     }
@@ -172,8 +180,8 @@ bool CanBusUtil::setFrameFromPayload(QString payload, QCanBusFrame *frame)
 
     const int maxSize = frame->hasFlexibleDataRateFormat() ? 64 : 8;
     if (bytes.size() > maxSize) {
-        m_output << "Warning: Truncating payload at max. size of " << maxSize << " bytes." << endl;
-        bytes.truncate(maxSize);
+        m_output << tr("Data field invalid: Size is longer than %1 bytes.").arg(maxSize) << endl;
+        return false;
     }
 
     frame->setPayload(bytes);
@@ -184,20 +192,18 @@ bool CanBusUtil::setFrameFromPayload(QString payload, QCanBusFrame *frame)
 bool CanBusUtil::connectCanDevice()
 {
     if (!m_canBus->plugins().contains(m_pluginName)) {
-        m_output << "Could not find suitable plugin." << endl;
-        m_output << "Available plugins:" << endl;
-        printPlugins();
+        m_output << tr("Cannot find CAN bus plugin '%1'.").arg(m_pluginName) << endl;
         return false;
     }
 
     m_canDevice.reset(m_canBus->createDevice(m_pluginName, m_deviceName));
     if (!m_canDevice) {
-        m_output << "Unable to create QCanBusDevice with device name: " << m_deviceName << endl;
+        m_output << tr("Cannot create CAN bus device: '%1'").arg(m_deviceName) << endl;
         return false;
     }
-    connect(m_canDevice.data(), &QCanBusDevice::errorOccurred, m_readTask, &ReadTask::receiveError);
+    connect(m_canDevice.data(), &QCanBusDevice::errorOccurred, m_readTask, &ReadTask::handleError);
     if (!m_canDevice->connectDevice()) {
-        m_output << "Unable to connect QCanBusDevice with device name: " << m_deviceName << endl;
+        m_output << tr("Cannot create CAN bus device: '%1'").arg(m_deviceName) << endl;
         return false;
     }
 
@@ -210,15 +216,15 @@ bool CanBusUtil::sendData()
     QString payload;
     QCanBusFrame frame;
 
-    if (parseDataField(id, payload) == false)
+    if (!parseDataField(id, payload))
         return false;
 
-    if (setFrameFromPayload(payload, &frame) == false)
+    if (!setFrameFromPayload(payload, &frame))
         return false;
 
     if (id > 0x1FFFFFFF) { // 29 bits
-        id = 0x1FFFFFFF;
-        m_output << "Warning! Id does not fit into Extended Frame Format, setting id to: " << id << endl;
+        m_output << tr("Cannot send invalid frame ID: '%1'").arg(id, 0, 16) << endl;
+        return false;
     }
 
     frame.setFrameId(id);

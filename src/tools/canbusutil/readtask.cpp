@@ -36,9 +36,9 @@
 
 #include "readtask.h"
 
-ReadTask::ReadTask(QTextStream &output, QObject *parent)
-    : QObject(parent),
-      output(output) { }
+ReadTask::ReadTask(QTextStream &output, QObject *parent) :
+    QObject(parent),
+    m_output(output) { }
 
 void ReadTask::setShowTimeStamp(bool showTimeStamp)
 {
@@ -55,10 +55,10 @@ void ReadTask::setShowFdFlags(bool showFlags)
     m_showFdFlags = showFlags;
 }
 
-void ReadTask::checkMessages() {
+void ReadTask::handleFrames() {
     auto canDevice = qobject_cast<QCanBusDevice *>(QObject::sender());
     if (canDevice == nullptr) {
-        qWarning("ReadTask::checkMessages: Unknown sender");
+        qWarning("ReadTask::handleFrames: Unknown sender.");
         return;
     }
 
@@ -87,16 +87,17 @@ void ReadTask::checkMessages() {
         else
             view += frame.toString();
 
-        output << view << endl;
+        m_output << view << endl;
     }
 }
 
-void ReadTask::receiveError(QCanBusDevice::CanBusError /*error*/) {
+void ReadTask::handleError(QCanBusDevice::CanBusError /*error*/)
+{
     auto canDevice = qobject_cast<QCanBusDevice *>(QObject::sender());
     if (canDevice == nullptr) {
-        qWarning("ReadTask::receiveError: Unknown sender");
+        qWarning("ReadTask::handleError: Unknown sender.");
         return;
     }
 
-    output << "Read error: " << canDevice->errorString() << endl;
+    m_output << tr("Read error: '%1'").arg(canDevice->errorString()) << endl;
 }

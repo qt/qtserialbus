@@ -45,17 +45,17 @@ class ReadTask : public QObject
 {
     Q_OBJECT
 public:
-    explicit ReadTask(QTextStream &output, QObject *parent = nullptr);
+    explicit ReadTask(QTextStream &m_output, QObject *parent = nullptr);
     void setShowTimeStamp(bool showStamp);
     bool isShowFdFlags() const;
     void setShowFdFlags(bool isShowFdFlags);
 
 public slots:
-    void checkMessages();
-    void receiveError(QCanBusDevice::CanBusError /*error*/);
+    void handleFrames();
+    void handleError(QCanBusDevice::CanBusError /*error*/);
 
 private:
-    QTextStream &output;
+    QTextStream &m_output;
     bool m_showTimeStamp = false;
     bool m_showFdFlags = false;
 };
