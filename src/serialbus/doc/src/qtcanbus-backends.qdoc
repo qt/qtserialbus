@@ -81,6 +81,10 @@
             \li Vector Informatik
             \li \l {Using VectorCAN Plugin}{VectorCAN} (\c vectorcan)
             \li CAN bus plugin using the Vector CAN adapters.
+        \row
+            \li Virtual CAN interface
+            \li \l {Using VirtualCAN Plugin}{VirtualCAN} (\c virtualcan)
+            \li CAN bus plugin using a virtual TCP/IP connection.
     \endtable
 
     \section1 Implementing a Custom CAN Plugin

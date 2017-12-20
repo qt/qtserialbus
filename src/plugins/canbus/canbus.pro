@@ -2,6 +2,9 @@ TEMPLATE = subdirs
 
 include($$OUT_PWD/../../serialbus/qtserialbus-config.pri)
 QT_FOR_CONFIG += serialbus-private
+
+SUBDIRS += virtualcan
+
 qtConfig(socketcan) {
     SUBDIRS += socketcan
 }
