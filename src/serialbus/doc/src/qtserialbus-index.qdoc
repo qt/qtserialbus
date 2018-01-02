@@ -73,13 +73,32 @@
         \li Logging Category
         \li Description
     \row
+        \li qt.canbus
+        \li Enables standard logging inside the \l {Qt CAN Bus} classes
+    \row
+        \li qt.canbus.plugins
+        \li Enables low level logging inside the \l {Qt CAN Bus} plugin classes.
+        To set logging for a specific plugin, use "qt.canbus.plugins.pluginname".
+        e.g. "qt.canbus.plugins.socketcan". "qt.canbus.plugins*" affects all plugins.
+    \row
         \li qt.modbus
-        \li Enables standard logging inside the Modbus classes
+        \li Enables standard logging inside the \l {Qt Modbus} classes
     \row
         \li qt.modbus.lowlevel
         \li Enables low level logging including individual packet content inside
-            the Modbus classes
+            the \l {Qt Modbus} classes
     \endtable
+
+    Logging categories can be used to enable additional warning and debug output
+    for \l QtSerialBus. More detailed information about logging can be found
+    in \l QLoggingCategory.
+
+    A quick way to enable all \l {Qt Modbus} logging is to add the following line
+    to the main() function:
+
+    \code
+        QLoggingCategory::setFilterRules(QStringLiteral("qt.modbus* = true"));
+    \endcode
 
     \section1 Examples
 
