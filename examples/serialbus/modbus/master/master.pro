@@ -1,4 +1,5 @@
 QT += serialbus serialport widgets
+requires(qtConfig(combobox))
 
 TARGET = modbusmaster
 TEMPLATE = app
