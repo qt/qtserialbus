@@ -4,6 +4,7 @@ INCLUDEPATH += .
 TARGET = adueditor
 QT += serialbus serialport widgets
 QT += serialbus-private core-private
+requires(qtConfig(combobox))
 
 FORMS += interface.ui
 SOURCES += main.cpp mainwindow.cpp modbustcpclient.cpp

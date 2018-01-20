@@ -1,4 +1,5 @@
 QT += serialbus widgets
+requires(qtConfig(combobox))
 
 TARGET = can
 TEMPLATE = app

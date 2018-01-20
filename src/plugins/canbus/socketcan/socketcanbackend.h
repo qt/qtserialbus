@@ -50,6 +50,7 @@
 #include <sys/socket.h>
 #include <sys/uio.h>
 #include <linux/can.h>
+#include <sys/time.h>
 
 QT_BEGIN_NAMESPACE
 
