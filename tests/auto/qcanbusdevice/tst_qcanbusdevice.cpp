@@ -143,6 +143,9 @@ private slots:
     void conf();
     void write();
     void read();
+    void readAll();
+    void clearInputBuffer();
+    void clearOutputBuffer();
     void error();
     void cleanupTestCase();
     void tst_filtering();
@@ -269,6 +272,61 @@ void tst_QCanBusDevice::read()
     QVERIFY(!frame1.isValid());
     QVERIFY(frame2.frameId());
     QVERIFY(frame2.isValid());
+}
+
+void tst_QCanBusDevice::readAll()
+{
+    enum { FrameNumber = 10 };
+    device->disconnectDevice();
+    QVERIFY(device->connectDevice());
+    QTRY_VERIFY_WITH_TIMEOUT(device->state() == QCanBusDevice::ConnectedState, 5000);
+
+    for (int i = 0; i < FrameNumber; ++i)
+        device->triggerNewFrame();
+
+    const QVector<QCanBusFrame> frames = device->readAllFrames();
+    QCOMPARE(FrameNumber, frames.size());
+    QVERIFY(!device->framesAvailable());
+}
+
+void tst_QCanBusDevice::clearInputBuffer()
+{
+    device->disconnectDevice();
+    QVERIFY(!device->clear(QCanBusDevice::Input));
+
+    QVERIFY(device->connectDevice());
+    QTRY_VERIFY_WITH_TIMEOUT(device->state() == QCanBusDevice::ConnectedState, 5000);
+
+    for (int i = 0; i < 10; ++i)
+        device->triggerNewFrame();
+
+    QVERIFY(device->clear(QCanBusDevice::Input));
+
+    QVERIFY(!device->framesAvailable());
+}
+
+void tst_QCanBusDevice::clearOutputBuffer()
+{
+    // this test requires buffered writing
+    device->setWriteBuffered(true);
+    device->disconnectDevice();
+    QVERIFY(!device->clear(QCanBusDevice::Output));
+
+    QVERIFY(device->connectDevice());
+
+    // first test buffered writing, frames will be written after some delay
+    QSignalSpy spy(device.data(), &QCanBusDevice::framesWritten);
+    for (int i = 0; i < 10; ++i)
+        device->writeFrame(QCanBusFrame(0x123, "output"));
+    QTRY_VERIFY_WITH_TIMEOUT(spy.count() == 10, 5000);
+
+    // now test clearing the buffer before the frames are actually written
+    spy.clear();
+    for (int i = 0; i < 10; ++i)
+        device->writeFrame(QCanBusFrame(0x123, "output"));
+
+    device->clear(QCanBusDevice::Output);
+    QTRY_VERIFY_WITH_TIMEOUT(spy.count() == 0, 5000);
 }
 
 void tst_QCanBusDevice::error()

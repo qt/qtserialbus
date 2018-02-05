@@ -404,7 +404,7 @@ QString QCanBusDevice::errorString() const
     Returns the number of available frames. If no frames are available,
     this function returns 0.
 
-    \sa readFrame()
+    \sa clear(), readFrame(), readAllFrames()
 */
 qint64 QCanBusDevice::framesAvailable() const
 {
@@ -419,11 +419,52 @@ qint64 QCanBusDevice::framesAvailable() const
     Therefore, if this function returns zero, that does not mean all CAN frames are
     already written to the CAN bus.
 
-    \sa writeFrame()
+    \sa clear(), writeFrame()
 */
 qint64 QCanBusDevice::framesToWrite() const
 {
     return d_func()->outgoingFrames.size();
+}
+
+/*!
+    \since 5.12
+    \enum QCanBusDevice::Direction
+
+    This enum describes possible data transmission directions.
+
+    \value Input            Input direction.
+    \value Output           Output direction.
+    \value AllDirections    Both directions, input and output.
+*/
+
+/*!
+    \since 5.12
+    Clears the devices input or output buffers, depending on \a direction.
+
+    This function only operates on QCanBusDevice buffers. Frames that are
+    already written to the CAN driver or CAN hardware layer, or that are
+    not yet read from these layers, are not cleared by this function.
+
+    \note Clearing the output buffers is only possible for buffered devices.
+
+    \sa framesAvailable(), readFrame(), framesToWrite(), writeFrame(),
+*/
+bool QCanBusDevice::clear(QCanBusDevice::Directions direction)
+{
+    Q_D(QCanBusDevice);
+
+    if (Q_UNLIKELY(d->state != ConnectedState))
+        return false;
+
+    if (direction & Direction::Input) {
+        QMutexLocker(&d_func()->incomingFramesGuard);
+        d_func()->incomingFrames.clear();
+    }
+
+    if (direction & Direction::Output)
+        d_func()->outgoingFrames.clear();
+
+    return true;
 }
 
 /*!
@@ -573,7 +614,7 @@ bool QCanBusDevice::waitForFramesReceived(int msecs)
 
     The queue operates according to the FIFO principle.
 
-    \sa framesAvailable()
+    \sa clear(), framesAvailable(), readAllFrames()
 */
 QCanBusFrame QCanBusDevice::readFrame()
 {
@@ -588,6 +629,29 @@ QCanBusFrame QCanBusDevice::readFrame()
         return QCanBusFrame(QCanBusFrame::InvalidFrame);
 
     return d->incomingFrames.takeFirst();
+}
+
+/*!
+    \since 5.12
+    Returns all \l{QCanBusFrame}s from the queue; otherwise returns
+    an empty QVector. The returned frames are removed from the queue.
+
+    The queue operates according to the FIFO principle.
+
+    \sa clear(), framesAvailable(), readFrame()
+*/
+QVector<QCanBusFrame> QCanBusDevice::readAllFrames()
+{
+    Q_D(QCanBusDevice);
+
+    if (Q_UNLIKELY(d->state != ConnectedState))
+        return QVector<QCanBusFrame>();
+
+    QMutexLocker locker(&d->incomingFramesGuard);
+
+    QVector<QCanBusFrame> result;
+    result.swap(d->incomingFrames);
+    return result;
 }
 
 /*!

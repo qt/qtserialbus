@@ -105,8 +105,17 @@ public:
 
     virtual bool writeFrame(const QCanBusFrame &frame) = 0;
     QCanBusFrame readFrame();
+    QVector<QCanBusFrame> readAllFrames();
     qint64 framesAvailable() const;
     qint64 framesToWrite() const;
+
+    enum Direction {
+        Input = 1,
+        Output = 2,
+        AllDirections = Input | Output
+    };
+    Q_DECLARE_FLAGS(Directions, Direction)
+    bool clear(Directions direction = Direction::AllDirections);
 
     virtual bool waitForFramesWritten(int msecs);
     virtual bool waitForFramesReceived(int msecs);
