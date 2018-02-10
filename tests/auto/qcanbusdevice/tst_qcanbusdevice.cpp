@@ -199,7 +199,7 @@ void tst_QCanBusDevice::conf()
 
     QVector<int> keys = device->configurationKeys();
     QCOMPARE(keys.size(), 1);
-    QVERIFY(keys[0] == QCanBusDevice::ErrorFilterKey);
+    QVERIFY(keys.at(0) == QCanBusDevice::ErrorFilterKey);
 
     QCOMPARE(value.value<QCanBusFrame::FrameErrors>(),
              QCanBusFrame::LostArbitrationError | QCanBusFrame::BusError);
@@ -258,9 +258,9 @@ void tst_QCanBusDevice::read()
     QVERIFY(device->connectDevice());
     QTRY_VERIFY_WITH_TIMEOUT(device->state() == QCanBusDevice::ConnectedState, 5000);
     QCOMPARE(stateSpy.count(), 2);
-    QCOMPARE(stateSpy[0].at(0).value<QCanBusDevice::CanBusDeviceState>(),
+    QCOMPARE(stateSpy.at(0).at(0).value<QCanBusDevice::CanBusDeviceState>(),
              QCanBusDevice::ConnectingState);
-    QCOMPARE(stateSpy[1].at(0).value<QCanBusDevice::CanBusDeviceState>(),
+    QCOMPARE(stateSpy.at(1).at(0).value<QCanBusDevice::CanBusDeviceState>(),
              QCanBusDevice::ConnectedState);
 
     device->triggerNewFrame();
