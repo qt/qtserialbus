@@ -710,7 +710,7 @@ int QModbusResponse::calculateDataSize(const QModbusResponse &response)
     case QModbusResponse::ReadWriteMultipleRegisters:
     case QModbusResponse::ReportServerId:
         if (response.dataSize() >= 1)
-            size = 1 /*byte count*/ + quint8(response.data()[0]) /*actual bytes*/;
+            size = 1 /*byte count*/ + quint8(response.data().at(0)) /*actual bytes*/;
         break;
     case QModbusResponse::ReadFifoQueue: {
         if (response.dataSize() >= 2) {
