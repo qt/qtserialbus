@@ -258,6 +258,9 @@ bool QModbusDevice::connectDevice()
 */
 void QModbusDevice::disconnectDevice()
 {
+    if (state() == QModbusDevice::UnconnectedState)
+        return;
+
     setState(QModbusDevice::ClosingState);
 
     //Unconnected is set by backend -> might be delayed by event loop
