@@ -333,7 +333,7 @@ public:
         m_requestBuffer.clear();
     }
 
-    QByteArray m_requestBuffer;;
+    QByteArray m_requestBuffer;
     bool m_processesBroadcast = false;
     QSerialPort *m_serialPort = nullptr;
 };
