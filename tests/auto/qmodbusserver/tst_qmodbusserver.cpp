@@ -1046,6 +1046,72 @@ private slots:
         }
     }
 
+    void tst_dataCallsShiftedIndex()
+    {
+        TestServer overlapIndex;
+        const quint16 dataCount = 4;
+
+        QModbusDataUnitMap map;
+        map.insert(QModbusDataUnit::HoldingRegisters, {QModbusDataUnit::HoldingRegisters, 3, dataCount});
+        server.setMap(map);
+        QCOMPARE(map.value(QModbusDataUnit::HoldingRegisters).valueCount(), dataCount);
+
+        QVERIFY(server.setData(QModbusDataUnit::HoldingRegisters, 3, 0xaaaa));
+        QVERIFY(server.setData(QModbusDataUnit::HoldingRegisters, 4, 0xbbbb));
+        QVERIFY(server.setData(QModbusDataUnit::HoldingRegisters, 5, 0xcccc));
+        QVERIFY(server.setData(QModbusDataUnit::HoldingRegisters, 6, 0xdddd));
+
+        // ********** Test individual access ********** //
+        quint16 data = 0;
+        QVERIFY(server.data(QModbusDataUnit::HoldingRegisters, 3, &data));
+        QCOMPARE(data, 0xaaaa);
+        QVERIFY(server.data(QModbusDataUnit::HoldingRegisters, 4, &data));
+        QCOMPARE(data, 0xbbbb);
+        QVERIFY(server.data(QModbusDataUnit::HoldingRegisters, 5, &data));
+        QCOMPARE(data, 0xcccc);
+        QVERIFY(server.data(QModbusDataUnit::HoldingRegisters, 6, &data));
+        QCOMPARE(data, 0xdddd);
+
+
+        // block write at start
+        QModbusDataUnit unit(QModbusDataUnit::HoldingRegisters, 3, 3);
+        for (int i = 0; i < 3; i++)
+            unit.setValue(i, quint16(0x1111 + i));
+        QVERIFY(server.setData(unit));
+
+        QModbusDataUnit results(QModbusDataUnit::HoldingRegisters, 3, 3);
+        QVERIFY(server.data(&results));
+        QCOMPARE(results.values(), QVector<quint16>({0x1111, 0x1112, 0x1113}));
+
+        //i block write at end
+        unit.setStartAddress(4);
+        results.setStartAddress(4);
+        unit.setValues({0x1, 0x2, 0x3});
+        QVERIFY(server.setData(unit));
+        QVERIFY(server.data(&results));
+        QCOMPARE(results.values(), QVector<quint16>({0x1, 0x2, 0x3}));
+
+
+        unit.setStartAddress(2); // overlap in front
+        QVERIFY(!server.setData(unit));
+        unit.setStartAddress(5); // overlap at end
+        QVERIFY(!server.setData(unit));
+
+        data = 0;
+        QVERIFY(!server.data(QModbusDataUnit::HoldingRegisters, 7, &data));
+        QCOMPARE(data, 0);
+        QVERIFY(!server.data(QModbusDataUnit::HoldingRegisters, 2, &data));
+        QCOMPARE(data, 0);
+
+        QVERIFY(!server.setData(QModbusDataUnit::HoldingRegisters, 7, 0xabcd));
+        QVERIFY(!server.setData(QModbusDataUnit::HoldingRegisters, 2, 0xabcd));
+
+        QVERIFY(!server.data(QModbusDataUnit::HoldingRegisters, 7, &data));
+        QCOMPARE(data, 0);
+        QVERIFY(!server.data(QModbusDataUnit::HoldingRegisters, 2, &data));
+        QCOMPARE(data, 0);
+    }
+
     void tst_serverAddress()
     {
         server.setServerAddress(56);
