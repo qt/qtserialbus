@@ -64,6 +64,7 @@ private slots:
     void cleanupTestCase();
 
     void connectDevice();
+    void disconnectDevice();
     void state();
     void error();
 
@@ -96,6 +97,15 @@ void tst_QModbusDevice::connectDevice()
 
     device->setState(QModbusDevice::ClosingState);
     QVERIFY(!device->connectDevice());
+}
+
+void tst_QModbusDevice::disconnectDevice()
+{
+    //see QTBUG-66648
+    DummyDevice dev;
+    QCOMPARE(dev.state(), QModbusDevice::UnconnectedState);
+    dev.disconnectDevice();
+    QCOMPARE(dev.state(), QModbusDevice::UnconnectedState);
 }
 
 void tst_QModbusDevice::state()
