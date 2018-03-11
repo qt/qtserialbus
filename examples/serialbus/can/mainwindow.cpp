@@ -151,11 +151,21 @@ void MainWindow::connectDevice()
 
         m_ui->sendFrameBox->setEnabled(true);
 
-        QVariant bitRate = m_canDevice->configurationParameter(QCanBusDevice::BitRateKey);
+        const QVariant bitRate = m_canDevice->configurationParameter(QCanBusDevice::BitRateKey);
         if (bitRate.isValid()) {
-            m_status->setText(tr("Plugin: %1, connected to %2 at %3 kBit/s")
-                    .arg(p.pluginName).arg(p.deviceInterfaceName)
-                    .arg(bitRate.toInt() / 1000));
+            const bool isCanFd =
+                    m_canDevice->configurationParameter(QCanBusDevice::CanFdKey).toBool();
+            const QVariant dataBitRate =
+                    m_canDevice->configurationParameter(QCanBusDevice::DataBitRateKey);
+            if (isCanFd && dataBitRate.isValid()) {
+                m_status->setText(tr("Plugin: %1, connected to %2 at %3 / %4 kBit/s")
+                                  .arg(p.pluginName).arg(p.deviceInterfaceName)
+                                  .arg(bitRate.toInt() / 1000).arg(dataBitRate.toInt() / 1000));
+            } else {
+                m_status->setText(tr("Plugin: %1, connected to %2 at %3 kBit/s")
+                                  .arg(p.pluginName).arg(p.deviceInterfaceName)
+                                  .arg(bitRate.toInt() / 1000));
+            }
         } else {
             m_status->setText(tr("Plugin: %1, connected to %2")
                     .arg(p.pluginName).arg(p.deviceInterfaceName));
