@@ -347,7 +347,7 @@ void VectorCanBackendPrivate::startRead()
             break;
         }
 
-        if (event.tag != XL_RECEIVE_MSG || event.portHandle != portHandle)
+        if (event.tag != XL_RECEIVE_MSG)
             continue;
 
         const s_xl_can_msg &msg = event.tagData.msg;
