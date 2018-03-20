@@ -558,12 +558,12 @@ bool QModbusServer::readData(QModbusDataUnit *newData) const
 }
 
 /*!
-    \fn void QModbusServer::dataWritten(QModbusDataUnit::RegisterType register, int address, int size)
+    \fn void QModbusServer::dataWritten(QModbusDataUnit::RegisterType table, int address, int size)
 
     This signal is emitted when a Modbus client has written one or more fields of data to the
     Modbus server. The signal contains information about the fields that were written:
     \list
-        \li \a register type that was written,
+        \li Register type (\a table) that was written,
         \li \a address of the first field that was written,
         \li and \a size of consecutive fields that were written starting from \a address.
     \endlist

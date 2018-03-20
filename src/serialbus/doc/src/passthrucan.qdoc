@@ -139,7 +139,7 @@
         \row
             \li QCanBusDevice::RawFilterKey
             \li This option allows setting up filters for incoming CAN bus messages.
-                If provided, the value should be a \l {QList<QCanBusDevice::Filter>}.
+                If provided, the value should be a \l {QList}<\l{QCanBusDevice::Filter}>.
                 Only data frame ID filters are supported. By default, data frames
                 with any ID are accepted.
         \row
