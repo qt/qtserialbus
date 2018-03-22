@@ -58,6 +58,7 @@ public:
 
     void setShowTimeStamp(bool showTimeStamp);
     void setShowFdFlags(bool showFdFlags);
+    void setConfigurationParameter(QCanBusDevice::ConfigurationKey key, const QVariant &value);
     bool start(const QString &pluginName, const QString &deviceName, const QString &data = QString());
     int  printPlugins();
     int  printDevices(const QString &pluginName);
@@ -78,6 +79,8 @@ private:
     QString m_data;
     QScopedPointer<QCanBusDevice> m_canDevice;
     ReadTask *m_readTask = nullptr;
+    using ConfigurationParameter = QHash<QCanBusDevice::ConfigurationKey, QVariant>;
+    ConfigurationParameter m_configurationParameter;
 };
 
 #endif // CANBUSUTIL_H

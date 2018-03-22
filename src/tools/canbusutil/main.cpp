@@ -102,6 +102,28 @@ int main(int argc, char *argv[])
             CanBusUtil::tr("Show available CAN bus devices for the given plugin."));
     parser.addOption(listDevicesOption);
 
+    const QCommandLineOption canFdOption({"f", "can-fd"},
+            CanBusUtil::tr("Enable CAN FD functionality when listening."));
+    parser.addOption(canFdOption);
+
+    const QCommandLineOption loopbackOption({"c", "local-loopback"},
+            CanBusUtil::tr("Transmits all sent frames to other local applications."));
+    parser.addOption(loopbackOption);
+
+    const QCommandLineOption receiveOwnOption({"o", "receive-own"},
+            CanBusUtil::tr("Receive each sent frame on successful transmission."));
+    parser.addOption(receiveOwnOption);
+
+    const QCommandLineOption bitrateOption({"b", "bitrate"},
+            CanBusUtil::tr("Set the CAN bus bitrate to the given value."),
+            QStringLiteral("bitrate"));
+    parser.addOption(bitrateOption);
+
+    const QCommandLineOption dataBitrateOption({"a", "data-bitrate"},
+            CanBusUtil::tr("Set the CAN FD data bitrate to the given value."),
+            QStringLiteral("bitrate"));
+    parser.addOption(dataBitrateOption);
+
     parser.process(app);
 
     if (parser.isSet(listOption))
@@ -109,6 +131,22 @@ int main(int argc, char *argv[])
 
     QString data;
     const QStringList args = parser.positionalArguments();
+
+    if (parser.isSet(canFdOption))
+        util.setConfigurationParameter(QCanBusDevice::CanFdKey, true);
+    if (parser.isSet(loopbackOption))
+        util.setConfigurationParameter(QCanBusDevice::LoopbackKey, true);
+    if (parser.isSet(receiveOwnOption))
+        util.setConfigurationParameter(QCanBusDevice::ReceiveOwnKey, true);
+    if (!parser.value(bitrateOption).isEmpty()) {
+        util.setConfigurationParameter(QCanBusDevice::BitRateKey,
+                                       parser.value(bitrateOption).toInt());
+    }
+    if (!parser.value(dataBitrateOption).isEmpty()) {
+        util.setConfigurationParameter(QCanBusDevice::DataBitRateKey,
+                                       parser.value(dataBitrateOption).toInt());
+    }
+
     if (parser.isSet(listeningOption)) {
         util.setShowTimeStamp(parser.isSet(showTimeStampOption));
         util.setShowFdFlags(parser.isSet(showFdFlagsOption));

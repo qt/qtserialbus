@@ -58,6 +58,12 @@ void CanBusUtil::setShowFdFlags(bool showFdFlags)
     m_readTask->setShowFdFlags(showFdFlags);
 }
 
+void CanBusUtil::setConfigurationParameter(QCanBusDevice::ConfigurationKey key,
+                                           const QVariant &value)
+{
+    m_configurationParameter[key] = value;
+}
+
 bool CanBusUtil::start(const QString &pluginName, const QString &deviceName, const QString &data)
 {
     if (!m_canBus) {
@@ -201,6 +207,11 @@ bool CanBusUtil::connectCanDevice()
         m_output << tr("Cannot create CAN bus device: '%1'").arg(m_deviceName) << endl;
         return false;
     }
+
+    const auto constEnd = m_configurationParameter.constEnd();
+    for (auto i = m_configurationParameter.constBegin(); i != constEnd; ++i)
+        m_canDevice->setConfigurationParameter(i.key(), i.value());
+
     connect(m_canDevice.data(), &QCanBusDevice::errorOccurred, m_readTask, &ReadTask::handleError);
     if (!m_canDevice->connectDevice()) {
         m_output << tr("Cannot create CAN bus device: '%1'").arg(m_deviceName) << endl;
