@@ -457,12 +457,12 @@ bool QCanBusDevice::clear(QCanBusDevice::Directions direction)
         return false;
 
     if (direction & Direction::Input) {
-        QMutexLocker(&d_func()->incomingFramesGuard);
-        d_func()->incomingFrames.clear();
+        QMutexLocker(&d->incomingFramesGuard);
+        d->incomingFrames.clear();
     }
 
     if (direction & Direction::Output)
-        d_func()->outgoingFrames.clear();
+        d->outgoingFrames.clear();
 
     return true;
 }
