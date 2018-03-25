@@ -64,7 +64,7 @@ Q_GLOBAL_STATIC(QLibrary, pcanLibrary)
 bool PeakCanBackend::canCreate(QString *errorReason)
 {
 #ifdef LINK_LIBPCANBASIC
-    return true;
+    Q_UNUSED(errorReason);
 #else
     static bool symbolsResolved = resolvePeakCanSymbols(pcanLibrary());
     if (Q_UNLIKELY(!symbolsResolved)) {
@@ -73,8 +73,17 @@ bool PeakCanBackend::canCreate(QString *errorReason)
         *errorReason = pcanLibrary()->errorString();
         return false;
     }
-    return true;
 #endif
+
+    char apiVersion[32];
+    TPCANStatus stat = CAN_GetValue(PCAN_NONEBUS, PCAN_API_VERSION, apiVersion, sizeof(apiVersion));
+    if (Q_UNLIKELY(stat != PCAN_ERROR_OK)) {
+        qCWarning(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot resolve PCAN-API version!");
+        return false;
+    }
+    qCInfo(QT_CANBUS_PLUGINS_PEAKCAN, "Using PCAN-API version: %s", apiVersion);
+
+    return true;
 }
 
 struct PcanChannel{
