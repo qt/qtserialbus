@@ -312,7 +312,7 @@ static QDataStream &pduFromStream(QDataStream &stream, QModbusPdu &pdu, Type typ
 
 /*!
     \internal
-    \fn QModbusPdu::QModbusPdu(FunctionCode code, Args... data)
+    \fn template <typename ... Args> QModbusPdu::QModbusPdu(FunctionCode code, Args ... data)
 
     Constructs a QModbusPdu with function code set to \a code and payload set to \a data.
     The data is converted and stored in big-endian byte order.
@@ -397,7 +397,7 @@ static QDataStream &pduFromStream(QDataStream &stream, QModbusPdu &pdu, Type typ
 */
 
 /*!
-    \fn void QModbusPdu::decodeData(Args && ... data) const
+    \fn template <typename ... Args> void QModbusPdu::decodeData(Args && ... data) const
 
     Converts the payload into host endianness and reads it into \a data. Data can be a variable
     length argument list.
@@ -415,7 +415,7 @@ static QDataStream &pduFromStream(QDataStream &stream, QModbusPdu &pdu, Type typ
 */
 
 /*!
-    \fn void QModbusPdu::encodeData(Args ... data)
+    \fn template <typename ... Args> void QModbusPdu::encodeData(Args ... data)
 
     Sets the payload to \a data. The data is converted and stored in big-endian byte order.
 
@@ -502,7 +502,7 @@ QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu)
 */
 
 /*!
-    \fn QModbusRequest::QModbusRequest(FunctionCode code, Args... data)
+    \fn template <typename ... Args> QModbusRequest::QModbusRequest(FunctionCode code, Args... data)
 
     Constructs a QModbusRequest with function code set to \a code and payload set to \a data.
     The data is converted and stored in big-endian byte order.
@@ -650,7 +650,7 @@ QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu)
 */
 
 /*!
-    \fn QModbusResponse::QModbusResponse(FunctionCode code, Args... data)
+    \fn template <typename ... Args> QModbusResponse::QModbusResponse(FunctionCode code, Args... data)
 
     Constructs a QModbusResponse with function code set to \a code and payload set to \a data.
     The data is converted and stored in big-endian byte order.

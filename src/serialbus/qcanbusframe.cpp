@@ -350,7 +350,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \fn TimeStamp::TimeStamp(qint64 s, qint64 usec)
+    \fn QCanBusFrame::TimeStamp::TimeStamp(qint64 s, qint64 usec)
 
     Constructs a TimeStamp in seconds, \a s, and microseconds, \a usec.
 
@@ -359,7 +359,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \fn static TimeStamp TimeStamp::fromMicroSeconds(qint64 usec)
+    \fn static TimeStamp QCanBusFrame::TimeStamp::fromMicroSeconds(qint64 usec)
 
     Constructs a normalized TimeStamp from microseconds \a usec.
 
@@ -368,13 +368,13 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \fn qint64 TimeStamp::seconds() const
+    \fn qint64 QCanBusFrame::TimeStamp::seconds() const
 
     Returns the seconds of the timestamp.
 */
 
 /*!
-    \fn qint64 TimeStamp::microSeconds() const
+    \fn qint64 QCanBusFrame::TimeStamp::microSeconds() const
 
     Returns the microseconds of the timestamp.
 */

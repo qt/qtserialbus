@@ -209,9 +209,9 @@ Q_LOGGING_CATEGORY(QT_CANBUS, "qt.canbus")
 */
 
 /*!
-    \fn QCanBusDevice::errorOccurred(CanBusError error)
+    \fn void QCanBusDevice::errorOccurred(CanBusError)
 
-    This signal is emitted when an error of the type \a error occurs.
+    This signal is emitted when an error occurs.
 */
 
 /*!
