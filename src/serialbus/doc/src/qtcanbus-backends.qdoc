@@ -42,6 +42,7 @@
 
     \list
         \li QCanBus provides an API to create a QCanBusDevice from a chosen plugin.
+        \li QCanBusDeviceInfo provides information about available CAN devices.
         \li QCanBusDevice provides an API for direct access to the CAN device.
         \li QCanBusFrame defines a CAN frame that can be written and read from QCanBusDevice.
     \endlist
