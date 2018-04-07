@@ -119,7 +119,8 @@ QString QCanBusDeviceInfo::serialNumber() const
 /*!
     \since 5.11
     Returns the sequential channel number of the CAN bus interface, starting
-    with zero. If the interface has only one channel or if no information about
+    with zero. For example, a two channel CAN interface may have the channels
+    0 and 1. If the interface has only one channel or if no information about
     the channel is available, zero is returned.
 */
 int QCanBusDeviceInfo::channel() const
