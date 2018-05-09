@@ -7,9 +7,19 @@ QT += serialbus-private core-private
 requires(qtConfig(combobox))
 requires(qtConfig(modbus-serialport))
 
-FORMS += interface.ui
-SOURCES += main.cpp mainwindow.cpp modbustcpclient.cpp
-HEADERS += mainwindow.h plaintextedit.h modbustcpclient.h modbustcpclient_p.h
+SOURCES += \
+    main.cpp \
+    mainwindow.cpp \
+    modbustcpclient.cpp
+
+HEADERS += \
+    mainwindow.h  \
+    modbustcpclient.h \
+    modbustcpclient_p.h \
+    plaintextedit.h
+
+FORMS += \
+    interface.ui
 
 target.path = $$[QT_INSTALL_EXAMPLES]/serialbus/modbus/adueditor
 INSTALLS += target

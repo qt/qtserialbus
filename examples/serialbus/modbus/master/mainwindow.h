@@ -83,24 +83,24 @@ private:
     QModbusDataUnit writeRequest() const;
 
 private slots:
-    void on_connectButton_clicked();
-    void onStateChanged(int state);
+    void onConnectButtonClicked();
+    void onModbusStateChanged(int state);
 
-    void on_readButton_clicked();
-    void readReady();
+    void onReadButtonClicked();
+    void onReadReady();
 
-    void on_writeButton_clicked();
-    void on_readWriteButton_clicked();
+    void onWriteButtonClicked();
+    void onReadWriteButtonClicked();
 
-    void on_connectType_currentIndexChanged(int);
-    void on_writeTable_currentIndexChanged(int);
+    void onConnectTypeChanged(int);
+    void onWriteTableChanged(int);
 
 private:
-    Ui::MainWindow *ui;
-    QModbusReply *lastRequest;
-    QModbusClient *modbusDevice;
-    SettingsDialog *m_settingsDialog;
-    WriteRegisterModel *writeModel;
+    Ui::MainWindow *ui = nullptr;
+    QModbusReply *lastRequest = nullptr;
+    QModbusClient *modbusDevice = nullptr;
+    SettingsDialog *m_settingsDialog = nullptr;
+    WriteRegisterModel *writeModel = nullptr;
 };
 
 #endif // MAINWINDOW_H

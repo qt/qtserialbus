@@ -52,8 +52,8 @@
 #include "modbustcpclient.h"
 
 #include <QLoggingCategory>
-#include <QModbusRtuSerialMaster>
 #include <QModbusPdu>
+#include <QModbusRtuSerialMaster>
 #include <QSerialPortInfo>
 
 #ifndef QT_STATIC
@@ -84,7 +84,7 @@ MainWindow::MainWindow(QWidget *parent)
     for (const QSerialPortInfo &info : ports)
         serialPortCombo->addItem(info.portName(), false);
     serialPortCombo->insertSeparator(serialPortCombo->count());
-    serialPortCombo->addItem(QStringLiteral("Add port..."), true);
+    serialPortCombo->addItem(tr("Add port..."), true);
     serialPortCombo->setInsertPolicy(QComboBox::InsertAtTop);
 
     connect(tcpRadio, &QRadioButton::toggled, this, [this](bool toggled) {
@@ -119,14 +119,14 @@ void MainWindow::on_sendButton_clicked()
         return;
     }
 
-    const quint8 address = (isSerial ? addressSpin : ui1Spin)->value();
+    const quint8 address = quint8((isSerial ? addressSpin : ui1Spin)->value());
     if (isCustom) {
         qDebug() << "Send: Sending custom PDU.";
         reply = m_device->sendRawRequest(QModbusRequest(QModbusRequest::FunctionCode(
             pduData[0]), pduData.mid(1)), address);
     } else {
         qDebug() << "Send: Sending PDU with predefined function code.";
-        quint16 fc = (isSerial ? fcSerialDrop : fcTcpDrop)->currentText().left(4).toShort(0, 16);
+        quint16 fc = (isSerial ? fcSerialDrop : fcTcpDrop)->currentText().left(4).toUShort(0, 16);
         reply = m_device->sendRawRequest(QModbusRequest(QModbusRequest::FunctionCode(fc), pduData),
             address);
     }
@@ -149,24 +149,23 @@ void MainWindow::on_connectButton_clicked()
 {
     if (tcpRadio->isChecked()) {
         auto device = new ModbusTcpClient;
-        using signature = void (QSpinBox::*)(int);
-        connect(ti1Spin, static_cast<signature>(&QSpinBox::valueChanged), device,
-            &ModbusTcpClient::valueChanged);
-        connect(ti2Spin, static_cast<signature>(&QSpinBox::valueChanged), device,
-            &ModbusTcpClient::valueChanged);
+        connect(ti1Spin, QOverload<int>::of(&QSpinBox::valueChanged),
+                device, &ModbusTcpClient::valueChanged);
+        connect(ti2Spin, QOverload<int>::of(&QSpinBox::valueChanged),
+                device, &ModbusTcpClient::valueChanged);
 
-        connect(pi1Spin, static_cast<signature>(&QSpinBox::valueChanged), device,
-            &ModbusTcpClient::valueChanged);
-        connect(pi2Spin, static_cast<signature>(&QSpinBox::valueChanged), device,
-            &ModbusTcpClient::valueChanged);
+        connect(pi1Spin, QOverload<int>::of(&QSpinBox::valueChanged),
+                device, &ModbusTcpClient::valueChanged);
+        connect(pi2Spin, QOverload<int>::of(&QSpinBox::valueChanged),
+                device, &ModbusTcpClient::valueChanged);
 
-        connect(l1Spin, static_cast<signature>(&QSpinBox::valueChanged), device,
-            &ModbusTcpClient::valueChanged);
-        connect(l2Spin, static_cast<signature>(&QSpinBox::valueChanged), device,
-            &ModbusTcpClient::valueChanged);
+        connect(l1Spin, QOverload<int>::of(&QSpinBox::valueChanged),
+                device, &ModbusTcpClient::valueChanged);
+        connect(l2Spin, QOverload<int>::of(&QSpinBox::valueChanged),
+                device, &ModbusTcpClient::valueChanged);
 
-        connect(ui1Spin, static_cast<signature>(&QSpinBox::valueChanged), device,
-            &ModbusTcpClient::valueChanged);
+        connect(ui1Spin, QOverload<int>::of(&QSpinBox::valueChanged),
+                device, &ModbusTcpClient::valueChanged);
 
         m_device = device;
         device->valueChanged(0);    // trigger update

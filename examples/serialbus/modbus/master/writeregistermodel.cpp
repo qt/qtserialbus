@@ -82,7 +82,7 @@ QVariant WriteRegisterModel::data(const QModelIndex &index, int role) const
     if (index.column() == CoilsColumn && role == Qt::CheckStateRole) // coils
         return m_coils.at(index.row()) ? Qt::Checked : Qt::Unchecked;
 
-    else if (index.column() == HoldingColumn && role == Qt::DisplayRole) //holding registers
+    if (index.column() == HoldingColumn && role == Qt::DisplayRole) // holding registers
         return QString("0x%1").arg(QString::number(m_holdingRegisters.at(index.row()), 16));
 
     return QVariant();
@@ -146,9 +146,9 @@ Qt::ItemFlags WriteRegisterModel::flags(const QModelIndex &index) const
     if ((index.row() < m_address) || (index.row() >= (m_address + m_number)))
         flags &= ~Qt::ItemIsEnabled;
 
-    if (index.column() == CoilsColumn) //coils
+    if (index.column() == CoilsColumn) // coils
         return flags | Qt::ItemIsUserCheckable;
-    if (index.column() == HoldingColumn) //holding registers
+    if (index.column() == HoldingColumn) // holding registers
         return flags | Qt::ItemIsEditable;
 
     return flags;

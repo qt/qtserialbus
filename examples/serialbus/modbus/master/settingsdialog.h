@@ -88,7 +88,7 @@ public:
 
 private:
     Settings m_settings;
-    Ui::SettingsDialog *ui;
+    Ui::SettingsDialog *ui = nullptr;
 };
 
 #endif // SETTINGSDIALOG_H

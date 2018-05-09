@@ -77,7 +77,7 @@ public:
     ~MainWindow();
 
 private Q_SLOTS:
-    void on_connectButton_clicked();
+    void onConnectButtonClicked();
     void onStateChanged(int state);
 
     void coilChanged(int id);
@@ -87,7 +87,7 @@ private Q_SLOTS:
     void setRegister(const QString &value);
     void updateWidgets(QModbusDataUnit::RegisterType table, int address, int size);
 
-    void on_connectType_currentIndexChanged(int);
+    void onCurrentConnectTypeChanged(int);
 
     void handleDeviceError(QModbusDevice::Error newError);
 
@@ -96,13 +96,13 @@ private:
     void setupDeviceData();
     void setupWidgetContainers();
 
-    Ui::MainWindow *ui;
-    QModbusServer *modbusDevice;
+    Ui::MainWindow *ui = nullptr;
+    QModbusServer *modbusDevice = nullptr;
 
     QButtonGroup coilButtons;
     QButtonGroup discreteButtons;
     QHash<QString, QLineEdit *> registers;
-    SettingsDialog *m_settingsDialog;
+    SettingsDialog *m_settingsDialog = nullptr;
 };
 
 #endif // MAINWINDOW_H

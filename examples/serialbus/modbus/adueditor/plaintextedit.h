@@ -81,12 +81,12 @@ public:
     void contextMenuEvent(QContextMenuEvent *event)
     {
         QMenu menu(this);
-        menu.addAction(QStringLiteral("Clear"), this, &QPlainTextEdit::clear);
+        menu.addAction(tr("Clear"), this, &QPlainTextEdit::clear);
 #ifndef QT_NO_CLIPBOARD
-        menu.addAction(QStringLiteral("Copy"), this, &QPlainTextEdit::copy, QKeySequence::Copy);
+        menu.addAction(tr("Copy"), this, &QPlainTextEdit::copy, QKeySequence::Copy);
 #endif
         menu.addSeparator();
-        menu.addAction(QStringLiteral("Select All"), this, &QPlainTextEdit::selectAll,
+        menu.addAction(tr("Select All"), this, &QPlainTextEdit::selectAll,
             QKeySequence::SelectAll);
         menu.exec(event->globalPos());
     }

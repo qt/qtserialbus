@@ -79,8 +79,8 @@ signals:
     void updateViewport();
 
 public:
-    int m_number;
-    int m_address;
+    int m_number = 0;
+    int m_address = 0;
     QBitArray m_coils;
     QVector<quint16> m_holdingRegisters;
 };

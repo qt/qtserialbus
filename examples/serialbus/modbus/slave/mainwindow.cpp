@@ -67,18 +67,17 @@ enum ModbusConnection {
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , modbusDevice(nullptr)
 {
     ui->setupUi(this);
     setupWidgetContainers();
 
 #if QT_CONFIG(modbus_serialport)
     ui->connectType->setCurrentIndex(0);
-    on_connectType_currentIndexChanged(0);
+    onCurrentConnectTypeChanged(0);
 #else
     // lock out the serial port option
     ui->connectType->setCurrentIndex(1);
-    on_connectType_currentIndexChanged(1);
+    onCurrentConnectTypeChanged(1);
     ui->connectType->setEnabled(false);
 #endif
 
@@ -102,16 +101,20 @@ void MainWindow::initActions()
     ui->actionExit->setEnabled(true);
     ui->actionOptions->setEnabled(true);
 
+    connect(ui->connectButton, &QPushButton::clicked,
+            this, &MainWindow::onConnectButtonClicked);
     connect(ui->actionConnect, &QAction::triggered,
-            this, &MainWindow::on_connectButton_clicked);
+            this, &MainWindow::onConnectButtonClicked);
     connect(ui->actionDisconnect, &QAction::triggered,
-            this, &MainWindow::on_connectButton_clicked);
+            this, &MainWindow::onConnectButtonClicked);
+    connect(ui->connectType, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &MainWindow::onCurrentConnectTypeChanged);
 
     connect(ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
     connect(ui->actionOptions, &QAction::triggered, m_settingsDialog, &QDialog::show);
 }
 
-void MainWindow::on_connectType_currentIndexChanged(int index)
+void MainWindow::onCurrentConnectTypeChanged(int index)
 {
     if (modbusDevice) {
         modbusDevice->disconnect();
@@ -119,7 +122,7 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
         modbusDevice = nullptr;
     }
 
-    ModbusConnection type = static_cast<ModbusConnection> (index);
+    auto type = static_cast<ModbusConnection>(index);
     if (type == Serial) {
 #if QT_CONFIG(modbus_serialport)
         modbusDevice = new QModbusRtuSerialSlave(this);
@@ -176,14 +179,14 @@ void MainWindow::handleDeviceError(QModbusDevice::Error newError)
     statusBar()->showMessage(modbusDevice->errorString(), 5000);
 }
 
-void MainWindow::on_connectButton_clicked()
+void MainWindow::onConnectButtonClicked()
 {
     bool intendToConnect = (modbusDevice->state() == QModbusDevice::UnconnectedState);
 
     statusBar()->clearMessage();
 
     if (intendToConnect) {
-        if (static_cast<ModbusConnection> (ui->connectType->currentIndex()) == Serial) {
+        if (static_cast<ModbusConnection>(ui->connectType->currentIndex()) == Serial) {
             modbusDevice->setConnectionParameter(QModbusDevice::SerialPortNameParameter,
                 ui->portEdit->text());
 #if QT_CONFIG(modbus_serialport)
@@ -244,7 +247,7 @@ void MainWindow::bitChanged(int id, QModbusDataUnit::RegisterType table, bool va
     if (!modbusDevice)
         return;
 
-    if (!modbusDevice->setData(table, id, value))
+    if (!modbusDevice->setData(table, quint16(id), value))
         statusBar()->showMessage(tr("Could not set data: ") + modbusDevice->errorString(), 5000);
 }
 
@@ -256,11 +259,11 @@ void MainWindow::setRegister(const QString &value)
     const QString objectName = QObject::sender()->objectName();
     if (registers.contains(objectName)) {
         bool ok = true;
-        const int id = QObject::sender()->property("ID").toInt();
+        const quint16 id = quint16(QObject::sender()->property("ID").toUInt());
         if (objectName.startsWith(QStringLiteral("inReg")))
-            ok = modbusDevice->setData(QModbusDataUnit::InputRegisters, id, value.toInt(&ok, 16));
+            ok = modbusDevice->setData(QModbusDataUnit::InputRegisters, id, value.toUShort(&ok, 16));
         else if (objectName.startsWith(QStringLiteral("holdReg")))
-            ok = modbusDevice->setData(QModbusDataUnit::HoldingRegisters, id, value.toInt(&ok, 16));
+            ok = modbusDevice->setData(QModbusDataUnit::HoldingRegisters, id, value.toUShort(&ok, 16));
 
         if (!ok)
             statusBar()->showMessage(tr("Could not set register: ") + modbusDevice->errorString(),
@@ -275,11 +278,11 @@ void MainWindow::updateWidgets(QModbusDataUnit::RegisterType table, int address,
         QString text;
         switch (table) {
         case QModbusDataUnit::Coils:
-            modbusDevice->data(QModbusDataUnit::Coils, address + i, &value);
+            modbusDevice->data(QModbusDataUnit::Coils, quint16(address + i), &value);
             coilButtons.button(address + i)->setChecked(value);
             break;
         case QModbusDataUnit::HoldingRegisters:
-            modbusDevice->data(QModbusDataUnit::HoldingRegisters, address + i, &value);
+            modbusDevice->data(QModbusDataUnit::HoldingRegisters, quint16(address + i), &value);
             registers.value(QStringLiteral("holdReg_%1").arg(address + i))->setText(text
                 .setNum(value, 16));
             break;
@@ -296,10 +299,10 @@ void MainWindow::setupDeviceData()
     if (!modbusDevice)
         return;
 
-    for (int i = 0; i < coilButtons.buttons().count(); ++i)
+    for (quint16 i = 0; i < coilButtons.buttons().count(); ++i)
         modbusDevice->setData(QModbusDataUnit::Coils, i, coilButtons.button(i)->isChecked());
 
-    for (int i = 0; i < discreteButtons.buttons().count(); ++i) {
+    for (quint16 i = 0; i < discreteButtons.buttons().count(); ++i) {
         modbusDevice->setData(QModbusDataUnit::DiscreteInputs, i,
             discreteButtons.button(i)->isChecked());
     }
@@ -307,11 +310,11 @@ void MainWindow::setupDeviceData()
     bool ok;
     for (QLineEdit *widget : qAsConst(registers)) {
         if (widget->objectName().startsWith(QStringLiteral("inReg"))) {
-            modbusDevice->setData(QModbusDataUnit::InputRegisters, widget->property("ID").toInt(),
-                widget->text().toInt(&ok, 16));
+            modbusDevice->setData(QModbusDataUnit::InputRegisters, quint16(widget->property("ID").toUInt()),
+                widget->text().toUShort(&ok, 16));
         } else if (widget->objectName().startsWith(QStringLiteral("holdReg"))) {
-            modbusDevice->setData(QModbusDataUnit::HoldingRegisters, widget->property("ID").toInt(),
-                widget->text().toInt(&ok, 16));
+            modbusDevice->setData(QModbusDataUnit::HoldingRegisters, quint16(widget->property("ID").toUInt()),
+                widget->text().toUShort(&ok, 16));
         }
     }
 }

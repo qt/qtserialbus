@@ -67,8 +67,6 @@ enum ModbusConnection {
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , lastRequest(nullptr)
-    , modbusDevice(nullptr)
 {
     ui->setupUi(this);
 
@@ -82,8 +80,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->writeValueTable->setModel(writeModel);
     ui->writeValueTable->hideColumn(2);
-    connect(writeModel, &WriteRegisterModel::updateViewport, ui->writeValueTable->viewport(),
-        static_cast<void (QWidget::*)()>(&QWidget::update));
+    connect(writeModel, &WriteRegisterModel::updateViewport,
+            ui->writeValueTable->viewport(), QOverload<>::of(&QWidget::update));
 
     ui->writeTable->addItem(tr("Coils"), QModbusDataUnit::Coils);
     ui->writeTable->addItem(tr("Discrete Inputs"), QModbusDataUnit::DiscreteInputs);
@@ -92,11 +90,11 @@ MainWindow::MainWindow(QWidget *parent)
 
 #if QT_CONFIG(modbus_serialport)
     ui->connectType->setCurrentIndex(0);
-    on_connectType_currentIndexChanged(0);
+    onConnectTypeChanged(0);
 #else
     // lock out the serial port option
     ui->connectType->setCurrentIndex(1);
-    on_connectType_currentIndexChanged(1);
+    onConnectTypeChanged(1);
     ui->connectType->setEnabled(false);
 #endif
 
@@ -105,10 +103,10 @@ MainWindow::MainWindow(QWidget *parent)
         model->setItem(i, new QStandardItem(QStringLiteral("%1").arg(i + 1)));
     ui->writeSize->setModel(model);
     ui->writeSize->setCurrentText("10");
-    connect(ui->writeSize,&QComboBox::currentTextChanged, writeModel,
-        &WriteRegisterModel::setNumberOfValues);
+    connect(ui->writeSize, &QComboBox::currentTextChanged,
+            writeModel, &WriteRegisterModel::setNumberOfValues);
 
-    auto valueChanged = static_cast<void (QSpinBox::*)(int)> (&QSpinBox::valueChanged);
+    auto valueChanged = QOverload<int>::of(&QSpinBox::valueChanged);
     connect(ui->writeAddress, valueChanged, writeModel, &WriteRegisterModel::setStartAddress);
     connect(ui->writeAddress, valueChanged, this, [this, model](int i) {
         int lastPossibleIndex = 0;
@@ -142,16 +140,28 @@ void MainWindow::initActions()
     ui->actionExit->setEnabled(true);
     ui->actionOptions->setEnabled(true);
 
+    connect(ui->connectButton, &QPushButton::clicked,
+            this, &MainWindow::onConnectButtonClicked);
     connect(ui->actionConnect, &QAction::triggered,
-            this, &MainWindow::on_connectButton_clicked);
+            this, &MainWindow::onConnectButtonClicked);
     connect(ui->actionDisconnect, &QAction::triggered,
-            this, &MainWindow::on_connectButton_clicked);
+            this, &MainWindow::onConnectButtonClicked);
+    connect(ui->readButton, &QPushButton::clicked,
+            this, &MainWindow::onReadButtonClicked);
+    connect(ui->writeButton, &QPushButton::clicked,
+            this, &MainWindow::onWriteButtonClicked);
+    connect(ui->readWriteButton, &QPushButton::clicked,
+            this, &MainWindow::onReadWriteButtonClicked);
+    connect(ui->connectType, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &MainWindow::onConnectTypeChanged);
+    connect(ui->writeTable, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &MainWindow::onWriteTableChanged);
 
     connect(ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
     connect(ui->actionOptions, &QAction::triggered, m_settingsDialog, &QDialog::show);
 }
 
-void MainWindow::on_connectType_currentIndexChanged(int index)
+void MainWindow::onConnectTypeChanged(int index)
 {
     if (modbusDevice) {
         modbusDevice->disconnectDevice();
@@ -159,7 +169,7 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
         modbusDevice = nullptr;
     }
 
-    auto type = static_cast<ModbusConnection> (index);
+    auto type = static_cast<ModbusConnection>(index);
     if (type == Serial) {
 #if QT_CONFIG(modbus_serialport)
         modbusDevice = new QModbusRtuSerialMaster(this);
@@ -182,18 +192,18 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
             statusBar()->showMessage(tr("Could not create Modbus client."), 5000);
     } else {
         connect(modbusDevice, &QModbusClient::stateChanged,
-                this, &MainWindow::onStateChanged);
+                this, &MainWindow::onModbusStateChanged);
     }
 }
 
-void MainWindow::on_connectButton_clicked()
+void MainWindow::onConnectButtonClicked()
 {
     if (!modbusDevice)
         return;
 
     statusBar()->clearMessage();
     if (modbusDevice->state() != QModbusDevice::ConnectedState) {
-        if (static_cast<ModbusConnection> (ui->connectType->currentIndex()) == Serial) {
+        if (static_cast<ModbusConnection>(ui->connectType->currentIndex()) == Serial) {
             modbusDevice->setConnectionParameter(QModbusDevice::SerialPortNameParameter,
                 ui->portEdit->text());
 #if QT_CONFIG(modbus_serialport)
@@ -226,7 +236,7 @@ void MainWindow::on_connectButton_clicked()
     }
 }
 
-void MainWindow::onStateChanged(int state)
+void MainWindow::onModbusStateChanged(int state)
 {
     bool connected = (state != QModbusDevice::UnconnectedState);
     ui->actionConnect->setEnabled(!connected);
@@ -238,7 +248,7 @@ void MainWindow::onStateChanged(int state)
         ui->connectButton->setText(tr("Disconnect"));
 }
 
-void MainWindow::on_readButton_clicked()
+void MainWindow::onReadButtonClicked()
 {
     if (!modbusDevice)
         return;
@@ -247,7 +257,7 @@ void MainWindow::on_readButton_clicked()
 
     if (auto *reply = modbusDevice->sendReadRequest(readRequest(), ui->serverEdit->value())) {
         if (!reply->isFinished())
-            connect(reply, &QModbusReply::finished, this, &MainWindow::readReady);
+            connect(reply, &QModbusReply::finished, this, &MainWindow::onReadReady);
         else
             delete reply; // broadcast replies return immediately
     } else {
@@ -255,7 +265,7 @@ void MainWindow::on_readButton_clicked()
     }
 }
 
-void MainWindow::readReady()
+void MainWindow::onReadReady()
 {
     auto reply = qobject_cast<QModbusReply *>(sender());
     if (!reply)
@@ -263,7 +273,7 @@ void MainWindow::readReady()
 
     if (reply->error() == QModbusDevice::NoError) {
         const QModbusDataUnit unit = reply->result();
-        for (uint i = 0; i < unit.valueCount(); i++) {
+        for (int i = 0, total = int(unit.valueCount()); i < total; ++i) {
             const QString entry = tr("Address: %1, Value: %2").arg(unit.startAddress() + i)
                                      .arg(QString::number(unit.value(i),
                                           unit.registerType() <= QModbusDataUnit::Coils ? 10 : 16));
@@ -282,7 +292,7 @@ void MainWindow::readReady()
     reply->deleteLater();
 }
 
-void MainWindow::on_writeButton_clicked()
+void MainWindow::onWriteButtonClicked()
 {
     if (!modbusDevice)
         return;
@@ -290,7 +300,7 @@ void MainWindow::on_writeButton_clicked()
 
     QModbusDataUnit writeUnit = writeRequest();
     QModbusDataUnit::RegisterType table = writeUnit.registerType();
-    for (uint i = 0; i < writeUnit.valueCount(); i++) {
+    for (int i = 0, total = int(writeUnit.valueCount()); i < total; ++i) {
         if (table == QModbusDataUnit::Coils)
             writeUnit.setValue(i, writeModel->m_coils[i + writeUnit.startAddress()]);
         else
@@ -319,7 +329,7 @@ void MainWindow::on_writeButton_clicked()
     }
 }
 
-void MainWindow::on_readWriteButton_clicked()
+void MainWindow::onReadWriteButtonClicked()
 {
     if (!modbusDevice)
         return;
@@ -328,7 +338,7 @@ void MainWindow::on_readWriteButton_clicked()
 
     QModbusDataUnit writeUnit = writeRequest();
     QModbusDataUnit::RegisterType table = writeUnit.registerType();
-    for (uint i = 0; i < writeUnit.valueCount(); i++) {
+    for (int i = 0, total = int(writeUnit.valueCount()); i < total; ++i) {
         if (table == QModbusDataUnit::Coils)
             writeUnit.setValue(i, writeModel->m_coils[i + writeUnit.startAddress()]);
         else
@@ -338,7 +348,7 @@ void MainWindow::on_readWriteButton_clicked()
     if (auto *reply = modbusDevice->sendReadWriteRequest(readRequest(), writeUnit,
         ui->serverEdit->value())) {
         if (!reply->isFinished())
-            connect(reply, &QModbusReply::finished, this, &MainWindow::readReady);
+            connect(reply, &QModbusReply::finished, this, &MainWindow::onReadReady);
         else
             delete reply; // broadcast replies return immediately
     } else {
@@ -346,7 +356,7 @@ void MainWindow::on_readWriteButton_clicked()
     }
 }
 
-void MainWindow::on_writeTable_currentIndexChanged(int index)
+void MainWindow::onWriteTableChanged(int index)
 {
     const bool coilsOrHolding = index == 0 || index == 3;
     if (coilsOrHolding) {
@@ -363,25 +373,25 @@ void MainWindow::on_writeTable_currentIndexChanged(int index)
 QModbusDataUnit MainWindow::readRequest() const
 {
     const auto table =
-        static_cast<QModbusDataUnit::RegisterType> (ui->writeTable->currentData().toInt());
+        static_cast<QModbusDataUnit::RegisterType>(ui->writeTable->currentData().toInt());
 
     int startAddress = ui->readAddress->value();
     Q_ASSERT(startAddress >= 0 && startAddress < 10);
 
     // do not go beyond 10 entries
-    int numberOfEntries = qMin(ui->readSize->currentText().toInt(), 10 - startAddress);
+    quint16 numberOfEntries = qMin(ui->readSize->currentText().toUShort(), quint16(10 - startAddress));
     return QModbusDataUnit(table, startAddress, numberOfEntries);
 }
 
 QModbusDataUnit MainWindow::writeRequest() const
 {
     const auto table =
-        static_cast<QModbusDataUnit::RegisterType> (ui->writeTable->currentData().toInt());
+        static_cast<QModbusDataUnit::RegisterType>(ui->writeTable->currentData().toInt());
 
     int startAddress = ui->writeAddress->value();
     Q_ASSERT(startAddress >= 0 && startAddress < 10);
 
     // do not go beyond 10 entries
-    int numberOfEntries = qMin(ui->writeSize->currentText().toInt(), 10 - startAddress);
+    quint16 numberOfEntries = qMin(ui->writeSize->currentText().toUShort(), quint16(10 - startAddress));
     return QModbusDataUnit(table, startAddress, numberOfEntries);
 }
