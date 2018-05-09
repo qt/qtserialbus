@@ -39,12 +39,12 @@
 #include "qmodbusserver_p.h"
 #include "qmodbus_symbols_p.h"
 
+#include <QtCore/qbitarray.h>
 #include <QtCore/qdebug.h>
 #include <QtCore/qloggingcategory.h>
 #include <QtCore/qvector.h>
 
 #include <algorithm>
-#include <bitset>
 
 QT_BEGIN_NAMESPACE
 
@@ -731,18 +731,16 @@ QModbusResponse QModbusServerPrivate::readBits(const QModbusPdu &request,
         unit.setValueCount(byteCount * 8);
     }
 
-    address = 0; // The data range now starts with zero.
-    QVector<quint8> bytes;
-    for (int i = 0; i < byteCount; ++i) {
-        std::bitset<8> byte;
-        // According to the spec: If the returned quantity is not a multiple of eight,
-        // the remaining bits in the final data byte will be padded with zeros.
-        for (int currentBit = 0; currentBit < 8; ++currentBit)
-            byte[currentBit] = unit.value(address++); // The padding happens inside value().
-        bytes.append(static_cast<quint8> (byte.to_ulong()));
-    }
+    // Using byteCount * 8 so the remaining bits in the last byte are zero
+    QBitArray bytes(byteCount * 8);
 
-    return QModbusResponse(request.functionCode(), byteCount, bytes);
+    address = 0; // The data range now starts with zero.
+    for ( ; address < count; ++address)
+        bytes.setBit(address, unit.value(address));
+
+    QByteArray payload = QByteArray::fromRawData(bytes.bits(), byteCount);
+    payload.prepend(char(byteCount));
+    return QModbusResponse(request.functionCode(), payload);
 }
 
 QModbusResponse QModbusServerPrivate::processReadHoldingRegistersRequest(const QModbusRequest &rqst)
@@ -831,13 +829,12 @@ QModbusResponse QModbusServerPrivate::processReadExceptionStatusRequest(const QM
     }
 
     quint16 address = 0;
-    QVector<quint8> bytes;
-    std::bitset<8> byte;
+    quint8 byte = 0;
     for (int currentBit = 0; currentBit < 8; ++currentBit)
-        byte[currentBit] = coils.value(address++); // The padding happens inside value().
-    bytes.append(static_cast<quint8> (byte.to_ulong()));
+        if (coils.value(address++)) // The padding happens inside value().
+            byte |= (1U << currentBit);
 
-    return QModbusResponse(request.functionCode(), bytes);
+    return QModbusResponse(request.functionCode(), byte);
 }
 
 QModbusResponse QModbusServerPrivate::processDiagnosticsRequest(const QModbusRequest &request)
@@ -985,7 +982,7 @@ QModbusResponse QModbusServerPrivate::processWriteMultipleCoilsRequest(const QMo
             QModbusExceptionResponse::IllegalDataAddress);
     }
 
-    QVector<std::bitset<8>> bytes;
+    QVector<quint8> bytes;
     const QByteArray payload = request.data().mid(5);
     for (qint32 i = payload.size() - 1; i >= 0; --i)
         bytes.append(quint8(payload[i]));
@@ -994,9 +991,9 @@ QModbusResponse QModbusServerPrivate::processWriteMultipleCoilsRequest(const QMo
     // range is numberOfCoils and therefore index too.
     quint16 coil = numberOfCoils;
     qint32 currentBit = 8 - ((byteCount * 8) - numberOfCoils);
-    for (const auto &currentByte : qAsConst(bytes)) {
+    for (quint8 currentByte : qAsConst(bytes)) {
         for (currentBit -= 1; currentBit >= 0; --currentBit)
-            coils.setValue(--coil, currentByte[currentBit]);
+            coils.setValue(--coil, currentByte & (1U << currentBit) ? 1 : 0);
         currentBit = 8;
     }
 

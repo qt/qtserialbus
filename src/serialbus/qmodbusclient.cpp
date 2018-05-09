@@ -41,8 +41,6 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qloggingcategory.h>
 
-#include <bitset>
-
 QT_BEGIN_NAMESPACE
 
 Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
@@ -304,10 +302,11 @@ QModbusRequest QModbusClientPrivate::createWriteRequest(const QModbusDataUnit &d
         quint8 address = 0;
         QVector<quint8> bytes;
         for (quint8 i = 0; i < byteCount; ++i) {
-            std::bitset<8> byte;
+            quint8 byte = 0;
             for (int currentBit = 0; currentBit < 8; ++currentBit)
-                byte[currentBit] = data.value(address++);
-            bytes.append(static_cast<quint8> (byte.to_ulong()));
+                if (data.value(address++))
+                    byte |= (1U << currentBit);
+            bytes.append(byte);
         }
 
         return QModbusRequest(QModbusRequest::WriteMultipleCoils, quint16(data.startAddress()),
@@ -454,9 +453,9 @@ bool QModbusClientPrivate::collateBits(const QModbusPdu &response,
     if (data) {
         uint value = 0;
         for (qint32 i = 1; i < payload.size(); ++i) {
-            const std::bitset<8> byte = payload[i];
+            const quint8 byte = quint8(payload[i]);
             for (qint32 currentBit = 0; currentBit < 8 && value < data->valueCount(); ++currentBit)
-                data->setValue(value++, byte[currentBit]);
+                data->setValue(value++, byte & (1U << currentBit) ? 1 : 0);
         }
         data->setRegisterType(type);
     }
