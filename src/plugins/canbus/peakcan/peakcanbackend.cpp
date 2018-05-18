@@ -120,7 +120,7 @@ QList<QCanBusDeviceInfo> PeakCanBackend::interfaces()
     QList<QCanBusDeviceInfo> result;
 
     for (int i = 0; pcanChannels[i].index != PCAN_NONEBUS; ++i) {
-        int value = 0;
+        uint value = 0;
         const TPCANHandle index = pcanChannels[i].index;
         const TPCANStatus stat = ::CAN_GetValue(index, PCAN_CHANNEL_CONDITION,
                                                 &value, sizeof(value));
