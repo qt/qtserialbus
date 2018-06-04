@@ -67,7 +67,7 @@ public:
         d_func()->m_open = true;
         setState(QModbusDevice::UnconnectedState);
     }
-    bool processResponse(const QModbusResponse &response, QModbusDataUnit *data)
+    bool processResponse(const QModbusResponse &response, QModbusDataUnit *data) override
     {
         return QModbusClient::processResponse(response, data);
     }
