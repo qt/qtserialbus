@@ -267,21 +267,28 @@
 #define PCAN_TYPE_DNG_SJA_EPP    0x06U  // PCAN-Dongle EPP SJA1000
 
 // Type definitions
-#define TPCANHandle              quint16 // Represents a PCAN hardware channel handle
-#define TPCANStatus              quint32 // Represents a PCAN status/error code
-#define TPCANParameter           quint8  // Represents a PCAN parameter to be read or set
-#define TPCANDevice              quint8  // Represents a PCAN device
-#define TPCANMessageType         quint8  // Represents the type of a PCAN message
-#define TPCANType                quint8  // Represents the type of PCAN hardware to be initialized
-#define TPCANMode                quint8  // Represents a PCAN filter mode
-#define TPCANBaudrate            quint16  // Represents a PCAN Baud rate register value
-#define TPCANBitrateFD           char *  // Represents a PCAN-FD bit rate string
-#define TPCANTimestampFD         quint64 // Represents a timestamp of a received PCAN FD message
+#ifdef Q_OS_MACOS
+#define TPCANLong                quint64
+#define TPCANLongToFrameID(a)    static_cast<quint32>(a)
+#else
+#define TPCANLong                quint32
+#define TPCANLongToFrameID(a)    a
+#endif
+#define TPCANHandle              quint16   // Represents a PCAN hardware channel handle
+#define TPCANStatus              TPCANLong // Represents a PCAN status/error code
+#define TPCANParameter           quint8    // Represents a PCAN parameter to be read or set
+#define TPCANDevice              quint8    // Represents a PCAN device
+#define TPCANMessageType         quint8    // Represents the type of a PCAN message
+#define TPCANType                quint8    // Represents the type of PCAN hardware to be initialized
+#define TPCANMode                quint8    // Represents a PCAN filter mode
+#define TPCANBaudrate            quint16   // Represents a PCAN Baud rate register value
+#define TPCANBitrateFD           char *    // Represents a PCAN-FD bit rate string
+#define TPCANTimestampFD         quint64   // Represents a timestamp of a received PCAN FD message
 
 // Represents a PCAN message
 typedef struct tagTPCANMsg
 {
-    quint32             ID;      // 11/29-bit message identifier
+    TPCANLong           ID;      // 11/29-bit message identifier
     TPCANMessageType    MSGTYPE; // Type of the message
     quint8              LEN;     // Data Length Code of the message (0..8)
     quint8              DATA[8]; // Data of the message (DATA[0]..DATA[7])
@@ -291,15 +298,15 @@ typedef struct tagTPCANMsg
 // Total Microseconds = micros + 1000 * millis + 0xFFFFFFFF * 1000 * millis_overflow
 typedef struct tagTPCANTimestamp
 {
-    quint32   millis;             // Base-value: milliseconds: 0.. 2^32-1
-    quint16   millis_overflow;    // Roll-arounds of millis
-    quint16   micros;             // Microseconds: 0..999
+    TPCANLong   millis;             // Base-value: milliseconds: 0.. 2^32-1
+    quint16     millis_overflow;    // Roll-arounds of millis
+    quint16     micros;             // Microseconds: 0..999
 } TPCANTimestamp;
 
 // Represents a PCAN message from a FD capable hardware
 typedef struct tagTPCANMsgFD
 {
-    quint32           ID;       // 11/29-bit message identifier
+    TPCANLong         ID;       // 11/29-bit message identifier
     TPCANMessageType  MSGTYPE;  // Type of the message
     quint8            DLC;      // Data Length Code of the message (0..15)
     quint8            DATA[64]; // Data of the message (DATA[0]..DATA[63])
@@ -314,7 +321,7 @@ typedef struct tagTPCANMsgFD
     if (!symbolName) \
         return false;
 
-GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Initialize, TPCANHandle, TPCANBaudrate, TPCANType, quint32, quint16)
+GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Initialize, TPCANHandle, TPCANBaudrate, TPCANType, TPCANLong, quint16)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_InitializeFD, TPCANHandle, TPCANBitrateFD)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Uninitialize, TPCANHandle)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Reset, TPCANHandle)
@@ -323,15 +330,19 @@ GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Read, TPCANHandle, TPCANMsg *, TPCANTi
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_ReadFD, TPCANHandle, TPCANMsgFD *, TPCANTimestampFD *)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Write, TPCANHandle, TPCANMsg *)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_WriteFD, TPCANHandle, TPCANMsgFD *)
-GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_FilterMessages, TPCANHandle, quint32, quint32, TPCANMode)
-GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_GetValue, TPCANHandle, TPCANParameter, void *, quint32)
-GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_SetValue, TPCANHandle, TPCANParameter, void *, quint32)
+GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_FilterMessages, TPCANHandle, TPCANLong, TPCANLong, TPCANMode)
+GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_GetValue, TPCANHandle, TPCANParameter, void *, TPCANLong)
+GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_SetValue, TPCANHandle, TPCANParameter, void *, TPCANLong)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_GetErrorText, TPCANStatus, quint16, char *)
 
 inline bool resolveSymbols(QLibrary *pcanLibrary)
 {
     if (!pcanLibrary->isLoaded()) {
-        pcanLibrary->setFileName(QStringLiteral("pcanbasic"));
+        #ifdef Q_OS_MACOS
+            pcanLibrary->setFileName(QStringLiteral("PCBUSB"));
+        #else
+            pcanLibrary->setFileName(QStringLiteral("pcanbasic"));
+        #endif
         if (!pcanLibrary->load())
             return false;
     }

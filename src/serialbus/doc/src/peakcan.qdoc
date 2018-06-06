@@ -34,8 +34,9 @@
     \l{http://www.peak-system.com/}{PEAK-System} CAN adapters.
 
     This plugin requires the PCAN device drivers and the PCAN-Basic library
-    version 4.0.0 or higher. Supported platforms are Windows (pcanbasic.dll)
-    and Linux (libpcanbasic.so).
+    version 4.0.0 or higher on Windows (pcanbasic.dll) and Linux (libpcanbasic.so).
+    On macOS the plugin requires the PCBUSB library from
+    \l{http://www.mac-can.com}{UV Software}.
 
     \section1 Creating CAN Bus Devices
 
@@ -69,6 +70,8 @@
     list of currently available devices.
 
     \note Only the USB and PCI adapters are currently supported by this plugin.
+
+    \note On macOS, only USB adapters are currently supported by this plugin.
 
     The device is now open for writing and reading CAN frames:
 
