@@ -55,6 +55,7 @@
 #include <QModbusRtuSerialSlave>
 #include <QModbusTcpServer>
 #include <QRegularExpression>
+#include <QRegularExpressionValidator>
 #include <QStatusBar>
 #include <QUrl>
 
@@ -326,8 +327,8 @@ void MainWindow::setupWidgetContainers()
     for (QLineEdit *lineEdit : qle) {
         registers.insert(lineEdit->objectName(), lineEdit);
         lineEdit->setProperty("ID", regexp.match(lineEdit->objectName()).captured("ID").toInt());
-        lineEdit->setValidator(new QRegExpValidator(QRegExp(QStringLiteral("[0-9a-f]{0,4}"),
-            Qt::CaseInsensitive), this));
+        lineEdit->setValidator(new QRegularExpressionValidator(QRegularExpression(QStringLiteral("[0-9a-f]{0,4}"),
+            QRegularExpression::CaseInsensitiveOption), this));
         connect(lineEdit, &QLineEdit::textChanged, this, &MainWindow::setRegister);
     }
 }
