@@ -116,6 +116,7 @@ Q_LOGGING_CATEGORY(QT_CANBUS, "qt.canbus")
                             CAN FD allows to transmit the payload of frames with
                             \l QCanBusFrame::hasBitrateSwitch() flag at a higher data bitrate,
                             after the arbitration phase at the nominal bitrate is finished.
+                            This enum value was introduced in Qt 5.9.
                             See also \c QCanBusDevice::BitRateKey
     \value UserKey          This key defines the range where custom keys start. Its most
                             common purpose is to permit platform-specific configuration
