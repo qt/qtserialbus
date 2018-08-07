@@ -99,9 +99,13 @@
     signal:
 
     \code
-        connect(device, &QCanBusDevice::stateChanged,
-                this, &MyClass::canStateChanged);
-        device->connectDevice();
+        if (!device) {
+            // Error handling goes here
+        } else {
+            connect(device, &QCanBusDevice::stateChanged,
+                    this, &MyClass::canStateChanged);
+            device->connectDevice();
+        }
     \endcode
 
     \l {QCanBusDevice::}{state()} will return \l {QCanBusDevice::}{ConnectedState}
