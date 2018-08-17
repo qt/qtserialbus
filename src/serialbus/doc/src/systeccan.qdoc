@@ -26,11 +26,11 @@
 ****************************************************************************/
 /*!
     \page qtserialbus-SystecCAN-overview.html
-    \title Using SystecCAN Backend
+    \title Using SystecCAN Plugin
 
-    \brief Overview of how to use the SystecCAN backend.
+    \brief Overview of how to use the SystecCAN plugin.
 
-    The SystecCAN backend encapsulates the low-level API to work with the
+    The SystecCAN plugin encapsulates the low-level API to work with the
     \l{http://www.systec-electronic.com/}{SYS TEC} CAN adapters.
 
     This plugin requires the SYS TEC CAN device drivers and the usbcan32.dll
@@ -38,28 +38,36 @@
 
     \section1 Creating CAN Bus Devices
 
-    At first it is necessary to check that QCanBus provides the desired backend:
+    At first it is necessary to check that QCanBus provides the desired plugin:
 
     \code
         if (QCanBus::instance()->plugins().contains(QStringLiteral("systeccan"))) {
-            // backend available
+            // plugin available
         }
     \endcode
 
-    Where \e systeccan is the backend name.
+    Where \e systeccan is the plugin name.
 
     Next, a connection to a specific interface can be established:
 
     \code
+        QString errorString;
         QCanBusDevice *device = QCanBus::instance()->createDevice(
-            QStringLiteral("systeccan"), QStringLiteral("can0.0"));
-        device->connectDevice();
+            QStringLiteral("systeccan"), QStringLiteral("can0.0"), &errorString);
+        if (!device) {
+            // Error handling goes here
+            qDebug << errorString;
+        } else {
+            device->connectDevice();
+        }
+
     \endcode
 
     Where, \e can0.0 is the active CAN interface name (interface 0, channel 0).
-    The SystecCAN backend supports 64 USB interfaces (so called modules) from
+    The SystecCAN plugin supports 64 USB interfaces (so called modules) from
     \e can0.0 to \e can63.1. Each module can have one or two channels, they can
-    be accessed by the index canX.0 or canX.1.
+    be accessed by the index canX.0 or canX.1. The \l {QCanBus::}{availableDevices()}
+    method returns a list of currently available devices.
 
     \note SYS TEC also provides 8 or 16 channel CAN interfaces. These units
     consist of an USB hub and multiple two-channel modules internally.

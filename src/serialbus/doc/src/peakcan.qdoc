@@ -52,14 +52,21 @@
     Next, a connection to a specific interface can be established:
 
     \code
+        QString errorString;
         QCanBusDevice *device = QCanBus::instance()->createDevice(
-            QStringLiteral("peakcan"), QStringLiteral("usb0"));
-        device->connectDevice();
+            QStringLiteral("peakcan"), QStringLiteral("usb0"), &errorString);
+        if (!device) {
+            // Error handling goes here
+            qDebug << errorString;
+        } else {
+            device->connectDevice();
+        }
     \endcode
 
     Where \e usb0 is the active CAN interface name. The PeakCAN plugin supports
     16 USB interfaces from \e usb0 to \e usb15 and 16 PCI interfaces from
-    \e pci0 to \e pci15.
+    \e pci0 to \e pci15. The \l {QCanBus::}{availableDevices()} method returns a
+    list of currently available devices.
 
     \note Only the USB and PCI adapters are currently supported by this plugin.
 

@@ -111,13 +111,21 @@
     Next, a connection to a specific interface can be established:
 
     \code
+        QString errorString;
         QCanBusDevice *device = QCanBus::instance()->createDevice(
-            QStringLiteral("socketcan"), QStringLiteral("can0"));
-        device->connectDevice();
+            QStringLiteral("socketcan"), QStringLiteral("can0"), &errorString);
+        if (!device) {
+            // Error handling goes here
+            qDebug << errorString;
+        } else {
+            device->connectDevice();
+        }
     \endcode
 
     Where \e can0 is the active CAN interface name. CAN interfaces act like regular
     network interfaces on Linux systems and can be discovered using \c ifconfig.
+    Also, the \l {QCanBus::}{availableDevices()} method returns a list of currently
+    available devices.
 
     The device is now open for writing and reading CAN frames:
 
