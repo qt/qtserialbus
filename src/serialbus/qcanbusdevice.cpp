@@ -73,6 +73,11 @@ Q_LOGGING_CATEGORY(QT_CANBUS, "qt.canbus")
     \value ConfigurationError   An error occurred when attempting to set a configuration
                                 parameter.
     \value UnknownError         An unknown error occurred.
+    \value OperationError       An operation was attempted while the device was in
+                                a state that did not permit it. This enum was introduced
+                                in Qt 5.14.
+    \value TimeoutError         An timeout occurred while waiting for frames written or
+                                received. This enum was introduced in Qt 5.14.
 */
 
 /*!
@@ -248,7 +253,7 @@ QCanBusDevice::QCanBusDevice(QObject *parent) :
     CAN bus implementations must use this function to update the device's
     error state.
 
-    \sa error(), errorOccurred()
+    \sa error(), errorOccurred(), clearError()
 */
 void QCanBusDevice::setError(const QString &errorText, CanBusError errorId)
 {
@@ -258,6 +263,24 @@ void QCanBusDevice::setError(const QString &errorText, CanBusError errorId)
     d->lastError = errorId;
 
     emit errorOccurred(errorId);
+}
+
+/*!
+    \since 5.14
+    Clears the error id and the human readable description of the last
+    device error.
+
+    CAN bus implementations must use this function to update the device's
+    error state.
+
+    \sa error(), errorOccurred(), setError()
+*/
+void QCanBusDevice::clearError()
+{
+    Q_D(QCanBusDevice);
+
+    d->errorText.clear();
+    d->lastError = NoError;
 }
 
 /*!
@@ -569,8 +592,14 @@ void QCanBusDevice::clear(QCanBusDevice::Directions direction)
 {
     Q_D(QCanBusDevice);
 
-    if (Q_UNLIKELY(d->state != ConnectedState))
+    if (Q_UNLIKELY(d->state != ConnectedState)) {
+        const QString error = tr("Cannot clear buffers as device is not connected.");
+        qCWarning(QT_CANBUS, "%ls", qUtf16Printable(error));
+        setError(error, CanBusError::OperationError);
         return;
+    }
+
+    clearError();
 
     if (direction & Direction::Input) {
         QMutexLocker(&d->incomingFramesGuard);
@@ -607,31 +636,46 @@ bool QCanBusDevice::waitForFramesWritten(int msecs)
                              "recursively. Check that no slot containing waitForFramesReceived() "
                              "is called in response to framesWritten(qint64) or "
                              "errorOccurred(CanBusError) signals.");
+        setError(tr("QCanBusDevice::waitForFramesWritten() must not be called recursively."),
+                 CanBusError::OperationError);
         return false;
     }
 
     QScopedValueRollback<bool> guard(d_func()->waitForWrittenEntered);
     d_func()->waitForWrittenEntered = true;
 
-    if (d_func()->state != ConnectedState)
+    if (Q_UNLIKELY(d_func()->state != ConnectedState)) {
+        const QString error = tr("Cannot wait for frames written as device is not connected.");
+        qCWarning(QT_CANBUS, "%ls", qUtf16Printable(error));
+        setError(error, CanBusError::OperationError);
         return false;
+    }
 
     if (!framesToWrite())
         return false; // nothing pending, nothing to wait upon
 
+    enum { Written = 0, Error, Timeout };
     QEventLoop loop;
-    connect(this, &QCanBusDevice::framesWritten, &loop, [&]() { loop.exit(0); });
-    connect(this, &QCanBusDevice::errorOccurred, &loop, [&]() { loop.exit(1); });
+    connect(this, &QCanBusDevice::framesWritten, &loop, [&]() { loop.exit(Written); });
+    connect(this, &QCanBusDevice::errorOccurred, &loop, [&]() { loop.exit(Error); });
     if (msecs >= 0)
-        QTimer::singleShot(msecs, &loop, [&]() { loop.exit(2); });
+        QTimer::singleShot(msecs, &loop, [&]() { loop.exit(Timeout); });
 
-    int result = 0;
+    int result = Written;
     while (framesToWrite() > 0) {
         // wait till all written or time out
         result = loop.exec(QEventLoop::ExcludeUserInputEvents);
-        if (result > 0)
+        if (Q_UNLIKELY(result == Timeout)) {
+            const QString error = tr("Timeout (%1 ms) during wait for frames written.").arg(msecs);
+            setError(error, CanBusError::TimeoutError);
+            qCWarning(QT_CANBUS, "%ls", qUtf16Printable(error));
+        }
+
+        if (result > Written)
             return false;
     }
+
+    clearError();
     return true;
 }
 
@@ -660,25 +704,39 @@ bool QCanBusDevice::waitForFramesReceived(int msecs)
                              "recursively. Check that no slot containing waitForFramesReceived() "
                              "is called in response to framesReceived() or "
                              "errorOccurred(CanBusError) signals.");
+        setError(tr("QCanBusDevice::waitForFramesReceived() must not be called recursively."),
+                 CanBusError::OperationError);
         return false;
     }
 
     QScopedValueRollback<bool> guard(d_func()->waitForReceivedEntered);
     d_func()->waitForReceivedEntered = true;
 
-    if (d_func()->state != ConnectedState)
+    if (Q_UNLIKELY(d_func()->state != ConnectedState)) {
+        const QString error = tr("Cannot wait for frames received as device is not connected.");
+        qCWarning(QT_CANBUS, "%ls", qUtf16Printable(error));
+        setError(error, CanBusError::OperationError);
         return false;
+    }
 
+    enum { Received = 0, Error, Timeout };
     QEventLoop loop;
-
-    connect(this, &QCanBusDevice::framesReceived, &loop, [&]() { loop.exit(0); });
-    connect(this, &QCanBusDevice::errorOccurred, &loop, [&]() { loop.exit(1); });
+    connect(this, &QCanBusDevice::framesReceived, &loop, [&]() { loop.exit(Received); });
+    connect(this, &QCanBusDevice::errorOccurred, &loop, [&]() { loop.exit(Error); });
     if (msecs >= 0)
-        QTimer::singleShot(msecs, &loop, [&]() { loop.exit(2); });
+        QTimer::singleShot(msecs, &loop, [&]() { loop.exit(Timeout); });
 
     int result = loop.exec(QEventLoop::ExcludeUserInputEvents);
 
-    return result == 0;
+    if (Q_UNLIKELY(result == Timeout)) {
+        const QString error = tr("Timeout (%1 ms) during wait for frames received.").arg(msecs);
+        setError(error, CanBusError::TimeoutError);
+        qCWarning(QT_CANBUS, "%ls", qUtf16Printable(error));
+    }
+
+    if (result == Received)
+        clearError();
+    return result == Received;
 }
 
 /*!
@@ -734,8 +792,14 @@ QCanBusFrame QCanBusDevice::readFrame()
 {
     Q_D(QCanBusDevice);
 
-    if (Q_UNLIKELY(d->state != ConnectedState))
+    if (Q_UNLIKELY(d->state != ConnectedState)) {
+        const QString error = tr("Cannot read frame as device is not connected.");
+        qCWarning(QT_CANBUS, "%ls", qUtf16Printable(error));
+        setError(error, CanBusError::OperationError);
         return QCanBusFrame(QCanBusFrame::InvalidFrame);
+    }
+
+    clearError();
 
     QMutexLocker locker(&d->incomingFramesGuard);
 
@@ -758,8 +822,14 @@ QVector<QCanBusFrame> QCanBusDevice::readAllFrames()
 {
     Q_D(QCanBusDevice);
 
-    if (Q_UNLIKELY(d->state != ConnectedState))
+    if (Q_UNLIKELY(d->state != ConnectedState)) {
+        const QString error = tr("Cannot read frame as device is not connected.");
+        qCWarning(QT_CANBUS, "%ls", qUtf16Printable(error));
+        setError(error, CanBusError::OperationError);
         return QVector<QCanBusFrame>();
+    }
+
+    clearError();
 
     QMutexLocker locker(&d->incomingFramesGuard);
 
@@ -834,6 +904,8 @@ bool QCanBusDevice::connectDevice()
         setState(UnconnectedState);
         return false;
     }
+
+    clearError();
 
     //Connected is set by backend -> might be delayed by event loop
     return true;

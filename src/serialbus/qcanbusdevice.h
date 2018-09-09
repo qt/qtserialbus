@@ -60,7 +60,9 @@ public:
         WriteError,
         ConnectionError,
         ConfigurationError,
-        UnknownError
+        UnknownError,
+        OperationError,
+        TimeoutError
     };
     Q_ENUM(CanBusError)
 
@@ -167,6 +169,7 @@ Q_SIGNALS:
 protected:
     void setState(QCanBusDevice::CanBusDeviceState newState);
     void setError(const QString &errorText, QCanBusDevice::CanBusError);
+    void clearError();
 
     void enqueueReceivedFrames(const QVector<QCanBusFrame> &newFrames);
 
