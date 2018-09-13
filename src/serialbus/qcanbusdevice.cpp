@@ -450,12 +450,12 @@ qint64 QCanBusDevice::framesToWrite() const
 
     \sa framesAvailable(), readFrame(), framesToWrite(), writeFrame(),
 */
-bool QCanBusDevice::clear(QCanBusDevice::Directions direction)
+void QCanBusDevice::clear(QCanBusDevice::Directions direction)
 {
     Q_D(QCanBusDevice);
 
     if (Q_UNLIKELY(d->state != ConnectedState))
-        return false;
+        return;
 
     if (direction & Direction::Input) {
         QMutexLocker(&d->incomingFramesGuard);
@@ -464,8 +464,6 @@ bool QCanBusDevice::clear(QCanBusDevice::Directions direction)
 
     if (direction & Direction::Output)
         d->outgoingFrames.clear();
-
-    return true;
 }
 
 /*!
