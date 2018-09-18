@@ -40,7 +40,9 @@
     For C++ projects include the header appropriate for the current use case,
     for example applications using the CAN bus device may use
 
-    \code #include <QCanBusDevice> \endcode
+    \code
+    #include <QCanBusDevice>
+    \endcode
 
     The .pro file should have the \e serialbus keyword added
 

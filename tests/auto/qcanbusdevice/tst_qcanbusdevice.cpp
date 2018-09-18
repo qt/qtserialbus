@@ -291,16 +291,15 @@ void tst_QCanBusDevice::readAll()
 
 void tst_QCanBusDevice::clearInputBuffer()
 {
-    device->disconnectDevice();
-    QVERIFY(!device->clear(QCanBusDevice::Input));
-
-    QVERIFY(device->connectDevice());
-    QTRY_VERIFY_WITH_TIMEOUT(device->state() == QCanBusDevice::ConnectedState, 5000);
+    if (device->state() != QCanBusDevice::ConnectedState) {
+        QVERIFY(device->connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(device->state() == QCanBusDevice::ConnectedState, 5000);
+    }
 
     for (int i = 0; i < 10; ++i)
         device->triggerNewFrame();
 
-    QVERIFY(device->clear(QCanBusDevice::Input));
+    device->clear(QCanBusDevice::Input);
 
     QVERIFY(!device->framesAvailable());
 }
@@ -309,10 +308,11 @@ void tst_QCanBusDevice::clearOutputBuffer()
 {
     // this test requires buffered writing
     device->setWriteBuffered(true);
-    device->disconnectDevice();
-    QVERIFY(!device->clear(QCanBusDevice::Output));
 
-    QVERIFY(device->connectDevice());
+    if (device->state() != QCanBusDevice::ConnectedState) {
+        QVERIFY(device->connectDevice());
+        QTRY_VERIFY_WITH_TIMEOUT(device->state() == QCanBusDevice::ConnectedState, 5000);
+    }
 
     // first test buffered writing, frames will be written after some delay
     QSignalSpy spy(device.data(), &QCanBusDevice::framesWritten);

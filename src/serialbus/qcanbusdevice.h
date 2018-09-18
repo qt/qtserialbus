@@ -115,7 +115,7 @@ public:
         AllDirections = Input | Output
     };
     Q_DECLARE_FLAGS(Directions, Direction)
-    bool clear(Directions direction = Direction::AllDirections);
+    void clear(Directions direction = Direction::AllDirections);
 
     virtual bool waitForFramesWritten(int msecs);
     virtual bool waitForFramesReceived(int msecs);
