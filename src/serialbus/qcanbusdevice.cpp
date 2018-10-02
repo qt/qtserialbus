@@ -317,6 +317,17 @@ bool QCanBusDevice::hasOutgoingFrames() const
 }
 
 /*!
+ * Called from the derived plugin to register a function that performs the
+ * CAN controller hardware reset when \a resetController() is called.
+ */
+void QCanBusDevice::setResetControllerFunction(std::function<void()> &resetter)
+{
+    Q_D(QCanBusDevice);
+
+    d->m_resetControllerFunction = resetter;
+}
+
+/*!
     Sets the configuration parameter \a key for the CAN bus connection
     to \a value. The potential keys are represented by \l ConfigurationKey.
 
@@ -439,6 +450,31 @@ qint64 QCanBusDevice::framesAvailable() const
 qint64 QCanBusDevice::framesToWrite() const
 {
     return d_func()->outgoingFrames.size();
+}
+
+/*!
+    \since 5.14
+
+    Performs a CAN controller reset to release the CAN controller from
+    bus off state, if possible.
+
+    \note CAN controller resets disturb the running communication and
+    may take up to one second to complete. Only call this function to
+    recover from bus errors.
+
+    \note This function may not be implemented in all CAN plugins.
+    Please refer to the plugins help pages for more information.
+*/
+void QCanBusDevice::resetController()
+{
+    if (d_func()->m_resetControllerFunction) {
+        d_func()->m_resetControllerFunction();
+    } else {
+        const char error[] = QT_TRANSLATE_NOOP("QCanBusDevice",
+                "This CAN bus plugin does not support hardware controller reset.");
+        qCWarning(QT_CANBUS, error);
+        setError(tr(error), QCanBusDevice::CanBusError::ConfigurationError);
+    }
 }
 
 /*!

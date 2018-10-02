@@ -105,4 +105,11 @@
                 100000, 125000, 250000, 500000, 800000, 1000000. Note that this configuration
                 parameter can only be adjusted while the QCanBusDevice is not connected.
    \endtable
+
+   PeakCAN supports the following additional functions:
+
+    \list
+        \li QCanBusDevice::resetController()
+    \endlist
+
 */

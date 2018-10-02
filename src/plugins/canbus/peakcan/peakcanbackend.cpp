@@ -717,6 +717,9 @@ PeakCanBackend::PeakCanBackend(const QString &name, QObject *parent)
 
     d->setupChannel(name.toLatin1());
     d->setupDefaultConfigurations();
+
+    std::function<void()> f = std::bind(&PeakCanBackend::resetController, this);
+    setResetControllerFunction(f);
 }
 
 PeakCanBackend::~PeakCanBackend()
@@ -806,6 +809,12 @@ QString PeakCanBackend::interpretErrorFrame(const QCanBusFrame &errorFrame)
     Q_UNUSED(errorFrame);
 
     return QString();
+}
+
+void PeakCanBackend::resetController()
+{
+    close();
+    open();
 }
 
 QT_END_NAMESPACE

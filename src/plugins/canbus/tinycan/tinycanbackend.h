@@ -72,6 +72,8 @@ public:
     static QList<QCanBusDeviceInfo> interfaces();
 
 private:
+    void resetController();
+
     TinyCanBackendPrivate * const d_ptr;
 };
 

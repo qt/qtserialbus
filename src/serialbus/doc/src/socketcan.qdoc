@@ -203,4 +203,11 @@
     \snippet snippetmain.cpp SocketCan Filter Example
 
     Extended frame format and flexible data-rate are supported in SocketCAN.
- */
+
+    SocketCAN supports the following additional functions:
+
+    \list
+        \li QCanBusDevice::resetController() (needs libsocketcan)
+    \endlist
+
+*/

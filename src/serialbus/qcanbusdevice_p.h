@@ -74,6 +74,8 @@ public:
 
     bool waitForReceivedEntered = false;
     bool waitForWrittenEntered = false;
+
+    std::function<void()> m_resetControllerFunction;
 };
 
 QT_END_NAMESPACE

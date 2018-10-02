@@ -109,4 +109,11 @@
                 is disabled by default. If this option is enabled, the therefore received frames
                 are marked with QCanBusFrame::hasLocalEcho()
    \endtable
+
+    SystecCAN supports the following additional functions:
+
+    \list
+        \li QCanBusDevice::resetController()
+    \endlist
+
 */

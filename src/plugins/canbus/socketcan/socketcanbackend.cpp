@@ -194,6 +194,9 @@ SocketCanBackend::SocketCanBackend(const QString &name) :
     }
 
     resetConfigurations();
+
+    std::function<void()> f = std::bind(&SocketCanBackend::resetController, this);
+    setResetControllerFunction(f);
 }
 
 SocketCanBackend::~SocketCanBackend()
@@ -748,6 +751,11 @@ void SocketCanBackend::readSocket()
     }
 
     enqueueReceivedFrames(newFrames);
+}
+
+void SocketCanBackend::resetController()
+{
+    libSocketCan->restart(canSocketName);
 }
 
 QT_END_NAMESPACE

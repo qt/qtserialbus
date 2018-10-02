@@ -95,4 +95,11 @@
             \li Determines the bit rate of the CAN bus connection. The following bit rates
                 are supported: 10000, 20000, 50000, 100000, 125000, 250000, 500000, 800000, 1000000.
    \endtable
- */
+
+    TinyCAN supports the following additional functions:
+
+    \list
+        \li QCanBusDevice::resetController()
+    \endlist
+
+*/

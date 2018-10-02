@@ -76,6 +76,8 @@ public:
                                               int channelNumber);
 
 private:
+    void resetController();
+
     SystecCanBackendPrivate * const d_ptr;
 };
 

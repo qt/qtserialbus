@@ -41,6 +41,8 @@
 #include <QtSerialBus/qcanbusframe.h>
 #include <QtSerialBus/qcanbusdeviceinfo.h>
 
+#include <functional>
+
 QT_BEGIN_NAMESPACE
 
 class QCanBusDevicePrivate;
@@ -120,6 +122,8 @@ public:
     qint64 framesAvailable() const;
     qint64 framesToWrite() const;
 
+    void resetController();
+
     enum Direction {
         Input = 1,
         Output = 2,
@@ -162,6 +166,8 @@ protected:
     //      Can be folded into one call to connectDevice() & disconnectDevice()
     virtual bool open() = 0;
     virtual void close() = 0;
+
+    void setResetControllerFunction(std::function<void()> &resetter);
 
     static QCanBusDeviceInfo createDeviceInfo(const QString &name,
                                               bool isVirtual = false,

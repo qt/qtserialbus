@@ -72,6 +72,8 @@ public:
     static QList<QCanBusDeviceInfo> interfaces();
 
 private:
+    void resetController();
+
     PeakCanBackendPrivate * const d_ptr;
 };
 

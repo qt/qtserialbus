@@ -83,6 +83,7 @@ private:
     void resetConfigurations();
     bool connectSocket();
     bool applyConfigurationParameter(int key, const QVariant &value);
+    void resetController();
 
     canfd_frame m_frame;
     sockaddr_can m_address;

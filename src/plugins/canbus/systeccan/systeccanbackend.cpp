@@ -454,6 +454,11 @@ bool SystecCanBackendPrivate::verifyBitRate(int bitrate)
     return true;
 }
 
+void SystecCanBackendPrivate::resetController()
+{
+    ::UcanResetCan(handle);
+}
+
 SystecCanBackend::SystecCanBackend(const QString &name, QObject *parent) :
     QCanBusDevice(parent),
     d_ptr(new SystecCanBackendPrivate(this))
@@ -462,6 +467,9 @@ SystecCanBackend::SystecCanBackend(const QString &name, QObject *parent) :
 
     d->setupChannel(name);
     d->setupDefaultConfigurations();
+
+    std::function<void()> f = std::bind(&SystecCanBackend::resetController, this);
+    setResetControllerFunction(f);
 }
 
 SystecCanBackend::~SystecCanBackend()
@@ -551,6 +559,12 @@ QString SystecCanBackend::interpretErrorFrame(const QCanBusFrame &errorFrame)
     Q_UNUSED(errorFrame);
 
     return QString();
+}
+
+void SystecCanBackend::resetController()
+{
+    Q_D(SystecCanBackend);
+    d->resetController();
 }
 
 QT_END_NAMESPACE

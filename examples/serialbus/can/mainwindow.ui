@@ -87,6 +87,8 @@
     <addaction name="actionConnect"/>
     <addaction name="actionDisconnect"/>
     <addaction name="separator"/>
+    <addaction name="actionResetController"/>
+    <addaction name="separator"/>
     <addaction name="actionClearLog"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
@@ -161,6 +163,14 @@
    </property>
    <property name="toolTip">
     <string>Open plugin documentation in Webbrowser</string>
+   </property>
+  </action>
+  <action name="actionResetController">
+   <property name="text">
+    <string>&amp;Reset CAN Controller</string>
+   </property>
+   <property name="toolTip">
+    <string>Reset CAN Controller</string>
    </property>
   </action>
  </widget>

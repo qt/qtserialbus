@@ -405,8 +405,7 @@ void TinyCanBackendPrivate::startRead()
             } else {
                 if (status.CanStatus == CAN_STATUS_BUS_OFF) {
                     qCWarning(QT_CANBUS_PLUGINS_TINYCAN, "CAN bus is in off state, trying to reset the bus.");
-                    if (::CanSetMode(channelIndex, OP_CAN_RESET, CAN_CMD_NONE) < 0)
-                        q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ReadError);
+                    resetController();
                 }
             }
 
@@ -468,6 +467,18 @@ void TinyCanBackendPrivate::cleanupDriver()
     }
 }
 
+void TinyCanBackendPrivate::resetController()
+{
+    Q_Q(TinyCanBackend);
+    qint32 ret = ::CanSetMode(channelIndex, OP_CAN_RESET, CAN_CMD_NONE);
+    if (Q_UNLIKELY(ret < 0)) {
+        const QString errorString = systemErrorString(ret);
+        qCWarning(QT_CANBUS_PLUGINS_TINYCAN, "Cannot perform hardware reset: %ls",
+                  qUtf16Printable(errorString));
+        q->setError(errorString, QCanBusDevice::CanBusError::ConfigurationError);
+    }
+}
+
 bool TinyCanBackendPrivate::setBitRate(int bitrate)
 {
     Q_Q(TinyCanBackend);
@@ -498,6 +509,9 @@ TinyCanBackend::TinyCanBackend(const QString &name, QObject *parent)
 
     d->setupChannel(name);
     d->setupDefaultConfigurations();
+
+    std::function<void()> f = std::bind(&TinyCanBackend::resetController, this);
+    setResetControllerFunction(f);
 }
 
 TinyCanBackend::~TinyCanBackend()
@@ -589,6 +603,12 @@ QString TinyCanBackend::interpretErrorFrame(const QCanBusFrame &errorFrame)
     Q_UNUSED(errorFrame);
 
     return QString();
+}
+
+void TinyCanBackend::resetController()
+{
+    Q_D(TinyCanBackend);
+    d->resetController();
 }
 
 QT_END_NAMESPACE
