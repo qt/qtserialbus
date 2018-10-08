@@ -157,8 +157,10 @@ int QModbusClient::timeout() const
 /*!
     \fn void QModbusClient::timeoutChanged(int newTimeout)
 
-    This signal is emitted if the response is not received within the required
-    timeout. The new response timeout for the device is passed as \a newTimeout.
+    This signal is emitted when the timeout used by this QModbusClient instance
+    is changed. The new response timeout for the device is passed as \a newTimeout.
+
+    \sa setTimout()
 */
 
 /*!
@@ -172,7 +174,7 @@ int QModbusClient::timeout() const
     Already active/running timeouts are not affected by such timeout duration
     changes.
 
-    \sa timeout
+    \sa timeout timeoutChanged()
 */
 void QModbusClient::setTimeout(int newTimeout)
 {
