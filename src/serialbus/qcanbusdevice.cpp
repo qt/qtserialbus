@@ -684,7 +684,7 @@ QVector<QCanBusFrame> QCanBusDevice::readAllFrames()
 */
 
 /*!
-    \fn QString interpretErrorFrame(const QCanBusFrame &frame)
+    \fn QString QCanBusDevice::interpretErrorFrame(const QCanBusFrame &frame)
 
     Interprets \a frame as error frame and returns a human readable
     description of the error.

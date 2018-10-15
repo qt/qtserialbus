@@ -46,7 +46,9 @@
 
     The .pro file should have the \e serialbus keyword added
 
-    \code QT += serialbus \endcode
+    \code
+    QT += serialbus
+    \endcode
 
 
     See more in the \l {Qt Serial Bus} {Qt Serial Bus Overview}.

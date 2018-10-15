@@ -160,7 +160,7 @@ int QModbusClient::timeout() const
     This signal is emitted when the timeout used by this QModbusClient instance
     is changed. The new response timeout for the device is passed as \a newTimeout.
 
-    \sa setTimout()
+    \sa setTimeout()
 */
 
 /*!

@@ -490,6 +490,13 @@ QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu)
 */
 
 /*!
+  \typedef QModbusRequest::CalcFuncPtr
+
+  Typedef for a pointer to a custom calculator function with the same signature as
+  \l QModbusRequest::calculateDataSize.
+*/
+
+/*!
     \fn QModbusRequest::QModbusRequest()
 
     Constructs an invalid QModbusRequest.
@@ -635,6 +642,14 @@ QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu)
         quint8 payloadInBytes = 2, outputHigh = 0xcd, outputLow = 0x01;
         QModbusResponse response(QModbusResponse::ReadCoils, payloadInBytes, outputHigh, outputLow);
     \endcode
+*/
+
+
+/*!
+  \typedef QModbusResponse::CalcFuncPtr
+
+  Typedef for a pointer to a custom calculator function with the same signature as
+  \l QModbusResponse::calculateDataSize.
 */
 
 /*!

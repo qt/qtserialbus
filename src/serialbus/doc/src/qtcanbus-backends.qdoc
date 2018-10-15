@@ -67,7 +67,7 @@
             \li CAN bus plugin using the SAE J2534 Pass-Thru interface.
         \row
             \li SYS TEC electronic
-            \li \l {Using SystecCAN Backend}{SystecCAN} (\c systeccan)
+            \li \l {Using SystecCAN Plugin}{SystecCAN} (\c systeccan)
             \li CAN bus backend using the SYS TEC CAN adapters.
         \row
             \li PEAK-System
