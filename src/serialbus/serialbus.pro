@@ -1,7 +1,8 @@
 TARGET = QtSerialBus
 
 QT = core-private
-QT_FOR_PRIVATE = network serialport
+QT_FOR_PRIVATE = network
+
 CONFIG += c++11
 
 QMAKE_DOCS = $$PWD/doc/qtserialbus.qdocconf
@@ -18,10 +19,8 @@ PUBLIC_HEADERS += \
     qmodbusdataunit.h \
     qmodbusclient.h \
     qmodbusreply.h \
-    qmodbusrtuserialmaster.h \
     qmodbustcpclient.h \
     qmodbustcpserver.h \
-    qmodbusrtuserialslave.h \
     qmodbuspdu.h \
     qmodbusdeviceidentification.h
 
@@ -31,10 +30,8 @@ PRIVATE_HEADERS += \
     qmodbusserver_p.h \
     qmodbusclient_p.h \
     qmodbusdevice_p.h \
-    qmodbusrtuserialmaster_p.h \
     qmodbustcpclient_p.h \
     qmodbustcpserver_p.h \
-    qmodbusrtuserialslave_p.h \
     qmodbus_symbols_p.h \
     qmodbuscommevent_p.h \
     qmodbusadu_p.h \
@@ -50,13 +47,26 @@ SOURCES += \
     qmodbusdataunit.cpp \
     qmodbusclient.cpp \
     qmodbusreply.cpp \
-    qmodbusrtuserialmaster.cpp \
     qmodbustcpclient.cpp \
     qmodbustcpserver.cpp \
-    qmodbusrtuserialslave.cpp \
     qmodbuspdu.cpp \
     qmodbusdeviceidentification.cpp
 
+qtConfig(modbus-serialport) {
+    QT_FOR_PRIVATE += serialport
+
+    PUBLIC_HEADERS += \
+        qmodbusrtuserialmaster.h \
+        qmodbusrtuserialslave.h
+
+    PRIVATE_HEADERS += \
+        qmodbusrtuserialmaster_p.h \
+        qmodbusrtuserialslave_p.h
+
+    SOURCES += \
+        qmodbusrtuserialmaster.cpp \
+        qmodbusrtuserialslave.cpp
+}
 HEADERS += $$PUBLIC_HEADERS $$PRIVATE_HEADERS
 
 MODULE_PLUGIN_TYPES = \

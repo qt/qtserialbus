@@ -5,6 +5,7 @@ TARGET = adueditor
 QT += serialbus serialport widgets
 QT += serialbus-private core-private
 requires(qtConfig(combobox))
+requires(qtConfig(modbus-serialport))
 
 FORMS += interface.ui
 SOURCES += main.cpp mainwindow.cpp modbustcpclient.cpp

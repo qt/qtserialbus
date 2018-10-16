@@ -58,19 +58,23 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->setupUi(this);
 
     ui->parityCombo->setCurrentIndex(1);
+#if QT_CONFIG(modbus_serialport)
     ui->baudCombo->setCurrentText(QString::number(m_settings.baud));
     ui->dataBitsCombo->setCurrentText(QString::number(m_settings.dataBits));
     ui->stopBitsCombo->setCurrentText(QString::number(m_settings.stopBits));
+#endif
     ui->timeoutSpinner->setValue(m_settings.responseTime);
     ui->retriesSpinner->setValue(m_settings.numberOfRetries);
 
     connect(ui->applyButton, &QPushButton::clicked, [this]() {
+#if QT_CONFIG(modbus_serialport)
         m_settings.parity = ui->parityCombo->currentIndex();
         if (m_settings.parity > 0)
             m_settings.parity++;
         m_settings.baud = ui->baudCombo->currentText().toInt();
         m_settings.dataBits = ui->dataBitsCombo->currentText().toInt();
         m_settings.stopBits = ui->stopBitsCombo->currentText().toInt();
+#endif
         m_settings.responseTime = ui->timeoutSpinner->value();
         m_settings.numberOfRetries = ui->retriesSpinner->value();
 

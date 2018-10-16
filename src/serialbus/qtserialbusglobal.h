@@ -38,6 +38,7 @@
 #define QTSERIALBUSGLOBAL_H
 
 #include <QtCore/qglobal.h>
+#include <QtSerialBus/qtserialbus-config.h>
 
 QT_BEGIN_NAMESPACE
 

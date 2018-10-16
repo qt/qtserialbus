@@ -124,6 +124,7 @@ QVariant QModbusDevice::connectionParameter(int parameter) const
 {
     Q_D(const QModbusDevice);
     switch (parameter) {
+#if QT_CONFIG(modbus_serialport)
     case SerialPortNameParameter:
         return d->m_comPort;
     case SerialDataBitsParameter:
@@ -134,6 +135,7 @@ QVariant QModbusDevice::connectionParameter(int parameter) const
         return d->m_stopBits;
     case SerialBaudRateParameter:
         return d->m_baudRate;
+#endif
     case NetworkPortParameter:
         return d->m_networkPort;
     case NetworkAddressParameter:
@@ -156,6 +158,7 @@ void QModbusDevice::setConnectionParameter(int parameter, const QVariant &value)
 {
     Q_D(QModbusDevice);
     switch (parameter) {
+#if QT_CONFIG(modbus_serialport)
     case SerialPortNameParameter:
         d->m_comPort = value.toString();
         break;
@@ -171,6 +174,7 @@ void QModbusDevice::setConnectionParameter(int parameter, const QVariant &value)
     case SerialBaudRateParameter:
         d->m_baudRate = QSerialPort::BaudRate(value.toInt());
         break;
+#endif
     case NetworkPortParameter:
         d->m_networkPort = value.toInt();
         break;

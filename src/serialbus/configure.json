@@ -25,6 +25,12 @@
             "label": "Socket CAN FD",
             "condition": "config.linux && features.socketcan && tests.socketcan_fd",
             "output": [ "privateFeature"]
+        },
+        "modbus-serialport" : {
+            "label": "SerialPort Support",
+            "condition": "module.serialport",
+            "purpose": "Enables Serial-based Modbus Support",
+            "output": [ "publicFeature"]
         }
     },
 
@@ -46,7 +52,8 @@
             "section": "Qt SerialBus",
             "entries": [
                 "socketcan",
-                "socketcan_fd"
+                "socketcan_fd",
+                "modbus-serialport"
             ]
         }
     ]

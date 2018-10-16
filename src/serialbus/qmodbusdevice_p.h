@@ -39,7 +39,9 @@
 
 #include <QtCore/qvariant.h>
 #include <QtSerialBus/qmodbusdevice.h>
+#if QT_CONFIG(modbus_serialport)
 #include <QtSerialPort/qserialport.h>
+#endif
 
 #include <private/qobject_p.h>
 
@@ -65,11 +67,13 @@ public:
     QModbusDevice::Error error = QModbusDevice::NoError;
     QString errorString;
 
+#if QT_CONFIG(modbus_serialport)
     QString m_comPort;
     QSerialPort::DataBits m_dataBits = QSerialPort::Data8;
     QSerialPort::Parity m_parity = QSerialPort::EvenParity;
     QSerialPort::StopBits m_stopBits = QSerialPort::OneStop;
     QSerialPort::BaudRate m_baudRate = QSerialPort::Baud19200;
+#endif
 
     int m_networkPort = 502;
     QString m_networkAddress = QStringLiteral("127.0.0.1");

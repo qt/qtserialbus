@@ -90,8 +90,15 @@ MainWindow::MainWindow(QWidget *parent)
     ui->writeTable->addItem(tr("Input Registers"), QModbusDataUnit::InputRegisters);
     ui->writeTable->addItem(tr("Holding Registers"), QModbusDataUnit::HoldingRegisters);
 
+#if QT_CONFIG(modbus_serialport)
     ui->connectType->setCurrentIndex(0);
     on_connectType_currentIndexChanged(0);
+#else
+    // lock out the serial port option
+    ui->connectType->setCurrentIndex(1);
+    on_connectType_currentIndexChanged(1);
+    ui->connectType->setEnabled(false);
+#endif
 
     auto model = new QStandardItemModel(10, 1, this);
     for (int i = 0; i < 10; ++i)
@@ -154,7 +161,9 @@ void MainWindow::on_connectType_currentIndexChanged(int index)
 
     auto type = static_cast<ModbusConnection> (index);
     if (type == Serial) {
+#if QT_CONFIG(modbus_serialport)
         modbusDevice = new QModbusRtuSerialMaster(this);
+#endif
     } else if (type == Tcp) {
         modbusDevice = new QModbusTcpClient(this);
         if (ui->portEdit->text().isEmpty())
@@ -187,6 +196,7 @@ void MainWindow::on_connectButton_clicked()
         if (static_cast<ModbusConnection> (ui->connectType->currentIndex()) == Serial) {
             modbusDevice->setConnectionParameter(QModbusDevice::SerialPortNameParameter,
                 ui->portEdit->text());
+#if QT_CONFIG(modbus_serialport)
             modbusDevice->setConnectionParameter(QModbusDevice::SerialParityParameter,
                 m_settingsDialog->settings().parity);
             modbusDevice->setConnectionParameter(QModbusDevice::SerialBaudRateParameter,
@@ -195,6 +205,7 @@ void MainWindow::on_connectButton_clicked()
                 m_settingsDialog->settings().dataBits);
             modbusDevice->setConnectionParameter(QModbusDevice::SerialStopBitsParameter,
                 m_settingsDialog->settings().stopBits);
+#endif
         } else {
             const QUrl url = QUrl::fromUserInput(ui->portEdit->text());
             modbusDevice->setConnectionParameter(QModbusDevice::NetworkPortParameter, url.port());

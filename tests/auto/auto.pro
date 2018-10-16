@@ -11,8 +11,11 @@ SUBDIRS += cmake \
            qmodbusserver \
            qmodbuscommevent \
            qmodbusadu \
-           qmodbusdeviceidentification \
-           qmodbusrtuserialmaster
+           qmodbusdeviceidentification
+
+QT_FOR_CONFIG += serialbus
+
+qtConfig(modbus-serialport): SUBDIRS += qmodbusrtuserialmaster
 
 qcanbus.depends += plugins
 qcanbusdevice.depends += plugins

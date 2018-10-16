@@ -35,7 +35,9 @@
 ****************************************************************************/
 
 #include <QtSerialBus/qmodbusserver.h>
+#if QT_CONFIG(modbus_serialport)
 #include <QtSerialBus/qmodbusrtuserialslave.h>
+#endif
 #include <QtSerialBus/qmodbustcpserver.h>
 #include <QtSerialBus/qmodbusdeviceidentification.h>
 
@@ -90,7 +92,9 @@ private slots:
     void testServerAddress()
     {
         QCOMPARE(QModbusTcpServer().serverAddress(), 0xff);
+#if QT_CONFIG(modbus_serialport)
         QCOMPARE(QModbusRtuSerialSlave().serverAddress(), 1);
+#endif
     }
 
     void testProcessRequestReadWriteSingleMultipleCoils()
