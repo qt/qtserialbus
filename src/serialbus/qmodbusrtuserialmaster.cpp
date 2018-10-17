@@ -150,17 +150,23 @@ void QModbusRtuSerialMaster::close()
     if (d->m_serialPort->isOpen())
         d->m_serialPort->close();
 
-    if (d->m_queue.count())
-        qCDebug(QT_MODBUS_LOW) << "(RTU client) Aborted replies:" << d->m_queue.count();
+    // enqueue current active request back for abortion
+    d->m_queue.enqueue(d->m_current);
+    d->m_current = QModbusClientPrivate::QueueElement();
 
+    int numberOfAborts = 0;
     while (!d->m_queue.isEmpty()) {
         // Finish each open reply and forget them
         QModbusRtuSerialMasterPrivate::QueueElement elem = d->m_queue.dequeue();
         if (!elem.reply.isNull()) {
             elem.reply->setError(QModbusDevice::ReplyAbortedError,
                                  QModbusClient::tr("Reply aborted due to connection closure."));
+            numberOfAborts++;
         }
     }
+
+    if (numberOfAborts > 0)
+        qCDebug(QT_MODBUS_LOW) << "(RTU client) Aborted replies:" << numberOfAborts;
 
     setState(QModbusDevice::UnconnectedState);
 }
