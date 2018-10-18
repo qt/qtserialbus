@@ -265,9 +265,11 @@ public:
     }
 
     void scheduleNextRequest() {
+        Q_Q(QModbusRtuSerialMaster);
+
         m_state = Schedule;
         m_serialPort->clear(QSerialPort::AllDirections);
-        QTimer::singleShot(m_interFrameDelayMilliseconds, [this]() { processQueue(); });
+        QTimer::singleShot(m_interFrameDelayMilliseconds, q, [this]() { processQueue(); });
     }
 
     QModbusReply *enqueueRequest(const QModbusRequest &request, int serverAddress,
