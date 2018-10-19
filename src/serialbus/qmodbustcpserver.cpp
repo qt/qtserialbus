@@ -171,4 +171,66 @@ QModbusResponse QModbusTcpServer::processRequest(const QModbusPdu &request)
     return QModbusServer::processRequest(request);
 }
 
+/*!
+  Installs  an \a observer that can be used to obtain notifications when a
+  new TCP client connects to this server instance. In addition, the \a observer
+  can be used to reject the incoming TCP connection.
+
+  QModbusTcpServer takes ownership of the given \a observer. Any previously set
+  observer will be deleted. The observer can be uninstalled by calling this
+  function with \c nullptr as parameter.
+
+  \sa QModbusTcpConnectionObserver
+  \since 5.13
+*/
+void QModbusTcpServer::installConnectionObserver(QModbusTcpConnectionObserver *observer)
+{
+    Q_D(QModbusTcpServer);
+
+    d->m_observer.reset(observer);
+}
+
+/*!
+    \class QModbusTcpConnectionObserver
+    \inmodule QtSerialBus
+    \since 5.13
+
+    \brief The QModbusTcpConnectionObserver class represents the interface for
+    objects that can be passed to \l QModbusTcpServer::installConnectionObserver.
+
+    The interface must be implemented by the developer to be able to monitor
+    every incoming TCP connection from another Modbus client.
+
+    \sa QModbusTcpServer::installConnectionObserver
+*/
+
+QModbusTcpConnectionObserver::~QModbusTcpConnectionObserver()
+{
+}
+
+/*!
+  \fn bool QModbusTcpConnectionObserver::acceptNewConnection(QTcpSocket *newClient)
+
+  This function is a callback for every incoming TCP connection. The user should
+  provide \a newClient to receive a notification when a new client connection
+  is established and to determine whether the connection is to be accepted.
+
+  The function should return \c true if the connection is to be accepted. Otherwise,
+  the socket is closed/rejected.
+*/
+
+/*!
+  \fn void QModbusTcpServer::modbusClientDisconnected(QTcpSocket *modbusClient)
+
+  This signal is emitted when a current TCP based \a modbusClient disconnects
+  from this Modbus TCP server. Note that there might be several TCP clients
+  connected at the same time.
+
+  Notifications on incoming new connections can be received by installing a
+  QModbusTcpConnectionObserver via \l installConnectionObserver().
+
+  \sa installConnectionObserver
+  \since 5.13
+*/
+
 QT_END_NAMESPACE

@@ -48,6 +48,8 @@
 
 #include <private/qmodbusserver_p.h>
 
+#include <memory>
+
 //
 //  W A R N I N G
 //  -------------
@@ -123,6 +125,13 @@ public:
             qCDebug(QT_MODBUS) << "(TCP server) Incoming socket from" << socket->peerAddress()
                                << socket->peerName() << socket->peerPort();
 
+            if (m_observer && !m_observer->acceptNewConnection(socket)) {
+                qCDebug(QT_MODBUS) << "(TCP server) Connection rejected by observer";
+                socket->close();
+                socket->deleteLater();
+                return;
+            }
+
             connections.append(socket);
 
             auto buffer = new QByteArray();
@@ -133,6 +142,9 @@ public:
             });
             QObject::connect(socket, &QTcpSocket::disconnected, [socket, this]() {
                 connections.removeAll(socket);
+
+                Q_Q(QModbusTcpServer);
+                emit q->modbusClientDisconnected(socket);
                 socket->deleteLater();
             });
             QObject::connect(socket, &QTcpSocket::readyRead, [buffer, socket, this]() {
@@ -213,6 +225,8 @@ public:
 
     QTcpServer *m_tcpServer;
     QVector<QTcpSocket *> connections;
+
+    std::unique_ptr<QModbusTcpConnectionObserver> m_observer;
 
     static const qint8 mbpaHeaderSize = 7;
     static const qint16 maxBytesModbusADU = 260;
