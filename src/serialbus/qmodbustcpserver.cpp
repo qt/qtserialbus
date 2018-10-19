@@ -110,7 +110,7 @@ bool QModbusTcpServer::open()
         return false;
     }
 
-    if (d->m_tcpServer->listen(QHostAddress(url.host()), url.port()))
+    if (d->m_tcpServer->listen(QHostAddress(url.host()), quint16(url.port())))
         setState(QModbusDevice::ConnectedState);
     else
         setError(d->m_tcpServer->errorString(), QModbusDevice::ConnectionError);

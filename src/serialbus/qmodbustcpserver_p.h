@@ -205,7 +205,7 @@ public:
                         return;
                     }
 
-                    int writtenBytes = socket->write(result);
+                    qint64 writtenBytes = socket->write(result);
                     if (writtenBytes == -1 || writtenBytes < result.size()) {
                         qCDebug(QT_MODBUS) << "(TCP server) Cannot write requested response to socket.";
                         forwardError(QModbusTcpServer::tr("Could not write response to client"),

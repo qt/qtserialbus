@@ -73,7 +73,7 @@ public:
 
         m_serialPort = new QSerialPort(q);
         QObject::connect(m_serialPort, &QSerialPort::readyRead, [this]() {
-            const int size = m_serialPort->size();
+            const qint64 size = m_serialPort->size();
             m_requestBuffer += m_serialPort->read(size);
 
             const QModbusSerialAdu adu(QModbusSerialAdu::Rtu, m_requestBuffer);
@@ -201,7 +201,7 @@ public:
                 return;
             }
 
-            int writtenBytes = m_serialPort->write(result);
+            qint64 writtenBytes = m_serialPort->write(result);
             if ((writtenBytes == -1) || (writtenBytes < result.size())) {
                 qCDebug(QT_MODBUS) << "(RTU server) Cannot write requested response to serial port.";
                 q->setError(QModbusRtuSerialSlave::tr("Could not write response to client"),
