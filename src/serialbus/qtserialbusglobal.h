@@ -34,8 +34,8 @@
 **
 ****************************************************************************/
 
-#ifndef QSERIALBUSGLOBAL_H
-#define QSERIALBUSGLOBAL_H
+#ifndef QTSERIALBUSGLOBAL_H
+#define QTSERIALBUSGLOBAL_H
 
 #include <QtCore/qglobal.h>
 
@@ -53,4 +53,4 @@ QT_BEGIN_NAMESPACE
 
 QT_END_NAMESPACE
 
-#endif // QSERIALBUSGLOBAL_H
+#endif // QTSERIALBUSGLOBAL_H

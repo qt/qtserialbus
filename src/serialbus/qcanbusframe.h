@@ -39,7 +39,7 @@
 
 #include <QtCore/qmetatype.h>
 #include <QtCore/qobject.h>
-#include <QtSerialBus/qserialbusglobal.h>
+#include <QtSerialBus/qtserialbusglobal.h>
 
 QT_BEGIN_NAMESPACE
 

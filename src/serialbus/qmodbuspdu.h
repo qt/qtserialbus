@@ -39,7 +39,7 @@
 #include <QtCore/qdatastream.h>
 #include <QtCore/qmetatype.h>
 #include <QtCore/qvector.h>
-#include <QtSerialBus/qserialbusglobal.h>
+#include <QtSerialBus/qtserialbusglobal.h>
 
 QT_BEGIN_NAMESPACE
 

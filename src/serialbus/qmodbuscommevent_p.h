@@ -37,7 +37,7 @@
 #ifndef QMODBUSCOMMEVENT_P_H
 #define QMODBUSCOMMEVENT_P_H
 
-#include <QtSerialBus/qserialbusglobal.h>
+#include <QtSerialBus/qtserialbusglobal.h>
 
 //
 //  W A R N I N G

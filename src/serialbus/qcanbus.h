@@ -38,7 +38,7 @@
 #define QCANBUS_H
 
 #include <QtCore/qobject.h>
-#include <QtSerialBus/qserialbusglobal.h>
+#include <QtSerialBus/qtserialbusglobal.h>
 #include <QtSerialBus/qcanbusdevice.h>
 #include <QtSerialBus/qcanbusdeviceinfo.h>
 

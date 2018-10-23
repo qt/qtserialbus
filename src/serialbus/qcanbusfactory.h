@@ -38,7 +38,7 @@
 #define QCANBUSFACTORY_H
 
 #include <QtCore/qstringlist.h>
-#include <QtSerialBus/qserialbusglobal.h>
+#include <QtSerialBus/qtserialbusglobal.h>
 #include <QtSerialBus/qcanbusdevice.h>
 #include <QtSerialBus/qcanbusdeviceinfo.h>
 

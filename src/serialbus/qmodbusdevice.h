@@ -38,7 +38,7 @@
 
 #include <QtCore/qobject.h>
 #include <QtCore/qiodevice.h>
-#include <QtSerialBus/qserialbusglobal.h>
+#include <QtSerialBus/qtserialbusglobal.h>
 
 QT_BEGIN_NAMESPACE
 
