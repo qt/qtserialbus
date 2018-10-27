@@ -39,7 +39,9 @@
 
 #include <QtCore/qbytearray.h>
 #include <QtCore/qdebug.h>
+#include <QtCore/qelapsedtimer.h>
 #include <QtCore/qloggingcategory.h>
+#include <QtCore/qmath.h>
 #include <QtSerialBus/qmodbusrtuserialslave.h>
 #include <QtSerialPort/qserialport.h>
 
@@ -73,6 +75,21 @@ public:
 
         m_serialPort = new QSerialPort(q);
         QObject::connect(m_serialPort, &QSerialPort::readyRead, [this]() {
+
+            if (m_interFrameTimer.isValid()
+                    && m_interFrameTimer.elapsed() > m_interFrameDelayMilliseconds
+                    && !m_requestBuffer.isEmpty()) {
+                // This permits response buffer clearing if it contains garbage
+                // but still permits cases where very slow baud rates can cause
+                // chunked and delayed packets
+                qCDebug(QT_MODBUS_LOW) << "(RTU server) Dropping older ADU fragments due to larger than 3.5 char delay (expected:"
+                                       << m_interFrameDelayMilliseconds << ", max:"
+                                       << m_interFrameTimer.elapsed() << ")";
+                m_requestBuffer.clear();
+            }
+
+            m_interFrameTimer.start();
+
             const qint64 size = m_serialPort->size();
             m_requestBuffer += m_serialPort->read(size);
 
@@ -330,12 +347,19 @@ public:
             m_serialPort->setStopBits(m_stopBits);
         }
 
+        // for calulcation details see
+        // QModbusRtuSerialMasterPrivate::calculateInterFrameDelay()
+        m_interFrameDelayMilliseconds = qMax(m_interFrameDelayMilliseconds,
+                                             qCeil(3500. / (qreal(m_baudRate) / 11.)));
+
         m_requestBuffer.clear();
     }
 
     QByteArray m_requestBuffer;
     bool m_processesBroadcast = false;
     QSerialPort *m_serialPort = nullptr;
+    QElapsedTimer m_interFrameTimer;
+    int m_interFrameDelayMilliseconds = 2;
 };
 
 QT_END_NAMESPACE

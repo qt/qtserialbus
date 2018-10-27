@@ -502,10 +502,11 @@ bool QModbusServer::writeData(const QModbusDataUnit &newData)
         return false;
 
     bool changeRequired = false;
-    for (int i = newData.startAddress(); i <= rangeEndAddress; i++) {
-        quint16 newValue = newData.value(i - newData.startAddress());
-        changeRequired |= (current.value(i) != newValue);
-        current.setValue(i, newValue);
+    for (uint i = 0; i < newData.valueCount(); i++) {
+        const quint16 newValue = newData.value(i);
+        const int translatedIndex = newData.startAddress() - current.startAddress() + i;
+        changeRequired |= (current.value(translatedIndex) != newValue);
+        current.setValue(translatedIndex, newValue);
     }
 
     if (changeRequired)
@@ -553,7 +554,7 @@ bool QModbusServer::readData(QModbusDataUnit *newData) const
     if (rangeEndAddress < current.startAddress() || rangeEndAddress > internalRangeEndAddress)
         return false;
 
-    newData->setValues(current.values().mid(newData->startAddress(), newData->valueCount()));
+    newData->setValues(current.values().mid(newData->startAddress() - current.startAddress(), newData->valueCount()));
     return true;
 }
 

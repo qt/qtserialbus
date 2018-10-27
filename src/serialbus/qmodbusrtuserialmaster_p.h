@@ -151,8 +151,10 @@ public:
                 return;
             }
 
-            if (m_state != State::Receive)
+            if (m_state != State::Receive) {
+                qCDebug(QT_MODBUS) << "(RTU server) Ignoring response due to non receive state";
                 return;
+            }
 
             m_sendTimer.stop();
             m_responseTimer.stop();
@@ -215,6 +217,13 @@ public:
 
         QObject::connect(m_serialPort, &QSerialPort::bytesWritten, q, [this](qint64 bytes) {
             m_current.bytesWritten += bytes;
+            if (m_state == Send && (m_current.bytesWritten == m_current.adu.size()) && !m_current.reply.isNull()) {
+                // the if conditions above are copied from processQueue()
+                qCDebug(QT_MODBUS) << "(RTU client) Send successful (quick):" << m_current.requestPdu;
+                m_state = Receive;
+                m_sendTimer.stop();
+                m_responseTimer.start(m_responseTimeoutDuration);
+            }
         });
 
         QObject::connect(m_serialPort, &QSerialPort::aboutToClose, q, [this]() {
@@ -265,9 +274,11 @@ public:
     }
 
     void scheduleNextRequest() {
+        Q_Q(QModbusRtuSerialMaster);
+
         m_state = Schedule;
         m_serialPort->clear(QSerialPort::AllDirections);
-        QTimer::singleShot(m_interFrameDelayMilliseconds, [this]() { processQueue(); });
+        QTimer::singleShot(m_interFrameDelayMilliseconds, q, [this]() { processQueue(); });
     }
 
     QModbusReply *enqueueRequest(const QModbusRequest &request, int serverAddress,
@@ -319,7 +330,7 @@ public:
             break;
 
         case Send:
-            // send timeout will always happen
+            // send timeout will always happen unless cancelled by very quick bytesWritten
             if (m_current.reply.isNull()) {
                 scheduleNextRequest();
             } else if (m_current.bytesWritten < m_current.adu.size()) {
