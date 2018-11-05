@@ -13,6 +13,5 @@ SOURCES += main.cpp \
 DISTFILES = plugin.json
 
 PLUGIN_TYPE = canbus
-PLUGIN_EXTENDS = serialbus
 PLUGIN_CLASS_NAME = TinyCanBusPlugin
 load(qt_plugin)
