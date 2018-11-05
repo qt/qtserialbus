@@ -26,7 +26,6 @@ QtSerialBus
    * [QTBUG-66143] Added the functions QCanBusDevice::readAllFrames() to read
      all frames from the receive buffer and QCanBusDevice::clear() to clear
      the receive or transmit buffer.
-   * Added missing Q_DECLARE_OPERATORS_FOR_FLAGS(QCanBusDevice::Directions)
 
  - canbusutil
   * [QTBUG-67164] Added configuration options to canbusutil, e.g. for
@@ -45,12 +44,11 @@ QtSerialBus
    * [QTBUG-64843] Fixed incorrect reading and writing of QModbusServer
      registers with non-zero start addresses.
 
- - QModbusRtuSerialMaster                         *
+ - QModbusRtuSerialMaster
    * [QTBUG-69188] Fixed that RTU Master ignored responses due to being in
      Send state (Introduced by the fix for QTBUG-62299)
    * [QTBUG-65684] Fixed a crash due to access of deleted memory.
 
- - QModbusRtuSerialSlave                          *
+ - QModbusRtuSerialSlave
    * [QTBUG-59286] Permit dropping the RTU Slave request buffer when it
      contains wrong characters between individual Modbus PDUs.
-
