@@ -12,6 +12,5 @@ SOURCES += \
 DISTFILES = plugin.json
 
 PLUGIN_TYPE = canbus
-PLUGIN_EXTENDS = serialbus
 PLUGIN_CLASS_NAME = VirtualCanBusPlugin
 load(qt_plugin)
