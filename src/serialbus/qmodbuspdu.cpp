@@ -105,9 +105,10 @@ static int minimumDataSize(const QModbusPdu &pdu, Type type)
 
 static QDataStream &pduFromStream(QDataStream &stream, QModbusPdu &pdu, Type type)
 {
-    QModbusPdu::FunctionCode code = QModbusPdu::Invalid;
-    if (stream.readRawData((char *) (&code), sizeof(quint8)) != sizeof(quint8))
+    quint8 codeByte = 0;
+    if (stream.readRawData((char *) (&codeByte), sizeof(quint8)) != sizeof(quint8))
         return stream;
+    QModbusPdu::FunctionCode code = (QModbusPdu::FunctionCode) codeByte;
     pdu.setFunctionCode(code);
 
     auto needsAdditionalRead = [](QModbusPdu &pdu, int size) -> bool {
