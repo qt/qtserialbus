@@ -158,6 +158,6 @@ QModbusResponse QModbusRtuSerialSlave::processRequest(const QModbusPdu &request)
     return QModbusServer::processRequest(request);
 }
 
-#include "moc_qmodbusrtuserialslave.cpp"
-
 QT_END_NAMESPACE
+
+#include "moc_qmodbusrtuserialslave.cpp"

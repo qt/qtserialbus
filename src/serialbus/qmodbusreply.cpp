@@ -269,6 +269,6 @@ void QModbusReply::setRawResult(const QModbusResponse &response)
     d->m_response = response;
 }
 
-#include "moc_qmodbusreply.cpp"
-
 QT_END_NAMESPACE
+
+#include "moc_qmodbusreply.cpp"
