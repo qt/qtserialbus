@@ -149,6 +149,8 @@ private slots:
     void error();
     void cleanupTestCase();
     void tst_filtering();
+    void filterEqual_data();
+    void filterEqual();
     void tst_bufferingAttribute();
 
     void tst_waitForFramesReceived();
@@ -161,6 +163,7 @@ tst_QCanBusDevice::tst_QCanBusDevice()
 {
     qRegisterMetaType<QCanBusDevice::CanBusDeviceState>();
     qRegisterMetaType<QCanBusDevice::CanBusError>();
+    qRegisterMetaType<QCanBusDevice::Filter>();
 }
 
 void tst_QCanBusDevice::initTestCase()
@@ -419,6 +422,89 @@ void tst_QCanBusDevice::tst_filtering()
               != QCanBusDevice::Filter::MatchBaseAndExtendedFormat);
     QVERIFY(newFilter.at(1).format & QCanBusDevice::Filter::MatchBaseFormat);
     QVERIFY(!(newFilter.at(1).format & QCanBusDevice::Filter::MatchExtendedFormat));
+}
+
+void tst_QCanBusDevice::filterEqual_data()
+{
+    using Filter = QCanBusDevice::Filter;
+    using Frame = QCanBusFrame;
+
+    QTest::addColumn<QCanBusDevice::Filter>("first");
+    QTest::addColumn<QCanBusDevice::Filter>("second");
+    QTest::addColumn<bool>("isEqual");
+
+    auto filter = [](quint32 frameId, quint32 frameIdMask,
+                     Frame::FrameType type,
+                     Filter::FormatFilter format) {
+        Filter result;
+        result.frameId = frameId;
+        result.frameIdMask = frameIdMask;
+        result.type = type;
+        result.format = format;
+        return result;
+    };
+
+    QTest::newRow("empty-equal")
+            << Filter()
+            << Filter()
+            << true;
+    QTest::newRow("empty-default-equal")
+            << Filter()
+            << filter(0, 0, Frame::InvalidFrame, Filter::MatchBaseAndExtendedFormat)
+            << true;
+    QTest::newRow("empty-non-default-different")
+            << Filter()
+            << filter(1, 2, Frame::ErrorFrame, Filter::MatchBaseFormat)
+            << false;
+
+    QTest::newRow("frame-id-equal")
+            << filter(0x345, 0x800, Frame::RemoteRequestFrame, Filter::MatchBaseFormat)
+            << filter(0x345, 0x800, Frame::RemoteRequestFrame, Filter::MatchBaseFormat)
+            << true;
+    QTest::newRow("frame-id-different")
+            << filter(0x345, 0x000, Frame::RemoteRequestFrame, Filter::MatchBaseFormat)
+            << filter(0x346, 0x000, Frame::RemoteRequestFrame, Filter::MatchBaseFormat)
+            << false;
+
+    QTest::newRow("frame-mask-equal")
+            << filter(0x123, 0x7FF, Frame::InvalidFrame, Filter::MatchBaseAndExtendedFormat)
+            << filter(0x123, 0x7FF, Frame::InvalidFrame, Filter::MatchBaseAndExtendedFormat)
+            << true;
+    QTest::newRow("frame-mask-different")
+            << filter(0x123, 0x7FF, Frame::InvalidFrame, Filter::MatchBaseAndExtendedFormat)
+            << filter(0x123, 0x7FE, Frame::InvalidFrame, Filter::MatchBaseAndExtendedFormat)
+            << false;
+
+    QTest::newRow("frame-type-equal")
+            << filter(0xFFF, 0xBFF, Frame::DataFrame,    Filter::MatchBaseAndExtendedFormat)
+            << filter(0xFFF, 0xBFF, Frame::DataFrame,    Filter::MatchBaseAndExtendedFormat)
+            << true;
+    QTest::newRow("frame-type-different")
+            << filter(0xFFF, 0xBFF, Frame::DataFrame,    Filter::MatchBaseAndExtendedFormat)
+            << filter(0xFFF, 0xBFF, Frame::InvalidFrame, Filter::MatchBaseAndExtendedFormat)
+            << false;
+
+    QTest::newRow("filter-equal")
+            << filter(0xFFF, 0xBFF, Frame::ErrorFrame,    Filter::MatchExtendedFormat)
+            << filter(0xFFF, 0xBFF, Frame::ErrorFrame,    Filter::MatchExtendedFormat)
+            << true;
+    QTest::newRow("filter-different")
+            << filter(0xFFF, 0xBFF, Frame::ErrorFrame,    Filter::MatchExtendedFormat)
+            << filter(0xFFF, 0xBFF, Frame::ErrorFrame,    Filter::MatchBaseAndExtendedFormat)
+            << false;
+}
+
+void tst_QCanBusDevice::filterEqual()
+{
+    QFETCH(QCanBusDevice::Filter, first);
+    QFETCH(QCanBusDevice::Filter, second);
+    QFETCH(bool, isEqual);
+
+    if (isEqual) {
+        QCOMPARE(first, second);
+    } else {
+        QVERIFY(first != second);
+    }
 }
 
 void tst_QCanBusDevice::tst_bufferingAttribute()

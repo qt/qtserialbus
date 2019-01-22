@@ -84,6 +84,17 @@ public:
 
     struct Filter
     {
+        bool operator==(const Filter &other) const
+        {
+            return frameId == other.frameId && frameIdMask == other.frameIdMask
+                    && type == other.type && format == other.format;
+        }
+
+        bool operator!=(const Filter &other) const
+        {
+            return !operator==(other);
+        }
+
         enum FormatFilter {
             MatchBaseFormat = 0x0001,
             MatchExtendedFormat = 0x0002,
@@ -171,6 +182,7 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(QCanBusDevice::Directions)
 
 QT_END_NAMESPACE
 
+Q_DECLARE_METATYPE(QCanBusDevice::Filter)
 Q_DECLARE_METATYPE(QCanBusDevice::Filter::FormatFilter)
 Q_DECLARE_METATYPE(QList<QCanBusDevice::Filter>)
 

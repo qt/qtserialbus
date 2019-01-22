@@ -142,6 +142,20 @@ Q_LOGGING_CATEGORY(QT_CANBUS, "qt.canbus")
 */
 
 /*!
+    \fn QCanBusDevice::Filter::operator==(const Filter &other)
+
+    Returns true, if the filter \a other is equal to this filter,
+    otherwise returns false.
+*/
+
+/*!
+    \fn QCanBusDevice::Filter::operator!=(const Filter &other)
+
+    Returns true, if the filter \a other is not equal to this filter,
+    otherwise returns false.
+*/
+
+/*!
     \enum QCanBusDevice::Filter::FormatFilter
     This enum describes the format pattern, which is used to filter incoming
     CAN bus frames.
