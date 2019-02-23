@@ -72,6 +72,15 @@ public:
     };
     Q_ENUM(CanBusDeviceState)
 
+    enum class CanBusStatus {
+        Unknown,
+        Good,
+        Warning,
+        Error,
+        BusOff
+    };
+    Q_ENUM(CanBusStatus)
+
     enum ConfigurationKey {
         RawFilterKey = 0,
         ErrorFilterKey,
@@ -123,6 +132,8 @@ public:
     qint64 framesToWrite() const;
 
     void resetController();
+    bool hasBusStatus() const;
+    QCanBusDevice::CanBusStatus busStatus() const;
 
     enum Direction {
         Input = 1,
@@ -168,6 +179,7 @@ protected:
     virtual void close() = 0;
 
     void setResetControllerFunction(std::function<void()> &resetter);
+    void setCanBusStatusGetter(std::function<CanBusStatus()> &busStatusGetter);
 
     static QCanBusDeviceInfo createDeviceInfo(const QString &name,
                                               bool isVirtual = false,

@@ -328,6 +328,17 @@ void QCanBusDevice::setResetControllerFunction(std::function<void()> &resetter)
 }
 
 /*!
+ * Called from the derived plugin to register a function that returns the
+ * CAN controller bus status when \a busStatus() is called.
+ */
+void QCanBusDevice::setCanBusStatusGetter(std::function<CanBusStatus()> &busStatusGetter)
+{
+    Q_D(QCanBusDevice);
+
+    d->m_busStatusGetter = busStatusGetter;
+}
+
+/*!
     Sets the configuration parameter \a key for the CAN bus connection
     to \a value. The potential keys are represented by \l ConfigurationKey.
 
@@ -464,6 +475,8 @@ qint64 QCanBusDevice::framesToWrite() const
 
     \note This function may not be implemented in all CAN plugins.
     Please refer to the plugins help pages for more information.
+
+    \sa busStatus()
 */
 void QCanBusDevice::resetController()
 {
@@ -475,6 +488,55 @@ void QCanBusDevice::resetController()
         qCWarning(QT_CANBUS, error);
         setError(tr(error), QCanBusDevice::CanBusError::ConfigurationError);
     }
+}
+
+/*!
+    \since 5.14
+
+    Return true, if the CAN plugin supports requesting the CAN bus status.
+
+    \sa busStatus()
+ */
+bool QCanBusDevice::hasBusStatus() const
+{
+    return d_func()->m_busStatusGetter != nullptr;
+}
+
+/*!
+    \since 5.14
+    \enum QCanBusDevice::CanBusStatus
+
+    This enum describes possible CAN bus status values.
+
+    \value Unknown  The CAN bus status is unknown
+                    (e.g. not supported by the CAN plugin).
+    \value Good     The CAN controller is fully operational
+    \value Warning  The CAN controller is in warning status
+    \value Error    The CAN controller is in error status
+                    (no longer sending CAN frames)
+    \value BusOff   The CAN controller is in bus off status
+                    (disconnected from the CAN bus)
+*/
+
+/*!
+    \since 5.14
+
+    Returns the current CAN bus status. If the status cannot be requested,
+    QCanBusDevice::UnknownStatus is returned.
+
+    \note This function may not be implemented in all CAN plugins.
+    Please refer to the plugins help pages for more information.
+    The function hasBusStatus() can be used at runtime to check if
+    the used CAN plugin has support for requesting the CAN bus status.
+
+    \sa hasBusStatus(), hardwareControllerReset()
+*/
+QCanBusDevice::CanBusStatus QCanBusDevice::busStatus() const
+{
+    if (d_func()->m_busStatusGetter)
+        return d_func()->m_busStatusGetter();
+
+    return QCanBusDevice::CanBusStatus::Unknown;
 }
 
 /*!

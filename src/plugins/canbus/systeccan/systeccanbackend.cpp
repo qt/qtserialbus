@@ -459,6 +459,35 @@ void SystecCanBackendPrivate::resetController()
     ::UcanResetCan(handle);
 }
 
+QCanBusDevice::CanBusStatus SystecCanBackendPrivate::busStatus()
+{
+    Q_Q(SystecCanBackend);
+
+    tStatusStruct status;
+    ::memset(&status, 0, sizeof(status));
+    const UCANRET result = ::UcanGetStatus(handle, &status);
+
+    if (Q_UNLIKELY(result != USBCAN_SUCCESSFUL)) {
+        qCWarning(QT_CANBUS_PLUGINS_SYSTECCAN, "Can not query CAN bus status.");
+        q->setError(SystecCanBackend::tr("Can not query CAN bus status."), QCanBusDevice::ConfigurationError);
+        return QCanBusDevice::CanBusStatus::Unknown;
+    }
+
+    if (status.m_wCanStatus & USBCAN_CANERR_BUSOFF)
+        return QCanBusDevice::CanBusStatus::BusOff;
+
+    if (status.m_wCanStatus & USBCAN_CANERR_BUSHEAVY)
+        return QCanBusDevice::CanBusStatus::Error;
+
+    if (status.m_wCanStatus & USBCAN_CANERR_BUSLIGHT)
+        return QCanBusDevice::CanBusStatus::Warning;
+
+    if (status.m_wCanStatus == USBCAN_CANERR_OK)
+        return QCanBusDevice::CanBusStatus::Good;
+
+    return QCanBusDevice::CanBusStatus::Unknown;
+}
+
 SystecCanBackend::SystecCanBackend(const QString &name, QObject *parent) :
     QCanBusDevice(parent),
     d_ptr(new SystecCanBackendPrivate(this))
@@ -470,6 +499,9 @@ SystecCanBackend::SystecCanBackend(const QString &name, QObject *parent) :
 
     std::function<void()> f = std::bind(&SystecCanBackend::resetController, this);
     setResetControllerFunction(f);
+
+    std::function<CanBusStatus()> g = std::bind(&SystecCanBackend::busStatus, this);
+    setCanBusStatusGetter(g);
 }
 
 SystecCanBackend::~SystecCanBackend()
@@ -565,6 +597,13 @@ void SystecCanBackend::resetController()
 {
     Q_D(SystecCanBackend);
     d->resetController();
+}
+
+QCanBusDevice::CanBusStatus SystecCanBackend::busStatus()
+{
+    Q_D(SystecCanBackend);
+
+    return d->busStatus();
 }
 
 QT_END_NAMESPACE

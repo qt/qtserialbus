@@ -720,6 +720,9 @@ PeakCanBackend::PeakCanBackend(const QString &name, QObject *parent)
 
     std::function<void()> f = std::bind(&PeakCanBackend::resetController, this);
     setResetControllerFunction(f);
+
+    std::function<CanBusStatus()> g = std::bind(&PeakCanBackend::busStatus, this);
+    setCanBusStatusGetter(g);
 }
 
 PeakCanBackend::~PeakCanBackend()
@@ -815,6 +818,25 @@ void PeakCanBackend::resetController()
 {
     close();
     open();
+}
+
+QCanBusDevice::CanBusStatus PeakCanBackend::busStatus() const
+{
+    const TPCANStatus status = ::CAN_GetStatus(d_ptr->channelIndex);
+
+    switch (status & PCAN_ERROR_ANYBUSERR) {
+    case PCAN_ERROR_OK:
+        return QCanBusDevice::CanBusStatus::Good;
+    case PCAN_ERROR_BUSWARNING:
+        return QCanBusDevice::CanBusStatus::Warning;
+    case PCAN_ERROR_BUSPASSIVE:
+        return QCanBusDevice::CanBusStatus::Error;
+    case PCAN_ERROR_BUSOFF:
+        return QCanBusDevice::CanBusStatus::BusOff;
+    default:
+        qCWarning(QT_CANBUS_PLUGINS_PEAKCAN, "Unknown CAN bus status: %lu.", ulong(status));
+        return QCanBusDevice::CanBusStatus::Unknown;
+    }
 }
 
 QT_END_NAMESPACE

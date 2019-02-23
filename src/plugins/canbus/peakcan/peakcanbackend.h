@@ -73,6 +73,7 @@ public:
 
 private:
     void resetController();
+    CanBusStatus busStatus() const;
 
     PeakCanBackendPrivate * const d_ptr;
 };

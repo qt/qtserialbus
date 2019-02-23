@@ -60,7 +60,8 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    m_ui(new Ui::MainWindow)
+    m_ui(new Ui::MainWindow),
+    m_busStatusTimer(new QTimer(this))
 {
     m_ui->setupUi(this);
 
@@ -174,12 +175,39 @@ void MainWindow::connectDevice()
                     .arg(p.pluginName).arg(p.deviceInterfaceName));
         }
     }
+
+    connect(m_busStatusTimer, &QTimer::timeout, this, [this]() {
+        switch (m_canDevice->busStatus()) {
+        case QCanBusDevice::CanBusStatus::Good:
+            m_ui->busStatus->setText("CAN bus status: Good.");
+            break;
+        case QCanBusDevice::CanBusStatus::Warning:
+            m_ui->busStatus->setText("CAN bus status: Warning.");
+            break;
+        case QCanBusDevice::CanBusStatus::Error:
+            m_ui->busStatus->setText("CAN bus status: Error.");
+            break;
+        case QCanBusDevice::CanBusStatus::BusOff:
+            m_ui->busStatus->setText("CAN bus status: Bus Off.");
+            break;
+        default:
+            m_ui->busStatus->setText("CAN bus status: Unknown.");
+            break;
+        }
+    });
+
+    if (m_canDevice->hasBusStatus())
+        m_busStatusTimer->start(2000);
+    else
+        m_ui->busStatus->setText(tr("No CAN bus status available."));
 }
 
 void MainWindow::disconnectDevice()
 {
     if (!m_canDevice)
         return;
+
+    m_busStatusTimer->stop();
 
     m_canDevice->disconnectDevice();
     delete m_canDevice;

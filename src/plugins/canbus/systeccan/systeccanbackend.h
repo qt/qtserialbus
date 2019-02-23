@@ -77,6 +77,7 @@ public:
 
 private:
     void resetController();
+    QCanBusDevice::CanBusStatus busStatus();
 
     SystecCanBackendPrivate * const d_ptr;
 };

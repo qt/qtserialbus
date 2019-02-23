@@ -197,6 +197,13 @@ SocketCanBackend::SocketCanBackend(const QString &name) :
 
     std::function<void()> f = std::bind(&SocketCanBackend::resetController, this);
     setResetControllerFunction(f);
+
+    if (hasBusStatus()) {
+        // Only register busStatus when libsocketcan is available
+        // QCanBusDevice::hasBusStatus() will return false otherwise
+        std::function<CanBusStatus()> g = std::bind(&SocketCanBackend::busStatus, this);
+        setCanBusStatusGetter(g);
+    }
 }
 
 SocketCanBackend::~SocketCanBackend()
@@ -756,6 +763,16 @@ void SocketCanBackend::readSocket()
 void SocketCanBackend::resetController()
 {
     libSocketCan->restart(canSocketName);
+}
+
+bool SocketCanBackend::hasBusStatus() const
+{
+    return libSocketCan->hasBusStatus();
+}
+
+QCanBusDevice::CanBusStatus SocketCanBackend::busStatus() const
+{
+    return libSocketCan->busStatus(canSocketName);
 }
 
 QT_END_NAMESPACE

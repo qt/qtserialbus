@@ -208,6 +208,7 @@
 
     \list
         \li QCanBusDevice::resetController() (needs libsocketcan)
+        \li QCanBusDevice::busStatus() (needs libsocketcan)
     \endlist
 
 */

@@ -66,11 +66,22 @@ struct can_bittiming {
     quint32 brp = 0;          /* Bit-rate prescaler */
 };
 
+enum can_state {
+    CAN_STATE_ERROR_ACTIVE = 0, /* RX/TX error count < 96 */
+    CAN_STATE_ERROR_WARNING,    /* RX/TX error count < 128 */
+    CAN_STATE_ERROR_PASSIVE,    /* RX/TX error count < 256 */
+    CAN_STATE_BUS_OFF,          /* RX/TX error count >= 256 */
+    CAN_STATE_STOPPED,          /* Device is stopped */
+    CAN_STATE_SLEEPING,         /* Device is sleeping */
+    CAN_STATE_MAX
+};
+
 GENERATE_SYMBOL(int, can_do_restart, const char * /* name */)
 GENERATE_SYMBOL(int, can_do_stop, const char * /* name */)
 GENERATE_SYMBOL(int, can_do_start, const char * /* name */)
 GENERATE_SYMBOL(int, can_set_bitrate, const char * /* name */, quint32 /* bitrate */)
 GENERATE_SYMBOL(int, can_get_bittiming, const char * /* name */, struct can_bittiming * /* bt */)
+GENERATE_SYMBOL(int, can_get_state, const char * /* name */, int * /* state */)
 
 LibSocketCan::LibSocketCan(QString *errorString)
 {
@@ -87,6 +98,7 @@ LibSocketCan::LibSocketCan(QString *errorString)
         RESOLVE_SYMBOL(can_do_restart);
         RESOLVE_SYMBOL(can_set_bitrate);
         RESOLVE_SYMBOL(can_get_bittiming);
+        RESOLVE_SYMBOL(can_get_state);
 
         return true;
     };
@@ -188,6 +200,39 @@ bool LibSocketCan::setBitrate(const QString &interface, quint32 bitrate)
     }
 
     return ::can_set_bitrate(interface.toLatin1().constData(), bitrate) == 0;
+}
+
+bool LibSocketCan::hasBusStatus() const
+{
+    return ::can_get_state != nullptr;
+}
+
+QCanBusDevice::CanBusStatus LibSocketCan::busStatus(const QString &interface) const
+{
+    if (!::can_get_state) {
+        qCWarning(QT_CANBUS_PLUGINS_SOCKETCAN, "Function can_get_state() is not available.");
+        return QCanBusDevice::CanBusStatus::Unknown;
+    }
+
+    int status = 0;
+    int result = ::can_get_state(interface.toLatin1().constData(), &status);
+
+    if (result < 0)
+        return QCanBusDevice::CanBusStatus::Unknown;
+
+    switch (status) {
+    case CAN_STATE_ERROR_ACTIVE:
+        return QCanBusDevice::CanBusStatus::Good;
+    case CAN_STATE_ERROR_WARNING:
+        return QCanBusDevice::CanBusStatus::Warning;
+    case CAN_STATE_ERROR_PASSIVE:
+        return QCanBusDevice::CanBusStatus::Error;
+    case CAN_STATE_BUS_OFF:
+        return QCanBusDevice::CanBusStatus::BusOff;
+    default:
+        // Device is stopped or sleeping, so status is unknown
+        return QCanBusDevice::CanBusStatus::Unknown;
+    }
 }
 
 QT_END_NAMESPACE
