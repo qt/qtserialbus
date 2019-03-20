@@ -351,6 +351,9 @@ QModbusRequest QModbusClientPrivate::createRWRequest(const QModbusDataUnit &read
 void QModbusClientPrivate::processQueueElement(const QModbusResponse &pdu,
                                                const QueueElement &element)
 {
+    if (element.reply.isNull())
+        return;
+
     element.reply->setRawResult(pdu);
     if (pdu.isException()) {
         element.reply->setError(QModbusDevice::ProtocolError,

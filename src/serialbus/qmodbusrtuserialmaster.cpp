@@ -150,10 +150,6 @@ void QModbusRtuSerialMaster::close()
     if (d->m_serialPort->isOpen())
         d->m_serialPort->close();
 
-    // enqueue current active request back for abortion
-    d->m_queue.enqueue(d->m_current);
-    d->m_current = QModbusClientPrivate::QueueElement();
-
     int numberOfAborts = 0;
     while (!d->m_queue.isEmpty()) {
         // Finish each open reply and forget them
