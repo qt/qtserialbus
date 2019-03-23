@@ -741,7 +741,7 @@ bool PeakCanBackend::open()
         // the bitrate can not be applied after opening of device
         const auto keys = configurationKeys();
         for (int key : keys) {
-            if (key == QCanBusDevice::BitRateKey)
+            if (key == QCanBusDevice::BitRateKey || key == QCanBusDevice::DataBitRateKey)
                 continue;
             const QVariant param = configurationParameter(key);
             const bool success = d->setConfigurationParameter(key, param);
