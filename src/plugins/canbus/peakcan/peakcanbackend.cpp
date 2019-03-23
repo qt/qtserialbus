@@ -68,6 +68,8 @@ bool PeakCanBackend::canCreate(QString *errorReason)
 #else
     static bool symbolsResolved = resolveSymbols(pcanLibrary());
     if (Q_UNLIKELY(!symbolsResolved)) {
+        qCCritical(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot load library: %ls",
+                qUtf16Printable(pcanLibrary()->errorString()));
         *errorReason = pcanLibrary()->errorString();
         return false;
     }
@@ -331,15 +333,21 @@ bool PeakCanBackendPrivate::open()
     }
 
     if (Q_UNLIKELY(st != PCAN_ERROR_OK)) {
-        q->setError(systemErrorString(st), QCanBusDevice::ConnectionError);
+        const QString errorString = systemErrorString(st);
+        qCCritical(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot initialize hardware: %ls",
+                   qUtf16Printable(errorString));
+        q->setError(errorString, QCanBusDevice::ConnectionError);
         return false;
     }
 
 #if defined(Q_OS_WIN32)
     if (readHandle == INVALID_HANDLE_VALUE) {
         readHandle = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
-        if (!readHandle) {
-            q->setError(qt_error_string(::GetLastError()), QCanBusDevice::ConnectionError);
+        if (Q_UNLIKELY(!readHandle)) {
+            const QString errorString = qt_error_string(::GetLastError());
+            qCCritical(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot create receive event handler: %ls",
+                       qUtf16Printable(errorString));
+            q->setError(errorString, QCanBusDevice::ConnectionError);
             return false;
         }
     }
@@ -353,7 +361,10 @@ bool PeakCanBackendPrivate::open()
 #else
     const TPCANStatus err = ::CAN_GetValue(channelIndex, PCAN_RECEIVE_EVENT, &readHandle, sizeof(readHandle));
     if (Q_UNLIKELY(err != PCAN_ERROR_OK)) {
-        q->setError(systemErrorString(err), QCanBusDevice::ConnectionError);
+        const QString errorString = systemErrorString(err);
+        qCCritical(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot create receive event handler: %ls",
+                   qUtf16Printable(errorString));
+        q->setError(errorString, QCanBusDevice::ConnectionError);
         return false;
     }
 #endif
@@ -380,8 +391,12 @@ void PeakCanBackendPrivate::close()
 
     quint32 value = 0;
     const TPCANStatus err = ::CAN_SetValue(channelIndex, PCAN_RECEIVE_EVENT, &value, sizeof(value));
-    if (Q_UNLIKELY(err != PCAN_ERROR_OK))
-        q->setError(systemErrorString(err), QCanBusDevice::ConnectionError);
+    if (Q_UNLIKELY(err != PCAN_ERROR_OK)) {
+        const QString errorString = systemErrorString(err);
+        qCCritical(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot unregister receive event handler: %ls",
+                   qUtf16Printable(errorString));
+        q->setError(errorString, QCanBusDevice::ConnectionError);
+    }
 
     const TPCANStatus st = ::CAN_Uninitialize(channelIndex);
     if (Q_UNLIKELY(st != PCAN_ERROR_OK))
@@ -389,8 +404,12 @@ void PeakCanBackendPrivate::close()
 
 #if defined(Q_OS_WIN32)
     if (readHandle && (readHandle != INVALID_HANDLE_VALUE)) {
-        if (Q_UNLIKELY(!::CloseHandle(readHandle)))
-            q->setError(qt_error_string(::GetLastError()), QCanBusDevice::ConnectionError);
+        const QString errorString = qt_error_string(::GetLastError());
+        if (Q_UNLIKELY(!::CloseHandle(readHandle))) {
+            qCCritical(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot close read handle: %ls",
+                       qUtf16Printable(errorString));
+            q->setError(errorString, QCanBusDevice::ConnectionError);
+        }
         readHandle = INVALID_HANDLE_VALUE;
     }
 #else
@@ -413,6 +432,7 @@ bool PeakCanBackendPrivate::setConfigurationParameter(int key, const QVariant &v
     case QCanBusDevice::DataBitRateKey: {
         const int dataBitrate = value.toInt();
         if (Q_UNLIKELY(dataBitrateString(dataBitrate).isEmpty())) {
+            qCWarning(QT_CANBUS_PLUGINS_PEAKCAN, "Unsupported data bitrate value: %d", dataBitrate);
             q->setError(PeakCanBackend::tr("Unsupported data bitrate value: %1.").arg(dataBitrate),
                         QCanBusDevice::ConfigurationError);
             return false;
@@ -420,6 +440,7 @@ bool PeakCanBackendPrivate::setConfigurationParameter(int key, const QVariant &v
         return true;
     }
     default:
+        qCWarning(QT_CANBUS_PLUGINS_PEAKCAN, "Unsupported configuration key: %d", key);
         q->setError(PeakCanBackend::tr("Unsupported configuration key: %1").arg(key),
                     QCanBusDevice::ConfigurationError);
         return false;
@@ -558,8 +579,9 @@ void PeakCanBackendPrivate::startWrite()
             ::memcpy(message.DATA, payload.constData(), sizeof(message.DATA));
         st = ::CAN_WriteFD(channelIndex, &message);
     } else if (frame.hasFlexibleDataRateFormat()) {
-        q->setError(PeakCanBackend::tr("Cannot send CAN FD frame format as CAN FD is not enabled."),
-                    QCanBusDevice::WriteError);
+        const char errorString[] = "Cannot send CAN FD frame format as CAN FD is not enabled.";
+        qCWarning(QT_CANBUS_PLUGINS_PEAKCAN(), errorString);
+        q->setError(PeakCanBackend::tr(errorString), QCanBusDevice::WriteError);
     } else {
         TPCANMsg message;
         ::memset(&message, 0, sizeof(message));
@@ -576,10 +598,14 @@ void PeakCanBackendPrivate::startWrite()
         st = ::CAN_Write(channelIndex, &message);
     }
 
-    if (Q_UNLIKELY(st != PCAN_ERROR_OK))
-        q->setError(systemErrorString(st), QCanBusDevice::WriteError);
-    else
+    if (Q_UNLIKELY(st != PCAN_ERROR_OK)) {
+        const QString errorString = systemErrorString(st);
+        qCWarning(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot write frame: %ls",
+                  qUtf16Printable(errorString));
+        q->setError(errorString, QCanBusDevice::WriteError);
+    } else {
         emit q->framesWritten(qint64(1));
+    }
 
     if (q->hasOutgoingFrames() && !writeNotifier->isActive())
         writeNotifier->start();
@@ -662,8 +688,9 @@ bool PeakCanBackendPrivate::verifyBitRate(int bitrate)
     Q_Q(PeakCanBackend);
 
     if (Q_UNLIKELY(isOpen)) {
-        q->setError(PeakCanBackend::tr("Cannot change bitrate for already opened device."),
-                    QCanBusDevice::ConfigurationError);
+        const char errorString[] = "Cannot change bitrate for already opened device.";
+        qCWarning(QT_CANBUS_PLUGINS_PEAKCAN, errorString);
+        q->setError(PeakCanBackend::tr(errorString), QCanBusDevice::ConfigurationError);
         return false;
     }
 
@@ -674,6 +701,7 @@ bool PeakCanBackendPrivate::verifyBitRate(int bitrate)
         isValidBitrate = bitrateCodeFromBitrate(bitrate) != PCAN_BAUD_INVALID;
 
     if (Q_UNLIKELY(!isValidBitrate)) {
+        qCWarning(QT_CANBUS_PLUGINS_PEAKCAN, "Unsupported bitrate value: %d.", bitrate);
         q->setError(PeakCanBackend::tr("Unsupported bitrate value: %1.").arg(bitrate),
                     QCanBusDevice::ConfigurationError);
     }
