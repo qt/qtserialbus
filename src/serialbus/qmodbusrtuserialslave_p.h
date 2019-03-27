@@ -347,7 +347,7 @@ public:
             m_serialPort->setStopBits(m_stopBits);
         }
 
-        // for calulcation details see
+        // for calculation details see
         // QModbusRtuSerialMasterPrivate::calculateInterFrameDelay()
         m_interFrameDelayMilliseconds = qMax(m_interFrameDelayMilliseconds,
                                              qCeil(3500. / (qreal(m_baudRate) / 11.)));

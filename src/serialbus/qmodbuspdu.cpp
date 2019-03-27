@@ -320,7 +320,7 @@ static QDataStream &pduFromStream(QDataStream &stream, QModbusPdu &pdu, Type typ
 
     \note Usage is limited \c quint8 and \c quint16 only. This is because
     \c QDataStream stream operators will not only append raw data, but also
-    e.g. size, count etc. for complex types.
+    e.g. size, count, etc. for complex types.
 */
 
 /*!
@@ -412,7 +412,7 @@ static QDataStream &pduFromStream(QDataStream &stream, QModbusPdu &pdu, Type typ
 
     \note Usage is limited \c quint8 and \c quint16 only. This is because
     \c QDataStream stream operators will not only append raw data, but also
-    e.g. size, count etc. for complex types.
+    e.g. size, count, etc. for complex types.
 */
 
 /*!
@@ -428,7 +428,7 @@ static QDataStream &pduFromStream(QDataStream &stream, QModbusPdu &pdu, Type typ
 
     \note Usage is limited \c quint8 and \c quint16 only. This is because
     \c QDataStream stream operators will not only append raw data, but also
-    e.g. size, count etc. for complex types.
+    e.g. size, count, etc. for complex types.
 */
 
 /*!
@@ -481,7 +481,7 @@ QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu)
     \note When using the constructor taking the \c QByteArray, please make sure to convert the
         containing data to big-endian byte order before creating the request.
 
-    The same request can be created like this, if the values are know at compile time:
+    The same request can be created like this, if the values are known at compile time:
     \code
         quint16 startAddress = 19, numberOfCoils = 10;
         quint8 payloadInBytes = 2, outputHigh = 0xcd, outputLow = 0x01;
@@ -517,7 +517,7 @@ QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu)
 
     \note Usage is limited \c quint8 and \c quint16 only. This is because
     \c QDataStream stream operators will not only append raw data, but also
-    e.g. size, count etc. for complex types.
+    e.g. size, count, etc. for complex types.
 */
 
 /*!
@@ -638,7 +638,7 @@ QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu)
     \note When using the constructor taking the \c QByteArray, please make sure to convert the
         containing data to big-endian byte order before creating the request.
 
-    The same response can be created like this, if the values are know at compile time:
+    The same response can be created like this, if the values are known at compile time:
     \code
         quint8 payloadInBytes = 2, outputHigh = 0xcd, outputLow = 0x01;
         QModbusResponse response(QModbusResponse::ReadCoils, payloadInBytes, outputHigh, outputLow);
@@ -673,7 +673,7 @@ QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu)
 
     \note Usage is limited \c quint8 and \c quint16 only. This is because
     \c QDataStream stream operators will not only append raw data, but also
-    e.g. size, count etc. for complex types.
+    e.g. size, count, etc. for complex types.
 */
 
 /*!

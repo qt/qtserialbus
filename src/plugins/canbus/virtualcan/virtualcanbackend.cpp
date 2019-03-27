@@ -62,12 +62,12 @@ static const char LocalEchoFlag        = 'L';
 VirtualCanServer::VirtualCanServer(QObject *parent)
     : QObject(parent)
 {
-    qCDebug(QT_CANBUS_PLUGINS_VIRTUALCAN, "Server [%p]: constructed.", this);
+    qCDebug(QT_CANBUS_PLUGINS_VIRTUALCAN, "Server [%p] constructed.", this);
 }
 
 VirtualCanServer::~VirtualCanServer()
 {
-    qCDebug(QT_CANBUS_PLUGINS_VIRTUALCAN, "Server [%p]: destructed.", this);
+    qCDebug(QT_CANBUS_PLUGINS_VIRTUALCAN, "Server [%p] destructed.", this);
 }
 
 void VirtualCanServer::start(quint16 port)
@@ -99,7 +99,7 @@ void VirtualCanServer::start(quint16 port)
 void VirtualCanServer::connected()
 {
     while (m_server->hasPendingConnections()) {
-        qCInfo(QT_CANBUS_PLUGINS_VIRTUALCAN, "Server [%p]: client connected.", this);
+        qCInfo(QT_CANBUS_PLUGINS_VIRTUALCAN, "Server [%p] client connected.", this);
         QTcpSocket *next = m_server->nextPendingConnection();
         m_serverSockets.append(next);
         connect(next, &QIODevice::readyRead, this, &VirtualCanServer::readyRead);
@@ -109,7 +109,7 @@ void VirtualCanServer::connected()
 
 void VirtualCanServer::disconnected()
 {
-    qCInfo(QT_CANBUS_PLUGINS_VIRTUALCAN, "Server [%p]: client disconnected.", this);
+    qCInfo(QT_CANBUS_PLUGINS_VIRTUALCAN, "Server [%p] client disconnected.", this);
 
     auto socket = qobject_cast<QTcpSocket *>(sender());
     Q_ASSERT(socket);
