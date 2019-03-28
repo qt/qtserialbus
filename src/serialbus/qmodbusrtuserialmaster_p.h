@@ -182,7 +182,7 @@ public:
         processQueueElement(response, m_queue.dequeue());
 
         m_state = Idle;
-        scheduleNextRequest();
+        scheduleNextRequest(m_interFrameDelayMilliseconds);
     }
 
     void onAboutToClose()
@@ -215,7 +215,7 @@ public:
         }
 
         m_state = Idle;
-        scheduleNextRequest();
+        scheduleNextRequest(m_interFrameDelayMilliseconds);
     }
 
     void onBytesWritten(qint64 bytes)
@@ -230,8 +230,14 @@ public:
 
         qCDebug(QT_MODBUS) << "(RTU client) Send successful:" << current.requestPdu;
 
-        // TODO: Implement broadcast here.
-        current.m_timerId = m_responseTimer.start(m_responseTimeoutDuration);
+        if (!current.reply.isNull() && current.reply->type() == QModbusReply::Broadcast) {
+            m_state = ProcessReply;
+            processQueueElement({}, m_queue.dequeue());
+            m_state = Idle;
+            scheduleNextRequest(m_turnaroundDelay);
+        } else {
+            current.m_timerId = m_responseTimer.start(m_responseTimeoutDuration);
+        }
     }
 
     void onError(QSerialPort::SerialPortError error)
@@ -354,23 +360,24 @@ public:
     {
         Q_Q(QModbusRtuSerialMaster);
 
-        auto reply = new QModbusReply(type, serverAddress, q);
+        auto reply = new QModbusReply(serverAddress == 0 ? QModbusReply::Broadcast : type,
+            serverAddress, q);
         QueueElement element(reply, request, unit, m_numberOfRetries + 1);
         element.adu = QModbusSerialAdu::create(QModbusSerialAdu::Rtu, serverAddress, request);
         m_queue.enqueue(element);
 
-        scheduleNextRequest();
+        scheduleNextRequest(m_interFrameDelayMilliseconds);
 
         return reply;
     }
 
-    void scheduleNextRequest()
+    void scheduleNextRequest(int delay)
     {
         Q_Q(QModbusRtuSerialMaster);
 
         if (m_state == Idle && !m_queue.isEmpty()) {
             m_state = WaitingForReplay;
-            QTimer::singleShot(m_interFrameDelayMilliseconds, q, [this]() { processQueue(); });
+            QTimer::singleShot(delay, q, [this]() { processQueue(); });
         }
     }
 
@@ -386,7 +393,7 @@ public:
         if (current.reply.isNull()) {
             m_queue.dequeue();
             m_state = Idle;
-            scheduleNextRequest();
+            scheduleNextRequest(m_interFrameDelayMilliseconds);
         } else {
             current.bytesWritten = 0;
             current.numberOfRetries--;
@@ -427,6 +434,7 @@ public:
     QSerialPort *m_serialPort = nullptr;
 
     int m_interFrameDelayMilliseconds = 2; // A approximated value of 1.750 msec.
+    int m_turnaroundDelay = 100; // Recommended value is between 100 and 200 msec.
 };
 
 QT_END_NAMESPACE
