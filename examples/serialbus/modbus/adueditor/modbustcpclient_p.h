@@ -98,7 +98,7 @@ public:
         using TypeId = void (QTimer::*)(int);
         q->connect(q, &QModbusClient::timeoutChanged,
                    element.timer.data(), static_cast<TypeId>(&QTimer::setInterval));
-        QObject::connect(element.timer.data(), &QTimer::timeout, [this, writeToSocket]() {
+        QObject::connect(element.timer.data(), &QTimer::timeout, q, [this, writeToSocket]() {
             if (!m_transactionStore.contains(m_tId))
                 return;
 
