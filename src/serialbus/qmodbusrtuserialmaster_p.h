@@ -330,7 +330,7 @@ public:
             break;
 
         case Send:
-            // send timeout will always happen unless cancelled by very quick bytesWritten
+            // send timeout will always happen unless canceled by very quick bytesWritten
             if (m_current.reply.isNull()) {
                 scheduleNextRequest();
             } else if (m_current.bytesWritten < m_current.adu.size()) {
