@@ -95,6 +95,8 @@ QModbusReply::QModbusReply(ReplyType type, int serverAddress, QObject *parent)
 
 /*!
     Returns \c true when the reply has finished or was aborted.
+
+    \sa finished(), error()
 */
 bool QModbusReply::isFinished() const
 {
@@ -190,10 +192,14 @@ int QModbusReply::serverAddress() const
 
     Note: Do not delete this reply object in the slot connected to this signal.
     Use \l deleteLater() instead.
+
+    \sa error(), errorString()
 */
 
 /*!
     Returns the error state of this reply.
+
+    \sa errorString(), errorOccurred()
 */
 QModbusDevice::Error QModbusReply::error() const
 {
