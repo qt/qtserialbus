@@ -351,6 +351,9 @@ QModbusRequest QModbusClientPrivate::createRWRequest(const QModbusDataUnit &read
 void QModbusClientPrivate::processQueueElement(const QModbusResponse &pdu,
                                                const QueueElement &element)
 {
+    if (element.reply.isNull())
+        return;
+
     element.reply->setRawResult(pdu);
     if (pdu.isException()) {
         element.reply->setError(QModbusDevice::ProtocolError,
@@ -358,7 +361,7 @@ void QModbusClientPrivate::processQueueElement(const QModbusResponse &pdu,
         return;
     }
 
-    if (element.reply->type() == QModbusReply::Raw) {
+    if (element.reply->type() != QModbusReply::Common) {
         element.reply->setFinished(true);
         return;
     }

@@ -115,9 +115,9 @@ public:
 
     void setupTcpServer()
     {
-        Q_Q(QModbusTcpServer);
-        m_tcpServer = new QTcpServer(q);
-        QObject::connect(m_tcpServer, &QTcpServer::newConnection, [this]() {
+        m_tcpServer = new QTcpServer(q_func());
+        QObject::connect(m_tcpServer, &QTcpServer::newConnection, q_func(), [this]() {
+            Q_Q(QModbusTcpServer);
             auto *socket = m_tcpServer->nextPendingConnection();
             if (!socket)
                 return;
@@ -136,18 +136,18 @@ public:
 
             auto buffer = new QByteArray();
 
-            QObject::connect(socket, &QObject::destroyed, [buffer]() {
+            QObject::connect(socket, &QObject::destroyed, q, [buffer]() {
                 // cleanup buffer
                 delete buffer;
             });
-            QObject::connect(socket, &QTcpSocket::disconnected, [socket, this]() {
+            QObject::connect(socket, &QTcpSocket::disconnected, q, [socket, this]() {
                 connections.removeAll(socket);
 
                 Q_Q(QModbusTcpServer);
                 emit q->modbusClientDisconnected(socket);
                 socket->deleteLater();
             });
-            QObject::connect(socket, &QTcpSocket::readyRead, [buffer, socket, this]() {
+            QObject::connect(socket, &QTcpSocket::readyRead, q, [buffer, socket, this]() {
                 if (!socket)
                     return;
 
@@ -214,7 +214,8 @@ public:
                 }
             });
         });
-        QObject::connect(m_tcpServer, &QTcpServer::acceptError,
+
+        QObject::connect(m_tcpServer, &QTcpServer::acceptError, q_func(),
                          [this](QAbstractSocket::SocketError /*sError*/) {
             Q_Q(QModbusTcpServer);
 

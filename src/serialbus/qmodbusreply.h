@@ -53,7 +53,8 @@ class Q_SERIALBUS_EXPORT QModbusReply : public QObject
 public:
     enum ReplyType {
         Raw,
-        Common
+        Common,
+        Broadcast
     };
     Q_ENUM(ReplyType)
 

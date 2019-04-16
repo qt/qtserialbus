@@ -126,6 +126,7 @@ public:
         QSharedPointer<QTimer> timer;
         QByteArray adu;
         qint64 bytesWritten = 0;
+        qint32 m_timerId = INT_MIN;
     };
     void processQueueElement(const QModbusResponse &pdu, const QueueElement &element);
 };

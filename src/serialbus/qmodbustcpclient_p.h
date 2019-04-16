@@ -71,7 +71,7 @@ public:
 
         m_socket = new QTcpSocket(q);
 
-        QObject::connect(m_socket, &QAbstractSocket::connected, [this]() {
+        QObject::connect(m_socket, &QAbstractSocket::connected, q, [this]() {
             qCDebug(QT_MODBUS) << "(TCP client) Connected to" << m_socket->peerAddress()
                                << "on port" << m_socket->peerPort();
             Q_Q(QModbusTcpClient);
@@ -79,7 +79,7 @@ public:
             q->setState(QModbusDevice::ConnectedState);
         });
 
-        QObject::connect(m_socket, &QAbstractSocket::disconnected, [this]() {
+        QObject::connect(m_socket, &QAbstractSocket::disconnected, q, [this]() {
            qCDebug(QT_MODBUS)  << "(TCP client) Connection closed.";
            Q_Q(QModbusTcpClient);
            q->setState(QModbusDevice::UnconnectedState);
@@ -87,7 +87,7 @@ public:
         });
 
         using TypeId = void (QAbstractSocket::*)(QAbstractSocket::SocketError);
-        QObject::connect(m_socket, static_cast<TypeId>(&QAbstractSocket::error),
+        QObject::connect(m_socket, static_cast<TypeId>(&QAbstractSocket::error), q,
                          [this](QAbstractSocket::SocketError /*error*/)
         {
             Q_Q(QModbusTcpClient);
@@ -100,7 +100,7 @@ public:
                         QModbusDevice::ConnectionError);
         });
 
-        QObject::connect(m_socket, &QIODevice::readyRead, [this](){
+        QObject::connect(m_socket, &QIODevice::readyRead, q, [this](){
             responseBuffer += m_socket->read(m_socket->bytesAvailable());
             qCDebug(QT_MODBUS_LOW) << "(TCP client) Response buffer:" << responseBuffer.toHex();
 
@@ -196,7 +196,7 @@ public:
             using TypeId = void (QTimer::*)(int);
             q->connect(q, &QModbusClient::timeoutChanged,
                        element.timer.data(), static_cast<TypeId>(&QTimer::setInterval));
-            QObject::connect(element.timer.data(), &QTimer::timeout, [this, writeToSocket, tId]() {
+            QObject::connect(element.timer.data(), &QTimer::timeout, q, [this, writeToSocket, tId]() {
                 if (!m_transactionStore.contains(tId))
                     return;
 

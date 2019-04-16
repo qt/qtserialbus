@@ -74,6 +74,9 @@ public:
     \value Common   The reply originates from a common read, write or read/write
                     request. See \l QModbusClient::sendReadRequest,
                     \l QModbusClient::sendWriteRequest and \l QModbusClient::sendReadWriteRequest
+    \value Broadcast The replay originates from a Modbus broadcast request. The
+                     \l serverAddress() will return \c 0 and the \l finished()
+                     signal will be emitted immediately.
 */
 
 /*!
@@ -92,6 +95,8 @@ QModbusReply::QModbusReply(ReplyType type, int serverAddress, QObject *parent)
 
 /*!
     Returns \c true when the reply has finished or was aborted.
+
+    \sa finished(), error()
 */
 bool QModbusReply::isFinished() const
 {
@@ -187,10 +192,14 @@ int QModbusReply::serverAddress() const
 
     Note: Do not delete this reply object in the slot connected to this signal.
     Use \l deleteLater() instead.
+
+    \sa error(), errorString()
 */
 
 /*!
     Returns the error state of this reply.
+
+    \sa errorString(), errorOccurred()
 */
 QModbusDevice::Error QModbusReply::error() const
 {

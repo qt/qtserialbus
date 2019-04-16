@@ -104,6 +104,33 @@ void QModbusRtuSerialMaster::setInterFrameDelay(int microseconds)
 }
 
 /*!
+    \since 5.13
+
+    Returns the amount of milliseconds for the silent interval between a Modbus
+    broadcast and a consecutive Modbus messages. The default value is set to
+    \c 100 milliseconds.
+*/
+int QModbusRtuSerialMaster::turnaroundDelay() const
+{
+    Q_D(const QModbusRtuSerialMaster);
+    return d->m_turnaroundDelay;
+}
+
+/*!
+    \since 5.13
+
+    Sets the amount of milliseconds for the silent interval between a Modbus
+    broadcast and a consecutive Modbus messages to \a turnaroundDelay.
+    Typically the turnaround delay is in the range of \c 100 to \c 200
+    milliseconds.
+*/
+void QModbusRtuSerialMaster::setTurnaroundDelay(int turnaroundDelay)
+{
+    Q_D(QModbusRtuSerialMaster);
+    d->m_turnaroundDelay = turnaroundDelay;
+}
+
+/*!
     \internal
 */
 QModbusRtuSerialMaster::QModbusRtuSerialMaster(QModbusRtuSerialMasterPrivate &dd, QObject *parent)
@@ -149,10 +176,6 @@ void QModbusRtuSerialMaster::close()
 
     if (d->m_serialPort->isOpen())
         d->m_serialPort->close();
-
-    // enqueue current active request back for abortion
-    d->m_queue.enqueue(d->m_current);
-    d->m_current = QModbusClientPrivate::QueueElement();
 
     int numberOfAborts = 0;
     while (!d->m_queue.isEmpty()) {
