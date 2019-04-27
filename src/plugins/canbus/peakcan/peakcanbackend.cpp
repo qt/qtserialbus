@@ -737,8 +737,8 @@ bool PeakCanBackend::open()
         if (Q_UNLIKELY(!d->open()))
             return false;
 
-        // apply all stored configurations except bitrate, because
-        // the bitrate can not be applied after opening of device
+        // Apply all stored configurations except bitrate, because
+        // the bitrate cannot be changed after opening the device
         const auto keys = configurationKeys();
         for (int key : keys) {
             if (key == QCanBusDevice::BitRateKey || key == QCanBusDevice::DataBitRateKey)
