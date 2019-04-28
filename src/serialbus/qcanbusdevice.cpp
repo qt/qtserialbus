@@ -719,8 +719,10 @@ bool QCanBusDevice::connectDevice()
     Q_D(QCanBusDevice);
 
     if (Q_UNLIKELY(d->state != QCanBusDevice::UnconnectedState)) {
-        setError(tr("Can not connect an already connected device"),
-                 QCanBusDevice::ConnectionError);
+        const char error[] = QT_TRANSLATE_NOOP("QCanBusDevice",
+                                "Can not connect an already connected device.");
+        qCWarning(QT_CANBUS, error);
+        setError(tr(error), QCanBusDevice::ConnectionError);
         return false;
     }
 
