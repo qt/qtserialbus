@@ -446,7 +446,8 @@ void TinyCanBackendPrivate::startupDriver()
         ::CanSetEvents(EVENT_ENABLE_RX_MESSAGES);
 
     } else if (Q_UNLIKELY(driverRefCount < 0)) {
-        qCritical("Wrong reference counter: %d", driverRefCount);
+        qCCritical(QT_CANBUS_PLUGINS_TINYCAN, "Wrong driver reference counter: %d",
+                   driverRefCount);
         return;
     }
 
@@ -458,7 +459,8 @@ void TinyCanBackendPrivate::cleanupDriver()
     --driverRefCount;
 
     if (Q_UNLIKELY(driverRefCount < 0)) {
-        qCritical("Wrong reference counter: %d", driverRefCount);
+        qCCritical(QT_CANBUS_PLUGINS_TINYCAN, "Wrong driver reference counter: %d",
+                   driverRefCount);
         driverRefCount = 0;
     } else if (driverRefCount == 0) {
         ::CanSetEvents(EVENT_DISABLE_ALL);

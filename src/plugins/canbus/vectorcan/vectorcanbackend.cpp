@@ -271,7 +271,8 @@ void VectorCanBackendPrivate::setupChannel(const QString &interfaceName)
         }
     }
 
-    qCritical("Unable to parse the channel %ls", qUtf16Printable(interfaceName));
+    qCCritical(QT_CANBUS_PLUGINS_VECTORCAN, "Unable to parse the channel %ls",
+               qUtf16Printable(interfaceName));
 }
 
 void VectorCanBackendPrivate::setupDefaultConfigurations()
@@ -388,7 +389,8 @@ XLstatus VectorCanBackendPrivate::loadDriver()
             return status;
 
     } else if (Q_UNLIKELY(driverRefCount < 0)) {
-        qCritical("Wrong reference counter: %d", driverRefCount);
+        qCCritical(QT_CANBUS_PLUGINS_VECTORCAN, "Wrong driver reference counter: %d",
+                   driverRefCount);
         return XL_ERR_CANNOT_OPEN_DRIVER;
     }
 
@@ -412,7 +414,8 @@ void VectorCanBackendPrivate::cleanupDriver()
     --driverRefCount;
 
     if (Q_UNLIKELY(driverRefCount < 0)) {
-        qCritical("Wrong reference counter: %d", driverRefCount);
+        qCCritical(QT_CANBUS_PLUGINS_VECTORCAN, "Wrong driver reference counter: %d",
+                   driverRefCount);
         driverRefCount = 0;
     } else if (driverRefCount == 0) {
         ::xlCloseDriver();
