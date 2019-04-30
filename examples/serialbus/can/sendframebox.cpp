@@ -72,7 +72,7 @@ QValidator::State HexIntegerValidator::validate(QString &input, int &) const
     bool ok;
     uint value = input.toUInt(&ok, 16);
 
-    if (!value)
+    if (input.isEmpty())
         return Intermediate;
 
     if (!ok || value > m_maximum)
