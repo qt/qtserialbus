@@ -90,8 +90,8 @@ private slots:
         QCOMPARE(spy.isEmpty(), false); // we expect the signal
 
         spy.clear();
-        client.setTimeout(49); // everything below 50 fails
-        QVERIFY(client.timeout() >= 50);
+        client.setTimeout(9); // everything below 10 fails
+        QVERIFY(client.timeout() >= 10);
         QCOMPARE(spy.isEmpty(), true); // and the signal should not fire
     }
 
