@@ -1,7 +1,6 @@
 TEMPLATE = subdirs
 SUBDIRS += cmake \
            qcanbusframe \
-           qcanbus \
            qcanbusdevice \
            qmodbusdataunit \
            qmodbusreply \
@@ -13,6 +12,8 @@ SUBDIRS += cmake \
            qmodbusadu \
            qmodbusdeviceidentification \
            qmodbusrtuserialmaster
+
+!android: SUBDIRS += qcanbus
 
 qcanbus.depends += plugins
 qcanbusdevice.depends += plugins
