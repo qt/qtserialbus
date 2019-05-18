@@ -74,7 +74,7 @@ public:
     \value Common   The reply originates from a common read, write or read/write
                     request. See \l QModbusClient::sendReadRequest,
                     \l QModbusClient::sendWriteRequest and \l QModbusClient::sendReadWriteRequest
-    \value Broadcast The replay originates from a Modbus broadcast request. The
+    \value Broadcast The reply originates from a Modbus broadcast request. The
                      \l serverAddress() will return \c 0 and the \l finished()
                      signal will be emitted immediately.
 */
