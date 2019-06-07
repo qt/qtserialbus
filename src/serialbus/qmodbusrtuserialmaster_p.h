@@ -427,6 +427,8 @@ public:
         return false;
     }
 
+    QIODevice *device() const override { return m_serialPort; }
+
     Timer m_responseTimer;
     QByteArray m_responseBuffer;
 

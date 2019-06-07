@@ -355,6 +355,8 @@ public:
         m_requestBuffer.clear();
     }
 
+    QIODevice *device() const override { return m_serialPort; }
+
     QByteArray m_requestBuffer;
     bool m_processesBroadcast = false;
     QSerialPort *m_serialPort = nullptr;

@@ -100,6 +100,8 @@ public:
     Error error() const;
     QString errorString() const;
 
+    QIODevice *device() const;
+
 Q_SIGNALS:
     void errorOccurred(QModbusDevice::Error error);
     void stateChanged(QModbusDevice::State state);

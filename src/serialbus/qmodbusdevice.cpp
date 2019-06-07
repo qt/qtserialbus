@@ -337,6 +337,20 @@ QString QModbusDevice::errorString() const
 }
 
 /*!
+    \since 5.13
+
+    Returns the underlying \l QIODevice used for ModBus communication or
+    \c nullptr if the device was not yet fully initialized.
+
+    \note Do not store a pointer to the underlying device, because it can be
+    invalidated at any point in time.
+*/
+QIODevice *QModbusDevice::device() const
+{
+    return d_func()->device();
+}
+
+/*!
     \fn bool QModbusDevice::open()
 
     This function is called by connectDevice(). Subclasses must provide

@@ -224,7 +224,7 @@ public:
         });
     }
 
-    QTcpServer *m_tcpServer;
+    QTcpServer *m_tcpServer { nullptr };
     QVector<QTcpSocket *> connections;
 
     std::unique_ptr<QModbusTcpConnectionObserver> m_observer;

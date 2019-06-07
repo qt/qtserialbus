@@ -79,6 +79,8 @@ public:
     QString m_networkAddress = QStringLiteral("127.0.0.1");
 
     QHash<int, QVariant> m_userConnectionParams;
+
+    virtual QIODevice *device() const { return nullptr; }
 };
 
 QT_END_NAMESPACE

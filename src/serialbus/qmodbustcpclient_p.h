@@ -255,6 +255,8 @@ public:
     inline void incrementTransactionId() { m_transactionId++; }
     inline int transactionId() const { return m_transactionId; }
 
+    QIODevice *device() const override { return m_socket; }
+
     QTcpSocket *m_socket = nullptr;
     QByteArray responseBuffer;
     QHash<quint16, QueueElement> m_transactionStore;
