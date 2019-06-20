@@ -82,7 +82,7 @@ public:
                 return false;
             }
             qDebug() << "Sent TCP ADU:" << buffer.toHex();
-            qDebug() << "Sent TCP PDU:" << request << "with tId:" << hex << m_tId;
+            qDebug() << "Sent TCP PDU:" << request << "with tId:" << Qt::hex << m_tId;
             return true;
         };
 
@@ -111,9 +111,9 @@ public:
                     return;
                 m_transactionStore.insert(m_tId, elem);
                 elem.timer->start();
-                qDebug() << "Resend request with tId:" << hex << m_tId;
+                qDebug() << "Resend request with tId:" << Qt::hex << m_tId;
             } else {
-                qDebug() << "Timeout of request with tId:" << hex << m_tId;
+                qDebug() << "Timeout of request with tId:" << Qt::hex << m_tId;
                 elem.reply->setError(QModbusDevice::TimeoutError,
                     QModbusClient::tr("Request timeout."));
             }

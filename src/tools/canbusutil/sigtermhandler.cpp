@@ -47,7 +47,7 @@ SigTermHandler *SigTermHandler::instance()
 void SigTermHandler::handle(int s)
 {
     QTextStream out(stdout);
-    out << " Caught signal " << s << endl;
+    out << " Caught signal " << s << Qt::endl;
     emit instance()->sigTermSignal();
 }
 

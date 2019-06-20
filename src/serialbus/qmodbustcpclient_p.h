@@ -121,7 +121,7 @@ public:
                 if (knownTransaction && m_transactionStore[transactionId].timer)
                     m_transactionStore[transactionId].timer->stop();
 
-                qCDebug(QT_MODBUS) << "(TCP client) tid:" << hex << transactionId << "size:"
+                qCDebug(QT_MODBUS) << "(TCP client) tid:" << Qt::hex << transactionId << "size:"
                     << bytesPdu << "server address:" << serverAddress;
 
                 // The length field is the byte count of the following fields, including the Unit
@@ -169,7 +169,7 @@ public:
                 return false;
             }
             qCDebug(QT_MODBUS_LOW) << "(TCP client) Sent TCP ADU:" << buffer.toHex();
-            qCDebug(QT_MODBUS) << "(TCP client) Sent TCP PDU:" << request << "with tId:" << hex
+            qCDebug(QT_MODBUS) << "(TCP client) Sent TCP PDU:" << request << "with tId:" <<Qt:: hex
                 << tId;
             return true;
         };
@@ -210,9 +210,9 @@ public:
                         return;
                     m_transactionStore.insert(tId, elem);
                     elem.timer->start();
-                    qCDebug(QT_MODBUS) << "(TCP client) Resend request with tId:" << hex << tId;
+                    qCDebug(QT_MODBUS) << "(TCP client) Resend request with tId:" << Qt::hex << tId;
                 } else {
-                    qCDebug(QT_MODBUS) << "(TCP client) Timeout of request with tId:" << hex << tId;
+                    qCDebug(QT_MODBUS) << "(TCP client) Timeout of request with tId:" <<Qt::hex << tId;
                     elem.reply->setError(QModbusDevice::TimeoutError,
                         QModbusClient::tr("Request timeout."));
                 }
@@ -220,7 +220,7 @@ public:
             element.timer->start();
         } else {
             qCWarning(QT_MODBUS) << "(TCP client) No response timeout timer for request with tId:"
-                << hex << tId << ". Expected timeout:" << m_responseTimeoutDuration;
+                << Qt::hex << tId << ". Expected timeout:" << m_responseTimeoutDuration;
         }
         incrementTransactionId();
 

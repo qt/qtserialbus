@@ -87,7 +87,7 @@ void ReadTask::handleFrames() {
         else
             view += frame.toString();
 
-        m_output << view << endl;
+        m_output << view << Qt::endl;
     }
 }
 
@@ -99,5 +99,5 @@ void ReadTask::handleError(QCanBusDevice::CanBusError /*error*/)
         return;
     }
 
-    m_output << tr("Read error: '%1'").arg(canDevice->errorString()) << endl;
+    m_output << tr("Read error: '%1'").arg(canDevice->errorString()) << Qt::endl;
 }

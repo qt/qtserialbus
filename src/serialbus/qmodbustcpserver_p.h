@@ -167,7 +167,7 @@ public:
                     input >> transactionId >> protocolId >> bytesPdu >> unitId;
 
                     qCDebug(QT_MODBUS_LOW) << "(TCP server) Request MBPA:" << "Transaction Id:"
-                        << hex << transactionId << "Protocol Id:" << protocolId << "PDU bytes:"
+                        << Qt::hex << transactionId << "Protocol Id:" << protocolId << "PDU bytes:"
                         << bytesPdu << "Unit Id:" << unitId;
 
                     // The length field is the byte count of the following fields, including the Unit

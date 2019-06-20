@@ -136,11 +136,11 @@ void MainWindow::on_sendButton_clicked()
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, [reply, this]() {
                 sendButton->setEnabled(true);
-                qDebug() << "Receive: Asynchronous response PDU: " << reply->rawResult() << endl;
+                qDebug() << "Receive: Asynchronous response PDU: " << reply->rawResult() << Qt::endl;
             });
         } else {
             sendButton->setEnabled(true);
-            qDebug() << "Receive: Synchronous response pdu: " << reply->rawResult() << endl;
+            qDebug() << "Receive: Synchronous response pdu: " << reply->rawResult() << Qt::endl;
         }
     }
 }

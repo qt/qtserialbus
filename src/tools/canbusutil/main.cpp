@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
         return util.printDevices(args.at(0));
     } else if (args.size() != 2) {
         output << CanBusUtil::tr("Invalid number of arguments (%1 given).").arg(args.size());
-        output << endl << endl << parser.helpText();
+        output << Qt::endl << Qt::endl << parser.helpText();
         return 1;
     }
 
