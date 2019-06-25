@@ -177,7 +177,7 @@ void MainWindow::onConnectTypeChanged(int index)
     } else if (type == Tcp) {
         modbusDevice = new QModbusTcpClient(this);
         if (ui->portEdit->text().isEmpty())
-            ui->portEdit->setText(QLatin1Literal("127.0.0.1:502"));
+            ui->portEdit->setText(QLatin1String("127.0.0.1:502"));
     }
 
     connect(modbusDevice, &QModbusClient::errorOccurred, [this](QModbusDevice::Error) {
