@@ -86,8 +86,8 @@ public:
            cleanupTransactionStore();
         });
 
-        using TypeId = void (QAbstractSocket::*)(QAbstractSocket::SocketError);
-        QObject::connect(m_socket, static_cast<TypeId>(&QAbstractSocket::error), q,
+        QObject::connect(m_socket,
+                         QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), q,
                          [this](QAbstractSocket::SocketError /*error*/)
         {
             Q_Q(QModbusTcpClient);
@@ -193,9 +193,8 @@ public:
         });
 
         if (element.timer) {
-            using TypeId = void (QTimer::*)(int);
             q->connect(q, &QModbusClient::timeoutChanged,
-                       element.timer.data(), static_cast<TypeId>(&QTimer::setInterval));
+                       element.timer.data(), QOverload<int>::of(&QTimer::setInterval));
             QObject::connect(element.timer.data(), &QTimer::timeout, q, [this, writeToSocket, tId]() {
                 if (!m_transactionStore.contains(tId))
                     return;
