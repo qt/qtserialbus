@@ -57,7 +57,7 @@ public:
     explicit CanBusUtil(QTextStream &output, QCoreApplication &app, QObject *parent = nullptr);
 
     void setShowTimeStamp(bool showTimeStamp);
-    void setShowFdFlags(bool showFdFlags);
+    void setShowFlags(bool showFlags);
     void setConfigurationParameter(QCanBusDevice::ConfigurationKey key, const QVariant &value);
     bool start(const QString &pluginName, const QString &deviceName, const QString &data = QString());
     int  printPlugins();

@@ -47,8 +47,8 @@ class ReadTask : public QObject
 public:
     explicit ReadTask(QTextStream &m_output, QObject *parent = nullptr);
     void setShowTimeStamp(bool showStamp);
-    bool isShowFdFlags() const;
-    void setShowFdFlags(bool isShowFdFlags);
+    bool isShowFlags() const;
+    void setShowFlags(bool isShowFlags);
 
 public slots:
     void handleFrames();
@@ -57,7 +57,7 @@ public slots:
 private:
     QTextStream &m_output;
     bool m_showTimeStamp = false;
-    bool m_showFdFlags = false;
+    bool m_showFlags = false;
 };
 
 #endif // READTASK_H

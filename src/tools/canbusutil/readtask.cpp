@@ -45,14 +45,14 @@ void ReadTask::setShowTimeStamp(bool showTimeStamp)
     m_showTimeStamp = showTimeStamp;
 }
 
-bool ReadTask::isShowFdFlags() const
+bool ReadTask::isShowFlags() const
 {
-    return m_showFdFlags;
+    return m_showFlags;
 }
 
-void ReadTask::setShowFdFlags(bool showFlags)
+void ReadTask::setShowFlags(bool showFlags)
 {
-    m_showFdFlags = showFlags;
+    m_showFlags = showFlags;
 }
 
 void ReadTask::handleFrames() {
@@ -73,12 +73,16 @@ void ReadTask::handleFrames() {
                     .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char('0'));
         }
 
-        if (m_showFdFlags) {
-            QString flags = QLatin1String("- -  ");
+        if (m_showFlags) {
+            QString flags = QLatin1String("- - -  ");
+
             if (frame.hasBitrateSwitch())
                 flags[0] = QLatin1Char('B');
             if (frame.hasErrorStateIndicator())
                 flags[2] = QLatin1Char('E');
+            if (frame.hasLocalEcho())
+                flags[4] = QLatin1Char('L');
+
             view += flags;
         }
 

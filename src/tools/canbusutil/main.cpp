@@ -94,9 +94,10 @@ int main(int argc, char *argv[])
             CanBusUtil::tr("Show timestamp for each received CAN bus frame."));
     parser.addOption(showTimeStampOption);
 
-    const QCommandLineOption showFdFlagsOption({"i", "info"},
-            CanBusUtil::tr("Show extra info (CAN FD flags) for each received CAN bus frame."));
-    parser.addOption(showFdFlagsOption);
+    const QCommandLineOption showFlagsOption({"i", "info"},
+            CanBusUtil::tr("Show flags bitrate switch, error indicator, and local echo"
+                           " for each received CAN bus frame."));
+    parser.addOption(showFlagsOption);
 
     const QCommandLineOption listDevicesOption({"d", "devices"},
             CanBusUtil::tr("Show available CAN bus devices for the given plugin."));
@@ -149,7 +150,7 @@ int main(int argc, char *argv[])
 
     if (parser.isSet(listeningOption)) {
         util.setShowTimeStamp(parser.isSet(showTimeStampOption));
-        util.setShowFdFlags(parser.isSet(showFdFlagsOption));
+        util.setShowFlags(parser.isSet(showFlagsOption));
     } else if (args.size() == 3) {
         data = args.at(2);
     } else if (args.size() == 1 && parser.isSet(listDevicesOption)) {
