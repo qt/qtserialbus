@@ -114,7 +114,7 @@ QList<QCanBusDeviceInfo> SystecCanBackend::interfaces()
 {
     QList<QCanBusDeviceInfo> result;
 
-    ::UcanEnumerateHardware(&ucanEnumCallback, &result, false, 0, ~0, 0, ~0, 0, ~0);
+    ::UcanEnumerateHardware(&ucanEnumCallback, &result, false, 0, quint8(~0), 0, quint32(~0), 0, quint32(~0));
 
     return result;
 }
@@ -281,8 +281,8 @@ bool SystecCanBackendPrivate::setupChannel(const QString &interfaceName)
     const QRegularExpressionMatch match = re.match(interfaceName);
 
     if (Q_LIKELY(match.hasMatch())) {
-        device = match.captured(1).toInt();
-        channel = match.captured(2).toInt();
+        device = quint8(match.captured(1).toUShort());
+        channel = quint8(match.captured(2).toUShort());
     } else {
         q->setError(SystecCanBackend::tr("Invalid interface '%1'.")
                     .arg(interfaceName), QCanBusDevice::ConnectionError);
@@ -377,7 +377,7 @@ void SystecCanBackendPrivate::startWrite()
     ::memset(&message, 0, sizeof(message));
 
     message.m_dwID = frame.frameId();
-    message.m_bDLC = payload.size();
+    message.m_bDLC = quint8(payload.size());
 
     message.m_bFF = frame.hasExtendedFrameFormat() ? USBCAN_MSG_FF_EXT : USBCAN_MSG_FF_STD;
 

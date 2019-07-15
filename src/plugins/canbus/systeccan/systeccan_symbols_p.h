@@ -88,8 +88,8 @@ typedef void (DRV_CALLBACK_TYPE *tCallbackFktEx) (tUcanHandle handle, quint32 ev
 #define kUcanModeHighResTimer   0x08        // high resolution time stamps in received CAN messages (only available with STM derivates)
 
 // ABR and ACR for mode "receive all CAN messages"
-#define USBCAN_AMR_ALL                      (quint32) 0xffffffff
-#define USBCAN_ACR_ALL                      (quint32) 0x00000000
+#define USBCAN_AMR_ALL                      0xffffffffU
+#define USBCAN_ACR_ALL                      0x00000000U
 
 #define USBCAN_OCR_DEFAULT                  0x1A  // default OCR for standard GW-002
 #define USBCAN_OCR_RS485_ISOLATED           0x1E  // OCR for RS485 interface and galvanic isolation
