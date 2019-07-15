@@ -118,6 +118,9 @@ Q_LOGGING_CATEGORY(QT_CANBUS, "qt.canbus")
                             after the arbitration phase at the nominal bitrate is finished.
                             This enum value was introduced in Qt 5.9.
                             See also \c QCanBusDevice::BitRateKey
+    \value ProtocolKey      This key allows to specify another protocol. For now, this
+                            parameter can only be set and used in the SocketCAN plugin.
+                            This enum value was introduced in Qt 5.14.
     \value UserKey          This key defines the range where custom keys start. Its most
                             common purpose is to permit platform-specific configuration
                             options.

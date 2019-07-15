@@ -89,6 +89,7 @@ public:
         BitRateKey,
         CanFdKey,
         DataBitRateKey,
+        ProtocolKey,
         UserKey = 30
     };
     Q_ENUM(ConfigurationKey)
