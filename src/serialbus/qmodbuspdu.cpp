@@ -106,9 +106,9 @@ static int minimumDataSize(const QModbusPdu &pdu, Type type)
 static QDataStream &pduFromStream(QDataStream &stream, QModbusPdu &pdu, Type type)
 {
     quint8 codeByte = 0;
-    if (stream.readRawData((char *) (&codeByte), sizeof(quint8)) != sizeof(quint8))
+    if (stream.readRawData(reinterpret_cast<char *>(&codeByte), sizeof(quint8)) != sizeof(quint8))
         return stream;
-    QModbusPdu::FunctionCode code = (QModbusPdu::FunctionCode) codeByte;
+    QModbusPdu::FunctionCode code = QModbusPdu::FunctionCode(codeByte);
     pdu.setFunctionCode(code);
 
     auto needsAdditionalRead = [](QModbusPdu &pdu, int size) -> bool {
@@ -157,13 +157,13 @@ static QDataStream &pduFromStream(QDataStream &stream, QModbusPdu &pdu, Type typ
                 return stream; // early return to avoid second read
             }
         } else {
-            data.resize(stream.device()->size() - 1); // One byte for the function code.
+            data.resize(int(stream.device()->size() - 1)); // One byte for the function code.
         }
     } else if (pdu.functionCode() == QModbusPdu::Diagnostics) {
         quint16 subCode;
         pdu.decodeData(&subCode);
         if (subCode == Diagnostics::ReturnQueryData)
-            data.resize(stream.device()->size() - 1); // One byte for the function code.
+            data.resize(int(stream.device()->size() - 1)); // One byte for the function code.
     }
 
     // reset what we have so far, next read might fail as well
@@ -547,7 +547,7 @@ int QModbusRequest::minimumDataSize(const QModbusRequest &request)
 int QModbusRequest::calculateDataSize(const QModbusRequest &request)
 {
     if (requestSizeCalculators.exists()) {
-        if (auto ptr = requestSizeCalculators()->value(request.functionCode(), nullptr))
+        if (auto ptr = requestSizeCalculators()->value(quint8(request.functionCode()), nullptr))
             return ptr(request);
     }
 
@@ -604,7 +604,7 @@ int QModbusRequest::calculateDataSize(const QModbusRequest &request)
 */
 void QModbusRequest::registerDataSizeCalculator(FunctionCode fc, CalcFuncPtr calculator)
 {
-    requestSizeCalculators()->insert(fc, calculator);
+    requestSizeCalculators()->insert(quint8(fc), calculator);
 }
 
 /*!
@@ -703,7 +703,7 @@ int QModbusResponse::minimumDataSize(const QModbusResponse &response)
 int QModbusResponse::calculateDataSize(const QModbusResponse &response)
 {
     if (responseSizeCalculators.exists()) {
-        if (auto ptr = responseSizeCalculators()->value(response.functionCode(), nullptr))
+        if (auto ptr = responseSizeCalculators()->value(quint8(response.functionCode()), nullptr))
             return ptr(response);
     }
 
@@ -765,7 +765,7 @@ int QModbusResponse::calculateDataSize(const QModbusResponse &response)
         for (int i = 1; i < numOfObjects; ++i) {
             if (data.size() <= nextSizeField)
                 break;
-            objectSize = data[nextSizeField];
+            objectSize = quint8(data[nextSizeField]);
             size += objectSize;
             nextSizeField += objectSize + 2; // object size + object id field + object size field
         }
@@ -790,7 +790,7 @@ int QModbusResponse::calculateDataSize(const QModbusResponse &response)
 */
 void QModbusResponse::registerDataSizeCalculator(FunctionCode fc, CalcFuncPtr calculator)
 {
-    responseSizeCalculators()->insert(fc, calculator);
+    responseSizeCalculators()->insert(quint8(fc), calculator);
 }
 
 /*!
