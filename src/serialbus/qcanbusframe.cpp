@@ -80,9 +80,15 @@ QT_BEGIN_NAMESPACE
 /*!
     \fn QCanBusFrame::setFrameId(quint32 newFrameId)
 
-    Sets the identifier of the CAN frame to \a newFrameId. The maximum size of a CAN frame
-    identifier is 11 bits, which can be extended up to 29 bits by supporting the \e {CAN extended frame
-    format}. The \e {CAN extended frame format} setting is automatically adapted to match \a newFrameId.
+    Sets the identifier of the CAN frame to \a newFrameId.
+
+    The maximum size of a CAN frame identifier is 11 bits, which can be
+    extended up to 29 bits by supporting the \e {CAN extended frame format}.
+    The \e {CAN extended frame format} setting is automatically set when a
+    \a newFrameId with more than 11 bits in size is given.
+
+    When the format is extended and a \a newFrameId with up to 11 bits or less
+    is passed, the \e {CAN extended frame format} setting is \a not changed.
 
     \sa frameId(), hasExtendedFrameFormat()
 */
