@@ -96,10 +96,25 @@
             \li Configuration parameter key
             \li Description
         \row
+            \li QCanBusDevice::CanFdKey
+            \li This configuration option determines whether CAN FD frames may be sent or
+                received. By default, this option is disabled. CAN FD compatible hardware
+                is needed to enable this option.
+        \row
             \li QCanBusDevice::BitRateKey
             \li Determines the bit rate of the CAN bus connection. The following bit rates
                 are supported: 5000, 10000, 20000, 33000, 47000, 50000, 83000, 95000,
-                100000, 125000, 250000, 500000, 800000, 1000000. Note that this configuration
-                parameter can only be adjusted while the QCanBusDevice is not connected.
+                100000, 125000, 250000, 500000, 800000, 1000000.
+                If the QCanBusDevice::CanFdKey option is enabled, the bit rates are limited
+                to 125000, 250000, 500000, or 1000000.
+                Note that this configuration parameter can only be adjusted while the
+                QCanBusDevice is not connected.
+        \row
+            \li QCanBusDevice::DataBitRateKey
+            \li Determines the data bit rate of the CAN FD bus connection. The
+                QCanBusDevice::CanFdKey option must be enabled to allow setting this option.
+                Possible data bitrates are 2000000, 4000000, 8000000, or 10000000. Note that
+                this configuration parameter can only be adjusted while the QCanBusDevice is
+                not connected.
    \endtable
 */
