@@ -49,6 +49,7 @@
 
 #include <linux/can/error.h>
 #include <linux/can/raw.h>
+#include <linux/sockios.h>
 #include <errno.h>
 #include <unistd.h>
 #include <net/if.h>
