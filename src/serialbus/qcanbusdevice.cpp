@@ -790,9 +790,10 @@ QVector<QCanBusFrame> QCanBusDevice::readAllFrames()
 
     As per CAN bus specification, frames of type
     \l {QCanBusFrame::RemoteRequestFrame} {remote transfer request (RTR)}
-    do not have a payload, but a length from 0 to 8 (including). This length indicates
-    the expected response payload length from the remote party. Therefore when sending a RTR frame using
-    this function it may still be required to set an arbitrary payload on \a frame. The length of
+    do not have a payload, but a length from 0 to 8 (including). This length
+    indicates the expected response payload length from the remote party.
+    Therefore when sending a RTR frame using this function it may still
+    be required to set an arbitrary payload on \a frame. The length of
     the arbitrary payload is what is set as size expectation for the RTR frame.
 
     \sa QCanBusFrame::setPayload()
