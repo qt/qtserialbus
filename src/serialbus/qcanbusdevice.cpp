@@ -641,9 +641,6 @@ bool QCanBusDevice::waitForFramesWritten(int msecs)
         return false;
     }
 
-    QScopedValueRollback<bool> guard(d_func()->waitForWrittenEntered);
-    d_func()->waitForWrittenEntered = true;
-
     if (Q_UNLIKELY(d_func()->state != ConnectedState)) {
         const QString error = tr("Cannot wait for frames written as device is not connected.");
         qCWarning(QT_CANBUS, "%ls", qUtf16Printable(error));
@@ -653,6 +650,9 @@ bool QCanBusDevice::waitForFramesWritten(int msecs)
 
     if (!framesToWrite())
         return false; // nothing pending, nothing to wait upon
+
+    QScopedValueRollback<bool> guard(d_func()->waitForWrittenEntered);
+    d_func()->waitForWrittenEntered = true;
 
     enum { Written = 0, Error, Timeout };
     QEventLoop loop;
@@ -709,15 +709,15 @@ bool QCanBusDevice::waitForFramesReceived(int msecs)
         return false;
     }
 
-    QScopedValueRollback<bool> guard(d_func()->waitForReceivedEntered);
-    d_func()->waitForReceivedEntered = true;
-
     if (Q_UNLIKELY(d_func()->state != ConnectedState)) {
         const QString error = tr("Cannot wait for frames received as device is not connected.");
         qCWarning(QT_CANBUS, "%ls", qUtf16Printable(error));
         setError(error, CanBusError::OperationError);
         return false;
     }
+
+    QScopedValueRollback<bool> guard(d_func()->waitForReceivedEntered);
+    d_func()->waitForReceivedEntered = true;
 
     enum { Received = 0, Error, Timeout };
     QEventLoop loop;
