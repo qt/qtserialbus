@@ -310,7 +310,7 @@ public:
             onBytesWritten(bytes);
         });
 
-        QObject::connect(m_serialPort, QOverload<QSerialPort::SerialPortError>::of(&QSerialPort::error),
+        QObject::connect(m_serialPort, &QSerialPort::errorOccurred,
                 q, [this](QSerialPort::SerialPortError error) {
             onError(error);
         });
