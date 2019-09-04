@@ -347,11 +347,11 @@ bool QCanBusDevice::hasOutgoingFrames() const
  * Called from the derived plugin to register a function that performs the
  * CAN controller hardware reset when \a resetController() is called.
  */
-void QCanBusDevice::setResetControllerFunction(std::function<void()> &resetter)
+void QCanBusDevice::setResetControllerFunction(std::function<void()> resetter)
 {
     Q_D(QCanBusDevice);
 
-    d->m_resetControllerFunction = resetter;
+    d->m_resetControllerFunction = std::move(resetter);
 }
 
 /*!
@@ -359,11 +359,11 @@ void QCanBusDevice::setResetControllerFunction(std::function<void()> &resetter)
  * Called from the derived plugin to register a function that returns the
  * CAN controller bus status when \a busStatus() is called.
  */
-void QCanBusDevice::setCanBusStatusGetter(std::function<CanBusStatus()> &busStatusGetter)
+void QCanBusDevice::setCanBusStatusGetter(std::function<CanBusStatus()> busStatusGetter)
 {
     Q_D(QCanBusDevice);
 
-    d->m_busStatusGetter = busStatusGetter;
+    d->m_busStatusGetter = std::move(busStatusGetter);
 }
 
 /*!

@@ -182,8 +182,8 @@ protected:
     virtual bool open() = 0;
     virtual void close() = 0;
 
-    void setResetControllerFunction(std::function<void()> &resetter);
-    void setCanBusStatusGetter(std::function<CanBusStatus()> &busStatusGetter);
+    void setResetControllerFunction(std::function<void()> resetter);
+    void setCanBusStatusGetter(std::function<CanBusStatus()> busStatusGetter);
 
     static QCanBusDeviceInfo createDeviceInfo(const QString &name,
                                               bool isVirtual = false,
