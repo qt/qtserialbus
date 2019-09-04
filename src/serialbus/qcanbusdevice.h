@@ -204,7 +204,6 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(QCanBusDevice::Directions)
 
 QT_END_NAMESPACE
 
-Q_DECLARE_METATYPE(QCanBusDevice::Filter)
 Q_DECLARE_METATYPE(QCanBusDevice::Filter::FormatFilter)
 Q_DECLARE_METATYPE(QList<QCanBusDevice::Filter>)
 
