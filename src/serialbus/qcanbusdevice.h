@@ -98,15 +98,15 @@ public:
 
     struct Filter
     {
-        bool operator==(const Filter &other) const
+        friend constexpr bool operator==(const Filter &a, const Filter &b) noexcept
         {
-            return frameId == other.frameId && frameIdMask == other.frameIdMask
-                    && type == other.type && format == other.format;
+            return a.frameId == b.frameId && a.frameIdMask == b.frameIdMask
+                    && a.type == b.type && a.format == b.format;
         }
 
-        bool operator!=(const Filter &other) const
+        friend constexpr bool operator!=(const Filter &a, const Filter &b) noexcept
         {
-            return !operator==(other);
+            return !operator==(a, b);
         }
 
         enum FormatFilter {
