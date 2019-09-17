@@ -1,0 +1,20 @@
+# Generated from canbusutil.pro.
+
+#####################################################################
+## canbusutil Tool:
+#####################################################################
+
+add_qt_tool(canbusutil
+    TOOLS_TARGET SerialBus # special case
+    SOURCES
+        canbusutil.cpp canbusutil.h
+        main.cpp
+        readtask.cpp readtask.h
+        sigtermhandler.cpp sigtermhandler.h
+    PUBLIC_LIBRARIES
+        Qt::SerialBus
+)
+
+#### Keys ignored in scope 1:.:.:canbusutil.pro:<TRUE>:
+# QMAKE_TARGET_DESCRIPTION = "Qt CAN Bus Util"
+# _LOADED = "qt_tool"

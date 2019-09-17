@@ -51,3 +51,15 @@ qtserialbus-config.pri
 *.vcxproj.user
 *.sdf
 *.opensdf
+
+# cmake
+CTestTestfile.cmake
+CMakeFiles
+cmake_install.cmake
+*_autogen*
+DartConfiguration.tcl
+build.ninja
+rules.ninja
+.ninja_*
+CMakeCache.txt
+compile_commands.json

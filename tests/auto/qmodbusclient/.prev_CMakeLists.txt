@@ -1,0 +1,22 @@
+# Generated from qmodbusclient.pro.
+
+if(NOT QT_CONFIG___contains___private_tests)
+    return()
+endif()
+
+#####################################################################
+## tst_qmodbusclient Test:
+#####################################################################
+
+add_qt_test(tst_qmodbusclient
+    SOURCES
+        tst_qmodbusclient.cpp
+    LIBRARIES
+        Qt::CorePrivate
+        Qt::SerialBusPrivate
+    PUBLIC_LIBRARIES
+        Qt::SerialBus
+)
+
+#### Keys ignored in scope 1:.:.:qmodbusclient.pro:<TRUE>:
+# _REQUIREMENTS = "contains(QT_CONFIG, private_tests)"

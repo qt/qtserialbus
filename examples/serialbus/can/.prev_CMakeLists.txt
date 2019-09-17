@@ -1,0 +1,53 @@
+# Generated from can.pro.
+
+cmake_minimum_required(VERSION 3.14)
+project(can LANGUAGES CXX)
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
+set(INSTALL_EXAMPLEDIR "examples")
+
+find_package(Qt6 COMPONENTS Core)
+find_package(Qt6 COMPONENTS Gui)
+find_package(Qt6 COMPONENTS SerialBus)
+find_package(Qt6 COMPONENTS Widgets)
+
+add_qt_gui_executable(can
+    bitratebox.cpp bitratebox.h
+    connectdialog.cpp connectdialog.h connectdialog.ui
+    main.cpp
+    mainwindow.cpp mainwindow.h mainwindow.ui
+    sendframebox.cpp sendframebox.h sendframebox.ui
+)
+target_link_libraries(can PUBLIC
+    Qt::Core
+    Qt::Gui
+    Qt::SerialBus
+    Qt::Widgets
+)
+
+# Resources:
+set(can_resource_files
+    "images/application-exit.png"
+    "images/clear.png"
+    "images/connect.png"
+    "images/disconnect.png"
+)
+
+qt6_add_resources(can "can"
+    PREFIX
+        "/"
+    FILES
+        ${can_resource_files}
+)
+
+
+install(TARGETS can
+    RUNTIME DESTINATION "${INSTALL_EXAMPLEDIR}"
+    BUNDLE DESTINATION "${INSTALL_EXAMPLEDIR}"
+    LIBRARY DESTINATION "${INSTALL_EXAMPLEDIR}"
+)
