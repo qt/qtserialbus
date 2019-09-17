@@ -98,15 +98,15 @@ public:
 
     struct Filter
     {
-        bool operator==(const Filter &other) const
+        friend constexpr bool operator==(const Filter &a, const Filter &b) noexcept
         {
-            return frameId == other.frameId && frameIdMask == other.frameIdMask
-                    && type == other.type && format == other.format;
+            return a.frameId == b.frameId && a.frameIdMask == b.frameIdMask
+                    && a.type == b.type && a.format == b.format;
         }
 
-        bool operator!=(const Filter &other) const
+        friend constexpr bool operator!=(const Filter &a, const Filter &b) noexcept
         {
-            return !operator==(other);
+            return !operator==(a, b);
         }
 
         enum FormatFilter {
@@ -182,8 +182,8 @@ protected:
     virtual bool open() = 0;
     virtual void close() = 0;
 
-    void setResetControllerFunction(std::function<void()> &resetter);
-    void setCanBusStatusGetter(std::function<CanBusStatus()> &busStatusGetter);
+    void setResetControllerFunction(std::function<void()> resetter);
+    void setCanBusStatusGetter(std::function<CanBusStatus()> busStatusGetter);
 
     static QCanBusDeviceInfo createDeviceInfo(const QString &name,
                                               bool isVirtual = false,
@@ -204,7 +204,6 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(QCanBusDevice::Directions)
 
 QT_END_NAMESPACE
 
-Q_DECLARE_METATYPE(QCanBusDevice::Filter)
 Q_DECLARE_METATYPE(QCanBusDevice::Filter::FormatFilter)
 Q_DECLARE_METATYPE(QList<QCanBusDevice::Filter>)
 
