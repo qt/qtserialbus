@@ -337,7 +337,7 @@ QString QModbusDevice::errorString() const
 }
 
 /*!
-    \since 5.13
+    \since 5.14
 
     Returns the underlying \l QIODevice used for ModBus communication or
     \c nullptr if the device was not yet fully initialized.
