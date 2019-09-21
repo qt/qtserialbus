@@ -61,7 +61,7 @@ bool VectorCanBackend::canCreate(QString *errorReason)
 #ifdef LINK_LIBVECTORCAN
     return true;
 #else
-    static bool symbolsResolved = resolveSymbols(vectorcanLibrary());
+    static bool symbolsResolved = resolveVectorCanSymbols(vectorcanLibrary());
     if (Q_UNLIKELY(!symbolsResolved)) {
         *errorReason = vectorcanLibrary()->errorString();
         return false;

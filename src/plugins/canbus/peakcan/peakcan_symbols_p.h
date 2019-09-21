@@ -328,7 +328,7 @@ GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_GetValue, TPCANHandle, TPCANParameter,
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_SetValue, TPCANHandle, TPCANParameter, void *, quint32)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_GetErrorText, TPCANStatus, quint16, char *)
 
-inline bool resolveSymbols(QLibrary *pcanLibrary)
+inline bool resolvePeakCanSymbols(QLibrary *pcanLibrary)
 {
     if (!pcanLibrary->isLoaded()) {
         pcanLibrary->setFileName(QStringLiteral("pcanbasic"));

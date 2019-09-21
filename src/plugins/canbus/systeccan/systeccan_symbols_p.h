@@ -282,7 +282,7 @@ GENERATE_SYMBOL_VARIABLE(UCANRET, UcanDeinitCanEx, tUcanHandle, quint8 /* channe
 GENERATE_SYMBOL_VARIABLE(UCANRET, UcanReadCanMsgEx, tUcanHandle, quint8 *, tCanMsgStruct *, quint32 *)
 GENERATE_SYMBOL_VARIABLE(UCANRET, UcanWriteCanMsgEx, tUcanHandle, quint8, tCanMsgStruct *, quint32 *)
 
-inline bool resolveSymbols(QLibrary *systecLibrary)
+inline bool resolveSystecCanSymbols(QLibrary *systecLibrary)
 {
     if (!systecLibrary->isLoaded()) {
 #ifdef Q_PROCESSOR_X86_64
