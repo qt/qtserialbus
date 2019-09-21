@@ -317,7 +317,7 @@ GENERATE_SYMBOL_VARIABLE(void, CanSetRxEventCallback, CanRxEventCallback)
 GENERATE_SYMBOL_VARIABLE(void, CanSetEvents, quint16)
 GENERATE_SYMBOL_VARIABLE(quint32, CanEventStatus, void)
 
-inline bool resolveSymbols(QLibrary *mhstcanLibrary)
+inline bool resolveTinyCanSymbols(QLibrary *mhstcanLibrary)
 {
     if (!mhstcanLibrary->isLoaded()) {
         mhstcanLibrary->setFileName(QStringLiteral("mhstcan"));

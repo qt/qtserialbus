@@ -55,7 +55,7 @@ Q_GLOBAL_STATIC(QLibrary, systecLibrary)
 
 bool SystecCanBackend::canCreate(QString *errorReason)
 {
-    static bool symbolsResolved = resolveSymbols(systecLibrary());
+    static bool symbolsResolved = resolveSystecCanSymbols(systecLibrary());
     if (Q_UNLIKELY(!symbolsResolved)) {
         *errorReason = systecLibrary()->errorString();
         return false;

@@ -458,7 +458,7 @@ GENERATE_SYMBOL_VARIABLE(XLstatus, xlReceive, XLportHandle, quint32 *, XLevent *
 GENERATE_SYMBOL_VARIABLE(XLstatus, xlSetNotification, XLportHandle, XLhandle *, int)
 GENERATE_SYMBOL_VARIABLE(char *, xlGetErrorString, XLstatus)
 
-inline bool resolveSymbols(QLibrary *vectorcanLibrary)
+inline bool resolveVectorCanSymbols(QLibrary *vectorcanLibrary)
 {
     if (!vectorcanLibrary->isLoaded()) {
 #ifdef Q_PROCESSOR_X86_64

@@ -66,7 +66,7 @@ bool PeakCanBackend::canCreate(QString *errorReason)
 #ifdef LINK_LIBPCANBASIC
     return true;
 #else
-    static bool symbolsResolved = resolveSymbols(pcanLibrary());
+    static bool symbolsResolved = resolvePeakCanSymbols(pcanLibrary());
     if (Q_UNLIKELY(!symbolsResolved)) {
         *errorReason = pcanLibrary()->errorString();
         return false;
