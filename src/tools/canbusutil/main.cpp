@@ -155,7 +155,9 @@ int main(int argc, char *argv[])
         data = args.at(2);
     } else if (args.size() == 1 && parser.isSet(listDevicesOption)) {
         return util.printDevices(args.at(0));
-    } else if (args.size() != 2) {
+    }
+
+    if (args.size() < 2 || args.size() > 3) {
         output << CanBusUtil::tr("Invalid number of arguments (%1 given).").arg(args.size());
         output << Qt::endl << Qt::endl << parser.helpText();
         return 1;
