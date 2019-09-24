@@ -62,7 +62,7 @@ bool TinyCanBackend::canCreate(QString *errorReason)
 #ifdef LINK_LIBMHSTCAN
     return true;
 #else
-    static bool symbolsResolved = resolveSymbols(mhstcanLibrary());
+    static bool symbolsResolved = resolveTinyCanSymbols(mhstcanLibrary());
     if (Q_UNLIKELY(!symbolsResolved)) {
         *errorReason = mhstcanLibrary()->errorString();
         return false;
