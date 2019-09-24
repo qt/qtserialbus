@@ -66,7 +66,7 @@ bool PeakCanBackend::canCreate(QString *errorReason)
 #ifdef LINK_LIBPCANBASIC
     return true;
 #else
-    static bool symbolsResolved = resolveSymbols(pcanLibrary());
+    static bool symbolsResolved = resolvePeakCanSymbols(pcanLibrary());
     if (Q_UNLIKELY(!symbolsResolved)) {
         qCCritical(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot load library: %ls",
                 qUtf16Printable(pcanLibrary()->errorString()));
