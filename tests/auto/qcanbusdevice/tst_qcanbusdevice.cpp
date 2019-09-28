@@ -44,6 +44,8 @@
 
 #include <memory>
 
+Q_DECLARE_METATYPE(QCanBusDevice::Filter)
+
 class tst_Backend : public QCanBusDevice
 {
     Q_OBJECT
