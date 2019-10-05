@@ -303,7 +303,7 @@ GENERATE_SYMBOL_VARIABLE(UCANRET, UcanResetCan, tUcanHandle)
 GENERATE_SYMBOL_VARIABLE(UCANRET, UcanWriteCanMsgEx, tUcanHandle, quint8, tCanMsgStruct *, quint32 *)
 GENERATE_SYMBOL_VARIABLE(UCANRET, UcanGetStatus, tUcanHandle, tStatusStruct *)
 
-inline bool resolveSymbols(QLibrary *systecLibrary)
+inline bool resolveSystecCanSymbols(QLibrary *systecLibrary)
 {
     if (!systecLibrary->isLoaded()) {
 #ifdef Q_PROCESSOR_X86_64
