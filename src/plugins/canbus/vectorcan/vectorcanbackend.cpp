@@ -1,4 +1,4 @@
-﻿/****************************************************************************
+/****************************************************************************
 **
 ** Copyright (C) 2017 Denis Shienkov <denis.shienkov@gmail.com>
 ** Contact: http://www.qt.io/licensing/
@@ -103,11 +103,11 @@ QList<QCanBusDeviceInfo> VectorCanBackend::interfaces()
 
 static int driverRefCount = 0;
 
-class ReadNotifier : public QWinEventNotifier
+class VectorCanReadNotifier : public QWinEventNotifier
 {
     // no Q_OBJECT macro!
 public:
-    explicit ReadNotifier(VectorCanBackendPrivate *d, QObject *parent)
+    explicit VectorCanReadNotifier(VectorCanBackendPrivate *d, QObject *parent)
         : QWinEventNotifier(parent)
         , dptr(d)
     {
@@ -128,11 +128,11 @@ private:
     VectorCanBackendPrivate * const dptr;
 };
 
-class WriteNotifier : public QTimer
+class VectorCanWriteNotifier : public QTimer
 {
     // no Q_OBJECT macro!
 public:
-    WriteNotifier(VectorCanBackendPrivate *d, QObject *parent)
+    VectorCanWriteNotifier(VectorCanBackendPrivate *d, QObject *parent)
         : QTimer(parent)
         , dptr(d)
     {
@@ -202,10 +202,10 @@ bool VectorCanBackendPrivate::open()
         }
     }
 
-    readNotifier = new ReadNotifier(this, q);
+    readNotifier = new VectorCanReadNotifier(this, q);
     readNotifier->setEnabled(true);
 
-    writeNotifier = new WriteNotifier(this, q);
+    writeNotifier = new VectorCanWriteNotifier(this, q);
 
     return true;
 }

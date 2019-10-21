@@ -1,4 +1,4 @@
-﻿/****************************************************************************
+/****************************************************************************
 **
 ** Copyright (C) 2017 Denis Shienkov <denis.shienkov@gmail.com>
 ** Copyright (C) 2017 The Qt Company Ltd.
@@ -89,11 +89,11 @@ struct TinyCanGlobal {
 
 Q_GLOBAL_STATIC(TinyCanGlobal, gTinyCan)
 
-class WriteNotifier : public QTimer
+class TinyCanWriteNotifier : public QTimer
 {
     // no Q_OBJECT macro!
 public:
-    WriteNotifier(TinyCanBackendPrivate *d, QObject *parent)
+    TinyCanWriteNotifier(TinyCanBackendPrivate *d, QObject *parent)
         : QTimer(parent)
         , dptr(d)
     {
@@ -211,7 +211,7 @@ bool TinyCanBackendPrivate::open()
         }
     }
 
-    writeNotifier = new WriteNotifier(this, q);
+    writeNotifier = new TinyCanWriteNotifier(this, q);
     writeNotifier->setInterval(0);
 
     isOpen = true;
