@@ -4,7 +4,7 @@
 ## tst_qcanbus Test:
 #####################################################################
 
-add_qt_test(tst_qcanbus
+qt_add_test(tst_qcanbus
     SOURCES
         tst_qcanbus.cpp
     PUBLIC_LIBRARIES

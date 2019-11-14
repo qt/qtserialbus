@@ -4,7 +4,7 @@
 ## tst_qmodbuspdu Test:
 #####################################################################
 
-add_qt_test(tst_qmodbuspdu
+qt_add_test(tst_qmodbuspdu
     SOURCES
         tst_qmodbuspdu.cpp
     PUBLIC_LIBRARIES

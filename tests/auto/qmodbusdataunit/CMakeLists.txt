@@ -4,7 +4,7 @@
 ## tst_qmodbusdataunit Test:
 #####################################################################
 
-add_qt_test(tst_qmodbusdataunit
+qt_add_test(tst_qmodbusdataunit
     SOURCES
         tst_qmodbusdataunit.cpp
     PUBLIC_LIBRARIES

@@ -9,7 +9,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(INSTALL_EXAMPLEDIR "examples")
+set(INSTALL_EXAMPLEDIR "examples/serialbus/modbus/master")
 
 find_package(Qt6 COMPONENTS Core)
 find_package(Qt6 COMPONENTS Gui)
@@ -42,13 +42,6 @@ target_link_libraries(modbusmaster PUBLIC
     Qt::Widgets
 )
 
-# special case
-extend_target(modbusmaster CONDITION QT_FEATURE_modbus_serialport
-    LIBRARIES
-        Qt::SerialPort
-)
-# special case
-
 # Resources:
 set(master_resource_files
     "images/application-exit.png"
@@ -64,6 +57,11 @@ qt6_add_resources(modbusmaster "master"
         ${master_resource_files}
 )
 
+if(QT_FEATURE_modbus_serialport)
+    target_link_libraries(modbusmaster PUBLIC
+        Qt::SerialPort
+    )
+endif()
 
 install(TARGETS modbusmaster
     RUNTIME DESTINATION "${INSTALL_EXAMPLEDIR}"

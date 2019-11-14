@@ -4,7 +4,7 @@
 ## qttinycanbus Plugin:
 #####################################################################
 
-add_qt_plugin(qttinycanbus
+qt_add_plugin(qttinycanbus
     TYPE canbus
     CLASS_NAME TinyCanBusPlugin
     SOURCES
@@ -18,4 +18,3 @@ add_qt_plugin(qttinycanbus
 
 #### Keys ignored in scope 1:.:.:tinycan.pro:<TRUE>:
 # DISTFILES = "plugin.json"
-# _LOADED = "qt_plugin"

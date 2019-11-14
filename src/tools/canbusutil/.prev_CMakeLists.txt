@@ -4,7 +4,7 @@
 ## canbusutil Tool:
 #####################################################################
 
-add_qt_tool(canbusutil
+qt_add_tool(canbusutil
     SOURCES
         canbusutil.cpp canbusutil.h
         main.cpp
@@ -16,4 +16,3 @@ add_qt_tool(canbusutil
 
 #### Keys ignored in scope 1:.:.:canbusutil.pro:<TRUE>:
 # QMAKE_TARGET_DESCRIPTION = "Qt CAN Bus Util"
-# _LOADED = "qt_tool"

@@ -4,7 +4,7 @@
 ## tst_qmodbusdeviceidentification Test:
 #####################################################################
 
-add_qt_test(tst_qmodbusdeviceidentification
+qt_add_test(tst_qmodbusdeviceidentification
     SOURCES
         tst_qmodbusdeviceidentification.cpp
     PUBLIC_LIBRARIES

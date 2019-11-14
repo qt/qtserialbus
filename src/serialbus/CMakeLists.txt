@@ -4,7 +4,7 @@
 ## SerialBus Module:
 #####################################################################
 
-add_qt_module(SerialBus
+qt_add_module(SerialBus
     PLUGIN_TYPES canbus
     SOURCES
         qcanbus.cpp qcanbus.h
@@ -32,13 +32,10 @@ add_qt_module(SerialBus
         Qt::Core
 )
 
-#### Keys ignored in scope 1:.:.:serialbus.pro:<TRUE>:
-# _LOADED = "qt_module"
-
 ## Scopes:
 #####################################################################
 
-extend_target(SerialBus CONDITION QT_FEATURE_modbus_serialport
+qt_extend_target(SerialBus CONDITION QT_FEATURE_modbus_serialport
     SOURCES
         qmodbusrtuserialmaster.cpp
         qmodbusrtuserialslave.cpp
@@ -49,7 +46,7 @@ extend_target(SerialBus CONDITION QT_FEATURE_modbus_serialport
 #### Keys ignored in scope 2:.:.:serialbus.pro:QT_FEATURE_modbus_serialport:
 # PRIVATE_HEADERS = "qmodbusrtuserialmaster_p.h" "qmodbusrtuserialslave_p.h"
 # PUBLIC_HEADERS = "qmodbusrtuserialmaster.h" "qmodbusrtuserialslave.h"
-add_qt_docs(SerialBus
+qt_add_docs(SerialBus
     doc/qtserialbus.qdocconf
 )
 

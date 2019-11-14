@@ -4,7 +4,7 @@
 ## qtsysteccanbus Plugin:
 #####################################################################
 
-add_qt_plugin(qtsysteccanbus
+qt_add_plugin(qtsysteccanbus
     TYPE canbus
     CLASS_NAME SystecCanBusPlugin
     SOURCES
@@ -18,4 +18,3 @@ add_qt_plugin(qtsysteccanbus
 
 #### Keys ignored in scope 1:.:.:systeccan.pro:<TRUE>:
 # DISTFILES = "plugin.json"
-# _LOADED = "qt_plugin"

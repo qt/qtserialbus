@@ -1,20 +1,22 @@
 # Generated from qmodbusclient.pro.
 
+# special case begin
 #if(NOT QT_CONFIG___contains___private_tests)
 #    return()
 #endif()
+# special case end
 
 #####################################################################
 ## tst_qmodbusclient Test:
 #####################################################################
 
-# special case
+# special case begin
 if (NOT QT_FEATURE_private_tests)
     return()
 endif()
-#special case
+#special case end
 
-add_qt_test(tst_qmodbusclient
+qt_add_test(tst_qmodbusclient
     SOURCES
         tst_qmodbusclient.cpp
     LIBRARIES

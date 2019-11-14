@@ -4,7 +4,7 @@
 ## qtpeakcanbus Plugin:
 #####################################################################
 
-add_qt_plugin(qtpeakcanbus
+qt_add_plugin(qtpeakcanbus
     TYPE canbus
     CLASS_NAME PeakCanBusPlugin
     SOURCES
@@ -18,4 +18,3 @@ add_qt_plugin(qtpeakcanbus
 
 #### Keys ignored in scope 1:.:.:peakcan.pro:<TRUE>:
 # DISTFILES = "plugin.json"
-# _LOADED = "qt_plugin"

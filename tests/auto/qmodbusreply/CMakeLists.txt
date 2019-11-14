@@ -4,7 +4,7 @@
 ## tst_qmodbusreply Test:
 #####################################################################
 
-add_qt_test(tst_qmodbusreply
+qt_add_test(tst_qmodbusreply
     SOURCES
         tst_qmodbusreply.cpp
     PUBLIC_LIBRARIES

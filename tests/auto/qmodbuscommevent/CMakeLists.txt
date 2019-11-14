@@ -4,7 +4,7 @@
 ## tst_qmodbuscommevent Test:
 #####################################################################
 
-add_qt_test(tst_qmodbuscommevent
+qt_add_test(tst_qmodbuscommevent
     SOURCES
         tst_qmodbuscommevent.cpp
     LIBRARIES

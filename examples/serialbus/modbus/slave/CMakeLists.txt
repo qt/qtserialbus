@@ -9,7 +9,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(INSTALL_EXAMPLEDIR "examples")
+set(INSTALL_EXAMPLEDIR "examples/serialbus/modbus/slave")
 
 find_package(Qt6 COMPONENTS Core)
 find_package(Qt6 COMPONENTS Gui)
@@ -40,12 +40,6 @@ target_link_libraries(modbusslave PUBLIC
     Qt::Widgets
 )
 
-# special case
-extend_target(modbusslave CONDITION QT_FEATURE_modbus_serialport
-    LIBRARIES
-        Qt::SerialPort
-)
-# special case
 
 # Resources:
 set(slave_resource_files
@@ -62,6 +56,11 @@ qt6_add_resources(modbusslave "slave"
         ${slave_resource_files}
 )
 
+if(QT_FEATURE_modbus_serialport)
+    target_link_libraries(modbusslave PUBLIC
+        Qt::SerialPort
+    )
+endif()
 
 install(TARGETS modbusslave
     RUNTIME DESTINATION "${INSTALL_EXAMPLEDIR}"

@@ -9,7 +9,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(INSTALL_EXAMPLEDIR "examples")
+set(INSTALL_EXAMPLEDIR "examples/serialbus/modbus/adueditor")
 
 # special case
 get_target_property(public_features Qt6::SerialBus QT_ENABLED_PUBLIC_FEATURES)
@@ -39,10 +39,12 @@ add_qt_gui_executable(adueditor
 target_include_directories(adueditor PUBLIC
     .
 )
+
 target_link_libraries(adueditor PRIVATE
     Qt::CorePrivate
     Qt::SerialBusPrivate
 )
+
 target_link_libraries(adueditor PUBLIC
     Qt::Core
     Qt::Gui

@@ -4,7 +4,7 @@
 ## qtvirtualcanbus Plugin:
 #####################################################################
 
-add_qt_plugin(qtvirtualcanbus
+qt_add_plugin(qtvirtualcanbus
     TYPE canbus
     CLASS_NAME VirtualCanBusPlugin
     SOURCES
@@ -18,4 +18,3 @@ add_qt_plugin(qtvirtualcanbus
 
 #### Keys ignored in scope 1:.:.:virtualcan.pro:<TRUE>:
 # DISTFILES = "plugin.json"
-# _LOADED = "qt_plugin"

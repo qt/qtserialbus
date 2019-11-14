@@ -9,7 +9,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(INSTALL_EXAMPLEDIR "examples")
+set(INSTALL_EXAMPLEDIR "examples/serialbus/can")
 
 find_package(Qt6 COMPONENTS Core)
 find_package(Qt6 COMPONENTS Gui)
@@ -37,6 +37,7 @@ target_link_libraries(can PUBLIC
     Qt::Widgets
 )
 
+
 # Resources:
 set(can_resource_files
     "images/application-exit.png"
@@ -51,7 +52,6 @@ qt6_add_resources(can "can"
     FILES
         ${can_resource_files}
 )
-
 
 install(TARGETS can
     RUNTIME DESTINATION "${INSTALL_EXAMPLEDIR}"

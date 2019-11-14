@@ -4,7 +4,7 @@
 ## qtcanbustestgeneric Plugin:
 #####################################################################
 
-add_qt_plugin(qtcanbustestgeneric
+qt_add_plugin(qtcanbustestgeneric
     TYPE canbus
     CLASS_NAME GenericBusPlugin
     SOURCES
@@ -18,4 +18,3 @@ add_qt_plugin(qtcanbustestgeneric
 #### Keys ignored in scope 1:.:.:genericcanbus.pro:<TRUE>:
 # DISTFILES = "plugin.json"
 # PLUGIN_EXTENDS = "-"
-# _LOADED = "qt_plugin"

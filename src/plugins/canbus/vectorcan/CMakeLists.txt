@@ -4,7 +4,7 @@
 ## qtvectorcanbus Plugin:
 #####################################################################
 
-add_qt_plugin(qtvectorcanbus
+qt_add_plugin(qtvectorcanbus
     TYPE canbus
     CLASS_NAME VectorCanBusPlugin
     SOURCES
@@ -18,4 +18,3 @@ add_qt_plugin(qtvectorcanbus
 
 #### Keys ignored in scope 1:.:.:vectorcan.pro:<TRUE>:
 # DISTFILES = "plugin.json"
-# _LOADED = "qt_plugin"

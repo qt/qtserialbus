@@ -4,7 +4,7 @@
 ## tst_qmodbusrtuserialmaster Test:
 #####################################################################
 
-add_qt_test(tst_qmodbusrtuserialmaster
+qt_add_test(tst_qmodbusrtuserialmaster
     SOURCES
         tst_qmodbusrtuserialmaster.cpp
     PUBLIC_LIBRARIES

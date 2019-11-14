@@ -4,7 +4,7 @@
 ## tst_qmodbusserver Test:
 #####################################################################
 
-add_qt_test(tst_qmodbusserver
+qt_add_test(tst_qmodbusserver
     SOURCES
         tst_qmodbusserver.cpp
     PUBLIC_LIBRARIES

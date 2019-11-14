@@ -4,7 +4,7 @@
 ## qtsocketcanbus Plugin:
 #####################################################################
 
-add_qt_plugin(qtsocketcanbus
+qt_add_plugin(qtsocketcanbus
     TYPE canbus
     CLASS_NAME SocketCanBusPlugin
     SOURCES
@@ -18,4 +18,3 @@ add_qt_plugin(qtsocketcanbus
 
 #### Keys ignored in scope 1:.:.:socketcan.pro:<TRUE>:
 # DISTFILES = "plugin.json"
-# _LOADED = "qt_plugin"

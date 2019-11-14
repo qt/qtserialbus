@@ -4,7 +4,7 @@
 ## qtpassthrucanbus Plugin:
 #####################################################################
 
-add_qt_plugin(qtpassthrucanbus
+qt_add_plugin(qtpassthrucanbus
     TYPE canbus
     CLASS_NAME PassThruCanBusPlugin
     SOURCES
@@ -18,4 +18,3 @@ add_qt_plugin(qtpassthrucanbus
 
 #### Keys ignored in scope 1:.:.:passthrucan.pro:<TRUE>:
 # DISTFILES = "plugin.json"
-# _LOADED = "qt_plugin"

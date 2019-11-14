@@ -4,7 +4,7 @@
 ## serialbus_cppsnippet Binary:
 #####################################################################
 
-add_qt_executable(serialbus_cppsnippet
+qt_add_executable(serialbus_cppsnippet
     GUI
     SOURCES
         snippetmain.cpp

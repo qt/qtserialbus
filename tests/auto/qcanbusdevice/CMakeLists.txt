@@ -4,7 +4,7 @@
 ## tst_qcanbusdevice Test:
 #####################################################################
 
-add_qt_test(tst_qcanbusdevice
+qt_add_test(tst_qcanbusdevice
     SOURCES
         tst_qcanbusdevice.cpp
     PUBLIC_LIBRARIES
