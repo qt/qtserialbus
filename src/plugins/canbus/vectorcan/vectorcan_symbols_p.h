@@ -228,6 +228,8 @@ typedef HANDLE XLhandle;
 
 #define XL_EVENT_FLAG_OVERRUN           0x01 // Used in XLevent.flags
 
+#define XL_CAN_MAX_DATA_LEN             64
+
 // structure for XL_RECEIVE_MSG, XL_TRANSMIT_MSG (32 bytes)
 struct s_xl_can_msg {
     unsigned long id;
@@ -255,6 +257,9 @@ static_assert(sizeof(s_xl_can_msg) == 32, "Invalid size of s_xl_can_msg structur
 #define XL_CHIPSTAT_ERROR_ACTIVE        0x08
 
 #define XL_CAN_STATE_FLAG_SJA_MODE      0x00000001
+
+#define XL_CANFD_RX_EVENT_HEADER_SIZE        32
+#define XL_CANFD_MAX_EVENT_SIZE              128
 
 // CAN Chip status
 struct s_xl_chip_state {
@@ -284,6 +289,86 @@ typedef struct s_xl_event {
     union s_xl_tag_data tagData; // 32 bytes
 } XLevent;
 static_assert(sizeof(s_xl_event) == 48, "Invalid size of s_xl_event structure");
+
+typedef struct {
+    quint32 id;
+    quint32 flags;
+    quint32 crc;
+    quint8 reserved1[12];
+    quint16 totalBitCnt;
+    quint8 dlc;
+    quint8 reserved[5];
+    quint8 data[XL_CAN_MAX_DATA_LEN];
+} XL_CAN_EV_RX_MSG;
+
+typedef struct {
+    quint32 canId;
+    quint32 msgFlags;
+    quint8 dlc;
+    quint8 reserved1;
+    quint16 reserved;
+    quint8 data[XL_CAN_MAX_DATA_LEN];
+} XL_CAN_EV_TX_REQUEST;
+
+typedef struct {
+    quint8 errorCode;
+    quint8 reserved[95];
+} XL_CAN_EV_ERROR;
+
+typedef struct {
+    quint8 busStatus;
+    quint8 txErrorCounter;
+    quint8 rxErrorCounter;
+    quint8 reserved;
+    quint32 reserved0;
+} XL_CAN_EV_CHIP_STATE;
+
+typedef struct s_xl_sync_pulse_ev {
+    quint32 triggerSource;
+    quint32 reserved;
+    quint64 time;
+} XL_SYNC_PULSE_EV;
+
+typedef XL_SYNC_PULSE_EV XL_CAN_EV_SYNC_PULSE;
+
+typedef struct {
+    quint32 size;
+    quint16 tag;
+    quint16 channelIndex;
+    quint32 userHandle;
+    quint16 flagsChip;
+    quint16 reserved0;
+    quint64 reserved1;
+    quint64 timeStamp;
+    union {
+        quint8 raw[XL_CANFD_MAX_EVENT_SIZE - XL_CANFD_RX_EVENT_HEADER_SIZE];
+        XL_CAN_EV_RX_MSG canRxOkMsg;
+        XL_CAN_EV_RX_MSG canTxOkMsg;
+        XL_CAN_EV_TX_REQUEST canTxRequest;
+        XL_CAN_EV_ERROR canError;
+        XL_CAN_EV_CHIP_STATE canChipState;
+        XL_CAN_EV_SYNC_PULSE canSyncPulse;
+    } tagData;
+} XLcanRxEvent;
+
+typedef struct {
+     quint32 id;
+     quint32 flags;
+     quint16 dlc;
+     quint16 reserved[7];
+     quint16 data[XL_CAN_MAX_DATA_LEN];
+} XL_CAN_TX_MSG;
+
+typedef struct {
+    quint32 tag;
+    quint32 transId;
+    quint32 channelIndex;
+    quint32 reserved[3];
+    union {
+        XL_CAN_TX_MSG canMsg;
+    } tagData;
+} XLcanTxEvent;
+
 
 // build a channels mask from the channels index
 #define XL_CHANNEL_MASK(x)  (quint64(1) << (x))
@@ -353,6 +438,22 @@ typedef qint16  XLstatus;
 // acceptance filter
 #define XL_CAN_STD  01 // flag for standard ID's
 #define XL_CAN_EXT  02 // flag for extended ID's
+
+#define XL_CAN_TXMSG_FLAG_EDL                0x0001    // extended data length
+#define XL_CAN_TXMSG_FLAG_BRS                0x0002    // baud rate switch
+#define XL_CAN_TXMSG_FLAG_RTR                0x0010    // remote transmission request
+#define XL_CAN_TXMSG_FLAG_HIGHPRIO           0x0080    // high priority message - clears all send buffers - then transmits
+#define XL_CAN_TXMSG_FLAG_WAKEUP             0x0200    // generate a wakeup message
+
+#define XL_CAN_RXMSG_FLAG_EDL                0x0001    // extended data length
+#define XL_CAN_RXMSG_FLAG_BRS                0x0002    // baud rate switch
+#define XL_CAN_RXMSG_FLAG_ESI                0x0004    // error state indicator
+#define XL_CAN_RXMSG_FLAG_RTR                0x0010    // remote transmission request
+#define XL_CAN_RXMSG_FLAG_EF                 0x0200    // error frame (only posssible in XL_CAN_EV_TX_REQUEST/XL_CAN_EV_TX_REMOVED)
+#define XL_CAN_RXMSG_FLAG_ARB_LOST           0x0400    // Arbitration Lost
+                                                       // set if the receiving node tried to transmit a message but lost arbitration process
+#define XL_CAN_RXMSG_FLAG_WAKEUP             0x2000    // high voltage message on single wire CAN
+#define XL_CAN_RXMSG_FLAG_TE                 0x4000    // 1: transceiver error detected
 
 typedef struct {
     quint32 busType;
@@ -447,6 +548,21 @@ typedef struct _XLacceptance {
     XLaccFilt xtd;
 } XLacceptance;
 
+typedef struct s_XLcanFdConf {
+    unsigned int arbitrationBitRate;
+    unsigned int sjwAbr;
+    unsigned int tseg1Abr;
+    unsigned int tseg2Abr;
+    unsigned int dataBitRate;
+    unsigned int sjwDbr;
+    unsigned int tseg1Dbr;
+    unsigned int tseg2Dbr;
+    unsigned char reserved;
+    unsigned char options;
+    unsigned char reserved1[2];
+    unsigned int reserved2;
+} XLcanFdConf;
+
 // defines for xlSetGlobalTimeSync
 #define XL_SET_TIMESYNC_NO_CHANGE   ((unsigned long)0)
 #define XL_SET_TIMESYNC_ON          ((unsigned long)1)
@@ -476,6 +592,10 @@ GENERATE_SYMBOL_VARIABLE(XLstatus, xlReceive, XLportHandle, quint32 *, XLevent *
 GENERATE_SYMBOL_VARIABLE(XLstatus, xlSetNotification, XLportHandle, XLhandle *, int)
 GENERATE_SYMBOL_VARIABLE(XLstatus, xlCanRequestChipState, XLportHandle, XLaccess)
 GENERATE_SYMBOL_VARIABLE(char *, xlGetErrorString, XLstatus)
+GENERATE_SYMBOL_VARIABLE(XLstatus, xlCanFdSetConfiguration, XLportHandle, XLaccess, XLcanFdConf *)
+GENERATE_SYMBOL_VARIABLE(XLstatus, xlCanReceive, XLportHandle, XLcanRxEvent *)
+GENERATE_SYMBOL_VARIABLE(XLstatus, xlCanTransmitEx, XLportHandle, XLaccess, quint32, quint32 *, XLcanTxEvent *)
+GENERATE_SYMBOL_VARIABLE(XLaccess, xlGetChannelMask, int, int, int)
 
 inline bool resolveVectorCanSymbols(QLibrary *vectorcanLibrary)
 {
@@ -502,7 +622,10 @@ inline bool resolveVectorCanSymbols(QLibrary *vectorcanLibrary)
     RESOLVE_SYMBOL(xlSetNotification)
     RESOLVE_SYMBOL(xlCanRequestChipState)
     RESOLVE_SYMBOL(xlGetErrorString)
-
+    RESOLVE_SYMBOL(xlCanFdSetConfiguration)
+    RESOLVE_SYMBOL(xlCanTransmitEx)
+    RESOLVE_SYMBOL(xlCanReceive)
+    RESOLVE_SYMBOL(xlGetChannelMask)
     return true;
 }
 

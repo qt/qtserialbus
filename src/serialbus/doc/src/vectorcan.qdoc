@@ -105,6 +105,15 @@
                 bus immediately appear in the receive buffer. This can be used to check if sending
                 was successful. If this option is enabled, the therefore received frames are marked
                 with QCanBusFrame::hasLocalEcho()
+        \row
+            \li QCanBusDevice::CanFdKey
+            \li Enable the use of CAN FD on the CAN bus connection. If this option is enabled, then
+                it is not possible to receive your own CAN frames being sent, so setting
+                QCanBusDevice::ReceiveOwnKey to true has no effect. Since Qt 5.15.
+        \row
+            \li QCanBusDevice::DataBitRateKey
+            \li Determines the data bit rate of the CAN bus connection. This is only available when
+                \l QCanBusDevice::CanFdKey is set to true. Since Qt 5.15.
    \endtable
 
     VectorCAN supports the following additional functions:
