@@ -88,7 +88,7 @@ QT_BEGIN_NAMESPACE
     \a newFrameId with more than 11 bits in size is given.
 
     When the format is extended and a \a newFrameId with up to 11 bits or less
-    is passed, the \e {CAN extended frame format} setting is \a not changed.
+    is passed, the \e {CAN extended frame format} setting is \b not changed.
 
     \sa frameId(), hasExtendedFrameFormat()
 */
