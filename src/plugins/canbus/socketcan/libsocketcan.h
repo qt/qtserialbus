@@ -38,6 +38,7 @@
 #define LIBSOCKETCAN_H
 
 #include <QtCore/qglobal.h>
+#include <QtSerialBus/qcanbusdevice.h>
 
 //
 //  W A R N I N G
@@ -65,6 +66,9 @@ public:
 
     quint32 bitrate(const QString &interface) const;
     bool setBitrate(const QString &interface, quint32 bitrate);
+
+    bool hasBusStatus() const;
+    QCanBusDevice::CanBusStatus busStatus(const QString &interface) const;
 };
 
 QT_END_NAMESPACE

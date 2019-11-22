@@ -81,6 +81,20 @@ typedef void (DRV_CALLBACK_TYPE *tCallbackFktEx) (tUcanHandle handle, quint32 ev
 #define USBCAN_EVENT_FATALDISCON            8    // a USB-CANmodul has been disconnected during operation
 #define USBCAN_EVENT_RESERVED1              0x80
 
+// CAN status flags (is returned with function UcanGetStatus() or UcanGetStatusEx() )
+#define USBCAN_CANERR_OK                    0x0000 // no error
+#define USBCAN_CANERR_XMTFULL               0x0001 // Tx-buffer of the CAN controller is full
+#define USBCAN_CANERR_OVERRUN               0x0002 // Rx-buffer of the CAN controller is full
+#define USBCAN_CANERR_BUSLIGHT              0x0004 // Bus error: Error Limit 1 exceeded (refer to SJA1000 manual)
+#define USBCAN_CANERR_BUSHEAVY              0x0008 // Bus error: Error Limit 2 exceeded (refer to SJA1000 manual)
+#define USBCAN_CANERR_BUSOFF                0x0010 // Bus error: CAN controller has gone into Bus-Off state
+#define USBCAN_CANERR_QRCVEMPTY             0x0020 // RcvQueue is empty
+#define USBCAN_CANERR_QOVERRUN              0x0040 // RcvQueue overrun
+#define USBCAN_CANERR_QXMTFULL              0x0080 // transmit queue is full
+#define USBCAN_CANERR_REGTEST               0x0100 // Register test of the SJA1000 failed
+#define USBCAN_CANERR_MEMTEST               0x0200 // Memory test failed
+#define USBCAN_CANERR_TXMSGLOST             0x0400 // transmit CAN message was automatically deleted by firmware
+
 #define kUcanModeNormal         0x00        // normal mode (send and receive)
 #define kUcanModeListenOnly     0x01        // listen only mode (only receive)
 #define kUcanModeTxEcho         0x02        // CAN messages which was sent will be received at UcanReadCanMsg..
@@ -88,8 +102,8 @@ typedef void (DRV_CALLBACK_TYPE *tCallbackFktEx) (tUcanHandle handle, quint32 ev
 #define kUcanModeHighResTimer   0x08        // high resolution time stamps in received CAN messages (only available with STM derivates)
 
 // ABR and ACR for mode "receive all CAN messages"
-#define USBCAN_AMR_ALL                      (quint32) 0xffffffff
-#define USBCAN_ACR_ALL                      (quint32) 0x00000000
+#define USBCAN_AMR_ALL                      0xffffffffU
+#define USBCAN_ACR_ALL                      0x00000000U
 
 #define USBCAN_OCR_DEFAULT                  0x1A  // default OCR for standard GW-002
 #define USBCAN_OCR_RS485_ISOLATED           0x1E  // OCR for RS485 interface and galvanic isolation
@@ -142,6 +156,11 @@ typedef struct _tCanMsgStruct {
     quint8  m_bData[8];                     // CAN Data
     quint32 m_dwTime;                       // Time in ms
 } tCanMsgStruct;
+
+typedef struct _tStatusStruct {
+    quint16 m_wCanStatus;                   // current CAN status
+    quint16 m_wUsbStatus;                   // current USB status
+} tStatusStruct;
 
 // Function return codes (encoding)
 #define USBCAN_SUCCESSFUL                   0x00                // no error
@@ -282,8 +301,9 @@ GENERATE_SYMBOL_VARIABLE(UCANRET, UcanDeinitCanEx, tUcanHandle, quint8 /* channe
 GENERATE_SYMBOL_VARIABLE(UCANRET, UcanReadCanMsgEx, tUcanHandle, quint8 *, tCanMsgStruct *, quint32 *)
 GENERATE_SYMBOL_VARIABLE(UCANRET, UcanResetCan, tUcanHandle)
 GENERATE_SYMBOL_VARIABLE(UCANRET, UcanWriteCanMsgEx, tUcanHandle, quint8, tCanMsgStruct *, quint32 *)
+GENERATE_SYMBOL_VARIABLE(UCANRET, UcanGetStatus, tUcanHandle, tStatusStruct *)
 
-inline bool resolveSymbols(QLibrary *systecLibrary)
+inline bool resolveSystecCanSymbols(QLibrary *systecLibrary)
 {
     if (!systecLibrary->isLoaded()) {
 #ifdef Q_PROCESSOR_X86_64
@@ -303,6 +323,7 @@ inline bool resolveSymbols(QLibrary *systecLibrary)
     RESOLVE_SYMBOL(UcanReadCanMsgEx);
     RESOLVE_SYMBOL(UcanResetCan);
     RESOLVE_SYMBOL(UcanWriteCanMsgEx);
+    RESOLVE_SYMBOL(UcanGetStatus);
 
     return true;
 }

@@ -1,4 +1,4 @@
-﻿/****************************************************************************
+/****************************************************************************
 **
 ** Copyright (C) 2017 Denis Shienkov <denis.shienkov@gmail.com>
 ** Copyright (C) 2017 The Qt Company Ltd.
@@ -66,7 +66,7 @@ bool PeakCanBackend::canCreate(QString *errorReason)
 #ifdef LINK_LIBPCANBASIC
     return true;
 #else
-    static bool symbolsResolved = resolveSymbols(pcanLibrary());
+    static bool symbolsResolved = resolvePeakCanSymbols(pcanLibrary());
     if (Q_UNLIKELY(!symbolsResolved)) {
         qCCritical(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot load library: %ls",
                 qUtf16Printable(pcanLibrary()->errorString()));
@@ -153,11 +153,11 @@ QList<QCanBusDeviceInfo> PeakCanBackend::interfaces()
 }
 
 #if defined(Q_OS_WIN32)
-class ReadNotifier : public QWinEventNotifier
+class PeakCanReadNotifier : public QWinEventNotifier
 {
     // no Q_OBJECT macro!
 public:
-    explicit ReadNotifier(PeakCanBackendPrivate *d, QObject *parent)
+    explicit PeakCanReadNotifier(PeakCanBackendPrivate *d, QObject *parent)
         : QWinEventNotifier(parent)
         , dptr(d)
     {
@@ -178,11 +178,11 @@ private:
     PeakCanBackendPrivate * const dptr;
 };
 #else
-class ReadNotifier : public QSocketNotifier
+class PeakCanReadNotifier : public QSocketNotifier
 {
     // no Q_OBJECT macro!
 public:
-    explicit ReadNotifier(PeakCanBackendPrivate *d, QObject *parent)
+    explicit PeakCanReadNotifier(PeakCanBackendPrivate *d, QObject *parent)
         : QSocketNotifier(d->readHandle, QSocketNotifier::Read, parent)
         , dptr(d)
     {
@@ -203,11 +203,11 @@ private:
 };
 #endif
 
-class WriteNotifier : public QTimer
+class PeakCanWriteNotifier : public QTimer
 {
     // no Q_OBJECT macro!
 public:
-    WriteNotifier(PeakCanBackendPrivate *d, QObject *parent)
+    PeakCanWriteNotifier(PeakCanBackendPrivate *d, QObject *parent)
         : QTimer(parent)
         , dptr(d)
     {
@@ -369,10 +369,10 @@ bool PeakCanBackendPrivate::open()
     }
 #endif
 
-    writeNotifier = new WriteNotifier(this, q);
+    writeNotifier = new PeakCanWriteNotifier(this, q);
     writeNotifier->setInterval(0);
 
-    readNotifier = new ReadNotifier(this, q);
+    readNotifier = new PeakCanReadNotifier(this, q);
     readNotifier->setEnabled(true);
 
     isOpen = true;
@@ -720,6 +720,9 @@ PeakCanBackend::PeakCanBackend(const QString &name, QObject *parent)
 
     std::function<void()> f = std::bind(&PeakCanBackend::resetController, this);
     setResetControllerFunction(f);
+
+    std::function<CanBusStatus()> g = std::bind(&PeakCanBackend::busStatus, this);
+    setCanBusStatusGetter(g);
 }
 
 PeakCanBackend::~PeakCanBackend()
@@ -815,6 +818,25 @@ void PeakCanBackend::resetController()
 {
     close();
     open();
+}
+
+QCanBusDevice::CanBusStatus PeakCanBackend::busStatus() const
+{
+    const TPCANStatus status = ::CAN_GetStatus(d_ptr->channelIndex);
+
+    switch (status & PCAN_ERROR_ANYBUSERR) {
+    case PCAN_ERROR_OK:
+        return QCanBusDevice::CanBusStatus::Good;
+    case PCAN_ERROR_BUSWARNING:
+        return QCanBusDevice::CanBusStatus::Warning;
+    case PCAN_ERROR_BUSPASSIVE:
+        return QCanBusDevice::CanBusStatus::Error;
+    case PCAN_ERROR_BUSOFF:
+        return QCanBusDevice::CanBusStatus::BusOff;
+    default:
+        qCWarning(QT_CANBUS_PLUGINS_PEAKCAN, "Unknown CAN bus status: %lu.", ulong(status));
+        return QCanBusDevice::CanBusStatus::Unknown;
+    }
 }
 
 QT_END_NAMESPACE

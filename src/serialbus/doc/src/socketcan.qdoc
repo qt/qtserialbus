@@ -196,6 +196,10 @@
             \li This configuration is not supported by the socketcan plugin. However
                 it is possible to set the data rate when configuring the CAN network interface
                 using the \c {ip link} command.
+        \row
+            \li QCanBusDevice::ProtocolKey
+            \li Allows to use another protocol inside the protocol family PF_CAN. The default
+                value for this configuration option is CAN_RAW (1).
     \endtable
 
     For example:
@@ -208,6 +212,7 @@
 
     \list
         \li QCanBusDevice::resetController() (needs libsocketcan)
+        \li QCanBusDevice::busStatus() (needs libsocketcan)
     \endlist
 
 */

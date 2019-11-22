@@ -73,6 +73,11 @@ Q_LOGGING_CATEGORY(QT_CANBUS, "qt.canbus")
     \value ConfigurationError   An error occurred when attempting to set a configuration
                                 parameter.
     \value UnknownError         An unknown error occurred.
+    \value OperationError       An operation was attempted while the device was in
+                                a state that did not permit it. This enum was introduced
+                                in Qt 5.14.
+    \value TimeoutError         An timeout occurred while waiting for frames written or
+                                received. This enum was introduced in Qt 5.14.
 */
 
 /*!
@@ -118,6 +123,9 @@ Q_LOGGING_CATEGORY(QT_CANBUS, "qt.canbus")
                             after the arbitration phase at the nominal bitrate is finished.
                             This enum value was introduced in Qt 5.9.
                             See also \c QCanBusDevice::BitRateKey
+    \value ProtocolKey      This key allows to specify another protocol. For now, this
+                            parameter can only be set and used in the SocketCAN plugin.
+                            This enum value was introduced in Qt 5.14.
     \value UserKey          This key defines the range where custom keys start. Its most
                             common purpose is to permit platform-specific configuration
                             options.
@@ -142,16 +150,18 @@ Q_LOGGING_CATEGORY(QT_CANBUS, "qt.canbus")
 */
 
 /*!
-    \fn QCanBusDevice::Filter::operator==(const Filter &other)
+    \fn bool operator==(const QCanBusDevice::Filter &a, const QCanBusDevice::Filter &b)
+    \relates QCanBusDevice::Filter
 
-    Returns true, if the filter \a other is equal to this filter,
+    Returns true, if the filter \a a is equal to the filter \a b,
     otherwise returns false.
 */
 
 /*!
-    \fn QCanBusDevice::Filter::operator!=(const Filter &other)
+    \fn bool operator!=(const QCanBusDevice::Filter &a, const QCanBusDevice::Filter &b)
+    \relates QCanBusDevice::Filter
 
-    Returns true, if the filter \a other is not equal to this filter,
+    Returns true, if the filter \a a is not equal to the filter \a b,
     otherwise returns false.
 */
 
@@ -245,7 +255,7 @@ QCanBusDevice::QCanBusDevice(QObject *parent) :
     CAN bus implementations must use this function to update the device's
     error state.
 
-    \sa error(), errorOccurred()
+    \sa error(), errorOccurred(), clearError()
 */
 void QCanBusDevice::setError(const QString &errorText, CanBusError errorId)
 {
@@ -255,6 +265,24 @@ void QCanBusDevice::setError(const QString &errorText, CanBusError errorId)
     d->lastError = errorId;
 
     emit errorOccurred(errorId);
+}
+
+/*!
+    \since 5.14
+    Clears the error id and the human readable description of the last
+    device error.
+
+    CAN bus implementations must use this function to update the device's
+    error state.
+
+    \sa error(), errorOccurred(), setError()
+*/
+void QCanBusDevice::clearError()
+{
+    Q_D(QCanBusDevice);
+
+    d->errorText.clear();
+    d->lastError = NoError;
 }
 
 /*!
@@ -317,14 +345,27 @@ bool QCanBusDevice::hasOutgoingFrames() const
 }
 
 /*!
- * Called from the derived plugin to register a function that performs the
- * CAN controller hardware reset when \a resetController() is called.
+ * \since 5.14
+ * Called from the derived plugin to register a function \a resetter which performs the
+ * CAN controller hardware reset when resetController() is called.
  */
-void QCanBusDevice::setResetControllerFunction(std::function<void()> &resetter)
+void QCanBusDevice::setResetControllerFunction(std::function<void()> resetter)
 {
     Q_D(QCanBusDevice);
 
-    d->m_resetControllerFunction = resetter;
+    d->m_resetControllerFunction = std::move(resetter);
+}
+
+/*!
+ * \since 5.14
+ * Called from the derived plugin to register a function \a busStatusGetter
+ * which returns the CAN controller bus status when busStatus() is called.
+ */
+void QCanBusDevice::setCanBusStatusGetter(std::function<CanBusStatus()> busStatusGetter)
+{
+    Q_D(QCanBusDevice);
+
+    d->m_busStatusGetter = std::move(busStatusGetter);
 }
 
 /*!
@@ -464,6 +505,8 @@ qint64 QCanBusDevice::framesToWrite() const
 
     \note This function may not be implemented in all CAN plugins.
     Please refer to the plugins help pages for more information.
+
+    \sa busStatus()
 */
 void QCanBusDevice::resetController()
 {
@@ -475,6 +518,55 @@ void QCanBusDevice::resetController()
         qCWarning(QT_CANBUS, error);
         setError(tr(error), QCanBusDevice::CanBusError::ConfigurationError);
     }
+}
+
+/*!
+    \since 5.14
+
+    Return true, if the CAN plugin supports requesting the CAN bus status.
+
+    \sa busStatus()
+ */
+bool QCanBusDevice::hasBusStatus() const
+{
+    return d_func()->m_busStatusGetter != nullptr;
+}
+
+/*!
+    \since 5.14
+    \enum QCanBusDevice::CanBusStatus
+
+    This enum describes possible CAN bus status values.
+
+    \value Unknown  The CAN bus status is unknown
+                    (e.g. not supported by the CAN plugin).
+    \value Good     The CAN controller is fully operational
+    \value Warning  The CAN controller is in warning status
+    \value Error    The CAN controller is in error status
+                    (no longer sending CAN frames)
+    \value BusOff   The CAN controller is in bus off status
+                    (disconnected from the CAN bus)
+*/
+
+/*!
+    \since 5.14
+
+    Returns the current CAN bus status. If the status cannot be requested,
+    QCanBusDevice::UnknownStatus is returned.
+
+    \note This function may not be implemented in all CAN plugins.
+    Please refer to the plugins help pages for more information.
+    The function hasBusStatus() can be used at runtime to check if
+    the used CAN plugin has support for requesting the CAN bus status.
+
+    \sa hasBusStatus(), resetController()
+*/
+QCanBusDevice::CanBusStatus QCanBusDevice::busStatus() const
+{
+    if (d_func()->m_busStatusGetter)
+        return d_func()->m_busStatusGetter();
+
+    return QCanBusDevice::CanBusStatus::Unknown;
 }
 
 /*!
@@ -504,8 +596,14 @@ void QCanBusDevice::clear(QCanBusDevice::Directions direction)
 {
     Q_D(QCanBusDevice);
 
-    if (Q_UNLIKELY(d->state != ConnectedState))
+    if (Q_UNLIKELY(d->state != ConnectedState)) {
+        const QString error = tr("Cannot clear buffers as device is not connected.");
+        qCWarning(QT_CANBUS, "%ls", qUtf16Printable(error));
+        setError(error, CanBusError::OperationError);
         return;
+    }
+
+    clearError();
 
     if (direction & Direction::Input) {
         QMutexLocker(&d->incomingFramesGuard);
@@ -542,31 +640,46 @@ bool QCanBusDevice::waitForFramesWritten(int msecs)
                              "recursively. Check that no slot containing waitForFramesReceived() "
                              "is called in response to framesWritten(qint64) or "
                              "errorOccurred(CanBusError) signals.");
+        setError(tr("QCanBusDevice::waitForFramesWritten() must not be called recursively."),
+                 CanBusError::OperationError);
         return false;
     }
 
-    QScopedValueRollback<bool> guard(d_func()->waitForWrittenEntered);
-    d_func()->waitForWrittenEntered = true;
-
-    if (d_func()->state != ConnectedState)
+    if (Q_UNLIKELY(d_func()->state != ConnectedState)) {
+        const QString error = tr("Cannot wait for frames written as device is not connected.");
+        qCWarning(QT_CANBUS, "%ls", qUtf16Printable(error));
+        setError(error, CanBusError::OperationError);
         return false;
+    }
 
     if (!framesToWrite())
         return false; // nothing pending, nothing to wait upon
 
-    QEventLoop loop;
-    connect(this, &QCanBusDevice::framesWritten, &loop, [&]() { loop.exit(0); });
-    connect(this, &QCanBusDevice::errorOccurred, &loop, [&]() { loop.exit(1); });
-    if (msecs >= 0)
-        QTimer::singleShot(msecs, &loop, [&]() { loop.exit(2); });
+    QScopedValueRollback<bool> guard(d_func()->waitForWrittenEntered);
+    d_func()->waitForWrittenEntered = true;
 
-    int result = 0;
+    enum { Written = 0, Error, Timeout };
+    QEventLoop loop;
+    connect(this, &QCanBusDevice::framesWritten, &loop, [&]() { loop.exit(Written); });
+    connect(this, &QCanBusDevice::errorOccurred, &loop, [&]() { loop.exit(Error); });
+    if (msecs >= 0)
+        QTimer::singleShot(msecs, &loop, [&]() { loop.exit(Timeout); });
+
+    int result = Written;
     while (framesToWrite() > 0) {
         // wait till all written or time out
         result = loop.exec(QEventLoop::ExcludeUserInputEvents);
-        if (result > 0)
+        if (Q_UNLIKELY(result == Timeout)) {
+            const QString error = tr("Timeout (%1 ms) during wait for frames written.").arg(msecs);
+            setError(error, CanBusError::TimeoutError);
+            qCWarning(QT_CANBUS, "%ls", qUtf16Printable(error));
+        }
+
+        if (result > Written)
             return false;
     }
+
+    clearError();
     return true;
 }
 
@@ -595,25 +708,39 @@ bool QCanBusDevice::waitForFramesReceived(int msecs)
                              "recursively. Check that no slot containing waitForFramesReceived() "
                              "is called in response to framesReceived() or "
                              "errorOccurred(CanBusError) signals.");
+        setError(tr("QCanBusDevice::waitForFramesReceived() must not be called recursively."),
+                 CanBusError::OperationError);
+        return false;
+    }
+
+    if (Q_UNLIKELY(d_func()->state != ConnectedState)) {
+        const QString error = tr("Cannot wait for frames received as device is not connected.");
+        qCWarning(QT_CANBUS, "%ls", qUtf16Printable(error));
+        setError(error, CanBusError::OperationError);
         return false;
     }
 
     QScopedValueRollback<bool> guard(d_func()->waitForReceivedEntered);
     d_func()->waitForReceivedEntered = true;
 
-    if (d_func()->state != ConnectedState)
-        return false;
-
+    enum { Received = 0, Error, Timeout };
     QEventLoop loop;
-
-    connect(this, &QCanBusDevice::framesReceived, &loop, [&]() { loop.exit(0); });
-    connect(this, &QCanBusDevice::errorOccurred, &loop, [&]() { loop.exit(1); });
+    connect(this, &QCanBusDevice::framesReceived, &loop, [&]() { loop.exit(Received); });
+    connect(this, &QCanBusDevice::errorOccurred, &loop, [&]() { loop.exit(Error); });
     if (msecs >= 0)
-        QTimer::singleShot(msecs, &loop, [&]() { loop.exit(2); });
+        QTimer::singleShot(msecs, &loop, [&]() { loop.exit(Timeout); });
 
     int result = loop.exec(QEventLoop::ExcludeUserInputEvents);
 
-    return result == 0;
+    if (Q_UNLIKELY(result == Timeout)) {
+        const QString error = tr("Timeout (%1 ms) during wait for frames received.").arg(msecs);
+        setError(error, CanBusError::TimeoutError);
+        qCWarning(QT_CANBUS, "%ls", qUtf16Printable(error));
+    }
+
+    if (result == Received)
+        clearError();
+    return result == Received;
 }
 
 /*!
@@ -669,8 +796,14 @@ QCanBusFrame QCanBusDevice::readFrame()
 {
     Q_D(QCanBusDevice);
 
-    if (Q_UNLIKELY(d->state != ConnectedState))
+    if (Q_UNLIKELY(d->state != ConnectedState)) {
+        const QString error = tr("Cannot read frame as device is not connected.");
+        qCWarning(QT_CANBUS, "%ls", qUtf16Printable(error));
+        setError(error, CanBusError::OperationError);
         return QCanBusFrame(QCanBusFrame::InvalidFrame);
+    }
+
+    clearError();
 
     QMutexLocker locker(&d->incomingFramesGuard);
 
@@ -693,8 +826,14 @@ QVector<QCanBusFrame> QCanBusDevice::readAllFrames()
 {
     Q_D(QCanBusDevice);
 
-    if (Q_UNLIKELY(d->state != ConnectedState))
+    if (Q_UNLIKELY(d->state != ConnectedState)) {
+        const QString error = tr("Cannot read frame as device is not connected.");
+        qCWarning(QT_CANBUS, "%ls", qUtf16Printable(error));
+        setError(error, CanBusError::OperationError);
         return QVector<QCanBusFrame>();
+    }
+
+    clearError();
 
     QMutexLocker locker(&d->incomingFramesGuard);
 
@@ -725,9 +864,10 @@ QVector<QCanBusFrame> QCanBusDevice::readAllFrames()
 
     As per CAN bus specification, frames of type
     \l {QCanBusFrame::RemoteRequestFrame} {remote transfer request (RTR)}
-    do not have a payload, but a length from 0 to 8 (including). This length indicates
-    the expected response payload length from the remote party. Therefore when sending a RTR frame using
-    this function it may still be required to set an arbitrary payload on \a frame. The length of
+    do not have a payload, but a length from 0 to 8 (including). This length
+    indicates the expected response payload length from the remote party.
+    Therefore when sending a RTR frame using this function it may still
+    be required to set an arbitrary payload on \a frame. The length of
     the arbitrary payload is what is set as size expectation for the RTR frame.
 
     \sa QCanBusFrame::setPayload()
@@ -768,6 +908,8 @@ bool QCanBusDevice::connectDevice()
         setState(UnconnectedState);
         return false;
     }
+
+    clearError();
 
     //Connected is set by backend -> might be delayed by event loop
     return true;

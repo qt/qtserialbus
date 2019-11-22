@@ -101,7 +101,7 @@ public:
     bool isException() const { return m_code & ExceptionByte; }
 
     qint16 size() const { return dataSize() + 1; }
-    qint16 dataSize() const { return m_data.size(); }
+    qint16 dataSize() const { return qint16(m_data.size()); }
 
     FunctionCode functionCode() const {
         return FunctionCode(quint8(m_code) &~ ExceptionByte);

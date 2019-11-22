@@ -49,6 +49,7 @@
 
 #include <linux/can/error.h>
 #include <linux/can/raw.h>
+#include <linux/sockios.h>
 #include <errno.h>
 #include <unistd.h>
 #include <net/if.h>
@@ -197,6 +198,13 @@ SocketCanBackend::SocketCanBackend(const QString &name) :
 
     std::function<void()> f = std::bind(&SocketCanBackend::resetController, this);
     setResetControllerFunction(f);
+
+    if (hasBusStatus()) {
+        // Only register busStatus when libsocketcan is available
+        // QCanBusDevice::hasBusStatus() will return false otherwise
+        std::function<CanBusStatus()> g = std::bind(&SocketCanBackend::busStatus, this);
+        setCanBusStatusGetter(g);
+    }
 }
 
 SocketCanBackend::~SocketCanBackend()
@@ -381,7 +389,7 @@ bool SocketCanBackend::connectSocket()
 {
     struct ifreq interface;
 
-    if (Q_UNLIKELY((canSocket = socket(PF_CAN, SOCK_RAW | SOCK_NONBLOCK, CAN_RAW)) < 0)) {
+    if (Q_UNLIKELY((canSocket = socket(PF_CAN, SOCK_RAW | SOCK_NONBLOCK, protocol)) < 0)) {
         setError(qt_error_string(errno),
                  QCanBusDevice::CanBusError::ConnectionError);
         return false;
@@ -456,6 +464,16 @@ void SocketCanBackend::setConfigurationParameter(int key, const QVariant &value)
                 return;
             }
         }
+    } else if (key == QCanBusDevice::ProtocolKey) {
+        bool ok = false;
+        const int newProtocol = value.toInt(&ok);
+        if (Q_UNLIKELY(!ok || (newProtocol < 0))) {
+            const QString errorString = tr("Cannot set protocol to value %1.").arg(value.toString());
+            setError(errorString, QCanBusDevice::ConfigurationError);
+            qCWarning(QT_CANBUS_PLUGINS_SOCKETCAN, "%ls", qUtf16Printable(errorString));
+            return;
+        }
+        protocol = newProtocol;
     }
     // connected & params not applyable/invalid
     if (canSocket != -1 && !applyConfigurationParameter(key, value))
@@ -756,6 +774,16 @@ void SocketCanBackend::readSocket()
 void SocketCanBackend::resetController()
 {
     libSocketCan->restart(canSocketName);
+}
+
+bool SocketCanBackend::hasBusStatus() const
+{
+    return libSocketCan->hasBusStatus();
+}
+
+QCanBusDevice::CanBusStatus SocketCanBackend::busStatus() const
+{
+    return libSocketCan->busStatus(canSocketName);
 }
 
 QT_END_NAMESPACE

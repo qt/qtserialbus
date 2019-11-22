@@ -60,7 +60,9 @@ public:
         WriteError,
         ConnectionError,
         ConfigurationError,
-        UnknownError
+        UnknownError,
+        OperationError,
+        TimeoutError
     };
     Q_ENUM(CanBusError)
 
@@ -72,6 +74,15 @@ public:
     };
     Q_ENUM(CanBusDeviceState)
 
+    enum class CanBusStatus {
+        Unknown,
+        Good,
+        Warning,
+        Error,
+        BusOff
+    };
+    Q_ENUM(CanBusStatus)
+
     enum ConfigurationKey {
         RawFilterKey = 0,
         ErrorFilterKey,
@@ -80,21 +91,22 @@ public:
         BitRateKey,
         CanFdKey,
         DataBitRateKey,
+        ProtocolKey,
         UserKey = 30
     };
     Q_ENUM(ConfigurationKey)
 
     struct Filter
     {
-        bool operator==(const Filter &other) const
+        friend constexpr bool operator==(const Filter &a, const Filter &b) noexcept
         {
-            return frameId == other.frameId && frameIdMask == other.frameIdMask
-                    && type == other.type && format == other.format;
+            return a.frameId == b.frameId && a.frameIdMask == b.frameIdMask
+                    && a.type == b.type && a.format == b.format;
         }
 
-        bool operator!=(const Filter &other) const
+        friend constexpr bool operator!=(const Filter &a, const Filter &b) noexcept
         {
-            return !operator==(other);
+            return !operator==(a, b);
         }
 
         enum FormatFilter {
@@ -123,6 +135,8 @@ public:
     qint64 framesToWrite() const;
 
     void resetController();
+    bool hasBusStatus() const;
+    QCanBusDevice::CanBusStatus busStatus() const;
 
     enum Direction {
         Input = 1,
@@ -155,6 +169,7 @@ Q_SIGNALS:
 protected:
     void setState(QCanBusDevice::CanBusDeviceState newState);
     void setError(const QString &errorText, QCanBusDevice::CanBusError);
+    void clearError();
 
     void enqueueReceivedFrames(const QVector<QCanBusFrame> &newFrames);
 
@@ -167,7 +182,8 @@ protected:
     virtual bool open() = 0;
     virtual void close() = 0;
 
-    void setResetControllerFunction(std::function<void()> &resetter);
+    void setResetControllerFunction(std::function<void()> resetter);
+    void setCanBusStatusGetter(std::function<CanBusStatus()> busStatusGetter);
 
     static QCanBusDeviceInfo createDeviceInfo(const QString &name,
                                               bool isVirtual = false,
@@ -188,7 +204,6 @@ Q_DECLARE_OPERATORS_FOR_FLAGS(QCanBusDevice::Directions)
 
 QT_END_NAMESPACE
 
-Q_DECLARE_METATYPE(QCanBusDevice::Filter)
 Q_DECLARE_METATYPE(QCanBusDevice::Filter::FormatFilter)
 Q_DECLARE_METATYPE(QList<QCanBusDevice::Filter>)
 

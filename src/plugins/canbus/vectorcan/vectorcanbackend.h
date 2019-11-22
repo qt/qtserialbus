@@ -71,6 +71,8 @@ public:
     static QList<QCanBusDeviceInfo> interfaces();
 
 private:
+    QCanBusDevice::CanBusStatus busStatus();
+
     VectorCanBackendPrivate * const d_ptr;
 };
 

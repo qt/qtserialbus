@@ -84,7 +84,10 @@ private:
     bool connectSocket();
     bool applyConfigurationParameter(int key, const QVariant &value);
     void resetController();
+    bool hasBusStatus() const;
+    QCanBusDevice::CanBusStatus busStatus() const;
 
+    int protocol = CAN_RAW;
     canfd_frame m_frame;
     sockaddr_can m_address;
     msghdr m_msg;

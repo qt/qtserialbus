@@ -42,6 +42,7 @@
 #include <QtSerialBus/qmodbuspdu.h>
 
 #include <private/qmodbusdevice_p.h>
+#include <limits.h>
 
 //
 //  W A R N I N G

@@ -114,6 +114,7 @@
 
     \list
         \li QCanBusDevice::resetController()
+        \li QCanBusDevice::busStatus()
     \endlist
 
 */

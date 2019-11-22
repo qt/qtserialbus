@@ -53,9 +53,9 @@ void CanBusUtil::setShowTimeStamp(bool showTimeStamp)
     m_readTask->setShowTimeStamp(showTimeStamp);
 }
 
-void CanBusUtil::setShowFdFlags(bool showFdFlags)
+void CanBusUtil::setShowFlags(bool showFlags)
 {
-    m_readTask->setShowFdFlags(showFdFlags);
+    m_readTask->setShowFlags(showFlags);
 }
 
 void CanBusUtil::setConfigurationParameter(QCanBusDevice::ConfigurationKey key,
@@ -80,7 +80,7 @@ bool CanBusUtil::start(const QString &pluginName, const QString &deviceName, con
         return false;
 
     if (m_listening) {
-        if (m_readTask->isShowFdFlags())
+        if (m_readTask->isShowFlags())
              m_canDevice->setConfigurationParameter(QCanBusDevice::CanFdKey, true);
         connect(m_canDevice.data(), &QCanBusDevice::framesReceived,
                 m_readTask, &ReadTask::handleFrames);

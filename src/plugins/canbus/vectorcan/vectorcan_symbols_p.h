@@ -249,9 +249,27 @@ static_assert(sizeof(s_xl_can_msg) == 32, "Invalid size of s_xl_can_msg structur
 #define XL_TRANSCEIVER_EVENT_ERROR      1
 #define XL_TRANSCEIVER_EVENT_CHANGED    2
 
+#define XL_CHIPSTAT_BUSOFF              0x01
+#define XL_CHIPSTAT_ERROR_PASSIVE       0x02
+#define XL_CHIPSTAT_ERROR_WARNING       0x04
+#define XL_CHIPSTAT_ERROR_ACTIVE        0x08
+
+#define XL_CAN_STATE_FLAG_SJA_MODE      0x00000001
+
+// CAN Chip status
+struct s_xl_chip_state {
+    unsigned char busStatus;
+    unsigned char txErrorCounter;
+    unsigned char rxErrorCounter;
+    unsigned char chipState;           // raw Status Register Value
+    unsigned int  flags;
+};
+static_assert(sizeof(s_xl_chip_state) == 8, "Invalid size of s_xl_chip_state structure");
+
 // basic bus message structure
 union s_xl_tag_data {
     struct s_xl_can_msg msg;
+    struct s_xl_chip_state chipState;
 };
 
 // event type definition (48 bytes)
@@ -456,9 +474,10 @@ GENERATE_SYMBOL_VARIABLE(XLstatus, xlCanSetChannelBitrate, XLportHandle, XLacces
 GENERATE_SYMBOL_VARIABLE(XLstatus, xlCanTransmit, XLportHandle, XLaccess, quint32 *, void *)
 GENERATE_SYMBOL_VARIABLE(XLstatus, xlReceive, XLportHandle, quint32 *, XLevent *)
 GENERATE_SYMBOL_VARIABLE(XLstatus, xlSetNotification, XLportHandle, XLhandle *, int)
+GENERATE_SYMBOL_VARIABLE(XLstatus, xlCanRequestChipState, XLportHandle, XLaccess)
 GENERATE_SYMBOL_VARIABLE(char *, xlGetErrorString, XLstatus)
 
-inline bool resolveSymbols(QLibrary *vectorcanLibrary)
+inline bool resolveVectorCanSymbols(QLibrary *vectorcanLibrary)
 {
     if (!vectorcanLibrary->isLoaded()) {
 #ifdef Q_PROCESSOR_X86_64
@@ -481,6 +500,7 @@ inline bool resolveSymbols(QLibrary *vectorcanLibrary)
     RESOLVE_SYMBOL(xlCanTransmit)
     RESOLVE_SYMBOL(xlReceive)
     RESOLVE_SYMBOL(xlSetNotification)
+    RESOLVE_SYMBOL(xlCanRequestChipState)
     RESOLVE_SYMBOL(xlGetErrorString)
 
     return true;
