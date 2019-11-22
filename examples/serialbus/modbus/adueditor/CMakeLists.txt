@@ -29,6 +29,12 @@ find_package(Qt6 COMPONENTS SerialBus)
 find_package(Qt6 COMPONENTS SerialPort)
 find_package(Qt6 COMPONENTS Widgets)
 
+# special case begin
+if (NOT QT_FEATURE_modbus_serialport)
+    return()
+endif()
+# special case end
+
 add_qt_gui_executable(adueditor
     interface.ui
     main.cpp
