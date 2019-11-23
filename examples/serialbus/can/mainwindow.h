@@ -96,7 +96,7 @@ private:
     QLabel *m_status = nullptr;
     QLabel *m_written = nullptr;
     ConnectDialog *m_connectDialog = nullptr;
-    QCanBusDevice *m_canDevice = nullptr;
+    std::unique_ptr<QCanBusDevice> m_canDevice;
     QTimer *m_busStatusTimer = nullptr;
 };
 

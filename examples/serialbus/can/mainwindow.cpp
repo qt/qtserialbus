@@ -79,8 +79,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    delete m_canDevice;
-
     delete m_connectDialog;
     delete m_ui;
 }
@@ -91,7 +89,10 @@ void MainWindow::initActionsConnections()
     m_ui->sendFrameBox->setEnabled(false);
 
     connect(m_ui->sendFrameBox, &SendFrameBox::sendFrame, this, &MainWindow::sendFrame);
-    connect(m_ui->actionConnect, &QAction::triggered, m_connectDialog, &ConnectDialog::show);
+    connect(m_ui->actionConnect, &QAction::triggered, [this]() {
+        m_canDevice.release()->deleteLater();
+        m_connectDialog->show();
+    });
     connect(m_connectDialog, &QDialog::accepted, this, &MainWindow::connectDevice);
     connect(m_ui->actionDisconnect, &QAction::triggered, this, &MainWindow::disconnectDevice);
     connect(m_ui->actionResetController, &QAction::triggered, this, [this]() {
@@ -125,8 +126,8 @@ void MainWindow::connectDevice()
     const ConnectDialog::Settings p = m_connectDialog->settings();
 
     QString errorString;
-    m_canDevice = QCanBus::instance()->createDevice(p.pluginName, p.deviceInterfaceName,
-                                                    &errorString);
+    m_canDevice.reset(QCanBus::instance()->createDevice(p.pluginName, p.deviceInterfaceName,
+                                                        &errorString));
     if (!m_canDevice) {
         m_status->setText(tr("Error creating device '%1', reason: '%2'")
                           .arg(p.pluginName).arg(errorString));
@@ -135,9 +136,12 @@ void MainWindow::connectDevice()
 
     m_numberFramesWritten = 0;
 
-    connect(m_canDevice, &QCanBusDevice::errorOccurred, this, &MainWindow::processErrors);
-    connect(m_canDevice, &QCanBusDevice::framesReceived, this, &MainWindow::processReceivedFrames);
-    connect(m_canDevice, &QCanBusDevice::framesWritten, this, &MainWindow::processFramesWritten);
+    connect(m_canDevice.get(), &QCanBusDevice::errorOccurred,
+            this, &MainWindow::processErrors);
+    connect(m_canDevice.get(), &QCanBusDevice::framesReceived,
+            this, &MainWindow::processReceivedFrames);
+    connect(m_canDevice.get(), &QCanBusDevice::framesWritten,
+            this, &MainWindow::processFramesWritten);
 
     if (p.useConfigurationEnabled) {
         for (const ConnectDialog::ConfigurationItem &item : p.configurations)
@@ -147,8 +151,7 @@ void MainWindow::connectDevice()
     if (!m_canDevice->connectDevice()) {
         m_status->setText(tr("Connection error: %1").arg(m_canDevice->errorString()));
 
-        delete m_canDevice;
-        m_canDevice = nullptr;
+        m_canDevice.reset();
     } else {
         m_ui->actionConnect->setEnabled(false);
         m_ui->actionDisconnect->setEnabled(true);
@@ -210,8 +213,6 @@ void MainWindow::disconnectDevice()
     m_busStatusTimer->stop();
 
     m_canDevice->disconnectDevice();
-    delete m_canDevice;
-    m_canDevice = nullptr;
 
     m_ui->actionConnect->setEnabled(true);
     m_ui->actionDisconnect->setEnabled(false);
