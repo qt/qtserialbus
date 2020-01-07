@@ -1,4 +1,4 @@
-﻿/****************************************************************************
+/****************************************************************************
 **
 ** Copyright (C) 2017 Denis Shienkov <denis.shienkov@gmail.com>
 ** Copyright (C) 2017 The Qt Company Ltd.
@@ -151,11 +151,11 @@ QList<QCanBusDeviceInfo> PeakCanBackend::interfaces()
 }
 
 #if defined(Q_OS_WIN32)
-class ReadNotifier : public QWinEventNotifier
+class PeakCanReadNotifier : public QWinEventNotifier
 {
     // no Q_OBJECT macro!
 public:
-    explicit ReadNotifier(PeakCanBackendPrivate *d, QObject *parent)
+    explicit PeakCanReadNotifier(PeakCanBackendPrivate *d, QObject *parent)
         : QWinEventNotifier(parent)
         , dptr(d)
     {
@@ -176,11 +176,11 @@ private:
     PeakCanBackendPrivate * const dptr;
 };
 #else
-class ReadNotifier : public QSocketNotifier
+class PeakCanReadNotifier : public QSocketNotifier
 {
     // no Q_OBJECT macro!
 public:
-    explicit ReadNotifier(PeakCanBackendPrivate *d, QObject *parent)
+    explicit PeakCanReadNotifier(PeakCanBackendPrivate *d, QObject *parent)
         : QSocketNotifier(d->readHandle, QSocketNotifier::Read, parent)
         , dptr(d)
     {
@@ -201,11 +201,11 @@ private:
 };
 #endif
 
-class WriteNotifier : public QTimer
+class PeakCanWriteNotifier : public QTimer
 {
     // no Q_OBJECT macro!
 public:
-    WriteNotifier(PeakCanBackendPrivate *d, QObject *parent)
+    PeakCanWriteNotifier(PeakCanBackendPrivate *d, QObject *parent)
         : QTimer(parent)
         , dptr(d)
     {
@@ -358,10 +358,10 @@ bool PeakCanBackendPrivate::open()
     }
 #endif
 
-    writeNotifier = new WriteNotifier(this, q);
+    writeNotifier = new PeakCanWriteNotifier(this, q);
     writeNotifier->setInterval(0);
 
-    readNotifier = new ReadNotifier(this, q);
+    readNotifier = new PeakCanReadNotifier(this, q);
     readNotifier->setEnabled(true);
 
     isOpen = true;
