@@ -51,7 +51,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QCanBusDevice> // for CanBusError
+#include <QCanBusDevice>
 
 #include <QMainWindow>
 
