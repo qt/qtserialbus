@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>446</width>
-    <height>395</height>
+    <height>418</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -200,6 +200,13 @@
       </item>
       <item>
        <widget class="QLabel" name="serialNumberLabel">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="aliasLabel">
         <property name="text">
          <string/>
         </property>

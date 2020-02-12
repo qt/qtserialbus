@@ -168,7 +168,7 @@
 #define PCAN_PCC                 0x06U  // PCAN-PC Card
 
 // PCAN parameters
-#define PCAN_DEVICE_NUMBER       0x01U  // PCAN-USB device number parameter
+#define PCAN_DEVICE_ID           0x01U  // Device identifier parameter
 #define PCAN_5VOLTS_POWER        0x02U  // PCAN-PC Card 5-Volt power parameter
 #define PCAN_RECEIVE_EVENT       0x03U  // PCAN receive event handler parameter
 #define PCAN_MESSAGE_FILTER      0x04U  // PCAN message filter parameter

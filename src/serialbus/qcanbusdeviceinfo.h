@@ -67,6 +67,7 @@ public:
     QString name() const;
     QString description() const;
     QString serialNumber() const;
+    QString alias() const;
     int channel() const;
 
     bool hasFlexibleDataRate() const;

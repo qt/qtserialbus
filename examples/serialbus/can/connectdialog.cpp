@@ -120,6 +120,10 @@ void ConnectDialog::interfaceChanged(const QString &interface)
             if (serialNumber.isEmpty())
                 serialNumber = tr("n/a");
             m_ui->serialNumberLabel->setText(tr("Serial: %1").arg(serialNumber));
+            QString alias = info.alias();
+            if (alias.isEmpty())
+                alias = tr("n/a");
+            m_ui->aliasLabel->setText(tr("Alias: %1").arg(alias));
             m_ui->channelLabel->setText(tr("Channel: %1").arg(info.channel()));
             m_ui->isVirtual->setChecked(info.isVirtual());
             m_ui->isFlexibleDataRateCapable->setChecked(info.hasFlexibleDataRate());

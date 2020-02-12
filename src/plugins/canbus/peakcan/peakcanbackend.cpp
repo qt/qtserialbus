@@ -143,9 +143,16 @@ QList<QCanBusDeviceInfo> PeakCanBackend::interfaces()
             if (chnStat != PCAN_ERROR_OK)
                 channel = 0;
 
+            QString alias;
+            quint32 deviceId = 0;
+            const TPCANStatus idStat = ::CAN_GetValue(index, PCAN_DEVICE_ID,
+                                                      &deviceId, sizeof(deviceId));
+            if (idStat == PCAN_ERROR_OK)
+                alias = QString::number(deviceId);
+
             result.append(std::move(createDeviceInfo(QLatin1String(pcanChannels[i].name),
                                                      QString(), QLatin1String(description),
-                                                     channel, false, isFd)));
+                                                     alias, channel, false, isFd)));
         }
     }
 

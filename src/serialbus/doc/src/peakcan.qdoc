@@ -38,6 +38,9 @@
     On macOS the plugin requires the PCBUSB library from
     \l{http://www.mac-can.com}{UV Software}.
 
+    \note QCanBusDeviceInfo::alias() is only supported on Windows and with
+        PCAN-Basic 4.4.0 or higher.
+
     \section1 Creating CAN Bus Devices
 
     At first it is necessary to check that QCanBus provides the desired plugin:
@@ -126,6 +129,11 @@
     \list
         \li QCanBusDevice::resetController()
         \li QCanBusDevice::busStatus()
+        \li QCanBusDeviceInfo::alias() (Windows and PCAN-Basic >= 4.4.0 only):
+            Returns the PCAN_DEVICE_ID which can be set to a user defined value
+            from 0..255 resp. 0..4294967295 (depending on the device) with PCAN-View.
+            The default value is 255 resp. 4294967295.
+
     \endlist
 
 */

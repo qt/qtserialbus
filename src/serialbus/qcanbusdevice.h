@@ -191,6 +191,10 @@ protected:
     static QCanBusDeviceInfo createDeviceInfo(const QString &name, const QString &serialNumber,
                                               const QString &description, int channel,
                                               bool isVirtual, bool isFlexibleDataRateCapable);
+    static QCanBusDeviceInfo createDeviceInfo(const QString &name, const QString &serialNumber,
+                                              const QString &description,
+                                              const QString &alias, int channel,
+                                              bool isVirtual, bool isFlexibleDataRateCapable);
 };
 
 Q_DECLARE_TYPEINFO(QCanBusDevice::CanBusError, Q_PRIMITIVE_TYPE);
