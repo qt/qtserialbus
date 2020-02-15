@@ -170,18 +170,36 @@ bool VectorCanBackendPrivate::open()
     Q_Q(VectorCanBackend);
 
     {
+        XLdriverConfig config;
+        if (Q_UNLIKELY(::xlGetDriverConfig(&config) != XL_SUCCESS)) {
+            q->setError(VectorCanBackend::tr("Unable to get driver configuration"),
+                        QCanBusDevice::CanBusError::ConnectionError);
+            return false;
+        }
+        channelMask = config.channel[channelIndex].channelMask;
         XLaccess permissionMask = channelMask;
-        const quint32 queueSize = 256;
+        const quint32 queueSize = usesCanFd ? 8192 : 256;
         const XLstatus status = ::xlOpenPort(&portHandle,
                                              const_cast<char *>(qPrintable(qApp->applicationName())),
                                              channelMask, &permissionMask, queueSize,
-                                             XL_INTERFACE_VERSION, XL_BUS_TYPE_CAN);
+                                             usesCanFd ? XL_INTERFACE_VERSION_V4 : XL_INTERFACE_VERSION, XL_BUS_TYPE_CAN);
 
         if (Q_UNLIKELY(status != XL_SUCCESS || portHandle == XL_INVALID_PORTHANDLE)) {
             q->setError(systemErrorString(status), QCanBusDevice::ConnectionError);
             portHandle = XL_INVALID_PORTHANDLE;
             return false;
         }
+    }
+    if (usesCanFd && arbBitRate != 0) {
+        XLcanFdConf xlfdconf;
+        ::memset(&xlfdconf, 0, sizeof(xlfdconf));
+        xlfdconf.dataBitRate = (dataBitRate != 0) ? dataBitRate : arbBitRate;
+        xlfdconf.arbitrationBitRate = arbBitRate;
+
+        const XLstatus status = ::xlCanFdSetConfiguration(portHandle, channelMask, &xlfdconf);
+        if (Q_UNLIKELY(status != XL_SUCCESS))
+            qCWarning(QT_CANBUS_PLUGINS_VECTORCAN,
+                      "Unable to change the configuration for an open channel");
     }
 
     {
@@ -252,6 +270,25 @@ bool VectorCanBackendPrivate::setConfigurationParameter(int key, const QVariant 
     case QCanBusDevice::ReceiveOwnKey:
         transmitEcho = value.toBool();
         return true;
+    case QCanBusDevice::DataBitRateKey:
+        return setDataBitRate(value.toUInt());
+    case QCanBusDevice::CanFdKey:
+    {
+        if (value.toBool()) {
+            XLdriverConfig config;
+            if (Q_UNLIKELY(::xlGetDriverConfig(&config) == XL_SUCCESS)) {
+                if (config.channel[channelIndex].channelCapabilities & XL_CHANNEL_FLAG_CANFD_SUPPORT) {
+                    usesCanFd = true;
+                    return true;
+                }
+            }
+            q->setError(VectorCanBackend::tr("Unable to set CAN FD"),
+                        QCanBusDevice::CanBusError::ConfigurationError);
+            return false;
+        }
+        usesCanFd = false;
+        return true;
+    }
     default:
         q->setError(VectorCanBackend::tr("Unsupported configuration key"),
                     QCanBusDevice::ConfigurationError);
@@ -261,13 +298,18 @@ bool VectorCanBackendPrivate::setConfigurationParameter(int key, const QVariant 
 
 void VectorCanBackendPrivate::setupChannel(const QString &interfaceName)
 {
+    Q_Q(VectorCanBackend);
     if (Q_LIKELY(interfaceName.startsWith(QStringLiteral("can")))) {
         const QStringRef ref = interfaceName.midRef(3);
         bool ok = false;
-        const int channelIndex = ref.toInt(&ok);
+        channelIndex = ref.toInt(&ok);
         if (ok && (channelIndex >= 0 && channelIndex < XL_CONFIG_MAX_CHANNELS)) {
-            channelMask = XL_CHANNEL_MASK((channelIndex));
+            channelMask = xlGetChannelMask(-1, channelIndex, 0);
             return;
+        } else {
+            channelIndex = -1;
+            q->setError(VectorCanBackend::tr("Unable to setup channel with interface name %1")
+                            .arg(interfaceName), QCanBusDevice::CanBusError::ConfigurationError);
         }
     }
 
@@ -302,29 +344,49 @@ void VectorCanBackendPrivate::startWrite()
     const QCanBusFrame frame = q->dequeueOutgoingFrame();
     const QByteArray payload = frame.payload();
 
-    XLevent event;
-    ::memset(&event, 0, sizeof(event));
-
-    event.tag = XL_TRANSMIT_MSG;
-
-    s_xl_can_msg &msg = event.tagData.msg;
-
-    msg.id = frame.frameId();
-    if (frame.hasExtendedFrameFormat())
-        msg.id |= XL_CAN_EXT_MSG_ID;
-
-    msg.dlc = payload.size();
-
-    if (frame.frameType() == QCanBusFrame::RemoteRequestFrame)
-        msg.flags |= XL_CAN_MSG_FLAG_REMOTE_FRAME; // we do not care about the payload
-    else if (frame.frameType() == QCanBusFrame::ErrorFrame)
-        msg.flags |= XL_CAN_MSG_FLAG_ERROR_FRAME; // we do not care about the payload
-    else
-        ::memcpy(msg.data, payload.constData(), sizeof(msg.data));
-
     quint32 eventCount = 1;
-    const XLstatus status = ::xlCanTransmit(portHandle, channelMask,
-                                            &eventCount, &event);
+    XLstatus status = XL_ERROR;
+    if (usesCanFd) {
+        XLcanTxEvent event;
+        ::memset(&event, 0, sizeof(event));
+
+        event.tag = XL_CAN_EV_TAG_TX_MSG;
+        XL_CAN_TX_MSG &msg = event.tagData.canMsg;
+
+        msg.id = frame.frameId();
+        if (frame.hasExtendedFrameFormat())
+            msg.id |= XL_CAN_EXT_MSG_ID;
+
+        msg.dlc = payload.size();
+        if (frame.hasFlexibleDataRateFormat())
+            msg.flags = XL_CAN_TXMSG_FLAG_EDL;
+        if (frame.frameType() == QCanBusFrame::RemoteRequestFrame)
+            msg.flags |= XL_CAN_TXMSG_FLAG_RTR; // we do not care about the payload
+        else
+            ::memcpy(msg.data, payload.constData(), sizeof(msg.data));
+
+        status = ::xlCanTransmitEx(portHandle, channelMask, eventCount, &eventCount, &event);
+    } else {
+        XLevent event;
+        ::memset(&event, 0, sizeof(event));
+        event.tag = XL_TRANSMIT_MSG;
+        s_xl_can_msg &msg = event.tagData.msg;
+
+        msg.id = frame.frameId();
+        if (frame.hasExtendedFrameFormat())
+            msg.id |= XL_CAN_EXT_MSG_ID;
+
+        msg.dlc = payload.size();
+
+        if (frame.frameType() == QCanBusFrame::RemoteRequestFrame)
+            msg.flags |= XL_CAN_MSG_FLAG_REMOTE_FRAME; // we do not care about the payload
+        else if (frame.frameType() == QCanBusFrame::ErrorFrame)
+            msg.flags |= XL_CAN_MSG_FLAG_ERROR_FRAME; // we do not care about the payload
+        else
+            ::memcpy(msg.data, payload.constData(), sizeof(msg.data));
+
+        status = ::xlCanTransmit(portHandle, channelMask, &eventCount, &event);
+    }
     if (Q_UNLIKELY(status != XL_SUCCESS)) {
         q->setError(systemErrorString(status),
                     QCanBusDevice::WriteError);
@@ -344,38 +406,66 @@ void VectorCanBackendPrivate::startRead()
 
     for (;;) {
         quint32 eventCount = 1;
-        XLevent event;
-        ::memset(&event, 0, sizeof(event));
+        if (usesCanFd) {
+            XLcanRxEvent event;
+            ::memset(&event, 0, sizeof(event));
 
-        const XLstatus status = ::xlReceive(portHandle, &eventCount, &event);
-        if (Q_UNLIKELY(status != XL_SUCCESS)) {
-            if (status != XL_ERR_QUEUE_IS_EMPTY) {
-                q->setError(systemErrorString(status),
-                            QCanBusDevice::ReadError);
+            const XLstatus status = ::xlCanReceive(portHandle, &event);
+            if (Q_UNLIKELY(status != XL_SUCCESS)) {
+                if (status != XL_ERR_QUEUE_IS_EMPTY) {
+                    q->setError(systemErrorString(status), QCanBusDevice::ReadError);
+                }
+                break;
             }
-            break;
+            if (event.tag != XL_CAN_EV_TAG_RX_OK)
+                continue;
+
+            const XL_CAN_EV_RX_MSG &msg = event.tagData.canRxOkMsg;
+
+            QCanBusFrame frame(msg.id & ~XL_CAN_EXT_MSG_ID,
+                QByteArray(reinterpret_cast<const char *>(msg.data), int(msg.dlc)));
+            frame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(event.timeStamp / 1000));
+            frame.setExtendedFrameFormat(msg.id & XL_CAN_RXMSG_FLAG_EDL);
+            frame.setFrameType((msg.flags & XL_CAN_RXMSG_FLAG_RTR)
+                                ? QCanBusFrame::RemoteRequestFrame
+                                : (msg.flags & XL_CAN_RXMSG_FLAG_EF)
+                                    ? QCanBusFrame::ErrorFrame
+                                    : QCanBusFrame::DataFrame);
+
+            newFrames.append(std::move(frame));
+        } else {
+            XLevent event;
+            ::memset(&event, 0, sizeof(event));
+
+            const XLstatus status = ::xlReceive(portHandle, &eventCount, &event);
+            if (Q_UNLIKELY(status != XL_SUCCESS)) {
+                if (status != XL_ERR_QUEUE_IS_EMPTY) {
+                    q->setError(systemErrorString(status),
+                        QCanBusDevice::ReadError);
+                }
+                break;
+            }
+            if (event.tag != XL_RECEIVE_MSG)
+                continue;
+
+            const s_xl_can_msg &msg = event.tagData.msg;
+
+            if ((msg.flags & XL_CAN_MSG_FLAG_TX_COMPLETED) && !transmitEcho)
+                continue;
+
+            QCanBusFrame frame(msg.id & ~XL_CAN_EXT_MSG_ID,
+                QByteArray(reinterpret_cast<const char *>(msg.data), int(msg.dlc)));
+            frame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(event.timeStamp / 1000));
+            frame.setExtendedFrameFormat(msg.id & XL_CAN_EXT_MSG_ID);
+            frame.setLocalEcho(msg.flags & XL_CAN_MSG_FLAG_TX_COMPLETED);
+            frame.setFrameType((msg.flags & XL_CAN_MSG_FLAG_REMOTE_FRAME)
+                                ? QCanBusFrame::RemoteRequestFrame
+                                : (msg.flags & XL_CAN_MSG_FLAG_ERROR_FRAME)
+                                   ? QCanBusFrame::ErrorFrame
+                                   : QCanBusFrame::DataFrame);
+
+            newFrames.append(std::move(frame));
         }
-
-        if (event.tag != XL_RECEIVE_MSG)
-            continue;
-
-        const s_xl_can_msg &msg = event.tagData.msg;
-
-        if ((msg.flags & XL_CAN_MSG_FLAG_TX_COMPLETED) && !transmitEcho)
-            continue;
-
-        QCanBusFrame frame(msg.id & ~XL_CAN_EXT_MSG_ID,
-                           QByteArray(reinterpret_cast<const char *>(msg.data), int(msg.dlc)));
-        frame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(event.timeStamp / 1000));
-        frame.setExtendedFrameFormat(msg.id & XL_CAN_EXT_MSG_ID);
-        frame.setLocalEcho(msg.flags & XL_CAN_MSG_FLAG_TX_COMPLETED);
-        frame.setFrameType((msg.flags & XL_CAN_MSG_FLAG_REMOTE_FRAME)
-                           ? QCanBusFrame::RemoteRequestFrame
-                           : (msg.flags & XL_CAN_MSG_FLAG_ERROR_FRAME)
-                             ? QCanBusFrame::ErrorFrame
-                             : QCanBusFrame::DataFrame);
-
-        newFrames.append(std::move(frame));
     }
 
     q->enqueueReceivedFrames(newFrames);
@@ -425,16 +515,37 @@ void VectorCanBackendPrivate::cleanupDriver()
 bool VectorCanBackendPrivate::setBitRate(quint32 bitrate)
 {
     Q_Q(VectorCanBackend);
-
-    if (q->state() != QCanBusDevice::UnconnectedState) {
+    if (!usesCanFd && q->state() != QCanBusDevice::UnconnectedState) {
         const XLstatus status = ::xlCanSetChannelBitrate(portHandle, channelMask, bitrate);
+        arbBitRate = bitrate;
         if (Q_UNLIKELY(status != XL_SUCCESS)) {
             q->setError(systemErrorString(status),
                         QCanBusDevice::CanBusError::ConfigurationError);
             return false;
         }
+    } else if (arbBitRate != bitrate) {
+        arbBitRate = bitrate;
     }
 
+    return true;
+}
+
+bool VectorCanBackendPrivate::setDataBitRate(quint32 bitrate)
+{
+    if (!usesCanFd) {
+        qCWarning(QT_CANBUS_PLUGINS_VECTORCAN,
+                  "Cannot set data bit rate in CAN 2.0 mode, this is only available with CAN FD");
+        return false;
+    }
+    if (dataBitRate != bitrate) {
+        if (bitrate >= 25000) { // Minimum
+            dataBitRate = bitrate;
+        } else {
+            qCWarning(QT_CANBUS_PLUGINS_VECTORCAN,
+                      "Cannot set data bit rate to less than 25000 which is the minimum");
+            return false;
+        }
+    }
     return true;
 }
 
@@ -520,9 +631,8 @@ bool VectorCanBackend::writeFrame(const QCanBusFrame &newData)
         return false;
     }
 
-    // CAN FD frame format not implemented at this stage
-    if (Q_UNLIKELY(newData.hasFlexibleDataRateFormat())) {
-        setError(tr("CAN FD frame format not supported."),
+    if (!d->usesCanFd && newData.hasFlexibleDataRateFormat()) {
+        setError(tr("Unable to write a flexible data rate format frame without CAN FD enabled."),
                  QCanBusDevice::WriteError);
         return false;
     }
@@ -556,34 +666,53 @@ QCanBusDevice::CanBusStatus VectorCanBackend::busStatus()
         return QCanBusDevice::CanBusStatus::Unknown;
     }
 
-    quint32 eventCount = 1;
-    XLevent event;
-    ::memset(&event, 0, sizeof(event));
+    quint8 busStatus = 0;
+    if (d->usesCanFd) {
+        XLcanRxEvent event;
+        ::memset(&event, 0, sizeof(event));
 
-    const XLstatus receiveStatus = ::xlReceive(d->portHandle, &eventCount, &event);
-    if (Q_UNLIKELY(receiveStatus != XL_SUCCESS)) {
-        const QString errorString = d->systemErrorString(receiveStatus);
-        qCWarning(QT_CANBUS_PLUGINS_VECTORCAN, "Can not query CAN bus status: %ls.",
-                  qUtf16Printable(errorString));
-        setError(errorString, QCanBusDevice::CanBusError::ReadError);
-        return QCanBusDevice::CanBusStatus::Unknown;
-    }
-
-    if (Q_LIKELY(event.tag == XL_CHIP_STATE)) {
-        switch (event.tagData.chipState.busStatus) {
-        case XL_CHIPSTAT_BUSOFF:
-            return QCanBusDevice::CanBusStatus::BusOff;
-        case XL_CHIPSTAT_ERROR_PASSIVE:
-            return QCanBusDevice::CanBusStatus::Error;
-        case XL_CHIPSTAT_ERROR_WARNING:
-            return QCanBusDevice::CanBusStatus::Warning;
-        case XL_CHIPSTAT_ERROR_ACTIVE:
-            return QCanBusDevice::CanBusStatus::Good;
+        const XLstatus receiveStatus = ::xlCanReceive(d->portHandle, &event);
+        if (Q_UNLIKELY(receiveStatus != XL_SUCCESS)) {
+            const QString errorString = d->systemErrorString(receiveStatus);
+            qCWarning(QT_CANBUS_PLUGINS_VECTORCAN, "Can not query CAN bus status: %ls.",
+                qUtf16Printable(errorString));
+            setError(errorString, QCanBusDevice::CanBusError::ReadError);
+            return QCanBusDevice::CanBusStatus::Unknown;
         }
+
+        if (Q_LIKELY(event.tag == XL_CAN_EV_TAG_CHIP_STATE))
+            busStatus = event.tagData.canChipState.busStatus;
+
+    } else {
+        quint32 eventCount = 1;
+        XLevent event;
+        ::memset(&event, 0, sizeof(event));
+
+        const XLstatus receiveStatus = ::xlReceive(d->portHandle, &eventCount, &event);
+        if (Q_UNLIKELY(receiveStatus != XL_SUCCESS)) {
+            const QString errorString = d->systemErrorString(receiveStatus);
+            qCWarning(QT_CANBUS_PLUGINS_VECTORCAN, "Can not query CAN bus status: %ls.",
+                qUtf16Printable(errorString));
+            setError(errorString, QCanBusDevice::CanBusError::ReadError);
+            return QCanBusDevice::CanBusStatus::Unknown;
+        }
+
+        if (Q_LIKELY(event.tag == XL_CHIP_STATE))
+            busStatus = event.tagData.chipState.busStatus;
     }
 
-    qCWarning(QT_CANBUS_PLUGINS_VECTORCAN, "Unknown CAN bus status: %u",
-              uint(event.tagData.chipState.busStatus));
+    switch (busStatus) {
+    case XL_CHIPSTAT_BUSOFF:
+        return QCanBusDevice::CanBusStatus::BusOff;
+    case XL_CHIPSTAT_ERROR_PASSIVE:
+        return QCanBusDevice::CanBusStatus::Error;
+    case XL_CHIPSTAT_ERROR_WARNING:
+        return QCanBusDevice::CanBusStatus::Warning;
+    case XL_CHIPSTAT_ERROR_ACTIVE:
+        return QCanBusDevice::CanBusStatus::Good;
+    }
+
+    qCWarning(QT_CANBUS_PLUGINS_VECTORCAN, "Unknown CAN bus status: %u", busStatus);
     return QCanBusDevice::CanBusStatus::Unknown;
 }
 

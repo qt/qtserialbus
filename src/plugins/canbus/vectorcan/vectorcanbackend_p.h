@@ -81,6 +81,7 @@ public:
     void startupDriver();
     static void cleanupDriver();
     bool setBitRate(quint32 bitrate);
+    bool setDataBitRate(quint32 bitrate);
 
     VectorCanBackend * const q_ptr;
 
@@ -90,6 +91,10 @@ public:
     HANDLE readHandle = INVALID_HANDLE_VALUE;
     QTimer *writeNotifier = nullptr;
     QWinEventNotifier *readNotifier = nullptr;
+    quint32 dataBitRate = 0;
+    quint32 arbBitRate = 0;
+    int channelIndex = -1;
+    bool usesCanFd = false;
 };
 
 QT_END_NAMESPACE
