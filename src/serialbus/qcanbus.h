@@ -20,6 +20,7 @@ public:
     QStringList plugins() const;
 
     QList<QCanBusDeviceInfo> availableDevices(const QString &plugin, QString *errorMessage = nullptr) const;
+    QList<QCanBusDeviceInfo> availableDevices(QString *errorMessage = nullptr) const;
 
     QCanBusDevice *createDevice(const QString &plugin,
                                 const QString &interfaceName,

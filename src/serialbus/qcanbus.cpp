@@ -148,6 +148,28 @@ QList<QCanBusDeviceInfo> QCanBus::availableDevices(const QString &plugin, QStrin
 }
 
 /*!
+    \since 6.8
+    Returns the available devices for all plugins, i.e. all available CAN interfaces.
+
+    In case of failure, the optional parameter \a errorMessage returns a textual
+    error description.
+
+    \note Some plugins might not or only partially support this function.
+
+    \sa createDevice()
+*/
+QList<QCanBusDeviceInfo> QCanBus::availableDevices(QString *errorMessage) const
+{
+    const QStringList allPlugins = plugins();
+    QList<QCanBusDeviceInfo> result;
+
+    for (const QString &plugin : allPlugins)
+        result.append(availableDevices(plugin, errorMessage));
+
+    return result;
+}
+
+/*!
     Creates a CAN bus device. \a plugin is the name of the plugin as returned by the \l plugins()
     method. \a interfaceName is the CAN bus interface name. In case of failure, the optional
     parameter \a errorMessage returns a textual error description.
