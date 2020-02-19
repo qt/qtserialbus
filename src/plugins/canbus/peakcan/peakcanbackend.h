@@ -69,6 +69,8 @@ public:
     QString interpretErrorFrame(const QCanBusFrame &errorFrame) override;
 
     static bool canCreate(QString *errorReason);
+    static QList<QCanBusDeviceInfo> interfacesByChannelCondition();
+    static QList<QCanBusDeviceInfo> interfacesByAttachedChannels(bool *ok);
     static QList<QCanBusDeviceInfo> interfaces();
 
 private:

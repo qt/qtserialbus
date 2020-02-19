@@ -1,6 +1,7 @@
 /****************************************************************************
 **
 ** Copyright (C) 2017 Denis Shienkov <denis.shienkov@gmail.com>
+** Copyright (c) 2020 Andre Hartmann <aha_1980@gmx.de>
 ** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
@@ -44,8 +45,10 @@
 #include <QtCore/qtimer.h>
 #include <QtCore/qcoreevent.h>
 #include <QtCore/qloggingcategory.h>
+#include <QtCore/qscopeguard.h>
 
 #include <algorithm>
+#include <vector>
 
 #ifdef Q_OS_WIN32
 #   include <QtCore/qwineventnotifier.h>
@@ -126,7 +129,7 @@ static const PcanChannel pcanChannels[] = {
     { "none",  PCAN_NONEBUS  }
 };
 
-QList<QCanBusDeviceInfo> PeakCanBackend::interfaces()
+QList<QCanBusDeviceInfo> PeakCanBackend::interfacesByChannelCondition()
 {
     QList<QCanBusDeviceInfo> result;
 
@@ -165,6 +168,65 @@ QList<QCanBusDeviceInfo> PeakCanBackend::interfaces()
         }
     }
 
+    return result;
+}
+
+QList<QCanBusDeviceInfo> PeakCanBackend::interfacesByAttachedChannels(bool *ok)
+{
+    *ok = true;
+    quint32 count = 0;
+    const TPCANStatus countStat = ::CAN_GetValue(0, PCAN_ATTACHED_CHANNELS_COUNT,
+                                                 &count, sizeof(count));
+    if (Q_UNLIKELY(countStat != PCAN_ERROR_OK)) {
+        qCWarning(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot query PCAN_ATTACHED_CHANNELS_COUNT.");
+        *ok = false;
+        return {};
+    }
+    if (count == 0)
+        return {};
+
+    std::vector<TPCANChannelInformation> infos(count);
+    const TPCANStatus infosStat = ::CAN_GetValue(0, PCAN_ATTACHED_CHANNELS, infos.data(),
+                                                 infos.size() * sizeof(TPCANChannelInformation));
+    if (Q_UNLIKELY(infosStat != PCAN_ERROR_OK)) {
+        qCWarning(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot query PCAN_ATTACHED_CHANNELS.");
+        *ok = false;
+        return {};
+    }
+
+    QList<QCanBusDeviceInfo> result;
+    for (quint32 i = 0; i < count; ++i) {
+        auto info = infos[i];
+        if (info.channel_condition & PCAN_CHANNEL_AVAILABLE) {
+            const quint32 deviceId = info.channel_handle;
+            const auto pcanChannel = std::find_if(std::begin(pcanChannels), std::end(pcanChannels),
+                                                  [deviceId](PcanChannel channel) {
+                return channel.index == deviceId;
+            });
+            const QString name = pcanChannel->name;
+            const QString description = info.device_name;
+            const QString alias = QString::number(info.device_id);
+            const int channel = info.controller_number;
+            const bool isCanFd = (info.device_features & FEATURE_FD_CAPABLE);
+
+            result.append(std::move(createDeviceInfo(name, QString(), description, alias,
+                                                     channel, false, isCanFd)));
+        }
+    }
+
+    return result;
+}
+
+QList<QCanBusDeviceInfo> PeakCanBackend::interfaces()
+{
+#ifdef Q_OS_WIN
+    bool ok = false;
+    const QList<QCanBusDeviceInfo> attachedChannelsResult = interfacesByAttachedChannels(&ok);
+    if (ok)
+        return attachedChannelsResult;
+#endif
+
+    const QList<QCanBusDeviceInfo> result = interfacesByChannelCondition();
     return result;
 }
 

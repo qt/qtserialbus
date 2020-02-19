@@ -1,6 +1,7 @@
 /****************************************************************************
 **
 ** Copyright (C) 2017 Denis Shienkov <denis.shienkov@gmail.com>
+** Copyright (c) 2020 Andre Hartmann <aha_1980@gmx.de>
 ** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
@@ -197,6 +198,8 @@
 #define PCAN_BUSSPEED_DATA       0x1BU  // Configured CAN data speed as Bits per seconds
 #define PCAN_IP_ADDRESS          0x1CU  // Remote address of a LAN channel as string in IPv4 format
 #define PCAN_LAN_SERVICE_STATUS  0x1DU  // Status of the Virtual PCAN-Gateway Service
+#define PCAN_ATTACHED_CHANNELS_COUNT  0x2AU  // Get the amount of PCAN channels attached to a system
+#define PCAN_ATTACHED_CHANNELS        0x2BU  // Get information about PCAN channels attached to a system
 
 #define FEATURE_FD_CAPABLE       0x01U  // Device supports flexible data-rate (CAN-FD)
 
@@ -224,6 +227,10 @@
 #define TRACE_FILE_DATE          0x02U  // Includes the date into the name of the trace file
 #define TRACE_FILE_TIME          0x04U  // Includes the start time into the name of the trace file
 #define TRACE_FILE_OVERWRITE     0x80U  // Causes the overwriting of available traces (same name)
+
+// Other constants
+#define MAX_LENGTH_HARDWARE_NAME      33     // Maximum length of the name of a device: 32 characters + terminator
+#define MAX_LENGTH_VERSION_STRING     18     // Maximum length of a version string: 17 characters + terminator
 
 // PCAN message types
 #define PCAN_MESSAGE_STANDARD    0x00U  // The PCAN message is a CAN Standard Frame (11-bit identifier)
@@ -311,6 +318,18 @@ typedef struct tagTPCANMsgFD
     quint8            DLC;      // Data Length Code of the message (0..15)
     quint8            DATA[64]; // Data of the message (DATA[0]..DATA[63])
 } TPCANMsgFD;
+
+// Describes an available PCAN channel
+typedef struct tagTPCANChannelInformation
+{
+    TPCANHandle channel_handle;                 // PCAN channel handle
+    TPCANDevice device_type;                    // Kind of PCAN device
+    quint8 controller_number;                   // CAN-Controller number
+    quint32 device_features;                    // Device capabilities flag (see FEATURE_*)
+    char device_name[MAX_LENGTH_HARDWARE_NAME]; // Device name
+    quint32 device_id;                          // Device number
+    quint32 channel_condition;                  // Availability status of a PCAN-Channel
+} TPCANChannelInformation;
 
 #define GENERATE_SYMBOL_VARIABLE(returnType, symbolName, ...) \
     typedef returnType (DRV_CALLBACK_TYPE *fp_##symbolName)(__VA_ARGS__); \
