@@ -568,8 +568,7 @@ void PeakCanBackendPrivate::startWrite()
 
     if (isFlexibleDatarateEnabled) {
         const int size = payload.size();
-        TPCANMsgFD message;
-        ::memset(&message, 0, sizeof(message));
+        TPCANMsgFD message = {};
         message.ID = frame.frameId();
         message.DLC = sizeToDlc(size);
         message.MSGTYPE = frame.hasExtendedFrameFormat() ? PCAN_MESSAGE_EXTENDED
@@ -590,9 +589,7 @@ void PeakCanBackendPrivate::startWrite()
         qCWarning(QT_CANBUS_PLUGINS_PEAKCAN(), errorString);
         q->setError(PeakCanBackend::tr(errorString), QCanBusDevice::WriteError);
     } else {
-        TPCANMsg message;
-        ::memset(&message, 0, sizeof(message));
-
+        TPCANMsg message = {};
         message.ID = frame.frameId();
         message.LEN = static_cast<quint8>(payload.size());
         message.MSGTYPE = frame.hasExtendedFrameFormat() ? PCAN_MESSAGE_EXTENDED
@@ -626,10 +623,8 @@ void PeakCanBackendPrivate::startRead()
 
     for (;;) {
         if (isFlexibleDatarateEnabled) {
-            TPCANMsgFD message;
-            ::memset(&message, 0, sizeof(message));
-            TPCANTimestampFD timestamp;
-            ::memset(&timestamp, 0, sizeof(timestamp));
+            TPCANMsgFD message = {};
+            TPCANTimestampFD timestamp = {};
 
             const TPCANStatus st = ::CAN_ReadFD(channelIndex, &message, &timestamp);
             if (st != PCAN_ERROR_OK) {
@@ -656,10 +651,8 @@ void PeakCanBackendPrivate::startRead()
 
             newFrames.append(std::move(frame));
         } else {
-            TPCANMsg message;
-            ::memset(&message, 0, sizeof(message));
-            TPCANTimestamp timestamp;
-            ::memset(&timestamp, 0, sizeof(timestamp));
+            TPCANMsg message = {};
+            TPCANTimestamp timestamp = {};
 
             const TPCANStatus st = ::CAN_Read(channelIndex, &message, &timestamp);
             if (st != PCAN_ERROR_OK) {
