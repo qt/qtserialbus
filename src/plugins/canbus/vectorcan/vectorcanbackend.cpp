@@ -191,8 +191,7 @@ bool VectorCanBackendPrivate::open()
         }
     }
     if (usesCanFd && arbBitRate != 0) {
-        XLcanFdConf xlfdconf;
-        ::memset(&xlfdconf, 0, sizeof(xlfdconf));
+        XLcanFdConf xlfdconf = {};
         xlfdconf.dataBitRate = (dataBitRate != 0) ? dataBitRate : arbBitRate;
         xlfdconf.arbitrationBitRate = arbBitRate;
 
@@ -347,8 +346,7 @@ void VectorCanBackendPrivate::startWrite()
     quint32 eventCount = 1;
     XLstatus status = XL_ERROR;
     if (usesCanFd) {
-        XLcanTxEvent event;
-        ::memset(&event, 0, sizeof(event));
+        XLcanTxEvent event = {};
 
         event.tag = XL_CAN_EV_TAG_TX_MSG;
         XL_CAN_TX_MSG &msg = event.tagData.canMsg;
@@ -367,8 +365,7 @@ void VectorCanBackendPrivate::startWrite()
 
         status = ::xlCanTransmitEx(portHandle, channelMask, eventCount, &eventCount, &event);
     } else {
-        XLevent event;
-        ::memset(&event, 0, sizeof(event));
+        XLevent event = {};
         event.tag = XL_TRANSMIT_MSG;
         s_xl_can_msg &msg = event.tagData.msg;
 
@@ -407,8 +404,7 @@ void VectorCanBackendPrivate::startRead()
     for (;;) {
         quint32 eventCount = 1;
         if (usesCanFd) {
-            XLcanRxEvent event;
-            ::memset(&event, 0, sizeof(event));
+            XLcanRxEvent event = {};
 
             const XLstatus status = ::xlCanReceive(portHandle, &event);
             if (Q_UNLIKELY(status != XL_SUCCESS)) {
@@ -434,8 +430,7 @@ void VectorCanBackendPrivate::startRead()
 
             newFrames.append(std::move(frame));
         } else {
-            XLevent event;
-            ::memset(&event, 0, sizeof(event));
+            XLevent event = {};
 
             const XLstatus status = ::xlReceive(portHandle, &eventCount, &event);
             if (Q_UNLIKELY(status != XL_SUCCESS)) {
@@ -668,8 +663,7 @@ QCanBusDevice::CanBusStatus VectorCanBackend::busStatus()
 
     quint8 busStatus = 0;
     if (d->usesCanFd) {
-        XLcanRxEvent event;
-        ::memset(&event, 0, sizeof(event));
+        XLcanRxEvent event = {};
 
         const XLstatus receiveStatus = ::xlCanReceive(d->portHandle, &event);
         if (Q_UNLIKELY(receiveStatus != XL_SUCCESS)) {
@@ -685,8 +679,7 @@ QCanBusDevice::CanBusStatus VectorCanBackend::busStatus()
 
     } else {
         quint32 eventCount = 1;
-        XLevent event;
-        ::memset(&event, 0, sizeof(event));
+        XLevent event = {};
 
         const XLstatus receiveStatus = ::xlReceive(d->portHandle, &eventCount, &event);
         if (Q_UNLIKELY(receiveStatus != XL_SUCCESS)) {

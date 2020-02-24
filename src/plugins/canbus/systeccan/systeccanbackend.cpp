@@ -202,8 +202,7 @@ bool SystecCanBackendPrivate::open()
     const int bitrate = q->configurationParameter(QCanBusDevice::BitRateKey).toInt();
     const bool receiveOwn = q->configurationParameter(QCanBusDevice::ReceiveOwnKey).toBool();
 
-    tUcanInitCanParam param;
-    ::memset(&param, 0, sizeof(param));
+    tUcanInitCanParam param = {};
     param.m_dwSize = sizeof(param);
     param.m_bMode  = receiveOwn ? kUcanModeTxEcho : kUcanModeNormal;
     param.m_bOCR   = USBCAN_OCR_DEFAULT;
@@ -373,8 +372,7 @@ void SystecCanBackendPrivate::startWrite()
     const QCanBusFrame frame = q->dequeueOutgoingFrame();
     const QByteArray payload = frame.payload();
 
-    tCanMsgStruct message;
-    ::memset(&message, 0, sizeof(message));
+    tCanMsgStruct message = {};
 
     message.m_dwID = frame.frameId();
     message.m_bDLC = quint8(payload.size());
@@ -403,8 +401,7 @@ void SystecCanBackendPrivate::readAllReceivedMessages()
     QVector<QCanBusFrame> newFrames;
 
     for (;;) {
-        tCanMsgStruct message;
-        ::memset(&message, 0, sizeof(message));
+        tCanMsgStruct message = {};
 
         const UCANRET result = ::UcanReadCanMsgEx(handle, &channel, &message, nullptr);
         if (result == USBCAN_WARN_NODATA)
@@ -463,8 +460,7 @@ QCanBusDevice::CanBusStatus SystecCanBackendPrivate::busStatus()
 {
     Q_Q(SystecCanBackend);
 
-    tStatusStruct status;
-    ::memset(&status, 0, sizeof(status));
+    tStatusStruct status = {};
     const UCANRET result = ::UcanGetStatus(handle, &status);
 
     if (Q_UNLIKELY(result != USBCAN_SUCCESSFUL)) {

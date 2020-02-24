@@ -352,8 +352,7 @@ void TinyCanBackendPrivate::startWrite()
     const QCanBusFrame frame = q->dequeueOutgoingFrame();
     const QByteArray payload = frame.payload();
 
-    TCanMsg message;
-    ::memset(&message, 0, sizeof(message));
+    TCanMsg message = {};
 
     if (Q_UNLIKELY(payload.size() > int(sizeof(message.Data.Bytes)))) {
         qCWarning(QT_CANBUS_PLUGINS_TINYCAN, "Cannot write frame with payload size %d.", payload.size());
@@ -389,16 +388,14 @@ void TinyCanBackendPrivate::startRead()
         if (!::CanReceiveGetCount(channelIndex))
             break;
 
-        TCanMsg message;
-        ::memset(&message, 0, sizeof(message));
+        TCanMsg message = {};
 
         const int messagesToRead = 1;
         const int ret = ::CanReceive(channelIndex, &message, messagesToRead);
         if (Q_UNLIKELY(ret < 0)) {
             q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ReadError);
 
-            TDeviceStatus status;
-            ::memset(&status, 0, sizeof(status));
+            TDeviceStatus status = {};
 
             if (::CanGetDeviceStatus(channelIndex, &status) < 0) {
                 q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ReadError);
