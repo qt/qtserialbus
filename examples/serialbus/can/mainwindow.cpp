@@ -75,6 +75,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     initActionsConnections();
     QTimer::singleShot(50, m_connectDialog, &ConnectDialog::show);
+
+    connect(m_busStatusTimer, &QTimer::timeout, this, &MainWindow::busStatus);
 }
 
 MainWindow::~MainWindow()
@@ -177,32 +179,39 @@ void MainWindow::connectDevice()
             m_status->setText(tr("Plugin: %1, connected to %2")
                     .arg(p.pluginName).arg(p.deviceInterfaceName));
         }
+
+        if (m_canDevice->hasBusStatus())
+            m_busStatusTimer->start(2000);
+        else
+            m_ui->busStatus->setText(tr("No CAN bus status available."));
+    }
+}
+
+void MainWindow::busStatus()
+{
+    if (!m_canDevice || !m_canDevice->hasBusStatus()) {
+        m_ui->busStatus->setText(tr("No CAN bus status available."));
+        m_busStatusTimer->stop();
+        return;
     }
 
-    connect(m_busStatusTimer, &QTimer::timeout, this, [this]() {
-        switch (m_canDevice->busStatus()) {
-        case QCanBusDevice::CanBusStatus::Good:
-            m_ui->busStatus->setText("CAN bus status: Good.");
-            break;
-        case QCanBusDevice::CanBusStatus::Warning:
-            m_ui->busStatus->setText("CAN bus status: Warning.");
-            break;
-        case QCanBusDevice::CanBusStatus::Error:
-            m_ui->busStatus->setText("CAN bus status: Error.");
-            break;
-        case QCanBusDevice::CanBusStatus::BusOff:
-            m_ui->busStatus->setText("CAN bus status: Bus Off.");
-            break;
-        default:
-            m_ui->busStatus->setText("CAN bus status: Unknown.");
-            break;
-        }
-    });
-
-    if (m_canDevice->hasBusStatus())
-        m_busStatusTimer->start(2000);
-    else
-        m_ui->busStatus->setText(tr("No CAN bus status available."));
+    switch (m_canDevice->busStatus()) {
+    case QCanBusDevice::CanBusStatus::Good:
+        m_ui->busStatus->setText("CAN bus status: Good.");
+        break;
+    case QCanBusDevice::CanBusStatus::Warning:
+        m_ui->busStatus->setText("CAN bus status: Warning.");
+        break;
+    case QCanBusDevice::CanBusStatus::Error:
+        m_ui->busStatus->setText("CAN bus status: Error.");
+        break;
+    case QCanBusDevice::CanBusStatus::BusOff:
+        m_ui->busStatus->setText("CAN bus status: Bus Off.");
+        break;
+    default:
+        m_ui->busStatus->setText("CAN bus status: Unknown.");
+        break;
+    }
 }
 
 void MainWindow::disconnectDevice()
