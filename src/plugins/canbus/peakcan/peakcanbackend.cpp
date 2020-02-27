@@ -45,7 +45,6 @@
 #include <QtCore/qtimer.h>
 #include <QtCore/qcoreevent.h>
 #include <QtCore/qloggingcategory.h>
-#include <QtCore/qscopeguard.h>
 
 #include <algorithm>
 #include <vector>
