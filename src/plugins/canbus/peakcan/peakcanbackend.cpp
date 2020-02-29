@@ -422,7 +422,7 @@ bool PeakCanBackendPrivate::open()
     if (readHandle == INVALID_HANDLE_VALUE) {
         readHandle = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
         if (Q_UNLIKELY(!readHandle)) {
-            const QString errorString = qt_error_string(::GetLastError());
+            const QString errorString = qt_error_string(int(::GetLastError()));
             qCCritical(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot create receive event handler: %ls",
                        qUtf16Printable(errorString));
             q->setError(errorString, QCanBusDevice::ConnectionError);
@@ -482,7 +482,7 @@ void PeakCanBackendPrivate::close()
 
 #if defined(Q_OS_WIN32)
     if (readHandle && (readHandle != INVALID_HANDLE_VALUE)) {
-        const QString errorString = qt_error_string(::GetLastError());
+        const QString errorString = qt_error_string(int(::GetLastError()));
         if (Q_UNLIKELY(!::CloseHandle(readHandle))) {
             qCCritical(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot close read handle: %ls",
                        qUtf16Printable(errorString));
