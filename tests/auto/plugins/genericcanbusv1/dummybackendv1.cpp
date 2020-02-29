@@ -52,17 +52,18 @@ DummyBackendV1::DummyBackendV1() :
 
         enqueueReceivedFrames({dummyFrame});
     });
-    simulateReceivingTimer->start(1000);
 }
 
 bool DummyBackendV1::open()
 {
+    simulateReceivingTimer->start(1000);
     setState(QCanBusDevice::ConnectedState);
     return true;
 }
 
 void DummyBackendV1::close()
 {
+    simulateReceivingTimer->stop();
     setState(QCanBusDevice::UnconnectedState);
 }
 

@@ -82,6 +82,7 @@ private slots:
     void sendFrame(const QCanBusFrame &frame) const;
     void processErrors(QCanBusDevice::CanBusError) const;
     void connectDevice();
+    void busStatus();
     void disconnectDevice();
     void processFramesWritten(qint64);
 
