@@ -752,6 +752,9 @@ void SocketCanBackend::resetController()
 
 bool SocketCanBackend::hasBusStatus() const
 {
+    if (isVirtual(canSocketName.toLatin1()))
+        return false;
+
     return libSocketCan->hasBusStatus();
 }
 
