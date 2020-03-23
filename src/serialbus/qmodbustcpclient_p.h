@@ -87,7 +87,7 @@ public:
         });
 
         QObject::connect(m_socket,
-                         QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), q,
+                         &QAbstractSocket::errorOccurred, q,
                          [this](QAbstractSocket::SocketError /*error*/)
         {
             Q_Q(QModbusTcpClient);
