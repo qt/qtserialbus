@@ -53,6 +53,7 @@ public:
     QString m_errorText;
     QModbusResponse m_response;
     QModbusReply::ReplyType m_type;
+    QVector<QModbusDevice::IntermediateError> m_intermediateErrors;
 };
 
 /*!
@@ -239,7 +240,6 @@ QString QModbusReply::errorString() const
     return d->m_errorText;
 }
 
-
 /*!
     Returns the type of the reply.
 
@@ -276,6 +276,41 @@ void QModbusReply::setRawResult(const QModbusResponse &response)
 {
     Q_D(QModbusReply);
     d->m_response = response;
+}
+
+/*!
+    \since 6.0
+    \fn void intermediateErrorOccurred(QModbusDevice::IntermediateError error)
+
+    This signal is emitted when an error has been detected in the processing of
+    this reply. The error will be described by the error code \a error.
+*/
+
+/*!
+    \since 6.0
+
+    Returns the list of intermediate errors that might have happened during
+    the send-receive cycle of a Modbus request until the QModbusReply reports
+    to be finished.
+*/
+QVector<QModbusDevice::IntermediateError> QModbusReply::intermediateErrors() const
+{
+    Q_D(const QModbusReply);
+    return d->m_intermediateErrors;
+}
+
+/*!
+   \internal
+   \since 6.0
+
+    Adds an intermediate error to the list of intermediate errors.
+    This will also cause the \l intermediateErrorOccurred() signal to be emitted.
+*/
+void QModbusReply::addIntermediateError(QModbusDevice::IntermediateError error)
+{
+    Q_D(QModbusReply);
+    d->m_intermediateErrors.append(error);
+    emit intermediateErrorOccurred(error);
 }
 
 QT_END_NAMESPACE

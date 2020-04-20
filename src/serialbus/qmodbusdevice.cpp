@@ -217,6 +217,27 @@ void QModbusDevice::setConnectionParameter(int parameter, const QVariant &value)
 */
 
 /*!
+    \since 6.0
+    \enum QModbusDevice::IntermediateError
+
+    This enum describes possible errors that can happen during a full send and
+    receive cycle for a Modbus reply.
+
+    \value ResponseCrcError         A Modbus response with a wrong CRC was received.
+    \value ResponseRequestMismatch  A Modbus response was received but did not
+                                    match the open request, probably due to the
+                                    PDU's function code not matching.
+
+    If any of the above intermediate errors occurred, the frame is likely
+    resent until the maximum number of retries has been reached.
+
+    The list of intermediate errors can be inspected from the \l QModbusReply
+    intermediate errors function.
+
+    \sa QModbusClient::numberOfRetries(), QModbusReply::intermediateErrors()
+*/
+
+/*!
     \fn QModbusDevice::errorOccurred(QModbusDevice::Error error)
 
     This signal is emitted when an error of the type, \a error, occurs.

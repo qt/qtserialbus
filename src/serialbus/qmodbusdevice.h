@@ -86,6 +86,13 @@ public:
     };
     Q_ENUM(ConnectionParameter)
 
+    enum IntermediateError
+    {
+        ResponseCrcError,
+        ResponseRequestMismatch
+    };
+    Q_ENUM(IntermediateError)
+
     explicit QModbusDevice(QObject *parent = nullptr);
     ~QModbusDevice();
 
@@ -118,6 +125,7 @@ protected:
 Q_DECLARE_TYPEINFO(QModbusDevice::Error, Q_PRIMITIVE_TYPE);
 Q_DECLARE_TYPEINFO(QModbusDevice::State, Q_PRIMITIVE_TYPE);
 Q_DECLARE_TYPEINFO(QModbusDevice::ConnectionParameter, Q_PRIMITIVE_TYPE);
+Q_DECLARE_TYPEINFO(QModbusDevice::IntermediateError, Q_PRIMITIVE_TYPE);
 
 QT_END_NAMESPACE
 

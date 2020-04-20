@@ -98,7 +98,7 @@ private:
 class QModbusRtuSerialMasterPrivate : public QModbusClientPrivate
 {
     Q_DECLARE_PUBLIC(QModbusRtuSerialMaster)
-        enum State
+    enum State
     {
         Idle,
         WaitingForReplay,
@@ -165,6 +165,7 @@ public:
             qCWarning(QT_MODBUS) << "(RTU client) Discarding response with wrong CRC, received:"
                 << adu.checksum<quint16>() << ", calculated CRC:"
                 << QModbusSerialAdu::calculateCRC(adu.data(), adu.size());
+            m_queue.first().reply->addIntermediateError(QModbusClient::ResponseCrcError);
             return;
         }
 
@@ -172,6 +173,7 @@ public:
         if (!canMatchRequestAndResponse(response, adu.serverAddress())) {
             qCWarning(QT_MODBUS) << "(RTU client) Cannot match response with open request, "
                 "ignoring";
+            m_queue.first().reply->addIntermediateError(QModbusClient::ResponseRequestMismatch);
             return;
         }
 
