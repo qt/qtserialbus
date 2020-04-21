@@ -95,11 +95,6 @@ QModbusDevice::~QModbusDevice()
     \value NetworkPortParameter      This parameter holds the network port. \c int
     \value NetworkAddressParameter   This parameter holds the host address for network
                                      communication. \c QString
-
-    User options:
-
-    \value UserParameter             This enum value has been deprecated. There
-                                     will be no replacement.
 */
 
 /*!
@@ -120,7 +115,7 @@ QModbusDevice::~QModbusDevice()
 
     \sa ConnectionParameter
 */
-QVariant QModbusDevice::connectionParameter(int parameter) const
+QVariant QModbusDevice::connectionParameter(ConnectionParameter parameter) const
 {
     Q_D(const QModbusDevice);
     switch (parameter) {
@@ -143,7 +138,7 @@ QVariant QModbusDevice::connectionParameter(int parameter) const
     default:
         break;
     }
-    return d->m_userConnectionParams.value(parameter); // ### Qt6: remove
+    return {};
 }
 
 /*!
@@ -154,7 +149,7 @@ QVariant QModbusDevice::connectionParameter(int parameter) const
     \sa ConnectionParameter
     \sa connectionParameter()
 */
-void QModbusDevice::setConnectionParameter(int parameter, const QVariant &value)
+void QModbusDevice::setConnectionParameter(ConnectionParameter parameter, const QVariant &value)
 {
     Q_D(QModbusDevice);
     switch (parameter) {
@@ -182,7 +177,7 @@ void QModbusDevice::setConnectionParameter(int parameter, const QVariant &value)
         d->m_networkAddress = value.toString();
         break;
     default:
-        d->m_userConnectionParams.insert(parameter, value); // ### Qt6: remove
+        Q_ASSERT_X(false, "", "Connection parameter not supported.");
         break;
     }
 }

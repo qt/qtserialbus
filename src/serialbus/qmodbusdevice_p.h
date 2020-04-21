@@ -78,8 +78,6 @@ public:
     int m_networkPort = 502;
     QString m_networkAddress = QStringLiteral("127.0.0.1");
 
-    QHash<int, QVariant> m_userConnectionParams; // ### Qt6: remove
-
     virtual QIODevice *device() const { return nullptr; }
 };
 

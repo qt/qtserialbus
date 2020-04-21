@@ -79,10 +79,7 @@ public:
         SerialStopBitsParameter,
 
         NetworkPortParameter,
-        NetworkAddressParameter,
-
-        // Reserved
-        UserParameter = 0x100 // ### Qt6: remove
+        NetworkAddressParameter
     };
     Q_ENUM(ConnectionParameter)
 
@@ -96,8 +93,8 @@ public:
     explicit QModbusDevice(QObject *parent = nullptr);
     ~QModbusDevice();
 
-    QVariant connectionParameter(int parameter) const;
-    void setConnectionParameter(int parameter, const QVariant &value);
+    QVariant connectionParameter(ConnectionParameter parameter) const;
+    void setConnectionParameter(ConnectionParameter parameter, const QVariant &value);
 
     bool connectDevice();
     void disconnectDevice();
