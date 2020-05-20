@@ -58,8 +58,8 @@ Q_DECLARE_INTERFACE(QCanBusFactory, "org.qt-project.Qt.QCanBusFactory")
 class Q_SERIALBUS_EXPORT QCanBusFactoryV2 : public QCanBusFactory
 {
 public:
-    virtual QCanBusDevice *createDevice(const QString &interfaceName,
-                                        QString *errorMessage) const = 0;
+    QCanBusDevice *createDevice(const QString &interfaceName,
+                                QString *errorMessage) const override = 0;
     virtual QList<QCanBusDeviceInfo> availableDevices(QString *errorMessage) const = 0;
 
 protected:

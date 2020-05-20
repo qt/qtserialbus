@@ -249,7 +249,7 @@ public:
         : QModbusResponse(FunctionCode(quint8(fc) | ExceptionByte), static_cast<quint8> (ec))
     {}
 
-    void setFunctionCode(FunctionCode c) {
+    void setFunctionCode(FunctionCode c) override {
         QModbusPdu::setFunctionCode(FunctionCode(quint8(c) | ExceptionByte));
     }
     void setExceptionCode(ExceptionCode ec) { QModbusPdu::encodeData(quint8(ec)); }
