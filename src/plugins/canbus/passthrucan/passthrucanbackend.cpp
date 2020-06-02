@@ -200,7 +200,7 @@ bool PassThruCanBackend::open()
     QByteArray subDev;
 
     if (splitPos >= 0)
-      subDev = m_deviceName.midRef(splitPos + 1).toLatin1();
+      subDev = QStringView{m_deviceName}.mid(splitPos + 1).toLatin1();
 
     const QString library = libraryForAdapter(adapter);
     if (library.isEmpty()) {

@@ -299,7 +299,7 @@ void VectorCanBackendPrivate::setupChannel(const QString &interfaceName)
 {
     Q_Q(VectorCanBackend);
     if (Q_LIKELY(interfaceName.startsWith(QStringLiteral("can")))) {
-        const QStringRef ref = interfaceName.midRef(3);
+        const QStringView ref = QStringView{interfaceName}.mid(3);
         bool ok = false;
         channelIndex = ref.toInt(&ok);
         if (ok && (channelIndex >= 0 && channelIndex < XL_CONFIG_MAX_CHANNELS)) {

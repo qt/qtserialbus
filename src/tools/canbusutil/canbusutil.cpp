@@ -133,7 +133,7 @@ bool CanBusUtil::parseDataField(quint32 &id, QString &payload)
         return false;
     }
 
-    id = m_data.leftRef(hashMarkPos).toUInt(nullptr, 16);
+    id = QStringView{m_data}.left(hashMarkPos).toUInt(nullptr, 16);
     payload = m_data.right(m_data.size() - hashMarkPos - 1);
 
     return true;
@@ -148,7 +148,7 @@ bool CanBusUtil::setFrameFromPayload(QString payload, QCanBusFrame *frame)
             return true;
 
         bool ok = false;
-        int rtrFrameLength = payload.midRef(1).toInt(&ok);
+        int rtrFrameLength = QStringView{payload}.mid(1).toInt(&ok);
         if (ok && rtrFrameLength >= 0 && rtrFrameLength <= 8) { // payload = "R8"
             frame->setPayload(QByteArray(rtrFrameLength, 0));
             return true;
@@ -172,7 +172,7 @@ bool CanBusUtil::setFrameFromPayload(QString payload, QCanBusFrame *frame)
     if (payload.size() % 2 != 0) {
         if (frame->hasFlexibleDataRateFormat()) {
             enum { BitrateSwitchFlag = 1, ErrorStateIndicatorFlag = 2 };
-            const int flags = payload.leftRef(1).toInt(nullptr, 16);
+            const int flags = QStringView{payload}.left(1).toInt(nullptr, 16);
             frame->setBitrateSwitch(flags & BitrateSwitchFlag);
             frame->setErrorStateIndicator(flags & ErrorStateIndicatorFlag);
             payload.remove(0, 1);
