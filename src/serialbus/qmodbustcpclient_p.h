@@ -86,8 +86,7 @@ public:
            cleanupTransactionStore();
         });
 
-        QObject::connect(m_socket,
-                         QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), q,
+        QObject::connect(m_socket, &QAbstractSocket::errorOccurred, q,
                          [this](QAbstractSocket::SocketError /*error*/)
         {
             Q_Q(QModbusTcpClient);

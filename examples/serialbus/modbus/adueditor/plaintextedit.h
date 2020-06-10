@@ -59,6 +59,11 @@ class PlainTextEdit : public QPlainTextEdit
     Q_OBJECT
     Q_DISABLE_COPY(PlainTextEdit)
 
+public Q_SLOT:
+    void setFocus() {
+        QWidget::setFocus();
+    }
+
 public:
     explicit PlainTextEdit(QWidget *parent = nullptr)
         : QPlainTextEdit(parent)

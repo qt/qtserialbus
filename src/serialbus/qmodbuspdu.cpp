@@ -439,7 +439,7 @@ static QDataStream &pduFromStream(QDataStream &stream, QModbusPdu &pdu, Type typ
 QDebug operator<<(QDebug debug, const QModbusPdu &pdu)
 {
     QDebugStateSaver _(debug);
-    debug.nospace().noquote() << "0x" << Qt::hex << qSetFieldWidth(2) << qSetPadChar('0')
+    debug.nospace().noquote() << "0x" << Qt::hex << qSetFieldWidth(2) << qSetPadChar(u'0')
         << (pdu.isException() ? pdu.functionCode() | QModbusPdu::ExceptionByte : pdu.functionCode())
         << qSetFieldWidth(0) << pdu.data().toHex();
     return debug;
