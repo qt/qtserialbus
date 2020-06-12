@@ -290,6 +290,7 @@ bool VirtualCanBackend::writeFrame(const QCanBusFrame &frame)
         enqueueReceivedFrames({echoFrame});
     }
 
+    emit framesWritten(qint64(1));
     return true;
 }
 

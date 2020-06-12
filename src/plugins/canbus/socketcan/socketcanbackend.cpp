@@ -56,30 +56,6 @@
 #include <sys/ioctl.h>
 #include <sys/time.h>
 
-#ifndef CANFD_MTU
-// CAN FD support was added by Linux kernel 3.6
-// For prior kernels we redefine the missing defines here
-// they are taken from linux/can/raw.h & linux/can.h
-
-enum {
-    CAN_RAW_FD_FRAMES = 5
-};
-
-#define CAN_MAX_DLEN 8
-#define CANFD_MAX_DLEN 64
-struct canfd_frame {
-    canid_t can_id;  /* 32 bit CAN_ID + EFF/RTR/ERR flags */
-    __u8    len;     /* frame payload length in byte */
-    __u8    flags;   /* additional flags for CAN FD */
-    __u8    __res0;  /* reserved / padding */
-    __u8    __res1;  /* reserved / padding */
-    __u8    data[CANFD_MAX_DLEN] __attribute__((aligned(8)));
-};
-#define CAN_MTU     (sizeof(struct can_frame))
-#define CANFD_MTU   (sizeof(struct canfd_frame))
-
-#endif
-
 #ifndef CANFD_BRS
 #   define CANFD_BRS 0x01 /* bit rate switch (second bitrate for payload data) */
 #endif
@@ -776,6 +752,9 @@ void SocketCanBackend::resetController()
 
 bool SocketCanBackend::hasBusStatus() const
 {
+    if (isVirtual(canSocketName.toLatin1()))
+        return false;
+
     return libSocketCan->hasBusStatus();
 }
 
