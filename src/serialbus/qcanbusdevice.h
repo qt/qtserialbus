@@ -126,11 +126,11 @@ public:
 
     virtual void setConfigurationParameter(int key, const QVariant &value);
     QVariant configurationParameter(int key) const;
-    QVector<int> configurationKeys() const;
+    QList<int> configurationKeys() const;
 
     virtual bool writeFrame(const QCanBusFrame &frame) = 0;
     QCanBusFrame readFrame();
-    QVector<QCanBusFrame> readAllFrames();
+    QList<QCanBusFrame> readAllFrames();
     qint64 framesAvailable() const;
     qint64 framesToWrite() const;
 
@@ -171,7 +171,7 @@ protected:
     void setError(const QString &errorText, QCanBusDevice::CanBusError);
     void clearError();
 
-    void enqueueReceivedFrames(const QVector<QCanBusFrame> &newFrames);
+    void enqueueReceivedFrames(const QList<QCanBusFrame> &newFrames);
 
     void enqueueOutgoingFrame(const QCanBusFrame &newFrame);
     QCanBusFrame dequeueOutgoingFrame();

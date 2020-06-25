@@ -67,20 +67,20 @@ void tst_QModbusDataUnit::constructors()
     QCOMPARE(coils.startAddress(), 15);
     const auto values = coils.values();
     QCOMPARE(values.size(), 20);
-    QCOMPARE(values, QVector<quint16>(20));
+    QCOMPARE(values, QList<quint16>(20));
     for (auto val : values) {
         QCOMPARE(val, quint16(0));
     }
     QCOMPARE(coils.valueCount(), 20u);
 
-    QModbusDataUnit unit2(QModbusDataUnit::HoldingRegisters, 3, QVector<quint16>() << 9);
+    QModbusDataUnit unit2(QModbusDataUnit::HoldingRegisters, 3, QList<quint16> { 9 });
     QCOMPARE(unit2.registerType(), QModbusDataUnit::HoldingRegisters);
     QCOMPARE(unit2.startAddress(), 3);
     QCOMPARE(unit2.values().size(), 1);
     QCOMPARE(unit2.values().at(0), (quint16) 9);
     QCOMPARE(unit2.valueCount(), 1u);
 
-    QVector<quint16> data;
+    QList<quint16> data;
     data.append(5);
     data.append(6);
     data.append(7);
@@ -97,12 +97,12 @@ void tst_QModbusDataUnit::constructors()
 
 void tst_QModbusDataUnit::setters()
 {
-    QModbusDataUnit unit(QModbusDataUnit::HoldingRegisters, 3, QVector<quint16>() << 9);
+    QModbusDataUnit unit(QModbusDataUnit::HoldingRegisters, 3, QList<quint16> { 9 });
     QCOMPARE(unit.valueCount(), 1u);
 
     unit.setRegisterType(QModbusDataUnit::InputRegisters);
     unit.setStartAddress(2);
-    QVector<quint16> data;
+    QList<quint16> data;
     data.append(9u);
     data.append(5u);
     unit.setValues(data);
@@ -147,15 +147,15 @@ void tst_QModbusDataUnit::testAPI()
     QCOMPARE(unit.registerType(), QModbusDataUnit::Invalid);
     QCOMPARE(unit.startAddress(), -1);
     QCOMPARE(unit.valueCount(), 0u);
-    QCOMPARE(unit.values(), QVector<quint16>());
+    QCOMPARE(unit.values(), QList<quint16>());
 
     unit.setStartAddress(15);
     unit.setRegisterType(QModbusDataUnit::Coils);
     QCOMPARE(unit.isValid(), true);
 
-    QCOMPARE(unit.values(), QVector<quint16>());
-    unit.setValues(QVector<quint16> {1, 2, 3, 4});
-    QCOMPARE(unit.values(), QVector<quint16>({1, 2, 3, 4}));
+    QCOMPARE(unit.values(), QList<quint16>());
+    unit.setValues(QList<quint16> { 1, 2, 3, 4 });
+    QCOMPARE(unit.values(), QList<quint16>({ 1, 2, 3, 4 }));
 
     QCOMPARE(unit.valueCount(), 4u);
     unit.setValueCount(25);

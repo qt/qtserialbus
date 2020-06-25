@@ -38,13 +38,12 @@
 #ifndef PEAKCANBACKEND_H
 #define PEAKCANBACKEND_H
 
-#include <QtSerialBus/qcanbusframe.h>
 #include <QtSerialBus/qcanbusdevice.h>
 #include <QtSerialBus/qcanbusdeviceinfo.h>
+#include <QtSerialBus/qcanbusframe.h>
 
-#include <QtCore/qvariant.h>
-#include <QtCore/qvector.h>
 #include <QtCore/qlist.h>
+#include <QtCore/qvariant.h>
 
 QT_BEGIN_NAMESPACE
 

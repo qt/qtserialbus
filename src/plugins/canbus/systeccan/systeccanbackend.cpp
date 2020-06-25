@@ -398,7 +398,7 @@ void SystecCanBackendPrivate::readAllReceivedMessages()
 {
     Q_Q(SystecCanBackend);
 
-    QVector<QCanBusFrame> newFrames;
+    QList<QCanBusFrame> newFrames;
 
     for (;;) {
         tCanMsgStruct message = {};
@@ -517,7 +517,7 @@ bool SystecCanBackend::open()
 
     // Apply all stored configurations except bitrate and receive own,
     // because these cannot be applied after opening the device
-    const QVector<int> keys = configurationKeys();
+    const QList<int> keys = configurationKeys();
     for (int key : keys) {
         if (key == BitRateKey || key == ReceiveOwnKey)
             continue;

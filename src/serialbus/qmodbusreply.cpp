@@ -53,7 +53,7 @@ public:
     QString m_errorText;
     QModbusResponse m_response;
     QModbusReply::ReplyType m_type;
-    QVector<QModbusDevice::IntermediateError> m_intermediateErrors;
+    QList<QModbusDevice::IntermediateError> m_intermediateErrors;
 };
 
 /*!
@@ -293,7 +293,7 @@ void QModbusReply::setRawResult(const QModbusResponse &response)
     the send-receive cycle of a Modbus request until the QModbusReply reports
     to be finished.
 */
-QVector<QModbusDevice::IntermediateError> QModbusReply::intermediateErrors() const
+QList<QModbusDevice::IntermediateError> QModbusReply::intermediateErrors() const
 {
     Q_D(const QModbusReply);
     return d->m_intermediateErrors;

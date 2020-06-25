@@ -382,7 +382,7 @@ void TinyCanBackendPrivate::startRead()
 {
     Q_Q(TinyCanBackend);
 
-    QVector<QCanBusFrame> newFrames;
+    QList<QCanBusFrame> newFrames;
 
     for (;;) {
         if (!::CanReceiveGetCount(channelIndex))

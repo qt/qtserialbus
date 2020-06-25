@@ -293,7 +293,7 @@ void QCanBusDevice::clearError()
     Subclasses must call this function when they receive frames.
 
 */
-void QCanBusDevice::enqueueReceivedFrames(const QVector<QCanBusFrame> &newFrames)
+void QCanBusDevice::enqueueReceivedFrames(const QList<QCanBusFrame> &newFrames)
 {
     Q_D(QCanBusDevice);
 
@@ -430,11 +430,11 @@ QVariant QCanBusDevice::configurationParameter(int key) const
     If a key is not explicitly mentioned the platform's
     default setting for the relevant key is used.
 */
-QVector<int> QCanBusDevice::configurationKeys() const
+QList<int> QCanBusDevice::configurationKeys() const
 {
     Q_D(const QCanBusDevice);
 
-    QVector<int> result;
+    QList<int> result;
     for (const ConfigEntry &e : d->configOptions)
         result.append(e.first);
 
@@ -816,13 +816,13 @@ QCanBusFrame QCanBusDevice::readFrame()
 /*!
     \since 5.12
     Returns all \l{QCanBusFrame}s from the queue; otherwise returns
-    an empty QVector. The returned frames are removed from the queue.
+    an empty QList. The returned frames are removed from the queue.
 
     The queue operates according to the FIFO principle.
 
     \sa clear(), framesAvailable(), readFrame()
 */
-QVector<QCanBusFrame> QCanBusDevice::readAllFrames()
+QList<QCanBusFrame> QCanBusDevice::readAllFrames()
 {
     Q_D(QCanBusDevice);
 
@@ -830,14 +830,14 @@ QVector<QCanBusFrame> QCanBusDevice::readAllFrames()
         const QString error = tr("Cannot read frame as device is not connected.");
         qCWarning(QT_CANBUS, "%ls", qUtf16Printable(error));
         setError(error, CanBusError::OperationError);
-        return QVector<QCanBusFrame>();
+        return QList<QCanBusFrame>();
     }
 
     clearError();
 
     QMutexLocker locker(&d->incomingFramesGuard);
 
-    QVector<QCanBusFrame> result;
+    QList<QCanBusFrame> result;
     result.swap(d->incomingFrames);
     return result;
 }

@@ -284,7 +284,7 @@ bool SocketCanBackend::applyConfigurationParameter(int key, const QVariant &valu
             break;
         }
 
-        QVector<can_filter> filters;
+        QList<can_filter> filters;
         filters.resize(filterList.size());
         for (int i = 0; i < filterList.size(); i++) {
             const QCanBusDevice::Filter f = filterList.at(i);
@@ -457,7 +457,7 @@ void SocketCanBackend::setConfigurationParameter(int key, const QVariant &value)
 
     QCanBusDevice::setConfigurationParameter(key, value);
 
-    // we need to check CAN FD option a lot -> cache it and avoid QVector lookup
+    // we need to check CAN FD option a lot -> cache it and avoid QList lookup
     if (key == QCanBusDevice::CanFdKey)
         canFdOptionEnabled = value.toBool();
 }
@@ -685,7 +685,7 @@ QString SocketCanBackend::interpretErrorFrame(const QCanBusFrame &errorFrame)
 
 void SocketCanBackend::readSocket()
 {
-    QVector<QCanBusFrame> newFrames;
+    QList<QCanBusFrame> newFrames;
 
     for (;;) {
         m_frame = {};

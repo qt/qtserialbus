@@ -302,7 +302,7 @@ QModbusRequest QModbusClientPrivate::createWriteRequest(const QModbusDataUnit &d
             byteCount += 1;
 
         quint8 address = 0;
-        QVector<quint8> bytes;
+        QList<quint8> bytes;
         for (quint8 i = 0; i < byteCount; ++i) {
             quint8 byte = 0;
             for (int currentBit = 0; currentBit < 8; ++currentBit)
@@ -501,7 +501,7 @@ bool QModbusClientPrivate::collateBytes(const QModbusPdu &response,
     if (data) {
         QDataStream stream(response.data().remove(0, 1));
 
-        QVector<quint16> values;
+        QList<quint16> values;
         const quint8 itemCount = byteCount / 2;
         for (int i = 0; i < itemCount; i++) {
             quint16 tmp;
@@ -544,7 +544,7 @@ bool QModbusClientPrivate::collateSingleValue(const QModbusPdu &response,
     if (data) {
         data->setRegisterType(type);
         data->setStartAddress(address);
-        data->setValues(QVector<quint16>{ value });
+        data->setValues(QList<quint16> { value });
     }
     return true;
 }

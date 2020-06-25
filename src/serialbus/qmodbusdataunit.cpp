@@ -98,7 +98,7 @@ QT_BEGIN_NAMESPACE
 
 /*!
     \fn QModbusDataUnit::QModbusDataUnit(RegisterType type, int address,
-                                         const QVector<quint16> &data)
+                                         const QList<quint16> &data)
 
     Constructs a unit of data for register\a type. Start address of the data is
     set to \a address and the unit's values to \a data.
@@ -138,7 +138,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \fn void QModbusDataUnit::setValues(const QVector<quint16> &values)
+    \fn void QModbusDataUnit::setValues(const QList<quint16> &values)
 
     Sets the \a values of the data unit. \l QModbusDataUnit::DiscreteInputs
     and \l QModbusDataUnit::Coils tables only accept single bit value, so \c 0
@@ -148,7 +148,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \fn QVector<quint16> QModbusDataUnit::values() const
+    \fn QList<quint16> QModbusDataUnit::values() const
 
     Returns the data in the data unit. \l QModbusDataUnit::DiscreteInputs
     and \l QModbusDataUnit::Coils tables only accept single bit value, so \c 0

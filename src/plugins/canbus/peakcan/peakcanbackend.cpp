@@ -689,7 +689,7 @@ void PeakCanBackendPrivate::startRead()
 {
     Q_Q(PeakCanBackend);
 
-    QVector<QCanBusFrame> newFrames;
+    QList<QCanBusFrame> newFrames;
 
     for (;;) {
         if (isFlexibleDatarateEnabled) {

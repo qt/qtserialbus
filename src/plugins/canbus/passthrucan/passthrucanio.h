@@ -48,7 +48,6 @@
 #include <QString>
 #include <QTimer>
 #include <QVariant>
-#include <QVector>
 
 QT_BEGIN_NAMESPACE
 
@@ -72,7 +71,7 @@ public:
 
 Q_SIGNALS:
     void errorOccurred(const QString &description, QCanBusDevice::CanBusError error);
-    void messagesReceived(QVector<QCanBusFrame> frames);
+    void messagesReceived(QList<QCanBusFrame> frames);
     void messagesSent(qint64 count);
     void openFinished(bool success);
     void closeFinished();
@@ -88,7 +87,7 @@ private:
     J2534::PassThru::Handle m_deviceId      = 0;
     J2534::PassThru::Handle m_channelId     = 0;
     QTimer *                m_idleNotifier  = nullptr;
-    QVector<J2534::Message> m_ioBuffer;
+    QList<J2534::Message> m_ioBuffer;
     QMutex                  m_writeGuard;
     QList<QCanBusFrame>     m_writeQueue;
 };

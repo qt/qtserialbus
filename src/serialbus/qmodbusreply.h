@@ -37,7 +37,7 @@
 #ifndef QMODBUSREPLY_H
 #define QMODBUSREPLY_H
 
-#include <QtCore/qvector.h>
+#include <QtCore/qlist.h>
 #include <QtSerialBus/qmodbusdataunit.h>
 #include <QtSerialBus/qmodbusdevice.h>
 #include <QtSerialBus/qmodbuspdu.h>
@@ -78,7 +78,7 @@ public:
     void setFinished(bool isFinished);
     void setError(QModbusDevice::Error error, const QString &errorText);
 
-    QVector<QModbusDevice::IntermediateError> intermediateErrors() const;
+    QList<QModbusDevice::IntermediateError> intermediateErrors() const;
     void addIntermediateError(QModbusDevice::IntermediateError error);
 
 Q_SIGNALS:

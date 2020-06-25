@@ -160,7 +160,7 @@ void tst_QModbusReply::tst_setResult()
     QCOMPARE(unit.valueCount(), 3u);
     QCOMPARE(unit.registerType(), QModbusDataUnit::Coils);
     QCOMPARE(unit.isValid(), true);
-    QVector<quint16>  reference = { 4,5,6 };
+    QList<quint16> reference = { 4, 5, 6 };
     QCOMPARE(unit.values(), reference);
 
     QModbusReply replyTest(QModbusReply::Common, 1);
@@ -176,7 +176,7 @@ void tst_QModbusReply::tst_setResult()
     QCOMPARE(replyTest.result().registerType(), QModbusDataUnit::Invalid);
     QCOMPARE(replyTest.result().isValid(), false);
     QCOMPARE(replyTest.rawResult().isValid(), false);
-    QCOMPARE(replyTest.result().values(), QVector<quint16>());
+    QCOMPARE(replyTest.result().values(), QList<quint16>());
 
     QModbusResponse response(QModbusResponse::ReadExceptionStatus, quint16(0x0000));
     replyTest.setResult(unit);
@@ -207,7 +207,7 @@ void tst_QModbusReply::tst_setResult()
     QCOMPARE(replyRawTest.result().registerType(), QModbusDataUnit::Invalid);
     QCOMPARE(replyRawTest.result().isValid(), false);
     QCOMPARE(replyRawTest.rawResult().isValid(), false);
-    QCOMPARE(replyRawTest.result().values(), QVector<quint16>());
+    QCOMPARE(replyRawTest.result().values(), QList<quint16>());
 
     replyRawTest.setResult(unit);
     replyRawTest.setRawResult(response);

@@ -52,7 +52,7 @@ public:
     PassThruCanBusPlugin()
     {
         qRegisterMetaType<QCanBusDevice::CanBusError>();
-        qRegisterMetaType<QVector<QCanBusFrame>>();
+        qRegisterMetaType<QList<QCanBusFrame>>();
     }
 
     QList<QCanBusDeviceInfo> availableDevices(QString *) const override

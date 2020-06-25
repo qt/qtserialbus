@@ -67,10 +67,10 @@ public:
     QCanBusDevice::CanBusDeviceState state = QCanBusDevice::UnconnectedState;
     QString errorText;
 
-    QVector<QCanBusFrame> incomingFrames;
+    QList<QCanBusFrame> incomingFrames;
     QMutex incomingFramesGuard;
-    QVector<QCanBusFrame> outgoingFrames;
-    QVector<ConfigEntry> configOptions;
+    QList<QCanBusFrame> outgoingFrames;
+    QList<ConfigEntry> configOptions;
 
     bool waitForReceivedEntered = false;
     bool waitForWrittenEntered = false;

@@ -41,8 +41,8 @@
 
 #include <QtCore/qbitarray.h>
 #include <QtCore/qdebug.h>
+#include <QtCore/qlist.h>
 #include <QtCore/qloggingcategory.h>
-#include <QtCore/qvector.h>
 
 #include <algorithm>
 
@@ -448,7 +448,7 @@ bool QModbusServer::data(QModbusDataUnit *newData) const
 */
 bool QModbusServer::setData(QModbusDataUnit::RegisterType table, quint16 address, quint16 data)
 {
-    return writeData(QModbusDataUnit(table, address, QVector<quint16>() << data));
+    return writeData(QModbusDataUnit(table, address, QList<quint16> { data }));
 }
 
 /*!
@@ -946,7 +946,7 @@ QModbusResponse QModbusServerPrivate::processGetCommEventLogRequest(const QModbu
     }
     const quint16 deviceBusy = tmp.value<quint16>();
 
-    QVector<quint8> eventLog(int(m_commEventLog.size()));
+    QList<quint8> eventLog(int(m_commEventLog.size()));
     std::copy(m_commEventLog.cbegin(), m_commEventLog.cend(), eventLog.begin());
 
     // 6 -> 3 x 2 Bytes (Status, Event Count and Message Count)
@@ -983,7 +983,7 @@ QModbusResponse QModbusServerPrivate::processWriteMultipleCoilsRequest(const QMo
             QModbusExceptionResponse::IllegalDataAddress);
     }
 
-    QVector<quint8> bytes;
+    QList<quint8> bytes;
     const QByteArray payload = request.data().mid(5);
     for (qint32 i = payload.size() - 1; i >= 0; --i)
         bytes.append(quint8(payload[i]));
@@ -1035,7 +1035,7 @@ QModbusResponse QModbusServerPrivate::processWriteMultipleRegistersRequest(
     const QByteArray pduData = request.data().remove(0,5);
     QDataStream stream(pduData);
 
-    QVector<quint16> values;
+    QList<quint16> values;
     quint16 tmp;
     for (int i = 0; i < numberOfRegisters; i++) {
         stream >> tmp;
@@ -1134,7 +1134,7 @@ QModbusResponse QModbusServerPrivate::processReadWriteMultipleRegistersRequest(
     const QByteArray pduData = request.data().remove(0,9);
     QDataStream stream(pduData);
 
-    QVector<quint16> values;
+    QList<quint16> values;
     quint16 tmp;
     for (int i = 0; i < writeQuantity; i++) {
         stream >> tmp;

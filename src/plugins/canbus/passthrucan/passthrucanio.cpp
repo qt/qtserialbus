@@ -287,7 +287,7 @@ void PassThruCanIO::readMessages(bool writePending)
             return;
     }
     const int numFrames = qMin<ulong>(m_ioBuffer.size(), numMsgs);
-    QVector<QCanBusFrame> frames;
+    QList<QCanBusFrame> frames;
     frames.reserve(numFrames);
 
     for (int i = 0; i < numFrames; ++i) {

@@ -120,7 +120,7 @@ private slots:
         QCOMPARE(unit.valueCount(), 24u);
         QCOMPARE(unit.startAddress(), 100);
         QCOMPARE(unit.values(),
-            QVector<quint16>({ 1,0,1,1,0,0,1,1, 1,1,0,1,0,1,1,0, 1,0,1,0,0,0,0,0 }));
+            QList<quint16>({ 1,0,1,1,0,0,1,1, 1,1,0,1,0,1,1,0, 1,0,1,0,0,0,0,0 }));
         QCOMPARE(unit.registerType(), QModbusDataUnit::Coils);
 
         unit = QModbusDataUnit();
@@ -131,7 +131,7 @@ private slots:
         QCOMPARE(unit.isValid(), true);
         QCOMPARE(unit.valueCount(), 1u);
         QCOMPARE(unit.startAddress(), 172);
-        QCOMPARE(unit.values(), QVector<quint16>() << Coil::On);
+        QCOMPARE(unit.values(), QList<quint16>() << Coil::On);
         QCOMPARE(unit.registerType(), QModbusDataUnit::Coils);
 
         unit = QModbusDataUnit();
@@ -142,7 +142,7 @@ private slots:
         QCOMPARE(unit.isValid(), true);
         QCOMPARE(unit.valueCount(), 10u);
         QCOMPARE(unit.startAddress(), 19);
-        QCOMPARE(unit.values(), QVector<quint16>());
+        QCOMPARE(unit.values(), QList<quint16>());
         QCOMPARE(unit.registerType(), QModbusDataUnit::Coils);
     }
 
@@ -159,7 +159,7 @@ private slots:
         QCOMPARE(unit.valueCount(), 24u);
         QCOMPARE(unit.startAddress(), 100);
         QCOMPARE(unit.values(),
-            QVector<quint16>({ 1,0,1,1,0,0,1,1, 1,1,0,1,0,1,1,0, 1,0,1,0,0,0,0,0 }));
+            QList<quint16>({ 1,0,1,1,0,0,1,1, 1,1,0,1,0,1,1,0, 1,0,1,0,0,0,0,0 }));
         QCOMPARE(unit.registerType(), QModbusDataUnit::DiscreteInputs);
 
         response.setFunctionCode(QModbusPdu::FunctionCode(0x82));
@@ -189,7 +189,7 @@ private slots:
         QCOMPARE(unit.isValid(), true);
         QCOMPARE(unit.valueCount(), 2u);
         QCOMPARE(unit.startAddress(), 100);
-        QCOMPARE(unit.values(), QVector<quint16>({ 52587, 1407 }));
+        QCOMPARE(unit.values(), QList<quint16>({ 52587, 1407 }));
         QCOMPARE(unit.registerType(), QModbusDataUnit::HoldingRegisters);
 
         response.setFunctionCode(QModbusPdu::FunctionCode(0x83));
@@ -219,7 +219,7 @@ private slots:
         QCOMPARE(unit.isValid(), true);
         QCOMPARE(unit.valueCount(), 2u);
         QCOMPARE(unit.startAddress(), 100);
-        QCOMPARE(unit.values(), QVector<quint16>({ 52587, 1407 }));
+        QCOMPARE(unit.values(), QList<quint16>({ 52587, 1407 }));
         QCOMPARE(unit.registerType(), QModbusDataUnit::InputRegisters);
 
         response.setFunctionCode(QModbusPdu::FunctionCode(0x84));
@@ -248,7 +248,7 @@ private slots:
         QCOMPARE(unit.isValid(), true);
         QCOMPARE(unit.valueCount(), 1u);
         QCOMPARE(unit.startAddress(), 1229);
-        QCOMPARE(unit.values(), QVector<quint16>(1, 27397u));
+        QCOMPARE(unit.values(), QList<quint16>(1, 27397u));
         QCOMPARE(unit.registerType(), QModbusDataUnit::HoldingRegisters);
 
         response.setFunctionCode(QModbusPdu::FunctionCode(0x86));
@@ -308,7 +308,7 @@ private slots:
 
         QCOMPARE(unit.isValid(), true);
         QCOMPARE(unit.valueCount(), 2u);
-        QCOMPARE(unit.values(), QVector<quint16>({ 52587, 1407 }));
+        QCOMPARE(unit.values(), QList<quint16>({ 52587, 1407 }));
         QCOMPARE(unit.registerType(), QModbusDataUnit::HoldingRegisters);
 
         response.setFunctionCode(QModbusPdu::FunctionCode(0x97));
@@ -365,39 +365,40 @@ private slots:
     {
         QTest::addColumn<QModbusDataUnit::RegisterType>("rc");
         QTest::addColumn<int>("address");
-        QTest::addColumn<QVector<quint16>>("values");
+        QTest::addColumn<QList<quint16>>("values");
         QTest::addColumn<QModbusPdu::FunctionCode>("fc");
         QTest::addColumn<QByteArray>("data");
         QTest::addColumn<bool>("isValid");
 
-        QTest::newRow("QModbusDataUnit::Invalid") << QModbusDataUnit::Invalid << 19
-            << (QVector<quint16>() << 1) << QModbusRequest::Invalid << QByteArray() << false;
-        QTest::newRow("QModbusDataUnit::DiscreteInputs") << QModbusDataUnit::DiscreteInputs << 19
-            << (QVector<quint16>() << 1) << QModbusRequest::Invalid << QByteArray() << false;
-        QTest::newRow("QModbusDataUnit::InputRegisters") << QModbusDataUnit::InputRegisters << 19
-            << (QVector<quint16>() << 1) << QModbusRequest::Invalid << QByteArray() << false;
+        QTest::newRow("QModbusDataUnit::Invalid") << QModbusDataUnit::Invalid << 19 << (QList<quint16> { 1 })
+                                                  << QModbusRequest::Invalid << QByteArray() << false;
+        QTest::newRow("QModbusDataUnit::DiscreteInputs")
+                << QModbusDataUnit::DiscreteInputs << 19 << (QList<quint16> { 1 }) << QModbusRequest::Invalid
+                << QByteArray() << false;
+        QTest::newRow("QModbusDataUnit::InputRegisters")
+                << QModbusDataUnit::InputRegisters << 19 << (QList<quint16> { 1 }) << QModbusRequest::Invalid
+                << QByteArray() << false;
 
-        QTest::newRow("QModbusDataUnit::Coils{Single}") << QModbusDataUnit::Coils << 172
-            << (QVector<quint16>() << 1) << QModbusRequest::WriteSingleCoil
-            << QByteArray::fromHex("00acff00") << true;
-        QTest::newRow("QModbusDataUnit::Coils{Multiple}") << QModbusDataUnit::Coils << 19
-            << (QVector<quint16>({ 1,0,1,1,0,0,1,1, 1,0 /* 6 times padding */ }))
-            << QModbusRequest::WriteMultipleCoils << QByteArray::fromHex("0013000a02cd01")
-            << true;
+        QTest::newRow("QModbusDataUnit::Coils{Single}")
+                << QModbusDataUnit::Coils << 172 << (QList<quint16> { 1 }) << QModbusRequest::WriteSingleCoil
+                << QByteArray::fromHex("00acff00") << true;
+        QTest::newRow("QModbusDataUnit::Coils{Multiple}")
+                << QModbusDataUnit::Coils << 19
+                << (QList<quint16> { 1,0,1,1,0,0,1,1, 1,0 /* 6 times padding */ })
+                << QModbusRequest::WriteMultipleCoils << QByteArray::fromHex("0013000a02cd01") << true;
         QTest::newRow("QModbusDataUnit::HoldingRegisters{Single}")
-            << QModbusDataUnit::HoldingRegisters << 1229 << (QVector<quint16>() << 27397u)
-            << QModbusRequest::WriteSingleRegister << QByteArray::fromHex("04cd6b05") << true;
+                << QModbusDataUnit::HoldingRegisters << 1229 << (QList<quint16> { 27397u })
+                << QModbusRequest::WriteSingleRegister << QByteArray::fromHex("04cd6b05") << true;
         QTest::newRow("QModbusDataUnit::HoldingRegisters{Multiple}")
-            << QModbusDataUnit::HoldingRegisters << 1 << (QVector<quint16>() << 27397u << 27397u)
-            << QModbusRequest::WriteMultipleRegisters << QByteArray::fromHex("00010002046b056b05")
-            << true;
+                << QModbusDataUnit::HoldingRegisters << 1 << (QList<quint16> { 27397u, 27397u })
+                << QModbusRequest::WriteMultipleRegisters << QByteArray::fromHex("00010002046b056b05") << true;
     }
 
     void testPrivateCreateWriteRequest()
     {
         QFETCH(QModbusDataUnit::RegisterType, rc);
         QFETCH(int, address);
-        QFETCH(QVector<quint16>, values);
+        QFETCH(QList<quint16>, values);
 
         TestClient client;
         QModbusDataUnit write(rc, address, values);
@@ -411,30 +412,32 @@ private slots:
     {
         QTest::addColumn<QModbusDataUnit::RegisterType>("rc");
         QTest::addColumn<int>("address");
-        QTest::addColumn<QVector<quint16>>("values");
+        QTest::addColumn<QList<quint16>>("values");
         QTest::addColumn<QModbusPdu::FunctionCode>("fc");
         QTest::addColumn<QByteArray>("data");
         QTest::addColumn<bool>("isValid");
 
-        QTest::newRow("QModbusDataUnit::Invalid") << QModbusDataUnit::Invalid << 19
-            << (QVector<quint16>() << 1) << QModbusRequest::Invalid << QByteArray() << false;
-        QTest::newRow("QModbusDataUnit::Coils") << QModbusDataUnit::Invalid << 172
-            << (QVector<quint16>() << 1) << QModbusRequest::Invalid << QByteArray() << false;
-        QTest::newRow("QModbusDataUnit::DiscreteInputs") << QModbusDataUnit::DiscreteInputs << 19
-            << (QVector<quint16>() << 1) << QModbusRequest::Invalid << QByteArray() << false;
-        QTest::newRow("QModbusDataUnit::InputRegisters") << QModbusDataUnit::InputRegisters << 19
-            << (QVector<quint16>() << 1) << QModbusRequest::Invalid << QByteArray() << false;
+        QTest::newRow("QModbusDataUnit::Invalid") << QModbusDataUnit::Invalid << 19 << (QList<quint16> { 1 })
+                                                  << QModbusRequest::Invalid << QByteArray() << false;
+        QTest::newRow("QModbusDataUnit::Coils") << QModbusDataUnit::Invalid << 172 << (QList<quint16> { 1 })
+                                                << QModbusRequest::Invalid << QByteArray() << false;
+        QTest::newRow("QModbusDataUnit::DiscreteInputs")
+                << QModbusDataUnit::DiscreteInputs << 19 << (QList<quint16> { 1 }) << QModbusRequest::Invalid
+                << QByteArray() << false;
+        QTest::newRow("QModbusDataUnit::InputRegisters")
+                << QModbusDataUnit::InputRegisters << 19 << (QList<quint16> { 1 }) << QModbusRequest::Invalid
+                << QByteArray() << false;
         QTest::newRow("QModbusDataUnit::HoldingRegisters{Read|Write}")
-            << QModbusDataUnit::HoldingRegisters << 1 << (QVector<quint16>() << 27397u << 27397u)
-            << QModbusRequest::ReadWriteMultipleRegisters
-            << QByteArray::fromHex("0001000200010002046b056b05") << true;
+                << QModbusDataUnit::HoldingRegisters << 1 << (QList<quint16> { 27397u, 27397u })
+                << QModbusRequest::ReadWriteMultipleRegisters << QByteArray::fromHex("0001000200010002046b056b05")
+                << true;
     }
 
     void testPrivateCreateRWRequest()
     {
         QFETCH(QModbusDataUnit::RegisterType, rc);
         QFETCH(int, address);
-        QFETCH(QVector<quint16>, values);
+        QFETCH(QList<quint16>, values);
 
         TestClient client;
         QModbusDataUnit read(rc, address, values.count());

@@ -399,7 +399,7 @@ void VectorCanBackendPrivate::startRead()
 {
     Q_Q(VectorCanBackend);
 
-    QVector<QCanBusFrame> newFrames;
+    QList<QCanBusFrame> newFrames;
 
     for (;;) {
         quint32 eventCount = 1;

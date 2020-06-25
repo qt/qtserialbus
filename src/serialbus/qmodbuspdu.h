@@ -37,8 +37,8 @@
 #define QMODBUSPDU_H
 
 #include <QtCore/qdatastream.h>
+#include <QtCore/qlist.h>
 #include <QtCore/qmetatype.h>
-#include <QtCore/qvector.h>
 #include <QtSerialBus/qtserialbusglobal.h>
 
 QT_BEGIN_NAMESPACE
@@ -154,7 +154,9 @@ private:
         static_assert(IsType<T, quint8 *, quint16 *>::value, "Only quint8* and quint16* supported.");
         (*stream) >> *t;
     }
-    template <typename T> void encode(QDataStream *stream, const QVector<T> &vector) {
+    template<typename T>
+    void encode(QDataStream *stream, const QList<T> &vector)
+    {
         static_assert(is_pod<T>::value, "Only POD types supported.");
         static_assert(IsType<T, quint8, quint16>::value, "Only quint8 and quint16 supported.");
         for (int i = 0; i < vector.count(); ++i)

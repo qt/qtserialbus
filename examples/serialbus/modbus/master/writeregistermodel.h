@@ -82,7 +82,7 @@ public:
     int m_number = 0;
     int m_address = 0;
     QBitArray m_coils;
-    QVector<quint16> m_holdingRegisters;
+    QList<quint16> m_holdingRegisters;
 };
 
 #endif // WRITEREGISTERMODEL_H

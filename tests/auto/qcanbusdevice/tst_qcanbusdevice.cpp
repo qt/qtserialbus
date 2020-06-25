@@ -210,7 +210,7 @@ void tst_QCanBusDevice::conf()
     QVariant value = device->configurationParameter(QCanBusDevice::ErrorFilterKey);
     QVERIFY(value.isValid());
 
-    QVector<int> keys = device->configurationKeys();
+    QList<int> keys = device->configurationKeys();
     QCOMPARE(keys.size(), 1);
     QVERIFY(keys.at(0) == QCanBusDevice::ErrorFilterKey);
 
@@ -294,7 +294,7 @@ void tst_QCanBusDevice::readAll()
     device->disconnectDevice();
     QTRY_VERIFY_WITH_TIMEOUT(device->state() == QCanBusDevice::UnconnectedState, 5000);
 
-    const QVector<QCanBusFrame> empty = device->readAllFrames();
+    const QList<QCanBusFrame> empty = device->readAllFrames();
     QCOMPARE(device->error(), QCanBusDevice::OperationError);
     QVERIFY(empty.isEmpty());
 
@@ -304,7 +304,7 @@ void tst_QCanBusDevice::readAll()
     for (int i = 0; i < FrameNumber; ++i)
         device->triggerNewFrame();
 
-    const QVector<QCanBusFrame> frames = device->readAllFrames();
+    const QList<QCanBusFrame> frames = device->readAllFrames();
     QCOMPARE(device->error(), QCanBusDevice::NoError);
     QCOMPARE(FrameNumber, frames.size());
     QVERIFY(!device->framesAvailable());

@@ -40,9 +40,9 @@
 #include <QtSerialBus/qcanbusdevice.h>
 #include <QtSerialBus/qcanbusframe.h>
 
+#include <QList>
 #include <QString>
 #include <QThread>
-#include <QVector>
 
 QT_BEGIN_NAMESPACE
 
@@ -79,6 +79,6 @@ private:
 QT_END_NAMESPACE
 
 Q_DECLARE_METATYPE(QCanBusDevice::CanBusError)
-Q_DECLARE_METATYPE(QVector<QCanBusFrame>)
+Q_DECLARE_METATYPE(QList<QCanBusFrame>)
 
 #endif // PASSTHRUCAN_PASSTHRUCANBACKEND_H

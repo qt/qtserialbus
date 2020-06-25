@@ -940,8 +940,8 @@ private slots:
 
         //testing server.setData(ModbusDataUnit&)
 
-        const QVector<quint16> valueVector = { 1, 1, 1, 1, 1};
-        const QVector<quint16> zeroVector = { 0, 0, 0, 0, 0};
+        const QList<quint16> valueVector = { 1, 1, 1, 1, 1 };
+        const QList<quint16> zeroVector = { 0, 0, 0, 0, 0 };
         QModbusDataUnit rangeUnit(registerType, 7, valueVector);
         QCOMPARE(rangeUnit.valueCount(), 5u);
         QCOMPARE(rangeUnit.values().count(), 5);
@@ -1085,7 +1085,7 @@ private slots:
 
         QModbusDataUnit results(QModbusDataUnit::HoldingRegisters, 3, 3);
         QVERIFY(server.data(&results));
-        QCOMPARE(results.values(), QVector<quint16>({0x1111, 0x1112, 0x1113}));
+        QCOMPARE(results.values(), QList<quint16>({ 0x1111, 0x1112, 0x1113 }));
 
         //i block write at end
         unit.setStartAddress(4);
@@ -1093,8 +1093,7 @@ private slots:
         unit.setValues({0x1, 0x2, 0x3});
         QVERIFY(server.setData(unit));
         QVERIFY(server.data(&results));
-        QCOMPARE(results.values(), QVector<quint16>({0x1, 0x2, 0x3}));
-
+        QCOMPARE(results.values(), QList<quint16>({ 0x1, 0x2, 0x3 }));
 
         unit.setStartAddress(2); // overlap in front
         QVERIFY(!server.setData(unit));

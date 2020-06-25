@@ -37,9 +37,9 @@
 #ifndef QMODBUSDATAUNIT_H
 #define QMODBUSDATAUNIT_H
 
+#include <QtCore/qlist.h>
 #include <QtCore/qmap.h>
 #include <QtCore/qmetatype.h>
-#include <QtCore/qvector.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -61,10 +61,10 @@ public:
     {}
 
     QModbusDataUnit(RegisterType type, int newStartAddress, quint16 newValueCount)
-        : QModbusDataUnit(type, newStartAddress, QVector<quint16>(newValueCount))
+        : QModbusDataUnit(type, newStartAddress, QList<quint16>(newValueCount))
     {}
 
-    QModbusDataUnit(RegisterType type, int newStartAddress, const QVector<quint16> &newValues)
+    QModbusDataUnit(RegisterType type, int newStartAddress, const QList<quint16> &newValues)
         : m_type(type)
         , m_startAddress(newStartAddress)
         , m_values(newValues)
@@ -77,8 +77,8 @@ public:
     inline int startAddress() const { return m_startAddress; }
     inline void setStartAddress(int newAddress) { m_startAddress = newAddress; }
 
-    inline QVector<quint16> values() const { return m_values; }
-    inline void setValues(const QVector<quint16> &newValues)
+    inline QList<quint16> values() const { return m_values; }
+    inline void setValues(const QList<quint16> &newValues)
     {
         m_values = newValues;
         m_valueCount = newValues.size();
@@ -100,7 +100,7 @@ public:
 private:
     RegisterType m_type = Invalid;
     int m_startAddress = -1;
-    QVector<quint16> m_values;
+    QList<quint16> m_values;
     uint m_valueCount = 0;
 };
 typedef QMap<QModbusDataUnit::RegisterType, QModbusDataUnit> QModbusDataUnitMap;
