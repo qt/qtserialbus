@@ -190,7 +190,7 @@ public:
     void onAboutToClose()
     {
         Q_Q(QModbusRtuSerialMaster);
-        Q_UNUSED(q) // avoid warning in release mode
+        Q_UNUSED(q); // avoid warning in release mode
         Q_ASSERT(q->state() == QModbusDevice::ClosingState);
 
         m_responseTimer.stop();

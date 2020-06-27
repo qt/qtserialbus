@@ -66,7 +66,7 @@ ModbusTcpClient::ModbusTcpClient(ModbusTcpClientPrivate &dd, QObject *parent)
 
 void ModbusTcpClient::valueChanged(int value)
 {
-    Q_UNUSED(value)
+    Q_UNUSED(value);
     Q_D(ModbusTcpClient);
 
     if (auto instance = MainWindow::instance()) {

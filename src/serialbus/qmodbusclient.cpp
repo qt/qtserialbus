@@ -236,8 +236,8 @@ bool QModbusClient::processResponse(const QModbusResponse &response, QModbusData
 */
 bool QModbusClient::processPrivateResponse(const QModbusResponse &response, QModbusDataUnit *data)
 {
-    Q_UNUSED(response)
-    Q_UNUSED(data)
+    Q_UNUSED(response);
+    Q_UNUSED(data);
     return false;
 }
 

@@ -170,7 +170,7 @@ private:
         if (argCount > 0) {
             QDataStream stream(&m_data, QIODevice::WriteOnly);
             char tmp[argCount] = { (encode(&stream, newData), void(), '0')... };
-            Q_UNUSED(tmp)
+            Q_UNUSED(tmp);
         }
     }
     template<typename ... Args> void decode(Args ... newData) const {
@@ -178,7 +178,7 @@ private:
         if (argCount > 0 && !m_data.isEmpty()) {
             QDataStream stream(m_data);
             char tmp[argCount] = { (decode(&stream, newData), void(), '0')... };
-            Q_UNUSED(tmp)
+            Q_UNUSED(tmp);
         }
     }
 
