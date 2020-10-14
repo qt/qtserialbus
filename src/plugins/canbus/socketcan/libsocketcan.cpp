@@ -87,10 +87,14 @@ LibSocketCan::LibSocketCan(QString *errorString)
 {
 #if QT_CONFIG(library)
     auto resolveSymbols = [](QLibrary *library) {
+        const QString libName = QStringLiteral("socketcan");
         if (!library->isLoaded()) {
-            library->setFileName(QStringLiteral("socketcan"));
-            if (!library->load())
-                return false;
+            library->setFileName(libName);
+            if (!library->load()) {
+                library->setFileNameAndVersion(libName, 2);
+                if (!library->load())
+                    return false;
+            }
         }
 
         RESOLVE_SYMBOL(can_do_start);
