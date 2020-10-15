@@ -355,7 +355,7 @@ void TinyCanBackendPrivate::startWrite()
     TCanMsg message = {};
 
     if (Q_UNLIKELY(payload.size() > int(sizeof(message.Data.Bytes)))) {
-        qCWarning(QT_CANBUS_PLUGINS_TINYCAN, "Cannot write frame with payload size %d.", payload.size());
+        qCWarning(QT_CANBUS_PLUGINS_TINYCAN, "Cannot write frame with payload size %d.", int(payload.size()));
     } else {
         message.Id = frame.frameId();
         message.Flags.Flag.Len = payload.size();

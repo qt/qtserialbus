@@ -37,6 +37,7 @@
 #define QMODBUSPDU_H
 
 #include <QtCore/qdatastream.h>
+#include <QtCore/qiodevice.h>
 #include <QtCore/qlist.h>
 #include <QtCore/qmetatype.h>
 #include <QtSerialBus/qtserialbusglobal.h>
