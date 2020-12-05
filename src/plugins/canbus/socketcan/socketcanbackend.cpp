@@ -349,7 +349,7 @@ bool SocketCanBackend::applyConfigurationParameter(int key, const QVariant &valu
     case QCanBusDevice::BitRateKey:
     {
         const quint32 bitRate = value.toUInt();
-        libSocketCan->setBitrate(canSocketName, bitRate);
+        success = libSocketCan->setBitrate(canSocketName, bitRate);
         break;
     }
     default:
