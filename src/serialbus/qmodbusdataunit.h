@@ -105,7 +105,7 @@ private:
 };
 typedef QMap<QModbusDataUnit::RegisterType, QModbusDataUnit> QModbusDataUnitMap;
 
-Q_DECLARE_TYPEINFO(QModbusDataUnit, Q_MOVABLE_TYPE);
+Q_DECLARE_TYPEINFO(QModbusDataUnit, Q_RELOCATABLE_TYPE);
 Q_DECLARE_TYPEINFO(QModbusDataUnit::RegisterType, Q_PRIMITIVE_TYPE);
 
 QT_END_NAMESPACE

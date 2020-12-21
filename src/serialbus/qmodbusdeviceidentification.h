@@ -110,7 +110,7 @@ private:
     QMap<int, QByteArray> m_objects;
     ConformityLevel m_conformityLevel = BasicConformityLevel;
 };
-Q_DECLARE_TYPEINFO(QModbusDeviceIdentification, Q_MOVABLE_TYPE);
+Q_DECLARE_TYPEINFO(QModbusDeviceIdentification, Q_RELOCATABLE_TYPE);
 Q_DECLARE_TYPEINFO(QModbusDeviceIdentification::ObjectId, Q_PRIMITIVE_TYPE);
 Q_DECLARE_TYPEINFO(QModbusDeviceIdentification::ReadDeviceIdCode, Q_PRIMITIVE_TYPE);
 Q_DECLARE_TYPEINFO(QModbusDeviceIdentification::ConformityLevel, Q_PRIMITIVE_TYPE);
