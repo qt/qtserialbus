@@ -69,9 +69,10 @@ public:
     static bool canCreate(QString *errorReason);
     static QList<QCanBusDeviceInfo> interfaces();
 
-private:
-    QCanBusDevice::CanBusStatus busStatus();
+    bool hasBusStatus() const override;
+    CanBusStatus busStatus() override;
 
+private:
     VectorCanBackendPrivate * const d_ptr;
 };
 

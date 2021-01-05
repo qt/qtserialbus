@@ -345,30 +345,6 @@ bool QCanBusDevice::hasOutgoingFrames() const
 }
 
 /*!
- * \since 5.14
- * Called from the derived plugin to register a function \a resetter which performs the
- * CAN controller hardware reset when resetController() is called.
- */
-void QCanBusDevice::setResetControllerFunction(std::function<void()> resetter)
-{
-    Q_D(QCanBusDevice);
-
-    d->m_resetControllerFunction = std::move(resetter);
-}
-
-/*!
- * \since 5.14
- * Called from the derived plugin to register a function \a busStatusGetter
- * which returns the CAN controller bus status when busStatus() is called.
- */
-void QCanBusDevice::setCanBusStatusGetter(std::function<CanBusStatus()> busStatusGetter)
-{
-    Q_D(QCanBusDevice);
-
-    d->m_busStatusGetter = std::move(busStatusGetter);
-}
-
-/*!
     Sets the configuration parameter \a key for the CAN bus connection
     to \a value. The potential keys are represented by \l ConfigurationKey.
 
@@ -510,14 +486,10 @@ qint64 QCanBusDevice::framesToWrite() const
 */
 void QCanBusDevice::resetController()
 {
-    if (d_func()->m_resetControllerFunction) {
-        d_func()->m_resetControllerFunction();
-    } else {
-        const char error[] = QT_TRANSLATE_NOOP("QCanBusDevice",
-                "This CAN bus plugin does not support hardware controller reset.");
-        qCWarning(QT_CANBUS, error);
-        setError(tr(error), QCanBusDevice::CanBusError::ConfigurationError);
-    }
+    const char error[] = QT_TRANSLATE_NOOP("QCanBusDevice",
+            "This CAN bus plugin does not support hardware controller reset.");
+    qCWarning(QT_CANBUS, error);
+    setError(tr(error), QCanBusDevice::CanBusError::ConfigurationError);
 }
 
 /*!
@@ -529,7 +501,7 @@ void QCanBusDevice::resetController()
  */
 bool QCanBusDevice::hasBusStatus() const
 {
-    return d_func()->m_busStatusGetter != nullptr;
+    return false;
 }
 
 /*!
@@ -561,11 +533,8 @@ bool QCanBusDevice::hasBusStatus() const
 
     \sa hasBusStatus(), resetController()
 */
-QCanBusDevice::CanBusStatus QCanBusDevice::busStatus() const
+QCanBusDevice::CanBusStatus QCanBusDevice::busStatus()
 {
-    if (d_func()->m_busStatusGetter)
-        return d_func()->m_busStatusGetter();
-
     return QCanBusDevice::CanBusStatus::Unknown;
 }
 

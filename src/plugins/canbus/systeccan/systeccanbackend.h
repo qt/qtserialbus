@@ -75,10 +75,11 @@ public:
                                               uint deviceNumber,
                                               int channelNumber);
 
-private:
-    void resetController();
-    QCanBusDevice::CanBusStatus busStatus();
+    void resetController() override;
+    bool hasBusStatus() const override;
+    CanBusStatus busStatus() override;
 
+private:
     SystecCanBackendPrivate * const d_ptr;
 };
 

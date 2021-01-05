@@ -782,12 +782,6 @@ PeakCanBackend::PeakCanBackend(const QString &name, QObject *parent)
 
     d->setupChannel(name.toLatin1());
     d->setupDefaultConfigurations();
-
-    std::function<void()> f = std::bind(&PeakCanBackend::resetController, this);
-    setResetControllerFunction(f);
-
-    std::function<CanBusStatus()> g = std::bind(&PeakCanBackend::busStatus, this);
-    setCanBusStatusGetter(g);
 }
 
 PeakCanBackend::~PeakCanBackend()
@@ -885,7 +879,12 @@ void PeakCanBackend::resetController()
     open();
 }
 
-QCanBusDevice::CanBusStatus PeakCanBackend::busStatus() const
+bool PeakCanBackend::hasBusStatus() const
+{
+    return true;
+}
+
+QCanBusDevice::CanBusStatus PeakCanBackend::busStatus()
 {
     const TPCANStatus status = ::CAN_GetStatus(d_ptr->channelIndex);
 

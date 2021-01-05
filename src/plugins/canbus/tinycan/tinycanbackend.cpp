@@ -508,9 +508,6 @@ TinyCanBackend::TinyCanBackend(const QString &name, QObject *parent)
 
     d->setupChannel(name);
     d->setupDefaultConfigurations();
-
-    std::function<void()> f = std::bind(&TinyCanBackend::resetController, this);
-    setResetControllerFunction(f);
 }
 
 TinyCanBackend::~TinyCanBackend()

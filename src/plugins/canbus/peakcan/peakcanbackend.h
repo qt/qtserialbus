@@ -72,10 +72,11 @@ public:
     static QList<QCanBusDeviceInfo> interfacesByAttachedChannels(bool *ok);
     static QList<QCanBusDeviceInfo> interfaces();
 
-private:
-    void resetController();
-    CanBusStatus busStatus() const;
+    void resetController() override;
+    bool hasBusStatus() const override;
+    CanBusStatus busStatus() override;
 
+private:
     PeakCanBackendPrivate * const d_ptr;
 };
 
