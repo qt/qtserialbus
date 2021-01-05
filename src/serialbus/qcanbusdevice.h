@@ -1,6 +1,7 @@
 /****************************************************************************
 **
 ** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2021 Andre Hartmann <aha_1980@gmx.de>
 ** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of the QtSerialBus module of the Qt Toolkit.
@@ -149,7 +150,6 @@ public:
     virtual bool waitForFramesWritten(int msecs);
     virtual bool waitForFramesReceived(int msecs);
 
-    // TODO rename these once QIODevice dependency has been removed
     bool connectDevice();
     void disconnectDevice();
 
@@ -177,8 +177,6 @@ protected:
     QCanBusFrame dequeueOutgoingFrame();
     bool hasOutgoingFrames() const;
 
-    // TODO Remove once official plugin system is gone
-    //      Can be folded into one call to connectDevice() & disconnectDevice()
     virtual bool open() = 0;
     virtual void close() = 0;
 
