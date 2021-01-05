@@ -494,12 +494,6 @@ SystecCanBackend::SystecCanBackend(const QString &name, QObject *parent) :
 
     d->setupChannel(name);
     d->setupDefaultConfigurations();
-
-    std::function<void()> f = std::bind(&SystecCanBackend::resetController, this);
-    setResetControllerFunction(f);
-
-    std::function<CanBusStatus()> g = std::bind(&SystecCanBackend::busStatus, this);
-    setCanBusStatusGetter(g);
 }
 
 SystecCanBackend::~SystecCanBackend()
@@ -595,6 +589,11 @@ void SystecCanBackend::resetController()
 {
     Q_D(SystecCanBackend);
     d->resetController();
+}
+
+bool SystecCanBackend::hasBusStatus() const
+{
+    return true;
 }
 
 QCanBusDevice::CanBusStatus SystecCanBackend::busStatus()

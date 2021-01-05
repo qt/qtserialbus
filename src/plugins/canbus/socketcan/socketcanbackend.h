@@ -100,6 +100,10 @@ public:
 
     static QList<QCanBusDeviceInfo> interfaces();
 
+    void resetController() override;
+    bool hasBusStatus() const override;
+    CanBusStatus busStatus() override;
+
 private Q_SLOTS:
     void readSocket();
 
@@ -107,9 +111,6 @@ private:
     void resetConfigurations();
     bool connectSocket();
     bool applyConfigurationParameter(ConfigurationKey key, const QVariant &value);
-    void resetController();
-    bool hasBusStatus() const;
-    QCanBusDevice::CanBusStatus busStatus() const;
 
     int protocol = CAN_RAW;
     canfd_frame m_frame;

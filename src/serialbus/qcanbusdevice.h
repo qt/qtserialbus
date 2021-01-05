@@ -135,9 +135,9 @@ public:
     qint64 framesAvailable() const;
     qint64 framesToWrite() const;
 
-    void resetController();
-    bool hasBusStatus() const;
-    QCanBusDevice::CanBusStatus busStatus() const;
+    virtual void resetController();
+    virtual bool hasBusStatus() const;
+    virtual CanBusStatus busStatus();
 
     enum Direction {
         Input = 1,
@@ -180,9 +180,6 @@ protected:
 
     virtual bool open() = 0;
     virtual void close() = 0;
-
-    void setResetControllerFunction(std::function<void()> resetter);
-    void setCanBusStatusGetter(std::function<CanBusStatus()> busStatusGetter);
 
     static QCanBusDeviceInfo createDeviceInfo(const QString &name,
                                               bool isVirtual = false,

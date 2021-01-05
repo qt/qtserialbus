@@ -70,9 +70,9 @@ public:
     static bool canCreate(QString *errorReason);
     static QList<QCanBusDeviceInfo> interfaces();
 
-private:
-    void resetController();
+    void resetController() override;
 
+private:
     TinyCanBackendPrivate * const d_ptr;
 };
 

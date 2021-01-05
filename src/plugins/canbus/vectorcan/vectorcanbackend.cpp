@@ -548,9 +548,6 @@ VectorCanBackend::VectorCanBackend(const QString &name, QObject *parent)
 
     d->setupChannel(name);
     d->setupDefaultConfigurations();
-
-    std::function<CanBusStatus()> g = std::bind(&VectorCanBackend::busStatus, this);
-    setCanBusStatusGetter(g);
 }
 
 VectorCanBackend::~VectorCanBackend()
@@ -642,6 +639,11 @@ QString VectorCanBackend::interpretErrorFrame(const QCanBusFrame &errorFrame)
     Q_UNUSED(errorFrame);
 
     return QString();
+}
+
+bool VectorCanBackend::hasBusStatus() const
+{
+    return true;
 }
 
 QCanBusDevice::CanBusStatus VectorCanBackend::busStatus()
