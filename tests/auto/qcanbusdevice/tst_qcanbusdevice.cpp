@@ -211,7 +211,7 @@ void tst_QCanBusDevice::conf()
     QVariant value = device->configurationParameter(QCanBusDevice::ErrorFilterKey);
     QVERIFY(value.isValid());
 
-    QList<int> keys = device->configurationKeys();
+    QList<QCanBusDevice::ConfigurationKey> keys = device->configurationKeys();
     QCOMPARE(keys.size(), 1);
     QVERIFY(keys.at(0) == QCanBusDevice::ErrorFilterKey);
 

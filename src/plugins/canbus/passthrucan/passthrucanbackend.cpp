@@ -130,7 +130,7 @@ PassThruCanBackend::~PassThruCanBackend()
     m_canIO->deleteLater();
 }
 
-void PassThruCanBackend::setConfigurationParameter(int key, const QVariant &value)
+void PassThruCanBackend::setConfigurationParameter(ConfigurationKey key, const QVariant &value)
 {
     QCanBusDevice::setConfigurationParameter(key, value);
 
@@ -266,7 +266,7 @@ void PassThruCanBackend::ackCloseFinished()
     setState(UnconnectedState);
 }
 
-void PassThruCanBackend::applyConfig(int key, const QVariant &value)
+void PassThruCanBackend::applyConfig(QCanBusDevice::ConfigurationKey key, const QVariant &value)
 {
     QMetaObject::invokeMethod(m_canIO, "applyConfig", Qt::QueuedConnection,
                               Q_ARG(int, key), Q_ARG(QVariant, value));

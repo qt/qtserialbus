@@ -232,7 +232,8 @@ void TinyCanBackendPrivate::close()
     isOpen = false;
 }
 
-bool TinyCanBackendPrivate::setConfigurationParameter(int key, const QVariant &value)
+bool TinyCanBackendPrivate::setConfigurationParameter(QCanBusDevice::ConfigurationKey key,
+                                                      const QVariant &value)
 {
     Q_Q(TinyCanBackend);
 
@@ -529,7 +530,7 @@ bool TinyCanBackend::open()
 
         // apply all stored configurations
         const auto keys = configurationKeys();
-        for (int key : keys) {
+        for (ConfigurationKey key : keys) {
             const QVariant param = configurationParameter(key);
             const bool success = d->setConfigurationParameter(key, param);
             if (Q_UNLIKELY(!success)) {
@@ -552,7 +553,7 @@ void TinyCanBackend::close()
     setState(QCanBusDevice::UnconnectedState);
 }
 
-void TinyCanBackend::setConfigurationParameter(int key, const QVariant &value)
+void TinyCanBackend::setConfigurationParameter(ConfigurationKey key, const QVariant &value)
 {
     Q_D(TinyCanBackend);
 

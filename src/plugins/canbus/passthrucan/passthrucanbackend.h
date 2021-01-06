@@ -56,7 +56,7 @@ public:
     explicit PassThruCanBackend(const QString &name, QObject *parent = nullptr);
     virtual ~PassThruCanBackend();
 
-    void setConfigurationParameter(int key, const QVariant &value) override;
+    void setConfigurationParameter(ConfigurationKey key, const QVariant &value) override;
     bool writeFrame(const QCanBusFrame &frame) override;
     QString interpretErrorFrame(const QCanBusFrame &errorFrame) override;
 
@@ -69,7 +69,7 @@ protected:
 private:
     void ackOpenFinished(bool success);
     void ackCloseFinished();
-    void applyConfig(int key, const QVariant &value);
+    void applyConfig(QCanBusDevice::ConfigurationKey key, const QVariant &value);
 
     QString         m_deviceName;
     QThread         m_ioThread;

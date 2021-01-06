@@ -55,7 +55,7 @@
 
 QT_BEGIN_NAMESPACE
 
-typedef QPair<int, QVariant > ConfigEntry;
+typedef QPair<QCanBusDevice::ConfigurationKey, QVariant > ConfigEntry;
 
 class QCanBusDevicePrivate : public QObjectPrivate
 {

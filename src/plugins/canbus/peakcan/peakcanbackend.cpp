@@ -496,7 +496,8 @@ void PeakCanBackendPrivate::close()
     isOpen = false;
 }
 
-bool PeakCanBackendPrivate::setConfigurationParameter(int key, const QVariant &value)
+bool PeakCanBackendPrivate::setConfigurationParameter(QCanBusDevice::ConfigurationKey key,
+                                                      const QVariant &value)
 {
     Q_Q(PeakCanBackend);
 
@@ -816,7 +817,7 @@ bool PeakCanBackend::open()
         // Apply all stored configurations except bitrate, because
         // the bitrate cannot be changed after opening the device
         const auto keys = configurationKeys();
-        for (int key : keys) {
+        for (ConfigurationKey key : keys) {
             if (key == QCanBusDevice::BitRateKey || key == QCanBusDevice::DataBitRateKey)
                 continue;
             const QVariant param = configurationParameter(key);
@@ -841,7 +842,7 @@ void PeakCanBackend::close()
     setState(QCanBusDevice::UnconnectedState);
 }
 
-void PeakCanBackend::setConfigurationParameter(int key, const QVariant &value)
+void PeakCanBackend::setConfigurationParameter(ConfigurationKey key, const QVariant &value)
 {
     Q_D(PeakCanBackend);
 

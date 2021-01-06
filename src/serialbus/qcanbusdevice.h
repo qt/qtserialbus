@@ -125,9 +125,9 @@ public:
 
     explicit QCanBusDevice(QObject *parent = nullptr);
 
-    virtual void setConfigurationParameter(int key, const QVariant &value);
-    QVariant configurationParameter(int key) const;
-    QList<int> configurationKeys() const;
+    virtual void setConfigurationParameter(ConfigurationKey key, const QVariant &value);
+    QVariant configurationParameter(ConfigurationKey key) const;
+    QList<ConfigurationKey> configurationKeys() const;
 
     virtual bool writeFrame(const QCanBusFrame &frame) = 0;
     QCanBusFrame readFrame();

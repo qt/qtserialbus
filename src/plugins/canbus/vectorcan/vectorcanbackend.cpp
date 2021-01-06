@@ -259,7 +259,8 @@ void VectorCanBackendPrivate::close()
     portHandle = XL_INVALID_PORTHANDLE;
 }
 
-bool VectorCanBackendPrivate::setConfigurationParameter(int key, const QVariant &value)
+bool VectorCanBackendPrivate::setConfigurationParameter(QCanBusDevice::ConfigurationKey key,
+                                                        const QVariant &value)
 {
     Q_Q(VectorCanBackend);
 
@@ -289,7 +290,7 @@ bool VectorCanBackendPrivate::setConfigurationParameter(int key, const QVariant 
         return true;
     }
     default:
-        q->setError(VectorCanBackend::tr("Unsupported configuration key"),
+        q->setError(VectorCanBackend::tr("Unsupported configuration key: %1").arg(key),
                     QCanBusDevice::ConfigurationError);
         return false;
     }
@@ -575,7 +576,7 @@ bool VectorCanBackend::open()
     }
 
     const auto keys = configurationKeys();
-    for (int key : keys) {
+    for (ConfigurationKey key : keys) {
         const QVariant param = configurationParameter(key);
         const bool success = d->setConfigurationParameter(key, param);
         if (!success) {
@@ -597,7 +598,7 @@ void VectorCanBackend::close()
     setState(QCanBusDevice::UnconnectedState);
 }
 
-void VectorCanBackend::setConfigurationParameter(int key, const QVariant &value)
+void VectorCanBackend::setConfigurationParameter(ConfigurationKey key, const QVariant &value)
 {
     Q_D(VectorCanBackend);
 

@@ -381,7 +381,7 @@ void QCanBusDevice::setCanBusStatusGetter(std::function<CanBusStatus()> busStatu
 
     \sa configurationParameter()
 */
-void QCanBusDevice::setConfigurationParameter(int key, const QVariant &value)
+void QCanBusDevice::setConfigurationParameter(ConfigurationKey key, const QVariant &value)
 {
     Q_D(QCanBusDevice);
 
@@ -411,7 +411,7 @@ void QCanBusDevice::setConfigurationParameter(int key, const QVariant &value)
 
     \sa setConfigurationParameter(), configurationKeys()
 */
-QVariant QCanBusDevice::configurationParameter(int key) const
+QVariant QCanBusDevice::configurationParameter(ConfigurationKey key) const
 {
     Q_D(const QCanBusDevice);
 
@@ -430,11 +430,11 @@ QVariant QCanBusDevice::configurationParameter(int key) const
     If a key is not explicitly mentioned the platform's
     default setting for the relevant key is used.
 */
-QList<int> QCanBusDevice::configurationKeys() const
+QList<QCanBusDevice::ConfigurationKey> QCanBusDevice::configurationKeys() const
 {
     Q_D(const QCanBusDevice);
 
-    QList<int> result;
+    QList<ConfigurationKey> result;
     for (const ConfigEntry &e : d->configOptions)
         result.append(e.first);
 

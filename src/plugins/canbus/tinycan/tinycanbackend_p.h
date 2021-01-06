@@ -66,7 +66,7 @@ public:
 
     bool open();
     void close();
-    bool setConfigurationParameter(int key, const QVariant &value);
+    bool setConfigurationParameter(QCanBusDevice::ConfigurationKey key, const QVariant &value);
 
     QString systemErrorString(int errorCode);
     void setupChannel(const QString &interfaceName);

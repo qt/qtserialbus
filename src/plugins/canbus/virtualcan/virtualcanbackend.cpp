@@ -224,7 +224,7 @@ void VirtualCanBackend::close()
     m_clientSocket->write("disconnect:can" + QByteArray::number(m_channel) + '\n');
 }
 
-void VirtualCanBackend::setConfigurationParameter(int key, const QVariant &value)
+void VirtualCanBackend::setConfigurationParameter(ConfigurationKey key, const QVariant &value)
 {
     if (key == QCanBusDevice::ReceiveOwnKey || key == QCanBusDevice::CanFdKey)
         QCanBusDevice::setConfigurationParameter(key, value);

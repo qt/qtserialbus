@@ -63,7 +63,7 @@ public:
 
     Q_INVOKABLE void open(const QString &library, const QByteArray &subDev, uint bitRate);
     Q_INVOKABLE void close();
-    Q_INVOKABLE void applyConfig(int key, const QVariant &value);
+    Q_INVOKABLE void applyConfig(QCanBusDevice::ConfigurationKey key, const QVariant &value);
     Q_INVOKABLE void listen();
 
     // Internally locked; safe to call directly from any thread.

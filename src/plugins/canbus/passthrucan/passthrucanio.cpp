@@ -106,7 +106,7 @@ void PassThruCanIO::close()
     emit closeFinished();
 }
 
-void PassThruCanIO::applyConfig(int key, const QVariant &value)
+void PassThruCanIO::applyConfig(QCanBusDevice::ConfigurationKey key, const QVariant &value)
 {
     if (Q_UNLIKELY(!m_passThru)) {
         qCCritical(QT_CANBUS_PLUGINS_PASSTHRU, "Pass-thru interface not open");

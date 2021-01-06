@@ -251,7 +251,8 @@ void SystecCanBackendPrivate::eventHandler(QEvent *event)
         readAllReceivedMessages();
 }
 
-bool SystecCanBackendPrivate::setConfigurationParameter(int key, const QVariant &value)
+bool SystecCanBackendPrivate::setConfigurationParameter(QCanBusDevice::ConfigurationKey key,
+                                                        const QVariant &value)
 {
     Q_Q(SystecCanBackend);
 
@@ -517,8 +518,8 @@ bool SystecCanBackend::open()
 
     // Apply all stored configurations except bitrate and receive own,
     // because these cannot be applied after opening the device
-    const QList<int> keys = configurationKeys();
-    for (int key : keys) {
+    const auto keys = configurationKeys();
+    for (ConfigurationKey key : keys) {
         if (key == BitRateKey || key == ReceiveOwnKey)
             continue;
         const QVariant param = configurationParameter(key);
@@ -542,7 +543,7 @@ void SystecCanBackend::close()
     setState(QCanBusDevice::UnconnectedState);
 }
 
-void SystecCanBackend::setConfigurationParameter(int key, const QVariant &value)
+void SystecCanBackend::setConfigurationParameter(ConfigurationKey key, const QVariant &value)
 {
     Q_D(SystecCanBackend);
 

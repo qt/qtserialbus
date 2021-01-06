@@ -92,7 +92,7 @@ public:
     bool open() override;
     void close() override;
 
-    void setConfigurationParameter(int key, const QVariant &value) override;
+    void setConfigurationParameter(ConfigurationKey key, const QVariant &value) override;
 
     bool writeFrame(const QCanBusFrame &newData) override;
 
@@ -106,7 +106,7 @@ private Q_SLOTS:
 private:
     void resetConfigurations();
     bool connectSocket();
-    bool applyConfigurationParameter(int key, const QVariant &value);
+    bool applyConfigurationParameter(ConfigurationKey key, const QVariant &value);
     void resetController();
     bool hasBusStatus() const;
     QCanBusDevice::CanBusStatus busStatus() const;
