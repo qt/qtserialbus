@@ -96,6 +96,38 @@ bool QModbusRtuSerialSlave::processesBroadcast() const
 }
 
 /*!
+    \since 6.2
+
+    Returns the amount of microseconds for the silent interval between two
+    consecutive Modbus messages.
+
+    \sa setInterFrameDelay()
+*/
+int QModbusRtuSerialSlave::interFrameDelay() const
+{
+    Q_D(const QModbusRtuSerialSlave);
+    return d->m_interFrameDelayMilliseconds * 1000;
+}
+
+/*!
+    \since 6.2
+
+    Sets the amount of \a microseconds for the silent interval between two
+    consecutive Modbus messages. By default, the class implementation will use
+    a pre-calculated value according to the Modbus specification. A active or
+    running connection is not affected by such delay changes.
+
+    \note If \a microseconds is set to -1 or \a microseconds is less than the
+    pre-calculated delay then this pre-calculated value is used as frame delay.
+*/
+void QModbusRtuSerialSlave::setInterFrameDelay(int microseconds)
+{
+    Q_D(QModbusRtuSerialSlave);
+    d->m_interFrameDelayMilliseconds = qCeil(qreal(microseconds) / 1000.);
+    d->calculateInterFrameDelay();
+}
+
+/*!
     \reimp
 
      \note When calling this function, existing buffered data is removed from

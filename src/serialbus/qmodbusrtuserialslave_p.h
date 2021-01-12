@@ -337,7 +337,8 @@ public:
         });
     }
 
-    void setupEnvironment() {
+    void setupEnvironment()
+    {
         if (m_serialPort) {
             m_serialPort->setPortName(m_comPort);
             m_serialPort->setParity(m_parity);
@@ -346,10 +347,7 @@ public:
             m_serialPort->setStopBits(m_stopBits);
         }
 
-        // for calculation details see
-        // QModbusRtuSerialMasterPrivate::calculateInterFrameDelay()
-        m_interFrameDelayMilliseconds = qMax(m_interFrameDelayMilliseconds,
-                                             qCeil(3500. / (qreal(m_baudRate) / 11.)));
+        calculateInterFrameDelay();
 
         m_requestBuffer.clear();
     }
@@ -360,7 +358,6 @@ public:
     bool m_processesBroadcast = false;
     QSerialPort *m_serialPort = nullptr;
     QElapsedTimer m_interFrameTimer;
-    int m_interFrameDelayMilliseconds = 2;
 };
 
 QT_END_NAMESPACE

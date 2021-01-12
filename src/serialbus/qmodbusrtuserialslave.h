@@ -54,6 +54,9 @@ public:
 
     bool processesBroadcast() const override;
 
+    int interFrameDelay() const;
+    void setInterFrameDelay(int microseconds);
+
 protected:
     QModbusRtuSerialSlave(QModbusRtuSerialSlavePrivate &dd, QObject *parent = nullptr);
 

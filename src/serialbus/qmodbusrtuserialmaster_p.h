@@ -318,29 +318,6 @@ public:
         });
     }
 
-    /*!
-        According to the Modbus specification, in RTU mode message frames
-        are separated by a silent interval of at least 3.5 character times.
-        Calculate the timeout if we are less than 19200 baud, use a fixed
-        timeout for everything equal or greater than 19200 baud.
-        If the user set the timeout to be longer than the calculated one,
-        we'll keep the user defined.
-    */
-    void calculateInterFrameDelay()
-    {
-        // The spec recommends a timeout value of 1.750 msec. Without such
-        // precise single-shot timers use a approximated value of 1.750 msec.
-        int delayMilliSeconds = 2;
-        if (m_baudRate < 19200) {
-            // Example: 9600 baud, 11 bit per packet -> 872 char/sec
-            // so: 1000 ms / 872 char = 1.147 ms/char * 3.5 character
-            // Always round up because the spec requests at least 3.5 char.
-            delayMilliSeconds = qCeil(3500. / (qreal(m_baudRate) / 11.));
-        }
-        if (m_interFrameDelayMilliseconds < delayMilliSeconds)
-            m_interFrameDelayMilliseconds = delayMilliSeconds;
-    }
-
     void setupEnvironment()
     {
         if (m_serialPort) {
@@ -437,7 +414,6 @@ public:
     QQueue<QueueElement> m_queue;
     QSerialPort *m_serialPort = nullptr;
 
-    int m_interFrameDelayMilliseconds = 2; // A approximated value of 1.750 msec.
     int m_turnaroundDelay = 100; // Recommended value is between 100 and 200 msec.
 };
 
