@@ -38,6 +38,7 @@
 #include <QtSerialBus/qcanbusfactory.h>
 
 #include <QtTest/qtest.h>
+#include <QtCore/QtPlugin>
 
 class tst_QCanBus : public QObject
 {
@@ -125,5 +126,7 @@ void tst_QCanBus::createDevice()
 }
 
 QTEST_MAIN(tst_QCanBus)
+Q_IMPORT_PLUGIN(GenericBusPlugin)
+Q_IMPORT_PLUGIN(GenericBusPluginV1)
 
 #include "tst_qcanbus.moc"
