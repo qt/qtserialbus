@@ -186,6 +186,7 @@ private:
     FunctionCode m_code = Invalid;
     QByteArray m_data;
     friend class QModbusSerialAdu;
+    friend struct QModbusPduPrivate;
 };
 Q_SERIALBUS_EXPORT QDebug operator<<(QDebug debug, const QModbusPdu &pdu);
 Q_SERIALBUS_EXPORT QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu);
