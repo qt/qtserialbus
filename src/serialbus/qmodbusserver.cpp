@@ -311,7 +311,7 @@ bool QModbusServer::setValue(int option, const QVariant &newValue)
 {
 #define CHECK_INT_OR_UINT(val) \
     do { \
-        if ((val.type() != QVariant::Int) && (val.type() != QVariant::UInt)) \
+        if ((val.typeId() != QMetaType::Type::Int) && (val.typeId() != QMetaType::Type::UInt)) \
             return false; \
     } while (0)
 
@@ -347,7 +347,7 @@ bool QModbusServer::setValue(int option, const QVariant &newValue)
         return true;
     }
     case ListenOnlyMode: {
-        if (newValue.type() != QVariant::Bool)
+        if (newValue.typeId() != QMetaType::Type::Bool)
             return false;
         d->m_serverOptions.insert(option, newValue);
         return true;
@@ -365,7 +365,7 @@ bool QModbusServer::setValue(int option, const QVariant &newValue)
         return true;
     }
     case AdditionalData: {
-        if (newValue.type() != QVariant::ByteArray)
+        if (newValue.typeId() != QMetaType::Type::QByteArray)
             return false;
         const QByteArray additionalData = newValue.toByteArray();
         if (additionalData.size() > 249)
