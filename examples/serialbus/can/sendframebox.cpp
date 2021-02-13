@@ -112,10 +112,12 @@ QValidator::State HexStringValidator::validate(QString &input, int &pos) const
         return Invalid;
 
     // insert a space after every two hex nibbles
-    const QRegularExpression insertSpace(QStringLiteral("(?:[[:xdigit:]]{2} )*[[:xdigit:]]{3}"));
-    if (insertSpace.match(input).hasMatch()) {
-        input.insert(input.size() - 1, space);
-        pos = input.size();
+    const QRegularExpression threeDigits(QStringLiteral("[[:xdigit:]]{3}"));
+
+    while (threeDigits.match(input).hasMatch()) {
+        const QRegularExpressionMatch match = threeDigits.match(input);
+        input.insert(match.capturedEnd() - 1, space);
+        pos = match.capturedEnd() + 1;
     }
 
     return Acceptable;
