@@ -137,30 +137,30 @@ SendFrameBox::SendFrameBox(QWidget *parent) :
     m_hexStringValidator = new HexStringValidator(this);
     m_ui->payloadEdit->setValidator(m_hexStringValidator);
 
-    connect(m_ui->dataFrame, &QRadioButton::toggled, [this](bool set) {
+    connect(m_ui->dataFrame, &QRadioButton::toggled, this, [this](bool set) {
         if (set)
             m_ui->flexibleDataRateBox->setEnabled(true);
     });
 
-    connect(m_ui->remoteFrame, &QRadioButton::toggled, [this](bool set) {
+    connect(m_ui->remoteFrame, &QRadioButton::toggled, this, [this](bool set) {
         if (set) {
             m_ui->flexibleDataRateBox->setEnabled(false);
             m_ui->flexibleDataRateBox->setChecked(false);
         }
     });
 
-    connect(m_ui->errorFrame, &QRadioButton::toggled, [this](bool set) {
+    connect(m_ui->errorFrame, &QRadioButton::toggled, this, [this](bool set) {
         if (set) {
             m_ui->flexibleDataRateBox->setEnabled(false);
             m_ui->flexibleDataRateBox->setChecked(false);
         }
     });
 
-    connect(m_ui->extendedFormatBox, &QCheckBox::toggled, [this](bool set) {
+    connect(m_ui->extendedFormatBox, &QCheckBox::toggled, this, [this](bool set) {
         m_hexIntegerValidator->setMaximum(set ? MaxExtendedId : MaxStandardId);
     });
 
-    connect(m_ui->flexibleDataRateBox, &QCheckBox::toggled, [this](bool set) {
+    connect(m_ui->flexibleDataRateBox, &QCheckBox::toggled, this, [this](bool set) {
         m_hexStringValidator->setMaxLength(set ? MaxPayloadFd : MaxPayload);
         m_ui->bitrateSwitchBox->setEnabled(set);
         if (!set)
