@@ -51,6 +51,8 @@
 #include "sendframebox.h"
 #include "ui_sendframebox.h"
 
+constexpr char THREE_DIGITS[] = "[[:xdigit:]]{3}";
+
 enum {
     MaxStandardId = 0x7FF,
     MaxExtendedId = 0x10000000
@@ -60,6 +62,41 @@ enum {
     MaxPayload = 8,
     MaxPayloadFd = 64
 };
+
+bool isEvenHex(QString input)
+{
+    const QChar space = QLatin1Char(' ');
+    input.remove(space);
+
+    if (input.size() % 2)
+        return false;
+
+    return true;
+}
+
+// Formats a string of hex characters with a space between every byte
+// Example: "012345" -> "01 23 45"
+static QString formatHexData(const QString &input)
+{
+    const QChar space = QLatin1Char(' ');
+    QString out = input;
+
+    const QRegularExpression threeDigits(THREE_DIGITS);
+    const QRegularExpression oneDigitAndSpace(QStringLiteral("((\\s+)|^)([[:xdigit:]]{1})(\\s+)"));
+
+    while (oneDigitAndSpace.match(out).hasMatch() || threeDigits.match(out).hasMatch()) {
+        if (threeDigits.match(out).hasMatch()) {
+            const QRegularExpressionMatch match = threeDigits.match(out);
+            out.insert(match.capturedEnd() - 1, space);
+        } else if (oneDigitAndSpace.match(out).hasMatch()) {
+            const QRegularExpressionMatch match = oneDigitAndSpace.match(out);
+            if (out.at(match.capturedEnd() - 1) == space)
+                out.remove(match.capturedEnd() - 1, 1);
+        }
+    }
+
+    return out.simplified().toUpper();
+}
 
 HexIntegerValidator::HexIntegerValidator(QObject *parent) :
     QValidator(parent),
@@ -112,7 +149,7 @@ QValidator::State HexStringValidator::validate(QString &input, int &pos) const
         return Invalid;
 
     // insert a space after every two hex nibbles
-    const QRegularExpression threeDigits(QStringLiteral("[[:xdigit:]]{3}"));
+    const QRegularExpression threeDigits(THREE_DIGITS);
 
     while (threeDigits.match(input).hasMatch()) {
         const QRegularExpressionMatch match = threeDigits.match(input);
@@ -169,18 +206,26 @@ SendFrameBox::SendFrameBox(QWidget *parent) :
             m_ui->bitrateSwitchBox->setChecked(false);
     });
 
-    auto frameIdTextChanged = [this]() {
+    auto frameIdOrPayloadChanged = [this]() {
         const bool hasFrameId = !m_ui->frameIdEdit->text().isEmpty();
         m_ui->sendButton->setEnabled(hasFrameId);
         m_ui->sendButton->setToolTip(hasFrameId
                                      ? QString() : tr("Cannot send because no Frame ID was given."));
+        if (hasFrameId) {
+            const bool isEven = isEvenHex(m_ui->payloadEdit->text());
+            m_ui->sendButton->setEnabled(isEven);
+            m_ui->sendButton->setToolTip(isEven
+                                         ? QString() : tr("Cannot send because Payload hex string is invalid."));
+        }
     };
-    connect(m_ui->frameIdEdit, &QLineEdit::textChanged, frameIdTextChanged);
-    frameIdTextChanged();
+    connect(m_ui->frameIdEdit, &QLineEdit::textChanged, frameIdOrPayloadChanged);
+    connect(m_ui->payloadEdit, &QLineEdit::textChanged, frameIdOrPayloadChanged);
+    frameIdOrPayloadChanged();
 
     connect(m_ui->sendButton, &QPushButton::clicked, [this]() {
         const uint frameId = m_ui->frameIdEdit->text().toUInt(nullptr, 16);
         QString data = m_ui->payloadEdit->text();
+        m_ui->payloadEdit->setText(formatHexData(data));
         const QByteArray payload = QByteArray::fromHex(data.remove(QLatin1Char(' ')).toLatin1());
 
         QCanBusFrame frame = QCanBusFrame(frameId, payload);
