@@ -530,7 +530,7 @@ QString SocketCanBackend::interpretErrorFrame(const QCanBusFrame &errorFrame)
     QString errorMsg;
 
     if (errorFrame.error() & QCanBusFrame::TransmissionTimeoutError)
-        errorMsg += QStringLiteral("TX timout\n");
+        errorMsg += QStringLiteral("TX timeout\n");
 
     if (errorFrame.error() & QCanBusFrame::MissingAcknowledgmentError)
         errorMsg += QStringLiteral("Received no ACK on transmission\n");
