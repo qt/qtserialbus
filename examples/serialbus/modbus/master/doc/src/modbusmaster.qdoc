@@ -39,5 +39,5 @@
     \include examples-run.qdocinc
 
     The example must be used in conjunction with the \l {Modbus Slave example} or another
-    Mobus device which is either connected via TCP or Serial Bus.
+    Modbus device which is either connected via TCP or Serial Port.
 */

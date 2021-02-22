@@ -280,7 +280,7 @@ void MainWindow::onReadReady()
             ui->readValue->addItem(entry);
         }
     } else if (reply->error() == QModbusDevice::ProtocolError) {
-        statusBar()->showMessage(tr("Read response error: %1 (Mobus exception: 0x%2)").
+        statusBar()->showMessage(tr("Read response error: %1 (Modbus exception: 0x%2)").
                                     arg(reply->errorString()).
                                     arg(reply->rawResult().exceptionCode(), -1, 16), 5000);
     } else {
@@ -311,7 +311,7 @@ void MainWindow::onWriteButtonClicked()
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, this, [this, reply]() {
                 if (reply->error() == QModbusDevice::ProtocolError) {
-                    statusBar()->showMessage(tr("Write response error: %1 (Mobus exception: 0x%2)")
+                    statusBar()->showMessage(tr("Write response error: %1 (Modbus exception: 0x%2)")
                         .arg(reply->errorString()).arg(reply->rawResult().exceptionCode(), -1, 16),
                         5000);
                 } else if (reply->error() != QModbusDevice::NoError) {

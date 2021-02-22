@@ -139,7 +139,7 @@ void QModbusServer::setServerAddress(int serverAddress)
 }
 
 /*!
-    Returns the address of this Mobus server instance.
+    Returns the address of this Modbus server instance.
 
     \sa setServerAddress()
 */
