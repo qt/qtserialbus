@@ -3,38 +3,15 @@ Makefile*
 *.pro.user
 .qmake.cache
 *.obj
-config.tests/language/language
-config.tests/socketcan/socketcan
-config.tests/socketcan_fd/socketcan_fd
-examples/serialbus/modbus/adueditor/adueditor
-examples/serialbus/modbus/master/modbusmaster
-examples/serialbus/modbus/slave/modbusslave
 *.moc
 *.uic
 *.pch
 .rcc
-src/serialbus/doc/snippets/serialbus_cppsnippet
-src/serialbus/QtSerialBus.version*
-examples/serialbus/can/can
-tests/auto/qcanbus/tst_qcanbus
-tests/auto/qcanbusdevice/tst_qcanbusdevice
-tests/auto/qcanbusframe/tst_qcanbusframe
-tests/auto/qmodbusadu/tst_qmodbusadu
-tests/auto/qmodbusclient/tst_qmodbusclient
-tests/auto/qmodbuscommevent/tst_qmodbuscommevent
-tests/auto/qmodbusdataunit/tst_qmodbusdataunit
-tests/auto/qmodbusdevice/tst_qmodbusdevice
-tests/auto/qmodbusdeviceidentification/tst_qmodbusdeviceidentification
-tests/auto/qmodbuspdu/tst_qmodbuspdu
-tests/auto/qmodbusreply/tst_qmodbusreply
-tests/auto/qmodbusrtuserialmaster/tst_qmodbusrtuserialmaster
-tests/auto/qmodbusserver/tst_qmodbusserver
 *_resource.rc
 *.exe
 *.ipch
 *_wrapper.bat
 *_wrapper.sh
-qtserialbus-config.pri
 
 # Visual Studio generated files
 *.ib_pdb_index
@@ -51,3 +28,6 @@ qtserialbus-config.pri
 *.vcxproj.user
 *.sdf
 *.opensdf
+.vs
+CMakeSettings.json
+out/*
