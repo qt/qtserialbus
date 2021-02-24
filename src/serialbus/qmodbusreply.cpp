@@ -148,15 +148,17 @@ void QModbusReply::setFinished(bool isFinished)
     If the request has not finished, has failed with an error or was a write
     request then the returned \l QModbusDataUnit instance is invalid.
 
-    \note If the \l type() of the reply is \l QModbusReply::Raw, the return
-    value will always be invalid.
+    \note If the \l type() of the reply is \l QModbusReply::Broadcast, the
+    return value will always be invalid. If the l type() of the reply is
+    \l QModbusReply::Raw, the return value might be invalid depending on the
+    implementation of \l QModbusClient::processPrivateResponse().
 
-    \sa type(), rawResult()
+    \sa type(), rawResult(), QModbusClient::processPrivateResponse()
 */
 QModbusDataUnit QModbusReply::result() const
 {
     Q_D(const QModbusReply);
-    if (type() == QModbusReply::Common)
+    if (type() != QModbusReply::Broadcast)
         return d->m_unit;
     return QModbusDataUnit();
 }

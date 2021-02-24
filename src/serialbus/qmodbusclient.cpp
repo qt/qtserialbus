@@ -361,7 +361,7 @@ void QModbusClientPrivate::processQueueElement(const QModbusResponse &pdu,
         return;
     }
 
-    if (element.reply->type() != QModbusReply::Common) {
+    if (element.reply->type() == QModbusReply::Broadcast) {
         element.reply->setFinished(true);
         return;
     }

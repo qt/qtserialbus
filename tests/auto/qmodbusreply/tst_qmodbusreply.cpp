@@ -213,7 +213,7 @@ void tst_QModbusReply::tst_setResult()
     replyRawTest.setRawResult(response);
     QCOMPARE(finishedSpy.count(), 0);
     QCOMPARE(errorSpyRaw.count(), 0);
-    QCOMPARE(replyRawTest.result().isValid(), false);
+    QCOMPARE(replyRawTest.result().isValid(), true);
     QCOMPARE(replyRawTest.rawResult().isValid(), true);
 
     tmp = replyRawTest.rawResult();
