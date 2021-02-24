@@ -53,7 +53,7 @@
 
 #include <QLoggingCategory>
 #include <QModbusPdu>
-#include <QModbusRtuSerialMaster>
+#include <QModbusRtuSerialClient>
 #include <QSerialPortInfo>
 
 #ifndef QT_STATIC
@@ -174,7 +174,7 @@ void MainWindow::on_connectButton_clicked()
         m_device->setConnectionParameter(QModbusDevice::NetworkPortParameter,
             tcpPortEdit->text());
     } else {
-        m_device = new QModbusRtuSerialMaster;
+        m_device = new QModbusRtuSerialClient;
         m_device->setConnectionParameter(QModbusDevice::SerialPortNameParameter,
             serialPortCombo->currentText());
 

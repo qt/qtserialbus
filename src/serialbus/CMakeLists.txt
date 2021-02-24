@@ -38,17 +38,14 @@ qt_internal_add_module(SerialBus
 
 qt_internal_extend_target(SerialBus CONDITION QT_FEATURE_modbus_serialport
     SOURCES
-        qmodbusrtuserialmaster.cpp
-        qmodbusrtuserialslave.cpp
+        qmodbusrtuserialclient.cpp qmodbusrtuserialclient.h qmodbusrtuserialclient_p.h
+        qmodbusrtuserialserver.cpp qmodbusrtuserialserver.h qmodbusrtuserialserver_p.h
     PUBLIC_LIBRARIES
         Qt::SerialPort
     PRIVATE_MODULE_INTERFACE
         Qt::SerialPort
 )
 
-#### Keys ignored in scope 2:.:.:serialbus.pro:QT_FEATURE_modbus_serialport:
-# PRIVATE_HEADERS = "qmodbusrtuserialmaster_p.h" "qmodbusrtuserialslave_p.h"
-# PUBLIC_HEADERS = "qmodbusrtuserialmaster.h" "qmodbusrtuserialslave.h"
 qt_internal_add_docs(SerialBus
     doc/qtserialbus.qdocconf
 )

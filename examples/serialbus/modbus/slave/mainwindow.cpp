@@ -52,7 +52,7 @@
 #include "settingsdialog.h"
 #include "ui_mainwindow.h"
 
-#include <QModbusRtuSerialSlave>
+#include <QModbusRtuSerialServer>
 #include <QModbusTcpServer>
 #include <QRegularExpression>
 #include <QRegularExpressionValidator>
@@ -125,7 +125,7 @@ void MainWindow::onCurrentConnectTypeChanged(int index)
     auto type = static_cast<ModbusConnection>(index);
     if (type == Serial) {
 #if QT_CONFIG(modbus_serialport)
-        modbusDevice = new QModbusRtuSerialSlave(this);
+        modbusDevice = new QModbusRtuSerialServer(this);
 #endif
     } else if (type == Tcp) {
         modbusDevice = new QModbusTcpServer(this);

@@ -34,18 +34,18 @@
 **
 ****************************************************************************/
 
-#include <QtSerialBus/qmodbusrtuserialmaster.h>
+#include <QtSerialBus/qmodbusrtuserialclient.h>
 
 #include <QtTest/QtTest>
 
-class tst_QModbusRtuSerialMaster : public QObject
+class tst_QModbusRtuSerialClient : public QObject
 {
     Q_OBJECT
 
 private slots:
     void testInterFrameDelay()
     {
-        QModbusRtuSerialMaster qmrsm;
+        QModbusRtuSerialClient qmrsm;
         QCOMPARE(qmrsm.interFrameDelay(), 2000);
         qmrsm.setInterFrameDelay(1000);
         QCOMPARE(qmrsm.interFrameDelay(), 2000);
@@ -56,6 +56,6 @@ private slots:
     }
 };
 
-QTEST_MAIN(tst_QModbusRtuSerialMaster)
+QTEST_MAIN(tst_QModbusRtuSerialClient)
 
 #include "tst_qmodbusrtuserialmaster.moc"

@@ -34,37 +34,45 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSRTUSERIALMASTER_H
-#define QMODBUSRTUSERIALMASTER_H
+#ifndef QMODBUSRTUSERIALSERVER_H
+#define QMODBUSRTUSERIALSERVER_H
 
-#include <QtSerialBus/qmodbusclient.h>
+#include <QtSerialBus/qmodbusserver.h>
 
 QT_BEGIN_NAMESPACE
 
-class QModbusRtuSerialMasterPrivate;
+class QModbusRtuSerialServerPrivate;
 
-class Q_SERIALBUS_EXPORT QModbusRtuSerialMaster : public QModbusClient
+class Q_SERIALBUS_EXPORT QModbusRtuSerialServer : public QModbusServer
 {
     Q_OBJECT
-    Q_DECLARE_PRIVATE(QModbusRtuSerialMaster)
+    Q_DECLARE_PRIVATE(QModbusRtuSerialServer)
 
 public:
-    explicit QModbusRtuSerialMaster(QObject *parent = nullptr);
-    ~QModbusRtuSerialMaster();
+    explicit QModbusRtuSerialServer(QObject *parent = nullptr);
+    ~QModbusRtuSerialServer();
+
+    bool processesBroadcast() const override;
 
     int interFrameDelay() const;
     void setInterFrameDelay(int microseconds);
 
-    int turnaroundDelay() const;
-    void setTurnaroundDelay(int turnaroundDelay);
-
 protected:
-    QModbusRtuSerialMaster(QModbusRtuSerialMasterPrivate &dd, QObject *parent = nullptr);
+    QModbusRtuSerialServer(QModbusRtuSerialServerPrivate &dd, QObject *parent = nullptr);
 
-    void close() override;
     bool open() override;
+    void close() override;
+
+    QModbusResponse processRequest(const QModbusPdu &request) override;
 };
 
+#if QT_DEPRECATED_SINCE(6, 2)
+QT_WARNING_PUSH
+QT_WARNING_DISABLE_GCC("-Wattributes")
+using QModbusRtuSerialSlave
+    Q_DECL_DEPRECATED_X("Please port your application to QModbusRtuSerialServer.") = QModbusRtuSerialServer;
+#endif
+QT_WARNING_POP
 QT_END_NAMESPACE
 
-#endif // QMODBUSRTUSERIALMASTER_H
+#endif // QMODBUSRTUSERIALSERVER_H

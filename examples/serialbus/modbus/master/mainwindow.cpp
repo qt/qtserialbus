@@ -54,7 +54,7 @@
 #include "writeregistermodel.h"
 
 #include <QModbusTcpClient>
-#include <QModbusRtuSerialMaster>
+#include <QModbusRtuSerialClient>
 #include <QStandardItemModel>
 #include <QStatusBar>
 #include <QUrl>
@@ -172,7 +172,7 @@ void MainWindow::onConnectTypeChanged(int index)
     auto type = static_cast<ModbusConnection>(index);
     if (type == Serial) {
 #if QT_CONFIG(modbus_serialport)
-        modbusDevice = new QModbusRtuSerialMaster(this);
+        modbusDevice = new QModbusRtuSerialClient(this);
 #endif
     } else if (type == Tcp) {
         modbusDevice = new QModbusTcpClient(this);

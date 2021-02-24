@@ -36,7 +36,7 @@
 
 #include <QtSerialBus/qmodbusserver.h>
 #if QT_CONFIG(modbus_serialport)
-#include <QtSerialBus/qmodbusrtuserialslave.h>
+#include <QtSerialBus/qmodbusrtuserialserver.h>
 #endif
 #include <QtSerialBus/qmodbustcpserver.h>
 #include <QtSerialBus/qmodbusdeviceidentification.h>
@@ -93,7 +93,7 @@ private slots:
     {
         QCOMPARE(QModbusTcpServer().serverAddress(), 0xff);
 #if QT_CONFIG(modbus_serialport)
-        QCOMPARE(QModbusRtuSerialSlave().serverAddress(), 1);
+        QCOMPARE(QModbusRtuSerialServer().serverAddress(), 1);
 #endif
     }
 

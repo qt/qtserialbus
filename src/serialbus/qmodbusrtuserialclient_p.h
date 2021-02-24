@@ -34,15 +34,15 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSSERIALMASTER_P_H
-#define QMODBUSSERIALMASTER_P_H
+#ifndef QMODBUSRTUSERIALCLIENT_P_H
+#define QMODBUSRTUSERIALCLIENT_P_H
 
 #include <QtCore/qloggingcategory.h>
 #include <QtCore/qmath.h>
 #include <QtCore/qpointer.h>
 #include <QtCore/qqueue.h>
 #include <QtCore/qtimer.h>
-#include <QtSerialBus/qmodbusrtuserialmaster.h>
+#include <QtSerialBus/qmodbusrtuserialclient.h>
 #include <QtSerialPort/qserialport.h>
 
 #include <private/qmodbusadu_p.h>
@@ -95,9 +95,9 @@ private:
     QBasicTimer m_timer;
 };
 
-class QModbusRtuSerialMasterPrivate : public QModbusClientPrivate
+class QModbusRtuSerialClientPrivate : public QModbusClientPrivate
 {
-    Q_DECLARE_PUBLIC(QModbusRtuSerialMaster)
+    Q_DECLARE_PUBLIC(QModbusRtuSerialClient)
     enum State
     {
         Idle,
@@ -189,7 +189,7 @@ public:
 
     void onAboutToClose()
     {
-        Q_Q(QModbusRtuSerialMaster);
+        Q_Q(QModbusRtuSerialClient);
         Q_UNUSED(q); // avoid warning in release mode
         Q_ASSERT(q->state() == QModbusDevice::ClosingState);
 
@@ -250,7 +250,7 @@ public:
         qCDebug(QT_MODBUS) << "(RTU server) QSerialPort error:" << error
             << (m_serialPort ? m_serialPort->errorString() : QString());
 
-        Q_Q(QModbusRtuSerialMaster);
+        Q_Q(QModbusRtuSerialClient);
 
         switch (error) {
         case QSerialPort::DeviceNotFoundError:
@@ -293,7 +293,7 @@ public:
 
     void setupSerialPort()
     {
-        Q_Q(QModbusRtuSerialMaster);
+        Q_Q(QModbusRtuSerialClient);
         m_serialPort = new QSerialPort(q);
 
         QObject::connect(&m_responseTimer, &Timer::timeout, q, [this](int timerId) {
@@ -331,13 +331,13 @@ public:
         calculateInterFrameDelay();
 
         m_responseBuffer.clear();
-        m_state = QModbusRtuSerialMasterPrivate::Idle;
+        m_state = QModbusRtuSerialClientPrivate::Idle;
     }
 
     QModbusReply *enqueueRequest(const QModbusRequest &request, int serverAddress,
         const QModbusDataUnit &unit, QModbusReply::ReplyType type) override
     {
-        Q_Q(QModbusRtuSerialMaster);
+        Q_Q(QModbusRtuSerialClient);
 
         auto reply = new QModbusReply(serverAddress == 0 ? QModbusReply::Broadcast : type,
             serverAddress, q);
@@ -352,7 +352,7 @@ public:
 
     void scheduleNextRequest(int delay)
     {
-        Q_Q(QModbusRtuSerialMaster);
+        Q_Q(QModbusRtuSerialClient);
 
         if (m_state == Idle && !m_queue.isEmpty()) {
             m_state = WaitingForReplay;
@@ -419,6 +419,4 @@ public:
 
 QT_END_NAMESPACE
 
-#include "qmodbusrtuserialmaster_p.h"
-
-#endif // QMODBUSSERIALMASTER_P_H
+#endif // QMODBUSRTUSERIALCLIENT_P_H

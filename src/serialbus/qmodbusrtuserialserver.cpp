@@ -34,60 +34,84 @@
 **
 ****************************************************************************/
 
-#include "qmodbusrtuserialmaster.h"
-#include "qmodbusrtuserialmaster_p.h"
+#include "qmodbusrtuserialserver.h"
+#include "qmodbusrtuserialserver_p.h"
 
 #include <QtCore/qloggingcategory.h>
 
 QT_BEGIN_NAMESPACE
 
-Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
-Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS_LOW)
-
 /*!
-    \class QModbusRtuSerialMaster
+    \class QModbusRtuSerialServer
     \inmodule QtSerialBus
-    \since 5.8
+    \since 6.2
 
-    \brief The QModbusRtuSerialMaster class represents a Modbus client
-    that uses a serial bus for its communication with the Modbus server.
+    \brief The QModbusRtuSerialServer class represents a Modbus server
+    that uses a serial port for its communication with the Modbus client.
 
-    Communication via Modbus requires the interaction between a single
-    Modbus client instance and multiple Modbus servers. This class
-    provides the client implementation via a serial port.
+    Communication via Modbus requires the interaction between a single Modbus
+    client instance and multiple Modbus server. This class provides the Modbus
+    server implementation via a serial port.
+
+    Since multiple Modbus server instances can interact with a Modbus client
+    at the same time (using a serial bus), servers are identified by their
+    \l serverAddress().
 */
 
 /*!
-    Constructs a serial Modbus master with the specified \a parent.
+    Constructs a QModbusRtuSerialServer with the specified \a parent. The
+    \l serverAddress preset is \c 1.
 */
-QModbusRtuSerialMaster::QModbusRtuSerialMaster(QObject *parent)
-    : QModbusClient(*new QModbusRtuSerialMasterPrivate, parent)
+QModbusRtuSerialServer::QModbusRtuSerialServer(QObject *parent)
+    : QModbusServer(*new QModbusRtuSerialServerPrivate, parent)
 {
-    Q_D(QModbusRtuSerialMaster);
+    Q_D(QModbusRtuSerialServer);
     d->setupSerialPort();
 }
 
 /*!
-    \internal
+    Destroys the QModbusRtuSerialServer instance.
 */
-QModbusRtuSerialMaster::~QModbusRtuSerialMaster()
+QModbusRtuSerialServer::~QModbusRtuSerialServer()
 {
     close();
 }
 
 /*!
+    \internal
+*/
+QModbusRtuSerialServer::QModbusRtuSerialServer(QModbusRtuSerialServerPrivate &dd, QObject *parent)
+    : QModbusServer(dd, parent)
+{
+    Q_D(QModbusRtuSerialServer);
+    d->setupSerialPort();
+}
+
+/*!
+    \reimp
+*/
+bool QModbusRtuSerialServer::processesBroadcast() const
+{
+    return d_func()->m_processesBroadcast;
+}
+
+/*!
+    \since 6.2
+
     Returns the amount of microseconds for the silent interval between two
     consecutive Modbus messages.
 
     \sa setInterFrameDelay()
 */
-int QModbusRtuSerialMaster::interFrameDelay() const
+int QModbusRtuSerialServer::interFrameDelay() const
 {
-    Q_D(const QModbusRtuSerialMaster);
+    Q_D(const QModbusRtuSerialServer);
     return d->m_interFrameDelayMilliseconds * 1000;
 }
 
 /*!
+    \since 6.2
+
     Sets the amount of \a microseconds for the silent interval between two
     consecutive Modbus messages. By default, the class implementation will use
     a pre-calculated value according to the Modbus specification. A active or
@@ -96,62 +120,25 @@ int QModbusRtuSerialMaster::interFrameDelay() const
     \note If \a microseconds is set to -1 or \a microseconds is less than the
     pre-calculated delay then this pre-calculated value is used as frame delay.
 */
-void QModbusRtuSerialMaster::setInterFrameDelay(int microseconds)
+void QModbusRtuSerialServer::setInterFrameDelay(int microseconds)
 {
-    Q_D(QModbusRtuSerialMaster);
+    Q_D(QModbusRtuSerialServer);
     d->m_interFrameDelayMilliseconds = qCeil(qreal(microseconds) / 1000.);
     d->calculateInterFrameDelay();
 }
 
 /*!
-    \since 5.13
-
-    Returns the amount of milliseconds for the silent interval between a Modbus
-    broadcast and a consecutive Modbus messages. The default value is set to
-    \c 100 milliseconds.
-*/
-int QModbusRtuSerialMaster::turnaroundDelay() const
-{
-    Q_D(const QModbusRtuSerialMaster);
-    return d->m_turnaroundDelay;
-}
-
-/*!
-    \since 5.13
-
-    Sets the amount of milliseconds for the silent interval between a Modbus
-    broadcast and a consecutive Modbus messages to \a turnaroundDelay.
-    Typically the turnaround delay is in the range of \c 100 to \c 200
-    milliseconds.
-*/
-void QModbusRtuSerialMaster::setTurnaroundDelay(int turnaroundDelay)
-{
-    Q_D(QModbusRtuSerialMaster);
-    d->m_turnaroundDelay = turnaroundDelay;
-}
-
-/*!
-    \internal
-*/
-QModbusRtuSerialMaster::QModbusRtuSerialMaster(QModbusRtuSerialMasterPrivate &dd, QObject *parent)
-    : QModbusClient(dd, parent)
-{
-    Q_D(QModbusRtuSerialMaster);
-    d->setupSerialPort();
-}
-
-/*!
-     \reimp
+    \reimp
 
      \note When calling this function, existing buffered data is removed from
      the serial port.
 */
-bool QModbusRtuSerialMaster::open()
+bool QModbusRtuSerialServer::open()
 {
     if (state() == QModbusDevice::ConnectedState)
         return true;
 
-    Q_D(QModbusRtuSerialMaster);
+    Q_D(QModbusRtuSerialServer);
     d->setupEnvironment(); // to be done before open
     if (d->m_serialPort->open(QIODevice::ReadWrite)) {
         setState(QModbusDevice::ConnectedState);
@@ -163,35 +150,44 @@ bool QModbusRtuSerialMaster::open()
 }
 
 /*!
-     \reimp
+    \reimp
 */
-void QModbusRtuSerialMaster::close()
+void QModbusRtuSerialServer::close()
 {
     if (state() == QModbusDevice::UnconnectedState)
         return;
 
-    setState(QModbusDevice::ClosingState);
-
-    Q_D(QModbusRtuSerialMaster);
-
+    Q_D(QModbusRtuSerialServer);
     if (d->m_serialPort->isOpen())
         d->m_serialPort->close();
 
-    int numberOfAborts = 0;
-    while (!d->m_queue.isEmpty()) {
-        // Finish each open reply and forget them
-        QModbusRtuSerialMasterPrivate::QueueElement elem = d->m_queue.dequeue();
-        if (!elem.reply.isNull()) {
-            elem.reply->setError(QModbusDevice::ReplyAbortedError,
-                                 QModbusClient::tr("Reply aborted due to connection closure."));
-            numberOfAborts++;
+    setState(QModbusDevice::UnconnectedState);
+}
+
+/*!
+    \reimp
+
+    Processes the Modbus client request specified by \a request and returns a
+    Modbus response.
+
+    The Modbus function \l QModbusRequest::EncapsulatedInterfaceTransport with
+    MEI Type 13 (0x0D) CANopen General Reference is filtered out because it is
+    usually Modbus TCP or Modbus serial ASCII only.
+
+    A request to the RTU serial server will be answered with a Modbus exception
+    response with the exception code QModbusExceptionResponse::IllegalFunction.
+*/
+QModbusResponse QModbusRtuSerialServer::processRequest(const QModbusPdu &request)
+{
+    if (request.functionCode() == QModbusRequest::EncapsulatedInterfaceTransport) {
+        quint8 meiType;
+        request.decodeData(&meiType);
+        if (meiType == EncapsulatedInterfaceTransport::CanOpenGeneralReference) {
+            return QModbusExceptionResponse(request.functionCode(),
+                QModbusExceptionResponse::IllegalFunction);
         }
     }
-
-    if (numberOfAborts > 0)
-        qCDebug(QT_MODBUS_LOW) << "(RTU client) Aborted replies:" << numberOfAborts;
-
-    setState(QModbusDevice::UnconnectedState);
+    return QModbusServer::processRequest(request);
 }
 
 QT_END_NAMESPACE

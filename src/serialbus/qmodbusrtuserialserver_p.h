@@ -34,15 +34,15 @@
 **
 ****************************************************************************/
 
-#ifndef QMODBUSRTUSERIALSLAVE_P_H
-#define QMODBUSRTUSERIALSLAVE_P_H
+#ifndef QMODBUSRTUSERIALSERVER_P_H
+#define QMODBUSRTUSERIALSERVER_P_H
 
 #include <QtCore/qbytearray.h>
 #include <QtCore/qdebug.h>
 #include <QtCore/qelapsedtimer.h>
 #include <QtCore/qloggingcategory.h>
 #include <QtCore/qmath.h>
-#include <QtSerialBus/qmodbusrtuserialslave.h>
+#include <QtSerialBus/qmodbusrtuserialserver.h>
 #include <QtSerialPort/qserialport.h>
 
 #include <private/qmodbusadu_p.h>
@@ -64,14 +64,14 @@ QT_BEGIN_NAMESPACE
 Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS)
 Q_DECLARE_LOGGING_CATEGORY(QT_MODBUS_LOW)
 
-class QModbusRtuSerialSlavePrivate : public QModbusServerPrivate
+class QModbusRtuSerialServerPrivate : public QModbusServerPrivate
 {
-    Q_DECLARE_PUBLIC(QModbusRtuSerialSlave)
+    Q_DECLARE_PUBLIC(QModbusRtuSerialServer)
 
 public:
     void setupSerialPort()
     {
-        Q_Q(QModbusRtuSerialSlave);
+        Q_Q(QModbusRtuSerialServer);
 
         m_serialPort = new QSerialPort(q);
         QObject::connect(m_serialPort, &QSerialPort::readyRead, q, [this]() {
@@ -101,7 +101,7 @@ public:
             // FunctionCode                  -> 1 byte
             // FunctionCode specific content -> 0-252 bytes
             // CRC                           -> 2 bytes
-            Q_Q(QModbusRtuSerialSlave);
+            Q_Q(QModbusRtuSerialServer);
             QModbusCommEvent event = QModbusCommEvent::ReceiveEvent;
             if (q->value(QModbusServer::ListenOnlyMode).toBool())
                 event |= QModbusCommEvent::ReceiveFlag::CurrentlyInListenOnlyMode;
@@ -211,7 +211,7 @@ public:
 
             if (!m_serialPort->isOpen()) {
                 qCDebug(QT_MODBUS) << "(RTU server) Requesting serial port has closed.";
-                q->setError(QModbusRtuSerialSlave::tr("Requesting serial port is closed"),
+                q->setError(QModbusRtuSerialServer::tr("Requesting serial port is closed"),
                             QModbusDevice::WriteError);
                 incrementCounter(QModbusServerPrivate::Counter::ServerNoResponse);
                 storeModbusCommEvent(event);
@@ -221,7 +221,7 @@ public:
             qint64 writtenBytes = m_serialPort->write(result);
             if ((writtenBytes == -1) || (writtenBytes < result.size())) {
                 qCDebug(QT_MODBUS) << "(RTU server) Cannot write requested response to serial port.";
-                q->setError(QModbusRtuSerialSlave::tr("Could not write response to client"),
+                q->setError(QModbusRtuSerialServer::tr("Could not write response to client"),
                             QModbusDevice::WriteError);
                 incrementCounter(QModbusServerPrivate::Counter::ServerNoResponse);
                 storeModbusCommEvent(event);
@@ -288,7 +288,7 @@ public:
             qCDebug(QT_MODBUS) << "(RTU server) QSerialPort error:" << error
                                << (m_serialPort ? m_serialPort->errorString() : QString());
 
-            Q_Q(QModbusRtuSerialSlave);
+            Q_Q(QModbusRtuSerialServer);
 
             switch (error) {
             case QSerialPort::DeviceNotFoundError:
@@ -330,7 +330,7 @@ public:
         });
 
         QObject::connect(m_serialPort, &QSerialPort::aboutToClose, q, [this]() {
-            Q_Q(QModbusRtuSerialSlave);
+            Q_Q(QModbusRtuSerialServer);
             // update state if socket closure was caused by remote side
             if (q->state() != QModbusDevice::ClosingState)
                 q->setState(QModbusDevice::UnconnectedState);
@@ -362,4 +362,4 @@ public:
 
 QT_END_NAMESPACE
 
-#endif // QMODBUSRTUSERIALSLAVE_P_H
+#endif // QMODBUSRTUSERIALSERVER_P_H
