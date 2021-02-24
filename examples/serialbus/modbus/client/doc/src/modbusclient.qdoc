@@ -25,19 +25,19 @@
 **
 ****************************************************************************/
 
-/*! \example modbus/master
-    \title Modbus Master example
+/*! \example modbus/client
+    \title Modbus Client example
 
-    \brief The example implements a Modbus master application.
+    \brief The example implements a Modbus client application.
 
-    The example acts as Modbus master sending Modbus request via serial line
-    and TCP respectively. The shown dialog allows the definition of standard requests and
-    displays incoming responses.
+    The example acts as Modbus client sending Modbus request via serial line
+    and TCP respectively. The shown dialog allows the definition of standard
+    requests and displays incoming responses.
 
-    \image ../images/modbusmaster.png
+    \image ../images/modbusclient.png
 
     \include examples-run.qdocinc
 
-    The example must be used in conjunction with the \l {Modbus Slave example} or another
-    Modbus device which is either connected via TCP or Serial Port.
+    The example must be used in conjunction with the \l {Modbus server example}
+    or another Modbus device which is either connected via TCP or Serial Port.
 */

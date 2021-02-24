@@ -3,7 +3,7 @@ requires(qtConfig(combobox))
 
 qtConfig(modbus-serialport): QT += serialport
 
-TARGET = modbusmaster
+TARGET = modbusclient
 TEMPLATE = app
 CONFIG += c++11
 
@@ -23,7 +23,7 @@ FORMS += \
     settingsdialog.ui
 
 RESOURCES += \
-    master.qrc
+    client.qrc
 
-target.path = $$[QT_INSTALL_EXAMPLES]/serialbus/modbus/master
+target.path = $$[QT_INSTALL_EXAMPLES]/serialbus/modbus/client
 INSTALLS += target

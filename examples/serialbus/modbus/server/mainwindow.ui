@@ -776,7 +776,7 @@
   </widget>
   <action name="actionConnect">
    <property name="icon">
-    <iconset resource="slave.qrc">
+    <iconset resource="server.qrc">
      <normaloff>:/images/connect.png</normaloff>:/images/connect.png</iconset>
    </property>
    <property name="text">
@@ -785,7 +785,7 @@
   </action>
   <action name="actionDisconnect">
    <property name="icon">
-    <iconset resource="slave.qrc">
+    <iconset resource="server.qrc">
      <normaloff>:/images/disconnect.png</normaloff>:/images/disconnect.png</iconset>
    </property>
    <property name="text">
@@ -794,7 +794,7 @@
   </action>
   <action name="actionExit">
    <property name="icon">
-    <iconset resource="slave.qrc">
+    <iconset resource="server.qrc">
      <normaloff>:/images/application-exit.png</normaloff>:/images/application-exit.png</iconset>
    </property>
    <property name="text">
@@ -803,7 +803,7 @@
   </action>
   <action name="actionOptions">
    <property name="icon">
-    <iconset resource="slave.qrc">
+    <iconset resource="server.qrc">
      <normaloff>:/images/settings.png</normaloff>:/images/settings.png</iconset>
    </property>
    <property name="text">
@@ -859,7 +859,7 @@
   <tabstop>holdReg_9</tabstop>
  </tabstops>
  <resources>
-  <include location="slave.qrc"/>
+  <include location="server.qrc"/>
  </resources>
  <connections/>
 </ui>

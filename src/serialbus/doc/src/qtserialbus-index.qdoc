@@ -104,7 +104,7 @@
 
     \list
          \li \l {CAN Bus Example}
-         \li \l {Modbus Master example}
-         \li \l {Modbus Slave example}
+         \li \l {Modbus Client example}
+         \li \l {Modbus Server example}
     \endlist
 */

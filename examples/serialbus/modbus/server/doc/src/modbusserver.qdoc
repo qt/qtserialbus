@@ -25,21 +25,21 @@
 **
 ****************************************************************************/
 
-/*! \example modbus/slave
-    \title Modbus Slave example
+/*! \example modbus/server
+    \title Modbus Server example
 
-    \brief The example implements a Modbus slave application.
+    \brief The example implements a Modbus server application.
 
-    The example acts as Modbus slave. It receives standard Modbus requests,
+    The example acts as Modbus server. It receives standard Modbus requests,
     adjusts its internal states based on the request and responds with the
-    appropriate reply. As such a slave is the equivalent of a Modbus server.
+    appropriate reply. As such a server is the equivalent of a Modbus server.
 
     \image ../images/modbusserver.png
 
     \include examples-run.qdocinc
 
-    This example must be used in conjunction with the \l {Modbus Master example}.
+    This example must be used in conjunction with the \l {Modbus Client example}.
     This example should be started and put into the listen state before
-    the Modbus master example is started. Subsequent interactions between the two examples
+    the Modbus client example is started. Subsequent interactions between the two examples
     use the Modbus protocol.
 */

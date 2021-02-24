@@ -136,10 +136,7 @@ void MainWindow::onCurrentConnectTypeChanged(int index)
 
     if (!modbusDevice) {
         ui->connectButton->setDisabled(true);
-        if (type == Serial)
-            statusBar()->showMessage(tr("Could not create Modbus slave."), 5000);
-        else
-            statusBar()->showMessage(tr("Could not create Modbus server."), 5000);
+        statusBar()->showMessage(tr("Could not create Modbus server."), 5000);
     } else {
         QModbusDataUnitMap reg;
         reg.insert(QModbusDataUnit::Coils, { QModbusDataUnit::Coils, 0, 10 });

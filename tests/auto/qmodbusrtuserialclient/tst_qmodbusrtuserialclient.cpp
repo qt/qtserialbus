@@ -58,4 +58,4 @@ private slots:
 
 QTEST_MAIN(tst_QModbusRtuSerialClient)
 
-#include "tst_qmodbusrtuserialmaster.moc"
+#include "tst_qmodbusrtuserialclient.moc"

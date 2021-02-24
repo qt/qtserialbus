@@ -186,10 +186,7 @@ void MainWindow::onConnectTypeChanged(int index)
 
     if (!modbusDevice) {
         ui->connectButton->setDisabled(true);
-        if (type == Serial)
-            statusBar()->showMessage(tr("Could not create Modbus master."), 5000);
-        else
-            statusBar()->showMessage(tr("Could not create Modbus client."), 5000);
+        statusBar()->showMessage(tr("Could not create Modbus client."), 5000);
     } else {
         connect(modbusDevice, &QModbusClient::stateChanged,
                 this, &MainWindow::onModbusStateChanged);

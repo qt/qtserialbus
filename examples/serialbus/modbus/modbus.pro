@@ -1,7 +1,7 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    master \
-    slave \
+    client \
+    server \
     adueditor \
     custom
