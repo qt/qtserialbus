@@ -51,7 +51,6 @@ class Q_SERIALBUS_EXPORT QModbusClient : public QModbusDevice
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(QModbusClient)
-    Q_PROPERTY(int timeout READ timeout WRITE setTimeout NOTIFY timeoutChanged)
 
 public:
     explicit QModbusClient(QObject *parent = nullptr);
