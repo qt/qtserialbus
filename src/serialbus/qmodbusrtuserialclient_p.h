@@ -201,7 +201,7 @@ public:
         m_responseTimer.stop();
         if (m_state != State::WaitingForReplay || m_queue.isEmpty())
             return;
-        const auto current = m_queue.first();
+        const auto &current = m_queue.first();
 
         if (current.m_timerId != timerId)
             return;
