@@ -107,7 +107,7 @@ void MainWindow::initActions()
             this, &MainWindow::onConnectButtonClicked);
     connect(ui->actionDisconnect, &QAction::triggered,
             this, &MainWindow::onConnectButtonClicked);
-    connect(ui->connectType, QOverload<int>::of(&QComboBox::currentIndexChanged),
+    connect(ui->connectType, &QComboBox::currentIndexChanged,
             this, &MainWindow::onCurrentConnectTypeChanged);
 
     connect(ui->actionExit, &QAction::triggered, this, &QMainWindow::close);

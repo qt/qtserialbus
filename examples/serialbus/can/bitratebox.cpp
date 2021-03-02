@@ -58,7 +58,7 @@ BitRateBox::BitRateBox(QWidget *parent) :
 {
     fillBitRates();
 
-    connect(this, QOverload<int>::of(&QComboBox::currentIndexChanged),
+    connect(this, &QComboBox::currentIndexChanged,
             this, &BitRateBox::checkCustomSpeedPolicy);
 }
 

@@ -106,9 +106,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->writeSize, &QComboBox::currentTextChanged,
             writeModel, &WriteRegisterModel::setNumberOfValues);
 
-    auto valueChanged = QOverload<int>::of(&QSpinBox::valueChanged);
-    connect(ui->writeAddress, valueChanged, writeModel, &WriteRegisterModel::setStartAddress);
-    connect(ui->writeAddress, valueChanged, this, [this, model](int i) {
+    connect(ui->writeAddress, &QSpinBox::valueChanged, writeModel, &WriteRegisterModel::setStartAddress);
+    connect(ui->writeAddress, &QSpinBox::valueChanged, this, [this, model](int i) {
         int lastPossibleIndex = 0;
         const int currentIndex = ui->writeSize->currentIndex();
         for (int ii = 0; ii < 10; ++ii) {
@@ -152,9 +151,9 @@ void MainWindow::initActions()
             this, &MainWindow::onWriteButtonClicked);
     connect(ui->readWriteButton, &QPushButton::clicked,
             this, &MainWindow::onReadWriteButtonClicked);
-    connect(ui->connectType, QOverload<int>::of(&QComboBox::currentIndexChanged),
+    connect(ui->connectType, &QComboBox::currentIndexChanged,
             this, &MainWindow::onConnectTypeChanged);
-    connect(ui->writeTable, QOverload<int>::of(&QComboBox::currentIndexChanged),
+    connect(ui->writeTable, &QComboBox::currentIndexChanged,
             this, &MainWindow::onWriteTableChanged);
 
     connect(ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
