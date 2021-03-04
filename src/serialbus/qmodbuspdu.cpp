@@ -121,6 +121,8 @@ static int minimumDataSize(const QModbusPdu &pdu, Type type)
 static QDataStream &pduFromStream(QDataStream &stream, Type type, QModbusPdu *pdu)
 {
     struct RAII {
+        RAII(QModbusPdu *ptr = nullptr)
+            : tmp(ptr) {}
         QModbusPdu *tmp{ nullptr };
         ~RAII() { if (tmp) *tmp = {}; }
     } raii = { pdu };
@@ -170,8 +172,8 @@ static QDataStream &pduFromStream(QDataStream &stream, Type type, QModbusPdu *pd
                 size += left;
             }
             if ((stream.status() == QDataStream::Ok) && (size <= MaxPduDataSize)) {
+                raii = {};
                 pdu->setData(data);
-                raii = { nullptr };
                 return stream; // early return to avoid second read
             }
         } else {
@@ -187,8 +189,8 @@ static QDataStream &pduFromStream(QDataStream &stream, Type type, QModbusPdu *pd
     if (data.size() <= MaxPduDataSize) {
         data.resize(size);
         if (stream.readRawData(data.data(), data.size()) == size) {
+            raii = {};
             pdu->setData(data);
-            raii = { nullptr };
         }
     }
     return stream;
