@@ -51,11 +51,14 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "connectdialog.h"
+#include "receivedframesmodel.h"
 
 #include <QCanBus>
 #include <QCanBusFrame>
 #include <QCloseEvent>
+#include <QDateTime>
 #include <QDesktopServices>
+#include <QLabel>
 #include <QTimer>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -73,10 +76,20 @@ MainWindow::MainWindow(QWidget *parent) :
     m_written = new QLabel;
     m_ui->statusBar->addWidget(m_written);
 
+    m_received = new QLabel;
+    m_ui->statusBar->addWidget(m_received);
+
+    m_model = new ReceivedFramesModel(this);
+    m_model->setQueueLimit(1000);
+    m_ui->receivedFramesView->setModel(m_model);
+
     initActionsConnections();
     QTimer::singleShot(50, m_connectDialog, &ConnectDialog::show);
 
     connect(m_busStatusTimer, &QTimer::timeout, this, &MainWindow::busStatus);
+    m_appendTimer = new QTimer(this);
+    connect(m_appendTimer, &QTimer::timeout, this, &MainWindow::onAppendFramesTimeout);
+    m_appendTimer->start(350);
 }
 
 MainWindow::~MainWindow()
@@ -102,7 +115,7 @@ void MainWindow::initActionsConnections()
     });
     connect(m_ui->actionQuit, &QAction::triggered, this, &QWidget::close);
     connect(m_ui->actionAboutQt, &QAction::triggered, qApp, &QApplication::aboutQt);
-    connect(m_ui->actionClearLog, &QAction::triggered, m_ui->receivedMessagesEdit, &QTextEdit::clear);
+    connect(m_ui->actionClearLog, &QAction::triggered, m_model, &ReceivedFramesModel::clear);
     connect(m_ui->actionPluginDocumentation, &QAction::triggered, this, []() {
         QDesktopServices::openUrl(QUrl("http://doc.qt.io/qt-5/qtcanbus-backends.html#can-bus-plugins"));
     });
@@ -126,6 +139,11 @@ void MainWindow::processErrors(QCanBusDevice::CanBusError error) const
 void MainWindow::connectDevice()
 {
     const ConnectDialog::Settings p = m_connectDialog->settings();
+
+    if (p.useModelRingBuffer)
+        m_model->setQueueLimit(p.modelRingBufferSize);
+    else
+        m_model->setQueueLimit(0);
 
     QString errorString;
     m_canDevice.reset(QCanBus::instance()->createDevice(p.pluginName, p.deviceInterfaceName,
@@ -263,13 +281,14 @@ void MainWindow::processReceivedFrames()
         return;
 
     while (m_canDevice->framesAvailable()) {
+        m_numberFramesReceived++;
         const QCanBusFrame frame = m_canDevice->readFrame();
 
-        QString view;
+        QString data;
         if (frame.frameType() == QCanBusFrame::ErrorFrame)
-            view = m_canDevice->interpretErrorFrame(frame);
+            data = m_canDevice->interpretErrorFrame(frame);
         else
-            view = frame.toString();
+            data = QLatin1String(frame.payload().toHex(' ').toUpper());
 
         const QString time = QString::fromLatin1("%1.%2  ")
                 .arg(frame.timeStamp().seconds(), 10, 10, QLatin1Char(' '))
@@ -277,7 +296,10 @@ void MainWindow::processReceivedFrames()
 
         const QString flags = frameFlags(frame);
 
-        m_ui->receivedMessagesEdit->append(time + flags + view);
+        const QString id = QString::number(frame.frameId(), 16);
+        const QString dlc = QString::number(frame.payload().size());
+
+        m_model->appendFrame(QStringList({QString::number(m_numberFramesReceived), time, flags, id, dlc, data}));
     }
 }
 
@@ -287,4 +309,17 @@ void MainWindow::sendFrame(const QCanBusFrame &frame) const
         return;
 
     m_canDevice->writeFrame(frame);
+}
+
+void MainWindow::onAppendFramesTimeout()
+{
+    if (!m_canDevice)
+        return;
+
+    if (m_model->needUpdate()) {
+        m_model->update();
+        if (m_connectDialog->settings().useAutoscroll)
+            m_ui->receivedFramesView->scrollToBottom();
+        m_received->setText(tr("%1 frames received").arg(m_numberFramesReceived));
+    }
 }

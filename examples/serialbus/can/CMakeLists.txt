@@ -24,6 +24,8 @@ qt_add_executable(can
     main.cpp
     mainwindow.cpp mainwindow.h mainwindow.ui
     sendframebox.cpp sendframebox.h sendframebox.ui
+    receivedframesmodel.cpp receivedframesmodel.h
+    receivedframesview.cpp receivedframesview.h
 )
 set_target_properties(can PROPERTIES
     WIN32_EXECUTABLE TRUE

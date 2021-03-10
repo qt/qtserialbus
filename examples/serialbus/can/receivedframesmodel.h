@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2021 Evgeny Shtanov <shtanov_evgenii@mail.ru>
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the examples of the QtSerialBus module.
@@ -48,62 +48,43 @@
 **
 ****************************************************************************/
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef RECEIVEDFRAMESMODEL_H
+#define RECEIVEDFRAMESMODEL_H
 
-#include <QCanBusDevice>
-#include <QMainWindow>
+#include "common.h"
 
-class ConnectDialog;
-class ReceivedFramesModel;
+#include <QAbstractTableModel>
+#include <QCanBusFrame>
+#include <QQueue>
 
-QT_BEGIN_NAMESPACE
-
-class QCanBusFrame;
-class QLabel;
-class QTimer;
-
-namespace Ui {
-class MainWindow;
-}
-
-QT_END_NAMESPACE
-
-class MainWindow : public QMainWindow
+class ReceivedFramesModel : public QAbstractTableModel
 {
-    Q_OBJECT
-
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow() override;
+    explicit ReceivedFramesModel(QObject *parent = nullptr);
 
-private slots:
-    void processReceivedFrames();
-    void sendFrame(const QCanBusFrame &frame) const;
-    void processErrors(QCanBusDevice::CanBusError) const;
-    void connectDevice();
-    void busStatus();
-    void disconnectDevice();
-    void processFramesWritten(qint64);
-    void onAppendFramesTimeout();
+    void appendFrame(const QStringList &slist);
+    void appendFrames(const QList<QStringList> &slvector);
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    void clear();
+    void setQueueLimit(int limit = 0); // 0 - unlimited
+    int getQueueLimit() { return m_queueLimit; }
+    bool needUpdate() const;
+    void update();
 
 protected:
-    void closeEvent(QCloseEvent *event) override;
+    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
 
 private:
-    void initActionsConnections();
+    void appendFramesRingBuffer(const QList<QStringList> &slvector);
+    void appendFramesUnlimited(const QList<QStringList> &slvector);
 
-    qint64 m_numberFramesWritten = 0;
-    qint64 m_numberFramesReceived = 0;
-    Ui::MainWindow *m_ui = nullptr;
-    QLabel *m_status = nullptr;
-    QLabel *m_written = nullptr;
-    QLabel *m_received = nullptr;
-    ConnectDialog *m_connectDialog = nullptr;
-    std::unique_ptr<QCanBusDevice> m_canDevice;
-    QTimer *m_busStatusTimer = nullptr;
-    QTimer *m_appendTimer = nullptr;
-    ReceivedFramesModel *m_model = nullptr;
+private:
+    QQueue<QStringList> m_framesQueue;
+    QList<QStringList> m_framesAccumulator; // Temporary variable to insert frames data
+    int m_queueLimit = 0;
 };
 
-#endif // MAINWINDOW_H
+#endif // RECEIVEDFRAMESMODEL_H

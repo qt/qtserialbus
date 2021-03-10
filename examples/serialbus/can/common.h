@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2021 Evgeny Shtanov <shtanov_evgenii@mail.ru>
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the examples of the QtSerialBus module.
@@ -48,62 +48,23 @@
 **
 ****************************************************************************/
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef COMMON_H
+#define COMMON_H
 
-#include <QCanBusDevice>
-#include <QMainWindow>
+#include <qnamespace.h>
 
-class ConnectDialog;
-class ReceivedFramesModel;
-
-QT_BEGIN_NAMESPACE
-
-class QCanBusFrame;
-class QLabel;
-class QTimer;
-
-namespace Ui {
-class MainWindow;
-}
-
-QT_END_NAMESPACE
-
-class MainWindow : public QMainWindow
-{
-    Q_OBJECT
-
-public:
-    explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow() override;
-
-private slots:
-    void processReceivedFrames();
-    void sendFrame(const QCanBusFrame &frame) const;
-    void processErrors(QCanBusDevice::CanBusError) const;
-    void connectDevice();
-    void busStatus();
-    void disconnectDevice();
-    void processFramesWritten(qint64);
-    void onAppendFramesTimeout();
-
-protected:
-    void closeEvent(QCloseEvent *event) override;
-
-private:
-    void initActionsConnections();
-
-    qint64 m_numberFramesWritten = 0;
-    qint64 m_numberFramesReceived = 0;
-    Ui::MainWindow *m_ui = nullptr;
-    QLabel *m_status = nullptr;
-    QLabel *m_written = nullptr;
-    QLabel *m_received = nullptr;
-    ConnectDialog *m_connectDialog = nullptr;
-    std::unique_ptr<QCanBusDevice> m_canDevice;
-    QTimer *m_busStatusTimer = nullptr;
-    QTimer *m_appendTimer = nullptr;
-    ReceivedFramesModel *m_model = nullptr;
+enum ReceivedFramesModelColumns {
+    Number = 0,
+    Timestamp,
+    Flags,
+    CanID,
+    DLC,
+    Data,
+    Count
 };
 
-#endif // MAINWINDOW_H
+enum : int {
+  ClipboardTextRole = Qt::UserRole + 1
+};
+
+#endif // COMMON_H

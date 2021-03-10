@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2021 Evgeny Shtanov <shtanov_evgenii@mail.ru>
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the examples of the QtSerialBus module.
@@ -48,62 +48,70 @@
 **
 ****************************************************************************/
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#include "common.h"
+#include "receivedframesview.h"
 
-#include <QCanBusDevice>
-#include <QMainWindow>
+#include <QAction>
+#include <QApplication>
+#include <QClipboard>
+#include <QKeyEvent>
+#include <QMenu>
 
-class ConnectDialog;
-class ReceivedFramesModel;
+ReceivedFramesView::ReceivedFramesView(QWidget *parent)
+ : QTableView(parent)
+{
+    setContextMenuPolicy(Qt::CustomContextMenu);
 
-QT_BEGIN_NAMESPACE
+    connect(this, &QWidget::customContextMenuRequested,
+        [this] (const QPoint &pos) {
+        QMenu contextMenu(tr("Context menu"), this);
 
-class QCanBusFrame;
-class QLabel;
-class QTimer;
+        QAction action1("Copy", this);
+        QAction action2("Select all", this);
 
-namespace Ui {
-class MainWindow;
+        connect(&action1, &QAction::triggered, this, &ReceivedFramesView::copyRow);
+        connect(&action2, &QAction::triggered, this, &QAbstractItemView::selectAll);
+
+        if (selectedIndexes().count())
+            contextMenu.addAction(&action1);
+        contextMenu.addAction(&action2);
+
+        contextMenu.exec(mapToGlobal(pos));
+    });
 }
 
-QT_END_NAMESPACE
-
-class MainWindow : public QMainWindow
+void ReceivedFramesView::setModel(QAbstractItemModel *model)
 {
-    Q_OBJECT
+    QTableView::setModel(model);
 
-public:
-    explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow() override;
+    for (int i = 0, count = model->columnCount(); i < count; i++) {
+        const QSize size = model->headerData(i, Qt::Horizontal, Qt::SizeHintRole).value<QSize>();
+        setColumnWidth(i, size.width());
+    }
+}
 
-private slots:
-    void processReceivedFrames();
-    void sendFrame(const QCanBusFrame &frame) const;
-    void processErrors(QCanBusDevice::CanBusError) const;
-    void connectDevice();
-    void busStatus();
-    void disconnectDevice();
-    void processFramesWritten(qint64);
-    void onAppendFramesTimeout();
+void ReceivedFramesView::keyPressEvent(QKeyEvent *event) {
+    if (event->matches(QKeySequence::Copy)) {
+        copyRow();
+    } else if (event->matches(QKeySequence::SelectAll)) {
+        selectAll();
+    } else {
+        QTableView::keyPressEvent(event);
+    }
+}
 
-protected:
-    void closeEvent(QCloseEvent *event) override;
+void ReceivedFramesView::copyRow() {
+    QClipboard *clipboard = QApplication::clipboard();
 
-private:
-    void initActionsConnections();
+    const QModelIndexList ilist = selectedIndexes();
 
-    qint64 m_numberFramesWritten = 0;
-    qint64 m_numberFramesReceived = 0;
-    Ui::MainWindow *m_ui = nullptr;
-    QLabel *m_status = nullptr;
-    QLabel *m_written = nullptr;
-    QLabel *m_received = nullptr;
-    ConnectDialog *m_connectDialog = nullptr;
-    std::unique_ptr<QCanBusDevice> m_canDevice;
-    QTimer *m_busStatusTimer = nullptr;
-    QTimer *m_appendTimer = nullptr;
-    ReceivedFramesModel *m_model = nullptr;
-};
+    QString strRow;
 
-#endif // MAINWINDOW_H
+    for (const QModelIndex &index : ilist) {
+        strRow += index.data(ClipboardTextRole).toString() + " ";
+        if (index.column() == model()->columnCount() - 1)
+            strRow += '\n';
+    }
+
+    clipboard->setText(strRow);
+}
