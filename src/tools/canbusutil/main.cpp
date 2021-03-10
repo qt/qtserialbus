@@ -40,7 +40,6 @@
 #include <QCommandLineParser>
 #include <QCoreApplication>
 #include <QTextStream>
-#include <QScopedPointer>
 
 #include <signal.h>
 
@@ -50,10 +49,10 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName(QStringLiteral("canbusutil"));
     QCoreApplication::setApplicationVersion(QStringLiteral(QT_VERSION_STR));
 
-    QScopedPointer<SigTermHandler> s(SigTermHandler::instance());
+    std::unique_ptr<SigTermHandler> s(SigTermHandler::instance());
     if (signal(SIGINT, SigTermHandler::handle) == SIG_ERR)
         return -1;
-    QObject::connect(s.data(), &SigTermHandler::sigTermSignal, &app, &QCoreApplication::quit);
+    QObject::connect(s.get(), &SigTermHandler::sigTermSignal, &app, &QCoreApplication::quit);
 
     QTextStream output(stdout);
     CanBusUtil util(output, app);

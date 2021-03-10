@@ -37,7 +37,6 @@
 #include <QtSerialBus/qcanbusdevice.h>
 #include <QtSerialBus/qcanbusframe.h>
 
-#include <QtCore/qscopedpointer.h>
 #include <QtCore/qtimer.h>
 #include <QtCore/QtPlugin>
 #include <QtTest/qsignalspy.h>
@@ -162,7 +161,7 @@ private slots:
     void tst_waitForFramesReceived();
     void tst_waitForFramesWritten();
 private:
-    QScopedPointer<tst_Backend> device;
+    std::unique_ptr<tst_Backend> device;
 };
 
 tst_QCanBusDevice::tst_QCanBusDevice()
@@ -177,7 +176,7 @@ void tst_QCanBusDevice::initTestCase()
     device.reset(new tst_Backend());
     QVERIFY(device);
 
-    QSignalSpy stateSpy(device.data(), &QCanBusDevice::stateChanged);
+    QSignalSpy stateSpy(device.get(), &QCanBusDevice::stateChanged);
 
     QVERIFY(!device->connectDevice()); // first connect triggered to fail
     QCOMPARE(device->error(), QCanBusDevice::NoError);
@@ -228,8 +227,8 @@ void tst_QCanBusDevice::write()
     device->setWriteBuffered(false);
     QVERIFY(!device->isWriteBuffered());
 
-    QSignalSpy spy(device.data(), &QCanBusDevice::framesWritten);
-    QSignalSpy stateSpy(device.data(), &QCanBusDevice::stateChanged);
+    QSignalSpy spy(device.get(), &QCanBusDevice::framesWritten);
+    QSignalSpy stateSpy(device.get(), &QCanBusDevice::stateChanged);
 
     QCanBusFrame frame;
     frame.setPayload(QByteArray("testData"));
@@ -263,7 +262,7 @@ void tst_QCanBusDevice::write()
 
 void tst_QCanBusDevice::read()
 {
-    QSignalSpy stateSpy(device.data(), &QCanBusDevice::stateChanged);
+    QSignalSpy stateSpy(device.get(), &QCanBusDevice::stateChanged);
 
     device->disconnectDevice();
     QCOMPARE(device->state(), QCanBusDevice::UnconnectedState);
@@ -351,7 +350,7 @@ void tst_QCanBusDevice::clearOutputBuffer()
     QCOMPARE(device->error(), QCanBusDevice::NoError);
 
     // first test buffered writing, frames will be written after some delay
-    QSignalSpy spy(device.data(), &QCanBusDevice::framesWritten);
+    QSignalSpy spy(device.get(), &QCanBusDevice::framesWritten);
     for (int i = 0; i < 10; ++i)
         device->writeFrame(QCanBusFrame(0x123, "output"));
     QTRY_VERIFY_WITH_TIMEOUT(spy.count() == 10, 5000);
@@ -368,10 +367,10 @@ void tst_QCanBusDevice::clearOutputBuffer()
 
 void tst_QCanBusDevice::error()
 {
-    QSignalSpy spy(device.data(), &QCanBusDevice::errorOccurred);
+    QSignalSpy spy(device.get(), &QCanBusDevice::errorOccurred);
     QString testString(QStringLiteral("testString"));
 
-    auto backend = qobject_cast<tst_Backend *>(device.data());
+    auto backend = qobject_cast<tst_Backend *>(device.get());
     QVERIFY(backend);
 
     // NoError
@@ -615,7 +614,7 @@ void tst_QCanBusDevice::tst_waitForFramesReceived()
         device->triggerNewFrame();
     });
     QTimer::singleShot(2000, [&]() { device->triggerNewFrame(); });
-    QObject::connect(device.data(), &QCanBusDevice::framesReceived, [this, &handleCounter]() {
+    QObject::connect(device.get(), &QCanBusDevice::framesReceived, [this, &handleCounter]() {
         handleCounter++;
         // this should trigger a recursion which we want to catch
         QVERIFY(!device->waitForFramesReceived(5000));
@@ -702,7 +701,7 @@ void tst_QCanBusDevice::tst_waitForFramesWritten()
     device->writeFrame(frame);
     QTimer::singleShot(1000, [&]() { device->writeFrame(frame); });
     QTimer::singleShot(2000, [&]() { device->writeFrame(frame); });
-    QObject::connect(device.data(), &QCanBusDevice::framesWritten, [this, &handleCounter]() {
+    QObject::connect(device.get(), &QCanBusDevice::framesWritten, [this, &handleCounter]() {
         handleCounter++;
         // this should trigger a recursion which we want to catch
         QVERIFY(!device->waitForFramesWritten(5000));

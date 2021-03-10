@@ -1015,7 +1015,7 @@ QCanBusDeviceInfo QCanBusDevice::createDeviceInfo(const QString &name, const QSt
                                                   int channel,
                                                   bool isVirtual, bool isFlexibleDataRateCapable)
 {
-    QScopedPointer<QCanBusDeviceInfoPrivate> info(new QCanBusDeviceInfoPrivate);
+    std::unique_ptr<QCanBusDeviceInfoPrivate> info(new QCanBusDeviceInfoPrivate);
     info->name = name;
     info->serialNumber = serialNumber;
     info->description = description;
@@ -1023,7 +1023,7 @@ QCanBusDeviceInfo QCanBusDevice::createDeviceInfo(const QString &name, const QSt
     info->channel = channel;
     info->hasFlexibleDataRate = isFlexibleDataRateCapable;
     info->isVirtual = isVirtual;
-    return QCanBusDeviceInfo(*info.take());
+    return QCanBusDeviceInfo(*info.release());
 }
 
 QT_END_NAMESPACE
