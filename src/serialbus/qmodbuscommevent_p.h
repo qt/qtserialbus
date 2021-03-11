@@ -81,7 +81,7 @@ public:
         InitiatedCommunicationRestart = 0x00
     };
 
-    inline QModbusCommEvent(QModbusCommEvent::EventByte byte)
+    constexpr QModbusCommEvent(QModbusCommEvent::EventByte byte) noexcept
         : m_eventByte(byte) {}
 
     operator quint8() const { return m_eventByte; }

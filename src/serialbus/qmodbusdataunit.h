@@ -56,8 +56,9 @@ public:
 
     QModbusDataUnit() = default;
 
-    explicit QModbusDataUnit(RegisterType type)
-        : QModbusDataUnit(type, 0, 0)
+    constexpr explicit QModbusDataUnit(RegisterType type) noexcept
+        : m_type(type)
+        , m_startAddress(0)
     {}
 
     QModbusDataUnit(RegisterType type, int newStartAddress, quint16 newValueCount)
