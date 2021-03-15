@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the documentation of the Qt Toolkit.
@@ -25,21 +25,26 @@
 **
 ****************************************************************************/
 
-/*! \example modbus/server
-    \title Modbus Server example
+/*! \example modbus/custom
+    \title Modbus Custom command example
 
-    \brief The example implements a Modbus server application.
+    \brief The example implements a Modbus client-server application.
 
-    The example acts as Modbus server. It receives standard Modbus requests,
-    adjusts its internal states based on the request and responds with the
-    appropriate reply.
+    The example acts as both Modbus client and server in a single application.
+    The connection between them is established via Modbus TCP. It is used to
+    send and receive custom Modbus requests and adjusts its internal states
+    based on the request and response.
 
-    \image ../images/modbusserver.png
+    \image ../images/custom.png
 
     \include examples-run.qdocinc
 
-    This example must be used in conjunction with the \l {Modbus Client example}.
-    This example should be started and put into the listen state before the
-    Modbus client example is started. Subsequent interactions between the two
-    examples use the Modbus protocol.
+    This example cannot be used in conjunction with other applications. Once the
+    example is started, it can only exchange custom Modbus commands within the
+    application itself. All interactions between the client and server use the
+    Modbus TCP protocol.
+
+    The main purpose of the example is to provide some demo code on how to
+    implement a Modbus client or Modbus server handling custom Modbus function
+    codes.
 */

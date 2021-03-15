@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the documentation of the Qt Toolkit.
@@ -24,22 +24,27 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+/*!
+    \page qtserialport-changes-qt6.html
 
-/*! \example modbus/server
-    \title Modbus Server example
+    \title Changes to Qt SerialBus
+    \ingroup changes-qt-5-to-6
+    \brief Migrate Qt SerialBus to Qt 6.
 
-    \brief The example implements a Modbus server application.
+    Qt 6 is a result of the conscious effort to make the framework more
+    efficient and easy to use.
+    We try to maintain binary and source compatibility for all the public
+    APIs in each release. But some changes were inevitable in an effort to
+    make Qt a better framework.
+    In this topic, we summarize those changes in Qt SerialBus module and
+    provide guidance to handle them.
 
-    The example acts as Modbus server. It receives standard Modbus requests,
-    adjusts its internal states based on the request and responds with the
-    appropriate reply.
+    \section1 Changes overview
+    The Qt SerialBus module is generally speaking source compatible with the
+    Qt5 version and users of the library should be able to continue with no or
+    minor changes to their project.
 
-    \image ../images/modbusserver.png
-
-    \include examples-run.qdocinc
-
-    This example must be used in conjunction with the \l {Modbus Client example}.
-    This example should be started and put into the listen state before the
-    Modbus client example is started. Subsequent interactions between the two
-    examples use the Modbus protocol.
+    \section1 Build system
+    As with Qt 6 in general, the Qt SerialBus module has CMake support in
+    addition to qmake.
 */

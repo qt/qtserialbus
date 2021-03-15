@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the documentation of the Qt Toolkit.
@@ -25,21 +25,15 @@
 **
 ****************************************************************************/
 
-/*! \example modbus/server
-    \title Modbus Server example
+//! [cmakebuild]
+    \code
+    find_package(Qt6 COMPONENTS SerialBus REQUIRED)
+    target_link_libraries(mytarget PRIVATE Qt6::SerialBus)
+    \endcode
+//! [cmakebuild]
 
-    \brief The example implements a Modbus server application.
-
-    The example acts as Modbus server. It receives standard Modbus requests,
-    adjusts its internal states based on the request and responds with the
-    appropriate reply.
-
-    \image ../images/modbusserver.png
-
-    \include examples-run.qdocinc
-
-    This example must be used in conjunction with the \l {Modbus Client example}.
-    This example should be started and put into the listen state before the
-    Modbus client example is started. Subsequent interactions between the two
-    examples use the Modbus protocol.
-*/
+//! [qmakebuild]
+    \code
+    QT += serialbus
+    \endcode
+//! [qmakebuild]

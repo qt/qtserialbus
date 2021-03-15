@@ -44,12 +44,13 @@
     #include <QCanBusDevice>
     \endcode
 
-    The .pro file should have the \e serialbus keyword added
+    To use the module with CMake, use the \c{find_package()} command to locate
+    the needed module components in the \c{Qt6} package:
+    \include qtserialbus-module-use.qdocinc cmakebuild
 
-    \code
-    QT += serialbus
-    \endcode
-
+    To use the module for building with qmake, add the module as a value of the
+    \c QT variable in the project's .pro file:
+    \include qtserialbus-module-use.qdocinc qmakebuild
 
     See more in the \l {Qt Serial Bus} {Qt Serial Bus Overview}.
 */

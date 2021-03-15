@@ -30,10 +30,9 @@
 
     \brief Implemented Qt Modbus.
 
-    Modbus is a request/reply protocol that has one Modbus client in its network and may have many
-    Modbus servers. Servers can control only their own internal states and clients can read and write
-    data in them. Modbus is not restricted by the network type, in theory it can use any
-    QIODevice. However, not every plugin supports all classes derived from QIODevice.
+    Modbus is a request/reply protocol that has one Modbus client in its
+    network and may have many Modbus servers. Servers can control only
+    their own internal states, and clients can read and write data in them.
 
     Each Modbus server has four tables in which it can store data.
 

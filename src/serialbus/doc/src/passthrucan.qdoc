@@ -31,7 +31,7 @@
     \brief Overview of how to use the J2534 Pass-Thru CAN plugin.
 
     The Pass-Thru CAN plugin accesses CAN adapters via the SAE J2534 Pass-Thru API.
-    SAE J2534 is a standard for accessing vehicle busses from an x86 Windows PC.
+    SAE J2534 is a standard for accessing vehicle buses from an x86 Windows PC.
     Although the API is specified only for 32-bit Windows, some vendors also provide
     implementations for 64-bit Windows and other operating systems such as Linux.
 
