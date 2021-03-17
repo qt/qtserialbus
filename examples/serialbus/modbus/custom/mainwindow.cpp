@@ -155,7 +155,6 @@ void MainWindow::onReadReady()
     if (reply->error() == QModbusDevice::NoError) {
         const QModbusDataUnit unit = reply->result();
         for (int i = 0, total = int(unit.valueCount()); i < total; ++i) {
-            auto st = unit.startAddress();
             m_model->setData(m_model->index(unit.startAddress() + i, 1),
                 QString::number(unit.value(i), 16), Qt::EditRole);
         }
