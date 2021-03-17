@@ -60,7 +60,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \fn QCanBusFrame::QCanBusFrame(quint32 identifier, const QByteArray &data)
+    \fn QCanBusFrame::QCanBusFrame(QCanBusFrame::FrameId identifier, const QByteArray &data)
 
     Constructs a CAN frame using \a identifier as the frame identifier and \a data as the payload.
 */
@@ -78,7 +78,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \fn QCanBusFrame::setFrameId(quint32 newFrameId)
+    \fn QCanBusFrame::setFrameId(QCanBusFrame::FrameId newFrameId)
 
     Sets the identifier of the CAN frame to \a newFrameId.
 
@@ -125,7 +125,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \fn quint32 QCanBusFrame::frameId() const
+    \fn QCanBusFrame::FrameId QCanBusFrame::frameId() const
 
     Returns the CAN frame identifier. If the CAN frame uses the
     extended frame format, the identifier has a maximum of 29 bits;
@@ -470,7 +470,7 @@ QDataStream &operator<<(QDataStream &out, const QCanBusFrame &frame)
 */
 QDataStream &operator>>(QDataStream &in, QCanBusFrame &frame)
 {
-    quint32 frameId;
+    QCanBusFrame::FrameId frameId;
     quint8 frameType;
     quint8 version;
     bool extendedFrameFormat;

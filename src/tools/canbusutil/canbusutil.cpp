@@ -125,7 +125,7 @@ int CanBusUtil::printDevices(const QString &pluginName)
     return 0;
 }
 
-bool CanBusUtil::parseDataField(quint32 &id, QString &payload)
+bool CanBusUtil::parseDataField(QCanBusFrame::FrameId &id, QString &payload)
 {
     int hashMarkPos = m_data.indexOf('#');
     if (hashMarkPos < 0) {

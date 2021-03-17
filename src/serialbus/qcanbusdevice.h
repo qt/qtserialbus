@@ -117,8 +117,8 @@ public:
         };
         Q_DECLARE_FLAGS(FormatFilters, FormatFilter)
 
-        quint32 frameId = 0;
-        quint32 frameIdMask = 0;
+        QCanBusFrame::FrameId frameId = 0;
+        QCanBusFrame::FrameId frameIdMask = 0;
         QCanBusFrame::FrameType type = QCanBusFrame::InvalidFrame;
         FormatFilter format = MatchBaseAndExtendedFormat;
     };

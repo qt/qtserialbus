@@ -409,7 +409,7 @@ void tst_QCanBusFrame::tst_isValidSize()
 void tst_QCanBusFrame::tst_toString_data()
 {
     QTest::addColumn<QCanBusFrame::FrameType>("frameType");
-    QTest::addColumn<quint32>("id");
+    QTest::addColumn<QCanBusFrame::FrameId>("id");
     QTest::addColumn<bool>("extended");
     QTest::addColumn<QByteArray>("payload");
     QTest::addColumn<QString>("expected");
@@ -467,7 +467,7 @@ void tst_QCanBusFrame::tst_toString_data()
 void tst_QCanBusFrame::tst_toString()
 {
     QFETCH(QCanBusFrame::FrameType, frameType);
-    QFETCH(quint32, id);
+    QFETCH(QCanBusFrame::FrameId, id);
     QFETCH(bool, extended);
     QFETCH(QByteArray, payload);
     QFETCH(QString, expected);
@@ -484,7 +484,7 @@ void tst_QCanBusFrame::tst_toString()
 
 void tst_QCanBusFrame::streaming_data()
 {
-    QTest::addColumn<quint32>("frameId");
+    QTest::addColumn<QCanBusFrame::FrameId>("frameId");
     QTest::addColumn<QByteArray>("payload");
     QTest::addColumn<qint64>("seconds");
     QTest::addColumn<qint64>("microSeconds");
@@ -496,47 +496,47 @@ void tst_QCanBusFrame::streaming_data()
     QTest::addColumn<QCanBusFrame::FrameType>("frameType");
 
 
-    QTest::newRow("emptyFrame") << quint32(0) << QByteArray()
+    QTest::newRow("emptyFrame") << QCanBusFrame::FrameId(0) << QByteArray()
                                 << qint64(0) << qint64(0)
                                 << false << false << false << false << false
                                 << QCanBusFrame::DataFrame;
-    QTest::newRow("fullFrame1") << quint32(123) << QByteArray("abcde1")
+    QTest::newRow("fullFrame1") << QCanBusFrame::FrameId(123) << QByteArray("abcde1")
                                << qint64(456) << qint64(784)
                                << true << false << false << false << false
                                << QCanBusFrame::DataFrame;
-    QTest::newRow("fullFrame2") << quint32(123) << QByteArray("abcde2")
+    QTest::newRow("fullFrame2") << QCanBusFrame::FrameId(123) << QByteArray("abcde2")
                                << qint64(457) << qint64(785)
                                << false << false << false << false << false
                                << QCanBusFrame::DataFrame;
-    QTest::newRow("fullFrameFD") << quint32(123) << QByteArray("abcdfd")
+    QTest::newRow("fullFrameFD") << QCanBusFrame::FrameId(123) << QByteArray("abcdfd")
                                 << qint64(457) << qint64(785)
                                 << false << true << false << false << false
                                 << QCanBusFrame::DataFrame;
-    QTest::newRow("fullFrameBRS") << quint32(123) << QByteArray("abcdfd")
+    QTest::newRow("fullFrameBRS") << QCanBusFrame::FrameId(123) << QByteArray("abcdfd")
                                 << qint64(457) << qint64(785)
                                 << false << true << true << false << false
                                 << QCanBusFrame::DataFrame;
-    QTest::newRow("fullFrameESI") << quint32(123) << QByteArray("abcdfd")
+    QTest::newRow("fullFrameESI") << QCanBusFrame::FrameId(123) << QByteArray("abcdfd")
                                   << qint64(457) << qint64(785)
                                   << false << true << false << true << false
                                   << QCanBusFrame::DataFrame;
-    QTest::newRow("echoFrame") << quint32(123) << QByteArray("abcde7")
+    QTest::newRow("echoFrame") << QCanBusFrame::FrameId(123) << QByteArray("abcde7")
                                << qint64(888) << qint64(777)
                                << false << false << false << false << true
                                << QCanBusFrame::DataFrame;
-    QTest::newRow("fullFrame3") << quint32(123) << QByteArray("abcde3")
+    QTest::newRow("fullFrame3") << QCanBusFrame::FrameId(123) << QByteArray("abcde3")
                                << qint64(458) << qint64(786)
                                << true << false << false << false << false
                                << QCanBusFrame::RemoteRequestFrame;
-    QTest::newRow("fullFrame4") << quint32(123) << QByteArray("abcde4")
+    QTest::newRow("fullFrame4") << QCanBusFrame::FrameId(123) << QByteArray("abcde4")
                                << qint64(459) << qint64(787)
                                << false << false << false << false << false
                                << QCanBusFrame::RemoteRequestFrame;
-    QTest::newRow("fullFrame5") << quint32(123) << QByteArray("abcde5")
+    QTest::newRow("fullFrame5") << QCanBusFrame::FrameId(123) << QByteArray("abcde5")
                                << qint64(460) << qint64(789)
                                << true << false << false << false << false
                                << QCanBusFrame::ErrorFrame;
-    QTest::newRow("fullFrame6") << quint32(123) << QByteArray("abcde6")
+    QTest::newRow("fullFrame6") << QCanBusFrame::FrameId(123) << QByteArray("abcde6")
                                << qint64(453) << qint64(788)
                                << false << false << false << false << false
                                << QCanBusFrame::ErrorFrame;
@@ -544,7 +544,7 @@ void tst_QCanBusFrame::streaming_data()
 
 void tst_QCanBusFrame::streaming()
 {
-    QFETCH(quint32, frameId);
+    QFETCH(QCanBusFrame::FrameId, frameId);
     QFETCH(QByteArray, payload);
     QFETCH(qint64, seconds);
     QFETCH(qint64, microSeconds);

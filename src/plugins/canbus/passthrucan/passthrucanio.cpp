@@ -185,8 +185,8 @@ bool PassThruCanIO::setMessageFilters(const QList<QCanBusDevice::Filter> &filter
         else
             mask.setRxStatus({});
 
-        qToBigEndian<quint32>(filter.frameId & filter.frameIdMask, pattern.data());
-        qToBigEndian<quint32>(filter.frameIdMask, mask.data());
+        qToBigEndian<QCanBusFrame::FrameId>(filter.frameId & filter.frameIdMask, pattern.data());
+        qToBigEndian<QCanBusFrame::FrameId>(filter.frameIdMask, mask.data());
 
         if (m_passThru->startMsgFilter(m_channelId, J2534::PassThru::PassFilter,
                                        mask, pattern) != J2534::PassThru::NoError)
@@ -236,7 +236,7 @@ bool PassThruCanIO::writeMessages()
             else
                 msg.setTxFlags({});
 
-            qToBigEndian<quint32>(frame.frameId(), msg.data());
+            qToBigEndian<QCanBusFrame::FrameId>(frame.frameId(), msg.data());
             std::memcpy(msg.data() + 4, payload.data(), payloadSize);
         }
     }
@@ -299,7 +299,7 @@ void PassThruCanIO::readMessages(bool writePending)
                       "Message with invalid size %lu received", msg.size());
             continue;
         }
-        const quint32 msgId = qFromBigEndian<quint32>(msg.data());
+        const QCanBusFrame::FrameId msgId = qFromBigEndian<QCanBusFrame::FrameId>(msg.data());
         const QByteArray payload (msg.data() + 4, msg.size() - 4);
 
         QCanBusFrame frame (msgId, payload);

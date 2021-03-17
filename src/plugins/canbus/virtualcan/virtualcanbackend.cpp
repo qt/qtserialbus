@@ -344,7 +344,7 @@ void VirtualCanBackend::clientReadyRead()
         const QByteArrayList list = answer.split('#');
         Q_ASSERT(list.size() == 3);
 
-        const quint32 id = list.at(0).toUInt();
+        const QCanBusFrame::FrameId id = list.at(0).toUInt();
         const QByteArray flags = list.at(1);
         const QByteArray data = QByteArray::fromHex(list.at(2));
         const qint64 timeStamp = QDateTime::currentDateTime().toMSecsSinceEpoch();

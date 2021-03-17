@@ -276,11 +276,10 @@
 // Type definitions
 #ifdef Q_OS_MACOS
 #define TPCANLong                quint64
-#define TPCANLongToFrameID(a)    static_cast<quint32>(a)
 #else
 #define TPCANLong                quint32
-#define TPCANLongToFrameID(a)    a
 #endif
+#define TPCANLongToFrameID(a)    static_cast<QCanBusFrame::FrameId>(a)
 #define TPCANHandle              quint16   // Represents a PCAN hardware channel handle
 #define TPCANStatus              TPCANLong // Represents a PCAN status/error code
 #define TPCANParameter           quint8    // Represents a PCAN parameter to be read or set

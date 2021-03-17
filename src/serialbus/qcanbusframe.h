@@ -48,6 +48,8 @@ class QDataStream;
 class Q_SERIALBUS_EXPORT QCanBusFrame
 {
 public:
+    using FrameId = quint32;
+
     class TimeStamp {
     public:
         constexpr TimeStamp(qint64 s = 0, qint64 usec = 0) noexcept
@@ -105,7 +107,7 @@ public:
     Q_DECLARE_FLAGS(FrameErrors, FrameError)
     Q_FLAGS(FrameErrors)
 
-    explicit QCanBusFrame(quint32 identifier, const QByteArray &data) :
+    explicit QCanBusFrame(QCanBusFrame::FrameId identifier, const QByteArray &data) :
         format(DataFrame),
         isExtendedFrame(0x0),
         version(Qt_5_10),
@@ -180,13 +182,13 @@ public:
         isExtendedFrame = (isExtended & 0x1);
     }
 
-    quint32 frameId() const noexcept
+    QCanBusFrame::FrameId frameId() const noexcept
     {
         if (Q_UNLIKELY(format == ErrorFrame))
             return 0;
         return (canId & 0x1FFFFFFFU);
     }
-    void setFrameId(quint32 newFrameId)
+    void setFrameId(QCanBusFrame::FrameId newFrameId)
     {
         if (Q_LIKELY(newFrameId < 0x20000000U)) {
             isValidFrameId = true;
