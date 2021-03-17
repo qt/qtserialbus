@@ -69,7 +69,7 @@ public:
         return true;
     }
 
-    bool open()
+    bool open() override
     {
         if (firstOpen) {
             firstOpen = false;
@@ -79,12 +79,12 @@ public:
         return true;
     }
 
-    void close()
+    void close() override
     {
         setState(QCanBusDevice::UnconnectedState);
     }
 
-    bool writeFrame(const QCanBusFrame &data)
+    bool writeFrame(const QCanBusFrame &data) override
     {
         if (state() != QCanBusDevice::ConnectedState) {
             setError(QStringLiteral("Cannot write frame as device is not connected"),
@@ -106,7 +106,7 @@ public:
         setError(text, e);
     }
 
-    QString interpretErrorFrame(const QCanBusFrame &/*errorFrame*/)
+    QString interpretErrorFrame(const QCanBusFrame &/*errorFrame*/) override
     {
         return QString();
     }
