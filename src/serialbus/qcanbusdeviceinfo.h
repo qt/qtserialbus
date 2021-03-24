@@ -52,13 +52,13 @@ public:
     QCanBusDeviceInfo(const QCanBusDeviceInfo &other);
     ~QCanBusDeviceInfo();
 
-    void swap(QCanBusDeviceInfo &other) Q_DECL_NOTHROW
+    void swap(QCanBusDeviceInfo &other) noexcept
     {
          qSwap(d_ptr, other.d_ptr);
     }
 
     QCanBusDeviceInfo &operator=(const QCanBusDeviceInfo &other);
-    QCanBusDeviceInfo &operator=(QCanBusDeviceInfo &&other) Q_DECL_NOTHROW
+    QCanBusDeviceInfo &operator=(QCanBusDeviceInfo &&other) noexcept
     {
         swap(other);
         return *this;
