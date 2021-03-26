@@ -325,13 +325,13 @@ void MainWindow::setupWidgetContainers()
     const QList<QCheckBox *> coils = findChildren<QCheckBox *>(regexp);
     for (QCheckBox *cbx : coils)
         coilButtons.addButton(cbx, regexp.match(cbx->objectName()).captured("ID").toInt());
-    connect(&coilButtons, SIGNAL(buttonClicked(int)), this, SLOT(coilChanged(int)));
+    connect(&coilButtons, &QButtonGroup::idClicked, this, &MainWindow::coilChanged);
 
     regexp.setPattern(QStringLiteral("disc_(?<ID>\\d+)"));
     const QList<QCheckBox *> discs = findChildren<QCheckBox *>(regexp);
     for (QCheckBox *cbx : discs)
         discreteButtons.addButton(cbx, regexp.match(cbx->objectName()).captured("ID").toInt());
-    connect(&discreteButtons, SIGNAL(buttonClicked(int)), this, SLOT(discreteInputChanged(int)));
+    connect(&discreteButtons, &QButtonGroup::idClicked, this, &MainWindow::discreteInputChanged);
 
     regexp.setPattern(QLatin1String("(in|hold)Reg_(?<ID>\\d+)"));
     const QList<QLineEdit *> qle = findChildren<QLineEdit *>(regexp);
