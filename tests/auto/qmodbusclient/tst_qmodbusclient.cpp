@@ -84,7 +84,7 @@ private slots:
         TestClient client;
         QCOMPARE(client.timeout(), 1000); //default value test
 
-        QSignalSpy spy(&client, SIGNAL(timeoutChanged(int)));
+        QSignalSpy spy(&client, &TestClient::timeoutChanged);
         client.setTimeout(50);
         QCOMPARE(client.timeout(), 50);
         QCOMPARE(spy.isEmpty(), false); // we expect the signal

@@ -898,8 +898,7 @@ private slots:
         }
 
         quint16 data = 0;
-        QSignalSpy writtenSpy(
-                    &server, SIGNAL(dataWritten(QModbusDataUnit::RegisterType,int,int)));
+        QSignalSpy writtenSpy(&server, &TestServer::dataWritten);
         QVERIFY(writtenSpy.isEmpty());
 
         QVERIFY(!server.data(registerType, MAP_RANGE+1, &data)); // out of range

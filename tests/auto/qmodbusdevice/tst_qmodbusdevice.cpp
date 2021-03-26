@@ -112,7 +112,7 @@ void tst_QModbusDevice::state()
 {
     device->setState(QModbusDevice::ConnectedState);
     QCOMPARE(device->state(), QModbusDevice::ConnectedState);
-    QSignalSpy spy(device, SIGNAL(stateChanged(QModbusDevice::State)));
+    QSignalSpy spy(device, &DummyDevice::stateChanged);
     device->setState(QModbusDevice::UnconnectedState);
     QCOMPARE(device->state(), QModbusDevice::UnconnectedState);
     device->setState(QModbusDevice::UnconnectedState);

@@ -80,8 +80,8 @@ void tst_QModbusReply::tst_setFinished()
 {
     QModbusReply replyTest(QModbusReply::Common, 1);
     QCOMPARE(replyTest.serverAddress(), 1);
-    QSignalSpy finishedSpy(&replyTest, SIGNAL(finished()));
-    QSignalSpy errorSpy(&replyTest, SIGNAL(errorOccurred(QModbusDevice::Error)));
+    QSignalSpy finishedSpy(&replyTest, &QModbusReply::finished);
+    QSignalSpy errorSpy(&replyTest, &QModbusReply::errorOccurred);
 
     QCOMPARE(replyTest.serverAddress(), 1);
     QCOMPARE(replyTest.isFinished(), false);
@@ -133,8 +133,8 @@ void tst_QModbusReply::tst_setError()
 
     QModbusReply replyTest(QModbusReply::Common, 1);
     QCOMPARE(replyTest.serverAddress(), 1);
-    QSignalSpy finishedSpy(&replyTest, SIGNAL(finished()));
-    QSignalSpy errorSpy(&replyTest, SIGNAL(errorOccurred(QModbusDevice::Error)));
+    QSignalSpy finishedSpy(&replyTest, &QModbusReply::finished);
+    QSignalSpy errorSpy(&replyTest, &QModbusReply::errorOccurred);
 
     QVERIFY(finishedSpy.isEmpty());
     QVERIFY(errorSpy.isEmpty());
@@ -165,8 +165,8 @@ void tst_QModbusReply::tst_setResult()
 
     QModbusReply replyTest(QModbusReply::Common, 1);
     QCOMPARE(replyTest.serverAddress(), 1);
-    QSignalSpy finishedSpy(&replyTest, SIGNAL(finished()));
-    QSignalSpy errorSpy(&replyTest, SIGNAL(errorOccurred(QModbusDevice::Error)));
+    QSignalSpy finishedSpy(&replyTest, &QModbusReply::finished);
+    QSignalSpy errorSpy(&replyTest, &QModbusReply::errorOccurred);
 
     QVERIFY(finishedSpy.isEmpty());
     QVERIFY(errorSpy.isEmpty());
@@ -196,8 +196,8 @@ void tst_QModbusReply::tst_setResult()
 
     QModbusReply replyRawTest(QModbusReply::Raw, 1);
     QCOMPARE(replyRawTest.serverAddress(), 1);
-    QSignalSpy finishedSpyRaw(&replyRawTest, SIGNAL(finished()));
-    QSignalSpy errorSpyRaw(&replyRawTest, SIGNAL(errorOccurred(QModbusDevice::Error)));
+    QSignalSpy finishedSpyRaw(&replyRawTest, &QModbusReply::finished);
+    QSignalSpy errorSpyRaw(&replyRawTest, &QModbusReply::errorOccurred);
 
     QVERIFY(finishedSpyRaw.isEmpty());
     QVERIFY(errorSpyRaw.isEmpty());
