@@ -491,7 +491,7 @@ bool QModbusClientPrivate::collateBytes(const QModbusPdu &response,
     if ((response.dataSize() - 1) != byteCount)
         return false;
 
-    // byte count needs to be odd to match full registers
+    // byte count needs to be even to match full registers
     if (byteCount % 2 != 0)
         return false;
 

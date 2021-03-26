@@ -157,7 +157,7 @@ public:
                         + buffer->toHex();
 
                     if (buffer->size() < mbpaHeaderSize) {
-                        qCDebug(QT_MODBUS) << "(TCP server) ADU too short. Waiting for more data.";
+                        qCDebug(QT_MODBUS) << "(TCP server) MBPA header too short. Waiting for more data.";
                         return;
                     }
 

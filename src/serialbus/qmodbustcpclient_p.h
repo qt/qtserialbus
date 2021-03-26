@@ -106,7 +106,7 @@ public:
             while (!responseBuffer.isEmpty()) {
                 // can we read enough for Modbus ADU header?
                 if (responseBuffer.size() < mbpaHeaderSize) {
-                    qCDebug(QT_MODBUS_LOW) << "(TCP client) Modbus ADU not complete";
+                    qCDebug(QT_MODBUS_LOW) << "(TCP client) MBPA header too short. Waiting for more data.";
                     return;
                 }
 
