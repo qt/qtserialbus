@@ -129,9 +129,21 @@ private slots:
         QCOMPARE(client.processResponse(response, &unit), true);
 
         QCOMPARE(unit.isValid(), false);
-        QCOMPARE(unit.valueCount(), 0);
+        QCOMPARE(unit.valueCount(), 24);
         QCOMPARE(unit.startAddress(), -1);
-        QCOMPARE(unit.values(), {});
+        QCOMPARE(unit.values(), values);
+        QCOMPARE(unit.registerType(), QModbusDataUnit::Coils);
+
+        unit = {};
+        unit.setStartAddress(1);
+        response = QModbusResponse(QModbusResponse::ReadCoils,
+            QByteArray::fromHex("03cd6b05"));
+        QCOMPARE(client.processResponse(response, &unit), true);
+
+        QCOMPARE(unit.isValid(), true);
+        QCOMPARE(unit.valueCount(), 24);
+        QCOMPARE(unit.startAddress(), 1);
+        QCOMPARE(unit.values(), values);
         QCOMPARE(unit.registerType(), QModbusDataUnit::Coils);
     }
 
@@ -197,9 +209,21 @@ private slots:
         QCOMPARE(client.processResponse(response, &unit), true);
 
         QCOMPARE(unit.isValid(), false);
-        QCOMPARE(unit.valueCount(), 0);
+        QCOMPARE(unit.valueCount(), 24);
         QCOMPARE(unit.startAddress(), -1);
-        QCOMPARE(unit.values(), {});
+        QCOMPARE(unit.values(), values);
+        QCOMPARE(unit.registerType(), QModbusDataUnit::DiscreteInputs);
+
+        unit = {};
+        unit.setStartAddress(1);
+        response = QModbusResponse(QModbusResponse::ReadDiscreteInputs,
+            QByteArray::fromHex("03acdb35"));
+        QCOMPARE(client.processResponse(response, &unit), true);
+
+        QCOMPARE(unit.isValid(), true);
+        QCOMPARE(unit.valueCount(), 24);
+        QCOMPARE(unit.startAddress(), 1);
+        QCOMPARE(unit.values(), values);
         QCOMPARE(unit.registerType(), QModbusDataUnit::DiscreteInputs);
     }
 
@@ -243,6 +267,18 @@ private slots:
         QCOMPARE(unit.startAddress(), -1);
         QCOMPARE(unit.values(), values);
         QCOMPARE(unit.registerType(), QModbusDataUnit::HoldingRegisters);
+
+        unit = {};
+        unit.setStartAddress(1);
+        response = QModbusResponse(QModbusResponse::ReadHoldingRegisters,
+            QByteArray::fromHex("04cd6b057f"));
+        QCOMPARE(client.processResponse(response, &unit), true);
+
+        QCOMPARE(unit.isValid(), true);
+        QCOMPARE(unit.valueCount(), 2);
+        QCOMPARE(unit.startAddress(), 1);
+        QCOMPARE(unit.values(), values);
+        QCOMPARE(unit.registerType(), QModbusDataUnit::HoldingRegisters);
     }
 
     void testProcessReadInputRegistersResponse()
@@ -283,6 +319,18 @@ private slots:
         QCOMPARE(unit.isValid(), false);
         QCOMPARE(unit.valueCount(), 2);
         QCOMPARE(unit.startAddress(), -1);
+        QCOMPARE(unit.values(), values);
+        QCOMPARE(unit.registerType(), QModbusDataUnit::InputRegisters);
+
+        unit = {};
+        unit.setStartAddress(1);
+        response = QModbusResponse(QModbusResponse::ReadInputRegisters,
+            QByteArray::fromHex("04cd6b057f"));
+        QCOMPARE(client.processResponse(response, &unit), true);
+
+        QCOMPARE(unit.isValid(), true);
+        QCOMPARE(unit.valueCount(), 2);
+        QCOMPARE(unit.startAddress(), 1);
         QCOMPARE(unit.values(), values);
         QCOMPARE(unit.registerType(), QModbusDataUnit::InputRegisters);
     }
@@ -384,6 +432,18 @@ private slots:
         QCOMPARE(unit.isValid(), false);
         QCOMPARE(unit.valueCount(), 2);
         QCOMPARE(unit.startAddress(), -1);
+        QCOMPARE(unit.values(), values);
+        QCOMPARE(unit.registerType(), QModbusDataUnit::HoldingRegisters);
+
+        unit = {};
+        unit.setStartAddress(1);
+        response = QModbusResponse(QModbusResponse::ReadWriteMultipleRegisters,
+            QByteArray::fromHex("04cd6b057f"));
+        QCOMPARE(client.processResponse(response, &unit), true);
+
+        QCOMPARE(unit.isValid(), true);
+        QCOMPARE(unit.valueCount(), 2);
+        QCOMPARE(unit.startAddress(), 1);
         QCOMPARE(unit.values(), values);
         QCOMPARE(unit.registerType(), QModbusDataUnit::HoldingRegisters);
     }

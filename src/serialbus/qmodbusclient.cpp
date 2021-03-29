@@ -447,18 +447,23 @@ bool QModbusClientPrivate::collateBits(const QModbusPdu &response,
     if (response.dataSize() < QModbusResponse::minimumDataSize(response))
         return false;
 
-    const QByteArray payload = response.data();
     // byte count needs to match available bytes
-    if ((payload.size() - 1) != payload[0])
+    const quint8 byteCount = quint8(response.data().at(0));
+    if ((response.dataSize() - 1) != byteCount)
         return false;
 
     if (data) {
-        uint value = 0;
-        for (qint32 i = 1; i < payload.size(); ++i) {
+        const int valueCount = byteCount *8;
+        const QByteArray payload = response.data();
+
+        qsizetype value = 0;
+        QList<quint16> values(valueCount);
+        for (qsizetype i = 1; i < payload.size(); ++i) {
             const quint8 byte = quint8(payload[i]);
-            for (qint32 currentBit = 0; currentBit < 8 && value < data->valueCount(); ++currentBit)
-                data->setValue(value++, byte & (1U << currentBit) ? 1 : 0);
+            for (qint32 currentBit = 0; currentBit < 8 && value < valueCount; ++currentBit)
+                values[value++] = (byte & (1U << currentBit) ? 1 : 0);
         }
+        data->setValues(values);
         data->setRegisterType(type);
     }
     return true;
