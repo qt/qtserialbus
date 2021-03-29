@@ -107,7 +107,7 @@ private slots:
         QCOMPARE(client.numberOfRetries(), 1);
     }
 
-    void testProcessReadWriteSingleMultipleCoilsResponse()
+    void testProcessReadCoilsResponse()
     {
         TestClient client;
 
@@ -122,9 +122,14 @@ private slots:
         QCOMPARE(unit.values(),
             QList<quint16>({ 1,0,1,1,0,0,1,1, 1,1,0,1,0,1,1,0, 1,0,1,0,0,0,0,0 }));
         QCOMPARE(unit.registerType(), QModbusDataUnit::Coils);
+    }
 
-        unit = QModbusDataUnit();
-        response = QModbusResponse(QModbusResponse::WriteSingleCoil,
+    void testProcessWriteSingleMultipleCoilsResponse()
+    {
+        TestClient client;
+
+        QModbusDataUnit unit;
+        QModbusResponse response = QModbusResponse(QModbusResponse::WriteSingleCoil,
             QByteArray::fromHex("00acff00"));
         QCOMPARE(client.processResponse(response, &unit), true);
 
