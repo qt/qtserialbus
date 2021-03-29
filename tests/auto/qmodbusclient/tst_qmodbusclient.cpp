@@ -110,6 +110,7 @@ private slots:
     void testProcessReadCoilsResponse()
     {
         TestClient client;
+        const QList<quint16> values({ 1,0,1,1,0,0,1,1, 1,1,0,1,0,1,1,0, 1,0,1,0,0,0,0,0 });
 
         QModbusDataUnit unit(QModbusDataUnit::Coils, 100, 24);
         QModbusResponse response = QModbusResponse(QModbusResponse::ReadCoils,
@@ -119,8 +120,7 @@ private slots:
         QCOMPARE(unit.isValid(), true);
         QCOMPARE(unit.valueCount(), 24u);
         QCOMPARE(unit.startAddress(), 100);
-        QCOMPARE(unit.values(),
-            QList<quint16>({ 1,0,1,1,0,0,1,1, 1,1,0,1,0,1,1,0, 1,0,1,0,0,0,0,0 }));
+        QCOMPARE(unit.values(), values);
         QCOMPARE(unit.registerType(), QModbusDataUnit::Coils);
     }
 
@@ -154,6 +154,7 @@ private slots:
     void testProcessReadDiscreteInputsResponse()
     {
         TestClient client;
+        const QList<quint16> values({ 1,0,1,1,0,0,1,1, 1,1,0,1,0,1,1,0, 1,0,1,0,0,0,0,0 });
 
         QModbusDataUnit unit(QModbusDataUnit::DiscreteInputs, 100, 24);
         QModbusResponse response = QModbusResponse(QModbusResponse::ReadDiscreteInputs,
@@ -163,8 +164,7 @@ private slots:
         QCOMPARE(unit.isValid(), true);
         QCOMPARE(unit.valueCount(), 24u);
         QCOMPARE(unit.startAddress(), 100);
-        QCOMPARE(unit.values(),
-            QList<quint16>({ 1,0,1,1,0,0,1,1, 1,1,0,1,0,1,1,0, 1,0,1,0,0,0,0,0 }));
+        QCOMPARE(unit.values(), values);
         QCOMPARE(unit.registerType(), QModbusDataUnit::DiscreteInputs);
 
         response.setFunctionCode(QModbusPdu::FunctionCode(0x82));
@@ -184,6 +184,7 @@ private slots:
     void testProcessReadHoldingRegistersResponse()
     {
         TestClient client;
+        const QList<quint16> values({ 52587, 1407 });
 
         QModbusDataUnit unit;
         unit.setStartAddress(100);
@@ -194,7 +195,7 @@ private slots:
         QCOMPARE(unit.isValid(), true);
         QCOMPARE(unit.valueCount(), 2u);
         QCOMPARE(unit.startAddress(), 100);
-        QCOMPARE(unit.values(), QList<quint16>({ 52587, 1407 }));
+        QCOMPARE(unit.values(), values);
         QCOMPARE(unit.registerType(), QModbusDataUnit::HoldingRegisters);
 
         response.setFunctionCode(QModbusPdu::FunctionCode(0x83));
@@ -214,6 +215,7 @@ private slots:
     void testProcessReadInputRegistersResponse()
     {
         TestClient client;
+        const QList<quint16> values({ 52587, 1407 });
 
         QModbusDataUnit unit;
         unit.setStartAddress(100);
@@ -224,7 +226,7 @@ private slots:
         QCOMPARE(unit.isValid(), true);
         QCOMPARE(unit.valueCount(), 2u);
         QCOMPARE(unit.startAddress(), 100);
-        QCOMPARE(unit.values(), QList<quint16>({ 52587, 1407 }));
+        QCOMPARE(unit.values(), values);
         QCOMPARE(unit.registerType(), QModbusDataUnit::InputRegisters);
 
         response.setFunctionCode(QModbusPdu::FunctionCode(0x84));
@@ -304,6 +306,7 @@ private slots:
     void testProcessReadWriteMultipleRegistersResponse()
     {
         TestClient client;
+        const QList<quint16> values({ 52587, 1407 });
 
         QModbusDataUnit unit;
         unit.setStartAddress(100);
@@ -313,7 +316,7 @@ private slots:
 
         QCOMPARE(unit.isValid(), true);
         QCOMPARE(unit.valueCount(), 2u);
-        QCOMPARE(unit.values(), QList<quint16>({ 52587, 1407 }));
+        QCOMPARE(unit.values(), values);
         QCOMPARE(unit.registerType(), QModbusDataUnit::HoldingRegisters);
 
         response.setFunctionCode(QModbusPdu::FunctionCode(0x97));
