@@ -154,11 +154,11 @@ private slots:
     void testProcessReadDiscreteInputsResponse()
     {
         TestClient client;
-        const QList<quint16> values({ 1,0,1,1,0,0,1,1, 1,1,0,1,0,1,1,0, 1,0,1,0,0,0,0,0 });
+        const QList<quint16> values({ 0,0,1,1,0,1,0,1, 1,1,0,1,1,0,1,1, 1,0,1,0,1,1,0,0 });
 
         QModbusDataUnit unit(QModbusDataUnit::DiscreteInputs, 100, 24);
         QModbusResponse response = QModbusResponse(QModbusResponse::ReadDiscreteInputs,
-            QByteArray::fromHex("03cd6b05"));
+            QByteArray::fromHex("03acdb35"));
         QCOMPARE(client.processResponse(response, &unit), true);
 
         QCOMPARE(unit.isValid(), true);
@@ -171,13 +171,13 @@ private slots:
         QCOMPARE(client.processResponse(response, &unit), false);
 
         response.setFunctionCode(QModbusResponse::ReadDiscreteInputs);
-        response.setData(QByteArray::fromHex("05"));
+        response.setData(QByteArray::fromHex("35"));
         QCOMPARE(client.processResponse(response, &unit), false);
 
-        response.setData(QByteArray::fromHex("03cd6b"));
+        response.setData(QByteArray::fromHex("03acdb"));
         QCOMPARE(client.processResponse(response, &unit), false);
 
-        response.setData(QByteArray::fromHex("03cd6b0517"));
+        response.setData(QByteArray::fromHex("03acdb3517"));
         QCOMPARE(client.processResponse(response, &unit), false);
     }
 
