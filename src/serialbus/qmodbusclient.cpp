@@ -294,11 +294,11 @@ QModbusRequest QModbusClientPrivate::createWriteRequest(const QModbusDataUnit &d
                                   quint16((data.value(0) == 0u) ? Coil::Off : Coil::On));
         }
 
-        quint8 byteCount = data.valueCount() / 8;
+        quint8 byteCount = quint8(data.valueCount() / 8);
         if ((data.valueCount() % 8) != 0)
             byteCount += 1;
 
-        quint8 address = 0;
+        qsizetype address = 0;
         QList<quint8> bytes;
         for (quint8 i = 0; i < byteCount; ++i) {
             quint8 byte = 0;
@@ -318,7 +318,7 @@ QModbusRequest QModbusClientPrivate::createWriteRequest(const QModbusDataUnit &d
                                   data.value(0));
         }
 
-        const quint8 byteCount = data.valueCount() * 2;
+        const quint8 byteCount = quint8(data.valueCount() * 2);
         return QModbusRequest(QModbusRequest::WriteMultipleRegisters, quint16(data.startAddress()),
                               quint16(data.valueCount()), byteCount, data.values());
     }   break;
@@ -339,7 +339,7 @@ QModbusRequest QModbusClientPrivate::createRWRequest(const QModbusDataUnit &read
         return QModbusRequest();
     }
 
-    const quint8 byteCount = write.valueCount() * 2;
+    const quint8 byteCount = quint8(write.valueCount() * 2);
     return QModbusRequest(QModbusRequest::ReadWriteMultipleRegisters, quint16(read.startAddress()),
                           quint16(read.valueCount()), quint16(write.startAddress()),
                           quint16(write.valueCount()), byteCount, write.values());

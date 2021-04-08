@@ -118,7 +118,7 @@ private slots:
         QCOMPARE(client.processResponse(response, &unit), true);
 
         QCOMPARE(unit.isValid(), true);
-        QCOMPARE(unit.valueCount(), 24u);
+        QCOMPARE(unit.valueCount(), 24);
         QCOMPARE(unit.startAddress(), 100);
         QCOMPARE(unit.values(), values);
         QCOMPARE(unit.registerType(), QModbusDataUnit::Coils);
@@ -157,7 +157,7 @@ private slots:
         QCOMPARE(client.processResponse(response, &unit), true);
 
         QCOMPARE(unit.isValid(), true);
-        QCOMPARE(unit.valueCount(), 1u);
+        QCOMPARE(unit.valueCount(), 1);
         QCOMPARE(unit.startAddress(), 172);
         QCOMPARE(unit.values(), QList<quint16>() << Coil::On);
         QCOMPARE(unit.registerType(), QModbusDataUnit::Coils);
@@ -168,7 +168,7 @@ private slots:
         QCOMPARE(client.processResponse(response, &unit), true);
 
         QCOMPARE(unit.isValid(), true);
-        QCOMPARE(unit.valueCount(), 10u);
+        QCOMPARE(unit.valueCount(), 10);
         QCOMPARE(unit.startAddress(), 19);
         QCOMPARE(unit.values(), QList<quint16>());
         QCOMPARE(unit.registerType(), QModbusDataUnit::Coils);
@@ -185,7 +185,7 @@ private slots:
         QCOMPARE(client.processResponse(response, &unit), true);
 
         QCOMPARE(unit.isValid(), true);
-        QCOMPARE(unit.valueCount(), 24u);
+        QCOMPARE(unit.valueCount(), 24);
         QCOMPARE(unit.startAddress(), 100);
         QCOMPARE(unit.values(), values);
         QCOMPARE(unit.registerType(), QModbusDataUnit::DiscreteInputs);
@@ -239,7 +239,7 @@ private slots:
         QCOMPARE(client.processResponse(response, &unit), true);
 
         QCOMPARE(unit.isValid(), true);
-        QCOMPARE(unit.valueCount(), 2u);
+        QCOMPARE(unit.valueCount(), 2);
         QCOMPARE(unit.startAddress(), 100);
         QCOMPARE(unit.values(), values);
         QCOMPARE(unit.registerType(), QModbusDataUnit::HoldingRegisters);
@@ -293,7 +293,7 @@ private slots:
         QCOMPARE(client.processResponse(response, &unit), true);
 
         QCOMPARE(unit.isValid(), true);
-        QCOMPARE(unit.valueCount(), 2u);
+        QCOMPARE(unit.valueCount(), 2);
         QCOMPARE(unit.startAddress(), 100);
         QCOMPARE(unit.values(), values);
         QCOMPARE(unit.registerType(), QModbusDataUnit::InputRegisters);
@@ -345,7 +345,7 @@ private slots:
         QCOMPARE(client.processResponse(response, &unit), true);
 
         QCOMPARE(unit.isValid(), true);
-        QCOMPARE(unit.valueCount(), 1u);
+        QCOMPARE(unit.valueCount(), 1);
         QCOMPARE(unit.startAddress(), 1229);
         QCOMPARE(unit.values(), QList<quint16>(1, 27397u));
         QCOMPARE(unit.registerType(), QModbusDataUnit::HoldingRegisters);
@@ -371,7 +371,7 @@ private slots:
         QCOMPARE(client.processResponse(response, &unit), true);
 
         QCOMPARE(unit.isValid(), true);
-        QCOMPARE(unit.valueCount(), 123u);
+        QCOMPARE(unit.valueCount(), 123);
         QCOMPARE(unit.startAddress(), 973);
         QCOMPARE(unit.registerType(), QModbusDataUnit::HoldingRegisters);
 
@@ -407,7 +407,7 @@ private slots:
         QCOMPARE(client.processResponse(response, &unit), true);
 
         QCOMPARE(unit.isValid(), true);
-        QCOMPARE(unit.valueCount(), 2u);
+        QCOMPARE(unit.valueCount(), 2);
         QCOMPARE(unit.values(), values);
         QCOMPARE(unit.registerType(), QModbusDataUnit::HoldingRegisters);
 

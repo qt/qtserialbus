@@ -85,16 +85,16 @@ public:
         m_valueCount = newValues.size();
     }
 
-    inline uint valueCount() const { return m_valueCount; }
-    inline void setValueCount(uint newCount) { m_valueCount = newCount; }
+    inline qsizetype valueCount() const { return m_valueCount; }
+    inline void setValueCount(qsizetype newCount) { m_valueCount = newCount; }
 
-    inline void setValue(int index, quint16 newValue)
+    inline void setValue(qsizetype index, quint16 newValue)
     {
         if (m_values.isEmpty() || index >= m_values.size())
             return;
         m_values[index] = newValue;
     }
-    inline quint16 value(int index) const { return m_values.value(index); }
+    inline quint16 value(qsizetype index) const { return m_values.value(index); }
 
     bool isValid() const { return m_type != Invalid && m_startAddress != -1; }
 
@@ -102,7 +102,7 @@ private:
     RegisterType m_type = Invalid;
     int m_startAddress = -1;
     QList<quint16> m_values;
-    uint m_valueCount = 0;
+    qsizetype m_valueCount = 0;
 };
 typedef QMap<QModbusDataUnit::RegisterType, QModbusDataUnit> QModbusDataUnitMap;
 

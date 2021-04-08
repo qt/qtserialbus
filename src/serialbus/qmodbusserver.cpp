@@ -502,9 +502,9 @@ bool QModbusServer::writeData(const QModbusDataUnit &newData)
         return false;
 
     bool changeRequired = false;
-    for (uint i = 0; i < newData.valueCount(); i++) {
+    for (qsizetype i = 0; i < newData.valueCount(); i++) {
         const quint16 newValue = newData.value(i);
-        const int translatedIndex = newData.startAddress() - current.startAddress() + i;
+        const qsizetype translatedIndex = newData.startAddress() - current.startAddress() + i;
         changeRequired |= (current.value(translatedIndex) != newValue);
         current.setValue(translatedIndex, newValue);
     }
@@ -725,7 +725,7 @@ QModbusResponse QModbusServerPrivate::readBits(const QModbusPdu &request,
             QModbusExceptionResponse::IllegalDataAddress);
     }
 
-    quint8 byteCount = count / 8;
+    quint8 byteCount = quint8(count / 8);
     if ((count % 8) != 0) {
         byteCount += 1;
         // If the range is not a multiple of 8, resize.
@@ -829,7 +829,7 @@ QModbusResponse QModbusServerPrivate::processReadExceptionStatusRequest(const QM
                                         QModbusExceptionResponse::IllegalDataAddress);
     }
 
-    quint16 address = 0;
+    qsizetype address = 0;
     quint8 byte = 0;
     for (int currentBit = 0; currentBit < 8; ++currentBit)
         if (coils.value(address++)) // The padding happens inside value().

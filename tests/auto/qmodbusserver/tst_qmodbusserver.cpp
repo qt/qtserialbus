@@ -942,7 +942,7 @@ private slots:
         const QList<quint16> valueVector = { 1, 1, 1, 1, 1 };
         const QList<quint16> zeroVector = { 0, 0, 0, 0, 0 };
         QModbusDataUnit rangeUnit(registerType, 7, valueVector);
-        QCOMPARE(rangeUnit.valueCount(), 5u);
+        QCOMPARE(rangeUnit.valueCount(), 5);
         QCOMPARE(rangeUnit.values().count(), 5);
         QCOMPARE(rangeUnit.startAddress(), 7);
         QVERIFY(rangeUnit.values() == valueVector);
@@ -951,8 +951,8 @@ private slots:
         writtenSpy.clear();
         QVERIFY(server.setData(rangeUnit) == validDataUnit);
         if (validDataUnit) {
-            for (int i = rangeUnit.startAddress();
-                 i < rangeUnit.startAddress() + int(rangeUnit.valueCount()); i++) {
+            for (qsizetype i = rangeUnit.startAddress();
+                 i < rangeUnit.startAddress() + rangeUnit.valueCount(); i++) {
                 quint16 readData = 0;
                 QVERIFY(server.data(registerType, i, &readData));
                 QCOMPARE(readData, valueVector.at(i-rangeUnit.startAddress()));
@@ -963,7 +963,7 @@ private slots:
             QCOMPARE(signalData.count(), 3);
             QCOMPARE(signalData.at(0).value<QModbusDataUnit::RegisterType>(), registerType);
             QCOMPARE(signalData.at(1).toInt(), rangeUnit.startAddress());
-            QCOMPARE(signalData.at(2).toUInt(), rangeUnit.valueCount());
+            QCOMPARE(signalData.at(2).toInt(), rangeUnit.valueCount());
         }
 
         // no writtenData() signal when writing same rangeUnit again
@@ -973,7 +973,7 @@ private slots:
 
         //never fits anywhere
         QModbusDataUnit oversizeUnit(registerType, 0, MAP_RANGE*2);
-        QCOMPARE(oversizeUnit.valueCount(), uint(MAP_RANGE*2));
+        QCOMPARE(oversizeUnit.valueCount(), MAP_RANGE*2);
         QCOMPARE(oversizeUnit.values().count(), MAP_RANGE*2);
         QCOMPARE(oversizeUnit.startAddress(), 0);
         QCOMPARE(oversizeUnit.registerType(), registerType);
@@ -1003,7 +1003,7 @@ private slots:
 
         //testing server.data(QModbusDataUnit *)
         QModbusDataUnit requestUnit(registerType, 7, 5);
-        QCOMPARE(requestUnit.valueCount(), 5u);
+        QCOMPARE(requestUnit.valueCount(), 5);
         QCOMPARE(requestUnit.values().count(), 5);
         QCOMPARE(requestUnit.startAddress(), 7);
         QVERIFY(requestUnit.registerType() == registerType);
@@ -1012,7 +1012,7 @@ private slots:
         QVERIFY(server.data(&requestUnit) == validDataUnit);
         if (validDataUnit) {
             QVERIFY(requestUnit.values() == valueVector);
-            QCOMPARE(requestUnit.valueCount(), 5u);
+            QCOMPARE(requestUnit.valueCount(), 5);
             QCOMPARE(requestUnit.values().count(), 5);
             QCOMPARE(requestUnit.startAddress(), 7);
         }
@@ -1030,7 +1030,7 @@ private slots:
         requestUnit.setStartAddress(-1);
         QVERIFY(server.data(&requestUnit) == validDataUnit);
         if (validDataUnit) {
-            QCOMPARE(requestUnit.valueCount(), uint(MAP_RANGE));
+            QCOMPARE(requestUnit.valueCount(), MAP_RANGE);
             QCOMPARE(requestUnit.values().count(), MAP_RANGE);
         }
 
@@ -1044,7 +1044,7 @@ private slots:
         oversizeUnit.setStartAddress(-1);
         QVERIFY(server.data(&oversizeUnit) == validDataUnit);
         if (validDataUnit) {
-            QCOMPARE(oversizeUnit.valueCount(), uint(MAP_RANGE));
+            QCOMPARE(oversizeUnit.valueCount(), MAP_RANGE);
             QCOMPARE(oversizeUnit.values().count(), MAP_RANGE);
         }
     }
@@ -1078,7 +1078,7 @@ private slots:
 
         // block write at start
         QModbusDataUnit unit(QModbusDataUnit::HoldingRegisters, 3, 3);
-        for (int i = 0; i < 3; i++)
+        for (qsizetype i = 0; i < 3; i++)
             unit.setValue(i, quint16(0x1111 + i));
         QVERIFY(server.setData(unit));
 

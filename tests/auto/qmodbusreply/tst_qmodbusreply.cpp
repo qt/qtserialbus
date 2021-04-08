@@ -157,7 +157,7 @@ void tst_QModbusReply::tst_setResult()
 {
     QModbusDataUnit unit(QModbusDataUnit::Coils, 5, {4,5,6});
     QCOMPARE(unit.startAddress(), 5);
-    QCOMPARE(unit.valueCount(), 3u);
+    QCOMPARE(unit.valueCount(), 3);
     QCOMPARE(unit.registerType(), QModbusDataUnit::Coils);
     QCOMPARE(unit.isValid(), true);
     QList<quint16> reference = { 4, 5, 6 };
@@ -172,7 +172,7 @@ void tst_QModbusReply::tst_setResult()
     QVERIFY(errorSpy.isEmpty());
 
     QCOMPARE(replyTest.result().startAddress(), -1);
-    QCOMPARE(replyTest.result().valueCount(), 0u);
+    QCOMPARE(replyTest.result().valueCount(), 0);
     QCOMPARE(replyTest.result().registerType(), QModbusDataUnit::Invalid);
     QCOMPARE(replyTest.result().isValid(), false);
     QCOMPARE(replyTest.rawResult().isValid(), false);
@@ -184,7 +184,7 @@ void tst_QModbusReply::tst_setResult()
     QCOMPARE(finishedSpy.count(), 0);
     QCOMPARE(errorSpy.count(), 0);
     QCOMPARE(replyTest.result().startAddress(), 5);
-    QCOMPARE(replyTest.result().valueCount(), 3u);
+    QCOMPARE(replyTest.result().valueCount(), 3);
     QCOMPARE(replyTest.result().registerType(), QModbusDataUnit::Coils);
     QCOMPARE(replyTest.result().isValid(), true);
     QCOMPARE(replyTest.result().values(), reference);
@@ -203,7 +203,7 @@ void tst_QModbusReply::tst_setResult()
     QVERIFY(errorSpyRaw.isEmpty());
 
     QCOMPARE(replyRawTest.result().startAddress(), -1);
-    QCOMPARE(replyRawTest.result().valueCount(), 0u);
+    QCOMPARE(replyRawTest.result().valueCount(), 0);
     QCOMPARE(replyRawTest.result().registerType(), QModbusDataUnit::Invalid);
     QCOMPARE(replyRawTest.result().isValid(), false);
     QCOMPARE(replyRawTest.rawResult().isValid(), false);

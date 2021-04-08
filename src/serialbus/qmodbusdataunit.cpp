@@ -158,7 +158,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \fn uint QModbusDataUnit::valueCount() const
+    \fn qsizetype QModbusDataUnit::valueCount() const
 
     Returns the size of the requested register's data block or the size of data
     read from the device.
@@ -173,7 +173,7 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \fn void QModbusDataUnit::setValueCount(uint newCount)
+    \fn void QModbusDataUnit::setValueCount(qsizetype newCount)
 
     Sets the size of the requested register's data block to \a newCount.
 
@@ -183,13 +183,13 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \fn void QModbusDataUnit::setValue(int index, quint16 value)
+    \fn void QModbusDataUnit::setValue(qsizetype index, quint16 value)
 
     Sets the register at position \a index to \a value.
 */
 
 /*!
-    \fn quint16 QModbusDataUnit::value(int index) const
+    \fn quint16 QModbusDataUnit::value(qsizetype index) const
 
     Return the value at position \a index.
 */

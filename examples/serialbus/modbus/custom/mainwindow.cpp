@@ -154,7 +154,7 @@ void MainWindow::onReadReady()
 
     if (reply->error() == QModbusDevice::NoError) {
         const QModbusDataUnit unit = reply->result();
-        for (int i = 0, total = int(unit.valueCount()); i < total; ++i) {
+        for (qsizetype i = 0, total = unit.valueCount(); i < total; ++i) {
             m_model->setData(m_model->index(unit.startAddress() + i, 1),
                 QString::number(unit.value(i), 16), Qt::EditRole);
         }
@@ -197,10 +197,10 @@ void MainWindow::onWriteButtonClicked()
             quint16(10 - ui->startAddress->value())) // do not go beyond 10 entries
     };
 
-    for (qsizetype i = 0, total = int(unit.valueCount()); i < total; ++i)
+    for (qsizetype i = 0, total = unit.valueCount(); i < total; ++i)
         unit.setValue(i, m_model->m_registers[i + unit.startAddress()]);
 
-    const quint8 byteCount = unit.valueCount() * 2;
+    const quint8 byteCount = quint8(unit.valueCount() * 2);
     QModbusRequest writeRequest {
         QModbusPdu::FunctionCode(ModbusClient::CustomWrite),
         quint16(unit.startAddress()),

@@ -269,7 +269,7 @@ void MainWindow::onReadReady()
 
     if (reply->error() == QModbusDevice::NoError) {
         const QModbusDataUnit unit = reply->result();
-        for (int i = 0, total = int(unit.valueCount()); i < total; ++i) {
+        for (qsizetype i = 0, total = unit.valueCount(); i < total; ++i) {
             const QString entry = tr("Address: %1, Value: %2").arg(unit.startAddress() + i)
                                      .arg(QString::number(unit.value(i),
                                           unit.registerType() <= QModbusDataUnit::Coils ? 10 : 16));
@@ -296,7 +296,7 @@ void MainWindow::onWriteButtonClicked()
 
     QModbusDataUnit writeUnit = writeRequest();
     QModbusDataUnit::RegisterType table = writeUnit.registerType();
-    for (int i = 0, total = int(writeUnit.valueCount()); i < total; ++i) {
+    for (qsizetype i = 0, total = writeUnit.valueCount(); i < total; ++i) {
         if (table == QModbusDataUnit::Coils)
             writeUnit.setValue(i, writeModel->m_coils[i + writeUnit.startAddress()]);
         else
@@ -334,7 +334,7 @@ void MainWindow::onReadWriteButtonClicked()
 
     QModbusDataUnit writeUnit = writeRequest();
     QModbusDataUnit::RegisterType table = writeUnit.registerType();
-    for (int i = 0, total = int(writeUnit.valueCount()); i < total; ++i) {
+    for (qsizetype i = 0, total = writeUnit.valueCount(); i < total; ++i) {
         if (table == QModbusDataUnit::Coils)
             writeUnit.setValue(i, writeModel->m_coils[i + writeUnit.startAddress()]);
         else
