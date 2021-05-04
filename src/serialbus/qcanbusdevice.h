@@ -193,6 +193,8 @@ protected:
                                               const QString &description,
                                               const QString &alias, int channel,
                                               bool isVirtual, bool isFlexibleDataRateCapable);
+
+    virtual QCanBusDeviceInfo deviceInfo() const;
 };
 
 Q_DECLARE_TYPEINFO(QCanBusDevice::CanBusError, Q_PRIMITIVE_TYPE);

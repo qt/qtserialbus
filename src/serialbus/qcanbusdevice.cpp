@@ -1026,4 +1026,16 @@ QCanBusDeviceInfo QCanBusDevice::createDeviceInfo(const QString &name, const QSt
     return QCanBusDeviceInfo(*info.release());
 }
 
+/*!
+    \since 6.2
+
+    Returns a QCanBusDeviceInfo for the current QCanBusDevice. If the function
+    is not implemented by a sub-class of QCanBusDevice, a default constructed
+    object is returned.
+ */
+QCanBusDeviceInfo QCanBusDevice::deviceInfo() const
+{
+    return QCanBusDeviceInfo(*(new QCanBusDeviceInfoPrivate));
+}
+
 QT_END_NAMESPACE

@@ -118,6 +118,19 @@ public:
         writeBufferUsed = isBuffered;
     }
 
+    QCanBusDeviceInfo deviceInfo() const override
+    {
+        return createDeviceInfo(
+            u"name"_qs,
+            u"serial number"_qs,
+            u"description"_qs,
+            u"alias"_qs,
+            100,    //channel
+            true,   // virtual
+            true    // flexible data rate
+        );
+    }
+
 public slots:
     void triggerDelayedWrites()
     {
@@ -160,6 +173,8 @@ private slots:
 
     void tst_waitForFramesReceived();
     void tst_waitForFramesWritten();
+
+    void tst_deviceInfo();
 private:
     std::unique_ptr<tst_Backend> device;
 };
@@ -712,6 +727,21 @@ void tst_QCanBusDevice::tst_waitForFramesWritten()
     QTRY_COMPARE_WITH_TIMEOUT(handleCounter, 3, 5000);
 
     device->setWriteBuffered(false);
+}
+
+void tst_QCanBusDevice::tst_deviceInfo()
+{
+    std::unique_ptr<tst_Backend> canDevice(new tst_Backend);
+    QVERIFY(canDevice != nullptr);
+
+    auto info = canDevice->deviceInfo();
+    QCOMPARE(info.name(), u"name"_qs);
+    QCOMPARE(info.serialNumber(), u"serial number"_qs);
+    QCOMPARE(info.description(), u"description"_qs);
+    QCOMPARE(info.alias(), u"alias"_qs);
+    QCOMPARE(info.channel(), 100);
+    QCOMPARE(info.hasFlexibleDataRate(), true);
+    QCOMPARE(info.isVirtual(), true);
 }
 
 QTEST_MAIN(tst_QCanBusDevice)
