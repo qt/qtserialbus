@@ -110,4 +110,8 @@
          \li \l {Modbus Server example}
          \li \l {Modbus Custom command example}
     \endlist
+
+    \section1 Module Evolution
+    \l {Changes to Qt SerialBus} lists important changes in the module API and
+    functionality that were done for the Qt 6 series of Qt.
 */

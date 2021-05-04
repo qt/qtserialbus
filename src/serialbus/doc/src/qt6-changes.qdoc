@@ -47,4 +47,12 @@
     \section1 Build system
     As with Qt 6 in general, the Qt SerialBus module has CMake support in
     addition to qmake.
+
+    \section1 API changes
+
+    \section2 Removal of QCanBusFactoryV2
+    In Qt6 the QCanBusFactoryV2 has been removed and is no longer part of the
+    public API. Instead QCanBusFactory has gained the additional method
+    QCanBusFactory::availableDevices that needs to be implemented by sub-classes
+    of QCanBusFactory.
 */

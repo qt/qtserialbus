@@ -84,15 +84,10 @@ void tst_QCanBus::plugins()
     const QStringList pluginList = bus->plugins();
     QVERIFY(!pluginList.isEmpty());
     QVERIFY(pluginList.contains("generic"));
-    QVERIFY(pluginList.contains("genericv1"));
 }
 
 void tst_QCanBus::interfaces()
 {
-    // Plugins derived from QCanBusFactory(V1) don't have availableDevices()
-    const QList<QCanBusDeviceInfo> deviceListV1 = bus->availableDevices("genericV1");
-    QVERIFY(deviceListV1.isEmpty());
-
     const QList<QCanBusDeviceInfo> pluginList = bus->availableDevices("generic");
     QCOMPARE(pluginList.size(), 1);
     QCOMPARE(pluginList.at(0).name(), QStringLiteral("can0"));
@@ -102,11 +97,6 @@ void tst_QCanBus::interfaces()
 
 void tst_QCanBus::createDevice()
 {
-    // Assure we can still create plugins derived from QCanBusFactory(V1)
-    QCanBusDevice *dummyV1 = bus->createDevice("genericv1", "unused");
-    QVERIFY(dummyV1);
-    delete dummyV1;
-
     QString error, error2;
     QCanBusDevice *dummy = bus->createDevice("generic", "unused");
     QCanBusDevice *dummy2 = bus->createDevice("generic", "unused");
@@ -127,6 +117,5 @@ void tst_QCanBus::createDevice()
 
 QTEST_MAIN(tst_QCanBus)
 Q_IMPORT_PLUGIN(GenericBusPlugin)
-Q_IMPORT_PLUGIN(GenericBusPluginV1)
 
 #include "tst_qcanbus.moc"

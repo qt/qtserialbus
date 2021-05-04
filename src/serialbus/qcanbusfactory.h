@@ -48,25 +48,14 @@ class Q_SERIALBUS_EXPORT QCanBusFactory
 {
 public:
     virtual QCanBusDevice *createDevice(const QString &interfaceName,
-                                        QString *errorMessage) const = 0;
-protected:
-    virtual ~QCanBusFactory() {}
-};
-
-Q_DECLARE_INTERFACE(QCanBusFactory, "org.qt-project.Qt.QCanBusFactory")
-
-class Q_SERIALBUS_EXPORT QCanBusFactoryV2 : public QCanBusFactory
-{
-public:
-    QCanBusDevice *createDevice(const QString &interfaceName,
-                                QString *errorMessage) const override = 0;
+                                QString *errorMessage) const = 0;
     virtual QList<QCanBusDeviceInfo> availableDevices(QString *errorMessage) const = 0;
 
 protected:
-    virtual ~QCanBusFactoryV2();
+    virtual ~QCanBusFactory();
 };
 
-Q_DECLARE_INTERFACE(QCanBusFactoryV2, "org.qt-project.Qt.QCanBusFactoryV2")
+Q_DECLARE_INTERFACE(QCanBusFactory, "org.qt-project.Qt.QCanBusFactory")
 
 QT_END_NAMESPACE
 

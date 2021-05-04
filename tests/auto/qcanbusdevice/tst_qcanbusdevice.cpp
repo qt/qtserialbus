@@ -716,6 +716,5 @@ void tst_QCanBusDevice::tst_waitForFramesWritten()
 
 QTEST_MAIN(tst_QCanBusDevice)
 Q_IMPORT_PLUGIN(GenericBusPlugin)
-Q_IMPORT_PLUGIN(GenericBusPluginV1)
 
 #include "tst_qcanbusdevice.moc"

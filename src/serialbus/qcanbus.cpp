@@ -166,15 +166,15 @@ QList<QCanBusDeviceInfo> QCanBus::availableDevices(const QString &plugin, QStrin
     if (Q_UNLIKELY(!obj))
         return QList<QCanBusDeviceInfo>();
 
-    const QCanBusFactoryV2 *factoryV2 = qobject_cast<QCanBusFactoryV2 *>(obj);
-    if (Q_UNLIKELY(!factoryV2)) {
+    const QCanBusFactory *factory = qobject_cast<QCanBusFactory *>(obj);
+    if (Q_UNLIKELY(!factory)) {
         setErrorMessage(errorMessage,
                         tr("The plugin '%1' does not provide this function.").arg(plugin));
         return QList<QCanBusDeviceInfo>();
     }
 
     QString errorString;
-    QList<QCanBusDeviceInfo> result = factoryV2->availableDevices(&errorString);
+    QList<QCanBusDeviceInfo> result = factory->availableDevices(&errorString);
 
     setErrorMessage(errorMessage, errorString);
     return result;
@@ -213,12 +213,8 @@ QCanBusDevice *QCanBus::createDevice(const QString &plugin, const QString &inter
     if (Q_UNLIKELY(!obj))
         return nullptr;
 
-    const QCanBusFactoryV2 *factoryV2 = qobject_cast<QCanBusFactoryV2 *>(obj);
-    if (Q_LIKELY(factoryV2))
-        return factoryV2->createDevice(interfaceName, errorMessage);
-
     const QCanBusFactory *factory = qobject_cast<QCanBusFactory *>(obj);
-    if (factory)
+    if (Q_LIKELY(factory))
         return factory->createDevice(interfaceName, errorMessage);
 
     setErrorMessage(errorMessage,
