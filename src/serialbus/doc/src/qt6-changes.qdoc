@@ -55,4 +55,11 @@
     public API. Instead QCanBusFactory has gained the additional method
     QCanBusFactory::availableDevices that needs to be implemented by sub-classes
     of QCanBusFactory.
+
+    \section2 Renaming of QModbusRtuSerialMaster and QModbusRtuSerialSlave
+    Following the recommendation of the Modbus organization the class
+    \c QModbusRtuSerialMaster has been renamed to \l QModbusRtuSerialClient and
+    the class \c QModbusRtuSerialSlave has been renamed to \l QModbusRtuSerialServer.
+    It is advised to use the new class names in new or ported code to adhere to
+    the Modbus naming scheme.
 */
