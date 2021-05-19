@@ -8,6 +8,9 @@ project(QtSerialBus
     LANGUAGES CXX C
 )
 
+# Make sure we use the fixed BASE argument of qt_add_resource.
+set(QT_USE_FIXED_QT_ADD_RESOURCE_BASE TRUE)
+
 if(WASM)
     message(NOTICE "Skipping the build as the condition \"NOT WASM\" is not met.")
     return()
