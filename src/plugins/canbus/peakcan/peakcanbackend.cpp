@@ -186,7 +186,7 @@ QList<QCanBusDeviceInfo> PeakCanBackend::interfacesByAttachedChannels(bool *ok)
 
     std::vector<TPCANChannelInformation> infos(count);
     const TPCANStatus infosStat = ::CAN_GetValue(0, PCAN_ATTACHED_CHANNELS, infos.data(),
-                                                 infos.size() * sizeof(TPCANChannelInformation));
+                                                 quint32(infos.size() * sizeof(TPCANChannelInformation)));
     if (Q_UNLIKELY(infosStat != PCAN_ERROR_OK)) {
         qCWarning(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot query PCAN_ATTACHED_CHANNELS.");
         *ok = false;
