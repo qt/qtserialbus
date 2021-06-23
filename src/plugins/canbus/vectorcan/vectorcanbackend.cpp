@@ -343,6 +343,7 @@ void VectorCanBackendPrivate::startWrite()
 
     const QCanBusFrame frame = q->dequeueOutgoingFrame();
     const QByteArray payload = frame.payload();
+    const qsizetype payloadSize = payload.size();
 
     quint32 eventCount = 1;
     XLstatus status = XL_ERROR;
@@ -356,13 +357,13 @@ void VectorCanBackendPrivate::startWrite()
         if (frame.hasExtendedFrameFormat())
             msg.id |= XL_CAN_EXT_MSG_ID;
 
-        msg.dlc = payload.size();
+        msg.dlc = payloadSize;
         if (frame.hasFlexibleDataRateFormat())
             msg.flags = XL_CAN_TXMSG_FLAG_EDL;
         if (frame.frameType() == QCanBusFrame::RemoteRequestFrame)
             msg.flags |= XL_CAN_TXMSG_FLAG_RTR; // we do not care about the payload
         else
-            ::memcpy(msg.data, payload.constData(), sizeof(msg.data));
+            ::memcpy(msg.data, payload.constData(), payloadSize);
 
         status = ::xlCanTransmitEx(portHandle, channelMask, eventCount, &eventCount, &event);
     } else {
@@ -374,14 +375,14 @@ void VectorCanBackendPrivate::startWrite()
         if (frame.hasExtendedFrameFormat())
             msg.id |= XL_CAN_EXT_MSG_ID;
 
-        msg.dlc = payload.size();
+        msg.dlc = payloadSize;
 
         if (frame.frameType() == QCanBusFrame::RemoteRequestFrame)
             msg.flags |= XL_CAN_MSG_FLAG_REMOTE_FRAME; // we do not care about the payload
         else if (frame.frameType() == QCanBusFrame::ErrorFrame)
             msg.flags |= XL_CAN_MSG_FLAG_ERROR_FRAME; // we do not care about the payload
         else
-            ::memcpy(msg.data, payload.constData(), sizeof(msg.data));
+            ::memcpy(msg.data, payload.constData(), payloadSize);
 
         status = ::xlCanTransmit(portHandle, channelMask, &eventCount, &event);
     }

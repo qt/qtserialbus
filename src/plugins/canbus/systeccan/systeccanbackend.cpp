@@ -372,18 +372,19 @@ void SystecCanBackendPrivate::startWrite()
 
     const QCanBusFrame frame = q->dequeueOutgoingFrame();
     const QByteArray payload = frame.payload();
+    const qsizetype payloadSize = payload.size();
 
     tCanMsgStruct message = {};
 
     message.m_dwID = frame.frameId();
-    message.m_bDLC = quint8(payload.size());
+    message.m_bDLC = quint8(payloadSize);
 
     message.m_bFF = frame.hasExtendedFrameFormat() ? USBCAN_MSG_FF_EXT : USBCAN_MSG_FF_STD;
 
     if (frame.frameType() == QCanBusFrame::RemoteRequestFrame)
         message.m_bFF |= USBCAN_MSG_FF_RTR; // remote request frame without payload
     else
-        ::memcpy(message.m_bData, payload.constData(), sizeof(message.m_bData));
+        ::memcpy(message.m_bData, payload.constData(), payloadSize);
 
     const UCANRET result = ::UcanWriteCanMsgEx(handle, channel, &message, nullptr);
     if (Q_UNLIKELY(result != USBCAN_SUCCESSFUL))

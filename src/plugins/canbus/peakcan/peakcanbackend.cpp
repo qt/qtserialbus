@@ -635,13 +635,13 @@ void PeakCanBackendPrivate::startWrite()
 
     const QCanBusFrame frame = q->dequeueOutgoingFrame();
     const QByteArray payload = frame.payload();
+    const qsizetype payloadSize = payload.size();
     TPCANStatus st = PCAN_ERROR_OK;
 
     if (isFlexibleDatarateEnabled) {
-        const int size = payload.size();
         TPCANMsgFD message = {};
         message.ID = frame.frameId();
-        message.DLC = sizeToDlc(size);
+        message.DLC = sizeToDlc(payloadSize);
         message.MSGTYPE = frame.hasExtendedFrameFormat() ? PCAN_MESSAGE_EXTENDED
                                                          : PCAN_MESSAGE_STANDARD;
 
@@ -653,7 +653,7 @@ void PeakCanBackendPrivate::startWrite()
         if (frame.frameType() == QCanBusFrame::RemoteRequestFrame)
             message.MSGTYPE |= PCAN_MESSAGE_RTR; // we do not care about the payload
         else
-            ::memcpy(message.DATA, payload.constData(), sizeof(message.DATA));
+            ::memcpy(message.DATA, payload.constData(), payloadSize);
         st = ::CAN_WriteFD(channelIndex, &message);
     } else if (frame.hasFlexibleDataRateFormat()) {
         const char errorString[] = "Cannot send CAN FD frame format as CAN FD is not enabled.";
@@ -662,14 +662,14 @@ void PeakCanBackendPrivate::startWrite()
     } else {
         TPCANMsg message = {};
         message.ID = frame.frameId();
-        message.LEN = static_cast<quint8>(payload.size());
+        message.LEN = static_cast<quint8>(payloadSize);
         message.MSGTYPE = frame.hasExtendedFrameFormat() ? PCAN_MESSAGE_EXTENDED
                                                          : PCAN_MESSAGE_STANDARD;
 
         if (frame.frameType() == QCanBusFrame::RemoteRequestFrame)
             message.MSGTYPE |= PCAN_MESSAGE_RTR; // we do not care about the payload
         else
-            ::memcpy(message.DATA, payload.constData(), sizeof(message.DATA));
+            ::memcpy(message.DATA, payload.constData(), payloadSize);
         st = ::CAN_Write(channelIndex, &message);
     }
 
