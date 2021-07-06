@@ -8,7 +8,7 @@ qt_internal_add_plugin(VirtualCanBusPlugin
     SOURCES
         main.cpp
         virtualcanbackend.cpp virtualcanbackend.h
-    PUBLIC_LIBRARIES
+    LIBRARIES
         Qt::Core
         Qt::Network
         Qt::SerialBus
