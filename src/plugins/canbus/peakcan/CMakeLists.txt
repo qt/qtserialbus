@@ -9,7 +9,7 @@ qt_internal_add_plugin(PeakCanBusPlugin
         main.cpp
         peakcan_symbols_p.h
         peakcanbackend.cpp peakcanbackend.h peakcanbackend_p.h
-    PUBLIC_LIBRARIES
+    LIBRARIES
         Qt::Core
         Qt::SerialBus
 )

@@ -9,7 +9,7 @@ qt_internal_add_plugin(SocketCanBusPlugin
         libsocketcan.cpp libsocketcan.h
         main.cpp
         socketcanbackend.cpp socketcanbackend.h
-    PUBLIC_LIBRARIES
+    LIBRARIES
         Qt::Core
         Qt::SerialBus
 )

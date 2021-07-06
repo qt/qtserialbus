@@ -10,6 +10,6 @@ qt_internal_add_plugin(PassThruCanBusPlugin
         main.cpp
         passthrucanbackend.cpp passthrucanbackend.h
         passthrucanio.cpp passthrucanio.h
-    PUBLIC_LIBRARIES
+    LIBRARIES
         Qt::SerialBus
 )
