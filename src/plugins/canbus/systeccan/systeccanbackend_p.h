@@ -58,8 +58,6 @@
 QT_BEGIN_NAMESPACE
 
 class QEvent;
-class QSocketNotifier;
-class QWinEventNotifier;
 class QTimer;
 
 class IncomingEventHandler : public QObject
