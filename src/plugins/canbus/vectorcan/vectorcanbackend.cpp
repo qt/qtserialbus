@@ -112,16 +112,10 @@ public:
         , dptr(d)
     {
         setHandle(dptr->readHandle);
-    }
 
-protected:
-    bool event(QEvent *e) override
-    {
-        if (e->type() == QEvent::WinEventAct) {
+        connect(this, &QWinEventNotifier::activated, this, [this]() {
             dptr->startRead();
-            return true;
-        }
-        return QWinEventNotifier::event(e);
+        });
     }
 
 private:
