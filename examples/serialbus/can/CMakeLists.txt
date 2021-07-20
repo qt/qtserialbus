@@ -20,6 +20,8 @@ find_package(Qt6 COMPONENTS Widgets)
 
 qt_add_executable(can
     bitratebox.cpp bitratebox.h
+    canbusdeviceinfobox.h canbusdeviceinfobox.cpp canbusdeviceinfobox.ui
+    canbusdeviceinfodialog.h canbusdeviceinfodialog.cpp canbusdeviceinfodialog.ui
     connectdialog.cpp connectdialog.h connectdialog.ui
     main.cpp
     mainwindow.cpp mainwindow.h mainwindow.ui

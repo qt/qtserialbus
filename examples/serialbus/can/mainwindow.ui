@@ -92,6 +92,7 @@
     </property>
     <addaction name="actionConnect"/>
     <addaction name="actionDisconnect"/>
+    <addaction name="actionDeviceInformation"/>
     <addaction name="separator"/>
     <addaction name="actionResetController"/>
     <addaction name="separator"/>
@@ -177,6 +178,11 @@
    </property>
    <property name="toolTip">
     <string>Reset CAN Controller</string>
+   </property>
+  </action>
+  <action name="actionDeviceInformation">
+   <property name="text">
+    <string>Device &amp;Information...</string>
    </property>
   </action>
  </widget>

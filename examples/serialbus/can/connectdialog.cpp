@@ -114,26 +114,15 @@ void ConnectDialog::pluginChanged(const QString &plugin)
 
 void ConnectDialog::interfaceChanged(const QString &interface)
 {
-    m_ui->isVirtual->setChecked(false);
-    m_ui->isFlexibleDataRateCapable->setChecked(false);
+    const auto deviceInfo = std::find_if(m_interfaces.constBegin(), m_interfaces.constEnd(),
+                                   [interface](const QCanBusDeviceInfo &info) {
+        return interface == info.name();
+    });
 
-    for (const QCanBusDeviceInfo &info : qAsConst(m_interfaces)) {
-        if (info.name() == interface) {
-            m_ui->descriptionLabel->setText(info.description());
-            QString serialNumber = info.serialNumber();
-            if (serialNumber.isEmpty())
-                serialNumber = tr("n/a");
-            m_ui->serialNumberLabel->setText(tr("Serial: %1").arg(serialNumber));
-            QString alias = info.alias();
-            if (alias.isEmpty())
-                alias = tr("n/a");
-            m_ui->aliasLabel->setText(tr("Alias: %1").arg(alias));
-            m_ui->channelLabel->setText(tr("Channel: %1").arg(info.channel()));
-            m_ui->isVirtual->setChecked(info.isVirtual());
-            m_ui->isFlexibleDataRateCapable->setChecked(info.hasFlexibleDataRate());
-            break;
-        }
-    }
+    if (deviceInfo == m_interfaces.constEnd())
+        m_ui->deviceInfoBox->clear();
+    else
+        m_ui->deviceInfoBox->setDeviceInfo(*deviceInfo);
 }
 
 void ConnectDialog::ok()

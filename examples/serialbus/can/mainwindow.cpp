@@ -50,6 +50,7 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "canbusdeviceinfodialog.h"
 #include "connectdialog.h"
 #include "receivedframesmodel.h"
 
@@ -101,6 +102,7 @@ MainWindow::~MainWindow()
 void MainWindow::initActionsConnections()
 {
     m_ui->actionDisconnect->setEnabled(false);
+    m_ui->actionDeviceInformation->setEnabled(false);
     m_ui->sendFrameBox->setEnabled(false);
 
     connect(m_ui->sendFrameBox, &SendFrameBox::sendFrame, this, &MainWindow::sendFrame);
@@ -118,6 +120,11 @@ void MainWindow::initActionsConnections()
     connect(m_ui->actionClearLog, &QAction::triggered, m_model, &ReceivedFramesModel::clear);
     connect(m_ui->actionPluginDocumentation, &QAction::triggered, this, []() {
         QDesktopServices::openUrl(QUrl("http://doc.qt.io/qt-5/qtcanbus-backends.html#can-bus-plugins"));
+    });
+    connect(m_ui->actionDeviceInformation, &QAction::triggered, this, [this]() {
+        auto info = m_canDevice->deviceInfo();
+        CanBusDeviceInfoDialog dialog(info, this);
+        dialog.exec();
     });
 }
 
@@ -175,6 +182,7 @@ void MainWindow::connectDevice()
     } else {
         m_ui->actionConnect->setEnabled(false);
         m_ui->actionDisconnect->setEnabled(true);
+        m_ui->actionDeviceInformation->setEnabled(true);
 
         m_ui->sendFrameBox->setEnabled(true);
 
@@ -243,6 +251,7 @@ void MainWindow::disconnectDevice()
 
     m_ui->actionConnect->setEnabled(true);
     m_ui->actionDisconnect->setEnabled(false);
+    m_ui->actionDeviceInformation->setEnabled(false);
 
     m_ui->sendFrameBox->setEnabled(false);
 
