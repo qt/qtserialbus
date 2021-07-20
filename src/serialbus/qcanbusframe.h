@@ -147,7 +147,7 @@ public:
         return length <= 8;
     }
 
-    FrameType frameType() const noexcept
+    constexpr FrameType frameType() const noexcept
     {
         switch (format) {
         case 0x1: return DataFrame;
@@ -160,7 +160,7 @@ public:
         return UnknownFrame;
     }
 
-    void setFrameType(FrameType newFormat) noexcept
+    constexpr void setFrameType(FrameType newFormat) noexcept
     {
         switch (newFormat) {
         case DataFrame:
@@ -176,19 +176,19 @@ public:
         }
     }
 
-    bool hasExtendedFrameFormat() const noexcept { return (isExtendedFrame & 0x1); }
-    void setExtendedFrameFormat(bool isExtended) noexcept
+    constexpr bool hasExtendedFrameFormat() const noexcept { return (isExtendedFrame & 0x1); }
+    constexpr void setExtendedFrameFormat(bool isExtended) noexcept
     {
         isExtendedFrame = (isExtended & 0x1);
     }
 
-    QCanBusFrame::FrameId frameId() const noexcept
+    constexpr QCanBusFrame::FrameId frameId() const noexcept
     {
         if (Q_UNLIKELY(format == ErrorFrame))
             return 0;
         return (canId & 0x1FFFFFFFU);
     }
-    void setFrameId(QCanBusFrame::FrameId newFrameId)
+    constexpr void setFrameId(QCanBusFrame::FrameId newFrameId)
     {
         if (Q_LIKELY(newFrameId < 0x20000000U)) {
             isValidFrameId = true;
@@ -206,19 +206,19 @@ public:
         if (data.length() > 8)
             isFlexibleDataRate = 0x1;
     }
-    void setTimeStamp(TimeStamp ts) noexcept { stamp = ts; }
+    constexpr void setTimeStamp(TimeStamp ts) noexcept { stamp = ts; }
 
     QByteArray payload() const { return load; }
-    TimeStamp timeStamp() const noexcept { return stamp; }
+    constexpr TimeStamp timeStamp() const noexcept { return stamp; }
 
-    FrameErrors error() const noexcept
+    constexpr FrameErrors error() const noexcept
     {
         if (format != ErrorFrame)
             return NoError;
 
         return FrameErrors(canId & 0x1FFFFFFFU);
     }
-    void setError(FrameErrors e)
+    constexpr void setError(FrameErrors e)
     {
         if (format != ErrorFrame)
             return;
@@ -227,8 +227,8 @@ public:
 
     QString toString() const;
 
-    bool hasFlexibleDataRateFormat() const noexcept { return (isFlexibleDataRate & 0x1); }
-    void setFlexibleDataRateFormat(bool isFlexibleData) noexcept
+    constexpr bool hasFlexibleDataRateFormat() const noexcept { return (isFlexibleDataRate & 0x1); }
+    constexpr void setFlexibleDataRateFormat(bool isFlexibleData) noexcept
     {
         isFlexibleDataRate = (isFlexibleData & 0x1);
         if (!isFlexibleData) {
@@ -237,23 +237,23 @@ public:
         }
     }
 
-    bool hasBitrateSwitch() const noexcept { return (isBitrateSwitch & 0x1); }
-    void setBitrateSwitch(bool bitrateSwitch) noexcept
+    constexpr bool hasBitrateSwitch() const noexcept { return (isBitrateSwitch & 0x1); }
+    constexpr void setBitrateSwitch(bool bitrateSwitch) noexcept
     {
         isBitrateSwitch = (bitrateSwitch & 0x1);
         if (bitrateSwitch)
             isFlexibleDataRate = 0x1;
     }
 
-    bool hasErrorStateIndicator() const noexcept { return (isErrorStateIndicator & 0x1); }
-    void setErrorStateIndicator(bool errorStateIndicator) noexcept
+    constexpr bool hasErrorStateIndicator() const noexcept { return (isErrorStateIndicator & 0x1); }
+    constexpr void setErrorStateIndicator(bool errorStateIndicator) noexcept
     {
         isErrorStateIndicator = (errorStateIndicator & 0x1);
         if (errorStateIndicator)
             isFlexibleDataRate = 0x1;
     }
-    bool hasLocalEcho() const noexcept { return (isLocalEcho & 0x1); }
-    void setLocalEcho(bool localEcho) noexcept
+    constexpr bool hasLocalEcho() const noexcept { return (isLocalEcho & 0x1); }
+    constexpr void setLocalEcho(bool localEcho) noexcept
     {
         isLocalEcho = (localEcho & 0x1);
     }
