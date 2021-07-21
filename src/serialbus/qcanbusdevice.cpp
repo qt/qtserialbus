@@ -958,21 +958,6 @@ QCanBusDeviceInfo QCanBusDevice::createDeviceInfo(const QString &name, bool isVi
 }
 
 /*!
-    \since 5.11
-    Returns a QCanBusDeviceInfo created from the given parameters \a name,
-    \a serialNumber, \a description, \a channel, \a isVirtual, and \a
-    isFlexibleDataRateCapable.
-    \internal
- */
-QCanBusDeviceInfo QCanBusDevice::createDeviceInfo(const QString &name, const QString &serialNumber,
-                                                  const QString &description, int channel,
-                                                  bool isVirtual, bool isFlexibleDataRateCapable)
-{
-    return createDeviceInfo(name, serialNumber, description, QString(),
-                            channel, isVirtual, isFlexibleDataRateCapable);
-}
-
-/*!
     \since 6.0
     Returns a QCanBusDeviceInfo created from the given parameters \a name,
     \a serialNumber, \a description, \a alias, \a channel, \a isVirtual,
