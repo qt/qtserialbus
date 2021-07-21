@@ -159,6 +159,7 @@ public:
     QString errorString() const;
 
     virtual QString interpretErrorFrame(const QCanBusFrame &errorFrame) = 0;
+    virtual QCanBusDeviceInfo deviceInfo() const;
 
 Q_SIGNALS:
     void errorOccurred(QCanBusDevice::CanBusError);
@@ -193,8 +194,6 @@ protected:
                                               const QString &description,
                                               const QString &alias, int channel,
                                               bool isVirtual, bool isFlexibleDataRateCapable);
-
-    virtual QCanBusDeviceInfo deviceInfo() const;
 };
 
 Q_DECLARE_TYPEINFO(QCanBusDevice::CanBusError, Q_PRIMITIVE_TYPE);
