@@ -146,9 +146,9 @@ QList<QCanBusDeviceInfo> SocketCanBackend::interfaces()
         const QString serial;
         const QString description = deviceDescription(deviceName);
         const int channel = deviceChannel(deviceName);
-        result.append(std::move(createDeviceInfo(deviceName, serial, description,
-                                                 channel, isVirtual(deviceName),
-                                                 isFlexibleDataRateCapable(deviceName))));
+        result.append(createDeviceInfo(deviceName, serial, description,
+                                       QString(), channel, isVirtual(deviceName),
+                                       isFlexibleDataRateCapable(deviceName)));
     }
 
     std::sort(result.begin(), result.end(),

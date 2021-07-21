@@ -182,11 +182,8 @@ protected:
     virtual void close() = 0;
 
     static QCanBusDeviceInfo createDeviceInfo(const QString &name,
-                                              bool isVirtual = false,
-                                              bool isFlexibleDataRateCapable = false);
-    static QCanBusDeviceInfo createDeviceInfo(const QString &name, const QString &serialNumber,
-                                              const QString &description, int channel,
-                                              bool isVirtual, bool isFlexibleDataRateCapable);
+                                              bool isVirtual,
+                                              bool isFlexibleDataRateCapable);
     static QCanBusDeviceInfo createDeviceInfo(const QString &name, const QString &serialNumber,
                                               const QString &description,
                                               const QString &alias, int channel,

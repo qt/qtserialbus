@@ -69,7 +69,8 @@ QCanBusDeviceInfo SystecCanBackend::createDeviceInfo(const QString &serialNumber
                                                      int channelNumber)
 {
     const QString name = QString::fromLatin1("can%1.%2").arg(deviceNumber).arg(channelNumber);
-    return QCanBusDevice::createDeviceInfo(name, serialNumber, description, channelNumber, false, false);
+    return QCanBusDevice::createDeviceInfo(name, serialNumber, description,
+                                           QString(), channelNumber, false, false);
 }
 
 static QString descriptionString(uint productCode)
@@ -100,11 +101,11 @@ static void DRV_CALLBACK_TYPE ucanEnumCallback(DWORD index, BOOL isUsed,
 
     const QString serialNumber = QString::number(hardwareInfo->m_dwSerialNr);
     const QString description = descriptionString(hardwareInfo->m_dwProductCode);
-    result->append(std::move(SystecCanBackend::createDeviceInfo(serialNumber, description,
-                                                                hardwareInfo->m_bDeviceNr, 0)));
+    result->append(SystecCanBackend::createDeviceInfo(serialNumber, description,
+                                                      hardwareInfo->m_bDeviceNr, 0));
     if (USBCAN_CHECK_SUPPORT_TWO_CHANNEL(hardwareInfo)) {
-        result->append(std::move(SystecCanBackend::createDeviceInfo(serialNumber, description,
-                                                                    hardwareInfo->m_bDeviceNr, 1)));
+        result->append(SystecCanBackend::createDeviceInfo(serialNumber, description,
+                                                          hardwareInfo->m_bDeviceNr, 1));
     }
 
     initInfo->m_fTryNext = true; // continue enumerating with next device
