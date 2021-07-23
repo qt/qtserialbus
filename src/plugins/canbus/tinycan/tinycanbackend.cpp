@@ -74,7 +74,8 @@ bool TinyCanBackend::canCreate(QString *errorReason)
 QList<QCanBusDeviceInfo> TinyCanBackend::interfaces()
 {
     QList<QCanBusDeviceInfo> result;
-    result.append(createDeviceInfo(QStringLiteral("can0.0"), false, false));
+    result.append(createDeviceInfo(QStringLiteral("tinycan"), QStringLiteral("can0.0"),
+                                   false, false));
     return result;
 }
 

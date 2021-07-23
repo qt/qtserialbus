@@ -61,6 +61,7 @@ public:
     {
     }
 
+    QString plugin;
     QString name;
     QString description;
     QString serialNumber;

@@ -306,6 +306,7 @@ QList<QCanBusDeviceInfo> VirtualCanBackend::interfaces()
 
     for (int channel = 0; channel < VirtualChannels; ++channel) {
         result.append(createDeviceInfo(
+                          QStringLiteral("virtualcan"),
                           QStringLiteral("can%1").arg(channel), QString(),
                           QStringLiteral("Qt Virtual CAN bus"), QString(),
                           channel, true, true));

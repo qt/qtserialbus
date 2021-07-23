@@ -181,13 +181,18 @@ protected:
     virtual bool open() = 0;
     virtual void close() = 0;
 
-    static QCanBusDeviceInfo createDeviceInfo(const QString &name,
+    static QCanBusDeviceInfo createDeviceInfo(const QString &plugin,
+                                              const QString &name,
                                               bool isVirtual,
                                               bool isFlexibleDataRateCapable);
-    static QCanBusDeviceInfo createDeviceInfo(const QString &name, const QString &serialNumber,
+    static QCanBusDeviceInfo createDeviceInfo(const QString &plugin,
+                                              const QString &name,
+                                              const QString &serialNumber,
                                               const QString &description,
-                                              const QString &alias, int channel,
-                                              bool isVirtual, bool isFlexibleDataRateCapable);
+                                              const QString &alias,
+                                              int channel,
+                                              bool isVirtual,
+                                              bool isFlexibleDataRateCapable);
 };
 
 Q_DECLARE_TYPEINFO(QCanBusDevice::CanBusError, Q_PRIMITIVE_TYPE);
