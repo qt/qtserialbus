@@ -34,53 +34,40 @@
 **
 ****************************************************************************/
 
-#include "dummybackend.h"
+#include "testcanbackend.h"
 
-#include <QtCore/qdatetime.h>
-#include <QtCore/qdebug.h>
-#include <QtCore/qtimer.h>
+#include <QtSerialBus/qcanbus.h>
+#include <QtSerialBus/qcanbusfactory.h>
 
 QT_BEGIN_NAMESPACE
 
-DummyBackend::DummyBackend() :
-    simulateReceivingTimer(new QTimer(this))
+class TestCanBusPlugin : public QObject, public QCanBusFactory
 {
-    connect(simulateReceivingTimer, &QTimer::timeout, [this]() {
-        const quint64 timeStamp = QDateTime::currentDateTime().toMSecsSinceEpoch();
-        QCanBusFrame dummyFrame(12, "def");
-        dummyFrame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(timeStamp * 1000));
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QCanBusFactory" FILE "plugin.json")
+    Q_INTERFACES(QCanBusFactory)
 
-        enqueueReceivedFrames({dummyFrame});
-    });
-}
+public:
+    QList<QCanBusDeviceInfo> availableDevices(QString *errorMessage) const override
+    {
+        Q_UNUSED(errorMessage);
 
-bool DummyBackend::open()
-{
-    simulateReceivingTimer->start(1000);
-    setState(QCanBusDevice::ConnectedState);
-    return true;
-}
+        return TestCanBackend::interfaces();
+    }
 
-void DummyBackend::close()
-{
-    simulateReceivingTimer->stop();
-    setState(QCanBusDevice::UnconnectedState);
-}
+    QCanBusDevice *createDevice(const QString &interfaceName, QString *errorMessage) const override
+    {
+        if (interfaceName == QStringLiteral("invalid")) {
+            if (errorMessage)
+                *errorMessage = tr("No such interface: '%1'").arg(interfaceName);
 
-bool DummyBackend::writeFrame(const QCanBusFrame &data)
-{
-    qDebug("DummyBackend::writeFrame: %ls", qUtf16Printable(data.toString()));
-    return true;
-}
-
-QString DummyBackend::interpretErrorFrame(const QCanBusFrame &/*errorFrame*/)
-{
-    return QString();
-}
-
-QList<QCanBusDeviceInfo> DummyBackend::interfaces()
-{
-    return {createDeviceInfo(QStringLiteral("generic"), QStringLiteral("can0"), true, true)};
-}
+            return nullptr;
+        }
+        auto device = new TestCanBackend();
+        return device;
+    }
+};
 
 QT_END_NAMESPACE
+
+#include "main.moc"

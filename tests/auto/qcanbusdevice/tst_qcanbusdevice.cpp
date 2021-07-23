@@ -747,6 +747,6 @@ void tst_QCanBusDevice::tst_deviceInfo()
 }
 
 QTEST_MAIN(tst_QCanBusDevice)
-Q_IMPORT_PLUGIN(GenericBusPlugin)
+Q_IMPORT_PLUGIN(TestCanBusPlugin)
 
 #include "tst_qcanbusdevice.moc"

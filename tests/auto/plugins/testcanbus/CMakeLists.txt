@@ -1,14 +1,14 @@
 #####################################################################
-## GenericBusPlugin Plugin:
+## TestCanBusPlugin Plugin:
 #####################################################################
 
-qt_internal_add_plugin(GenericBusPlugin
-    OUTPUT_NAME qtcanbustestgeneric
+qt_internal_add_plugin(TestCanBusPlugin
+    OUTPUT_NAME qttestcanbus
     TYPE canbus
     DEFAULT_IF FALSE
     STATIC
     SOURCES
-        dummybackend.cpp dummybackend.h
+        testcanbackend.cpp testcanbackend.h
         main.cpp
     PUBLIC_LIBRARIES
         Qt::Core

@@ -34,8 +34,8 @@
 **
 ****************************************************************************/
 
-#ifndef DUMMYBACKEND_H
-#define DUMMYBACKEND_H
+#ifndef TESTCANBACKEND_H
+#define TESTCANBACKEND_H
 
 #include <QtSerialBus/qcanbusdevice.h>
 
@@ -43,11 +43,11 @@ QT_BEGIN_NAMESPACE
 
 class QTimer;
 
-class DummyBackend : public QCanBusDevice
+class TestCanBackend : public QCanBusDevice
 {
     Q_OBJECT
 public:
-    explicit DummyBackend();
+    explicit TestCanBackend();
 
     bool open() override;
     void close() override;
@@ -64,4 +64,4 @@ private:
 
 QT_END_NAMESPACE
 
-#endif // DUMMYBACKEND_H
+#endif // TESTCANBACKEND_H

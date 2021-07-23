@@ -83,14 +83,14 @@ void tst_QCanBus::plugins()
 {
     const QStringList pluginList = bus->plugins();
     QVERIFY(!pluginList.isEmpty());
-    QVERIFY(pluginList.contains("generic"));
+    QVERIFY(pluginList.contains("testcan"));
 }
 
 void tst_QCanBus::interfaces()
 {
-    const QList<QCanBusDeviceInfo> pluginList = bus->availableDevices("generic");
+    const QList<QCanBusDeviceInfo> pluginList = bus->availableDevices("testcan");
     QCOMPARE(pluginList.size(), 1);
-    QCOMPARE(pluginList.at(0).plugin(), QStringLiteral("generic"));
+    QCOMPARE(pluginList.at(0).plugin(), QStringLiteral("testcan"));
     QCOMPARE(pluginList.at(0).name(), QStringLiteral("can0"));
     QVERIFY(pluginList.at(0).isVirtual());
     QVERIFY(pluginList.at(0).hasFlexibleDataRate());
@@ -99,12 +99,12 @@ void tst_QCanBus::interfaces()
 void tst_QCanBus::createDevice()
 {
     QString error, error2;
-    QCanBusDevice *dummy = bus->createDevice("generic", "unused");
-    QCanBusDevice *dummy2 = bus->createDevice("generic", "unused");
-    QCanBusDevice *faulty = bus->createDevice("generic", "invalid", &error);
+    QCanBusDevice *testcan = bus->createDevice("testcan", "unused");
+    QCanBusDevice *testcan2 = bus->createDevice("testcan", "unused");
+    QCanBusDevice *faulty = bus->createDevice("testcan", "invalid", &error);
     QCanBusDevice *faulty2 = bus->createDevice("faulty", "faulty", &error2);
-    QVERIFY(dummy);
-    QVERIFY(dummy2);
+    QVERIFY(testcan);
+    QVERIFY(testcan2);
 
     QVERIFY(!faulty);
     QCOMPARE(error, tr("No such interface: 'invalid'"));
@@ -112,11 +112,11 @@ void tst_QCanBus::createDevice()
     QVERIFY(!faulty2);
     QCOMPARE(error2, tr("No such plugin: 'faulty'"));
 
-    delete dummy;
-    delete dummy2;
+    delete testcan;
+    delete testcan2;
 }
 
 QTEST_MAIN(tst_QCanBus)
-Q_IMPORT_PLUGIN(GenericBusPlugin)
+Q_IMPORT_PLUGIN(TestCanBusPlugin)
 
 #include "tst_qcanbus.moc"
