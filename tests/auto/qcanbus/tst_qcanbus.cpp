@@ -90,6 +90,7 @@ void tst_QCanBus::interfaces()
 {
     const QList<QCanBusDeviceInfo> pluginList = bus->availableDevices("generic");
     QCOMPARE(pluginList.size(), 1);
+    QCOMPARE(pluginList.at(0).plugin(), QStringLiteral("generic"));
     QCOMPARE(pluginList.at(0).name(), QStringLiteral("can0"));
     QVERIFY(pluginList.at(0).isVirtual());
     QVERIFY(pluginList.at(0).hasFlexibleDataRate());

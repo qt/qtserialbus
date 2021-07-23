@@ -69,7 +69,8 @@ QCanBusDeviceInfo SystecCanBackend::createDeviceInfo(const QString &serialNumber
                                                      int channelNumber)
 {
     const QString name = QString::fromLatin1("can%1.%2").arg(deviceNumber).arg(channelNumber);
-    return QCanBusDevice::createDeviceInfo(name, serialNumber, description,
+    return QCanBusDevice::createDeviceInfo(QStringLiteral("systeccan"), name,
+                                           serialNumber, description,
                                            QString(), channelNumber, false, false);
 }
 

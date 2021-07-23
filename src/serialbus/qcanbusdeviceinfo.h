@@ -64,6 +64,7 @@ public:
         return *this;
     }
 
+    QString plugin() const;
     QString name() const;
     QString description() const;
     QString serialNumber() const;

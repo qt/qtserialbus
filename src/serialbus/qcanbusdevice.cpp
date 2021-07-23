@@ -946,30 +946,37 @@ void QCanBusDevice::setState(QCanBusDevice::CanBusDeviceState newState)
 }
 
 /*!
- * Returns a QCanBusDeviceInfo created from the given parameters \a name,
- * \a isVirtual, and \a isFlexibleDataRateCapable.
+ * \since 6.2
+ * Returns a QCanBusDeviceInfo created from the given parameters \a plugin,
+ * \a name, \a isVirtual, and \a isFlexibleDataRateCapable.
  * \internal
  */
-QCanBusDeviceInfo QCanBusDevice::createDeviceInfo(const QString &name, bool isVirtual,
+QCanBusDeviceInfo QCanBusDevice::createDeviceInfo(const QString &plugin, const QString &name,
+                                                  bool isVirtual,
                                                   bool isFlexibleDataRateCapable)
 {
-    return createDeviceInfo(name, QString(), QString(), QString(),
+    return createDeviceInfo(plugin, name, QString(), QString(), QString(),
                             0, isVirtual, isFlexibleDataRateCapable);
 }
 
 /*!
-    \since 6.0
-    Returns a QCanBusDeviceInfo created from the given parameters \a name,
-    \a serialNumber, \a description, \a alias, \a channel, \a isVirtual,
+    \since 6.2
+    Returns a QCanBusDeviceInfo created from the given parameters \a plugin,
+    \a name, \a serialNumber, \a description, \a alias, \a channel, \a isVirtual,
     and \a isFlexibleDataRateCapable.
     \internal
  */
-QCanBusDeviceInfo QCanBusDevice::createDeviceInfo(const QString &name, const QString &serialNumber,
-                                                  const QString &description, const QString &alias,
+QCanBusDeviceInfo QCanBusDevice::createDeviceInfo(const QString &plugin,
+                                                  const QString &name,
+                                                  const QString &serialNumber,
+                                                  const QString &description,
+                                                  const QString &alias,
                                                   int channel,
-                                                  bool isVirtual, bool isFlexibleDataRateCapable)
+                                                  bool isVirtual,
+                                                  bool isFlexibleDataRateCapable)
 {
     std::unique_ptr<QCanBusDeviceInfoPrivate> info(new QCanBusDeviceInfoPrivate);
+    info->plugin = plugin;
     info->name = name;
     info->serialNumber = serialNumber;
     info->description = description;

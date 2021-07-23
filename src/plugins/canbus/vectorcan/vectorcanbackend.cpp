@@ -93,7 +93,8 @@ QList<QCanBusDeviceInfo> VectorCanBackend::interfaces()
         const QString name = QStringLiteral("can") + QString::number(i);
         const QString serial = QString::number(config.channel[i].serialNumber);
         const QString description = QLatin1String(config.channel[i].name);
-        result.append(createDeviceInfo(name, serial, description, QString(),
+        result.append(createDeviceInfo(QStringLiteral("vectorcan"), name,
+                                       serial, description, QString(),
                                        channel, isVirtual, isFd));
     }
 

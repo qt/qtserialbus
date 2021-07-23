@@ -87,8 +87,21 @@ QCanBusDeviceInfo::~QCanBusDeviceInfo() = default;
 */
 QCanBusDeviceInfo &QCanBusDeviceInfo::operator=(const QCanBusDeviceInfo &) = default;
 
+ /*!
+    \since 6.2
+     Returns the plugin name of this CAN bus interface, e.g. "peakcan".
+
+     This corresponds to the \c plugin parameter of QCanBus::createDevice().
+ */
+QString QCanBusDeviceInfo::plugin() const
+{
+    return d_ptr->plugin;
+}
+
 /*!
-    Returns the interface name of this CAN bus interface, e.g. can0.
+    Returns the interface name of this CAN bus interface, e.g. "can0".
+
+    This corresponds to the \c interfaceName parameter of QCanBus::createDevice().
 */
 QString QCanBusDeviceInfo::name() const
 {

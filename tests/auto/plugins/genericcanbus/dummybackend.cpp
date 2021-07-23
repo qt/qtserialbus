@@ -80,7 +80,7 @@ QString DummyBackend::interpretErrorFrame(const QCanBusFrame &/*errorFrame*/)
 
 QList<QCanBusDeviceInfo> DummyBackend::interfaces()
 {
-    return {createDeviceInfo(QStringLiteral("can0"), true, true)};
+    return {createDeviceInfo(QStringLiteral("generic"), QStringLiteral("can0"), true, true)};
 }
 
 QT_END_NAMESPACE

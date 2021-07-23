@@ -121,6 +121,7 @@ public:
     QCanBusDeviceInfo deviceInfo() const override
     {
         return createDeviceInfo(
+            u"plugin"_qs,
             u"name"_qs,
             u"serial number"_qs,
             u"description"_qs,
@@ -735,6 +736,7 @@ void tst_QCanBusDevice::tst_deviceInfo()
     QVERIFY(canDevice != nullptr);
 
     auto info = canDevice->deviceInfo();
+    QCOMPARE(info.plugin(), u"plugin"_qs);
     QCOMPARE(info.name(), u"name"_qs);
     QCOMPARE(info.serialNumber(), u"serial number"_qs);
     QCOMPARE(info.description(), u"description"_qs);

@@ -161,7 +161,8 @@ QList<QCanBusDeviceInfo> PeakCanBackend::interfacesByChannelCondition()
             if (idStat == PCAN_ERROR_OK)
                 alias = QString::number(deviceId);
 
-            result.append(createDeviceInfo(QLatin1String(pcanChannels[i].name),
+            result.append(createDeviceInfo(QStringLiteral("peakcan"),
+                                           QLatin1String(pcanChannels[i].name),
                                            QString(), QLatin1String(description),
                                            alias, channel, false, isFd));
         }
@@ -208,7 +209,8 @@ QList<QCanBusDeviceInfo> PeakCanBackend::interfacesByAttachedChannels(bool *ok)
             const int channel = info.controller_number;
             const bool isCanFd = (info.device_features & FEATURE_FD_CAPABLE);
 
-            result.append(createDeviceInfo(name, QString(), description, alias,
+            result.append(createDeviceInfo(QStringLiteral("peakcan"), name, QString(),
+                                           description, alias,
                                            channel, false, isCanFd));
         }
     }

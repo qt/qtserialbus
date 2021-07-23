@@ -177,8 +177,7 @@ QList<QCanBusDeviceInfo> PassThruCanBackend::interfaces()
 
         const QString name = canAdapterName(entries);
         if (!name.isEmpty())
-            list.append(createDeviceInfo(name, false, false));
-
+            list.append(createDeviceInfo(QStringLiteral("passthrucan"), name, false, false));
         entries.endGroup();
     }
 #endif
