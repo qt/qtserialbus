@@ -34,40 +34,53 @@
 **
 ****************************************************************************/
 
-#include "dummybackend.h"
+#include "testcanbackend.h"
 
-#include <QtSerialBus/qcanbus.h>
-#include <QtSerialBus/qcanbusfactory.h>
+#include <QtCore/qdatetime.h>
+#include <QtCore/qdebug.h>
+#include <QtCore/qtimer.h>
 
 QT_BEGIN_NAMESPACE
 
-class GenericBusPlugin : public QObject, public QCanBusFactory
+TestCanBackend::TestCanBackend() :
+    simulateReceivingTimer(new QTimer(this))
 {
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QCanBusFactory" FILE "plugin.json")
-    Q_INTERFACES(QCanBusFactory)
+    connect(simulateReceivingTimer, &QTimer::timeout, [this]() {
+        const quint64 timeStamp = QDateTime::currentDateTime().toMSecsSinceEpoch();
+        QCanBusFrame dummyFrame(12, "def");
+        dummyFrame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(timeStamp * 1000));
 
-public:
-    QList<QCanBusDeviceInfo> availableDevices(QString *errorMessage) const override
-    {
-        Q_UNUSED(errorMessage);
+        enqueueReceivedFrames({dummyFrame});
+    });
+}
 
-        return DummyBackend::interfaces();
-    }
+bool TestCanBackend::open()
+{
+    simulateReceivingTimer->start(1000);
+    setState(QCanBusDevice::ConnectedState);
+    return true;
+}
 
-    QCanBusDevice *createDevice(const QString &interfaceName, QString *errorMessage) const override
-    {
-        if (interfaceName == QStringLiteral("invalid")) {
-            if (errorMessage)
-                *errorMessage = tr("No such interface: '%1'").arg(interfaceName);
+void TestCanBackend::close()
+{
+    simulateReceivingTimer->stop();
+    setState(QCanBusDevice::UnconnectedState);
+}
 
-            return nullptr;
-        }
-        auto device = new DummyBackend();
-        return device;
-    }
-};
+bool TestCanBackend::writeFrame(const QCanBusFrame &data)
+{
+    qDebug("DummyBackend::writeFrame: %ls", qUtf16Printable(data.toString()));
+    return true;
+}
+
+QString TestCanBackend::interpretErrorFrame(const QCanBusFrame &/*errorFrame*/)
+{
+    return QString();
+}
+
+QList<QCanBusDeviceInfo> TestCanBackend::interfaces()
+{
+    return {createDeviceInfo(QStringLiteral("testcan"), QStringLiteral("can0"), true, true)};
+}
 
 QT_END_NAMESPACE
-
-#include "main.moc"

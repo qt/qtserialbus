@@ -1,1 +1,1 @@
-add_subdirectory(genericcanbus)
+add_subdirectory(testcanbus)

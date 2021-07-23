@@ -11,6 +11,6 @@ qt_internal_add_test(tst_qcanbusdevice
 )
 
 # should be
-# qt6_import_plugins(tst_qcanbusdevice INCLUDE GenericBusPlugin)
+# qt6_import_plugins(tst_qcanbusdevice INCLUDE TestCanBusPlugin)
 # but qt6_import_plugins does not work here
-target_link_libraries(tst_qcanbusdevice PRIVATE GenericBusPlugin)
+target_link_libraries(tst_qcanbusdevice PRIVATE TestCanBusPlugin)
