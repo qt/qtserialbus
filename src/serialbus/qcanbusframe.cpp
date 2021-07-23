@@ -50,19 +50,31 @@ QT_BEGIN_NAMESPACE
     \l QCanBusDevice can use QCanBusFrame for read and write operations. It contains the frame
     identifier and the data payload. QCanBusFrame contains the timestamp of the moment it was read.
 
-    \sa QCanBusFrame::TimeStamp
+    \sa QCanBusFrame::FrameId, QCanBusFrame::TimeStamp, payload()
+*/
+
+/*!
+    \typedef QCanBusFrame::FrameId
+
+    A distinct type for a CAN bus frame identifier with either 11 or 29 bit.
+
+    \sa frameId(), setFrameId()
 */
 
 /*!
     \fn QCanBusFrame::QCanBusFrame(QCanBusFrame::FrameType type = DataFrame)
 
     Constructs a CAN frame of the specified \a type.
+
+    \sa QCanBusFrame::FrameType, setFrameType()
 */
 
 /*!
     \fn QCanBusFrame::QCanBusFrame(QCanBusFrame::FrameId identifier, const QByteArray &data)
 
     Constructs a CAN frame using \a identifier as the frame identifier and \a data as the payload.
+
+    \sa QCanBusFrame::FrameId
 */
 
 /*!
@@ -90,7 +102,7 @@ QT_BEGIN_NAMESPACE
     When the format is extended and a \a newFrameId with up to 11 bits or less
     is passed, the \e {CAN extended frame format} setting is \b not changed.
 
-    \sa frameId(), hasExtendedFrameFormat()
+    \sa QCanBusFrame::FrameId, frameId(), hasExtendedFrameFormat()
 */
 
 /*!
@@ -133,20 +145,20 @@ QT_BEGIN_NAMESPACE
 
     If the frame is of \l ErrorFrame type, this ID is always 0.
 
-    \sa setFrameId(), hasExtendedFrameFormat()
+    \sa QCanBusFrame::FrameId, setFrameId(), hasExtendedFrameFormat()
 */
 
 /*!
     \fn bool QCanBusFrame::hasExtendedFrameFormat() const
 
-    Returns \c true if the CAN frame uses a 29bit identifier;
-    otherwise \c false, implying an 11bit identifier.
+    Returns \c true if the CAN frame uses a 29 bit identifier;
+    otherwise \c false, implying an 11 bit identifier.
 
     \sa setExtendedFrameFormat(), frameId()
 */
 
 /*!
-    \fn  void QCanBusFrame::setExtendedFrameFormat(bool isExtended)
+    \fn void QCanBusFrame::setExtendedFrameFormat(bool isExtended)
 
     Sets the extended frame format flag to \a isExtended.
 
@@ -166,6 +178,7 @@ QT_BEGIN_NAMESPACE
 
     \value Qt_5_8               This frame is the initial version introduced in Qt 5.8
     \value Qt_5_9               This frame version was introduced in Qt 5.9
+    \value Qt_5_10              This frame version was introduced in Qt 5.10
 */
 
 /*!
@@ -180,7 +193,7 @@ QT_BEGIN_NAMESPACE
     \value InvalidFrame         This value represents an invalid frame.
                                 This type is used for error reporting.
 
-    \sa setFrameType()
+    \sa frameType(), setFrameType()
 */
 
 /*!
@@ -202,6 +215,8 @@ QT_BEGIN_NAMESPACE
     \value ControllerRestartError       The controller restarted.
     \value UnknownError                 An unknown error has occurred.
     \value AnyError                     Matches every other error type.
+
+    \sa error(), setError()
 */
 
 /*!
@@ -209,7 +224,7 @@ QT_BEGIN_NAMESPACE
 
     Returns the type of the frame.
 
-    \sa setFrameType()
+    \sa QCanBusFrame::FrameType, setFrameType()
 */
 
 /*!
@@ -217,7 +232,7 @@ QT_BEGIN_NAMESPACE
 
     Sets the type of the frame to \a newType.
 
-    \sa frameType()
+    \sa QCanBusFrame::FrameType, frameType()
 */
 
 /*!
@@ -242,7 +257,7 @@ QT_BEGIN_NAMESPACE
     Returns the error of the current error frame. If the frame
     is not an \l ErrorFrame, this function returns \l NoError.
 
-    \sa setError()
+    \sa QCanBusFrame::FrameError, setError()
 */
 
 /*!
@@ -251,7 +266,7 @@ QT_BEGIN_NAMESPACE
     Sets the frame's \a error type. This function does nothing if
     \l frameType() is not an \l ErrorFrame.
 
-    \sa error()
+    \sa QCanBusFrame::FrameError, error()
 */
 
 /*!
