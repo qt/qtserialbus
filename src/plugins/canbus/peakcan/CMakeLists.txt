@@ -11,5 +11,6 @@ qt_internal_add_plugin(PeakCanBusPlugin
         peakcanbackend.cpp peakcanbackend.h peakcanbackend_p.h
     LIBRARIES
         Qt::Core
+        Qt::Network
         Qt::SerialBus
 )

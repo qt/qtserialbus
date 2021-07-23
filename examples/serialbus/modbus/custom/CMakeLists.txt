@@ -34,6 +34,7 @@ set_target_properties(customcommand PROPERTIES
 target_link_libraries(customcommand PRIVATE
     Qt::Core
     Qt::Gui
+    Qt::Network
     Qt::SerialBus
     Qt::Widgets
 )

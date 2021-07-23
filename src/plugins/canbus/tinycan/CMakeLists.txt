@@ -11,5 +11,6 @@ qt_internal_add_plugin(TinyCanBusPlugin
         tinycanbackend.cpp tinycanbackend.h tinycanbackend_p.h
     LIBRARIES
         Qt::Core
+        Qt::Network
         Qt::SerialBus
 )

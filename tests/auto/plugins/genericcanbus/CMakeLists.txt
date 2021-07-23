@@ -12,5 +12,6 @@ qt_internal_add_plugin(GenericBusPlugin
         main.cpp
     PUBLIC_LIBRARIES
         Qt::Core
+        Qt::Network
         Qt::SerialBus
 )

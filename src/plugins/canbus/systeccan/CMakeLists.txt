@@ -11,5 +11,6 @@ qt_internal_add_plugin(SystecCanBusPlugin
         systeccanbackend.cpp systeccanbackend.h systeccanbackend_p.h
     PUBLIC_LIBRARIES
         Qt::Core
+        Qt::Network
         Qt::SerialBus
 )
