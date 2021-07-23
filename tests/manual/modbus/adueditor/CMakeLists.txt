@@ -10,6 +10,7 @@ qt_internal_add_manual_test(adueditor
         Qt::Core
         Qt::CorePrivate
         Qt::Gui
+        Qt::Network
         Qt::SerialBus
         Qt::SerialBusPrivate
         Qt::SerialPort

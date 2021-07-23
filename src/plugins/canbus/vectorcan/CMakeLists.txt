@@ -11,5 +11,6 @@ qt_internal_add_plugin(VectorCanBusPlugin
         vectorcanbackend.cpp vectorcanbackend.h vectorcanbackend_p.h
     PUBLIC_LIBRARIES
         Qt::Core
+        Qt::Network
         Qt::SerialBus
 )

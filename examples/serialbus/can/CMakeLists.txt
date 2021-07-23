@@ -34,6 +34,7 @@ set_target_properties(can PROPERTIES
 target_link_libraries(can PUBLIC
     Qt::Core
     Qt::Gui
+    Qt::Network
     Qt::SerialBus
     Qt::Widgets
 )

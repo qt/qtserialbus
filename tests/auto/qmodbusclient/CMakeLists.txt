@@ -11,6 +11,7 @@ qt_internal_add_test(tst_qmodbusclient
         tst_qmodbusclient.cpp
     PUBLIC_LIBRARIES
         Qt::CorePrivate
+        Qt::Network
         Qt::SerialBus
         Qt::SerialBusPrivate
 )

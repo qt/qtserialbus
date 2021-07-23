@@ -30,6 +30,7 @@ set_target_properties(modbusserver PROPERTIES
 target_link_libraries(modbusserver PUBLIC
     Qt::Core
     Qt::Gui
+    Qt::Network
     Qt::SerialBus
     Qt::Widgets
 )

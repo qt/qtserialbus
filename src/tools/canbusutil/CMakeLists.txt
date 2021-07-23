@@ -11,6 +11,7 @@ qt_internal_add_tool(${target_name}
         main.cpp
         readtask.cpp readtask.h
         sigtermhandler.cpp sigtermhandler.h
-    PUBLIC_LIBRARIES
+    LIBRARIES
+        Qt::Network
         Qt::SerialBus
 )
