@@ -71,6 +71,7 @@ public:
 
     bool hasBusStatus() const override;
     CanBusStatus busStatus() override;
+    QCanBusDeviceInfo deviceInfo() const override;
 
 private:
     VectorCanBackendPrivate * const d_ptr;

@@ -302,6 +302,8 @@ GENERATE_SYMBOL_VARIABLE(UCANRET, UcanReadCanMsgEx, tUcanHandle, quint8 *, tCanM
 GENERATE_SYMBOL_VARIABLE(UCANRET, UcanResetCan, tUcanHandle)
 GENERATE_SYMBOL_VARIABLE(UCANRET, UcanWriteCanMsgEx, tUcanHandle, quint8, tCanMsgStruct *, quint32 *)
 GENERATE_SYMBOL_VARIABLE(UCANRET, UcanGetStatus, tUcanHandle, tStatusStruct *)
+GENERATE_SYMBOL_VARIABLE(UCANRET, UcanGetHardwareInfoEx2, tUcanHandle, tUcanHardwareInfoEx *,
+                         void * /* channelInfo0 */, void * /* channelInfo1 */);
 
 inline bool resolveSystecCanSymbols(QLibrary *systecLibrary)
 {
@@ -324,6 +326,7 @@ inline bool resolveSystecCanSymbols(QLibrary *systecLibrary)
     RESOLVE_SYMBOL(UcanResetCan);
     RESOLVE_SYMBOL(UcanWriteCanMsgEx);
     RESOLVE_SYMBOL(UcanGetStatus);
+    RESOLVE_SYMBOL(UcanGetHardwareInfoEx2);
 
     return true;
 }

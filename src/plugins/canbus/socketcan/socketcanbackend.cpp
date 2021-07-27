@@ -127,6 +127,18 @@ static int deviceChannel(const QString &canDevice)
     return content.toInt(nullptr, 0);
 }
 
+QCanBusDeviceInfo SocketCanBackend::socketCanDeviceInfo(const QString &deviceName)
+{
+    const QString serial; // exists for code readability purposes only
+    const QString alias;  // exists for code readability purposes only
+    const QString description = deviceDescription(deviceName);
+    const int channel = deviceChannel(deviceName);
+    return createDeviceInfo(QStringLiteral("socketcan"), deviceName,
+                            serial, description,
+                            alias, channel, isVirtual(deviceName),
+                            isFlexibleDataRateCapable(deviceName));
+}
+
 QList<QCanBusDeviceInfo> SocketCanBackend::interfaces()
 {
     QList<QCanBusDeviceInfo> result;
@@ -143,13 +155,7 @@ QList<QCanBusDeviceInfo> SocketCanBackend::interfaces()
         if (!(flags(deviceName) & DeviceIsActive))
             continue;
 
-        const QString serial;
-        const QString description = deviceDescription(deviceName);
-        const int channel = deviceChannel(deviceName);
-        result.append(createDeviceInfo(QStringLiteral("socketcan"), deviceName,
-                                       serial, description,
-                                       QString(), channel, isVirtual(deviceName),
-                                       isFlexibleDataRateCapable(deviceName)));
+        result.append(socketCanDeviceInfo(deviceName));
     }
 
     std::sort(result.begin(), result.end(),
@@ -158,6 +164,11 @@ QList<QCanBusDeviceInfo> SocketCanBackend::interfaces()
     });
 
     return result;
+}
+
+QCanBusDeviceInfo SocketCanBackend::deviceInfo() const
+{
+    return socketCanDeviceInfo(canSocketName);
 }
 
 SocketCanBackend::SocketCanBackend(const QString &name) :

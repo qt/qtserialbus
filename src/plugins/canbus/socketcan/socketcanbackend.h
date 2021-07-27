@@ -98,11 +98,13 @@ public:
 
     QString interpretErrorFrame(const QCanBusFrame &errorFrame) override;
 
+    static QCanBusDeviceInfo socketCanDeviceInfo(const QString &deviceName);
     static QList<QCanBusDeviceInfo> interfaces();
 
     void resetController() override;
     bool hasBusStatus() const override;
     CanBusStatus busStatus() override;
+    QCanBusDeviceInfo deviceInfo() const override;
 
 private Q_SLOTS:
     void readSocket();

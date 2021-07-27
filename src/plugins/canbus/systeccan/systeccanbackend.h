@@ -78,6 +78,7 @@ public:
     void resetController() override;
     bool hasBusStatus() const override;
     CanBusStatus busStatus() override;
+    QCanBusDeviceInfo deviceInfo() const override;
 
 private:
     SystecCanBackendPrivate * const d_ptr;

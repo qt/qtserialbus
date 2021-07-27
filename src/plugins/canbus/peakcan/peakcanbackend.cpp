@@ -128,7 +128,7 @@ static const PcanChannel pcanChannels[] = {
     { "none",  PCAN_NONEBUS  }
 };
 
-QList<QCanBusDeviceInfo> PeakCanBackend::interfacesByChannelCondition()
+QList<QCanBusDeviceInfo> PeakCanBackend::interfacesByChannelCondition(Availability available)
 {
     QList<QCanBusDeviceInfo> result;
 
@@ -137,7 +137,7 @@ QList<QCanBusDeviceInfo> PeakCanBackend::interfacesByChannelCondition()
         const TPCANHandle index = pcanChannels[i].index;
         const TPCANStatus stat = ::CAN_GetValue(index, PCAN_CHANNEL_CONDITION,
                                                 &value, sizeof(value));
-        if ((stat == PCAN_ERROR_OK) && (value & PCAN_CHANNEL_AVAILABLE)) {
+        if ((stat == PCAN_ERROR_OK) && (value & uint(available))) {
             const TPCANStatus fdStat = ::CAN_GetValue(index, PCAN_CHANNEL_FEATURES,
                                                       &value, sizeof(value));
             const bool isFd = (fdStat == PCAN_ERROR_OK) && (value & FEATURE_FD_CAPABLE);
@@ -161,7 +161,7 @@ QList<QCanBusDeviceInfo> PeakCanBackend::interfacesByChannelCondition()
             if (idStat == PCAN_ERROR_OK)
                 alias = QString::number(deviceId);
 
-            result.append(createDeviceInfo(QStringLiteral("peakcan"),
+            result.append(QCanBusDevice::createDeviceInfo(QStringLiteral("peakcan"),
                                            QLatin1String(pcanChannels[i].name),
                                            QString(), QLatin1String(description),
                                            alias, channel, false, isFd));
@@ -171,7 +171,20 @@ QList<QCanBusDeviceInfo> PeakCanBackend::interfacesByChannelCondition()
     return result;
 }
 
-QList<QCanBusDeviceInfo> PeakCanBackend::interfacesByAttachedChannels(bool *ok)
+static QString pcanChannelNameForIndex(uint index)
+{
+    const auto pcanChannel = std::find_if(std::begin(pcanChannels), std::end(pcanChannels),
+                                          [index](PcanChannel channel) {
+        return channel.index == index;
+    });
+    if (Q_LIKELY(pcanChannel != std::end(pcanChannels)))
+        return pcanChannel->name;
+
+    qWarning("%s: Cannot get channel name for index %u.", Q_FUNC_INFO, index);
+    return QStringLiteral("none");
+}
+
+QList<QCanBusDeviceInfo> PeakCanBackend::interfacesByAttachedChannels(Availability available, bool *ok)
 {
     *ok = true;
     quint32 count = 0;
@@ -197,13 +210,8 @@ QList<QCanBusDeviceInfo> PeakCanBackend::interfacesByAttachedChannels(bool *ok)
     QList<QCanBusDeviceInfo> result;
     for (quint32 i = 0; i < count; ++i) {
         auto info = infos[i];
-        if (info.channel_condition & PCAN_CHANNEL_AVAILABLE) {
-            const quint32 deviceId = info.channel_handle;
-            const auto pcanChannel = std::find_if(std::begin(pcanChannels), std::end(pcanChannels),
-                                                  [deviceId](PcanChannel channel) {
-                return channel.index == deviceId;
-            });
-            const QString name = pcanChannel->name;
+        if (info.channel_condition & uint(available)) {
+            const QString name = pcanChannelNameForIndex(info.channel_handle);
             const QString description = info.device_name;
             const QString alias = QString::number(info.device_id);
             const int channel = info.controller_number;
@@ -218,17 +226,41 @@ QList<QCanBusDeviceInfo> PeakCanBackend::interfacesByAttachedChannels(bool *ok)
     return result;
 }
 
-QList<QCanBusDeviceInfo> PeakCanBackend::interfaces()
+QList<QCanBusDeviceInfo> PeakCanBackend::attachedInterfaces(Availability available)
 {
 #ifdef Q_OS_WIN
     bool ok = false;
-    const QList<QCanBusDeviceInfo> attachedChannelsResult = interfacesByAttachedChannels(&ok);
+    const QList<QCanBusDeviceInfo> attachedChannelsResult = interfacesByAttachedChannels(available, &ok);
     if (ok)
         return attachedChannelsResult;
 #endif
 
-    const QList<QCanBusDeviceInfo> result = interfacesByChannelCondition();
+    const QList<QCanBusDeviceInfo> result = interfacesByChannelCondition(available);
     return result;
+}
+
+QList<QCanBusDeviceInfo> PeakCanBackend::interfaces()
+{
+    return attachedInterfaces(Availability::Available);
+}
+
+QCanBusDeviceInfo PeakCanBackend::deviceInfo() const
+{
+    const uint index = d_ptr->channelIndex;
+    const QString name = pcanChannelNameForIndex(index);
+    const QList<QCanBusDeviceInfo> availableDevices = attachedInterfaces(Availability::Occupied);
+
+    const auto deviceInfo = std::find_if(availableDevices.constBegin(),
+                                         availableDevices.constEnd(),
+                                         [name](const QCanBusDeviceInfo &info) {
+        return name == info.name();
+    });
+
+    if (Q_LIKELY(deviceInfo != availableDevices.constEnd()))
+        return *deviceInfo;
+
+    qWarning("%s: Cannot get device info for index %u.", Q_FUNC_INFO, index);
+    return QCanBusDevice::deviceInfo();
 }
 
 #if defined(Q_OS_WIN32)

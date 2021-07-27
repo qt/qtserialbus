@@ -61,6 +61,7 @@ public:
     QString interpretErrorFrame(const QCanBusFrame &errorFrame) override;
 
     static QList<QCanBusDeviceInfo> interfaces();
+    QCanBusDeviceInfo deviceInfo() const override;
 
 protected:
     bool open() override;
