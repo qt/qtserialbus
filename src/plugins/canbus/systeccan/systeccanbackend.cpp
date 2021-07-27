@@ -605,4 +605,14 @@ QCanBusDevice::CanBusStatus SystecCanBackend::busStatus()
     return d->busStatus();
 }
 
+QCanBusDeviceInfo SystecCanBackend::deviceInfo() const
+{
+    tUcanHardwareInfoEx hardwareInfo = {};
+    UcanGetHardwareInfoEx2(d_ptr->handle, &hardwareInfo, nullptr, nullptr);
+
+    const QString serialNumber = QString::number(hardwareInfo.m_dwSerialNr);
+    const QString description = descriptionString(hardwareInfo.m_dwProductCode);
+    return createDeviceInfo(serialNumber, description, hardwareInfo.m_bDeviceNr, d_ptr->channel);
+}
+
 QT_END_NAMESPACE

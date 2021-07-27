@@ -708,4 +708,23 @@ QCanBusDevice::CanBusStatus VectorCanBackend::busStatus()
     return QCanBusDevice::CanBusStatus::Unknown;
 }
 
+QCanBusDeviceInfo VectorCanBackend::deviceInfo() const
+{
+    const QList<QCanBusDeviceInfo> availableDevices = interfaces();
+    const int index = d_ptr->channelIndex;
+    const QString name = QStringLiteral("can%1").arg(index);
+
+    const auto deviceInfo = std::find_if(availableDevices.constBegin(),
+                                         availableDevices.constEnd(),
+                                         [name](const QCanBusDeviceInfo &info) {
+        return name == info.name();
+    });
+
+    if (Q_LIKELY(deviceInfo != availableDevices.constEnd()))
+        return *deviceInfo;
+
+    qWarning("%s: Cannot get device info for index %d.", Q_FUNC_INFO, index);
+    return QCanBusDevice::deviceInfo();
+}
+
 QT_END_NAMESPACE

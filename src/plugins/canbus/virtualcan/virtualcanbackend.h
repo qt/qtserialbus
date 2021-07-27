@@ -90,7 +90,11 @@ public:
 
     static QList<QCanBusDeviceInfo> interfaces();
 
+    QCanBusDeviceInfo deviceInfo() const override;
+
 private:
+    static QCanBusDeviceInfo virtualCanDeviceInfo(uint channel);
+
     void clientConnected();
     void clientDisconnected();
     void clientReadyRead();

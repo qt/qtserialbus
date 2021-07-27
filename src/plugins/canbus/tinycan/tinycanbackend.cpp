@@ -603,4 +603,9 @@ void TinyCanBackend::resetController()
     d->resetController();
 }
 
+QCanBusDeviceInfo TinyCanBackend::deviceInfo() const
+{
+    return createDeviceInfo(QStringLiteral("tinycan"), QStringLiteral("can0.0"), false, false);
+}
+
 QT_END_NAMESPACE

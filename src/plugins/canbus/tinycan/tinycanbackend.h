@@ -71,6 +71,7 @@ public:
     static QList<QCanBusDeviceInfo> interfaces();
 
     void resetController() override;
+    QCanBusDeviceInfo deviceInfo() const override;
 
 private:
     TinyCanBackendPrivate * const d_ptr;

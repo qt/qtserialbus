@@ -184,6 +184,11 @@ QList<QCanBusDeviceInfo> PassThruCanBackend::interfaces()
     return list;
 }
 
+QCanBusDeviceInfo PassThruCanBackend::deviceInfo() const
+{
+    return createDeviceInfo(QStringLiteral("passthrucan"), m_deviceName, false, false);
+}
+
 bool PassThruCanBackend::open()
 {
     if (Q_UNLIKELY(state() != ConnectingState)) {

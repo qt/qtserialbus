@@ -300,19 +300,28 @@ QString VirtualCanBackend::interpretErrorFrame(const QCanBusFrame &errorFrame)
     return QString();
 }
 
+QCanBusDeviceInfo VirtualCanBackend::virtualCanDeviceInfo(uint channel)
+{
+    return createDeviceInfo(
+                QStringLiteral("virtualcan"),
+                QStringLiteral("can%1").arg(channel), QString(),
+                QStringLiteral("Qt Virtual CAN bus"), QString(),
+                channel, true, true);
+}
+
 QList<QCanBusDeviceInfo> VirtualCanBackend::interfaces()
 {
     QList<QCanBusDeviceInfo> result;
 
-    for (int channel = 0; channel < VirtualChannels; ++channel) {
-        result.append(createDeviceInfo(
-                          QStringLiteral("virtualcan"),
-                          QStringLiteral("can%1").arg(channel), QString(),
-                          QStringLiteral("Qt Virtual CAN bus"), QString(),
-                          channel, true, true));
-    }
+    for (uint channel = 0; channel < VirtualChannels; ++channel)
+        result.append(virtualCanDeviceInfo(channel));
 
     return result;
+}
+
+QCanBusDeviceInfo VirtualCanBackend::deviceInfo() const
+{
+    return virtualCanDeviceInfo(m_channel);
 }
 
 void VirtualCanBackend::clientConnected()

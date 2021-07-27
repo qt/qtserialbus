@@ -68,15 +68,22 @@ public:
     QString interpretErrorFrame(const QCanBusFrame &errorFrame) override;
 
     static bool canCreate(QString *errorReason);
-    static QList<QCanBusDeviceInfo> interfacesByChannelCondition();
-    static QList<QCanBusDeviceInfo> interfacesByAttachedChannels(bool *ok);
     static QList<QCanBusDeviceInfo> interfaces();
 
     void resetController() override;
     bool hasBusStatus() const override;
     CanBusStatus busStatus() override;
+    QCanBusDeviceInfo deviceInfo() const override;
 
 private:
+    enum class Availability {
+        Available = 1U, // matches PCAN_CHANNEL_AVAILABLE
+        Occupied  = 2U  // matches PCAN_CHANNEL_OCCUPIED
+    };
+    static QList<QCanBusDeviceInfo> interfacesByChannelCondition(Availability available);
+    static QList<QCanBusDeviceInfo> interfacesByAttachedChannels(Availability available, bool *ok);
+    static QList<QCanBusDeviceInfo> attachedInterfaces(Availability available);
+
     PeakCanBackendPrivate * const d_ptr;
 };
 
