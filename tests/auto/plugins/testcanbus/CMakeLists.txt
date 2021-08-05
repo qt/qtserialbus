@@ -4,7 +4,7 @@
 
 qt_internal_add_plugin(TestCanBusPlugin
     OUTPUT_NAME qttestcanbus
-    TYPE canbus
+    PLUGIN_TYPE canbus
     DEFAULT_IF FALSE
     STATIC
     SOURCES
