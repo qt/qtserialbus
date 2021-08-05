@@ -4,7 +4,7 @@
 
 qt_internal_add_plugin(TinyCanBusPlugin
     OUTPUT_NAME qttinycanbus
-    TYPE canbus
+    PLUGIN_TYPE canbus
     SOURCES
         main.cpp
         tinycan_symbols_p.h

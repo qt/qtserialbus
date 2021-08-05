@@ -4,7 +4,7 @@
 
 qt_internal_add_plugin(VirtualCanBusPlugin
     OUTPUT_NAME qtvirtualcanbus
-    TYPE canbus
+    PLUGIN_TYPE canbus
     SOURCES
         main.cpp
         virtualcanbackend.cpp virtualcanbackend.h

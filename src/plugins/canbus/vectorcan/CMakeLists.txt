@@ -4,7 +4,7 @@
 
 qt_internal_add_plugin(VectorCanBusPlugin
     OUTPUT_NAME qtvectorcanbus
-    TYPE canbus
+    PLUGIN_TYPE canbus
     SOURCES
         main.cpp
         vectorcan_symbols_p.h

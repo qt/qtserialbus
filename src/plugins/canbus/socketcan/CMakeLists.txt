@@ -4,7 +4,7 @@
 
 qt_internal_add_plugin(SocketCanBusPlugin
     OUTPUT_NAME qtsocketcanbus
-    TYPE canbus
+    PLUGIN_TYPE canbus
     SOURCES
         libsocketcan.cpp libsocketcan.h
         main.cpp

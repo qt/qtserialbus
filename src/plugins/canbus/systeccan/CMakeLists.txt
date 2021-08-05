@@ -4,7 +4,7 @@
 
 qt_internal_add_plugin(SystecCanBusPlugin
     OUTPUT_NAME qtsysteccanbus
-    TYPE canbus
+    PLUGIN_TYPE canbus
     SOURCES
         main.cpp
         systeccan_symbols_p.h
