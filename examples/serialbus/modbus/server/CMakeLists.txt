@@ -15,6 +15,7 @@ set(INSTALL_EXAMPLEDIR "${INSTALL_EXAMPLESDIR}/serialbus/modbus/server")
 
 find_package(Qt6 COMPONENTS Core)
 find_package(Qt6 COMPONENTS Gui)
+find_package(Qt6 COMPONENTS Network)
 find_package(Qt6 COMPONENTS SerialBus)
 find_package(Qt6 COMPONENTS Widgets)
 
