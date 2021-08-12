@@ -61,6 +61,7 @@ QT_BEGIN_NAMESPACE
 namespace Ui {
 class ConnectDialog;
 }
+class QSettings;
 
 QT_END_NAMESPACE
 
@@ -82,7 +83,7 @@ public:
     };
 
     explicit ConnectDialog(QWidget *parent = nullptr);
-    ~ConnectDialog();
+    ~ConnectDialog() override;
 
     Settings settings() const;
 
@@ -94,12 +95,15 @@ private slots:
 
 private:
     QString configurationValue(QCanBusDevice::ConfigurationKey key);
+    void restoreSettings();
     void revertSettings();
+    void saveSettings();
     void updateSettings();
 
     Ui::ConnectDialog *m_ui = nullptr;
     Settings m_currentSettings;
     QList<QCanBusDeviceInfo> m_interfaces;
+    QSettings *m_settings = nullptr;
 };
 
 #endif // CONNECTDIALOG_H

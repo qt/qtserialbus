@@ -52,10 +52,12 @@
 #include "ui_connectdialog.h"
 
 #include <QCanBus>
+#include <QSettings>
 
 ConnectDialog::ConnectDialog(QWidget *parent) :
     QDialog(parent),
-    m_ui(new Ui::ConnectDialog)
+    m_ui(new Ui::ConnectDialog),
+    m_settings(new QSettings("Qt", "CAN example"))
 {
     m_ui->setupUi(this);
 
@@ -76,7 +78,7 @@ ConnectDialog::ConnectDialog(QWidget *parent) :
 
     connect(m_ui->okButton, &QPushButton::clicked, this, &ConnectDialog::ok);
     connect(m_ui->cancelButton, &QPushButton::clicked, this, &ConnectDialog::cancel);
-    connect(m_ui->useConfigurationBox, &QCheckBox::clicked,
+    connect(m_ui->useConfigurationBox, &QCheckBox::toggled,
             m_ui->configurationBox, &QGroupBox::setEnabled);
     connect(m_ui->pluginListBox, &QComboBox::currentTextChanged,
             this, &ConnectDialog::pluginChanged);
@@ -91,17 +93,78 @@ ConnectDialog::ConnectDialog(QWidget *parent) :
 
     m_ui->pluginListBox->addItems(QCanBus::instance()->plugins());
 
-    updateSettings();
+    restoreSettings();
 }
 
 ConnectDialog::~ConnectDialog()
 {
+    delete m_settings;
     delete m_ui;
 }
 
 ConnectDialog::Settings ConnectDialog::settings() const
 {
     return m_currentSettings;
+}
+
+
+void ConnectDialog::saveSettings()
+{
+    m_settings->beginGroup("LastSettings");
+
+    m_settings->setValue("PluginName", m_currentSettings.pluginName);
+    m_settings->setValue("DeviceInterfaceName", m_currentSettings.deviceInterfaceName);
+    m_settings->setValue("UseAutoscroll", m_currentSettings.useAutoscroll);
+    m_settings->setValue("UseRingBuffer", m_currentSettings.useModelRingBuffer);
+    m_settings->setValue("RingBufferSize", m_currentSettings.modelRingBufferSize);
+    m_settings->setValue("UseCustomConfiguration", m_currentSettings.useConfigurationEnabled);
+
+    if (m_currentSettings.useConfigurationEnabled) {
+        m_settings->setValue("Loopback", configurationValue(QCanBusDevice::LoopbackKey));
+        m_settings->setValue("ReceiveOwn", configurationValue(QCanBusDevice::ReceiveOwnKey));
+        m_settings->setValue("ErrorFilter", configurationValue(QCanBusDevice::ErrorFilterKey));
+        m_settings->setValue("BitRate", configurationValue(QCanBusDevice::BitRateKey));
+        m_settings->setValue("CanFd", configurationValue(QCanBusDevice::CanFdKey));
+        m_settings->setValue("DataBitRate", configurationValue(QCanBusDevice::DataBitRateKey));
+    }
+
+    m_settings->endGroup();
+}
+
+void ConnectDialog::restoreSettings()
+{
+    m_settings->beginGroup("LastSettings");
+
+    m_currentSettings.pluginName = m_settings->value("PluginName").toString();
+    m_currentSettings.deviceInterfaceName = m_settings->value("DeviceInterfaceName").toString();
+    m_currentSettings.useAutoscroll = m_settings->value("UseAutoscroll").toBool();
+    m_currentSettings.useModelRingBuffer = m_settings->value("UseRingBuffer").toBool();
+    m_currentSettings.modelRingBufferSize = m_settings->value("RingBufferSize").toInt();
+    m_currentSettings.useConfigurationEnabled = m_settings->value("UseCustomConfiguration").toBool();
+
+    revertSettings();
+
+    auto setting = [this](const QString &key) {
+        return m_settings->value(key).toString();
+    };
+
+    if (m_currentSettings.useConfigurationEnabled) {
+        m_ui->loopbackBox->setCurrentText(setting("Loopback"));
+
+        m_ui->receiveOwnBox->setCurrentText(setting("ReceiveOwn"));
+
+        m_ui->errorFilterEdit->setText(setting("ErrorFilter"));
+
+        m_ui->bitrateBox->setCurrentText(setting("BitRate"));
+
+        m_ui->canFdBox->setCurrentText(setting("CanFd"));
+
+        m_ui->dataBitrateBox->setCurrentText(setting("DataBitRate"));
+    }
+
+    m_settings->endGroup();
+
+    updateSettings();
 }
 
 void ConnectDialog::pluginChanged(const QString &plugin)
@@ -128,6 +191,7 @@ void ConnectDialog::interfaceChanged(const QString &interface)
 void ConnectDialog::ok()
 {
     updateSettings();
+    saveSettings();
     accept();
 }
 
@@ -162,6 +226,10 @@ void ConnectDialog::revertSettings()
     m_ui->pluginListBox->setCurrentText(m_currentSettings.pluginName);
     m_ui->interfaceListBox->setCurrentText(m_currentSettings.deviceInterfaceName);
     m_ui->useConfigurationBox->setChecked(m_currentSettings.useConfigurationEnabled);
+
+    m_ui->ringBufferBox->setChecked(m_currentSettings.useModelRingBuffer);
+    m_ui->ringBufferLimitBox->setValue(m_currentSettings.modelRingBufferSize);
+    m_ui->autoscrollBox->setChecked(m_currentSettings.useAutoscroll);
 
     QString value = configurationValue(QCanBusDevice::LoopbackKey);
     m_ui->loopbackBox->setCurrentText(value);
@@ -214,18 +282,18 @@ void ConnectDialog::updateSettings()
         if (!m_ui->errorFilterEdit->text().isEmpty()) {
             QString value = m_ui->errorFilterEdit->text();
             bool ok = false;
-            int dec = value.toInt(&ok);
+            value.toInt(&ok); // check if value contains a valid integer
             if (ok) {
                 ConfigurationItem item;
                 item.first = QCanBusDevice::ErrorFilterKey;
-                item.second = QVariant::fromValue(QCanBusFrame::FrameErrors(dec));
+                item.second = value;
                 m_currentSettings.configurations.append(item);
             }
         }
 
         // process raw filter list
         if (!m_ui->rawFilterEdit->text().isEmpty()) {
-            //TODO current ui not sfficient to reflect this param
+            //TODO current ui not sufficient to reflect this param
         }
 
         // process bitrate
