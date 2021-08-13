@@ -134,13 +134,14 @@ QValidator::State HexStringValidator::validate(QString &input, int &pos) const
     const int maxSize = 2 * m_maxLength;
     const QChar space = QLatin1Char(' ');
     QString data = input;
+
     data.remove(space);
 
     if (data.isEmpty())
         return Intermediate;
 
-    // limit maximum size and forbid trailing spaces
-    if ((data.size() > maxSize) || (data.size() == maxSize && input.endsWith(space)))
+    // limit maximum size
+    if (data.size() > maxSize)
         return Invalid;
 
     // check if all input is valid
@@ -148,13 +149,32 @@ QValidator::State HexStringValidator::validate(QString &input, int &pos) const
     if (!re.match(data).hasMatch())
         return Invalid;
 
+    // don't allow user to enter more than one space
+    const QRegularExpression twoSpaces(QStringLiteral("([\\s]{2})"));
+    if (twoSpaces.match(input).hasMatch()) {
+        const QRegularExpressionMatch match = twoSpaces.match(input);
+        input.replace(match.capturedStart(), 2, ' ');
+        pos = match.capturedEnd() - 1;
+    }
+
     // insert a space after every two hex nibbles
     const QRegularExpression threeDigits(THREE_DIGITS);
 
     while (threeDigits.match(input).hasMatch()) {
         const QRegularExpressionMatch match = threeDigits.match(input);
-        input.insert(match.capturedEnd() - 1, space);
-        pos = match.capturedEnd() + 1;
+        if (pos == match.capturedStart() + 1) {
+            // add one hex nibble before two - Abc
+            input.insert(match.capturedStart() + 1, space);
+            pos = match.capturedStart() + 1;
+        } else if (pos == match.capturedStart() + 2) {
+            // add hex nibble in the middle - aBc
+            input.insert(match.capturedEnd() - 1, space);
+            pos = match.capturedEnd();
+        } else {
+            // add one hex nibble after two - abC
+            input.insert(match.capturedEnd() - 1, space);
+            pos = match.capturedEnd() + 1;
+        }
     }
 
     return Acceptable;
