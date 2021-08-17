@@ -150,19 +150,17 @@ Q_LOGGING_CATEGORY(QT_CANBUS, "qt.canbus")
 */
 
 /*!
-    \fn bool operator==(const QCanBusDevice::Filter &a, const QCanBusDevice::Filter &b)
-    \relates QCanBusDevice::Filter
+    \fn bool QCanBusDevice::Filter::operator==(const QCanBusDevice::Filter &a, const QCanBusDevice::Filter &b)
 
-    Returns true, if the filter \a a is equal to the filter \a b,
-    otherwise returns false.
+    Returns \c true, if the filter \a a is equal to the filter \a b,
+    otherwise returns \c false.
 */
 
 /*!
-    \fn bool operator!=(const QCanBusDevice::Filter &a, const QCanBusDevice::Filter &b)
-    \relates QCanBusDevice::Filter
+    \fn bool QCanBusDevice::Filter::operator!=(const QCanBusDevice::Filter &a, const QCanBusDevice::Filter &b)
 
-    Returns true, if the filter \a a is not equal to the filter \a b,
-    otherwise returns false.
+    Returns \c true, if the filter \a a is not equal to the filter \a b,
+    otherwise returns \c false.
 */
 
 /*!
