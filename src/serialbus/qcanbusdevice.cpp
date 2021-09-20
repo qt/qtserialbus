@@ -573,7 +573,7 @@ void QCanBusDevice::clear(QCanBusDevice::Directions direction)
     clearError();
 
     if (direction & Direction::Input) {
-        QMutexLocker(&d->incomingFramesGuard);
+        QMutexLocker locker(&d->incomingFramesGuard);
         d->incomingFrames.clear();
     }
 
