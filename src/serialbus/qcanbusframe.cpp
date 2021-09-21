@@ -102,7 +102,7 @@ QT_BEGIN_NAMESPACE
     enabled on the \l QCanBusDevice by setting the \l QCanBusDevice::CanFdKey.
 
     Frames of type \l RemoteRequestFrame (RTR) do not have a payload. However they have to
-    provide an indication of the responses expected payload length. To set the length expection it
+    provide an indication of the responses expected payload length. To set the expected length it
     is necessary to set a fake payload whose length matches the expected payload length of the
     response. One way of doing this might be as follows:
 
