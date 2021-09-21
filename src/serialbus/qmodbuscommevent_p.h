@@ -89,15 +89,15 @@ public:
         return static_cast<QModbusCommEvent::EventByte> (m_eventByte);
     }
 
-    inline QModbusCommEvent operator=(QModbusCommEvent::EventByte byte) {
+    inline QModbusCommEvent &operator=(QModbusCommEvent::EventByte byte) {
         m_eventByte = byte;
         return *this;
     }
-    inline QModbusCommEvent operator|=(QModbusCommEvent::SendFlag sf) {
+    inline QModbusCommEvent &operator|=(QModbusCommEvent::SendFlag sf) {
         m_eventByte |= quint8(sf);
         return *this;
     }
-    inline QModbusCommEvent operator|=(QModbusCommEvent::ReceiveFlag rf) {
+    inline QModbusCommEvent &operator|=(QModbusCommEvent::ReceiveFlag rf) {
         m_eventByte |= quint8(rf);
         return *this;
     }
