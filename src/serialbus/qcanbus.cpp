@@ -53,9 +53,9 @@ class QCanBusPrivate
 {
 public:
     QCanBusPrivate() { }
-    QCanBusPrivate(int index, const QJsonObject &meta) : meta(meta), index(index) {}
+    QCanBusPrivate(int index, const QCborMap &meta) : meta(meta), index(index) {}
 
-    QJsonObject meta;
+    QCborMap meta;
     QObject *factory = nullptr;
     int index = -1;
 };
@@ -70,9 +70,9 @@ static QCanBus *globalInstance = nullptr;
 
 static void loadPlugins()
 {
-    const QList<QJsonObject> meta = qFactoryLoader()->metaData();
+    const QList<QPluginParsedMetaData> meta = qFactoryLoader()->metaData();
     for (int i = 0; i < meta.count(); i++) {
-        const QJsonObject obj = meta.at(i).value(QLatin1String("MetaData")).toObject();
+        const QCborMap obj = meta.at(i).value(QtPluginMetaDataKeys::MetaData).toMap();
         if (obj.isEmpty())
             continue;
 
