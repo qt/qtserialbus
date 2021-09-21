@@ -421,17 +421,22 @@ QString QCanBusFrame::toString() const
         break;
     }
 
-    const char * const idFormat = hasExtendedFrameFormat() ? "%08X" : "     %03X";
-    const char * const dlcFormat = hasFlexibleDataRateFormat() ? "  [%02d]" : "   [%d]";
     QString result;
-    result.append(QString::asprintf(idFormat, static_cast<uint>(frameId())));
-    result.append(QString::asprintf(dlcFormat, payload().size()));
+    result.append(hasExtendedFrameFormat() ? u""_qs : u"     "_qs);
+    result.append(u"%1"_qs.arg(static_cast<uint>(frameId()),
+                               hasExtendedFrameFormat() ? 8 : 3,
+                               16, QLatin1Char('0')).toUpper());
+
+    result.append(hasFlexibleDataRateFormat() ? u"  "_qs : u"   "_qs);
+    result.append(u"[%1]"_qs.arg(payload().size(),
+                               hasFlexibleDataRateFormat() ? 2 : 0,
+                               10, QLatin1Char('0')));
 
     if (type == RemoteRequestFrame) {
-        result.append(QLatin1String("  Remote Request"));
+        result.append(u"  Remote Request"_qs);
     } else if (!payload().isEmpty()) {
         const QByteArray data = payload().toHex(' ').toUpper();
-        result.append(QLatin1String("  "));
+        result.append(u"  "_qs);
         result.append(QLatin1String(data));
     }
 
