@@ -230,12 +230,12 @@ QList<QCanBusDeviceInfo> PeakCanBackend::attachedInterfaces(Availability availab
 {
 #ifdef Q_OS_WIN
     bool ok = false;
-    const QList<QCanBusDeviceInfo> attachedChannelsResult = interfacesByAttachedChannels(available, &ok);
+    QList<QCanBusDeviceInfo> attachedChannelsResult = interfacesByAttachedChannels(available, &ok);
     if (ok)
         return attachedChannelsResult;
 #endif
 
-    const QList<QCanBusDeviceInfo> result = interfacesByChannelCondition(available);
+    QList<QCanBusDeviceInfo> result = interfacesByChannelCondition(available);
     return result;
 }
 
