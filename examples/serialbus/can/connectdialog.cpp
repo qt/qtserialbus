@@ -53,13 +53,38 @@
 
 #include <QCanBus>
 
+BinIntegerValidator::BinIntegerValidator(uint maximum, QObject *parent) :
+    QValidator(parent),
+    m_maximum(maximum)
+{
+}
+
+QValidator::State BinIntegerValidator::validate(QString &input, int &) const
+{
+    bool ok;
+    uint value = input.toUInt(&ok, 2);
+
+    if (input.isEmpty())
+        return Intermediate;
+
+    if (!ok || value > m_maximum)
+        return Invalid;
+
+    return Acceptable;
+}
+
+void BinIntegerValidator::setMaximum(uint maximum)
+{
+    m_maximum = maximum;
+}
+
 ConnectDialog::ConnectDialog(QWidget *parent) :
     QDialog(parent),
     m_ui(new Ui::ConnectDialog)
 {
     m_ui->setupUi(this);
 
-    m_ui->errorFilterEdit->setValidator(new QIntValidator(0, 0x1FFFFFFFU, this));
+    m_ui->errorFilterEdit->setValidator(new BinIntegerValidator(0x3FFU, this));
 
     m_ui->loopbackBox->addItem(tr("unspecified"), QVariant());
     m_ui->loopbackBox->addItem(tr("false"), QVariant(false));
