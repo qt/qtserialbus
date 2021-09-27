@@ -15,3 +15,4 @@ qt_internal_add_tool(${target_name}
         Qt::Network
         Qt::SerialBus
 )
+qt_internal_return_unless_building_tools()
