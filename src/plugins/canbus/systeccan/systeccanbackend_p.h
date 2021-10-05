@@ -70,7 +70,7 @@ public:
         QObject(parent),
         dptr(systecPrivate) { }
 
-    void customEvent(QEvent *event);
+    void customEvent(QEvent *event) override;
 
 private:
        SystecCanBackendPrivate * const dptr;
