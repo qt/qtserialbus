@@ -12,7 +12,7 @@
     This plugin requires the PCAN device drivers and the PCAN-Basic library
     version 4.4.0 or higher on Windows (pcanbasic.dll) resp. 4.0.0 on Linux
     (libpcanbasic.so). On macOS the plugin requires the PCBUSB library from
-    \l{http://www.mac-can.com}{UV Software}.
+    \l{http://www.mac-can.com}{UV Software}, version is 0.9 or higher.
 
     \note QCanBusDeviceInfo::alias() is only supported on Windows and with
         PCAN-Basic 4.4.0 or higher.

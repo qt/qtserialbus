@@ -241,14 +241,8 @@
 #define PCAN_TYPE_DNG_SJA_EPP    0x06U  // PCAN-Dongle EPP SJA1000
 
 // Type definitions
-#ifdef Q_OS_MACOS
-#define TPCANLong                quint64
-#else
-#define TPCANLong                quint32
-#endif
-#define TPCANLongToFrameID(a)    static_cast<QCanBusFrame::FrameId>(a)
 #define TPCANHandle              quint16   // Represents a PCAN hardware channel handle
-#define TPCANStatus              TPCANLong // Represents a PCAN status/error code
+#define TPCANStatus              quint32   // Represents a PCAN status/error code
 #define TPCANParameter           quint8    // Represents a PCAN parameter to be read or set
 #define TPCANDevice              quint8    // Represents a PCAN device
 #define TPCANMessageType         quint8    // Represents the type of a PCAN message
@@ -261,7 +255,7 @@
 // Represents a PCAN message
 typedef struct tagTPCANMsg
 {
-    TPCANLong           ID;      // 11/29-bit message identifier
+    quint32             ID;      // 11/29-bit message identifier
     TPCANMessageType    MSGTYPE; // Type of the message
     quint8              LEN;     // Data Length Code of the message (0..8)
     quint8              DATA[8]; // Data of the message (DATA[0]..DATA[7])
@@ -271,7 +265,7 @@ typedef struct tagTPCANMsg
 // Total Microseconds = micros + 1000 * millis + 0xFFFFFFFF * 1000 * millis_overflow
 typedef struct tagTPCANTimestamp
 {
-    TPCANLong   millis;             // Base-value: milliseconds: 0.. 2^32-1
+    quint32     millis;             // Base-value: milliseconds: 0.. 2^32-1
     quint16     millis_overflow;    // Roll-arounds of millis
     quint16     micros;             // Microseconds: 0..999
 } TPCANTimestamp;
@@ -279,7 +273,7 @@ typedef struct tagTPCANTimestamp
 // Represents a PCAN message from a FD capable hardware
 typedef struct tagTPCANMsgFD
 {
-    TPCANLong         ID;       // 11/29-bit message identifier
+    quint32           ID;       // 11/29-bit message identifier
     TPCANMessageType  MSGTYPE;  // Type of the message
     quint8            DLC;      // Data Length Code of the message (0..15)
     quint8            DATA[64]; // Data of the message (DATA[0]..DATA[63])
@@ -306,7 +300,7 @@ typedef struct tagTPCANChannelInformation
     if (!symbolName) \
         return false;
 
-GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Initialize, TPCANHandle, TPCANBaudrate, TPCANType, TPCANLong, quint16)
+GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Initialize, TPCANHandle, TPCANBaudrate, TPCANType, quint32, quint16)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_InitializeFD, TPCANHandle, TPCANBitrateFD)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Uninitialize, TPCANHandle)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Reset, TPCANHandle)
@@ -315,9 +309,9 @@ GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Read, TPCANHandle, TPCANMsg *, TPCANTi
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_ReadFD, TPCANHandle, TPCANMsgFD *, TPCANTimestampFD *)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_Write, TPCANHandle, TPCANMsg *)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_WriteFD, TPCANHandle, TPCANMsgFD *)
-GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_FilterMessages, TPCANHandle, TPCANLong, TPCANLong, TPCANMode)
-GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_GetValue, TPCANHandle, TPCANParameter, void *, TPCANLong)
-GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_SetValue, TPCANHandle, TPCANParameter, void *, TPCANLong)
+GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_FilterMessages, TPCANHandle, quint32, quint32, TPCANMode)
+GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_GetValue, TPCANHandle, TPCANParameter, void *, quint32)
+GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_SetValue, TPCANHandle, TPCANParameter, void *, quint32)
 GENERATE_SYMBOL_VARIABLE(TPCANStatus, CAN_GetErrorText, TPCANStatus, quint16, char *)
 
 inline bool resolvePeakCanSymbols(QLibrary *pcanLibrary)
