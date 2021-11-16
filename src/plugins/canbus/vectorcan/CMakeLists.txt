@@ -9,7 +9,7 @@ qt_internal_add_plugin(VectorCanBusPlugin
         main.cpp
         vectorcan_symbols_p.h
         vectorcanbackend.cpp vectorcanbackend.h vectorcanbackend_p.h
-    PUBLIC_LIBRARIES
+    LIBRARIES
         Qt::Core
         Qt::Network
         Qt::SerialBus
