@@ -771,7 +771,7 @@ void PeakCanBackendPrivate::startRead()
             const int size = static_cast<int>(message.LEN);
             QCanBusFrame frame(TPCANLongToFrameID(message.ID),
                                QByteArray(reinterpret_cast<const char *>(message.DATA), size));
-            const quint64 millis = timestamp.millis + Q_UINT64_C(0xFFFFFFFF) * timestamp.millis_overflow;
+            const quint64 millis = timestamp.millis + Q_UINT64_C(0x100000000) * timestamp.millis_overflow;
             const quint64 micros = Q_UINT64_C(1000) * millis + timestamp.micros;
             frame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(static_cast<qint64>(micros)));
             frame.setExtendedFrameFormat(message.MSGTYPE & PCAN_MESSAGE_EXTENDED);
