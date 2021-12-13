@@ -66,15 +66,18 @@ ReceivedFramesView::ReceivedFramesView(QWidget *parent)
         [this] (const QPoint &pos) {
         QMenu contextMenu(tr("Context menu"), this);
 
-        QAction action1("Copy", this);
-        QAction action2("Select all", this);
-
-        connect(&action1, &QAction::triggered, this, &ReceivedFramesView::copyRow);
-        connect(&action2, &QAction::triggered, this, &QAbstractItemView::selectAll);
+#ifndef QT_NO_CLIPBOARD
+        QAction copyAction("Copy", this);
+        connect(&copyAction, &QAction::triggered, this, &ReceivedFramesView::copyRow);
 
         if (selectedIndexes().count())
-            contextMenu.addAction(&action1);
-        contextMenu.addAction(&action2);
+            contextMenu.addAction(&copyAction);
+#endif
+
+        QAction selectAllAction("Select all", this);
+        connect(&selectAllAction, &QAction::triggered, this, &QAbstractItemView::selectAll);
+
+        contextMenu.addAction(&selectAllAction);
 
         contextMenu.exec(mapToGlobal(pos));
     });
@@ -100,7 +103,9 @@ void ReceivedFramesView::keyPressEvent(QKeyEvent *event) {
     }
 }
 
-void ReceivedFramesView::copyRow() {
+void ReceivedFramesView::copyRow()
+{
+#ifndef QT_NO_CLIPBOARD
     QClipboard *clipboard = QApplication::clipboard();
 
     const QModelIndexList ilist = selectedIndexes();
@@ -114,4 +119,5 @@ void ReceivedFramesView::copyRow() {
     }
 
     clipboard->setText(strRow);
+#endif
 }
