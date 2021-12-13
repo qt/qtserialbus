@@ -48,8 +48,9 @@
 **
 ****************************************************************************/
 
-#include "common.h"
 #include "receivedframesview.h"
+
+#include "common.h"
 
 #include <QAction>
 #include <QApplication>
@@ -58,7 +59,7 @@
 #include <QMenu>
 
 ReceivedFramesView::ReceivedFramesView(QWidget *parent)
- : QTableView(parent)
+    : QTableView(parent)
 {
     setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -93,7 +94,8 @@ void ReceivedFramesView::setModel(QAbstractItemModel *model)
     }
 }
 
-void ReceivedFramesView::keyPressEvent(QKeyEvent *event) {
+void ReceivedFramesView::keyPressEvent(QKeyEvent *event)
+{
     if (event->matches(QKeySequence::Copy)) {
         copyRow();
     } else if (event->matches(QKeySequence::SelectAll)) {

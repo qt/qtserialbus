@@ -50,8 +50,9 @@
 
 #include "receivedframesmodel.h"
 
-#include <iterator>
 #include <QSize>
+
+#include <iterator>
 
 constexpr int ColumnAlignment[] = {
     Qt::AlignRight | Qt::AlignVCenter,
@@ -64,7 +65,6 @@ constexpr int ColumnAlignment[] = {
 
 ReceivedFramesModel::ReceivedFramesModel(QObject *parent) : QAbstractTableModel(parent)
 {
-
 }
 
 bool ReceivedFramesModel::removeRows(int row, int count, const QModelIndex &parent)
@@ -157,11 +157,13 @@ void ReceivedFramesModel::appendFrames(const QList<QStringList> &slvector)
     m_framesAccumulator.append(slvector);
 }
 
-bool ReceivedFramesModel::needUpdate() const {
+bool ReceivedFramesModel::needUpdate() const
+{
     return !m_framesAccumulator.empty();
 }
 
-void ReceivedFramesModel::update() {
+void ReceivedFramesModel::update()
+{
     if (m_framesAccumulator.empty())
         return;
 
