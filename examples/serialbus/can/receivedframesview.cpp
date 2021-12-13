@@ -63,7 +63,7 @@ ReceivedFramesView::ReceivedFramesView(QWidget *parent)
     setContextMenuPolicy(Qt::CustomContextMenu);
 
     connect(this, &QWidget::customContextMenuRequested,
-        [this] (const QPoint &pos) {
+        this, [this] (const QPoint &pos) {
         QMenu contextMenu(tr("Context menu"), this);
 
 #ifndef QT_NO_CLIPBOARD
