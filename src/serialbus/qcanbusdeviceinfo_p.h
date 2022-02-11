@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 Andre Hartmann <aha_1980@gmx.de>
+** Copyright (C) 2021 Andre Hartmann <aha_1980@gmx.de>
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the QtSerialBus module of the Qt Toolkit.
@@ -53,6 +53,7 @@
 
 #include <QtCore/qshareddata.h>
 #include <QtCore/qstring.h>
+#include <QtCore/private/qglobal_p.h>
 
 QT_BEGIN_NAMESPACE
 

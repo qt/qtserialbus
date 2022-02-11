@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2021 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the QtSerialBus module of the Qt Toolkit.
@@ -41,6 +41,7 @@
 #define QMODBUSCOMMEVENT_P_H
 
 #include <QtSerialBus/qtserialbusglobal.h>
+#include <QtCore/private/qglobal_p.h>
 
 //
 //  W A R N I N G
