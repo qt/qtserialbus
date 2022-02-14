@@ -4,20 +4,15 @@ project(can LANGUAGES CXX)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 if(NOT DEFINED INSTALL_EXAMPLESDIR)
-  set(INSTALL_EXAMPLESDIR "examples")
+    set(INSTALL_EXAMPLESDIR "examples")
 endif()
 
 set(INSTALL_EXAMPLEDIR "${INSTALL_EXAMPLESDIR}/serialbus/can")
 
-find_package(Qt6 COMPONENTS Core)
-find_package(Qt6 COMPONENTS Gui)
-find_package(Qt6 COMPONENTS Network)
-find_package(Qt6 COMPONENTS SerialBus)
-find_package(Qt6 COMPONENTS Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Network SerialBus Widgets)
 
 qt_add_executable(can
     bitratebox.cpp bitratebox.h
@@ -30,10 +25,12 @@ qt_add_executable(can
     receivedframesmodel.cpp receivedframesmodel.h
     receivedframesview.cpp receivedframesview.h
 )
+
 set_target_properties(can PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
 )
+
 target_link_libraries(can PUBLIC
     Qt::Core
     Qt::Gui
@@ -41,7 +38,6 @@ target_link_libraries(can PUBLIC
     Qt::SerialBus
     Qt::Widgets
 )
-
 
 # Resources:
 set(can_resource_files
