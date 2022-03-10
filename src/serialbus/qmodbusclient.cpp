@@ -367,7 +367,7 @@ void QModbusClientPrivate::processQueueElement(const QModbusResponse &pdu,
     }
 
     QModbusDataUnit unit = element.unit;
-    if (!processResponse(pdu, &unit)) {
+    if (!q_func()->processResponse(pdu, &unit)) {
         element.reply->setError(QModbusDevice::UnknownError,
             QModbusClient::tr("An invalid response has been received."));
         return;
