@@ -225,7 +225,7 @@ public:
     {
         if (format != ErrorFrame)
             return;
-        canId = (e & AnyError);
+        canId = (e & AnyError).toInt();
     }
 
     QString toString() const;
