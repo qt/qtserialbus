@@ -47,6 +47,8 @@
 
 #include <memory>
 
+using namespace Qt::StringLiterals;
+
 Q_DECLARE_METATYPE(QCanBusDevice::Filter)
 
 class tst_Backend : public QCanBusDevice
@@ -124,11 +126,11 @@ public:
     QCanBusDeviceInfo deviceInfo() const override
     {
         return createDeviceInfo(
-            u"plugin"_qs,
-            u"name"_qs,
-            u"serial number"_qs,
-            u"description"_qs,
-            u"alias"_qs,
+            u"plugin"_s,
+            u"name"_s,
+            u"serial number"_s,
+            u"description"_s,
+            u"alias"_s,
             100,    //channel
             true,   // virtual
             true    // flexible data rate
@@ -739,11 +741,11 @@ void tst_QCanBusDevice::tst_deviceInfo()
     QVERIFY(canDevice != nullptr);
 
     auto info = canDevice->deviceInfo();
-    QCOMPARE(info.plugin(), u"plugin"_qs);
-    QCOMPARE(info.name(), u"name"_qs);
-    QCOMPARE(info.serialNumber(), u"serial number"_qs);
-    QCOMPARE(info.description(), u"description"_qs);
-    QCOMPARE(info.alias(), u"alias"_qs);
+    QCOMPARE(info.plugin(), u"plugin"_s);
+    QCOMPARE(info.name(), u"name"_s);
+    QCOMPARE(info.serialNumber(), u"serial number"_s);
+    QCOMPARE(info.description(), u"description"_s);
+    QCOMPARE(info.alias(), u"alias"_s);
     QCOMPARE(info.channel(), 100);
     QCOMPARE(info.hasFlexibleDataRate(), true);
     QCOMPARE(info.isVirtual(), true);

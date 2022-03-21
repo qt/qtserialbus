@@ -43,6 +43,8 @@
 
 QT_BEGIN_NAMESPACE
 
+using namespace Qt::StringLiterals;
+
 /*!
     \class QCanBusFrame
     \inmodule QtSerialBus
@@ -425,21 +427,21 @@ QString QCanBusFrame::toString() const
     }
 
     QString result;
-    result.append(hasExtendedFrameFormat() ? u""_qs : u"     "_qs);
-    result.append(u"%1"_qs.arg(static_cast<uint>(frameId()),
+    result.append(hasExtendedFrameFormat() ? u""_s : u"     "_s);
+    result.append(u"%1"_s.arg(static_cast<uint>(frameId()),
                                hasExtendedFrameFormat() ? 8 : 3,
                                16, QLatin1Char('0')).toUpper());
 
-    result.append(hasFlexibleDataRateFormat() ? u"  "_qs : u"   "_qs);
-    result.append(u"[%1]"_qs.arg(payload().size(),
+    result.append(hasFlexibleDataRateFormat() ? u"  "_s : u"   "_s);
+    result.append(u"[%1]"_s.arg(payload().size(),
                                hasFlexibleDataRateFormat() ? 2 : 0,
                                10, QLatin1Char('0')));
 
     if (type == RemoteRequestFrame) {
-        result.append(u"  Remote Request"_qs);
+        result.append(u"  Remote Request"_s);
     } else if (!payload().isEmpty()) {
         const QByteArray data = payload().toHex(' ').toUpper();
-        result.append(u"  "_qs);
+        result.append(u"  "_s);
         result.append(QLatin1String(data));
     }
 
