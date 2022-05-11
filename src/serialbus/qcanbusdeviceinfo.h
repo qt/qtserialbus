@@ -57,7 +57,7 @@ public:
 
     void swap(QCanBusDeviceInfo &other) noexcept
     {
-         qSwap(d_ptr, other.d_ptr);
+         d_ptr.swap(other.d_ptr);
     }
 
     QCanBusDeviceInfo &operator=(const QCanBusDeviceInfo &other);
