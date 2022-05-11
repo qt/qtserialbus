@@ -2,10 +2,8 @@
 ## canbusutil Tool:
 #####################################################################
 
-qt_get_tool_target_name(target_name canbusutil)
-qt_internal_add_tool(${target_name}
+qt_internal_add_app(canbusutil
     TARGET_DESCRIPTION "Qt CAN Bus Util"
-    TOOLS_TARGET SerialBus
     SOURCES
         canbusutil.cpp canbusutil.h
         main.cpp
@@ -15,4 +13,4 @@ qt_internal_add_tool(${target_name}
         Qt::Network
         Qt::SerialBus
 )
-qt_internal_return_unless_building_tools()
+set_target_properties(canbusutil PROPERTIES WIN32_EXECUTABLE FALSE)
