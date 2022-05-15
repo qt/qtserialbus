@@ -128,11 +128,12 @@ static QDataStream &pduFromStream(QDataStream &stream, Type type, QModbusPdu *pd
     } raii = { pdu };
 
     QModbusPdu::FunctionCode code = QModbusPdu::FunctionCode::Invalid;
-    if (stream.readRawData(reinterpret_cast<char *>(&code), sizeof(quint8)) != sizeof(quint8))
+    stream >> code;
+    if (stream.status() == QDataStream::ReadPastEnd)
         return stream;
     pdu->setFunctionCode(code);
 
-    if (code == QModbusPdu::Invalid || code == QModbusPdu::UndefinedFunctionCode) // shortcut
+    if (code == QModbusPdu::Invalid) // shortcut
         return stream;
 
     constexpr const int MaxPduDataSize = 252; // in bytes
@@ -620,6 +621,22 @@ int QModbusRequest::calculateDataSize(const QModbusRequest &request)
 void QModbusRequest::registerDataSizeCalculator(FunctionCode fc, CalcFuncPtr calculator)
 {
     requestSizeCalculators()->insert(quint8(fc), calculator);
+}
+
+/*!
+    \internal
+
+    Reads a FunctionCode from a \a stream.
+    In stream we serialize FunctionCode as one byte, so we use a temporary char
+    variable to make the code work on both little endian and big endian systems.
+    If reading from stream fails, code will retain original value.
+*/
+QDataStream &operator>>(QDataStream &stream, QModbusPdu::FunctionCode &code)
+{
+    char buffer;
+    if (stream.readRawData(&buffer, 1) == 1)
+        code = static_cast<QModbusPdu::FunctionCode>(buffer);
+    return stream;
 }
 
 /*!
