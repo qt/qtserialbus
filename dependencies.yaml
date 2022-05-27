@@ -3,5 +3,5 @@ dependencies:
     ref: 2cfcf4dcbe246189dbefaa37f36fd949c44de1e3
     required: true
   ../tqtc-qtserialport:
-    ref: e3098cea784e529284ef9e56ff85228557697f62
+    ref: b6b57f28634ac53694e72c63999176b0dbbcc026
     required: false
