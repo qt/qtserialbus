@@ -186,8 +186,12 @@ QModbusClient::QModbusClient(QModbusClientPrivate &dd, QObject *parent) :
 }
 
 /*!
-    Processes a Modbus server \a response and stores the decoded information in \a data. Returns
-    true on success; otherwise false.
+    Processes a Modbus server \a response and stores the decoded information in
+    \a data. Returns \c true on success; otherwise \c false.
+
+    \note The default implementation does not support all
+    \l {QModbusPdu::}{FunctionCode}s. Override this method in a custom Modbus
+    client implementations to handle the needed functions.
 */
 bool QModbusClient::processResponse(const QModbusResponse &response, QModbusDataUnit *data)
 {
