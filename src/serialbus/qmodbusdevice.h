@@ -26,7 +26,8 @@ public:
         TimeoutError,
         ProtocolError,
         ReplyAbortedError,
-        UnknownError
+        UnknownError,
+        InvalidResponseError
     };
     Q_ENUM(Error)
 
