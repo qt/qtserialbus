@@ -166,6 +166,13 @@ void QModbusDevice::setConnectionParameter(ConnectionParameter parameter, const 
     \value ReplyAbortedError    The reply was aborted due to a disconnection of
                                 the device.
     \value UnknownError         An unknown error occurred.
+
+    \note An UnknownError can also indicate that the received
+    \l {QModbusPdu::}{FunctionCode} is not supported in the current
+    implementation. In this case custom Modbus client implementations need to
+    override the \l {QModbusClient::}{processResponse()} and
+    \l {QModbusClient::}{processPrivateResponse()} methods to provide support
+    for needed functions.
 */
 
 /*!
