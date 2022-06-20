@@ -11,7 +11,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class QModbusPdu
+class Q_SERIALBUS_EXPORT QModbusPdu
 {
 public:
     enum ExceptionCode {
@@ -53,7 +53,7 @@ public:
     };
 
     QModbusPdu() = default;
-    virtual ~QModbusPdu() = default;
+    virtual ~QModbusPdu();
 
     bool isValid() const {
         return (m_code >= ReadCoils && m_code < UndefinedFunctionCode)
@@ -158,7 +158,7 @@ private:
 Q_SERIALBUS_EXPORT QDebug operator<<(QDebug debug, const QModbusPdu &pdu);
 Q_SERIALBUS_EXPORT QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu);
 
-class QModbusRequest : public QModbusPdu
+class Q_SERIALBUS_EXPORT QModbusRequest : public QModbusPdu
 {
 public:
     QModbusRequest() = default;
@@ -169,12 +169,13 @@ public:
     explicit QModbusRequest(FunctionCode code, const QByteArray &newData = QByteArray())
         : QModbusPdu(code, newData)
     {}
+    ~QModbusRequest() override;
 
-    Q_SERIALBUS_EXPORT static int minimumDataSize(const QModbusRequest &pdu);
-    Q_SERIALBUS_EXPORT static int calculateDataSize(const QModbusRequest &pdu);
+    static int minimumDataSize(const QModbusRequest &pdu);
+    static int calculateDataSize(const QModbusRequest &pdu);
 
     using CalcFuncPtr = decltype(&calculateDataSize);
-    Q_SERIALBUS_EXPORT static void registerDataSizeCalculator(FunctionCode fc, CalcFuncPtr func);
+    static void registerDataSizeCalculator(FunctionCode fc, CalcFuncPtr func);
 
     template <typename ... Args>
     QModbusRequest(FunctionCode code, Args ... newData)
@@ -185,7 +186,7 @@ Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &stream, QModbusRequest &
 inline QDataStream &operator<<(QDataStream &stream, const QModbusRequest &pdu)
 { return stream << static_cast<const QModbusPdu &>(pdu); }
 
-class QModbusResponse : public QModbusPdu
+class Q_SERIALBUS_EXPORT QModbusResponse : public QModbusPdu
 {
 public:
     QModbusResponse() = default;
@@ -196,12 +197,13 @@ public:
     explicit QModbusResponse(FunctionCode code, const QByteArray &newData = QByteArray())
         : QModbusPdu(code, newData)
     {}
+    ~QModbusResponse() override;
 
-    Q_SERIALBUS_EXPORT static int minimumDataSize(const QModbusResponse &pdu);
-    Q_SERIALBUS_EXPORT static int calculateDataSize(const QModbusResponse &pdu);
+    static int minimumDataSize(const QModbusResponse &pdu);
+    static int calculateDataSize(const QModbusResponse &pdu);
 
     using CalcFuncPtr = decltype(&calculateDataSize);
-    Q_SERIALBUS_EXPORT static void registerDataSizeCalculator(FunctionCode fc, CalcFuncPtr func);
+    static void registerDataSizeCalculator(FunctionCode fc, CalcFuncPtr func);
 
     template <typename ... Args>
     QModbusResponse(FunctionCode code, Args ... newData)
@@ -209,7 +211,7 @@ public:
     {}
 };
 
-class QModbusExceptionResponse : public QModbusResponse
+class Q_SERIALBUS_EXPORT QModbusExceptionResponse : public QModbusResponse
 {
 public:
     QModbusExceptionResponse() = default;
@@ -219,6 +221,7 @@ public:
     QModbusExceptionResponse(FunctionCode fc, ExceptionCode ec)
         : QModbusResponse(FunctionCode(quint8(fc) | ExceptionByte), static_cast<quint8> (ec))
     {}
+    ~QModbusExceptionResponse() override;
 
     void setFunctionCode(FunctionCode c) override {
         QModbusPdu::setFunctionCode(FunctionCode(quint8(c) | ExceptionByte));
