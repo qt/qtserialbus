@@ -272,6 +272,8 @@ static QDataStream &pduFromStream(QDataStream &stream, Type type, QModbusPdu *pd
 
     Destroys a QModbusPdu.
 */
+QModbusPdu::~QModbusPdu()
+    = default;
 
 /*!
     \fn QModbusPdu::QModbusPdu(const QModbusPdu &other)
@@ -510,6 +512,12 @@ QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu)
 */
 
 /*!
+    \internal
+*/
+QModbusRequest::~QModbusRequest()
+    = default;
+
+/*!
     Returns the expected minimum data size for \a request based on the
     request's function code; \c {-1} if the function code is not known.
 */
@@ -664,6 +672,12 @@ QDataStream &operator>>(QDataStream &stream, QModbusRequest &pdu)
     Constructs a QModbusResponse with function code set to \a code and payload set to \a data.
     The data is expected to be stored in big-endian byte order already.
 */
+
+/*!
+    \internal
+*/
+QModbusResponse::~QModbusResponse()
+    = default;
 
 /*!
     Returns the expected minimum data size for \a response based on the
@@ -824,6 +838,12 @@ QDataStream &operator>>(QDataStream &stream, QModbusResponse &pdu)
     Constructs a QModbusExceptionResponse with function code set to \a code and exception error
     code set to \a ec.
 */
+
+/*!
+    \internal
+*/
+QModbusExceptionResponse::~QModbusExceptionResponse()
+    = default;
 
 /*!
     \fn void QModbusExceptionResponse::setFunctionCode(FunctionCode c)
