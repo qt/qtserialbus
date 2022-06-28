@@ -12,13 +12,6 @@
 
     \section1 Getting Started
 
-    To include the definitions of the module's classes and functions, use the
-    following directive:
-
-    \code
-    #include <QtSerialBus>
-    \endcode
-
     To use the module with CMake, use the \c{find_package()} command to locate
     the needed module components in the \c{Qt6} package:
     \include qtserialbus-module-use.qdocinc cmakebuild
