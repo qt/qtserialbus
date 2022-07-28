@@ -12,7 +12,7 @@ endif()
 qt_internal_add_test(tst_qmodbusclient
     SOURCES
         tst_qmodbusclient.cpp
-    PUBLIC_LIBRARIES
+    LIBRARIES
         Qt::CorePrivate
         Qt::Network
         Qt::SerialBus

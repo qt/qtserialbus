@@ -9,7 +9,7 @@ qt_internal_add_manual_test(adueditor
         mainwindow.cpp mainwindow.h
         modbustcpclient.cpp modbustcpclient.h modbustcpclient_p.h
         plaintextedit.h
-    PUBLIC_LIBRARIES
+    LIBRARIES
         Qt::Core
         Qt::CorePrivate
         Qt::Gui

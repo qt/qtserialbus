@@ -8,7 +8,7 @@
 qt_internal_add_test(tst_qmodbuscommevent
     SOURCES
         tst_qmodbuscommevent.cpp
-    PUBLIC_LIBRARIES
+    LIBRARIES
         Qt::Network
         Qt::SerialBus
         Qt::SerialBusPrivate

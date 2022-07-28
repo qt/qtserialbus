@@ -13,7 +13,7 @@ qt_internal_add_plugin(TestCanBusPlugin
     SOURCES
         testcanbackend.cpp testcanbackend.h
         main.cpp
-    PUBLIC_LIBRARIES
+    LIBRARIES
         Qt::Core
         Qt::Network
         Qt::SerialBus

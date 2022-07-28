@@ -8,7 +8,7 @@
 qt_internal_add_test(tst_qmodbusdataunit
     SOURCES
         tst_qmodbusdataunit.cpp
-    PUBLIC_LIBRARIES
+    LIBRARIES
         Qt::Network
         Qt::SerialBus
 )

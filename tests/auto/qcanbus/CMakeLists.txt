@@ -8,7 +8,7 @@
 qt_internal_add_test(tst_qcanbus
     SOURCES
         tst_qcanbus.cpp
-    PUBLIC_LIBRARIES
+    LIBRARIES
         Qt::Network
         Qt::SerialBus
 )
