@@ -254,7 +254,6 @@
        <property name="title">
         <string>CAN Interface Properties</string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout"/>
       </widget>
      </item>
     </layout>
