@@ -132,7 +132,7 @@ QModbusReply *QModbusClient::sendReadWriteRequest(const QModbusDataUnit &read,
     fits inside the Modbus PDU data section and has a valid function code.
     The only check performed before sending is therefore the validity check,
     see \l QModbusPdu::isValid. If no error occurred the function returns a
-    a new valid \l QModbusReply; nullptr otherwise. Modbus networks may have
+    new valid \l QModbusReply; nullptr otherwise. Modbus networks may have
     multiple servers, each server has a unique \a serverAddress.
 
     \sa QModbusReply::rawResult()
