@@ -13,6 +13,10 @@ qt_internal_add_module(SerialBus
         qcanbusdeviceinfo.cpp qcanbusdeviceinfo.h qcanbusdeviceinfo_p.h
         qcanbusfactory.cpp qcanbusfactory.h
         qcanbusframe.cpp qcanbusframe.h
+        qcancommondefinitions.cpp qcancommondefinitions.h
+        qcanmessagedescription.cpp qcanmessagedescription.h qcanmessagedescription_p.h
+        qcansignaldescription.cpp qcansignaldescription.h qcansignaldescription_p.h
+        qcanuniqueiddescription.cpp qcanuniqueiddescription.h qcanuniqueiddescription_p.h
         qmodbus_symbols_p.h
         qmodbusadu_p.h
         qmodbusclient.cpp qmodbusclient.h qmodbusclient_p.h
@@ -35,6 +39,7 @@ qt_internal_add_module(SerialBus
         Qt::CorePrivate
         Qt::Network
     GENERATE_CPP_EXPORTS
+    GENERATE_PRIVATE_CPP_EXPORTS
 )
 
 ## Scopes:
