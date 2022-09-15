@@ -4,6 +4,7 @@
 add_subdirectory(cmake)
 add_subdirectory(qcanbusframe)
 add_subdirectory(qcanbusdevice)
+add_subdirectory(qcanframeprocessor)
 add_subdirectory(qcanmessagedescription)
 add_subdirectory(qcansignaldescription)
 add_subdirectory(qcanuniqueiddescription)

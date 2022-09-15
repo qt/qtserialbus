@@ -14,6 +14,7 @@ qt_internal_add_module(SerialBus
         qcanbusfactory.cpp qcanbusfactory.h
         qcanbusframe.cpp qcanbusframe.h
         qcancommondefinitions.cpp qcancommondefinitions.h
+        qcanframeprocessor.cpp qcanframeprocessor.h qcanframeprocessor_p.h
         qcanmessagedescription.cpp qcanmessagedescription.h qcanmessagedescription_p.h
         qcansignaldescription.cpp qcansignaldescription.h qcansignaldescription_p.h
         qcanuniqueiddescription.cpp qcanuniqueiddescription.h qcanuniqueiddescription_p.h
