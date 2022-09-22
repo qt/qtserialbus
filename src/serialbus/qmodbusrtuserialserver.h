@@ -4,6 +4,10 @@
 #ifndef QMODBUSRTUSERIALSERVER_H
 #define QMODBUSRTUSERIALSERVER_H
 
+#if 0
+#pragma qt_class(QModbusRtuSerialSlave)
+#endif
+
 #include <QtSerialBus/qmodbusserver.h>
 
 QT_BEGIN_NAMESPACE

@@ -4,6 +4,10 @@
 #ifndef QMODBUSRTUSERIALCLIENT_H
 #define QMODBUSRTUSERIALCLIENT_H
 
+#if 0
+#pragma qt_class(QModbusRtuSerialMaster)
+#endif
+
 #include <QtSerialBus/qmodbusclient.h>
 
 QT_BEGIN_NAMESPACE
