@@ -38,7 +38,7 @@ static QCanBus *globalInstance = nullptr;
 static void loadPlugins()
 {
     const QList<QPluginParsedMetaData> meta = qFactoryLoader()->metaData();
-    for (int i = 0; i < meta.count(); i++) {
+    for (int i = 0; i < meta.size(); i++) {
         const QCborMap obj = meta.at(i).value(QtPluginMetaDataKeys::MetaData).toMap();
         if (obj.isEmpty())
             continue;

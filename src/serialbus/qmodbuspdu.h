@@ -127,7 +127,7 @@ private:
     {
         static_assert(is_pod<T>::value, "Only POD types supported.");
         static_assert(IsType<T, quint8, quint16>::value, "Only quint8 and quint16 supported.");
-        for (int i = 0; i < vector.count(); ++i)
+        for (int i = 0; i < vector.size(); ++i)
             (*stream) << vector[i];
     }
 
