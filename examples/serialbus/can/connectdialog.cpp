@@ -124,7 +124,7 @@ void ConnectDialog::pluginChanged(const QString &plugin)
 {
     m_ui->interfaceListBox->clear();
     m_interfaces = QCanBus::instance()->availableDevices(plugin);
-    for (const QCanBusDeviceInfo &info : qAsConst(m_interfaces))
+    for (const QCanBusDeviceInfo &info : std::as_const(m_interfaces))
         m_ui->interfaceListBox->addItem(info.name());
 }
 
@@ -158,7 +158,7 @@ QString ConnectDialog::configurationValue(QCanBusDevice::ConfigurationKey key)
 {
     QVariant result;
 
-    for (const ConfigurationItem &item : qAsConst(m_currentSettings.configurations)) {
+    for (const ConfigurationItem &item : std::as_const(m_currentSettings.configurations)) {
         if (item.first == key) {
             result = item.second;
             break;
