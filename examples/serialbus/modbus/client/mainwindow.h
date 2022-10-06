@@ -10,11 +10,9 @@
 QT_BEGIN_NAMESPACE
 
 class QModbusClient;
-class QModbusReply;
 
 namespace Ui {
 class MainWindow;
-class SettingsDialog;
 }
 
 QT_END_NAMESPACE
@@ -50,7 +48,6 @@ private slots:
 
 private:
     Ui::MainWindow *ui = nullptr;
-    QModbusReply *lastRequest = nullptr;
     QModbusClient *modbusDevice = nullptr;
     SettingsDialog *m_settingsDialog = nullptr;
     WriteRegisterModel *writeModel = nullptr;

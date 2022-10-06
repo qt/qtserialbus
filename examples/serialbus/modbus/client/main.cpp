@@ -4,13 +4,27 @@
 #include "mainwindow.h"
 
 #include <QApplication>
+#include <QCommandLineParser>
+#include <QCommandLineOption>
 #include <QLoggingCategory>
+
+using namespace Qt::StringLiterals;
 
 int main(int argc, char *argv[])
 {
-    // Uncomment the following line to enable logging
-    // QLoggingCategory::setFilterRules(QStringLiteral("qt.modbus* = true"));
     QApplication a(argc, argv);
+
+    QCommandLineParser parser;
+    parser.setApplicationDescription(u"Modbus Client Example"_s);
+    parser.addHelpOption();
+    parser.addVersionOption();
+    QCommandLineOption verboseOption(u"verbose"_s, u"Verbose mode"_s);
+    parser.addOption(verboseOption);
+    parser.process(a);
+
+    if (parser.isSet(verboseOption))
+        QLoggingCategory::setFilterRules(u"qt.modbus* = true"_s);
+
     MainWindow w;
     w.show();
 
