@@ -443,7 +443,7 @@ QString QCanBusFrame::toString() const
 /*! \relates QCanBusFrame
 
     Writes a \a frame to the stream (\a out) and returns a reference
-    to the it.
+    to it.
 */
 QDataStream &operator<<(QDataStream &out, const QCanBusFrame &frame)
 {
@@ -466,7 +466,7 @@ QDataStream &operator<<(QDataStream &out, const QCanBusFrame &frame)
 /*! \relates QCanBusFrame
 
     Reads a \a frame from the stream (\a in) and returns a
-    reference to the it.
+    reference to it.
 */
 QDataStream &operator>>(QDataStream &in, QCanBusFrame &frame)
 {
