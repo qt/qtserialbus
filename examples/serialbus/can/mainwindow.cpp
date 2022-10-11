@@ -117,7 +117,7 @@ void MainWindow::initActionsConnections()
     connect(m_ui->actionAboutQt, &QAction::triggered, qApp, &QApplication::aboutQt);
     connect(m_ui->actionClearLog, &QAction::triggered, m_model, &ReceivedFramesModel::clear);
     connect(m_ui->actionPluginDocumentation, &QAction::triggered, this, []() {
-        QDesktopServices::openUrl(QUrl("http://doc.qt.io/qt-5/qtcanbus-backends.html#can-bus-plugins"));
+        QDesktopServices::openUrl(QUrl("http://doc.qt.io/qt-6/qtcanbus-backends.html#can-bus-plugins"));
     });
 }
 
@@ -150,7 +150,7 @@ void MainWindow::connectDevice()
                                                         &errorString));
     if (!m_canDevice) {
         m_status->setText(tr("Error creating device '%1', reason: '%2'")
-                          .arg(p.pluginName).arg(errorString));
+                          .arg(p.pluginName, errorString));
         return;
     }
 
@@ -186,16 +186,16 @@ void MainWindow::connectDevice()
                     m_canDevice->configurationParameter(QCanBusDevice::DataBitRateKey);
             if (isCanFd && dataBitRate.isValid()) {
                 m_status->setText(tr("Plugin: %1, connected to %2 at %3 / %4 kBit/s")
-                                  .arg(p.pluginName).arg(p.deviceInterfaceName)
+                                  .arg(p.pluginName, p.deviceInterfaceName)
                                   .arg(bitRate.toInt() / 1000).arg(dataBitRate.toInt() / 1000));
             } else {
                 m_status->setText(tr("Plugin: %1, connected to %2 at %3 kBit/s")
-                                  .arg(p.pluginName).arg(p.deviceInterfaceName)
+                                  .arg(p.pluginName, p.deviceInterfaceName)
                                   .arg(bitRate.toInt() / 1000));
             }
         } else {
             m_status->setText(tr("Plugin: %1, connected to %2")
-                    .arg(p.pluginName).arg(p.deviceInterfaceName));
+                    .arg(p.pluginName, p.deviceInterfaceName));
         }
 
         if (m_canDevice->hasBusStatus())
