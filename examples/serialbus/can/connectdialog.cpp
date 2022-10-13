@@ -10,7 +10,7 @@
 ConnectDialog::ConnectDialog(QWidget *parent) :
     QDialog(parent),
     m_ui(new Ui::ConnectDialog),
-    m_settings(new QSettings("Qt", "CAN example"))
+    m_settings(new QSettings("QtProject", "CAN example"))
 {
     m_ui->setupUi(this);
 

@@ -15,6 +15,8 @@
 #include <QLabel>
 #include <QTimer>
 
+using namespace Qt::StringLiterals;
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     m_ui(new Ui::MainWindow),
@@ -225,14 +227,14 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 static QString frameFlags(const QCanBusFrame &frame)
 {
-    QString result = QLatin1String(" --- ");
+    QString result = u" --- "_s;
 
     if (frame.hasBitrateSwitch())
-        result[1] = QLatin1Char('B');
+        result[1] = u'B';
     if (frame.hasErrorStateIndicator())
-        result[2] = QLatin1Char('E');
+        result[2] = u'E';
     if (frame.hasLocalEcho())
-        result[3] = QLatin1Char('L');
+        result[3] = u'L';
 
     return result;
 }
@@ -250,11 +252,11 @@ void MainWindow::processReceivedFrames()
         if (frame.frameType() == QCanBusFrame::ErrorFrame)
             data = m_canDevice->interpretErrorFrame(frame);
         else
-            data = QLatin1String(frame.payload().toHex(' ').toUpper());
+            data = QString::fromLatin1(frame.payload().toHex(' ').toUpper());
 
         const QString time = QString::fromLatin1("%1.%2  ")
-                .arg(frame.timeStamp().seconds(), 10, 10, QLatin1Char(' '))
-                .arg(frame.timeStamp().microSeconds() / 100, 4, 10, QLatin1Char('0'));
+                .arg(frame.timeStamp().seconds(), 10, 10, ' '_L1)
+                .arg(frame.timeStamp().microSeconds() / 100, 4, 10, '0'_L1);
 
         const QString flags = frameFlags(frame);
 
