@@ -4,7 +4,35 @@
 #include "sendframebox.h"
 #include "ui_sendframebox.h"
 
-constexpr char THREE_DIGITS[] = "[[:xdigit:]]{3}";
+using namespace Qt::StringLiterals;
+
+static const QRegularExpression &threeHexDigitsPattern()
+{
+    static const QRegularExpression result(u"[[:xdigit:]]{3}"_s);
+    Q_ASSERT(result.isValid());
+    return result;
+}
+
+static const QRegularExpression &oneDigitAndSpacePattern()
+{
+    static const QRegularExpression result(u"((\\s+)|^)([[:xdigit:]]{1})(\\s+)"_s);
+    Q_ASSERT(result.isValid());
+    return result;
+}
+
+const QRegularExpression &hexNumberPattern()
+{
+    static const QRegularExpression result(u"^[[:xdigit:]]*$"_s);
+    Q_ASSERT(result.isValid());
+    return result;
+}
+
+const QRegularExpression &twoSpacesPattern()
+{
+    static const QRegularExpression result(u"([\\s]{2})"_s);
+    Q_ASSERT(result.isValid());
+    return result;
+}
 
 enum {
     MaxStandardId = 0x7FF,
@@ -16,35 +44,27 @@ enum {
     MaxPayloadFd = 64
 };
 
-bool isEvenHex(QString input)
+static bool isEvenHex(QString input)
 {
-    const QChar space = QLatin1Char(' ');
-    input.remove(space);
-
-    if (input.size() % 2)
-        return false;
-
-    return true;
+    input.remove(u' ');
+    return (input.size() % 2) == 0;
 }
 
 // Formats a string of hex characters with a space between every byte
 // Example: "012345" -> "01 23 45"
 static QString formatHexData(const QString &input)
 {
-    const QChar space = QLatin1Char(' ');
     QString out = input;
 
-    const QRegularExpression threeDigits(THREE_DIGITS);
-    const QRegularExpression oneDigitAndSpace(QStringLiteral("((\\s+)|^)([[:xdigit:]]{1})(\\s+)"));
-
-    while (oneDigitAndSpace.match(out).hasMatch() || threeDigits.match(out).hasMatch()) {
-        if (threeDigits.match(out).hasMatch()) {
-            const QRegularExpressionMatch match = threeDigits.match(out);
-            out.insert(match.capturedEnd() - 1, space);
-        } else if (oneDigitAndSpace.match(out).hasMatch()) {
-            const QRegularExpressionMatch match = oneDigitAndSpace.match(out);
-            if (out.at(match.capturedEnd() - 1) == space)
-                out.remove(match.capturedEnd() - 1, 1);
+    while (true) {
+        if (auto match = threeHexDigitsPattern().match(out); match.hasMatch()) {
+            out.insert(match.capturedEnd() - 1, u' ');
+        } else if (match = oneDigitAndSpacePattern().match(out); match.hasMatch()) {
+            const auto pos = match.capturedEnd() - 1;
+            if (out.at(pos) == u' ')
+                out.remove(pos, 1);
+        } else {
+            break;
         }
     }
 
@@ -59,16 +79,11 @@ HexIntegerValidator::HexIntegerValidator(QObject *parent) :
 
 QValidator::State HexIntegerValidator::validate(QString &input, int &) const
 {
-    bool ok;
-    uint value = input.toUInt(&ok, 16);
-
     if (input.isEmpty())
         return Intermediate;
-
-    if (!ok || value > m_maximum)
-        return Invalid;
-
-    return Acceptable;
+    bool ok;
+    uint value = input.toUInt(&ok, 16);
+    return ok && value <= m_maximum ? Acceptable : Invalid;
 }
 
 void HexIntegerValidator::setMaximum(uint maximum)
@@ -85,10 +100,9 @@ HexStringValidator::HexStringValidator(QObject *parent) :
 QValidator::State HexStringValidator::validate(QString &input, int &pos) const
 {
     const int maxSize = 2 * m_maxLength;
-    const QChar space = QLatin1Char(' ');
     QString data = input;
 
-    data.remove(space);
+    data.remove(u' ');
 
     if (data.isEmpty())
         return Intermediate;
@@ -98,35 +112,33 @@ QValidator::State HexStringValidator::validate(QString &input, int &pos) const
         return Invalid;
 
     // check if all input is valid
-    const QRegularExpression re(QStringLiteral("^[[:xdigit:]]*$"));
-    if (!re.match(data).hasMatch())
+    if (!hexNumberPattern().match(data).hasMatch())
         return Invalid;
 
     // don't allow user to enter more than one space
-    const QRegularExpression twoSpaces(QStringLiteral("([\\s]{2})"));
-    if (twoSpaces.match(input).hasMatch()) {
-        const QRegularExpressionMatch match = twoSpaces.match(input);
+    if (const auto match = twoSpacesPattern().match(input); match.hasMatch()) {
         input.replace(match.capturedStart(), 2, ' ');
         pos = match.capturedEnd() - 1;
     }
 
     // insert a space after every two hex nibbles
-    const QRegularExpression threeDigits(THREE_DIGITS);
-
-    while (threeDigits.match(input).hasMatch()) {
-        const QRegularExpressionMatch match = threeDigits.match(input);
-        if (pos == match.capturedStart() + 1) {
+    while (true) {
+        const QRegularExpressionMatch match = threeHexDigitsPattern().match(input);
+        if (!match.hasMatch())
+            break;
+        const auto start = match.capturedStart();
+        const auto end = match.capturedEnd();
+        if (pos == start + 1) {
             // add one hex nibble before two - Abc
-            input.insert(match.capturedStart() + 1, space);
-            pos = match.capturedStart() + 1;
-        } else if (pos == match.capturedStart() + 2) {
+            input.insert(pos, u' ');
+        } else if (pos == start + 2) {
             // add hex nibble in the middle - aBc
-            input.insert(match.capturedEnd() - 1, space);
-            pos = match.capturedEnd();
+            input.insert(end - 1, u' ');
+            pos = end;
         } else {
             // add one hex nibble after two - abC
-            input.insert(match.capturedEnd() - 1, space);
-            pos = match.capturedEnd() + 1;
+            input.insert(end - 1, u' ');
+            pos = end + 1;
         }
     }
 
@@ -199,7 +211,7 @@ SendFrameBox::SendFrameBox(QWidget *parent) :
         const uint frameId = m_ui->frameIdEdit->text().toUInt(nullptr, 16);
         QString data = m_ui->payloadEdit->text();
         m_ui->payloadEdit->setText(formatHexData(data));
-        const QByteArray payload = QByteArray::fromHex(data.remove(QLatin1Char(' ')).toLatin1());
+        const QByteArray payload = QByteArray::fromHex(data.remove(u' ').toLatin1());
 
         QCanBusFrame frame = QCanBusFrame(frameId, payload);
         frame.setExtendedFrameFormat(m_ui->extendedFormatBox->isChecked());

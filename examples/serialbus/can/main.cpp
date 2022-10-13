@@ -6,9 +6,11 @@
 #include <QApplication>
 #include <QLoggingCategory>
 
+using namespace Qt::StringLiterals;
+
 int main(int argc, char *argv[])
 {
-    QLoggingCategory::setFilterRules(QStringLiteral("qt.canbus* = true"));
+    QLoggingCategory::setFilterRules(u"qt.canbus* = true"_s);
     QApplication a(argc, argv);
     MainWindow w;
     w.show();
