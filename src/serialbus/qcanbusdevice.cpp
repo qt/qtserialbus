@@ -367,8 +367,8 @@ QVariant QCanBusDevice::configurationParameter(ConfigurationKey key) const
 /*!
     Returns the list of keys used by the CAN bus connection.
 
-    The the meaning of the keys is equivalent to \l ConfigurationKey.
-    If a key is not explicitly mentioned the platform's
+    The meaning of the keys is equivalent to \l ConfigurationKey.
+    If a key is not explicitly mentioned, the platform's
     default setting for the relevant key is used.
 */
 QList<QCanBusDevice::ConfigurationKey> QCanBusDevice::configurationKeys() const
