@@ -959,7 +959,7 @@ QModbusResponse QModbusServerPrivate::processWriteMultipleCoilsRequest(const QMo
     // range is numberOfCoils and therefore index too.
     quint16 coil = numberOfCoils;
     qint32 currentBit = 8 - ((byteCount * 8) - numberOfCoils);
-    for (quint8 currentByte : qAsConst(bytes)) {
+    for (quint8 currentByte : std::as_const(bytes)) {
         for (currentBit -= 1; currentBit >= 0; --currentBit)
             coils.setValue(--coil, currentByte & (1U << currentBit) ? 1 : 0);
         currentBit = 8;

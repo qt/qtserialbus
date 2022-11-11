@@ -207,7 +207,7 @@ public:
 
         qCDebug(QT_MODBUS) << "(TCP client) Cleanup of pending requests";
 
-        for (const auto &elem : qAsConst(m_transactionStore)) {
+        for (const auto &elem : std::as_const(m_transactionStore)) {
             if (elem.reply.isNull())
                 continue;
             elem.reply->setError(QModbusDevice::ReplyAbortedError,

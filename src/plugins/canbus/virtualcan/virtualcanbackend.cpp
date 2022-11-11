@@ -112,7 +112,7 @@ void VirtualCanServer::readyRead()
             const QByteArrayList commandList = command.split(':');
             Q_ASSERT(commandList.size() == 2);
 
-            for (QTcpSocket *writeSocket : qAsConst(m_serverSockets)) {
+            for (QTcpSocket *writeSocket : std::as_const(m_serverSockets)) {
                 // Don't send the frame back to its origin
                 if (writeSocket == readSocket)
                     continue;
