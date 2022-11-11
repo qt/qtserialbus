@@ -78,7 +78,7 @@ public:
         format(DataFrame),
         isExtendedFrame(0x0),
         version(Qt_5_10),
-        isFlexibleDataRate(data.length() > 8 ? 0x1 : 0x0),
+        isFlexibleDataRate(data.size() > 8 ? 0x1 : 0x0),
         isBitrateSwitch(0x0),
         isErrorStateIndicator(0x0),
         isLocalEcho(0x0),
@@ -102,7 +102,7 @@ public:
             return false;
 
         // maximum permitted payload size in CAN or CAN FD
-        const int length = load.length();
+        const int length = load.size();
         if (isFlexibleDataRate) {
             if (format == RemoteRequestFrame)
                 return false;
@@ -170,7 +170,7 @@ public:
     void setPayload(const QByteArray &data)
     {
         load = data;
-        if (data.length() > 8)
+        if (data.size() > 8)
             isFlexibleDataRate = 0x1;
     }
     constexpr void setTimeStamp(TimeStamp ts) noexcept { stamp = ts; }

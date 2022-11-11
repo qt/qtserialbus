@@ -1253,7 +1253,7 @@ QModbusResponse QModbusServerPrivate::processEncapsulatedInterfaceTransportReque
                 header[4] = quint8(0x00); // next object id
                 header[5] = quint8(0x01); // number of objects
                 header[6] = objectId;
-                header[7] = quint8(object.length());
+                header[7] = quint8(object.size());
                 return QModbusResponse(request.functionCode(), QByteArray(header + object));
             }
             default:

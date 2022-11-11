@@ -168,7 +168,7 @@ void tst_QCanBusDevice::initTestCase()
     QVERIFY(device->connectDevice());
     QCOMPARE(device->error(), QCanBusDevice::NoError);
     QTRY_VERIFY_WITH_TIMEOUT(device->state() == QCanBusDevice::ConnectedState, 5000);
-    QCOMPARE(stateSpy.count(), 4);
+    QCOMPARE(stateSpy.size(), 4);
     QCOMPARE(stateSpy.at(0).at(0).value<QCanBusDevice::CanBusDeviceState>(),
              QCanBusDevice::ConnectingState);
     QCOMPARE(stateSpy.at(1).at(0).value<QCanBusDevice::CanBusDeviceState>(),
@@ -220,7 +220,7 @@ void tst_QCanBusDevice::write()
 
     device->disconnectDevice();
     QTRY_VERIFY_WITH_TIMEOUT(device->state() == QCanBusDevice::UnconnectedState, 5000);
-    QCOMPARE(stateSpy.count(), 2);
+    QCOMPARE(stateSpy.size(), 2);
     QCOMPARE(stateSpy.at(0).at(0).value<QCanBusDevice::CanBusDeviceState>(),
              QCanBusDevice::ClosingState);
     QCOMPARE(stateSpy.at(1).at(0).value<QCanBusDevice::CanBusDeviceState>(),
@@ -230,11 +230,11 @@ void tst_QCanBusDevice::write()
 
     QVERIFY(!device->writeFrame(frame));
     QCOMPARE(device->error(), QCanBusDevice::OperationError);
-    QCOMPARE(spy.count(), 0);
+    QCOMPARE(spy.size(), 0);
 
     device->connectDevice();
     QTRY_VERIFY_WITH_TIMEOUT(device->state() == QCanBusDevice::ConnectedState, 5000);
-    QCOMPARE(stateSpy.count(), 2);
+    QCOMPARE(stateSpy.size(), 2);
     QCOMPARE(stateSpy.at(0).at(0).value<QCanBusDevice::CanBusDeviceState>(),
              QCanBusDevice::ConnectingState);
     QCOMPARE(stateSpy.at(1).at(0).value<QCanBusDevice::CanBusDeviceState>(),
@@ -242,7 +242,7 @@ void tst_QCanBusDevice::write()
 
     QVERIFY(device->writeFrame(frame));
     QCOMPARE(device->error(), QCanBusDevice::NoError);
-    QCOMPARE(spy.count(), 1);
+    QCOMPARE(spy.size(), 1);
 }
 
 void tst_QCanBusDevice::read()
@@ -258,7 +258,7 @@ void tst_QCanBusDevice::read()
 
     QVERIFY(device->connectDevice());
     QTRY_VERIFY_WITH_TIMEOUT(device->state() == QCanBusDevice::ConnectedState, 5000);
-    QCOMPARE(stateSpy.count(), 2);
+    QCOMPARE(stateSpy.size(), 2);
     QCOMPARE(stateSpy.at(0).at(0).value<QCanBusDevice::CanBusDeviceState>(),
              QCanBusDevice::ConnectingState);
     QCOMPARE(stateSpy.at(1).at(0).value<QCanBusDevice::CanBusDeviceState>(),
@@ -338,7 +338,7 @@ void tst_QCanBusDevice::clearOutputBuffer()
     QSignalSpy spy(device.get(), &QCanBusDevice::framesWritten);
     for (int i = 0; i < 10; ++i)
         device->writeFrame(QCanBusFrame(0x123, "output"));
-    QTRY_VERIFY_WITH_TIMEOUT(spy.count() == 10, 5000);
+    QTRY_VERIFY_WITH_TIMEOUT(spy.size() == 10, 5000);
 
     // now test clearing the buffer before the frames are actually written
     spy.clear();
@@ -347,7 +347,7 @@ void tst_QCanBusDevice::clearOutputBuffer()
 
     device->clear(QCanBusDevice::Output);
     QCOMPARE(device->error(), QCanBusDevice::NoError);
-    QTRY_VERIFY_WITH_TIMEOUT(spy.count() == 0, 5000);
+    QTRY_VERIFY_WITH_TIMEOUT(spy.size() == 0, 5000);
 }
 
 void tst_QCanBusDevice::error()
@@ -365,31 +365,31 @@ void tst_QCanBusDevice::error()
     backend->emulateError(testString + QStringLiteral("a"), QCanBusDevice::ReadError);
     QCOMPARE(testString + QStringLiteral("a"), device->errorString());
     QCOMPARE(device->error(), 1);
-    QCOMPARE(spy.count(), 1);
+    QCOMPARE(spy.size(), 1);
 
     // WriteError
     backend->emulateError(testString + QStringLiteral("b"), QCanBusDevice::WriteError);
     QCOMPARE(testString + QStringLiteral("b"), device->errorString());
     QCOMPARE(device->error(), 2);
-    QCOMPARE(spy.count(), 2);
+    QCOMPARE(spy.size(), 2);
 
     // ConnectionError
     backend->emulateError(testString + QStringLiteral("c"), QCanBusDevice::ConnectionError);
     QCOMPARE(testString + QStringLiteral("c"), device->errorString());
     QCOMPARE(device->error(), 3);
-    QCOMPARE(spy.count(), 3);
+    QCOMPARE(spy.size(), 3);
 
     // ConfigurationError
     backend->emulateError(testString + QStringLiteral("d"), QCanBusDevice::ConfigurationError);
     QCOMPARE(testString + QStringLiteral("d"), device->errorString());
     QCOMPARE(device->error(), 4);
-    QCOMPARE(spy.count(), 4);
+    QCOMPARE(spy.size(), 4);
 
     // UnknownError
     backend->emulateError(testString + QStringLiteral("e"), QCanBusDevice::UnknownError);
     QCOMPARE(testString + QStringLiteral("e"), device->errorString());
     QCOMPARE(device->error(), 5);
-    QCOMPARE(spy.count(), 5);
+    QCOMPARE(spy.size(), 5);
 }
 
 void tst_QCanBusDevice::cleanupTestCase()
@@ -424,7 +424,7 @@ void tst_QCanBusDevice::tst_filtering()
 
     const QVariant wrapper = QVariant::fromValue(filters);
     const auto newFilter = wrapper.value<QList<QCanBusDevice::Filter> >();
-    QCOMPARE(newFilter.count(), 2);
+    QCOMPARE(newFilter.size(), 2);
 
     QCOMPARE(newFilter.at(0).type, QCanBusFrame::DataFrame);
     QCOMPARE(newFilter.at(0).frameId, 0x1u);

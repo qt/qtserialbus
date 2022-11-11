@@ -530,7 +530,7 @@ private slots:
         QFETCH(QList<quint16>, values);
 
         TestClient client;
-        QModbusDataUnit read(rc, address, values.count());
+        QModbusDataUnit read(rc, address, values.size());
         QModbusDataUnit write(rc, address, values);
         QModbusRequest request = client.d_func()->createRWRequest(read, write);
         QTEST(request.functionCode(), "fc");

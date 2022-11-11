@@ -85,7 +85,7 @@ void tst_QModbusDevice::state()
     device->setState(QModbusDevice::UnconnectedState);
     QCOMPARE(device->state(), QModbusDevice::UnconnectedState);
 
-    QCOMPARE(spy.count(), 1);
+    QCOMPARE(spy.size(), 1);
 }
 
 void tst_QModbusDevice::error()
