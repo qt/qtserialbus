@@ -25,7 +25,8 @@ QT_BEGIN_NAMESPACE
     from a CAN frame include the following:
     \list
         \li Data source (frame ID or payload).
-        \li Data endianness.
+        \li Data endianness. See \l {Data Endianness Processing} section for
+            more details.
         \li Data format.
         \li Start bit position.
         \li Data length in bits.
@@ -46,6 +47,71 @@ QT_BEGIN_NAMESPACE
 
     The QCanSignalDescription class provides methods to control all those
     parameters.
+
+    \section2 Data Endianness Processing
+
+    Little endian and big endian data is encoded differently.
+    For big endian values, start bit positions are given for the most
+    significant bit. For little endian values, the start position is that of
+    the least significant bit.
+
+    Let's consider two examples. In both examples we will encode two 12-bit
+    values in the 3-byte payload.
+
+    \section3 Little Endian
+
+    For the little endian case the data layout can be represented by the
+    following image:
+
+    \image canbus_signals_le.png
+
+    Here the columns represent bit numbers, and the rows represent byte numbers.
+    \c {LSB} marks the first (least significant) bit of the value, and \c {MSB}
+    marks the last (most significant) bit of the value. The blue color marks the
+    first value, and the orange color marks the second value.
+
+    The information about these values will be encoded in QCanSignalDescription
+    in the following way:
+
+    \code
+    QCanSignalDescription signal1;
+    signal1.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+    signal1.setStartBit(0);
+    signal1.setBitLength(12);
+    // other parameters for signal1
+
+    QCanSignalDescription signal2;
+    signal2.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+    signal2.setStartBit(12);
+    signal2.setBitLength(12);
+    // other parameters for signal2
+    \endcode
+
+    \section3 Big Endian
+
+    The following image represents the value layout for the big endian case:
+
+    \image canbus_signals_be.png
+
+    The values can be represented in QCanSignalDescription in the following
+    way:
+
+    \code
+    QCanSignalDescription signal1;
+    signal1.setDataEndian(QtCanBus::DataEndian::BigEndian);
+    signal1.setStartBit(7);
+    signal1.setBitLength(12);
+    // other parameters for signal1
+
+    QCanSignalDescription signal2;
+    signal2.setDataEndian(QtCanBus::DataEndian::BigEndian);
+    signal2.setStartBit(11);
+    signal2.setBitLength(12);
+    // other parameters for signal2
+    \endcode
+
+    Note how the start bits are different from the little endian case. Also the
+    values are aligned differently.
 
     \section2 Multiplexed Signals Explained
 

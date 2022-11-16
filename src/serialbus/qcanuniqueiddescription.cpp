@@ -32,6 +32,11 @@ QT_BEGIN_NAMESPACE
         \li The endian used to extract the value.
     \endlist
 
+    Check the \l {Data Endianness Processing} section of the
+    \l QCanSignalDescription documentation to see how the start bit value
+    depends on the data endianness. The approach that is described there is
+    also used for unique id description.
+
     The actual value of a unique identifier is represented by the
     \l QtCanBus::UniqueId type.
 

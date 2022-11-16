@@ -26,11 +26,8 @@ private slots:
     void detachOnOperations();
 
     /* parse */
-    void parseSignalFromFrameId_data();
-    void parseSignalFromFrameId();
-
-    void parseSignalFromPayload_data();
-    void parseSignalFromPayload();
+    void parseSignal_data();
+    void parseSignal();
 
     void parseWithValueConversion_data();
     void parseWithValueConversion();
@@ -48,11 +45,8 @@ private slots:
     void extractUniqueId();
 
     /* generate */
-    void prepareFrameId_data();
-    void prepareFrameId();
-
-    void preparePayload_data();
-    void preparePayload();
+    void prepareFrame_data();
+    void prepareFrame();
 
     void prepareWithValueConversion_data();
     void prepareWithValueConversion();
@@ -65,6 +59,10 @@ private slots:
 
     void prepareUniqueId_data();
     void prepareUniqueId();
+
+    /* roundtrip */
+    void roundtrip_data();
+    void roundtrip();
 };
 
 void tst_QCanFrameProcessor::construct()
@@ -270,227 +268,321 @@ void tst_QCanFrameProcessor::detachOnOperations()
     }
 }
 
-void tst_QCanFrameProcessor::parseSignalFromFrameId_data()
+void tst_QCanFrameProcessor::parseSignal_data()
 {
-    QTest::addColumn<quint32>("frameId");
+    QTest::addColumn<QtCanBus::DataSource>("source");
+    QTest::addColumn<quint64>("data");
     QTest::addColumn<quint16>("startBit");
     QTest::addColumn<quint16>("bitLength");
     QTest::addColumn<QtCanBus::DataFormat>("format");
     QTest::addColumn<QtCanBus::DataEndian>("endian");
     QTest::addColumn<QVariant>("expectedValue");
 
-    quint32 frameId {0x1234FFEC};
-    for (quint16 i = 0; i < 8; ++i) {
-        quint32 value = (frameId << i) & 0x1FFFFFFFU;
+    struct SourceDesc {
+        QtCanBus::DataSource source;
+        const char name[8];
+    };
 
-        QTest::addRow("int16, le, from %d", i)
-                << value << i << quint16(16)
+    static constexpr SourceDesc sources[] = {
+        {QtCanBus::DataSource::FrameId, "FrameId"},
+        {QtCanBus::DataSource::Payload, "Payload"}
+    };
+
+    for (const auto &s : sources) {
+        // LE, 16 bit, start 0
+        QTest::addRow("%s, unsigned, 16bit, start 0, le", s.name)
+                << s.source
+                << quint64(0x1234FFEC) << quint16(0) << quint16(16)
+                << QtCanBus::DataFormat::UnsignedInteger
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(65516);
+
+        QTest::addRow("%s, signed neg, 16bit, start 0, le", s.name)
+                << s.source
+                << quint64(0x1234FFEC) << quint16(0) << quint16(16)
                 << QtCanBus::DataFormat::SignedInteger
                 << QtCanBus::DataEndian::LittleEndian
                 << QVariant(-20);
 
-        QTest::addRow("uint16, le, from %d", i)
-                << value << i << quint16(16)
+        QTest::addRow("%s, signed pos, 16bit, start 0, le", s.name)
+                << s.source
+                << quint64(0x12340FEC) << quint16(0) << quint16(16)
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(4076);
+
+        // LE, 16 bit, start 5
+        QTest::addRow("%s, unsigned, 16bit, start 5, le", s.name)
+                << s.source
+                << quint64(0x1234FFECULL << 5)
+                << quint16(5) << quint16(16)
                 << QtCanBus::DataFormat::UnsignedInteger
                 << QtCanBus::DataEndian::LittleEndian
                 << QVariant(65516);
-    }
 
-    frameId = quint32(0x12348582);
-    for (quint16 i = 0; i < 8; ++i) {
-        quint32 value = (frameId << i) & 0x1FFFFFFFU;
-
-        QTest::addRow("int16, be, from %d", i)
-                << value << i << quint16(16)
-                << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::BigEndian
-                << QVariant(-32123);
-
-        QTest::addRow("uint16, be, from %d", i)
-                << value << i << quint16(16)
-                << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::BigEndian
-                << QVariant(33413);
-    }
-}
-
-void tst_QCanFrameProcessor::parseSignalFromFrameId()
-{
-    QFETCH(quint32, frameId);
-    QFETCH(quint16, startBit);
-    QFETCH(quint16, bitLength);
-    QFETCH(QtCanBus::DataFormat, format);
-    QFETCH(QtCanBus::DataEndian, endian);
-    QFETCH(QVariant, expectedValue);
-
-    QCanSignalDescription sig;
-    sig.setName("test_signal");
-    sig.setDataSource(QtCanBus::DataSource::FrameId);
-    sig.setDataFormat(format);
-    sig.setDataEndian(endian);
-    sig.setStartBit(startBit);
-    sig.setBitLength(bitLength);
-    QVERIFY(sig.isValid());
-
-    // The unique id will be extracted from the 0-th payload byte
-    QCanUniqueIdDescription uidDesc;
-    uidDesc.setSource(QtCanBus::DataSource::Payload);
-    uidDesc.setStartBit(0);
-    uidDesc.setBitLength(4);
-
-    const QtCanBus::UniqueId expectedUid = 0x0A;
-
-    QCanMessageDescription message;
-    message.setName("test_message");
-    message.setUniqueId(expectedUid);
-    message.setSize(1);
-    message.addSignalDescription(sig);
-    QVERIFY(message.isValid());
-
-    QCanFrameProcessor parser;
-    parser.setUniqueIdDescription(uidDesc);
-    parser.addMessageDescriptions({ message });
-
-    QCanBusFrame frame(frameId, QByteArray(1, 0x0A));
-    QVERIFY(frame.isValid());
-
-    const auto result = parser.parseFrame(frame);
-    const auto signalValues = result.signalValues;
-    QCOMPARE(result.uniqueId, expectedUid);
-    QVERIFY(!signalValues.isEmpty());
-
-    const QVariantMap expectedSignalValues({qMakePair(sig.name(), expectedValue)});
-
-    // The values can be doubles, so we need to compare them explicitly
-    QCOMPARE(signalValues.keys(), expectedSignalValues.keys());
-    for (const auto &key : expectedSignalValues.keys()) {
-        const auto expectedValue = expectedSignalValues.value(key);
-        if (expectedValue.canConvert(QMetaType::fromType<double>()))
-            QCOMPARE(signalValues.value(key).toDouble(), expectedValue.toDouble());
-        else
-            QCOMPARE(signalValues.value(key), expectedValue);
-    }
-}
-
-void tst_QCanFrameProcessor::parseSignalFromPayload_data()
-{
-    QTest::addColumn<QByteArray>("payload");
-    QTest::addColumn<quint16>("startBit");
-    QTest::addColumn<quint16>("bitLength");
-    QTest::addColumn<QtCanBus::DataFormat>("format");
-    QTest::addColumn<QtCanBus::DataEndian>("endian");
-    QTest::addColumn<QVariant>("expectedValue");
-
-    // (u)int, LE/BE, variable start and bitLength
-
-    // Every next value in the list is supposed to have a length in bits cut
-    // by one.
-    static constexpr quint16 unsignedValues[] = { 0xCFC7, 0x67E3, 0x33F1, 0x19F8,
-                                                  0x0CFC, 0x067E, 0x033F, 0x019F };
-    // signedValues contain signed representations of the unsignedValues,
-    // considering that the bit lengths is cut every time. For example,
-    // unsingedValues[1] contain 1 in its 14'th bit (starting from 0), so it
-    // must be treated as a negative value.
-    static constexpr qint16 signedValues[] = { -12345, -6173, -3087, -1544,
-                                               -772, -386, -193, -97 };
-
-    for (quint16 i = 0; i < 8; ++i) {
-        // shift, to change start bit
-        quint32 valueForPayload = qToLittleEndian(unsignedValues[i]) << i;
-        const QByteArray expectedPayload(reinterpret_cast<const char*>(&valueForPayload),
-                                         sizeof(quint32));
-        QTest::addRow("int, le, from %d, length %d", i, 16 - i)
-                << expectedPayload << i << quint16(16 - i)
+        QTest::addRow("%s, signed neg, 16bit, start 5, le", s.name)
+                << s.source
+                << quint64((0x1234FFECULL << 5) & 0x1FFFFFFFU)
+                << quint16(5) << quint16(16)
                 << QtCanBus::DataFormat::SignedInteger
                 << QtCanBus::DataEndian::LittleEndian
-                << QVariant(signedValues[i]);
+                << QVariant(-20);
 
-        QTest::addRow("uint, le, from %d, length %d", i, 16 - i)
-                << expectedPayload << i << quint16(16 - i)
+        QTest::addRow("%s, signed pos, 16bit, start 5, le", s.name)
+                << s.source
+                << quint64(0x12340FECULL << 5)
+                << quint16(5) << quint16(16)
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(4076);
+
+        // LE, 19 bit, start 0
+        QTest::addRow("%s, unsigned, 19bit, start 0, le", s.name)
+                << s.source
+                << quint64(0x1234FFEC) << quint16(0) << quint16(19)
                 << QtCanBus::DataFormat::UnsignedInteger
                 << QtCanBus::DataEndian::LittleEndian
-                << QVariant(unsignedValues[i]);
+                << QVariant(327660);
 
-        const quint16 beValue = qToBigEndian(unsignedValues[i]);
-        const uchar *beValueData = reinterpret_cast<const uchar *>(&beValue);
-        quint32 beValueForPayload = (beValueData[0] << i) + (beValueData[1] << 8);
-        const QByteArray expectedBePayload(reinterpret_cast<const char*>(&beValueForPayload),
-                                           sizeof(quint32));
-        QTest::addRow("int, be, from %d, length %d", i, 16 - i)
-                << expectedBePayload << i << quint16(16 - i)
+        QTest::addRow("%s, signed neg, 19bit, start 0, le", s.name)
+                << s.source
+                << quint64(0x123D800A) << quint16(0) << quint16(19)
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(-163830);
+
+        QTest::addRow("%s, signed pos, 19bit, start 0, le", s.name)
+                << s.source
+                << quint64(0x1231800A) << quint16(0) << quint16(19)
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(98314);
+
+        // LE, 19 bit, start 3
+        QTest::addRow("%s, unsigned, 19bit, start 3, le", s.name)
+                << s.source
+                << quint64(0x1234FFECULL << 3)
+                << quint16(3) << quint16(19)
+                << QtCanBus::DataFormat::UnsignedInteger
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(327660);
+
+        QTest::addRow("%s, signed neg, 19bit, start 3, le", s.name)
+                << s.source
+                << quint64(0x123D800AULL << 3)
+                << quint16(3) << quint16(19)
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(-163830);
+
+        QTest::addRow("%s, signed pos, 19bit, start 3, le", s.name)
+                << s.source
+                << quint64(0x1231800AULL << 3)
+                << quint16(3) << quint16(19)
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(98314);
+
+        // BE, 16 bit, start 7
+        QTest::addRow("%s, unsigned, 16bit, start 7, be", s.name)
+                << s.source
+                << quint64(0x1234ECFF) << quint16(7) << quint16(16)
+                << QtCanBus::DataFormat::UnsignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(65516);
+
+        QTest::addRow("%s, signed neg, 16bit, start 7, be", s.name)
+                << s.source
+                << quint64(0x1234ECFF) << quint16(7) << quint16(16)
                 << QtCanBus::DataFormat::SignedInteger
                 << QtCanBus::DataEndian::BigEndian
-                << QVariant(signedValues[i]);
+                << QVariant(-20);
 
-        QTest::addRow("uint, be, from %d, length %d", i, 16 - i)
-                << expectedBePayload << i << quint16(16 - i)
+        QTest::addRow("%s, signed pos, 16bit, start 7, be", s.name)
+                << s.source
+                << quint64(0x1234EC0F) << quint16(7) << quint16(16)
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(4076);
+
+        // BE, 16 bit, start 5
+        QTest::addRow("%s, unsigned, 16bit, start 5, be", s.name)
+                << s.source
+                << quint64(0x1234FB3F) << quint16(5) << quint16(16)
                 << QtCanBus::DataFormat::UnsignedInteger
                 << QtCanBus::DataEndian::BigEndian
-                << QVariant(unsignedValues[i]);
-    }
+                << QVariant(65516);
 
-    // float, LE/BE, variable start
-    const float floatVal = 123.456f;
-    for (quint16 i = 0; i < 8; ++i) {
-        quint64 valueForPayload = 0;
-        const float leFloatVal = qToLittleEndian(floatVal);
-        memcpy(&valueForPayload, &leFloatVal, sizeof(float));
-        valueForPayload = valueForPayload << i;
-        const QByteArray expectedPayload(reinterpret_cast<const char*>(&valueForPayload),
-                                         sizeof(quint64));
-        QTest::addRow("float, le, from %d", i)
-                << expectedPayload << i << quint16(32)
-                << QtCanBus::DataFormat::Float
-                << QtCanBus::DataEndian::LittleEndian
-                << QVariant(floatVal);
-
-        valueForPayload = 0;
-        const float beFloatVal = qToBigEndian(floatVal);
-        memcpy(&valueForPayload, &beFloatVal, sizeof(float));
-        valueForPayload = valueForPayload << i;
-        const QByteArray expectedBePayload(reinterpret_cast<const char*>(&valueForPayload),
-                                           sizeof(quint64));
-        QTest::addRow("float, be, from %d", i)
-                << expectedBePayload << i << quint16(32)
-                << QtCanBus::DataFormat::Float
+        QTest::addRow("%s, signed neg, 16bit, start 5, be", s.name)
+                << s.source
+                << quint64(0x1234FB3F) << quint16(5) << quint16(16)
+                << QtCanBus::DataFormat::SignedInteger
                 << QtCanBus::DataEndian::BigEndian
-                << QVariant(floatVal);
+                << QVariant(-20);
+
+        QTest::addRow("%s, signed pos, 16bit, start 5, be", s.name)
+                << s.source
+                << quint64(0x1234FB03) << quint16(5) << quint16(16)
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(4076);
+
+        // BE, 21 bit, start 7
+        QTest::addRow("%s, unsigned, 21bit, start 7, be", s.name)
+                << s.source
+                << quint64(0x1264FFA7) << quint16(7) << quint16(21)
+                << QtCanBus::DataFormat::UnsignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(1376236);
+
+        QTest::addRow("%s, signed neg, 21bit, start 7, be", s.name)
+                << s.source
+                << quint64(0x1264FFA7) << quint16(7) << quint16(21)
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(-720916);
+
+        QTest::addRow("%s, signed pos, 21bit, start 7, be", s.name)
+                << s.source
+                << quint64(0x1264FF27) << quint16(7) << quint16(21)
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(327660);
+
+        // BE, 21 bit, start 4
+        QTest::addRow("%s, unsigned, 21bit, start 4, be", s.name)
+                << s.source
+                << quint64(0x12ECFF14) << quint16(4) << quint16(21)
+                << QtCanBus::DataFormat::UnsignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(1376236);
+
+        QTest::addRow("%s, signed neg, 21bit, start 4, be", s.name)
+                << s.source
+                << quint64(0x12ECFF14) << quint16(4) << quint16(21)
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(-720916);
+
+        QTest::addRow("%s, signed pos, 21bit, start 4, be", s.name)
+                << s.source
+                << quint64(0x12ECFF04) << quint16(4) << quint16(21)
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(327660);
+
+        // Some LE tests for values less than 8 bit
+        QTest::addRow("%s, unsinged, 4bit, start 0, le", s.name)
+                << s.source
+                << quint64(0x12345678) << quint16(0) << quint16(4)
+                << QtCanBus::DataFormat::UnsignedInteger
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(8);
+
+        QTest::addRow("%s, unsinged, 4bit, start 3, le", s.name)
+                << s.source
+                << quint64(0x12345678) << quint16(3) << quint16(4)
+                << QtCanBus::DataFormat::UnsignedInteger
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(15);
+
+        QTest::addRow("%s, unsinged, 4bit, start 7, le", s.name)
+                << s.source
+                << quint64(0x12345678) << quint16(7) << quint16(4)
+                << QtCanBus::DataFormat::UnsignedInteger
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(12);
+
+        // Some BE tests for values less than 8 bit
+        QTest::addRow("%s, unsinged, 4bit, start 7, be", s.name)
+                << s.source
+                << quint64(0x12345678) << quint16(7) << quint16(4)
+                << QtCanBus::DataFormat::UnsignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(7);
+
+        QTest::addRow("%s, unsinged, 4bit, start 5, be", s.name)
+                << s.source
+                << quint64(0x12345678) << quint16(5) << quint16(4)
+                << QtCanBus::DataFormat::UnsignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(14);
+
+        QTest::addRow("%s, unsinged, 4bit, start 0, be", s.name)
+                << s.source
+                << quint64(0x12345678) << quint16(0) << quint16(4)
+                << QtCanBus::DataFormat::UnsignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(2);
     }
 
-    // double, LE/BE
+    // float data - payload only
+    {
+        const float floatVal = 123.456f;
+        for (quint16 i = 0; i < 8; ++i) {
+            quint64 value = 0;
+            const float leFloatVal = qToLittleEndian(floatVal);
+            memcpy(&value, &leFloatVal, sizeof(float));
+            value = value << i;
+            QTest::addRow("Payload, float, le, start %d", i)
+                    << QtCanBus::DataSource::Payload
+                    << value << i << quint16(32)
+                    << QtCanBus::DataFormat::Float
+                    << QtCanBus::DataEndian::LittleEndian
+                    << QVariant(floatVal);
+
+            // to get the proper BE value with an offset, we need to take an LE
+            // value, shift it to the right, and then swap bytes
+            value = 0;
+            memcpy(&value, &leFloatVal, sizeof(float));
+            value = value << 16; // so that we have some room for right shift
+                                 // this means that default start bit is 23
+            value = value >> i;
+            value = qToBigEndian(value);
+            QTest::addRow("Payload, float, be, start %d", 23 - i)
+                    << QtCanBus::DataSource::Payload
+                    << value << quint16(23 - i) << quint16(32)
+                    << QtCanBus::DataFormat::Float
+                    << QtCanBus::DataEndian::BigEndian
+                    << QVariant(floatVal);
+        }
+    }
+
+    // double data - payload only
     {
         const double doubleVal = 1.234e-15;
         const double leDoubleVal = qToLittleEndian(doubleVal);
-        const QByteArray expectedPayload(reinterpret_cast<const char*>(&leDoubleVal),
-                                         sizeof(double));
-        QTest::addRow("double, le")
-                << expectedPayload << quint16(0) << quint16(64)
+        quint64 value = 0;
+        memcpy(&value, &leDoubleVal, sizeof(leDoubleVal));
+        QTest::addRow("Payload, double, le")
+                << QtCanBus::DataSource::Payload
+                << value << quint16(0) << quint16(64)
                 << QtCanBus::DataFormat::Double
                 << QtCanBus::DataEndian::LittleEndian
                 << QVariant(doubleVal);
 
         const double beDoubleVal = qToBigEndian(doubleVal);
-        const QByteArray expectedBePayload(reinterpret_cast<const char*>(&beDoubleVal),
-                                           sizeof(double));
-        QTest::addRow("double, be")
-                << expectedBePayload << quint16(0) << quint16(64)
+        memcpy(&value, &beDoubleVal, sizeof(beDoubleVal));
+        QTest::addRow("Payload, double, be")
+                << QtCanBus::DataSource::Payload
+                << value << quint16(7) << quint16(64)
                 << QtCanBus::DataFormat::Double
                 << QtCanBus::DataEndian::BigEndian
                 << QVariant(doubleVal);
     }
 
     // ASCII
-    {
-        const QByteArray expectedData("abc", 3);
-        const quint16 offset = 8; // start from the 2nd byte
+    for (const auto &s : sources) {
+        const bool isPayload = s.source == QtCanBus::DataSource::Payload;
+        const QByteArray expectedData = isPayload ? QByteArray("abc", 3) : QByteArray("ab", 2);
+        const quint16 offset = isPayload ? 8 : 4;
         for (quint16 i = 0; i < 8; ++i) {
-            quint64 valueForPayload = 0;
-            memcpy(&valueForPayload, expectedData.constData(), expectedData.size());
-            valueForPayload = valueForPayload << (offset + i);
-            const QByteArray payload(reinterpret_cast<const char *>(&valueForPayload),
-                                     sizeof(quint64));
-            QTest::addRow("ascii, offset %d", offset + i)
-                    << payload << quint16(offset + i) << quint16(expectedData.size() * 8)
+            quint64 value = 0;
+            memcpy(&value, expectedData.constData(), expectedData.size());
+            value = value << (offset + i);
+            QTest::addRow("%s, ascii, offset %d", s.name, offset + i)
+                    << s.source
+                    << value << quint16(offset + i) << quint16(expectedData.size() * 8)
                     << QtCanBus::DataFormat::Ascii
                     << QtCanBus::DataEndian::LittleEndian
                     << QVariant(expectedData);
@@ -498,9 +590,10 @@ void tst_QCanFrameProcessor::parseSignalFromPayload_data()
     }
 }
 
-void tst_QCanFrameProcessor::parseSignalFromPayload()
+void tst_QCanFrameProcessor::parseSignal()
 {
-    QFETCH(QByteArray, payload);
+    QFETCH(QtCanBus::DataSource, source);
+    QFETCH(quint64, data);
     QFETCH(quint16, startBit);
     QFETCH(quint16, bitLength);
     QFETCH(QtCanBus::DataFormat, format);
@@ -509,35 +602,51 @@ void tst_QCanFrameProcessor::parseSignalFromPayload()
 
     QCanSignalDescription sig;
     sig.setName("test_signal");
+    sig.setDataSource(source);
     sig.setDataFormat(format);
     sig.setDataEndian(endian);
     sig.setStartBit(startBit);
     sig.setBitLength(bitLength);
     QVERIFY(sig.isValid());
 
-    const QtCanBus::UniqueId uniqueId = 123;
+    const bool sourceIsPayload = source == QtCanBus::DataSource::Payload;
 
+    // The unique id will be extracted from the 0-th payload byte
+    const auto uidSource = sourceIsPayload ? QtCanBus::DataSource::FrameId
+                                           : QtCanBus::DataSource::Payload;
+    QCanUniqueIdDescription uidDesc;
+    uidDesc.setSource(uidSource);
+    uidDesc.setStartBit(0);
+    uidDesc.setBitLength(4);
+
+    const QtCanBus::UniqueId expectedUid = 0x0A;
+
+    const auto messageSize = sourceIsPayload ? sizeof(data) : 1;
     QCanMessageDescription message;
     message.setName("test_message");
-    message.setUniqueId(uniqueId);
-    message.setSize(payload.size());
+    message.setUniqueId(expectedUid);
+    message.setSize(messageSize);
     message.addSignalDescription(sig);
     QVERIFY(message.isValid());
-
-    // Assume that our uniqueId is the whole FrameId
-    QCanUniqueIdDescription uidDesc;
-    uidDesc.setBitLength(29);
 
     QCanFrameProcessor parser;
     parser.setUniqueIdDescription(uidDesc);
     parser.addMessageDescriptions({ message });
 
-    QCanBusFrame frame(uniqueId, payload);
+    QCanBusFrame frame;
+    if (sourceIsPayload) {
+        frame.setFrameId(expectedUid);
+        const QByteArray payload(reinterpret_cast<const char *>(&data), sizeof(data));
+        frame.setPayload(payload);
+    } else {
+        frame.setFrameId(data & 0x1FFFFFFFU);
+        frame.setPayload(QByteArray(1, 0x0A));
+    }
     QVERIFY(frame.isValid());
 
     const auto result = parser.parseFrame(frame);
     const auto signalValues = result.signalValues;
-    QCOMPARE(result.uniqueId, uniqueId);
+    QCOMPARE(result.uniqueId, expectedUid);
     QVERIFY(!signalValues.isEmpty());
 
     const QVariantMap expectedSignalValues({qMakePair(sig.name(), expectedValue)});
@@ -583,7 +692,7 @@ void tst_QCanFrameProcessor::parseWithValueConversion()
 
     QCanSignalDescription sig;
     sig.setName("test_signal");
-    sig.setStartBit(0);
+    sig.setStartBit(7);
     sig.setBitLength(8);
     sig.setFactor(factor);
     sig.setOffset(offset);
@@ -669,21 +778,21 @@ void tst_QCanFrameProcessor::parseMultiplexedSignals()
 
     QCanSignalDescription s0; // multiplexor
     s0.setName(s0Name);
-    s0.setStartBit(0);
+    s0.setStartBit(1);
     s0.setBitLength(2);
     s0.setDataFormat(QtCanBus::DataFormat::UnsignedInteger);
     s0.setMultiplexState(QtCanBus::MultiplexState::MultiplexorSwitch);
 
     QCanSignalDescription s1; // multiplexed signal 1, used when s0 == 1
     s1.setName(s1Name);
-    s1.setStartBit(2);
+    s1.setStartBit(7);
     s1.setBitLength(6);
     s1.setMultiplexState(QtCanBus::MultiplexState::MultiplexedSignal);
     s1.addMultiplexSignal(s0.name(), s1MuxValue);
 
     QCanSignalDescription s2; // multiplexed signal 2, used when s0 == 2
     s2.setName(s2Name);
-    s2.setStartBit(2);
+    s2.setStartBit(7);
     s2.setBitLength(6);
     s2.setMultiplexState(QtCanBus::MultiplexState::MultiplexedSignal);
     s2.addMultiplexSignal(s0.name(), s2MuxValue);
@@ -875,7 +984,7 @@ void tst_QCanFrameProcessor::parseWithErrorsAndWarnings_data()
 
     QCanSignalDescription signalDesc;
     signalDesc.setName("s0");
-    signalDesc.setStartBit(0);
+    signalDesc.setStartBit(7);
     signalDesc.setBitLength(16);
 
     QCanMessageDescription messageDesc;
@@ -897,7 +1006,7 @@ void tst_QCanFrameProcessor::parseWithErrorsAndWarnings_data()
     // format float, but length != 32
     QCanSignalDescription invalidSignalDesc;
     invalidSignalDesc.setName("invalidSignal");
-    invalidSignalDesc.setStartBit(16);
+    invalidSignalDesc.setStartBit(23);
     invalidSignalDesc.setBitLength(8);
     invalidSignalDesc.setDataFormat(QtCanBus::DataFormat::Float);
 
@@ -916,20 +1025,20 @@ void tst_QCanFrameProcessor::parseWithErrorsAndWarnings_data()
 
     // other valid signal
     signalDesc.setName("s1");
-    signalDesc.setStartBit(32);
+    signalDesc.setStartBit(39);
     signalDesc.setBitLength(8);
 
     messageDesc.addSignalDescription(signalDesc);
 
     // valid signal, but length exceeds frame length
     signalDesc.setName("tooLong");
-    signalDesc.setStartBit(40);
+    signalDesc.setStartBit(47);
     signalDesc.setBitLength(32);
 
     messageDesc.addSignalDescription(signalDesc);
 
     expectedWarnings.push_back(tr("Skipping signal tooLong in message with unique id 123. "
-                                  "Its start + length exceeds data length."));
+                                  "Its expected length exceeds the data length."));
 
     // Two invalid signals skipped, two valid results are received
     QTest::addRow("invalid signal desc warning")
@@ -994,22 +1103,31 @@ void tst_QCanFrameProcessor::extractUniqueId_data()
     uidDesc.setSource(QtCanBus::DataSource::FrameId);
     uidDesc.setBitLength(12);
 
-    const QtCanBus::UniqueId uniqueIdLe = 0x0965;
-    const QtCanBus::UniqueId uniqueIdBe = 0x0596;
+    const QtCanBus::UniqueId uniqueId = 0x0965;
     for (quint16 startBit = 0; startBit < 8; ++startBit) {
         uidDesc.setStartBit(startBit);
         uidDesc.setEndian(QtCanBus::DataEndian::LittleEndian);
-        const QCanBusFrame::FrameId frameId = qToLittleEndian(uniqueIdLe) << startBit;
-        QTest::addRow("frameId, LE, offset %d", startBit)
+        const QCanBusFrame::FrameId frameIdLe = qToLittleEndian(uniqueId) << startBit;
+        QTest::addRow("frameId, LE, start %d", startBit)
                 << uidDesc
-                << QCanBusFrame(frameId, QByteArray(1, 0x01))
-                << uniqueIdLe;
+                << QCanBusFrame(frameIdLe, QByteArray(1, 0x01))
+                << uniqueId;
+    }
 
+    static constexpr quint16 startBitsFrame[] = { 3, 2, 1, 0, 15, 14, 13, 12 };
+    static constexpr qsizetype startBitsFrameLen =
+            sizeof(startBitsFrame)/sizeof(startBitsFrame[0]);
+
+    for (qsizetype idx = 0; idx < startBitsFrameLen; ++idx) {
+        const auto val = (qToLittleEndian(uniqueId) << 16) >> idx;
+        const auto startBit = startBitsFrame[idx];
+        const QCanBusFrame::FrameId frameIdBe = qToBigEndian(val);
         uidDesc.setEndian(QtCanBus::DataEndian::BigEndian);
-        QTest::addRow("frameId, BE, offset %d", startBit)
+        uidDesc.setStartBit(startBit);
+        QTest::addRow("frameId, BE, start %d", startBit)
                 << uidDesc
-                << QCanBusFrame(frameId, QByteArray(1, 0x01))
-                << uniqueIdBe;
+                << QCanBusFrame(frameIdBe, QByteArray(1, 0x01))
+                << uniqueId;
     }
 
     // unique id in payload, the 1st byte of the payload is used for signal,
@@ -1018,18 +1136,29 @@ void tst_QCanFrameProcessor::extractUniqueId_data()
     for (quint16 startBit = 8; startBit < 16; ++startBit) {
         uidDesc.setStartBit(startBit);
         uidDesc.setEndian(QtCanBus::DataEndian::LittleEndian);
-        const quint32 payload = 0x01 | (qToLittleEndian(uniqueIdLe) << startBit);
+        const quint32 payload = 0x01 | (qToLittleEndian(uniqueId) << startBit);
         const QByteArray payloadData(reinterpret_cast<const char *>(&payload), sizeof(payload));
         QTest::addRow("payload, LE, offset %d", startBit)
                 << uidDesc
                 << QCanBusFrame(0, payloadData)
-                << uniqueIdLe;
+                << uniqueId;
+    }
 
+    static constexpr quint16 startBitsPayload[] = { 11, 10, 9, 8, 23, 22, 21, 20 };
+    static constexpr qsizetype startBitsPayloadLen =
+            sizeof(startBitsPayload)/sizeof(startBitsPayload[0]);
+
+    for (qsizetype idx = 0; idx < startBitsPayloadLen; ++idx) {
+        const auto startBit = startBitsPayload[idx];
+        const auto val = (qToLittleEndian(uniqueId) << 8) >> idx;
+        quint32 payload = 0x01 | qToBigEndian(val);
+        const QByteArray payloadData(reinterpret_cast<const char *>(&payload), sizeof(payload));
         uidDesc.setEndian(QtCanBus::DataEndian::BigEndian);
+        uidDesc.setStartBit(startBit);
         QTest::addRow("payload, BE, offset %d", startBit)
                 << uidDesc
                 << QCanBusFrame(0, payloadData)
-                << uniqueIdBe;
+                << uniqueId;
     }
 }
 
@@ -1042,7 +1171,7 @@ void tst_QCanFrameProcessor::extractUniqueId()
     // Some valid message description.
     QCanSignalDescription signalDesc;
     signalDesc.setName("s0");
-    signalDesc.setStartBit(0);
+    signalDesc.setStartBit(7);
     signalDesc.setBitLength(8);
 
     QCanMessageDescription messageDesc;
@@ -1058,271 +1187,415 @@ void tst_QCanFrameProcessor::extractUniqueId()
     QCOMPARE(result.uniqueId, expectedUniqueId);
 }
 
-void tst_QCanFrameProcessor::prepareFrameId_data()
-{
-    QTest::addColumn<quint32>("initialFrameId");
-    QTest::addColumn<quint16>("startBit");
-    QTest::addColumn<quint16>("bitLength");
-    QTest::addColumn<QtCanBus::DataFormat>("format");
-    QTest::addColumn<QtCanBus::DataEndian>("endian");
-    QTest::addColumn<QVariant>("signalValue");
-    QTest::addColumn<quint32>("expectedFrameId");
-
-    const quint32 initialFrameId = 1;
-
-    // Every next value in the list is supposed to have a length in bits cut
-    // by one.
-    static constexpr quint16 leValues[] = { 0xCFC7, 0x67E3, 0x33F1, 0x19F8,
-                                            0x0CFC, 0x067E, 0x033F, 0x019F };
-    const quint16 startIdx = 4;
-    for (quint16 i = 0; i < 8; ++i) {
-        quint32 expectedFrameId = (leValues[i] << (startIdx + i)) | initialFrameId;
-        QTest::addRow("int, le, start %d, length %d", (startIdx + i), 16 - i)
-                << initialFrameId << quint16(startIdx + i) << quint16(16 - i)
-                << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::LittleEndian
-                << QVariant(static_cast<qint16>(leValues[i]))
-                << expectedFrameId;
-        QTest::addRow("uint, le, start %d, length %d", (startIdx + i), 16 - i)
-                << initialFrameId << quint16(startIdx + i) << quint16(16 - i)
-                << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::LittleEndian
-                << QVariant(leValues[i])
-                << expectedFrameId;
-
-        const uchar *leValueData = reinterpret_cast<const uchar *>(&leValues[i]);
-        const quint16 beValue = (0x00FF & (leValueData[1] << i)) + (leValueData[0] << 8);
-        expectedFrameId = (beValue << startIdx) | initialFrameId;
-        QTest::addRow("int, be, start %d, length %d", (startIdx + i), 16 - i)
-                << initialFrameId << quint16(startIdx + i) << quint16(16 - i)
-                << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::BigEndian
-                << QVariant(static_cast<qint16>(leValues[i]))
-                << expectedFrameId;
-        QTest::addRow("uint, be, start %d, length %d", (startIdx + i), 16 - i)
-                << initialFrameId << quint16(startIdx + i) << quint16(16 - i)
-                << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::BigEndian
-                << QVariant(leValues[i])
-                << expectedFrameId;
-    }
-}
-
-void tst_QCanFrameProcessor::prepareFrameId()
-{
-    QFETCH(quint32, initialFrameId);
-    QFETCH(quint16, startBit);
-    QFETCH(quint16, bitLength);
-    QFETCH(QtCanBus::DataFormat, format);
-    QFETCH(QtCanBus::DataEndian, endian);
-    QFETCH(QVariant, signalValue);
-    QFETCH(quint32, expectedFrameId);
-
-    QCanSignalDescription signalDesc;
-    signalDesc.setName("s0");
-    signalDesc.setDataSource(QtCanBus::DataSource::FrameId);
-    signalDesc.setDataFormat(format);
-    signalDesc.setDataEndian(endian);
-    signalDesc.setStartBit(startBit);
-    signalDesc.setBitLength(bitLength);
-
-    QCanUniqueIdDescription uidDesc;
-    uidDesc.setBitLength(4); // see the test data -> first 4 bits never change
-
-    QCanMessageDescription messageDesc;
-    messageDesc.setUniqueId(initialFrameId);
-    messageDesc.setSize(0);
-    messageDesc.addSignalDescription(signalDesc);
-
-    const QVariantMap signalValues = { qMakePair(signalDesc.name(), signalValue) };
-
-    QCanFrameProcessor processor;
-    processor.setUniqueIdDescription(uidDesc);
-    processor.addMessageDescriptions({ messageDesc });
-    const QCanBusFrame frame = processor.prepareFrame(initialFrameId, signalValues);
-
-    QVERIFY(frame.isValid());
-    QCOMPARE(frame.frameId(), expectedFrameId);
-}
-
-void tst_QCanFrameProcessor::preparePayload_data()
+void tst_QCanFrameProcessor::prepareFrame_data()
 {
     QTest::addColumn<quint16>("startBit");
     QTest::addColumn<quint16>("bitLength");
+    QTest::addColumn<QtCanBus::DataSource>("source");
     QTest::addColumn<QtCanBus::DataFormat>("format");
     QTest::addColumn<QtCanBus::DataEndian>("endian");
     QTest::addColumn<QVariant>("signalValue");
-    QTest::addColumn<QByteArray>("expectedPayload");
+    QTest::addColumn<quint64>("expectedData");
 
+    struct SourceDesc {
+        QtCanBus::DataSource source;
+        const char name[8];
+    };
 
-    // (u)int, LE/BE, variable length and start
-    // Every next value in the list is supposed to have a length in bits cut
-    // by one.
-    static constexpr quint16 leValues[] = { 0xCFC7, 0x67E3, 0x33F1, 0x19F8,
-                                            0x0CFC, 0x067E, 0x033F, 0x019F };
-    const quint16 startIdx = 4;
-    for (quint16 i = 0; i < 8; ++i) {
-        quint32 expectedPayloadData = (leValues[i] << (startIdx + i));
-        QByteArray expectedPayload(reinterpret_cast<const char *>(&expectedPayloadData),
-                                   sizeof(quint32));
-        QTest::addRow("int, le, start %d, length %d", (startIdx + i), 16 - i)
-                << quint16(startIdx + i) << quint16(16 - i)
-                << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::LittleEndian
-                << QVariant(static_cast<qint16>(leValues[i]))
-                << expectedPayload;
-        QTest::addRow("uint, le, start %d, length %d", (startIdx + i), 16 - i)
-                << quint16(startIdx + i) << quint16(16 - i)
+    static constexpr SourceDesc sources[] = {
+        {QtCanBus::DataSource::FrameId, "FrameId"},
+        {QtCanBus::DataSource::Payload, "Payload"}
+    };
+
+    for (const auto &s : sources) {
+        // LE, 16bit, start 0
+        QTest::addRow("%s, unsigned, 16bit, start 0, le", s.name)
+                << quint16(0) << quint16(16) << s.source
                 << QtCanBus::DataFormat::UnsignedInteger
                 << QtCanBus::DataEndian::LittleEndian
-                << QVariant(leValues[i])
-                << expectedPayload;
+                << QVariant(65516)
+                << quint64(0xFFEC);
 
-        const quint16 beValue = qToBigEndian(leValues[i]);
-        const uchar *beValueData = reinterpret_cast<const uchar *>(&beValue);
-        quint32 beValueForPayload = ((beValueData[0] << i) + (beValueData[1] << 8)) << startIdx;
-        expectedPayload = QByteArray(reinterpret_cast<const char*>(&beValueForPayload),
-                                     sizeof(quint32));
-        QTest::addRow("int, be, start %d, length %d", (startIdx + i), 16 - i)
-                << quint16(startIdx + i) << quint16(16 - i)
+        QTest::addRow("%s, signed neg, 16bit, start 0, le", s.name)
+                << quint16(0) << quint16(16) << s.source
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::BigEndian
-                << QVariant(static_cast<qint16>(leValues[i]))
-                << expectedPayload;
-        QTest::addRow("uint, be, start %d, length %d", (startIdx + i), 16 - i)
-                << quint16(startIdx + i) << quint16(16 - i)
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(-20)
+                << quint64(0xFFEC);
+
+        QTest::addRow("%s, signed pos, 16bit, start 0, le", s.name)
+                << quint16(0) << quint16(16) << s.source
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(32748)
+                << quint64(0x7FEC);
+
+        // LE, 16bit, start 5
+        QTest::addRow("%s, unsigned, 16bit, start 5, le", s.name)
+                << quint16(5) << quint16(16) << s.source
+                << QtCanBus::DataFormat::UnsignedInteger
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(65516)
+                << quint64(0xFFECULL << 5);
+
+        QTest::addRow("%s, signed neg, 16bit, start 5, le", s.name)
+                << quint16(5) << quint16(16) << s.source
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(-20)
+                << quint64(0xFFECULL << 5);
+
+        QTest::addRow("%s, signed pos, 16bit, start 5, le", s.name)
+                << quint16(5) << quint16(16) << s.source
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(32748)
+                << quint64(0x7FECULL << 5);
+
+        // LE, 19bit, start 0
+        QTest::addRow("%s, unsigned, 19bit, start 0, le", s.name)
+                << quint16(0) << quint16(19) << s.source
+                << QtCanBus::DataFormat::UnsignedInteger
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(327660)
+                << quint64(0x4FFEC);
+
+        QTest::addRow("%s, signed neg, 19bit, start 0, le", s.name)
+                << quint16(0) << quint16(19) << s.source
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(-196628)
+                << quint64(0x4FFEC);
+
+        QTest::addRow("%s, signed pos, 19bit, start 0, le", s.name)
+                << quint16(0) << quint16(19) << s.source
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(196588)
+                << quint64(0x2FFEC);
+
+        // LE, 19bit, start 3
+        QTest::addRow("%s, unsigned, 19bit, start 3, le", s.name)
+                << quint16(3) << quint16(19) << s.source
+                << QtCanBus::DataFormat::UnsignedInteger
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(327660)
+                << quint64(0x4FFECULL << 3);
+
+        QTest::addRow("%s, signed neg, 19bit, start 3, le", s.name)
+                << quint16(3) << quint16(19) << s.source
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(-196628)
+                << quint64(0x4FFECULL << 3);
+
+        QTest::addRow("%s, signed pos, 19bit, start 3, le", s.name)
+                << quint16(3) << quint16(19) << s.source
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(196588)
+                << quint64(0x2FFECULL << 3);
+
+        // BE, 16bit, start 7
+        QTest::addRow("%s, unsigned, 16bit, start 7, be", s.name)
+                << quint16(7) << quint16(16) << s.source
                 << QtCanBus::DataFormat::UnsignedInteger
                 << QtCanBus::DataEndian::BigEndian
-                << QVariant(leValues[i])
-                << expectedPayload;
-    }
+                << QVariant(65516)
+                << quint64(0xECFF);
 
-    // float, LE/BE, variable start
-    const float floatVal = 123.456f;
-    for (quint16 i = 0; i < 8; ++i) {
-        quint64 valueForPayload = 0;
-        const float leFloatVal = qToLittleEndian(floatVal);
-        memcpy(&valueForPayload, &leFloatVal, sizeof(float));
-        valueForPayload = valueForPayload << i;
-        QByteArray expectedPayload(reinterpret_cast<const char*>(&valueForPayload),
-                                   sizeof(quint64));
-        QTest::addRow("float, le, from %d", i)
-                << i << quint16(32)
-                << QtCanBus::DataFormat::Float
-                << QtCanBus::DataEndian::LittleEndian
-                << QVariant(floatVal)
-                << expectedPayload;
-
-        valueForPayload = 0;
-        const float beFloatVal = qToBigEndian(floatVal);
-        memcpy(&valueForPayload, &beFloatVal, sizeof(float));
-        valueForPayload = valueForPayload << i;
-        expectedPayload = QByteArray(reinterpret_cast<const char*>(&valueForPayload),
-                                     sizeof(quint64));
-        QTest::addRow("float, be, from %d", i)
-                << i << quint16(32)
-                << QtCanBus::DataFormat::Float
+        QTest::addRow("%s, signed neg, 16bit, start 7, be", s.name)
+                << quint16(7) << quint16(16) << s.source
+                << QtCanBus::DataFormat::SignedInteger
                 << QtCanBus::DataEndian::BigEndian
-                << QVariant(floatVal)
-                << expectedPayload;
+                << QVariant(-20)
+                << quint64(0xECFF);
+
+        QTest::addRow("%s, signed pos, 16bit, start 7, be", s.name)
+                << quint16(7) << quint16(16) << s.source
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(32748)
+                << quint64(0xEC7F);
+
+        // BE, 16bit, start 5
+        QTest::addRow("%s, unsigned, 16bit, start 5, be", s.name)
+                << quint16(5) << quint16(16) << s.source
+                << QtCanBus::DataFormat::UnsignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(65516)
+                << quint64(0x00FB3F);
+
+        QTest::addRow("%s, signed neg, 16bit, start 5, be", s.name)
+                << quint16(5) << quint16(16) << s.source
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(-20)
+                << quint64(0x00FB3F);
+
+        QTest::addRow("%s, signed pos, 16bit, start 5, be", s.name)
+                << quint16(5) << quint16(16) << s.source
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(32748)
+                << quint64(0x00FB1F);
+
+        // BE, 21bit, start 7
+        QTest::addRow("%s, unsigned, 21bit, start 7, be", s.name)
+                << quint16(7) << quint16(21) << s.source
+                << QtCanBus::DataFormat::UnsignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(1834988) /* 0x1BFFEC */
+                << quint64(0x60FFDF);
+
+        QTest::addRow("%s, signed neg, 21bit, start 7, be", s.name)
+                << quint16(7) << quint16(21) << s.source
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(-262164)
+                << quint64(0x60FFDF);
+
+        QTest::addRow("%s, signed pos, 21bit, start 7, be", s.name)
+                << quint16(7) << quint16(21) << s.source
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(786412)
+                << quint64(0x60FF5F);
+
+        // BE, 21bit, start 4
+        QTest::addRow("%s, unsigned, 21bit, start 4, be", s.name)
+                << quint16(4) << quint16(21) << s.source
+                << QtCanBus::DataFormat::UnsignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(1834988) /* 0x1BFFEC */
+                << quint64(0xECFF1B);
+
+        QTest::addRow("%s, signed neg, 21bit, start 4, be", s.name)
+                << quint16(4) << quint16(21) << s.source
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(-262164)
+                << quint64(0xECFF1B);
+
+        QTest::addRow("%s, signed pos, 21bit, start 4, be", s.name)
+                << quint16(4) << quint16(21) << s.source
+                << QtCanBus::DataFormat::SignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(786412)
+                << quint64(0xECFF0B);
+
+        // Some LE tests for values less than 8 bit
+        QTest::addRow("%s, unsinged, 4bit, start 0, le", s.name)
+                << quint16(0) << quint16(4) << s.source
+                << QtCanBus::DataFormat::UnsignedInteger
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(8)
+                << quint64(0x08);
+
+        QTest::addRow("%s, unsinged, 4bit, start 3, le", s.name)
+                << quint16(3) << quint16(4) << s.source
+                << QtCanBus::DataFormat::UnsignedInteger
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(15)
+                << quint64(0x78);
+
+        QTest::addRow("%s, unsinged, 4bit, start 7, le", s.name)
+                << quint16(7) << quint16(4) << s.source
+                << QtCanBus::DataFormat::UnsignedInteger
+                << QtCanBus::DataEndian::LittleEndian
+                << QVariant(12)
+                << quint64(0x0600);
+
+        // Some BE tests for values less than 8 bit
+        QTest::addRow("%s, unsinged, 4bit, start 7, be", s.name)
+                << quint16(7) << quint16(4) << s.source
+                << QtCanBus::DataFormat::UnsignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(8)
+                << quint64(0x80);
+
+        QTest::addRow("%s, unsinged, 4bit, start 5, be", s.name)
+                << quint16(5) << quint16(4) << s.source
+                << QtCanBus::DataFormat::UnsignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(14)
+                << quint64(0x38);
+
+        QTest::addRow("%s, unsinged, 4bit, start 0, be", s.name)
+                << quint16(0) << quint16(4) << s.source
+                << QtCanBus::DataFormat::UnsignedInteger
+                << QtCanBus::DataEndian::BigEndian
+                << QVariant(3)
+                << quint64(0x6000);
     }
 
-    // double, LE/BE
+    // float data - payload only
+    {
+        const float floatVal = 123.456f;
+        for (quint16 i = 0; i < 8; ++i) {
+            const float leFloatVal = qToLittleEndian(floatVal);
+            quint64 value = 0;
+            memcpy(&value, &leFloatVal, sizeof(leFloatVal));
+            value = value << i;
+            QTest::addRow("Payload, float, start %d, le", i)
+                    << quint16(i) << quint16(32)
+                    << QtCanBus::DataSource::Payload
+                    << QtCanBus::DataFormat::Float
+                    << QtCanBus::DataEndian::LittleEndian
+                    << QVariant(floatVal)
+                    << value;
+
+            // to get the proper BE value with an offset, we need to take an LE
+            // value, shift it to the right, and then swap bytes
+            value = 0;
+            memcpy(&value, &leFloatVal, sizeof(leFloatVal));
+            value = value << 16; // so that we have some room for right shift
+                                 // this means that default start bit is 23
+            value = value >> i;
+            value = qToBigEndian(value);
+            QTest::addRow("Payload, float, start %d, be", 23 - i)
+                    << quint16(23 - i) << quint16(32)
+                    << QtCanBus::DataSource::Payload
+                    << QtCanBus::DataFormat::Float
+                    << QtCanBus::DataEndian::BigEndian
+                    << QVariant(floatVal)
+                    << value;
+        }
+    }
+
+    // double data - payload only
     {
         const double doubleVal = 1.234e-15;
         const double leDoubleVal = qToLittleEndian(doubleVal);
-        QByteArray expectedPayload(reinterpret_cast<const char*>(&leDoubleVal), sizeof(double));
-        QTest::addRow("double, le")
+        quint64 value = 0;
+        memcpy(&value, &leDoubleVal, sizeof(leDoubleVal));
+        QTest::addRow("Payload, double, le")
                 << quint16(0) << quint16(64)
+                << QtCanBus::DataSource::Payload
                 << QtCanBus::DataFormat::Double
                 << QtCanBus::DataEndian::LittleEndian
                 << QVariant(doubleVal)
-                << expectedPayload;
+                << value;
 
         const double beDoubleVal = qToBigEndian(doubleVal);
-        expectedPayload = QByteArray(reinterpret_cast<const char*>(&beDoubleVal),
-                                     sizeof(double));
-        QTest::addRow("double, be")
-                << quint16(0) << quint16(64)
+        value = 0;
+        memcpy(&value, &beDoubleVal, sizeof(beDoubleVal));
+        QTest::addRow("Payload, double, be")
+                << quint16(7) << quint16(64)
+                << QtCanBus::DataSource::Payload
                 << QtCanBus::DataFormat::Double
                 << QtCanBus::DataEndian::BigEndian
                 << QVariant(doubleVal)
-                << expectedPayload;
+                << value;
     }
 
     // ASCII
-    {
-        const QByteArray expectedData("abc", 3);
-        const quint16 offset = 8; // start from the 2nd byte
+    for (const auto &s : sources) {
+        const bool isPayload = s.source == QtCanBus::DataSource::Payload;
+        const QByteArray asciiData = isPayload ? QByteArray("abc", 3) : QByteArray("ab", 2);
+        const quint16 offset = isPayload ? 8 : 4;
         for (quint16 i = 0; i < 8; ++i) {
-            quint64 valueForPayload = 0;
-            memcpy(&valueForPayload, expectedData.constData(), expectedData.size());
-            valueForPayload = valueForPayload << (offset + i);
-            const QByteArray payload(reinterpret_cast<const char *>(&valueForPayload),
-                                     sizeof(quint64));
-            QTest::addRow("ascii, offset %d", offset + i)
-                    << quint16(offset + i) << quint16(expectedData.size() * 8)
+            quint64 value = 0;
+            memcpy(&value, asciiData.constData(), asciiData.size());
+            value = value << (offset + i);
+            QTest::addRow("%s, ascii, start %d", s.name, offset + i)
+                    << quint16(offset + i) << quint16(asciiData.size() * 8) << s.source
                     << QtCanBus::DataFormat::Ascii
-                    << QtCanBus::DataEndian::LittleEndian
-                    << QVariant(expectedData)
-                    << payload;
+                    << QtCanBus::DataEndian::LittleEndian /* does not matter */
+                    << QVariant(asciiData)
+                    << value;
         }
     }
     // ASCII - not enough data
     {
         const QByteArray data("ab", 2);
-        QByteArray expectedPayload = data;
-        expectedPayload.push_back('\0'); // ab\0
+        QByteArray expectedData = data;
+        expectedData.push_back('\0'); // ab\0
+
+        quint64 value = 0;
+        memcpy(&value, expectedData.constData(), expectedData.size());
 
         QTest::addRow("ascii, not enough data")
-                << quint16(0) << quint16(expectedPayload.size() * 8)
+                << quint16(0) << quint16(expectedData.size() * 8)
+                << QtCanBus::DataSource::Payload
                 << QtCanBus::DataFormat::Ascii
                 << QtCanBus::DataEndian::LittleEndian
                 << QVariant(data)
-                << expectedPayload;
+                << value;
     }
     // ASCII - too much data
     {
         const QByteArray data("abcd", 4);
-        const QByteArray expectedPayload = data.left(3); // abc
+        const QByteArray expectedData = data.left(3); // abc
+
+        quint64 value = 0;
+        memcpy(&value, expectedData.constData(), expectedData.size());
 
         QTest::addRow("ascii, too much data")
-                << quint16(0) << quint16(expectedPayload.size() * 8)
+                << quint16(0) << quint16(expectedData.size() * 8)
+                << QtCanBus::DataSource::Payload
                 << QtCanBus::DataFormat::Ascii
                 << QtCanBus::DataEndian::LittleEndian
                 << QVariant(data)
-                << expectedPayload;
+                << value;
     }
 }
 
-void tst_QCanFrameProcessor::preparePayload()
+void tst_QCanFrameProcessor::prepareFrame()
 {
     QFETCH(quint16, startBit);
     QFETCH(quint16, bitLength);
+    QFETCH(QtCanBus::DataSource, source);
     QFETCH(QtCanBus::DataFormat, format);
     QFETCH(QtCanBus::DataEndian, endian);
     QFETCH(QVariant, signalValue);
-    QFETCH(QByteArray, expectedPayload);
+    QFETCH(quint64, expectedData);
 
     QCanSignalDescription signalDesc;
     signalDesc.setName("s0");
-    signalDesc.setDataFormat(format);
-    signalDesc.setDataEndian(endian);
     signalDesc.setStartBit(startBit);
     signalDesc.setBitLength(bitLength);
+    signalDesc.setDataSource(source);
+    signalDesc.setDataFormat(format);
+    signalDesc.setDataEndian(endian);
 
-    const QtCanBus::UniqueId uniqueId = 123;
+    // Unique Id will be located in a different place from the signal data.
+    // If it's in a payload, we assume that it's in the first byte.
+    // If it's in the frame id, we assume that it takes the whole frame id.
+    const bool sourceInPayload = source == QtCanBus::DataSource::Payload;
+    const auto uidSource = sourceInPayload ? QtCanBus::DataSource::FrameId
+                                           : QtCanBus::DataSource::Payload;
+    const auto uidLength = sourceInPayload ? 29 : 8;
 
-    QCanMessageDescription messageDesc;
-    messageDesc.setUniqueId(uniqueId);
-    messageDesc.setSize(expectedPayload.size());
-    messageDesc.addSignalDescription(signalDesc);
+    static constexpr QtCanBus::UniqueId uniqueId = 123;
 
-    // Assume that our uniqueId is the whole FrameId
     QCanUniqueIdDescription uidDesc;
-    uidDesc.setBitLength(29);
+    uidDesc.setEndian(QtCanBus::DataEndian::LittleEndian);
+    uidDesc.setSource(uidSource);
+    uidDesc.setStartBit(0);
+    uidDesc.setBitLength(uidLength);
+
+    const auto messageSize = sourceInPayload ? sizeof(expectedData) : 1;
+    QCanMessageDescription messageDesc;
+    messageDesc.setName("test");
+    messageDesc.setUniqueId(uniqueId);
+    messageDesc.setSize(messageSize);
+    messageDesc.setSignalDescriptions({ signalDesc });
 
     const QVariantMap signalValues = { qMakePair(signalDesc.name(), signalValue) };
+
+    QCanBusFrame expectedFrame;
+    if (sourceInPayload) {
+        expectedFrame.setFrameId(uniqueId & 0x1FFFFFFFU);
+        const QByteArray payload(reinterpret_cast<const char *>(&expectedData),
+                                 sizeof(expectedData));
+        expectedFrame.setPayload(payload);
+    } else {
+        expectedFrame.setFrameId(expectedData & 0x1FFFFFFFU);
+        // Explicitly truncating uniqueId to 1 byte. Fine, because it equals 123.
+        expectedFrame.setPayload(QByteArray(1, static_cast<char>(uniqueId)));
+    }
+    QVERIFY(expectedFrame.isValid());
 
     QCanFrameProcessor processor;
     processor.setUniqueIdDescription(uidDesc);
@@ -1330,8 +1603,8 @@ void tst_QCanFrameProcessor::preparePayload()
     const QCanBusFrame frame = processor.prepareFrame(uniqueId, signalValues);
 
     QVERIFY(frame.isValid());
-    QCOMPARE(frame.frameId(), uniqueId);
-    QCOMPARE(frame.payload(), expectedPayload);
+    QCOMPARE(frame.frameId(), expectedFrame.frameId());
+    QCOMPARE(frame.payload(), expectedFrame.payload());
 }
 
 void tst_QCanFrameProcessor::prepareWithValueConversion_data()
@@ -1364,7 +1637,7 @@ void tst_QCanFrameProcessor::prepareWithValueConversion()
 
     QCanSignalDescription signalDesc;
     signalDesc.setName("s0");
-    signalDesc.setStartBit(0);
+    signalDesc.setStartBit(7);
     signalDesc.setBitLength(8);
     signalDesc.setFactor(factor);
     signalDesc.setOffset(offset);
@@ -1525,7 +1798,7 @@ void tst_QCanFrameProcessor::prepareWithErrorsAndWarnings_data()
 
     QCanSignalDescription signalDesc;
     signalDesc.setName("s0");
-    signalDesc.setStartBit(0);
+    signalDesc.setStartBit(3);
     signalDesc.setBitLength(4);
 
     QCanMessageDescription messageDesc;
@@ -1559,7 +1832,7 @@ void tst_QCanFrameProcessor::prepareWithErrorsAndWarnings_data()
 
     // invalid signal desc - 0 length
     signalDesc.setName("s2");
-    signalDesc.setStartBit(4);
+    signalDesc.setStartBit(7);
     signalDesc.setBitLength(0);
 
     messageDesc.addSignalDescription(signalDesc);
@@ -1573,15 +1846,14 @@ void tst_QCanFrameProcessor::prepareWithErrorsAndWarnings_data()
             << warnings << QCanBusFrame::FrameId(messageDesc.uniqueId())
             << QByteArray::fromHex("0100");
 
-    // start + length exceed data length
+    // max bit exceed data length
     signalDesc.setName("s3");
-    signalDesc.setStartBit(8);
+    signalDesc.setStartBit(15);
     signalDesc.setBitLength(10);
 
     messageDesc.addSignalDescription(signalDesc);
 
-    warnings.push_back(tr("Skipping signal s3. Its start + length exceeds the "
-                          "expected message length."));
+    warnings.push_back(tr("Skipping signal s3. Its length exceeds the expected message length."));
 
     QTest::addRow("invalid signal length")
             << messageDesc << uidDesc << messageDesc.uniqueId()
@@ -1598,13 +1870,13 @@ void tst_QCanFrameProcessor::prepareWithErrorsAndWarnings_data()
     // first multiplexor
     signalDesc.setName("s0");
     signalDesc.setMultiplexState(QtCanBus::MultiplexState::MultiplexorSwitch);
-    signalDesc.setStartBit(0);
+    signalDesc.setStartBit(7);
     signalDesc.setBitLength(4);
     messageDesc.addSignalDescription(signalDesc);
 
     // s1 is used only when s0 is in range [2, 4] or 6
     signalDesc.setName("s1");
-    signalDesc.setStartBit(4);
+    signalDesc.setStartBit(3);
     signalDesc.setBitLength(12);
     signalDesc.setMultiplexState(QtCanBus::MultiplexState::MultiplexedSignal);
     const QCanSignalDescription::MultiplexValues muxValuesS0 { qMakePair(2, 4), qMakePair(6, 6) };
@@ -1613,7 +1885,7 @@ void tst_QCanFrameProcessor::prepareWithErrorsAndWarnings_data()
 
     // second multiplexor, used when s0 == 1
     signalDesc.setName("s2");
-    signalDesc.setStartBit(4);
+    signalDesc.setStartBit(3);
     signalDesc.setBitLength(4);
     signalDesc.setMultiplexState(QtCanBus::MultiplexState::SwitchAndSignal);
     signalDesc.addMultiplexSignal("s0", 1);
@@ -1621,7 +1893,7 @@ void tst_QCanFrameProcessor::prepareWithErrorsAndWarnings_data()
 
     // s3 depends on two multiplexors
     signalDesc.setName("s3");
-    signalDesc.setStartBit(8);
+    signalDesc.setStartBit(15);
     signalDesc.setBitLength(8);
     signalDesc.setMultiplexState(QtCanBus::MultiplexState::MultiplexedSignal);
     signalDesc.addMultiplexSignal("s0", 1);
@@ -1631,7 +1903,7 @@ void tst_QCanFrameProcessor::prepareWithErrorsAndWarnings_data()
 
     // s4 depends on two multiplexors
     signalDesc.setName("s4");
-    signalDesc.setStartBit(8);
+    signalDesc.setStartBit(15);
     signalDesc.setBitLength(8);
     signalDesc.setMultiplexState(QtCanBus::MultiplexState::MultiplexedSignal);
     signalDesc.addMultiplexSignal("s0", 1);
@@ -1639,8 +1911,8 @@ void tst_QCanFrameProcessor::prepareWithErrorsAndWarnings_data()
     messageDesc.addSignalDescription(signalDesc);
 
     warnings.clear();
-    warnings.push_back(tr("Skipped signal s1. Proper multiplexor values not found."));
-    warnings.push_back(tr("Skipped signal s4. Proper multiplexor values not found."));
+    warnings.push_back(tr("Skipping signal s1. Proper multiplexor values not found."));
+    warnings.push_back(tr("Skipping signal s4. Proper multiplexor values not found."));
 
     QTest::addRow("multiplexed signals")
             << messageDesc << uidDesc << messageDesc.uniqueId()
@@ -1648,7 +1920,7 @@ void tst_QCanFrameProcessor::prepareWithErrorsAndWarnings_data()
                              qMakePair("s3", 5), qMakePair("s4", 6) })
             << QCanFrameProcessor::Error::NoError << QString()
             << warnings << QCanBusFrame::FrameId(messageDesc.uniqueId())
-            << QByteArray::fromHex("2105");
+            << QByteArray::fromHex("1205");
 }
 
 void tst_QCanFrameProcessor::prepareWithErrorsAndWarnings()
@@ -1692,8 +1964,7 @@ void tst_QCanFrameProcessor::prepareUniqueId_data()
     QTest::addColumn<QVariantMap>("signalValues");
     QTest::addColumn<QCanBusFrame>("expectedFrame");
 
-    const QtCanBus::UniqueId uniqueIdLe = 0x0965;
-    const QtCanBus::UniqueId uniqueIdBe = 0x0596;
+    const QtCanBus::UniqueId uniqueId = 0x0965;
 
     QCanSignalDescription signalDesc;
     signalDesc.setName("s0");
@@ -1705,6 +1976,7 @@ void tst_QCanFrameProcessor::prepareUniqueId_data()
 
     QCanMessageDescription messageDesc;
     messageDesc.setName("test");
+    messageDesc.setUniqueId(uniqueId);
     messageDesc.setSize(1);
     messageDesc.addSignalDescription(signalDesc);
 
@@ -1715,18 +1987,26 @@ void tst_QCanFrameProcessor::prepareUniqueId_data()
     uidDesc.setSource(QtCanBus::DataSource::FrameId);
     uidDesc.setBitLength(12);
     for (quint8 startBit = 0; startBit < 8; ++startBit) {
-        messageDesc.setUniqueId(uniqueIdLe);
         uidDesc.setStartBit(startBit);
         uidDesc.setEndian(QtCanBus::DataEndian::LittleEndian);
-        const QCanBusFrame::FrameId frameId = qFromLittleEndian(uniqueIdLe) << startBit;
-        QTest::addRow("frameId, LE, offser %d", startBit)
-                << uidDesc << messageDesc << uniqueIdLe << signalValues
+        const QCanBusFrame::FrameId frameId = qFromLittleEndian(uniqueId) << startBit;
+        QTest::addRow("frameId, LE, start %d", startBit)
+                << uidDesc << messageDesc << uniqueId << signalValues
                 << QCanBusFrame(frameId, QByteArray(1, 0x01));
+    }
 
-        messageDesc.setUniqueId(uniqueIdBe);
+    static constexpr quint16 startBitsFrame[] = { 3, 2, 1, 0, 15, 14, 13, 12 };
+    static constexpr quint16 startBitsFrameLen =
+            sizeof(startBitsFrame)/sizeof(startBitsFrame[0]);
+
+    for (quint16 idx = 0; idx < startBitsFrameLen; ++idx) {
+        const auto val = (qToLittleEndian(uniqueId) << 16) >> idx;
+        const QCanBusFrame::FrameId frameId = qToBigEndian(val);
+        const auto startBit = startBitsFrame[idx];
         uidDesc.setEndian(QtCanBus::DataEndian::BigEndian);
+        uidDesc.setStartBit(startBit);
         QTest::addRow("frameId, BE, offser %d", startBit)
-                << uidDesc << messageDesc << uniqueIdBe << signalValues
+                << uidDesc << messageDesc << uniqueId << signalValues
                 << QCanBusFrame(frameId, QByteArray(1, 0x01));
     }
 
@@ -1734,20 +2014,30 @@ void tst_QCanFrameProcessor::prepareUniqueId_data()
     // populated with a signal value, so we start from the 2nd byte
     uidDesc.setSource(QtCanBus::DataSource::Payload);
     messageDesc.setSize(sizeof(quint32));
+
     for (quint8 startBit = 8; startBit < 16; ++startBit) {
-        messageDesc.setUniqueId(uniqueIdLe);
         uidDesc.setStartBit(startBit);
         uidDesc.setEndian(QtCanBus::DataEndian::LittleEndian);
-        const quint32 payload = 0x01 | qFromLittleEndian(uniqueIdLe) << startBit;
+        const quint32 payload = 0x01 | qFromLittleEndian(uniqueId) << startBit;
         const QByteArray payloadData(reinterpret_cast<const char *>(&payload), sizeof(payload));
         QTest::addRow("payload, LE, offser %d", startBit)
-                << uidDesc << messageDesc << uniqueIdLe << signalValues
+                << uidDesc << messageDesc << uniqueId << signalValues
                 << QCanBusFrame(0, payloadData);
+    }
 
-        messageDesc.setUniqueId(uniqueIdBe);
+    static constexpr quint16 startBitsPayload[] = { 11, 10, 9, 8, 23, 22, 21, 20 };
+    static constexpr qsizetype startBitsPayloadLen =
+            sizeof(startBitsPayload)/sizeof(startBitsPayload[0]);
+
+    for (quint16 idx = 0; idx < startBitsPayloadLen; ++idx) {
+        const auto val = (qToLittleEndian(uniqueId) << 8) >> idx;
+        const auto startBit = startBitsPayload[idx];
+        quint32 payload = 0x01 | qToBigEndian(val);
+        const QByteArray payloadData(reinterpret_cast<const char *>(&payload), sizeof(payload));
         uidDesc.setEndian(QtCanBus::DataEndian::BigEndian);
-        QTest::addRow("payload, BE, offser %d", startBit)
-                << uidDesc << messageDesc << uniqueIdBe << signalValues
+        uidDesc.setStartBit(startBit);
+        QTest::addRow("payload, BE, start %d", startBit)
+                << uidDesc << messageDesc << uniqueId << signalValues
                 << QCanBusFrame(0, payloadData);
     }
 }
@@ -1768,6 +2058,163 @@ void tst_QCanFrameProcessor::prepareUniqueId()
     QCOMPARE(processor.error(), QCanFrameProcessor::Error::NoError);
     QCOMPARE(result.frameId(), expectedFrame.frameId());
     QCOMPARE(result.payload(), expectedFrame.payload());
+}
+
+void tst_QCanFrameProcessor::roundtrip_data()
+{
+    QTest::addColumn<QCanMessageDescription>("messageDescription");
+    QTest::addColumn<QCanUniqueIdDescription>("uniqueIdDescription");
+    QTest::addColumn<QCanBusFrame>("inputFrame");
+    QTest::addColumn<QtCanBus::UniqueId>("expectedUniqueId");
+    QTest::addColumn<QVariantMap>("expectedSignalValues");
+
+    {
+        QCanUniqueIdDescription uidDesc;
+        uidDesc.setSource(QtCanBus::DataSource::FrameId);
+        uidDesc.setEndian(QtCanBus::DataEndian::LittleEndian);
+        uidDesc.setStartBit(0);
+        uidDesc.setBitLength(11);
+
+        const QtCanBus::UniqueId uniqueId = 1467;
+
+        QCanMessageDescription messageDesc;
+        messageDesc.setName("test");
+        messageDesc.setUniqueId(uniqueId);
+        messageDesc.setSize(8);
+
+        // s0 - 4 bits [0:3], signed int
+        QCanSignalDescription signalDesc;
+        signalDesc.setName("s0");
+        signalDesc.setDataSource(QtCanBus::DataSource::Payload);
+        signalDesc.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+        signalDesc.setDataFormat(QtCanBus::DataFormat::SignedInteger);
+        signalDesc.setStartBit(0);
+        signalDesc.setBitLength(4);
+        messageDesc.addSignalDescription(signalDesc);
+
+        // s1 - 12 bits [4:15], unsigned int
+        signalDesc.setName("s1");
+        signalDesc.setDataFormat(QtCanBus::DataFormat::UnsignedInteger);
+        signalDesc.setStartBit(4);
+        signalDesc.setBitLength(12);
+        messageDesc.addSignalDescription(signalDesc);
+
+        // s2 - 32 bits [16:47], float
+        signalDesc.setName("s2");
+        signalDesc.setDataFormat(QtCanBus::DataFormat::Float);
+        signalDesc.setStartBit(16);
+        signalDesc.setBitLength(32);
+        messageDesc.addSignalDescription(signalDesc);
+
+        // gap - 6 bits [48:53]
+
+        // s3 - 10 bits [54:63], unsinged int
+        signalDesc.setName("s3");
+        signalDesc.setDataFormat(QtCanBus::DataFormat::UnsignedInteger);
+        signalDesc.setStartBit(54);
+        signalDesc.setBitLength(10);
+        messageDesc.addSignalDescription(signalDesc);
+
+        const qint8 s0Val = -3;
+        const quint16 s1Val = 2890;
+        const float s2Val = 123.456f;
+        const quint16 s3Val = 963;
+        QVariantMap signalValues = { qMakePair("s0", s0Val), qMakePair("s1", s1Val),
+                                     qMakePair("s2", s2Val), qMakePair("s3", s3Val) };
+
+        quint64 payloadValue = (static_cast<quint64>(s3Val) << 54) +
+                (static_cast<quint64>(s1Val & 0x0FFF) << 4) + static_cast<quint64>(s0Val & 0x0F);
+        QByteArray payload(reinterpret_cast<const char *>(&payloadValue), sizeof(quint64));
+        memcpy(&payload[2], &s2Val, sizeof(float));
+
+        QCanBusFrame inputFrame(uniqueId, payload);
+
+        QTest::addRow("LE") << messageDesc << uidDesc << inputFrame << uniqueId << signalValues;
+    }
+    {
+        QCanUniqueIdDescription uidDesc;
+        uidDesc.setSource(QtCanBus::DataSource::FrameId);
+        uidDesc.setEndian(QtCanBus::DataEndian::BigEndian);
+        uidDesc.setStartBit(7);
+        uidDesc.setBitLength(11);
+
+        const QtCanBus::UniqueId uniqueId = 1467; // 0x60B7 for the specified layout
+
+        QCanMessageDescription messageDesc;
+        messageDesc.setName("test");
+        messageDesc.setUniqueId(uniqueId);
+        messageDesc.setSize(8);
+
+        // s0 - 4 bits [7:4], signed int
+        QCanSignalDescription signalDesc;
+        signalDesc.setName("s0");
+        signalDesc.setDataSource(QtCanBus::DataSource::Payload);
+        signalDesc.setDataEndian(QtCanBus::DataEndian::BigEndian);
+        signalDesc.setDataFormat(QtCanBus::DataFormat::SignedInteger);
+        signalDesc.setStartBit(7);
+        signalDesc.setBitLength(4);
+        messageDesc.addSignalDescription(signalDesc);
+
+        // s1 - 12 bits [3:0]+[15:8], unsigned int
+        signalDesc.setName("s1");
+        signalDesc.setDataFormat(QtCanBus::DataFormat::UnsignedInteger);
+        signalDesc.setStartBit(3);
+        signalDesc.setBitLength(12);
+        messageDesc.addSignalDescription(signalDesc);
+
+        // s2 - 32 bits [23:16]+[31:24]+[39:32]+[47:10], float
+        signalDesc.setName("s2");
+        signalDesc.setDataFormat(QtCanBus::DataFormat::Float);
+        signalDesc.setStartBit(23);
+        signalDesc.setBitLength(32);
+        messageDesc.addSignalDescription(signalDesc);
+
+        // gap - 6 bits [55:50]
+
+        // s3 - 10 bits [49:48]+[63:56], unsinged int
+        signalDesc.setName("s3");
+        signalDesc.setDataFormat(QtCanBus::DataFormat::UnsignedInteger);
+        signalDesc.setStartBit(49);
+        signalDesc.setBitLength(10);
+        messageDesc.addSignalDescription(signalDesc);
+
+        const qint8 s0Val = -3; // 0xD
+        const quint16 s1Val = 2890; // 0xB4A
+        const float s2Val = 123.456f;
+        const quint16 s3Val = 963; // 0x3C3
+        QVariantMap signalValues = { qMakePair("s0", s0Val), qMakePair("s1", s1Val),
+                                     qMakePair("s2", s2Val), qMakePair("s3", s3Val) };
+
+        quint64 payloadValue = 0xC303000000004ADBULL;
+        QByteArray payload(reinterpret_cast<const char *>(&payloadValue), sizeof(quint64));
+        const float s2BeVal = qToBigEndian(s2Val);
+        memcpy(&payload[2], &s2BeVal, sizeof(float));
+
+        QCanBusFrame inputFrame(0x60B7, payload);
+
+        QTest::addRow("BE") << messageDesc << uidDesc << inputFrame << uniqueId << signalValues;
+    }
+}
+
+void tst_QCanFrameProcessor::roundtrip()
+{
+    QFETCH(QCanMessageDescription, messageDescription);
+    QFETCH(QCanUniqueIdDescription, uniqueIdDescription);
+    QFETCH(QCanBusFrame, inputFrame);
+    QFETCH(QtCanBus::UniqueId, expectedUniqueId);
+    QFETCH(QVariantMap, expectedSignalValues);
+
+    QCanFrameProcessor processor;
+    processor.setUniqueIdDescription(uniqueIdDescription);
+    processor.setMessageDescriptions({ messageDescription });
+
+    const auto result = processor.parseFrame(inputFrame);
+    QCOMPARE(result.uniqueId, expectedUniqueId);
+    QCOMPARE(result.signalValues, expectedSignalValues);
+
+    const auto encodedFrame = processor.prepareFrame(result.uniqueId, result.signalValues);
+    QCOMPARE(encodedFrame.frameId(), inputFrame.frameId());
+    QCOMPARE(encodedFrame.payload(), inputFrame.payload());
 }
 
 QTEST_MAIN(tst_QCanFrameProcessor)

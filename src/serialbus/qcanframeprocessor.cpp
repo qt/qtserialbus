@@ -16,6 +16,37 @@
 
 QT_BEGIN_NAMESPACE
 
+// The initial revision of QCanFrameProcessor introduced the BE data processing
+// logic which is different from what is normally done in CAN protocols.
+// A later patch fixes the logic to be compliant with normal CAN approach
+// (taking DBC as a reference), and introduces this define to disable the
+// unused functions.
+// We could completely remove the "dead code", but for now we want to get some
+// feedback from the users to see if we need to have both approaches or not.
+#define USE_DBC_COMPATIBLE_BE_HANDLING
+
+// Helper method to extract the max bit number of the signal.
+// Note that for BE it's not the last bit of the signal.
+static quint16 extractMaxBitNum(quint16 startBit, quint16 bitLength, QtCanBus::DataEndian endian)
+{
+#ifdef USE_DBC_COMPATIBLE_BE_HANDLING
+    if (endian == QtCanBus::DataEndian::LittleEndian) {
+        return startBit + bitLength - 1;
+    } else {
+        const auto startByteNum = startBit / 8;
+        const auto bitsInStartByte = startBit % 8 + 1;
+        const auto leftBits = bitLength - bitsInStartByte;
+        if (leftBits <= 0)
+            return startBit; // so start bit is the largest
+
+        const auto leftBytesRounded = (leftBits % 8 == 0) ? leftBits / 8 : leftBits / 8 + 1;
+        return (startByteNum + leftBytesRounded + 1) * 8 - 1;
+    }
+#else
+    return startBit + bitLength - 1;
+#endif // USE_DBC_COMPATIBLE_BE_HANDLING
+}
+
 /*!
     \class QCanFrameProcessor
     \inmodule QtSerialBus
@@ -286,7 +317,7 @@ QCanBusFrame QCanFrameProcessor::prepareFrame(QtCanBus::UniqueId uniqueId,
 
         // check for multiplexor prerequisites
         if (!checkMuxValues(signalDesc, signalValues)) {
-            d->addWarning(QObject::tr("Skipped signal %1. Proper multiplexor values not found.").
+            d->addWarning(QObject::tr("Skipping signal %1. Proper multiplexor values not found.").
                           arg(signalName));
             continue;
         }
@@ -295,11 +326,11 @@ QCanBusFrame QCanFrameProcessor::prepareFrame(QtCanBus::UniqueId uniqueId,
         // For data in FrameId we consider max length == 29, because we do not
         // know if the frame is extended or not.
         const quint16 maxDataLength = dataInPayload ? payload.size() * 8 : 29;
-        const auto signalDataEnd = static_cast<quint16>(signalDesc.startBit() +
-                                                        signalDesc.bitLength() - 1);
+        const auto signalDataEnd = extractMaxBitNum(signalDesc.startBit(), signalDesc.bitLength(),
+                                                    signalDesc.dataEndian());
         if (signalDataEnd >= maxDataLength) {
-            d->addWarning(QObject::tr("Skipping signal %1. Its start + length exceeds "
-                                      "the expected message length.").arg(signalName));
+            d->addWarning(QObject::tr("Skipping signal %1. Its length exceeds the expected "
+                                      "message length.").arg(signalName));
             continue;
         }
 
@@ -593,8 +624,8 @@ void QCanFrameProcessorPrivate::addWarning(const QString &warning)
 QVariant QCanFrameProcessorPrivate::decodeSignal(const QCanBusFrame &frame,
                                                  const QCanSignalDescription &signalDesc)
 {
-    const auto signalDataEnd = static_cast<qsizetype>(signalDesc.startBit() +
-                                                      signalDesc.bitLength() - 1);
+    const auto signalDataEnd = extractMaxBitNum(signalDesc.startBit(), signalDesc.bitLength(),
+                                                signalDesc.dataEndian());
     const bool dataFromPayload =
             signalDesc.dataSource() == QtCanBus::DataSource::Payload;
 
@@ -604,7 +635,7 @@ QVariant QCanFrameProcessorPrivate::decodeSignal(const QCanBusFrame &frame,
 
     if (signalDataEnd >= maxDataLength) {
         addWarning(QObject::tr("Skipping signal %1 in message with unique id %2. "
-                               "Its start + length exceeds data length.").
+                               "Its expected length exceeds the data length.").
                    arg(signalDesc.name()).arg(frame.frameId()));
         return QVariant();
     }
@@ -616,15 +647,6 @@ QVariant QCanFrameProcessorPrivate::decodeSignal(const QCanBusFrame &frame,
             : reinterpret_cast<const unsigned char *>(&frameId);
 
     return parseData(data, signalDesc);
-}
-
-static constexpr bool isNativeLittleEndian()
-{
-#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
-    return true;
-#else
-    return false;
-#endif
 }
 
 static bool needValueConversion(const QCanSignalDescription &signalDesc)
@@ -665,6 +687,121 @@ static double convertToCanValue(const QVariant &value, const QCanSignalDescripti
 
     return result;
 }
+
+#ifdef USE_DBC_COMPATIBLE_BE_HANDLING
+
+template <typename T>
+static QVariant extractValue(const unsigned char *data, const QCanSignalDescription &signalDesc)
+{
+    constexpr auto tBitLength = sizeof(T) * 8;
+    const auto length = signalDesc.bitLength();
+    if constexpr (std::is_floating_point_v<T>)
+        Q_ASSERT(tBitLength == length);
+    else
+        Q_ASSERT(tBitLength >= length);
+    const auto maxBytesToRead = (length % 8 == 0) ? length / 8 : length / 8 + 1;
+    const auto start = signalDesc.startBit();
+    T value = {};
+    const bool isBigEndian = signalDesc.dataEndian() == QtCanBus::DataEndian::BigEndian;
+    if (isBigEndian) {
+        // Big Endian - start bit is MSB
+        if (start % 8 == 7 && length % 8 == 0) {
+            // The data is aligned at byte offset, we can simply memcpy
+            memcpy(&value, &data[(start - 7) / 8], maxBytesToRead);
+        } else {
+            // Data is not aligned at byte offset, we need to do some bit
+            // shifting. We cannot perform bit operations on float or double
+            // types, so we convert the value to uchar *.
+            // Because of how BE data is organized, the indices for reading
+            // would not be continuous. If we want to extract BE data from the
+            // middle 12 bits of a 2-byte payload, we will need to read bits 5-0
+            // and 15-10:
+            // _________________________________________________________________
+            // |7      |6      |5(MSB) |4      |3      |2      |1      |0      |
+            // -----------------------------------------------------------------
+            // |15     |14     |13     |12     |11     |10(LSB)|9      |8      |
+            // -----------------------------------------------------------------
+            unsigned char *valueData = reinterpret_cast<unsigned char *>(&value);
+            qsizetype bitIdx = start;
+            for (qsizetype processedBits = 0; processedBits < length; ++processedBits) {
+                const auto dataByteIdx = bitIdx / 8;
+                const auto dataBitIdx = bitIdx % 8;
+                if (data[dataByteIdx] & (0x01 << dataBitIdx)) {
+                    const auto byteIdx = processedBits / 8;
+                    // start filling each byte from MSB
+                    const auto bitIdx = 7 - (processedBits % 8);
+                    valueData[byteIdx] |= (0x01 << bitIdx);
+                }
+                // handle jump like 0 -> 15 from the example above
+                if (bitIdx % 8 == 0)
+                    bitIdx += 15;
+                else
+                    --bitIdx;
+            }
+        }
+    } else {
+        // Little Endian - start bit is LSB
+        if (start % 8 == 0 && length % 8 == 0) {
+            // The data is aligned at byte offset, we can simply memcpy
+            memcpy(&value, &data[start / 8], maxBytesToRead);
+        } else {
+            // Data is not aligned at byte offset, we need to do some bit
+            // shifting. We cannot perform bit operations on float or double
+            // types, so we convert the value to uchar *.
+            unsigned char *valueData = reinterpret_cast<unsigned char *>(&value);
+            quint16 valueIdx = 0;
+            for (auto i = start; i < start + length; ++i, ++valueIdx) {
+                const auto byteIdx = i / 8;
+                const auto bitIdx = i % 8;
+                if (data[byteIdx] & (0x01 << bitIdx))
+                    valueData[valueIdx / 8] |= 0x01 << (valueIdx % 8);
+            }
+        }
+    }
+    // check and convert endian
+    T convertedValue = {};
+    if (isBigEndian)
+        convertedValue = qFromBigEndian(value);
+    else
+        convertedValue = qFromLittleEndian(value);
+    const bool endianChanged = convertedValue != value;
+    value = convertedValue;
+    // for signed & unsigned fill the most significant bits with proper values
+    if constexpr (std::is_integral_v<T>) {
+        if (tBitLength > length) {
+            if (endianChanged) {
+                // After endian conversion we have unneeded bits in the end,
+                // so we need to cut them
+                value = value >> (tBitLength - length);
+            }
+            // value has more bits than we could actually read, so we need to
+            // fill the most significant bits properly
+            const auto dataFormat = signalDesc.dataFormat();
+            if (dataFormat == QtCanBus::DataFormat::SignedInteger) {
+                if (value & (0x01ULL << (length - 1))) {
+                    // msb = 1 -> negative value, fill the rest with 1's
+                    for (auto i = length; i < tBitLength; ++i)
+                        value |= (0x01ULL << i);
+                } else {
+                    // msb = 0 -> positive value, fill the rest with 0's
+                    for (auto i = length; i < tBitLength; ++i)
+                        value &= ~(0x01ULL << i);
+                }
+            } else if (dataFormat == QtCanBus::DataFormat::UnsignedInteger) {
+                // simply fill most significant bits with 0's
+                for (auto i = length; i < tBitLength; ++i)
+                    value &= ~(0x01ULL << i);
+            }
+        }
+    }
+    // perform value conversions, if needed
+    if (needValueConversion(signalDesc))
+        return QVariant::fromValue(convertFromCanValue(value, signalDesc));
+
+    return QVariant::fromValue(value);
+}
+
+#else
 
 template <typename T>
 static QVariant extractValue(const unsigned char *data, const QCanSignalDescription &signalDesc)
@@ -768,6 +905,8 @@ static QVariant extractValue(const unsigned char *data, const QCanSignalDescript
     return QVariant::fromValue(value);
 }
 
+#endif // USE_DBC_COMPATIBLE_BE_HANDLING
+
 static QVariant parseAscii(const unsigned char *data, const QCanSignalDescription &signalDesc)
 {
     Q_ASSERT(signalDesc.bitLength() % 8 == 0);
@@ -808,6 +947,108 @@ QVariant QCanFrameProcessorPrivate::parseData(const unsigned char *data,
         return parseAscii(data, signalDesc);
     }
     Q_UNREACHABLE();
+}
+
+#ifdef USE_DBC_COMPATIBLE_BE_HANDLING
+
+template <typename T>
+static void encodeValue(unsigned char *data, const QVariant &valueVar,
+                        const QCanSignalDescription &signalDesc)
+{
+    constexpr auto tBitLength = sizeof(T) * 8;
+    const auto length = signalDesc.bitLength();
+    if constexpr (std::is_floating_point_v<T>)
+        Q_ASSERT(tBitLength == length);
+    else
+        Q_ASSERT(tBitLength >= length);
+
+    // Perform value conversion.
+    T value = {};
+    if (needValueConversion(signalDesc))
+        value = static_cast<T>(std::round(convertToCanValue(valueVar, signalDesc)));
+    else
+        value = valueVar.value<T>();
+
+    const bool dataLittleEndian =
+            signalDesc.dataEndian() == QtCanBus::DataEndian::LittleEndian;
+
+    const auto maxBytesToWrite = (length % 8 == 0) ? length / 8 : length / 8 + 1;
+
+    // always treat the value-to-write as LE for simplicity
+    value = qToLittleEndian(value);
+    const quint16 start = signalDesc.startBit();
+    if (dataLittleEndian) {
+        // Little Endian
+        if (start % 8 == 0 && length % 8 == 0) {
+            // The data is aligned at byte offset, and has a round number of
+            // bytes, so we can simply memcpy
+            memcpy(&data[start / 8], &value, maxBytesToWrite);
+        } else {
+            const uchar *valueData = reinterpret_cast<const uchar *>(&value);
+            for (quint16 i = 0; i < length; ++i) {
+                const auto valueByteIdx = i / 8;
+                const auto valueBitIdx = i % 8;
+                const auto dataByteIdx = (start + i) / 8;
+                const auto dataBitIdx = (start + i) % 8;
+
+                if (valueData[valueByteIdx] & (0x01 << valueBitIdx))
+                    data[dataByteIdx] |= (0x01 << dataBitIdx);
+                else
+                    data[dataByteIdx] &= ~(0x01 << dataBitIdx);
+            }
+        }
+    } else {
+        // Big Endian
+        if (start % 8 == 7 && length % 8 == 0) {
+            // The data is aligned at byte offset and has a round number of
+            // bytes, so we can simply memcpy. Just need to convert to BE and
+            // take the meaningful bytes (those will be the most significant
+            // bytes after switching to BE).
+            value = qToBigEndian(value);
+            const uchar *valueData = reinterpret_cast<const uchar *>(&value);
+            const auto byteIdx = sizeof(value) - maxBytesToWrite;
+            memcpy(&data[(start - 7) / 8], &valueData[byteIdx], maxBytesToWrite);
+        } else {
+            // We need to start from the MSB of the valueToWrite
+            // Because of how BE data is organized, the indices for writing
+            // would not be continuous. If we want to write BE data to the
+            // middle 12 bits of a 2-byte payload, we will need to write bits
+            // 5-0 and 15-10:
+            // _________________________________________________________________
+            // |7      |6      |5(MSB) |4      |3      |2      |1      |0      |
+            // -----------------------------------------------------------------
+            // |15     |14     |13     |12     |11     |10(LSB)|9      |8      |
+            // -----------------------------------------------------------------
+            const uchar *valueData = reinterpret_cast<const uchar *>(&value);
+            auto dataBit = signalDesc.startBit();
+            for (auto valueBit = length - 1; valueBit >= 0; --valueBit) {
+                const auto valueByteIdx = valueBit / 8;
+                const auto valueBitIdx = valueBit % 8;
+                const auto dataByteIdx = dataBit / 8;
+                const auto dataBitIdx = dataBit % 8;
+                if (valueData[valueByteIdx] & (0x01 << valueBitIdx))
+                    data[dataByteIdx] |= (0x01 << dataBitIdx);
+                else
+                    data[dataByteIdx] &= ~(0x01 << dataBitIdx);
+                // handle jumps like 0 -> 15
+                if (dataBit % 8 == 0)
+                    dataBit += 15;
+                else
+                    --dataBit;
+            }
+        }
+    }
+}
+
+#else
+
+static constexpr bool isNativeLittleEndian()
+{
+#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
+    return true;
+#else
+    return false;
+#endif
 }
 
 template <typename T>
@@ -881,6 +1122,8 @@ static void encodeValue(unsigned char *data, const QVariant &valueVar,
     }
 }
 
+#endif // USE_DBC_COMPATIBLE_BE_HANDLING
+
 static void encodeAscii(unsigned char *data, const QVariant &value,
                         const QCanSignalDescription &signalDesc)
 {
@@ -934,8 +1177,9 @@ void QCanFrameProcessorPrivate::encodeSignal(unsigned char *data, const QVariant
 std::optional<QtCanBus::UniqueId>
 QCanFrameProcessorPrivate::extractUniqueId(const QCanBusFrame &frame) const
 {
-    const auto signalDataEnd = static_cast<qsizetype>(uidDescription.startBit() +
-                                                      uidDescription.bitLength() - 1);
+    const auto signalDataEnd = extractMaxBitNum(uidDescription.startBit(),
+                                                uidDescription.bitLength(),
+                                                uidDescription.endian());
     const bool dataFromPayload = uidDescription.source() == QtCanBus::DataSource::Payload;
 
     // For the FrameId case we do not really care if the frame id is extended
@@ -975,8 +1219,9 @@ QCanFrameProcessorPrivate::extractUniqueId(const QCanBusFrame &frame) const
 bool QCanFrameProcessorPrivate::fillUniqueId(unsigned char *data, quint16 sizeInBits,
                                              QtCanBus::UniqueId uniqueId)
 {
-    const auto uidDataEnd = static_cast<quint16>(uidDescription.startBit() +
-                                                 uidDescription.bitLength() - 1);
+    const auto uidDataEnd = extractMaxBitNum(uidDescription.startBit(),
+                                             uidDescription.bitLength(),
+                                             uidDescription.endian());
     if (uidDataEnd >= sizeInBits) {
         return false; // add a more specific error description?
     }
