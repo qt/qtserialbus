@@ -58,7 +58,7 @@ public:
     ParseResult parseFrame(const QCanBusFrame &frame);
 
     Error error() const;
-    QString errorDescription() const;
+    QString errorString() const;
     QStringList warnings() const;
 
     QList<QCanMessageDescription> messageDescriptions() const;

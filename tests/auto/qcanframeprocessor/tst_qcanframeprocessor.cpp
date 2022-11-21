@@ -73,7 +73,7 @@ void tst_QCanFrameProcessor::construct()
 
     QVERIFY(p.messageDescriptions().isEmpty());
     QCOMPARE(p.error(), QCanFrameProcessor::Error::NoError);
-    QVERIFY(p.errorDescription().isEmpty());
+    QVERIFY(p.errorString().isEmpty());
     QVERIFY(p.warnings().isEmpty());
     QVERIFY(!p.uniqueIdDescription().isValid());
     QVERIFY(!QCanFrameProcessorPrivate::get(p)->isShared());
@@ -202,7 +202,7 @@ void tst_QCanFrameProcessor::detachOnOperations()
         Q_UNUSED(error);
         QVERIFY(QCanFrameProcessorPrivate::get(p1)->isShared());
 
-        const auto errorDesc = p1.errorDescription();
+        const auto errorDesc = p1.errorString();
         Q_UNUSED(errorDesc);
         QVERIFY(QCanFrameProcessorPrivate::get(p1)->isShared());
 
@@ -957,7 +957,7 @@ void tst_QCanFrameProcessor::parseWithErrorsAndWarnings()
     const auto result = parser.parseFrame(frame);
 
     QCOMPARE(parser.error(), expectedError);
-    QCOMPARE(parser.errorDescription(), expectedErrorDescription);
+    QCOMPARE(parser.errorString(), expectedErrorDescription);
 
     // signal descriptions are stored as a QHash internally, so they are
     // processed in a hash-dependent order. Because of that the order of
@@ -1670,7 +1670,7 @@ void tst_QCanFrameProcessor::prepareWithErrorsAndWarnings()
     const QCanBusFrame frame = processor.prepareFrame(uniqueId, signalValues);
 
     QCOMPARE(processor.error(), expectedError);
-    QCOMPARE(processor.errorDescription(), expectedErrorDescription);
+    QCOMPARE(processor.errorString(), expectedErrorDescription);
     // signal descriptions are stored as a QHash internally, so they are
     // processed in a hash-dependent order. Because of that the order of
     // warnings cannot be defined. So we sort them alphabetically before

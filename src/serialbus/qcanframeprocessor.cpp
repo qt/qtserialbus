@@ -60,7 +60,7 @@ QT_BEGIN_NAMESPACE
     and desired values.
 
     Errors can occur during the encoding or decoding process. In such cases
-    the \l error() and \l errorDescription() methods can be used to get the
+    the \l error() and \l errorString() methods can be used to get the
     information about the error.
 
     Some non-critical problems may occur as well. Such problems will be logged,
@@ -84,10 +84,10 @@ QT_BEGIN_NAMESPACE
     \value UnsupportedFrameFormat The format of the received frame is not
                                   supported and cannot be parsed.
     \value DecodingError An error occurred during decoding. Use
-                         \l errorDescription() to get a string representation
+                         \l errorString() to get a string representation
                          of the error.
     \value EncodingError An error occurred during encoding. Use
-                         \l errorDescription() to get a string representation
+                         \l errorString() to get a string representation
                          of the error.
 */
 
@@ -204,12 +204,12 @@ QCanFrameProcessor &QCanFrameProcessor::operator=(const QCanFrameProcessor &othe
     \endlist
 
     If an error occurred during the encoding, an invalid \l QCanBusFrame is
-    returned. In such cases, the \l error() and \l errorDescription() methods
+    returned. In such cases, the \l error() and \l errorString() methods
     can be used to get information about the errors.
 
     \note Calling this method clears all previous errors and warnings.
 
-    \sa addMessageDescriptions(), error(), errorDescription(), warnings()
+    \sa addMessageDescriptions(), error(), errorString(), warnings()
 */
 QCanBusFrame QCanFrameProcessor::prepareFrame(QtCanBus::UniqueId uniqueId,
                                               const QVariantMap &signalValues)
@@ -314,7 +314,7 @@ QCanBusFrame QCanFrameProcessor::prepareFrame(QtCanBus::UniqueId uniqueId,
 /*!
     Returns the last error.
 
-    \sa errorDescription(), prepareFrame(), parseFrame()
+    \sa errorString(), prepareFrame(), parseFrame()
 */
 QCanFrameProcessor::Error QCanFrameProcessor::error() const
 {
@@ -326,16 +326,16 @@ QCanFrameProcessor::Error QCanFrameProcessor::error() const
 
     \sa error(), prepareFrame(), parseFrame()
 */
-QString QCanFrameProcessor::errorDescription() const
+QString QCanFrameProcessor::errorString() const
 {
-    return d->errorDescription;
+    return d->errorString;
 }
 
 /*!
     Returns the list of warnings generated during the last encoding or decoding
     call.
 
-    \sa error(), errorDescription(), prepareFrame(), parseFrame()
+    \sa error(), errorString(), prepareFrame(), parseFrame()
 */
 QStringList QCanFrameProcessor::warnings() const
 {
@@ -461,12 +461,12 @@ bool QCanFrameProcessor::equals(const QCanFrameProcessor &lhs, const QCanFramePr
 
     If an error occurred during the decoding, a result with empty
     \l {QCanFrameProcessor::ParseResult::}{signalValues} is returned.
-    In such cases, the \l error() and \l errorDescription() methods can be used
+    In such cases, the \l error() and \l errorString() methods can be used
     to get information about the errors.
 
     \note Calling this method clears all previous errors and warnings.
 
-    \sa addMessageDescriptions(), error(), errorDescription(), warnings()
+    \sa addMessageDescriptions(), error(), errorString(), warnings()
 */
 QCanFrameProcessor::ParseResult QCanFrameProcessor::parseFrame(const QCanBusFrame &frame)
 {
@@ -575,14 +575,14 @@ QCanFrameProcessor::ParseResult QCanFrameProcessor::parseFrame(const QCanBusFram
 void QCanFrameProcessorPrivate::resetErrors()
 {
     error = QCanFrameProcessor::Error::NoError;
-    errorDescription.clear();
+    errorString.clear();
     warnings.clear();
 }
 
 void QCanFrameProcessorPrivate::setError(QCanFrameProcessor::Error err, const QString &desc)
 {
     error = err;
-    errorDescription = desc;
+    errorString = desc;
 }
 
 void QCanFrameProcessorPrivate::addWarning(const QString &warning)
