@@ -47,7 +47,8 @@ QT_BEGIN_NAMESPACE
 
     If the parsing completes successfully, call \l messageDescriptions() to get
     a list of the message descriptions that were extracted during the last
-    \l parse() call.
+    \l parse() call. Call \l valueDescriptions() to get the textual descriptions
+    of signal raw values, if they are available.
 
     Use the static \l uniqueIdDescription() function to get a
     \l QCanUniqueIdDescription for the DBC format.
@@ -78,11 +79,46 @@ QT_BEGIN_NAMESPACE
         \li \c {SIG_VALTYPE_} - signal type description.
         \li \c {SG_MUL_VAL_} - extended multiplexing description.
         \li \c {CM_} - comments (only for message and signal descriptions).
+        \li \c {VAL_} - textual descriptions for raw signal values.
     \endlist
 
     Lines starting from other keywords are simply ignored.
 
     \sa QCanMessageDescription, QCanFrameProcessor
+*/
+
+/*!
+    \typealias QCanDbcFileParser::ValueDescriptions
+
+    This is a type alias for \c {QHash<quint32, QString>}.
+
+    The keys of the hash represent raw signal values, and the values of the
+    hash represent corresponding string descriptions.
+*/
+
+/*!
+    \typealias QCanDbcFileParser::SignalValueDescriptions
+
+    This is a type alias for \c {QHash<QString, ValueDescriptions>}.
+
+    The keys of the hash represent signal names, and the values of the
+    hash contain the corresponding \l QCanDbcFileParser::ValueDescriptions
+    entries.
+
+    \sa QCanDbcFileParser::ValueDescriptions
+*/
+
+/*!
+    \typealias QCanDbcFileParser::MessageValueDescriptions
+
+    This is a type alias for
+    \c {QHash<QtCanBus::UniqueId, SignalValueDescriptions>}.
+
+    The keys of the hash represent message unique ids, and the values of the
+    hash contain the corresponding \l QCanDbcFileParser::SignalValueDescriptions
+    entries.
+
+    \sa QCanDbcFileParser::SignalValueDescriptions
 */
 
 /*!
@@ -169,6 +205,27 @@ QList<QCanMessageDescription> QCanDbcFileParser::messageDescriptions() const
 }
 
 /*!
+    Returns the textual descriptions for signal raw values.
+
+    DBC supports the possibility to provide textual descriptions to signal raw
+    values. If such data exists in the parsed DBC file(s), it can be accessed
+    using this function.
+
+    The textual descriptions are unique for a certain signal within a specific
+    message, so the returned structure contains the information about the
+    message unique id and the signal name, as well as the actual value
+    descriptions.
+
+    \sa QCanDbcFileParser::MessageValueDescriptions,
+    QCanDbcFileParser::SignalValueDescriptions,
+    QCanDbcFileParser::ValueDescriptions
+*/
+QCanDbcFileParser::MessageValueDescriptions QCanDbcFileParser::valueDescriptions() const
+{
+    return d->m_valueDescriptions;
+}
+
+/*!
     Returns the last error which occurred during the parsing.
 
     \sa errorString(), parse()
@@ -236,6 +293,7 @@ static constexpr auto kSignalDef = "SG_ "_L1;
 static constexpr auto kSigValTypeDef = "SIG_VALTYPE_ "_L1;
 static constexpr auto kCommentDef = "CM_ "_L1;
 static constexpr auto kExtendedMuxDef = "SG_MUL_VAL_ "_L1;
+static constexpr auto kValDef = "VAL_ "_L1;
 
 static constexpr auto kUnsignedIntRegExp = "\\d+"_L1;
 static constexpr auto kDoubleRegExp = "[+-]?\\d+(.\\d+([eE][+-]?\\d+)?)?"_L1;
@@ -260,6 +318,7 @@ void QCanDbcFileParserPrivate::reset()
     m_seenExtraData = false;
     m_currentMessage = {};
     m_messageDescriptions.clear();
+    m_valueDescriptions.clear();
 }
 
 /*!
@@ -340,6 +399,10 @@ bool QCanDbcFileParserPrivate::processLine(const QStringView line)
         m_seenExtraData = true;
         addCurrentMessage();
         parseExtendedMux(data);
+    } else if (data.startsWith(kValDef)) {
+        m_seenExtraData = true;
+        addCurrentMessage();
+        parseValueDescriptions(data);
     }
     return true;
 }
@@ -779,6 +842,91 @@ void QCanDbcFileParserPrivate::parseExtendedMux(const QStringView data)
     multiplexedSignal.setMultiplexSignals(signalRanges);
     messageDesc.addSignalDescription(multiplexedSignal);
     m_messageDescriptions.insert(uid, messageDesc);
+}
+
+void QCanDbcFileParserPrivate::parseValueDescriptions(const QStringView data)
+{
+    // The regexp should match the following pattern:
+    //      VAL_ message_id signal_name { value_description };
+    // Here the value_description is defined as follows
+    //      value_description = unsigned_int char_string
+
+    // %1 valDef
+    // %2 maybeSpace
+    // %3 unsignedInt
+    // %4 oneOrMoreSpace
+    // %5 DbcIdentifier
+    // %6 charStr
+    const QString regExStr =
+            "%1%2(?<messageId>%3)%4(?<signalName>%5)(%4%3%4\"(%6)\")+%2;"_L1.
+            arg(kValDef, kMaybeSpaceRegExp, kUnsignedIntRegExp, kOneOrMoreSpaceRegExp,
+                kDbcIdentRegExp, kCharStrRegExp);
+
+    const QRegularExpression valueDescRegExp(regExStr);
+
+    const auto match = valueDescRegExp.matchView(data);
+    if (!match.hasMatch()) {
+        m_lineOffset = data.size();
+        addWarning(QObject::tr("Failed to parse value description from string %1").arg(data));
+        return;
+    }
+
+    m_lineOffset = match.capturedEnd(0);
+
+    bool ok = false;
+    const auto uid = match.capturedView(u"messageId"_s).toUInt(&ok);
+    if (!ok) {
+        addWarning(QObject::tr("Failed to parse value description from string %1").arg(data));
+        return;
+    }
+
+    // Check if the message exists
+    const auto messageDesc = m_messageDescriptions.value(uid);
+    if (!messageDesc.isValid()) {
+        addWarning(QObject::tr("Value description for message id %1 is skipped because "
+                               "the message description is not found").arg(uid));
+        return;
+    }
+
+    // Check if the signal exists within the message
+    const QString signalName = match.captured(u"signalName"_s);
+    if (!messageDesc.signalDescriptionForName(signalName).isValid()) {
+        addWarning(QObject::tr("Value description for signal %1 and message id %2 is skipped "
+                               "because the signal description is not found").
+                   arg(signalName).arg(uid));
+        return;
+    }
+
+    // We can have an arbitrary amount of value descriptions, so we can't use
+    // capture groups to capture them. But we know that they follow a specific
+    // pattern (because the full string matched the regexp). So we need to parse
+    // the rest of the matched string manually
+    const auto totalEnd = match.capturedEnd(0); // including the ';'
+    const auto signalNameEnd = match.capturedEnd(u"signalName"_s);
+    const auto len = totalEnd - signalNameEnd - 1;
+    if (len > 0) {
+        auto signalDescriptionsView = data.sliced(signalNameEnd, len).trimmed();
+        while (signalDescriptionsView.size()) {
+            const auto spacePos = signalDescriptionsView.indexOf(u' ');
+            if (spacePos == -1)
+                break;
+            bool ok = false;
+            const auto value = signalDescriptionsView.sliced(0, spacePos).toUInt(&ok);
+            if (!ok)
+                break;
+            const auto firstQuotePos = signalDescriptionsView.indexOf(u'"', spacePos + 1);
+            if (firstQuotePos == -1)
+                break;
+            const auto nextQuotePos = signalDescriptionsView.indexOf(u'"', firstQuotePos + 1);
+            if (nextQuotePos == -1)
+                break;
+            const auto description = signalDescriptionsView.sliced(
+                        firstQuotePos + 1, nextQuotePos - firstQuotePos - 1);
+
+            m_valueDescriptions[uid][signalName].insert(value, description.toString());
+            signalDescriptionsView = signalDescriptionsView.sliced(nextQuotePos + 1).trimmed();
+        }
+    }
 }
 
 void QCanDbcFileParserPrivate::postProcessSignalMultiplexing()

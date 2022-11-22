@@ -37,6 +37,7 @@ public:
     void parseSignalType(const QStringView data);
     void parseComment(const QStringView data);
     void parseExtendedMux(const QStringView data);
+    void parseValueDescriptions(const QStringView data);
     void postProcessSignalMultiplexing();
 
     void addWarning(QString &&warning);
@@ -53,6 +54,7 @@ public:
     bool m_seenExtraData = false;
     QCanMessageDescription m_currentMessage;
     QHash<QtCanBus::UniqueId, QCanMessageDescription> m_messageDescriptions;
+    QCanDbcFileParser::MessageValueDescriptions m_valueDescriptions;
 };
 
 QT_END_NAMESPACE

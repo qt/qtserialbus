@@ -6,6 +6,7 @@
 
 #include <QtCore/QList>
 
+#include <QtSerialBus/qcancommondefinitions.h>
 #include <QtSerialBus/qtserialbusglobal.h>
 
 #include <memory>
@@ -25,6 +26,13 @@ public:
         ParseError
     };
 
+    // The DBC protocol uses unsinged_integer to describe the supported values.
+    // Do we need to use QVariant instead of quint32? Or qint64 for better BC
+    // guarantees?
+    using ValueDescriptions = QHash<quint32, QString>;
+    using SignalValueDescriptions = QHash<QString, ValueDescriptions>;
+    using MessageValueDescriptions = QHash<QtCanBus::UniqueId, SignalValueDescriptions>;
+
     QCanDbcFileParser();
     ~QCanDbcFileParser();
 
@@ -32,6 +40,7 @@ public:
     bool parse(const QStringList &fileNames);
 
     QList<QCanMessageDescription> messageDescriptions() const;
+    MessageValueDescriptions valueDescriptions() const;
 
     Error error() const;
     QString errorString() const;

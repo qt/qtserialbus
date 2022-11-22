@@ -21,6 +21,8 @@ private slots:
     void uinqueId();
     void parseFile_data();
     void parseFile();
+    void valueDescriptions();
+    void resetState();
 
 private:
     QString m_filesDir;
@@ -38,6 +40,7 @@ void tst_QCanDbcFileParser::construct()
     QVERIFY(parser.errorString().isEmpty());
     QVERIFY(parser.warnings().isEmpty());
     QVERIFY(parser.messageDescriptions().isEmpty());
+    QVERIFY(parser.valueDescriptions().isEmpty());
 }
 
 void tst_QCanDbcFileParser::uinqueId()
@@ -921,6 +924,82 @@ void tst_QCanDbcFileParser::parseFile()
     std::sort(expectedMessageDescriptions.begin(), expectedMessageDescriptions.end(),
               messageDescComparator);
     QCOMPARE_EQ(messageDescriptions, expectedMessageDescriptions);
+}
+
+void tst_QCanDbcFileParser::valueDescriptions()
+{
+    QCanDbcFileParser::ValueDescriptions s0_test_value_descriptions;
+    s0_test_value_descriptions.insert(0, u"Description for the value '0x0'"_s);
+    s0_test_value_descriptions.insert(1, u"Description for the value '0x1'"_s);
+    s0_test_value_descriptions.insert(2, u"Description for the value '0x2'"_s);
+
+    QCanDbcFileParser::ValueDescriptions s1_test_value_descriptions;
+    s1_test_value_descriptions.insert(3, u"red"_s);
+    s1_test_value_descriptions.insert(4, u"green"_s);
+    s1_test_value_descriptions.insert(5, u"blue"_s);
+
+    const QCanDbcFileParser::SignalValueDescriptions test_value_descriptions {
+        qMakePair("s0", s0_test_value_descriptions), qMakePair("s1", s1_test_value_descriptions)
+    };
+
+    QCanDbcFileParser::ValueDescriptions s1_test1_value_descriptions;
+    s1_test1_value_descriptions.insert(3, u"r"_s);
+    s1_test1_value_descriptions.insert(4, u"g"_s);
+    s1_test1_value_descriptions.insert(5, u"b"_s);
+
+    QCanDbcFileParser::ValueDescriptions s2_test1_value_descriptions;
+    s2_test1_value_descriptions.insert(0, u"Value0"_s);
+    s2_test1_value_descriptions.insert(1, u"Value1"_s);
+    s2_test1_value_descriptions.insert(2, u"Value2"_s);
+    s2_test1_value_descriptions.insert(3, u"Value3"_s);
+    s2_test1_value_descriptions.insert(4, u"Value4"_s);
+
+    const QCanDbcFileParser::SignalValueDescriptions test1_value_descriptions {
+        qMakePair("s1", s1_test1_value_descriptions), qMakePair("s2", s2_test1_value_descriptions)
+    };
+
+    QCanDbcFileParser::MessageValueDescriptions expectedDescriptions;
+    expectedDescriptions.insert(1234, test_value_descriptions);
+    expectedDescriptions.insert(1235, test1_value_descriptions);
+
+    const QStringList expectedWarnings {
+        u"Value description for message id 1236 is skipped because the message "
+         "description is not found"_s,
+        u"Value description for signal s3 and message id 1235 is skipped because "
+         "the signal description is not found"_s,
+        u"Failed to parse value description from string "
+         "VAL_ 1235 s2 4 \"Value4\" 3 \"Value3\" 2 \"Value2\" 1 \"Value1\" 0 ;"_s
+    };
+
+    const QString fileName = u"value_descriptions.dbc"_s;
+    QCanDbcFileParser parser;
+    parser.parse(m_filesDir + fileName);
+    QCOMPARE(parser.error(), QCanDbcFileParser::Error::NoError);
+
+    QCOMPARE(parser.valueDescriptions(), expectedDescriptions);
+    QCOMPARE(parser.warnings(), expectedWarnings);
+}
+
+void tst_QCanDbcFileParser::resetState()
+{
+    // Test that the state is correctly reset between parsings
+    const QString fileName = u"value_descriptions.dbc"_s;
+    QCanDbcFileParser parser;
+    parser.parse(m_filesDir + fileName);
+
+    QCOMPARE(parser.error(), QCanDbcFileParser::Error::NoError);
+    QVERIFY(!parser.messageDescriptions().isEmpty());
+    QVERIFY(!parser.warnings().isEmpty());
+    QVERIFY(!parser.valueDescriptions().isEmpty());
+
+    // Now when we parse an invalid file, we should get an error, and all
+    // other getters should return default values
+    const QString invalidName = u"invalid_file"_s;
+    parser.parse(m_filesDir + invalidName);
+    QCOMPARE(parser.error(), QCanDbcFileParser::Error::FileReadError);
+    QVERIFY(parser.messageDescriptions().isEmpty());
+    QVERIFY(parser.warnings().isEmpty());
+    QVERIFY(parser.valueDescriptions().isEmpty());
 }
 
 QTEST_MAIN(tst_QCanDbcFileParser)
