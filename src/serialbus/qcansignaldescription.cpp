@@ -10,6 +10,7 @@ QT_BEGIN_NAMESPACE
     \class QCanSignalDescription
     \inmodule QtSerialBus
     \since 6.5
+    \preliminary
 
     \brief The QCanSignalDescription class describes the rules to extract one
     value out of the CAN frame and represent it in an application-defined

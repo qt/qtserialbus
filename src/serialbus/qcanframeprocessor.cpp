@@ -51,6 +51,7 @@ static quint16 extractMaxBitNum(quint16 startBit, quint16 bitLength, QtCanBus::D
     \class QCanFrameProcessor
     \inmodule QtSerialBus
     \since 6.5
+    \preliminary
 
     \brief The QCanFrameProcessor class can be used to decode
     a \l QCanBusFrame or to convert the input data into a \l QCanBusFrame that

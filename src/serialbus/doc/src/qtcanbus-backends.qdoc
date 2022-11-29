@@ -23,6 +23,25 @@
         \li QCanBusFrame defines a CAN frame that can be written and read from QCanBusDevice.
     \endlist
 
+    Starting from Qt 6.5, the module provides APIs to decode actual signal
+    values from raw CAN frames and also to encode user data into CAN frames:
+
+    \list
+        \li \l QCanSignalDescription provides rules to process CAN signals.
+        \li \l QCanMessageDescription provides rules to process CAN messages.
+            A message description usually contains multiple signal descriptions.
+        \li \l QCanUniqueIdDescription provides rules to process a unique
+            identifier within a CAN frame.
+        \li \l QCanFrameProcessor uses descriptions provided by
+            \l QCanMessageDescription, \l QCanSignalDescription, and
+            \l QCanUniqueIdDescription classes to encode or decode CAN frames.
+        \li \l QCanDbcFileParser provides an API to extract message descriptions
+            from DBC files.
+    \endlist
+
+    \note All APIs for encoding and decoding CAN frames are experimental and
+    subject to change.
+
     \section1 CAN Bus Plugins
 
     Multiple vendors provide CAN devices with varying APIs for access. The QtSerialBus module

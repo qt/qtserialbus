@@ -18,6 +18,7 @@ QT_BEGIN_NAMESPACE
     \class QCanDbcFileParser
     \inmodule QtSerialBus
     \since 6.5
+    \preliminary
 
     \brief The QCanDbcFileParser class can be used to parse DBC files.
 

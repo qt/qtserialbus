@@ -10,6 +10,7 @@ QT_BEGIN_NAMESPACE
     \class QCanUniqueIdDescription
     \inmodule QtSerialBus
     \since 6.5
+    \preliminary
 
     \brief The QCanUniqueIdDescription class describes the rules for accessing
     a unique identifier in a \l QCanBusFrame.

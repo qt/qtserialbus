@@ -14,6 +14,7 @@ QT_BEGIN_NAMESPACE
     \class QCanMessageDescription
     \inmodule QtSerialBus
     \since 6.5
+    \preliminary
 
     \brief The QCanMessageDescription class describes the rules to process a CAN
     message and represent it in an application-defined format.
