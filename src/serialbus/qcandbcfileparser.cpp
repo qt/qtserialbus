@@ -652,6 +652,8 @@ void QCanDbcFileParserPrivate::parseSignalType(const QStringView data)
     const auto match = sigValTypeRegEx.matchView(data);
     if (!match.hasMatch()) {
         m_lineOffset = data.size();
+        addWarning(QObject::tr("Failed to find signal value type description in string %1").
+                   arg(data));
         return;
     }
 
@@ -659,8 +661,10 @@ void QCanDbcFileParserPrivate::parseSignalType(const QStringView data)
 
     bool ok = false;
     const auto uid = match.capturedView(u"messageId"_s).toUInt(&ok);
-    if (!ok)
+    if (!ok) {
+        addWarning(QObject::tr("Failed to parse frame id from string %1").arg(data));
         return;
+    }
 
     auto msgDesc = m_messageDescriptions.value(uid);
     if (msgDesc.isValid()) {
@@ -693,8 +697,16 @@ void QCanDbcFileParserPrivate::parseSignalType(const QStringView data)
                     msgDesc.addSignalDescription(sigDesc);
                     m_messageDescriptions.insert(msgDesc.uniqueId(), msgDesc);
                 }
+            } else {
+                addWarning(QObject::tr("Failed to parse data type from string %1").arg(data));
             }
+        } else {
+            addWarning(QObject::tr("Failed to find signal description for signal %1. "
+                                   "Skipping string %2").arg(sigName, data));
         }
+    } else {
+        addWarning(QObject::tr("Failed to find message description for unique id %1. "
+                               "Skipping string %2").arg(uid).arg(data));
     }
 }
 
@@ -720,6 +732,8 @@ void QCanDbcFileParserPrivate::parseComment(const QStringView data)
 
     const auto match = commentRegExp.matchView(data);
     if (!match.hasMatch()) {
+        // no warning here, as we ignore some "general" comments, and parse only
+        // comments related to messages and signals
         m_lineOffset = data.size();
         return;
     }
@@ -730,12 +744,17 @@ void QCanDbcFileParserPrivate::parseComment(const QStringView data)
 
     bool ok = false;
     const auto uid = match.capturedView(u"messageId"_s).toUInt(&ok);
-    if (!ok)
+    if (!ok) {
+        addWarning(QObject::tr("Failed to parse frame id from string %1").arg(data));
         return;
+    }
 
     auto messageDesc = m_messageDescriptions.value(uid);
-    if (!messageDesc.isValid())
+    if (!messageDesc.isValid()) {
+        addWarning(QObject::tr("Failed to find message description for unique id %1. "
+                               "Skipping string %2").arg(uid).arg(data));
         return;
+    }
 
     if (type == kMessageDef) {
         const QString comment = match.captured(u"comment"_s);
@@ -743,14 +762,15 @@ void QCanDbcFileParserPrivate::parseComment(const QStringView data)
         m_messageDescriptions.insert(uid, messageDesc);
     } else if (type == kSignalDef) {
         const QString sigName = match.captured(u"sigName"_s);
-        if (!sigName.isEmpty()) {
-            auto signalDesc = messageDesc.signalDescriptionForName(sigName);
-            if (signalDesc.isValid()) {
-                const QString comment = match.captured(u"comment"_s);
-                signalDesc.setComment(comment);
-                messageDesc.addSignalDescription(signalDesc);
-                m_messageDescriptions.insert(uid, messageDesc);
-            }
+        auto signalDesc = messageDesc.signalDescriptionForName(sigName);
+        if (signalDesc.isValid()) {
+            const QString comment = match.captured(u"comment"_s);
+            signalDesc.setComment(comment);
+            messageDesc.addSignalDescription(signalDesc);
+            m_messageDescriptions.insert(uid, messageDesc);
+        } else {
+            addWarning(QObject::tr("Failed to find signal description for signal %1. "
+                                   "Skipping string %2").arg(sigName, data));
         }
     }
 }
@@ -779,6 +799,8 @@ void QCanDbcFileParserPrivate::parseExtendedMux(const QStringView data)
     const auto match = extendedMuxRegExp.matchView(data);
     if (!match.hasMatch()) {
         m_lineOffset = data.size();
+        addWarning(QObject::tr("Failed to find extended multiplexing description in string %1").
+                   arg(data));
         return;
     }
 
@@ -786,12 +808,17 @@ void QCanDbcFileParserPrivate::parseExtendedMux(const QStringView data)
 
     bool ok = false;
     const auto uid = match.capturedView(u"messageId"_s).toUInt(&ok);
-    if (!ok)
+    if (!ok) {
+        addWarning(QObject::tr("Failed to parse frame id from string %1").arg(data));
         return;
+    }
 
     auto messageDesc = m_messageDescriptions.value(uid);
-    if (!messageDesc.isValid())
+    if (!messageDesc.isValid()) {
+        addWarning(QObject::tr("Failed to find message description for unique id %1. "
+                               "Skipping string %2").arg(uid).arg(data));
         return;
+    }
 
     const QString multiplexedSignalName = match.captured(u"multiplexedSignal"_s);
     const QString multiplexorSwitchName = match.captured(u"multiplexorSwitch"_s);
@@ -799,8 +826,13 @@ void QCanDbcFileParserPrivate::parseExtendedMux(const QStringView data)
     auto multiplexedSignal = messageDesc.signalDescriptionForName(multiplexedSignalName);
     auto multiplexorSwitch = messageDesc.signalDescriptionForName(multiplexorSwitchName);
 
-    if (!multiplexedSignal.isValid() || !multiplexorSwitch.isValid())
+    if (!multiplexedSignal.isValid() || !multiplexorSwitch.isValid()) {
+        const QString invalidName = multiplexedSignal.isValid() ? multiplexorSwitchName
+                                                                : multiplexedSignalName;
+        addWarning(QObject::tr("Failed to find signal description for signal %1. "
+                               "Skipping string %2").arg(invalidName, data));
         return;
+    }
 
     auto signalRanges = multiplexedSignal.multiplexSignals();
     signalRanges.remove(kQtDummySignal); // dummy signal not needed anymore
@@ -884,17 +916,16 @@ void QCanDbcFileParserPrivate::parseValueDescriptions(const QStringView data)
     // Check if the message exists
     const auto messageDesc = m_messageDescriptions.value(uid);
     if (!messageDesc.isValid()) {
-        addWarning(QObject::tr("Value description for message id %1 is skipped because "
-                               "the message description is not found").arg(uid));
+        addWarning(QObject::tr("Failed to find message description for unique id %1. "
+                               "Skipping string %2").arg(uid).arg(data));
         return;
     }
 
     // Check if the signal exists within the message
     const QString signalName = match.captured(u"signalName"_s);
     if (!messageDesc.signalDescriptionForName(signalName).isValid()) {
-        addWarning(QObject::tr("Value description for signal %1 and message id %2 is skipped "
-                               "because the signal description is not found").
-                   arg(signalName).arg(uid));
+        addWarning(QObject::tr("Failed to find signal description for signal %1. "
+                               "Skipping string %2").arg(signalName, data));
         return;
     }
 

@@ -703,6 +703,16 @@ void tst_QCanDbcFileParser::parseFile_data()
         // so a warning is raised for every such message, and these message
         // descriptions are discarded
         expectedWarnings = {
+            u"Failed to find extended multiplexing description in string "
+             "SG_MUL_VAL_  1238 s2 s0 2-4, 6-8 10-10;"_s,
+            u"Failed to find extended multiplexing description in string "
+             "SG_MUL_VAL_  1238 s4 s1 2-3, 5-5"_s,
+            u"Failed to find message description for unique id 12371. Skipping string "
+             "SG_MUL_VAL_  12371 s4 s1 2-3, 5-5;"_s,
+            u"Failed to find signal description for signal s11. Skipping string "
+             "SG_MUL_VAL_  1235 s4 s11 2-3, 5-5;"_s,
+            u"Failed to find signal description for signal s6. Skipping string "
+             "SG_MUL_VAL_  1236 s6 s1 2-3, 5-5;"_s,
             u"Message description with unique id 1235 is skipped because it has invalid "
              "multiplexing description."_s,
             u"Message description with unique id 1236 is skipped because it has invalid "
@@ -857,6 +867,8 @@ void tst_QCanDbcFileParser::parseFile_data()
         expectedWarnings = {
             u"Failed to find signal description in string "
              "SG_ Singal%1 : 0|8@1+ (1,0) [0|0] \"unit\" Vector__XXX"_s,
+            u"Failed to find signal description for signal s6. Skipping string "
+             "SG_MUL_VAL_  1236 s6 s1 2-3, 5-5;"_s,
             u"Message description with unique id 1236 is skipped because it has invalid "
              "multiplexing description."_s,
         };
@@ -963,10 +975,10 @@ void tst_QCanDbcFileParser::valueDescriptions()
     expectedDescriptions.insert(1235, test1_value_descriptions);
 
     const QStringList expectedWarnings {
-        u"Value description for message id 1236 is skipped because the message "
-         "description is not found"_s,
-        u"Value description for signal s3 and message id 1235 is skipped because "
-         "the signal description is not found"_s,
+        u"Failed to find message description for unique id 1236. Skipping string "
+         "VAL_ 1236 s2 4 \"Value4\" 3 \"Value3\" 2 \"Value2\" 1 \"Value1\" 0 \"Value0\" ;"_s,
+        u"Failed to find signal description for signal s3. Skipping string "
+         "VAL_ 1235 s3 4 \"Value4\" 3 \"Value3\" 2 \"Value2\" 1 \"Value1\" 0 \"Value0\" ;"_s,
         u"Failed to parse value description from string "
          "VAL_ 1235 s2 4 \"Value4\" 3 \"Value3\" 2 \"Value2\" 1 \"Value1\" 0 ;"_s
     };
