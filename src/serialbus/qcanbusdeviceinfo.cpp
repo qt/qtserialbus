@@ -108,7 +108,7 @@ QString QCanBusDeviceInfo::serialNumber() const
 
     \note In contrast to serialNumber(), the alias is not guaranteed to be unique.
 
-    If that function is not supported by the CAN plugin, an empty string is returned.
+    If this function is not supported by the CAN plugin, an empty string is returned.
     \sa serialNumber()
 */
 QString QCanBusDeviceInfo::alias() const
