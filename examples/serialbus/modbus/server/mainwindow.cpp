@@ -5,7 +5,9 @@
 #include "settingsdialog.h"
 #include "ui_mainwindow.h"
 
-#include <QModbusRtuSerialServer>
+#if QT_CONFIG(modbus_serialport)
+#    include <QModbusRtuSerialServer>
+#endif
 #include <QModbusTcpServer>
 #include <QRegularExpression>
 #include <QRegularExpressionValidator>

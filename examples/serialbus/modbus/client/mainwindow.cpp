@@ -7,7 +7,9 @@
 #include "writeregistermodel.h"
 
 #include <QModbusTcpClient>
-#include <QModbusRtuSerialClient>
+#if QT_CONFIG(modbus_serialport)
+#    include <QModbusRtuSerialClient>
+#endif
 #include <QStandardItemModel>
 #include <QStatusBar>
 #include <QUrl>
