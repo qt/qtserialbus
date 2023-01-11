@@ -583,7 +583,7 @@ void tst_QCanFrameProcessor::parseSignal_data()
             QTest::addRow("%s, ascii, offset %d", s.name, offset + i)
                     << s.source
                     << value << quint16(offset + i) << quint16(expectedData.size() * 8)
-                    << QtCanBus::DataFormat::Ascii
+                    << QtCanBus::DataFormat::AsciiString
                     << QSysInfo::Endian::LittleEndian
                     << QVariant(expectedData);
         }
@@ -1500,7 +1500,7 @@ void tst_QCanFrameProcessor::prepareFrame_data()
             value = value << (offset + i);
             QTest::addRow("%s, ascii, start %d", s.name, offset + i)
                     << quint16(offset + i) << quint16(asciiData.size() * 8) << s.source
-                    << QtCanBus::DataFormat::Ascii
+                    << QtCanBus::DataFormat::AsciiString
                     << QSysInfo::Endian::LittleEndian /* does not matter */
                     << QVariant(asciiData)
                     << value;
@@ -1518,7 +1518,7 @@ void tst_QCanFrameProcessor::prepareFrame_data()
         QTest::addRow("ascii, not enough data")
                 << quint16(0) << quint16(expectedData.size() * 8)
                 << QtCanBus::DataSource::Payload
-                << QtCanBus::DataFormat::Ascii
+                << QtCanBus::DataFormat::AsciiString
                 << QSysInfo::Endian::LittleEndian
                 << QVariant(data)
                 << value;
@@ -1534,7 +1534,7 @@ void tst_QCanFrameProcessor::prepareFrame_data()
         QTest::addRow("ascii, too much data")
                 << quint16(0) << quint16(expectedData.size() * 8)
                 << QtCanBus::DataSource::Payload
-                << QtCanBus::DataFormat::Ascii
+                << QtCanBus::DataFormat::AsciiString
                 << QSysInfo::Endian::LittleEndian
                 << QVariant(data)
                 << value;

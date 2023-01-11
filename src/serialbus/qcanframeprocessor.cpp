@@ -944,7 +944,7 @@ QVariant QCanFrameProcessorPrivate::parseData(const unsigned char *data,
         return extractValue<float>(data, signalDesc);
     case QtCanBus::DataFormat::Double:
         return extractValue<double>(data, signalDesc);
-    case QtCanBus::DataFormat::Ascii:
+    case QtCanBus::DataFormat::AsciiString:
         return parseAscii(data, signalDesc);
     }
     Q_UNREACHABLE();
@@ -1168,7 +1168,7 @@ void QCanFrameProcessorPrivate::encodeSignal(unsigned char *data, const QVariant
     case QtCanBus::DataFormat::Double:
         encodeValue<double>(data, value, signalDesc);
         break;
-    case QtCanBus::DataFormat::Ascii:
+    case QtCanBus::DataFormat::AsciiString:
         encodeAscii(data, value, signalDesc);
         break;
     }

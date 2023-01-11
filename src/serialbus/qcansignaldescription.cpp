@@ -243,7 +243,7 @@ QCanSignalDescription &QCanSignalDescription::operator=(const QCanSignalDescript
         \li have \l bitLength() \c {== 64} if the \l dataFormat() is
             \l {QtCanBus::DataFormat::}{Double}
         \li the \l bitLength() \e must be a multiple of \c 8 if the
-            \l dataFormat() is \l {QtCanBus::DataFormat::}{Ascii}
+            \l dataFormat() is \l {QtCanBus::DataFormat::}{AsciiString}
         \li the \l bitLength() \e must be greater than \c 0 and less than or
             equal to \c {64}.
     \endlist
@@ -257,7 +257,7 @@ bool QCanSignalDescription::isValid() const
             return d->dataLength == 32;
         if (d->format == QtCanBus::DataFormat::Double)
             return d->dataLength == 64;
-        if (d->format == QtCanBus::DataFormat::Ascii)
+        if (d->format == QtCanBus::DataFormat::AsciiString)
             return d->dataLength % 8 == 0;
         return d->dataLength > 0 && d->dataLength <= 64;
     }();
@@ -395,7 +395,7 @@ void QCanSignalDescription::setDataSource(QtCanBus::DataSource source)
     By default, \l {QSysInfo::}{BigEndian} is used.
 
     \note The data endian is ignored if the \l dataFormat() is set to
-    \l {QtCanBus::DataFormat::}{Ascii}.
+    \l {QtCanBus::DataFormat::}{AsciiString}.
 
     \sa setDataEndian(), QSysInfo::Endian
 */
@@ -850,7 +850,7 @@ bool QCanSignalDescriptionPrivate::muxValueInRange(
         return checkValue<float>(value, ranges);
     case QtCanBus::DataFormat::Double:
         return checkValue<double>(value, ranges);
-    case QtCanBus::DataFormat::Ascii:
+    case QtCanBus::DataFormat::AsciiString:
         return checkValue<QByteArray>(value, ranges);
     }
 

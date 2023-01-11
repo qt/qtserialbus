@@ -266,7 +266,7 @@ void tst_QCanSignalDescription::isValid_data()
     }
     {
         QCanSignalDescription d = desc;
-        d.setDataFormat(QtCanBus::DataFormat::Ascii);
+        d.setDataFormat(QtCanBus::DataFormat::AsciiString);
         d.setBitLength(11);
         QTest::addRow("incorrect ASCII length") << d << false;
 

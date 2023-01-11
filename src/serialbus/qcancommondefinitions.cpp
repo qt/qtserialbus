@@ -37,7 +37,7 @@ QT_BEGIN_NAMESPACE
     \value UnsignedInteger The signal value is an unsigned integer.
     \value Float The signal value is float.
     \value Double The signal value is double.
-    \value Ascii The signal value is an ASCII string.
+    \value AsciiString The signal value is an ASCII string.
 */
 
 /*!
@@ -93,7 +93,7 @@ QDebug operator<<(QDebug dbg, QtCanBus::DataFormat format)
     case QtCanBus::DataFormat::Double:
         dbg << "Double";
         break;
-    case QtCanBus::DataFormat::Ascii:
+    case QtCanBus::DataFormat::AsciiString:
         dbg << "ASCII";
         break;
     }
