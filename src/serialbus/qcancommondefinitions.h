@@ -16,7 +16,7 @@ namespace QtCanBus {
 
 enum class DataSource : quint8 {
     Payload = 0,
-    FrameId
+    FrameId,
 };
 
 enum class DataFormat : quint8 {
@@ -24,14 +24,14 @@ enum class DataFormat : quint8 {
     UnsignedInteger,
     Float,
     Double,
-    Ascii
+    AsciiString,
 };
 
 enum class MultiplexState : quint8 {
     None = 0x00,
     MultiplexorSwitch = 0x01,
     MultiplexedSignal = 0x02,
-    SwitchAndSignal = MultiplexorSwitch | MultiplexedSignal
+    SwitchAndSignal = MultiplexorSwitch | MultiplexedSignal,
 };
 
 using UniqueId = quint32;
