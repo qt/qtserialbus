@@ -194,11 +194,11 @@ void QCanUniqueIdDescription::setBitLength(quint8 length)
 /*!
     Returns the data endian of the unique identifier.
 
-    By default, \l {QtCanBus::}{LittleEndian} is used.
+    By default, \l {QSysInfo::}{LittleEndian} is used.
 
-    \sa setEndian(), QtCanBus::DataEndian
+    \sa setEndian(), QSysInfo::Endian
 */
-QtCanBus::DataEndian QCanUniqueIdDescription::endian() const
+QSysInfo::Endian QCanUniqueIdDescription::endian() const
 {
     return d->endian;
 }
@@ -206,9 +206,9 @@ QtCanBus::DataEndian QCanUniqueIdDescription::endian() const
 /*!
     Sets the data endian of the unique identifier to \a endian.
 
-    \sa endian(), QtCanBus::DataEndian
+    \sa endian(), QSysInfo::Endian
 */
-void QCanUniqueIdDescription::setEndian(QtCanBus::DataEndian endian)
+void QCanUniqueIdDescription::setEndian(QSysInfo::Endian endian)
 {
     d.detach();
     d->endian = endian;

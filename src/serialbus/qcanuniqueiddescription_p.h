@@ -24,7 +24,7 @@ class Q_SERIALBUS_PRIVATE_EXPORT QCanUniqueIdDescriptionPrivate : public QShared
 {
 public:
     QtCanBus::DataSource source = QtCanBus::DataSource::FrameId;
-    QtCanBus::DataEndian endian = QtCanBus::DataEndian::LittleEndian;
+    QSysInfo::Endian endian = QSysInfo::Endian::LittleEndian;
     quint16 startBit = 0;
     quint8 bitLength = 0;
 

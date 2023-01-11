@@ -47,8 +47,8 @@ public:
     quint8 bitLength() const;
     void setBitLength(quint8 length);
 
-    QtCanBus::DataEndian endian() const;
-    void setEndian(QtCanBus::DataEndian endian);
+    QSysInfo::Endian endian() const;
+    void setEndian(QSysInfo::Endian endian);
 
 private:
     QExplicitlySharedDataPointer<QCanUniqueIdDescriptionPrivate> d;

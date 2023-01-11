@@ -275,7 +275,7 @@ void tst_QCanFrameProcessor::parseSignal_data()
     QTest::addColumn<quint16>("startBit");
     QTest::addColumn<quint16>("bitLength");
     QTest::addColumn<QtCanBus::DataFormat>("format");
-    QTest::addColumn<QtCanBus::DataEndian>("endian");
+    QTest::addColumn<QSysInfo::Endian>("endian");
     QTest::addColumn<QVariant>("expectedValue");
 
     struct SourceDesc {
@@ -294,21 +294,21 @@ void tst_QCanFrameProcessor::parseSignal_data()
                 << s.source
                 << quint64(0x1234FFEC) << quint16(0) << quint16(16)
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(65516);
 
         QTest::addRow("%s, signed neg, 16bit, start 0, le", s.name)
                 << s.source
                 << quint64(0x1234FFEC) << quint16(0) << quint16(16)
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(-20);
 
         QTest::addRow("%s, signed pos, 16bit, start 0, le", s.name)
                 << s.source
                 << quint64(0x12340FEC) << quint16(0) << quint16(16)
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(4076);
 
         // LE, 16 bit, start 5
@@ -317,7 +317,7 @@ void tst_QCanFrameProcessor::parseSignal_data()
                 << quint64(0x1234FFECULL << 5)
                 << quint16(5) << quint16(16)
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(65516);
 
         QTest::addRow("%s, signed neg, 16bit, start 5, le", s.name)
@@ -325,7 +325,7 @@ void tst_QCanFrameProcessor::parseSignal_data()
                 << quint64((0x1234FFECULL << 5) & 0x1FFFFFFFU)
                 << quint16(5) << quint16(16)
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(-20);
 
         QTest::addRow("%s, signed pos, 16bit, start 5, le", s.name)
@@ -333,7 +333,7 @@ void tst_QCanFrameProcessor::parseSignal_data()
                 << quint64(0x12340FECULL << 5)
                 << quint16(5) << quint16(16)
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(4076);
 
         // LE, 19 bit, start 0
@@ -341,21 +341,21 @@ void tst_QCanFrameProcessor::parseSignal_data()
                 << s.source
                 << quint64(0x1234FFEC) << quint16(0) << quint16(19)
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(327660);
 
         QTest::addRow("%s, signed neg, 19bit, start 0, le", s.name)
                 << s.source
                 << quint64(0x123D800A) << quint16(0) << quint16(19)
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(-163830);
 
         QTest::addRow("%s, signed pos, 19bit, start 0, le", s.name)
                 << s.source
                 << quint64(0x1231800A) << quint16(0) << quint16(19)
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(98314);
 
         // LE, 19 bit, start 3
@@ -364,7 +364,7 @@ void tst_QCanFrameProcessor::parseSignal_data()
                 << quint64(0x1234FFECULL << 3)
                 << quint16(3) << quint16(19)
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(327660);
 
         QTest::addRow("%s, signed neg, 19bit, start 3, le", s.name)
@@ -372,7 +372,7 @@ void tst_QCanFrameProcessor::parseSignal_data()
                 << quint64(0x123D800AULL << 3)
                 << quint16(3) << quint16(19)
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(-163830);
 
         QTest::addRow("%s, signed pos, 19bit, start 3, le", s.name)
@@ -380,7 +380,7 @@ void tst_QCanFrameProcessor::parseSignal_data()
                 << quint64(0x1231800AULL << 3)
                 << quint16(3) << quint16(19)
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(98314);
 
         // BE, 16 bit, start 7
@@ -388,21 +388,21 @@ void tst_QCanFrameProcessor::parseSignal_data()
                 << s.source
                 << quint64(0x1234ECFF) << quint16(7) << quint16(16)
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(65516);
 
         QTest::addRow("%s, signed neg, 16bit, start 7, be", s.name)
                 << s.source
                 << quint64(0x1234ECFF) << quint16(7) << quint16(16)
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(-20);
 
         QTest::addRow("%s, signed pos, 16bit, start 7, be", s.name)
                 << s.source
                 << quint64(0x1234EC0F) << quint16(7) << quint16(16)
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(4076);
 
         // BE, 16 bit, start 5
@@ -410,21 +410,21 @@ void tst_QCanFrameProcessor::parseSignal_data()
                 << s.source
                 << quint64(0x1234FB3F) << quint16(5) << quint16(16)
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(65516);
 
         QTest::addRow("%s, signed neg, 16bit, start 5, be", s.name)
                 << s.source
                 << quint64(0x1234FB3F) << quint16(5) << quint16(16)
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(-20);
 
         QTest::addRow("%s, signed pos, 16bit, start 5, be", s.name)
                 << s.source
                 << quint64(0x1234FB03) << quint16(5) << quint16(16)
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(4076);
 
         // BE, 21 bit, start 7
@@ -432,21 +432,21 @@ void tst_QCanFrameProcessor::parseSignal_data()
                 << s.source
                 << quint64(0x1264FFA7) << quint16(7) << quint16(21)
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(1376236);
 
         QTest::addRow("%s, signed neg, 21bit, start 7, be", s.name)
                 << s.source
                 << quint64(0x1264FFA7) << quint16(7) << quint16(21)
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(-720916);
 
         QTest::addRow("%s, signed pos, 21bit, start 7, be", s.name)
                 << s.source
                 << quint64(0x1264FF27) << quint16(7) << quint16(21)
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(327660);
 
         // BE, 21 bit, start 4
@@ -454,21 +454,21 @@ void tst_QCanFrameProcessor::parseSignal_data()
                 << s.source
                 << quint64(0x12ECFF14) << quint16(4) << quint16(21)
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(1376236);
 
         QTest::addRow("%s, signed neg, 21bit, start 4, be", s.name)
                 << s.source
                 << quint64(0x12ECFF14) << quint16(4) << quint16(21)
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(-720916);
 
         QTest::addRow("%s, signed pos, 21bit, start 4, be", s.name)
                 << s.source
                 << quint64(0x12ECFF04) << quint16(4) << quint16(21)
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(327660);
 
         // Some LE tests for values less than 8 bit
@@ -476,21 +476,21 @@ void tst_QCanFrameProcessor::parseSignal_data()
                 << s.source
                 << quint64(0x12345678) << quint16(0) << quint16(4)
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(8);
 
         QTest::addRow("%s, unsinged, 4bit, start 3, le", s.name)
                 << s.source
                 << quint64(0x12345678) << quint16(3) << quint16(4)
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(15);
 
         QTest::addRow("%s, unsinged, 4bit, start 7, le", s.name)
                 << s.source
                 << quint64(0x12345678) << quint16(7) << quint16(4)
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(12);
 
         // Some BE tests for values less than 8 bit
@@ -498,21 +498,21 @@ void tst_QCanFrameProcessor::parseSignal_data()
                 << s.source
                 << quint64(0x12345678) << quint16(7) << quint16(4)
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(7);
 
         QTest::addRow("%s, unsinged, 4bit, start 5, be", s.name)
                 << s.source
                 << quint64(0x12345678) << quint16(5) << quint16(4)
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(14);
 
         QTest::addRow("%s, unsinged, 4bit, start 0, be", s.name)
                 << s.source
                 << quint64(0x12345678) << quint16(0) << quint16(4)
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(2);
     }
 
@@ -528,7 +528,7 @@ void tst_QCanFrameProcessor::parseSignal_data()
                     << QtCanBus::DataSource::Payload
                     << value << i << quint16(32)
                     << QtCanBus::DataFormat::Float
-                    << QtCanBus::DataEndian::LittleEndian
+                    << QSysInfo::Endian::LittleEndian
                     << QVariant(floatVal);
 
             // to get the proper BE value with an offset, we need to take an LE
@@ -543,7 +543,7 @@ void tst_QCanFrameProcessor::parseSignal_data()
                     << QtCanBus::DataSource::Payload
                     << value << quint16(23 - i) << quint16(32)
                     << QtCanBus::DataFormat::Float
-                    << QtCanBus::DataEndian::BigEndian
+                    << QSysInfo::Endian::BigEndian
                     << QVariant(floatVal);
         }
     }
@@ -558,7 +558,7 @@ void tst_QCanFrameProcessor::parseSignal_data()
                 << QtCanBus::DataSource::Payload
                 << value << quint16(0) << quint16(64)
                 << QtCanBus::DataFormat::Double
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(doubleVal);
 
         const double beDoubleVal = qToBigEndian(doubleVal);
@@ -567,7 +567,7 @@ void tst_QCanFrameProcessor::parseSignal_data()
                 << QtCanBus::DataSource::Payload
                 << value << quint16(7) << quint16(64)
                 << QtCanBus::DataFormat::Double
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(doubleVal);
     }
 
@@ -584,7 +584,7 @@ void tst_QCanFrameProcessor::parseSignal_data()
                     << s.source
                     << value << quint16(offset + i) << quint16(expectedData.size() * 8)
                     << QtCanBus::DataFormat::Ascii
-                    << QtCanBus::DataEndian::LittleEndian
+                    << QSysInfo::Endian::LittleEndian
                     << QVariant(expectedData);
         }
     }
@@ -597,7 +597,7 @@ void tst_QCanFrameProcessor::parseSignal()
     QFETCH(quint16, startBit);
     QFETCH(quint16, bitLength);
     QFETCH(QtCanBus::DataFormat, format);
-    QFETCH(QtCanBus::DataEndian, endian);
+    QFETCH(QSysInfo::Endian, endian);
     QFETCH(QVariant, expectedValue);
 
     QCanSignalDescription sig;
@@ -861,14 +861,14 @@ void tst_QCanFrameProcessor::parseExtendedMultiplexedSignals()
 
     QCanSignalDescription s0; // multiplexor 1
     s0.setName("s0");
-    s0.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+    s0.setDataEndian(QSysInfo::Endian::LittleEndian);
     s0.setStartBit(0);
     s0.setBitLength(4);
     s0.setMultiplexState(QtCanBus::MultiplexState::MultiplexorSwitch);
 
     QCanSignalDescription s1; // multiplexor 2, also depends on the value of s0
     s1.setName("s1");
-    s1.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+    s1.setDataEndian(QSysInfo::Endian::LittleEndian);
     s1.setStartBit(4);
     s1.setBitLength(4);
     s1.setMultiplexState(QtCanBus::MultiplexState::SwitchAndSignal);
@@ -876,7 +876,7 @@ void tst_QCanFrameProcessor::parseExtendedMultiplexedSignals()
 
     QCanSignalDescription s2; // depends on mux1 only, contains 12 bits of data
     s2.setName("s2");
-    s2.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+    s2.setDataEndian(QSysInfo::Endian::LittleEndian);
     s2.setStartBit(4);
     s2.setBitLength(12);
     s2.setMultiplexState(QtCanBus::MultiplexState::MultiplexedSignal);
@@ -885,7 +885,7 @@ void tst_QCanFrameProcessor::parseExtendedMultiplexedSignals()
 
     QCanSignalDescription s3; // depends on mux2 (so indirectly on mux1)
     s3.setName("s3");
-    s3.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+    s3.setDataEndian(QSysInfo::Endian::LittleEndian);
     s3.setStartBit(8);
     s3.setBitLength(8);
     s3.setMultiplexState(QtCanBus::MultiplexState::MultiplexedSignal);
@@ -893,7 +893,7 @@ void tst_QCanFrameProcessor::parseExtendedMultiplexedSignals()
 
     QCanSignalDescription s4; // depends on mux2 (so indirectly on mux1)
     s4.setName("s4");
-    s4.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+    s4.setDataEndian(QSysInfo::Endian::LittleEndian);
     s4.setStartBit(8);
     s4.setBitLength(8);
     s4.setMultiplexState(QtCanBus::MultiplexState::MultiplexedSignal);
@@ -1106,7 +1106,7 @@ void tst_QCanFrameProcessor::extractUniqueId_data()
     const QtCanBus::UniqueId uniqueId = 0x0965;
     for (quint16 startBit = 0; startBit < 8; ++startBit) {
         uidDesc.setStartBit(startBit);
-        uidDesc.setEndian(QtCanBus::DataEndian::LittleEndian);
+        uidDesc.setEndian(QSysInfo::Endian::LittleEndian);
         const QCanBusFrame::FrameId frameIdLe = qToLittleEndian(uniqueId) << startBit;
         QTest::addRow("frameId, LE, start %d", startBit)
                 << uidDesc
@@ -1122,7 +1122,7 @@ void tst_QCanFrameProcessor::extractUniqueId_data()
         const auto val = (qToLittleEndian(uniqueId) << 16) >> idx;
         const auto startBit = startBitsFrame[idx];
         const QCanBusFrame::FrameId frameIdBe = qToBigEndian(val);
-        uidDesc.setEndian(QtCanBus::DataEndian::BigEndian);
+        uidDesc.setEndian(QSysInfo::Endian::BigEndian);
         uidDesc.setStartBit(startBit);
         QTest::addRow("frameId, BE, start %d", startBit)
                 << uidDesc
@@ -1135,7 +1135,7 @@ void tst_QCanFrameProcessor::extractUniqueId_data()
     uidDesc.setSource(QtCanBus::DataSource::Payload);
     for (quint16 startBit = 8; startBit < 16; ++startBit) {
         uidDesc.setStartBit(startBit);
-        uidDesc.setEndian(QtCanBus::DataEndian::LittleEndian);
+        uidDesc.setEndian(QSysInfo::Endian::LittleEndian);
         const quint32 payload = 0x01 | (qToLittleEndian(uniqueId) << startBit);
         const QByteArray payloadData(reinterpret_cast<const char *>(&payload), sizeof(payload));
         QTest::addRow("payload, LE, offset %d", startBit)
@@ -1153,7 +1153,7 @@ void tst_QCanFrameProcessor::extractUniqueId_data()
         const auto val = (qToLittleEndian(uniqueId) << 8) >> idx;
         quint32 payload = 0x01 | qToBigEndian(val);
         const QByteArray payloadData(reinterpret_cast<const char *>(&payload), sizeof(payload));
-        uidDesc.setEndian(QtCanBus::DataEndian::BigEndian);
+        uidDesc.setEndian(QSysInfo::Endian::BigEndian);
         uidDesc.setStartBit(startBit);
         QTest::addRow("payload, BE, offset %d", startBit)
                 << uidDesc
@@ -1193,7 +1193,7 @@ void tst_QCanFrameProcessor::prepareFrame_data()
     QTest::addColumn<quint16>("bitLength");
     QTest::addColumn<QtCanBus::DataSource>("source");
     QTest::addColumn<QtCanBus::DataFormat>("format");
-    QTest::addColumn<QtCanBus::DataEndian>("endian");
+    QTest::addColumn<QSysInfo::Endian>("endian");
     QTest::addColumn<QVariant>("signalValue");
     QTest::addColumn<quint64>("expectedData");
 
@@ -1212,21 +1212,21 @@ void tst_QCanFrameProcessor::prepareFrame_data()
         QTest::addRow("%s, unsigned, 16bit, start 0, le", s.name)
                 << quint16(0) << quint16(16) << s.source
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(65516)
                 << quint64(0xFFEC);
 
         QTest::addRow("%s, signed neg, 16bit, start 0, le", s.name)
                 << quint16(0) << quint16(16) << s.source
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(-20)
                 << quint64(0xFFEC);
 
         QTest::addRow("%s, signed pos, 16bit, start 0, le", s.name)
                 << quint16(0) << quint16(16) << s.source
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(32748)
                 << quint64(0x7FEC);
 
@@ -1234,21 +1234,21 @@ void tst_QCanFrameProcessor::prepareFrame_data()
         QTest::addRow("%s, unsigned, 16bit, start 5, le", s.name)
                 << quint16(5) << quint16(16) << s.source
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(65516)
                 << quint64(0xFFECULL << 5);
 
         QTest::addRow("%s, signed neg, 16bit, start 5, le", s.name)
                 << quint16(5) << quint16(16) << s.source
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(-20)
                 << quint64(0xFFECULL << 5);
 
         QTest::addRow("%s, signed pos, 16bit, start 5, le", s.name)
                 << quint16(5) << quint16(16) << s.source
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(32748)
                 << quint64(0x7FECULL << 5);
 
@@ -1256,21 +1256,21 @@ void tst_QCanFrameProcessor::prepareFrame_data()
         QTest::addRow("%s, unsigned, 19bit, start 0, le", s.name)
                 << quint16(0) << quint16(19) << s.source
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(327660)
                 << quint64(0x4FFEC);
 
         QTest::addRow("%s, signed neg, 19bit, start 0, le", s.name)
                 << quint16(0) << quint16(19) << s.source
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(-196628)
                 << quint64(0x4FFEC);
 
         QTest::addRow("%s, signed pos, 19bit, start 0, le", s.name)
                 << quint16(0) << quint16(19) << s.source
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(196588)
                 << quint64(0x2FFEC);
 
@@ -1278,21 +1278,21 @@ void tst_QCanFrameProcessor::prepareFrame_data()
         QTest::addRow("%s, unsigned, 19bit, start 3, le", s.name)
                 << quint16(3) << quint16(19) << s.source
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(327660)
                 << quint64(0x4FFECULL << 3);
 
         QTest::addRow("%s, signed neg, 19bit, start 3, le", s.name)
                 << quint16(3) << quint16(19) << s.source
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(-196628)
                 << quint64(0x4FFECULL << 3);
 
         QTest::addRow("%s, signed pos, 19bit, start 3, le", s.name)
                 << quint16(3) << quint16(19) << s.source
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(196588)
                 << quint64(0x2FFECULL << 3);
 
@@ -1300,21 +1300,21 @@ void tst_QCanFrameProcessor::prepareFrame_data()
         QTest::addRow("%s, unsigned, 16bit, start 7, be", s.name)
                 << quint16(7) << quint16(16) << s.source
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(65516)
                 << quint64(0xECFF);
 
         QTest::addRow("%s, signed neg, 16bit, start 7, be", s.name)
                 << quint16(7) << quint16(16) << s.source
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(-20)
                 << quint64(0xECFF);
 
         QTest::addRow("%s, signed pos, 16bit, start 7, be", s.name)
                 << quint16(7) << quint16(16) << s.source
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(32748)
                 << quint64(0xEC7F);
 
@@ -1322,21 +1322,21 @@ void tst_QCanFrameProcessor::prepareFrame_data()
         QTest::addRow("%s, unsigned, 16bit, start 5, be", s.name)
                 << quint16(5) << quint16(16) << s.source
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(65516)
                 << quint64(0x00FB3F);
 
         QTest::addRow("%s, signed neg, 16bit, start 5, be", s.name)
                 << quint16(5) << quint16(16) << s.source
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(-20)
                 << quint64(0x00FB3F);
 
         QTest::addRow("%s, signed pos, 16bit, start 5, be", s.name)
                 << quint16(5) << quint16(16) << s.source
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(32748)
                 << quint64(0x00FB1F);
 
@@ -1344,21 +1344,21 @@ void tst_QCanFrameProcessor::prepareFrame_data()
         QTest::addRow("%s, unsigned, 21bit, start 7, be", s.name)
                 << quint16(7) << quint16(21) << s.source
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(1834988) /* 0x1BFFEC */
                 << quint64(0x60FFDF);
 
         QTest::addRow("%s, signed neg, 21bit, start 7, be", s.name)
                 << quint16(7) << quint16(21) << s.source
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(-262164)
                 << quint64(0x60FFDF);
 
         QTest::addRow("%s, signed pos, 21bit, start 7, be", s.name)
                 << quint16(7) << quint16(21) << s.source
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(786412)
                 << quint64(0x60FF5F);
 
@@ -1366,21 +1366,21 @@ void tst_QCanFrameProcessor::prepareFrame_data()
         QTest::addRow("%s, unsigned, 21bit, start 4, be", s.name)
                 << quint16(4) << quint16(21) << s.source
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(1834988) /* 0x1BFFEC */
                 << quint64(0xECFF1B);
 
         QTest::addRow("%s, signed neg, 21bit, start 4, be", s.name)
                 << quint16(4) << quint16(21) << s.source
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(-262164)
                 << quint64(0xECFF1B);
 
         QTest::addRow("%s, signed pos, 21bit, start 4, be", s.name)
                 << quint16(4) << quint16(21) << s.source
                 << QtCanBus::DataFormat::SignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(786412)
                 << quint64(0xECFF0B);
 
@@ -1388,21 +1388,21 @@ void tst_QCanFrameProcessor::prepareFrame_data()
         QTest::addRow("%s, unsinged, 4bit, start 0, le", s.name)
                 << quint16(0) << quint16(4) << s.source
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(8)
                 << quint64(0x08);
 
         QTest::addRow("%s, unsinged, 4bit, start 3, le", s.name)
                 << quint16(3) << quint16(4) << s.source
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(15)
                 << quint64(0x78);
 
         QTest::addRow("%s, unsinged, 4bit, start 7, le", s.name)
                 << quint16(7) << quint16(4) << s.source
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(12)
                 << quint64(0x0600);
 
@@ -1410,21 +1410,21 @@ void tst_QCanFrameProcessor::prepareFrame_data()
         QTest::addRow("%s, unsinged, 4bit, start 7, be", s.name)
                 << quint16(7) << quint16(4) << s.source
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(8)
                 << quint64(0x80);
 
         QTest::addRow("%s, unsinged, 4bit, start 5, be", s.name)
                 << quint16(5) << quint16(4) << s.source
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(14)
                 << quint64(0x38);
 
         QTest::addRow("%s, unsinged, 4bit, start 0, be", s.name)
                 << quint16(0) << quint16(4) << s.source
                 << QtCanBus::DataFormat::UnsignedInteger
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(3)
                 << quint64(0x6000);
     }
@@ -1441,7 +1441,7 @@ void tst_QCanFrameProcessor::prepareFrame_data()
                     << quint16(i) << quint16(32)
                     << QtCanBus::DataSource::Payload
                     << QtCanBus::DataFormat::Float
-                    << QtCanBus::DataEndian::LittleEndian
+                    << QSysInfo::Endian::LittleEndian
                     << QVariant(floatVal)
                     << value;
 
@@ -1457,7 +1457,7 @@ void tst_QCanFrameProcessor::prepareFrame_data()
                     << quint16(23 - i) << quint16(32)
                     << QtCanBus::DataSource::Payload
                     << QtCanBus::DataFormat::Float
-                    << QtCanBus::DataEndian::BigEndian
+                    << QSysInfo::Endian::BigEndian
                     << QVariant(floatVal)
                     << value;
         }
@@ -1473,7 +1473,7 @@ void tst_QCanFrameProcessor::prepareFrame_data()
                 << quint16(0) << quint16(64)
                 << QtCanBus::DataSource::Payload
                 << QtCanBus::DataFormat::Double
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(doubleVal)
                 << value;
 
@@ -1484,7 +1484,7 @@ void tst_QCanFrameProcessor::prepareFrame_data()
                 << quint16(7) << quint16(64)
                 << QtCanBus::DataSource::Payload
                 << QtCanBus::DataFormat::Double
-                << QtCanBus::DataEndian::BigEndian
+                << QSysInfo::Endian::BigEndian
                 << QVariant(doubleVal)
                 << value;
     }
@@ -1501,7 +1501,7 @@ void tst_QCanFrameProcessor::prepareFrame_data()
             QTest::addRow("%s, ascii, start %d", s.name, offset + i)
                     << quint16(offset + i) << quint16(asciiData.size() * 8) << s.source
                     << QtCanBus::DataFormat::Ascii
-                    << QtCanBus::DataEndian::LittleEndian /* does not matter */
+                    << QSysInfo::Endian::LittleEndian /* does not matter */
                     << QVariant(asciiData)
                     << value;
         }
@@ -1519,7 +1519,7 @@ void tst_QCanFrameProcessor::prepareFrame_data()
                 << quint16(0) << quint16(expectedData.size() * 8)
                 << QtCanBus::DataSource::Payload
                 << QtCanBus::DataFormat::Ascii
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(data)
                 << value;
     }
@@ -1535,7 +1535,7 @@ void tst_QCanFrameProcessor::prepareFrame_data()
                 << quint16(0) << quint16(expectedData.size() * 8)
                 << QtCanBus::DataSource::Payload
                 << QtCanBus::DataFormat::Ascii
-                << QtCanBus::DataEndian::LittleEndian
+                << QSysInfo::Endian::LittleEndian
                 << QVariant(data)
                 << value;
     }
@@ -1547,7 +1547,7 @@ void tst_QCanFrameProcessor::prepareFrame()
     QFETCH(quint16, bitLength);
     QFETCH(QtCanBus::DataSource, source);
     QFETCH(QtCanBus::DataFormat, format);
-    QFETCH(QtCanBus::DataEndian, endian);
+    QFETCH(QSysInfo::Endian, endian);
     QFETCH(QVariant, signalValue);
     QFETCH(quint64, expectedData);
 
@@ -1570,7 +1570,7 @@ void tst_QCanFrameProcessor::prepareFrame()
     static constexpr QtCanBus::UniqueId uniqueId = 123;
 
     QCanUniqueIdDescription uidDesc;
-    uidDesc.setEndian(QtCanBus::DataEndian::LittleEndian);
+    uidDesc.setEndian(QSysInfo::Endian::LittleEndian);
     uidDesc.setSource(uidSource);
     uidDesc.setStartBit(0);
     uidDesc.setBitLength(uidLength);
@@ -1706,14 +1706,14 @@ void tst_QCanFrameProcessor::prepareMultiplexedPayload()
 
     QCanSignalDescription s0; // multiplexor 1
     s0.setName("s0");
-    s0.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+    s0.setDataEndian(QSysInfo::Endian::LittleEndian);
     s0.setStartBit(0);
     s0.setBitLength(4);
     s0.setMultiplexState(QtCanBus::MultiplexState::MultiplexorSwitch);
 
     QCanSignalDescription s1; // multiplexor 2, also depends on the value of s0
     s1.setName("s1");
-    s1.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+    s1.setDataEndian(QSysInfo::Endian::LittleEndian);
     s1.setStartBit(4);
     s1.setBitLength(4);
     s1.setMultiplexState(QtCanBus::MultiplexState::SwitchAndSignal);
@@ -1721,7 +1721,7 @@ void tst_QCanFrameProcessor::prepareMultiplexedPayload()
 
     QCanSignalDescription s2; // depends on mux1 only, contains 12 bits of data
     s2.setName("s2");
-    s2.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+    s2.setDataEndian(QSysInfo::Endian::LittleEndian);
     s2.setStartBit(4);
     s2.setBitLength(12);
     s2.setMultiplexState(QtCanBus::MultiplexState::MultiplexedSignal);
@@ -1730,7 +1730,7 @@ void tst_QCanFrameProcessor::prepareMultiplexedPayload()
 
     QCanSignalDescription s3; // depends on mux2 (so indirectly on mux1)
     s3.setName("s3");
-    s3.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+    s3.setDataEndian(QSysInfo::Endian::LittleEndian);
     s3.setStartBit(8);
     s3.setBitLength(8);
     s3.setMultiplexState(QtCanBus::MultiplexState::MultiplexedSignal);
@@ -1738,7 +1738,7 @@ void tst_QCanFrameProcessor::prepareMultiplexedPayload()
 
     QCanSignalDescription s4; // depends on mux2 (so indirectly on mux1)
     s4.setName("s4");
-    s4.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+    s4.setDataEndian(QSysInfo::Endian::LittleEndian);
     s4.setStartBit(8);
     s4.setBitLength(8);
     s4.setMultiplexState(QtCanBus::MultiplexState::MultiplexedSignal);
@@ -1969,7 +1969,7 @@ void tst_QCanFrameProcessor::prepareUniqueId_data()
     QCanSignalDescription signalDesc;
     signalDesc.setName("s0");
     signalDesc.setDataSource(QtCanBus::DataSource::Payload);
-    signalDesc.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+    signalDesc.setDataEndian(QSysInfo::Endian::LittleEndian);
     signalDesc.setDataFormat(QtCanBus::DataFormat::UnsignedInteger);
     signalDesc.setStartBit(0);
     signalDesc.setBitLength(8);
@@ -1988,7 +1988,7 @@ void tst_QCanFrameProcessor::prepareUniqueId_data()
     uidDesc.setBitLength(12);
     for (quint8 startBit = 0; startBit < 8; ++startBit) {
         uidDesc.setStartBit(startBit);
-        uidDesc.setEndian(QtCanBus::DataEndian::LittleEndian);
+        uidDesc.setEndian(QSysInfo::Endian::LittleEndian);
         const QCanBusFrame::FrameId frameId = qFromLittleEndian(uniqueId) << startBit;
         QTest::addRow("frameId, LE, start %d", startBit)
                 << uidDesc << messageDesc << uniqueId << signalValues
@@ -2003,7 +2003,7 @@ void tst_QCanFrameProcessor::prepareUniqueId_data()
         const auto val = (qToLittleEndian(uniqueId) << 16) >> idx;
         const QCanBusFrame::FrameId frameId = qToBigEndian(val);
         const auto startBit = startBitsFrame[idx];
-        uidDesc.setEndian(QtCanBus::DataEndian::BigEndian);
+        uidDesc.setEndian(QSysInfo::Endian::BigEndian);
         uidDesc.setStartBit(startBit);
         QTest::addRow("frameId, BE, offser %d", startBit)
                 << uidDesc << messageDesc << uniqueId << signalValues
@@ -2017,7 +2017,7 @@ void tst_QCanFrameProcessor::prepareUniqueId_data()
 
     for (quint8 startBit = 8; startBit < 16; ++startBit) {
         uidDesc.setStartBit(startBit);
-        uidDesc.setEndian(QtCanBus::DataEndian::LittleEndian);
+        uidDesc.setEndian(QSysInfo::Endian::LittleEndian);
         const quint32 payload = 0x01 | qFromLittleEndian(uniqueId) << startBit;
         const QByteArray payloadData(reinterpret_cast<const char *>(&payload), sizeof(payload));
         QTest::addRow("payload, LE, offser %d", startBit)
@@ -2034,7 +2034,7 @@ void tst_QCanFrameProcessor::prepareUniqueId_data()
         const auto startBit = startBitsPayload[idx];
         quint32 payload = 0x01 | qToBigEndian(val);
         const QByteArray payloadData(reinterpret_cast<const char *>(&payload), sizeof(payload));
-        uidDesc.setEndian(QtCanBus::DataEndian::BigEndian);
+        uidDesc.setEndian(QSysInfo::Endian::BigEndian);
         uidDesc.setStartBit(startBit);
         QTest::addRow("payload, BE, start %d", startBit)
                 << uidDesc << messageDesc << uniqueId << signalValues
@@ -2071,7 +2071,7 @@ void tst_QCanFrameProcessor::roundtrip_data()
     {
         QCanUniqueIdDescription uidDesc;
         uidDesc.setSource(QtCanBus::DataSource::FrameId);
-        uidDesc.setEndian(QtCanBus::DataEndian::LittleEndian);
+        uidDesc.setEndian(QSysInfo::Endian::LittleEndian);
         uidDesc.setStartBit(0);
         uidDesc.setBitLength(11);
 
@@ -2086,7 +2086,7 @@ void tst_QCanFrameProcessor::roundtrip_data()
         QCanSignalDescription signalDesc;
         signalDesc.setName("s0");
         signalDesc.setDataSource(QtCanBus::DataSource::Payload);
-        signalDesc.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+        signalDesc.setDataEndian(QSysInfo::Endian::LittleEndian);
         signalDesc.setDataFormat(QtCanBus::DataFormat::SignedInteger);
         signalDesc.setStartBit(0);
         signalDesc.setBitLength(4);
@@ -2134,7 +2134,7 @@ void tst_QCanFrameProcessor::roundtrip_data()
     {
         QCanUniqueIdDescription uidDesc;
         uidDesc.setSource(QtCanBus::DataSource::FrameId);
-        uidDesc.setEndian(QtCanBus::DataEndian::BigEndian);
+        uidDesc.setEndian(QSysInfo::Endian::BigEndian);
         uidDesc.setStartBit(7);
         uidDesc.setBitLength(11);
 
@@ -2149,7 +2149,7 @@ void tst_QCanFrameProcessor::roundtrip_data()
         QCanSignalDescription signalDesc;
         signalDesc.setName("s0");
         signalDesc.setDataSource(QtCanBus::DataSource::Payload);
-        signalDesc.setDataEndian(QtCanBus::DataEndian::BigEndian);
+        signalDesc.setDataEndian(QSysInfo::Endian::BigEndian);
         signalDesc.setDataFormat(QtCanBus::DataFormat::SignedInteger);
         signalDesc.setStartBit(7);
         signalDesc.setBitLength(4);

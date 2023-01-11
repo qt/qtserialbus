@@ -4,6 +4,7 @@
 #ifndef QCANCOMMONDEFINITIONS_H
 #define QCANCOMMONDEFINITIONS_H
 
+#include <QtCore/qsysinfo.h>
 #include <QtCore/qtconfigmacros.h>
 #include <QtCore/qtypes.h>
 
@@ -26,11 +27,6 @@ enum class DataFormat : quint8 {
     Ascii
 };
 
-enum class DataEndian : quint8 {
-    LittleEndian = 0,
-    BigEndian
-};
-
 enum class MultiplexState : quint8 {
     None = 0x00,
     MultiplexorSwitch = 0x01,
@@ -48,7 +44,6 @@ class QDebug;
 
 Q_SERIALBUS_EXPORT QDebug operator<<(QDebug dbg, QtCanBus::DataSource source);
 Q_SERIALBUS_EXPORT QDebug operator<<(QDebug dbg, QtCanBus::DataFormat format);
-Q_SERIALBUS_EXPORT QDebug operator<<(QDebug dbg, QtCanBus::DataEndian endian);
 Q_SERIALBUS_EXPORT QDebug operator<<(QDebug dbg, QtCanBus::MultiplexState state);
 
 #endif // QT_NO_DEBUG_STREAM

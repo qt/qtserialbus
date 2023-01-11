@@ -47,7 +47,7 @@ void tst_QCanDbcFileParser::uinqueId()
 {
     QCanUniqueIdDescription expectedDesc;
     expectedDesc.setSource(QtCanBus::DataSource::FrameId);
-    expectedDesc.setEndian(QtCanBus::DataEndian::LittleEndian);
+    expectedDesc.setEndian(QSysInfo::Endian::LittleEndian);
     expectedDesc.setStartBit(0);
     expectedDesc.setBitLength(29);
 
@@ -138,7 +138,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QCanSignalDescription signalDesc;
         signalDesc.setName("Signal0"); // correct
-        signalDesc.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+        signalDesc.setDataEndian(QSysInfo::Endian::LittleEndian);
         signalDesc.setDataFormat(QtCanBus::DataFormat::UnsignedInteger);
         signalDesc.setDataSource(QtCanBus::DataSource::Payload);
         signalDesc.setStartBit(0);
@@ -181,7 +181,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QCanSignalDescription signalDesc;
         signalDesc.setName("s0");
-        signalDesc.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+        signalDesc.setDataEndian(QSysInfo::Endian::LittleEndian);
         signalDesc.setDataFormat(QtCanBus::DataFormat::UnsignedInteger);
         signalDesc.setDataSource(QtCanBus::DataSource::Payload);
         signalDesc.setStartBit(0);
@@ -211,7 +211,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QCanSignalDescription signalDesc;
         signalDesc.setName("s0");
-        signalDesc.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+        signalDesc.setDataEndian(QSysInfo::Endian::LittleEndian);
         signalDesc.setDataFormat(QtCanBus::DataFormat::UnsignedInteger);
         signalDesc.setDataSource(QtCanBus::DataSource::Payload);
         signalDesc.setStartBit(0);
@@ -224,7 +224,7 @@ void tst_QCanDbcFileParser::parseFile_data()
         messageDesc.addSignalDescription(signalDesc);
 
         signalDesc.setName("s1");
-        signalDesc.setDataEndian(QtCanBus::DataEndian::BigEndian);
+        signalDesc.setDataEndian(QSysInfo::Endian::BigEndian);
         signalDesc.setBitLength(8);
         signalDesc.setStartBit(23);
         signalDesc.setPhysicalUnit("");
@@ -244,7 +244,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QCanSignalDescription signalDesc;
         signalDesc.setName("s0");
-        signalDesc.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+        signalDesc.setDataEndian(QSysInfo::Endian::LittleEndian);
         signalDesc.setDataFormat(QtCanBus::DataFormat::UnsignedInteger);
         signalDesc.setDataSource(QtCanBus::DataSource::Payload);
         signalDesc.setStartBit(0);
@@ -293,7 +293,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QCanSignalDescription signalDesc;
         signalDesc.setName("s0");
-        signalDesc.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+        signalDesc.setDataEndian(QSysInfo::Endian::LittleEndian);
         signalDesc.setDataFormat(QtCanBus::DataFormat::UnsignedInteger);
         signalDesc.setDataSource(QtCanBus::DataSource::Payload);
         signalDesc.setStartBit(0);
@@ -349,7 +349,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QCanSignalDescription signalDesc;
         signalDesc.setName("s0");
-        signalDesc.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+        signalDesc.setDataEndian(QSysInfo::Endian::LittleEndian);
         signalDesc.setDataFormat(QtCanBus::DataFormat::UnsignedInteger);
         signalDesc.setDataSource(QtCanBus::DataSource::Payload);
         signalDesc.setStartBit(0);
@@ -405,7 +405,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QCanSignalDescription signalDesc;
         signalDesc.setName("s0");
-        signalDesc.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+        signalDesc.setDataEndian(QSysInfo::Endian::LittleEndian);
         signalDesc.setDataFormat(QtCanBus::DataFormat::UnsignedInteger);
         signalDesc.setDataSource(QtCanBus::DataSource::Payload);
         signalDesc.setStartBit(0);
@@ -446,7 +446,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QCanSignalDescription signalDesc;
         signalDesc.setName("s0");
-        signalDesc.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+        signalDesc.setDataEndian(QSysInfo::Endian::LittleEndian);
         signalDesc.setDataFormat(QtCanBus::DataFormat::UnsignedInteger);
         signalDesc.setDataSource(QtCanBus::DataSource::Payload);
         signalDesc.setStartBit(0);
@@ -495,7 +495,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QCanSignalDescription signalDesc;
         signalDesc.setName("s0");
-        signalDesc.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+        signalDesc.setDataEndian(QSysInfo::Endian::LittleEndian);
         signalDesc.setDataFormat(QtCanBus::DataFormat::UnsignedInteger);
         signalDesc.setDataSource(QtCanBus::DataSource::Payload);
         signalDesc.setStartBit(0);
@@ -538,7 +538,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QCanSignalDescription signalDesc;
         signalDesc.setName("s0");
-        signalDesc.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+        signalDesc.setDataEndian(QSysInfo::Endian::LittleEndian);
         signalDesc.setDataFormat(QtCanBus::DataFormat::SignedInteger);
         signalDesc.setDataSource(QtCanBus::DataSource::Payload);
         signalDesc.setStartBit(0);
@@ -564,7 +564,7 @@ void tst_QCanDbcFileParser::parseFile_data()
         otherDesc.setComment("comment for Test1.");
 
         signalDesc.setName("s2");
-        signalDesc.setDataEndian(QtCanBus::DataEndian::BigEndian);
+        signalDesc.setDataEndian(QSysInfo::Endian::BigEndian);
         signalDesc.setDataFormat(QtCanBus::DataFormat::UnsignedInteger);
         signalDesc.setStartBit(7);
         signalDesc.setBitLength(8);
@@ -587,7 +587,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QCanSignalDescription signalDesc;
         signalDesc.setName("s0");
-        signalDesc.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+        signalDesc.setDataEndian(QSysInfo::Endian::LittleEndian);
         signalDesc.setDataFormat(QtCanBus::DataFormat::UnsignedInteger);
         signalDesc.setDataSource(QtCanBus::DataSource::Payload);
         signalDesc.setMultiplexState(QtCanBus::MultiplexState::MultiplexorSwitch);
@@ -644,7 +644,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QCanSignalDescription signalDesc;
         signalDesc.setName("s0");
-        signalDesc.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+        signalDesc.setDataEndian(QSysInfo::Endian::LittleEndian);
         signalDesc.setDataFormat(QtCanBus::DataFormat::UnsignedInteger);
         signalDesc.setDataSource(QtCanBus::DataSource::Payload);
         signalDesc.setMultiplexState(QtCanBus::MultiplexState::MultiplexorSwitch);
@@ -735,7 +735,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QCanSignalDescription signalDesc;
         signalDesc.setName("s0");
-        signalDesc.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+        signalDesc.setDataEndian(QSysInfo::Endian::LittleEndian);
         signalDesc.setDataFormat(QtCanBus::DataFormat::UnsignedInteger);
         signalDesc.setDataSource(QtCanBus::DataSource::Payload);
         signalDesc.setStartBit(0);
@@ -792,7 +792,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QCanSignalDescription signalDesc;
         signalDesc.setName("Signal0");
-        signalDesc.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+        signalDesc.setDataEndian(QSysInfo::Endian::LittleEndian);
         signalDesc.setDataFormat(QtCanBus::DataFormat::Float);
         signalDesc.setDataSource(QtCanBus::DataSource::Payload);
         signalDesc.setStartBit(0);
@@ -811,7 +811,7 @@ void tst_QCanDbcFileParser::parseFile_data()
         otherDesc.setTransmitter("Vector__XXX");
 
         signalDesc.setName("s0");
-        signalDesc.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+        signalDesc.setDataEndian(QSysInfo::Endian::LittleEndian);
         signalDesc.setDataFormat(QtCanBus::DataFormat::UnsignedInteger);
         signalDesc.setDataSource(QtCanBus::DataSource::Payload);
         signalDesc.setMultiplexState(QtCanBus::MultiplexState::MultiplexorSwitch);

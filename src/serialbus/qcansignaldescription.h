@@ -58,8 +58,8 @@ public:
     QtCanBus::DataSource dataSource() const;
     void setDataSource(QtCanBus::DataSource source);
 
-    QtCanBus::DataEndian dataEndian() const;
-    void setDataEndian(QtCanBus::DataEndian endian);
+    QSysInfo::Endian dataEndian() const;
+    void setDataEndian(QSysInfo::Endian endian);
 
     QtCanBus::DataFormat dataFormat() const;
     void setDataFormat(QtCanBus::DataFormat format);

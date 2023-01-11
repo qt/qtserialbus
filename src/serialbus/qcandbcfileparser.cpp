@@ -275,7 +275,7 @@ QCanUniqueIdDescription QCanDbcFileParser::uniqueIdDescription()
 {
     QCanUniqueIdDescription desc;
     desc.setSource(QtCanBus::DataSource::FrameId);
-    desc.setEndian(QtCanBus::DataEndian::LittleEndian);
+    desc.setEndian(QSysInfo::Endian::LittleEndian);
     desc.setStartBit(0);
     desc.setBitLength(29); // for both extended and normal frame id
     return desc;
@@ -590,7 +590,7 @@ QCanSignalDescription QCanDbcFileParserPrivate::extractSignal(const QRegularExpr
 
     // 0 = BE; 1 = LE
     const auto endian = match.capturedView(u"byteOrder"_s) == u"0"_s
-            ? QtCanBus::DataEndian::BigEndian : QtCanBus::DataEndian::LittleEndian;
+            ? QSysInfo::Endian::BigEndian : QSysInfo::Endian::LittleEndian;
     desc.setDataEndian(endian);
 
     // + = unsigned; - = signed

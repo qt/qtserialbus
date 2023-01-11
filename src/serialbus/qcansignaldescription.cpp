@@ -76,13 +76,13 @@ QT_BEGIN_NAMESPACE
 
     \code
     QCanSignalDescription signal1;
-    signal1.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+    signal1.setDataEndian(QSysInfo::Endian::LittleEndian);
     signal1.setStartBit(0);
     signal1.setBitLength(12);
     // other parameters for signal1
 
     QCanSignalDescription signal2;
-    signal2.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+    signal2.setDataEndian(QSysInfo::Endian::LittleEndian);
     signal2.setStartBit(12);
     signal2.setBitLength(12);
     // other parameters for signal2
@@ -99,13 +99,13 @@ QT_BEGIN_NAMESPACE
 
     \code
     QCanSignalDescription signal1;
-    signal1.setDataEndian(QtCanBus::DataEndian::BigEndian);
+    signal1.setDataEndian(QSysInfo::Endian::BigEndian);
     signal1.setStartBit(7);
     signal1.setBitLength(12);
     // other parameters for signal1
 
     QCanSignalDescription signal2;
-    signal2.setDataEndian(QtCanBus::DataEndian::BigEndian);
+    signal2.setDataEndian(QSysInfo::Endian::BigEndian);
     signal2.setStartBit(11);
     signal2.setBitLength(12);
     // other parameters for signal2
@@ -392,14 +392,14 @@ void QCanSignalDescription::setDataSource(QtCanBus::DataSource source)
 /*!
     Returns the data endian of the signal's value.
 
-    By default, \l {QtCanBus::DataEndian::}{BigEndian} is used.
+    By default, \l {QSysInfo::}{BigEndian} is used.
 
     \note The data endian is ignored if the \l dataFormat() is set to
     \l {QtCanBus::DataFormat::}{Ascii}.
 
-    \sa setDataEndian(), QtCanBus::DataEndian
+    \sa setDataEndian(), QSysInfo::Endian
 */
-QtCanBus::DataEndian QCanSignalDescription::dataEndian() const
+QSysInfo::Endian QCanSignalDescription::dataEndian() const
 {
     return d->endian;
 }
@@ -407,9 +407,9 @@ QtCanBus::DataEndian QCanSignalDescription::dataEndian() const
 /*!
     Sets the data endian of the signal's value to \a endian.
 
-    \sa dataEndian(), QtCanBus::DataEndian
+    \sa dataEndian(), QSysInfo::Endian
 */
-void QCanSignalDescription::setDataEndian(QtCanBus::DataEndian endian)
+void QCanSignalDescription::setDataEndian(QSysInfo::Endian endian)
 {
     d.detach();
     d->endian = endian;
