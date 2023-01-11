@@ -32,7 +32,7 @@ public:
     QString receiver;
     QString comment;
     QtCanBus::DataSource source = QtCanBus::DataSource::Payload;
-    QtCanBus::DataEndian endian = QtCanBus::DataEndian::BigEndian;
+    QSysInfo::Endian endian = QSysInfo::Endian::BigEndian;
     QtCanBus::DataFormat format = QtCanBus::DataFormat::SignedInteger;
     quint16 startBit = 0;
     quint16 dataLength = 0;

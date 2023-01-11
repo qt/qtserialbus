@@ -27,10 +27,10 @@ QT_BEGIN_NAMESPACE
 
 // Helper method to extract the max bit number of the signal.
 // Note that for BE it's not the last bit of the signal.
-static quint16 extractMaxBitNum(quint16 startBit, quint16 bitLength, QtCanBus::DataEndian endian)
+static quint16 extractMaxBitNum(quint16 startBit, quint16 bitLength, QSysInfo::Endian endian)
 {
 #ifdef USE_DBC_COMPATIBLE_BE_HANDLING
-    if (endian == QtCanBus::DataEndian::LittleEndian) {
+    if (endian == QSysInfo::Endian::LittleEndian) {
         return startBit + bitLength - 1;
     } else {
         const auto startByteNum = startBit / 8;
@@ -703,7 +703,7 @@ static QVariant extractValue(const unsigned char *data, const QCanSignalDescript
     const auto maxBytesToRead = (length % 8 == 0) ? length / 8 : length / 8 + 1;
     const auto start = signalDesc.startBit();
     T value = {};
-    const bool isBigEndian = signalDesc.dataEndian() == QtCanBus::DataEndian::BigEndian;
+    const bool isBigEndian = signalDesc.dataEndian() == QSysInfo::Endian::BigEndian;
     if (isBigEndian) {
         // Big Endian - start bit is MSB
         if (start % 8 == 7 && length % 8 == 0) {
@@ -832,7 +832,7 @@ static QVariant extractValue(const unsigned char *data, const QCanSignalDescript
         quint16 valueIdx = 0;
         quint16 startIdx = start;
         quint16 numToRead = length;
-        if (signalDesc.dataEndian() == QtCanBus::DataEndian::BigEndian) {
+        if (signalDesc.dataEndian() == QSysInfo::Endian::BigEndian) {
             const auto readInFirstByte = length % 8;
             // else we have round number of bytes and all these tricks are not needed
             if (readInFirstByte) {
@@ -865,7 +865,7 @@ static QVariant extractValue(const unsigned char *data, const QCanSignalDescript
     }
     // check and convert endian
     T convertedValue = {};
-    if (signalDesc.dataEndian() == QtCanBus::DataEndian::LittleEndian)
+    if (signalDesc.dataEndian() == QSysInfo::Endian::LittleEndian)
         convertedValue = qFromLittleEndian(value);
     else
         convertedValue = qFromBigEndian(value);
@@ -970,8 +970,7 @@ static void encodeValue(unsigned char *data, const QVariant &valueVar,
     else
         value = valueVar.value<T>();
 
-    const bool dataLittleEndian =
-            signalDesc.dataEndian() == QtCanBus::DataEndian::LittleEndian;
+    const bool dataLittleEndian = signalDesc.dataEndian() == QSysInfo::Endian::LittleEndian;
 
     const auto maxBytesToWrite = (length % 8 == 0) ? length / 8 : length / 8 + 1;
 
@@ -1080,7 +1079,7 @@ static void encodeValue(unsigned char *data, const QVariant &valueVar,
     // We also need to consider that we operate on q{u}int64 values for
     // {un}signed integers, so we need to chop the unneeded bytes first.
     const bool dataLittleEndian =
-            signalDesc.dataEndian() == QtCanBus::DataEndian::LittleEndian;
+            signalDesc.dataEndian() == QSysInfo::Endian::LittleEndian;
 
     T valueToWrite = value;
     quint16 writeOffset = 0;

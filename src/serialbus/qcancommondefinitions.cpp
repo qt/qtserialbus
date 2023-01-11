@@ -41,15 +41,6 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \enum QtCanBus::DataEndian
-
-    This enum represents the byte order of the data.
-
-    \value LittleEndian The data is little endian.
-    \value BigEndian The data is big endian.
-*/
-
-/*!
     \enum QtCanBus::MultiplexState
 
     This enum represents the possible multiplex states of a signal.
@@ -104,20 +95,6 @@ QDebug operator<<(QDebug dbg, QtCanBus::DataFormat format)
         break;
     case QtCanBus::DataFormat::Ascii:
         dbg << "ASCII";
-        break;
-    }
-    return dbg;
-}
-
-QDebug operator<<(QDebug dbg, QtCanBus::DataEndian endian)
-{
-    QDebugStateSaver saver(dbg);
-    switch (endian) {
-    case QtCanBus::DataEndian::LittleEndian:
-        dbg << "LittleEndian";
-        break;
-    case QtCanBus::DataEndian::BigEndian:
-        dbg << "BigEndian";
         break;
     }
     return dbg;

@@ -31,7 +31,7 @@ void tst_QCanUniqueIdDescription::init()
     d.setSource(QtCanBus::DataSource::FrameId);
     d.setStartBit(0);
     d.setBitLength(29);
-    d.setEndian(QtCanBus::DataEndian::LittleEndian);
+    d.setEndian(QSysInfo::Endian::LittleEndian);
 }
 
 void tst_QCanUniqueIdDescription::construct()
@@ -39,7 +39,7 @@ void tst_QCanUniqueIdDescription::construct()
     QCanUniqueIdDescription desc;
     QVERIFY(!desc.isValid());
     QCOMPARE(desc.source(), QtCanBus::DataSource::FrameId);
-    QCOMPARE(desc.endian(), QtCanBus::DataEndian::LittleEndian);
+    QCOMPARE(desc.endian(), QSysInfo::Endian::LittleEndian);
     QCOMPARE(desc.startBit(), 0);
     QCOMPARE(desc.bitLength(), 0);
 }
@@ -106,7 +106,7 @@ void tst_QCanUniqueIdDescription::comparison()
     }
     {
         QCanUniqueIdDescription d1 = d;
-        d1.setEndian(QtCanBus::DataEndian::BigEndian);
+        d1.setEndian(QSysInfo::Endian::BigEndian);
         QCOMPARE_NE(d1, d);
         QVERIFY(!QCanUniqueIdDescriptionPrivate::get(d)->isShared());
         QVERIFY(!QCanUniqueIdDescriptionPrivate::get(d1)->isShared());

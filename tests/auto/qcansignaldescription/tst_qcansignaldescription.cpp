@@ -30,7 +30,7 @@ void tst_QCanSignalDescription::construct()
     QCOMPARE(d.receiver(), QString());
     QCOMPARE(d.comment(), QString());
     QCOMPARE(d.dataSource(), QtCanBus::DataSource::Payload);
-    QCOMPARE(d.dataEndian(), QtCanBus::DataEndian::BigEndian);
+    QCOMPARE(d.dataEndian(), QSysInfo::Endian::BigEndian);
     QCOMPARE(d.dataFormat(), QtCanBus::DataFormat::SignedInteger);
     QCOMPARE(d.startBit(), 0);
     QCOMPARE(d.bitLength(), 0);
@@ -147,7 +147,7 @@ void tst_QCanSignalDescription::comparison()
     }
     {
         QCanSignalDescription d1 = d;
-        d1.setDataEndian(QtCanBus::DataEndian::LittleEndian);
+        d1.setDataEndian(QSysInfo::Endian::LittleEndian);
         QCOMPARE_NE(d1, d);
         QVERIFY(!QCanSignalDescriptionPrivate::get(d1)->isShared());
     }
