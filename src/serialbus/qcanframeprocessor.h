@@ -4,20 +4,19 @@
 #ifndef QCANFRAMEPROCESSOR_H
 #define QCANFRAMEPROCESSOR_H
 
-#include <QtCore/QExplicitlySharedDataPointer>
 #include <QtCore/QVariantMap>
 
 #include <QtSerialBus/qcancommondefinitions.h>
 #include <QtSerialBus/qtserialbusglobal.h>
+
+#include <memory>
 
 QT_BEGIN_NAMESPACE
 
 class QCanBusFrame;
 class QCanMessageDescription;
 class QCanUniqueIdDescription;
-
 class QCanFrameProcessorPrivate;
-QT_DECLARE_QESDP_SPECIALIZATION_DTOR_WITH_EXPORT(QCanFrameProcessorPrivate, Q_SERIALBUS_EXPORT)
 
 class Q_SERIALBUS_EXPORT QCanFrameProcessor
 {
@@ -36,23 +35,7 @@ public:
     };
 
     QCanFrameProcessor();
-    QCanFrameProcessor(const QCanFrameProcessor &other);
-    QCanFrameProcessor(QCanFrameProcessor &&other) noexcept;
     ~QCanFrameProcessor();
-
-    QCanFrameProcessor &operator=(const QCanFrameProcessor &other);
-    QT_MOVE_ASSIGNMENT_OPERATOR_IMPL_VIA_PURE_SWAP(QCanFrameProcessor)
-
-    friend bool operator==(const QCanFrameProcessor &lhs, const QCanFrameProcessor &rhs)
-    {
-        return equals(lhs, rhs);
-    }
-    friend bool operator!=(const QCanFrameProcessor &lhs, const QCanFrameProcessor &rhs)
-    {
-        return !equals(lhs, rhs);
-    }
-
-    void swap(QCanFrameProcessor &other) noexcept { d.swap(other.d); }
 
     QCanBusFrame prepareFrame(QtCanBus::UniqueId uniqueId, const QVariantMap &signalValues);
     ParseResult parseFrame(const QCanBusFrame &frame);
@@ -70,13 +53,11 @@ public:
     void setUniqueIdDescription(const QCanUniqueIdDescription &description);
 
 private:
-    QExplicitlySharedDataPointer<QCanFrameProcessorPrivate> d;
+    std::unique_ptr<QCanFrameProcessorPrivate> d;
     friend class QCanFrameProcessorPrivate;
 
-    static bool equals(const QCanFrameProcessor &lhs, const QCanFrameProcessor &rhs);
+    Q_DISABLE_COPY_MOVE(QCanFrameProcessor)
 };
-
-Q_DECLARE_SHARED(QCanFrameProcessor)
 
 QT_END_NAMESPACE
 

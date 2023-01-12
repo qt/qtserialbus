@@ -27,7 +27,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class Q_SERIALBUS_PRIVATE_EXPORT QCanFrameProcessorPrivate : public QSharedData
+class QCanFrameProcessorPrivate
 {
 public:
     void resetErrors();
@@ -39,8 +39,6 @@ public:
                       const QCanSignalDescription &signalDesc);
     std::optional<QtCanBus::UniqueId> extractUniqueId(const QCanBusFrame &frame) const;
     bool fillUniqueId(unsigned char *data, quint16 sizeInBits, QtCanBus::UniqueId uniqueId);
-
-    inline bool isShared() const { return ref.loadRelaxed() != 1; }
 
     static QCanFrameProcessorPrivate *get(const QCanFrameProcessor &processor);
 
