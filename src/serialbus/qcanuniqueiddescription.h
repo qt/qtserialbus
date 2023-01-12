@@ -34,7 +34,7 @@ public:
         return !equals(lhs, rhs);
     }
 
-    inline void swap(QCanUniqueIdDescription &other) noexcept { d.swap(other.d); }
+    void swap(QCanUniqueIdDescription &other) noexcept { d.swap(other.d); }
 
     bool isValid() const;
 
