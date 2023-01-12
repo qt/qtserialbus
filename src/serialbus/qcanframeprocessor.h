@@ -52,7 +52,7 @@ public:
         return !equals(lhs, rhs);
     }
 
-    inline void swap(QCanFrameProcessor &other) noexcept { d.swap(other.d); }
+    void swap(QCanFrameProcessor &other) noexcept { d.swap(other.d); }
 
     QCanBusFrame prepareFrame(QtCanBus::UniqueId uniqueId, const QVariantMap &signalValues);
     ParseResult parseFrame(const QCanBusFrame &frame);
