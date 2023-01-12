@@ -148,68 +148,14 @@ static quint16 extractMaxBitNum(quint16 startBit, quint16 bitLength, QSysInfo::E
     Creates a CAN frame processor.
 */
 QCanFrameProcessor::QCanFrameProcessor()
-    : d(new QCanFrameProcessorPrivate)
+    : d(std::make_unique<QCanFrameProcessorPrivate>())
 {
 }
-
-/*!
-    Creates a CAN frame processor with the parameters copied from \a other.
-*/
-QCanFrameProcessor::QCanFrameProcessor(const QCanFrameProcessor &other)
-    : d(other.d)
-{
-}
-
-/*!
-    Creates a CAN frame processor by moving from \a other.
-
-    \note The moved-from QCanFrameProcessor object can only be destroyed or
-    assigned to. The effect of calling other functions than the destructor or
-    one of the assignment operators is undefined.
-*/
-QCanFrameProcessor::QCanFrameProcessor(QCanFrameProcessor &&other) noexcept = default;
 
 /*!
     Destroys this frame processor.
 */
 QCanFrameProcessor::~QCanFrameProcessor() = default;
-
-QT_DEFINE_QESDP_SPECIALIZATION_DTOR(QCanFrameProcessorPrivate)
-
-/*!
-    Assigns the parameters from \a other to this CAN frame processor.
-*/
-QCanFrameProcessor &QCanFrameProcessor::operator=(const QCanFrameProcessor &other)
-{
-    d = other.d;
-    return *this;
-}
-
-/*!
-    \fn QCanFrameProcessor &QCanFrameProcessor::operator=(QCanFrameProcessor &&other) noexcept
-
-    Move-assigns the parameters from \a other to this CAN frame processor.
-
-    \note The moved-from QCanFrameProcessor object can only be destroyed or
-    assigned to. The effect of calling other functions than the destructor or
-    one of the assignment operators is undefined.
-*/
-
-/*!
-    \fn bool QCanFrameProcessor::operator==(const QCanFrameProcessor &lhs, const QCanFrameProcessor &rhs)
-
-    Returns \c true if the \a lhs object's \l messageDescriptions() and
-    \l uniqueIdDescription() are the same as those of \a rhs. Otherwise returns
-    \c false.
-*/
-
-/*!
-    \fn bool QCanFrameProcessor::operator!=(const QCanFrameProcessor &lhs, const QCanFrameProcessor &rhs)
-
-    Returns \c true if the \a lhs object's \l messageDescriptions() or
-    \l uniqueIdDescription() are not the same as those of \a rhs. Otherwise
-    returns \c false.
-*/
 
 /*!
     Constructs a CAN data frame, using \a uniqueId and \a signalValues
@@ -246,7 +192,6 @@ QCanFrameProcessor &QCanFrameProcessor::operator=(const QCanFrameProcessor &othe
 QCanBusFrame QCanFrameProcessor::prepareFrame(QtCanBus::UniqueId uniqueId,
                                               const QVariantMap &signalValues)
 {
-    d.detach();
     d->resetErrors();
 
     if (!d->uidDescription.isValid()) {
@@ -403,7 +348,6 @@ QList<QCanMessageDescription> QCanFrameProcessor::messageDescriptions() const
 */
 void QCanFrameProcessor::addMessageDescriptions(const QList<QCanMessageDescription> &descriptions)
 {
-    d.detach();
     for (const auto &desc : descriptions)
         d->messages.insert(desc.uniqueId(), desc);
 }
@@ -417,7 +361,6 @@ void QCanFrameProcessor::addMessageDescriptions(const QList<QCanMessageDescripti
 */
 void QCanFrameProcessor::setMessageDescriptions(const QList<QCanMessageDescription> &descriptions)
 {
-    d.detach();
     d->messages.clear();
     addMessageDescriptions(descriptions);
 }
@@ -430,7 +373,6 @@ void QCanFrameProcessor::setMessageDescriptions(const QList<QCanMessageDescripti
 */
 void QCanFrameProcessor::clearMessageDescriptions()
 {
-    d.detach();
     d->messages.clear();
 }
 
@@ -459,16 +401,7 @@ QCanUniqueIdDescription QCanFrameProcessor::uniqueIdDescription() const
 */
 void QCanFrameProcessor::setUniqueIdDescription(const QCanUniqueIdDescription &description)
 {
-    d.detach();
     d->uidDescription = description;
-}
-
-bool QCanFrameProcessor::equals(const QCanFrameProcessor &lhs, const QCanFrameProcessor &rhs)
-{
-    // we need to compare only message and uid descriptions, because errors and
-    // warnings change based on the processing results.
-    return lhs.d->uidDescription == rhs.d->uidDescription
-            && lhs.d->messages == rhs.d->messages;
 }
 
 /*!
@@ -502,7 +435,6 @@ bool QCanFrameProcessor::equals(const QCanFrameProcessor &lhs, const QCanFramePr
 */
 QCanFrameProcessor::ParseResult QCanFrameProcessor::parseFrame(const QCanBusFrame &frame)
 {
-    d.detach();
     d->resetErrors();
 
     if (!frame.isValid()) {
@@ -1249,7 +1181,7 @@ bool QCanFrameProcessorPrivate::fillUniqueId(unsigned char *data, quint16 sizeIn
 
 QCanFrameProcessorPrivate *QCanFrameProcessorPrivate::get(const QCanFrameProcessor &processor)
 {
-    return processor.d.data();
+    return processor.d.get();
 }
 
 QT_END_NAMESPACE
