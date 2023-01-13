@@ -22,8 +22,8 @@ class Q_SERIALBUS_EXPORT QCanMessageDescription
 public:
     QCanMessageDescription();
     QCanMessageDescription(const QCanMessageDescription &other);
-    QCanMessageDescription(QCanMessageDescription &&other) noexcept;
-    ~QCanMessageDescription();
+    QCanMessageDescription(QCanMessageDescription &&other) noexcept = default;
+    ~QCanMessageDescription() = default;
 
     QCanMessageDescription &operator=(const QCanMessageDescription &other);
     QT_MOVE_ASSIGNMENT_OPERATOR_IMPL_VIA_PURE_SWAP(QCanMessageDescription)

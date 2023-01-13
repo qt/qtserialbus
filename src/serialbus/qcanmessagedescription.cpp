@@ -63,18 +63,20 @@ QCanMessageDescription::QCanMessageDescription(const QCanMessageDescription &oth
 }
 
 /*!
+    \fn QCanMessageDescription::QCanMessageDescription(QCanMessageDescription &&other) noexcept
+
     Creates a message description by moving from \a other.
 
     \note The moved-from QCanMessageDescription object can only be destroyed or
     assigned to. The effect of calling other functions than the destructor or
     one of the assignment operators is undefined.
 */
-QCanMessageDescription::QCanMessageDescription(QCanMessageDescription &&other) noexcept = default;
 
 /*!
+    \fn QCanMessageDescription::~QCanMessageDescription()
+
     Destroys this message description.
 */
-QCanMessageDescription::~QCanMessageDescription() = default;
 
 QT_DEFINE_QESDP_SPECIALIZATION_DTOR(QCanMessageDescriptionPrivate)
 

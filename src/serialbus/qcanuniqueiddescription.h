@@ -19,8 +19,8 @@ class Q_SERIALBUS_EXPORT QCanUniqueIdDescription
 public:
     QCanUniqueIdDescription();
     QCanUniqueIdDescription(const QCanUniqueIdDescription &other);
-    QCanUniqueIdDescription(QCanUniqueIdDescription &&other) noexcept;
-    ~QCanUniqueIdDescription();
+    QCanUniqueIdDescription(QCanUniqueIdDescription &&other) noexcept = default;
+    ~QCanUniqueIdDescription() = default;
 
     QCanUniqueIdDescription &operator=(const QCanUniqueIdDescription &other);
     QT_MOVE_ASSIGNMENT_OPERATOR_IMPL_VIA_PURE_SWAP(QCanUniqueIdDescription)
