@@ -40,7 +40,7 @@ void tst_QCanDbcFileParser::construct()
     QVERIFY(parser.errorString().isEmpty());
     QVERIFY(parser.warnings().isEmpty());
     QVERIFY(parser.messageDescriptions().isEmpty());
-    QVERIFY(parser.valueDescriptions().isEmpty());
+    QVERIFY(parser.messageValueDescriptions().isEmpty());
 }
 
 void tst_QCanDbcFileParser::uinqueId()
@@ -988,7 +988,7 @@ void tst_QCanDbcFileParser::valueDescriptions()
     parser.parse(m_filesDir + fileName);
     QCOMPARE(parser.error(), QCanDbcFileParser::Error::NoError);
 
-    QCOMPARE(parser.valueDescriptions(), expectedDescriptions);
+    QCOMPARE(parser.messageValueDescriptions(), expectedDescriptions);
     QCOMPARE(parser.warnings(), expectedWarnings);
 }
 
@@ -1002,7 +1002,7 @@ void tst_QCanDbcFileParser::resetState()
     QCOMPARE(parser.error(), QCanDbcFileParser::Error::NoError);
     QVERIFY(!parser.messageDescriptions().isEmpty());
     QVERIFY(!parser.warnings().isEmpty());
-    QVERIFY(!parser.valueDescriptions().isEmpty());
+    QVERIFY(!parser.messageValueDescriptions().isEmpty());
 
     // Now when we parse an invalid file, we should get an error, and all
     // other getters should return default values
@@ -1011,7 +1011,7 @@ void tst_QCanDbcFileParser::resetState()
     QCOMPARE(parser.error(), QCanDbcFileParser::Error::FileReadError);
     QVERIFY(parser.messageDescriptions().isEmpty());
     QVERIFY(parser.warnings().isEmpty());
-    QVERIFY(parser.valueDescriptions().isEmpty());
+    QVERIFY(parser.messageValueDescriptions().isEmpty());
 }
 
 QTEST_MAIN(tst_QCanDbcFileParser)
