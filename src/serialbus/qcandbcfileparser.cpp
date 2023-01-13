@@ -48,8 +48,8 @@ QT_BEGIN_NAMESPACE
 
     If the parsing completes successfully, call \l messageDescriptions() to get
     a list of the message descriptions that were extracted during the last
-    \l parse() call. Call \l valueDescriptions() to get the textual descriptions
-    of signal raw values, if they are available.
+    \l parse() call. Call \l messageValueDescriptions() to get the textual
+    descriptions of signal raw values, if they are available.
 
     Use the static \l uniqueIdDescription() function to get a
     \l QCanUniqueIdDescription for the DBC format.
@@ -221,7 +221,7 @@ QList<QCanMessageDescription> QCanDbcFileParser::messageDescriptions() const
     QCanDbcFileParser::SignalValueDescriptions,
     QCanDbcFileParser::ValueDescriptions
 */
-QCanDbcFileParser::MessageValueDescriptions QCanDbcFileParser::valueDescriptions() const
+QCanDbcFileParser::MessageValueDescriptions QCanDbcFileParser::messageValueDescriptions() const
 {
     return d->m_valueDescriptions;
 }

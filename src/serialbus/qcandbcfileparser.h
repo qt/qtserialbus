@@ -26,7 +26,7 @@ public:
         ParseError
     };
 
-    // The DBC protocol uses unsinged_integer to describe the supported values.
+    // The DBC protocol uses unsigned_integer to describe the supported values.
     // Do we need to use QVariant instead of quint32? Or qint64 for better BC
     // guarantees?
     using ValueDescriptions = QHash<quint32, QString>;
@@ -40,7 +40,7 @@ public:
     bool parse(const QStringList &fileNames);
 
     QList<QCanMessageDescription> messageDescriptions() const;
-    MessageValueDescriptions valueDescriptions() const;
+    MessageValueDescriptions messageValueDescriptions() const;
 
     Error error() const;
     QString errorString() const;
