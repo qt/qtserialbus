@@ -843,7 +843,7 @@ void QCanDbcFileParserPrivate::parseExtendedMux(const QStringView data)
     if (sepIdx != -1) {
         const auto min = rangeView.first(sepIdx).trimmed().toUInt();
         const auto max = rangeView.sliced(sepIdx + 1).trimmed().toUInt();
-        rangeValues.emplaceBack(qMakePair(min, max));
+        rangeValues.push_back({min, max});
     }
 
     // We can have an arbitrary amount of ranges, so we can't use capture groups
@@ -861,7 +861,7 @@ void QCanDbcFileParserPrivate::parseExtendedMux(const QStringView data)
             if (sepIdx != -1) {
                 const auto min = range.first(sepIdx).trimmed().toUInt();
                 const auto max = range.sliced(sepIdx + 1).trimmed().toUInt();
-                rangeValues.emplaceBack(qMakePair(min, max));
+                rangeValues.push_back({min, max});
             }
         }
     }

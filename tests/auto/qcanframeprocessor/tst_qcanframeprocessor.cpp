@@ -684,7 +684,7 @@ void tst_QCanFrameProcessor::parseExtendedMultiplexedSignals()
     s2.setStartBit(4);
     s2.setBitLength(12);
     s2.setMultiplexState(QtCanBus::MultiplexState::MultiplexedSignal);
-    const QCanSignalDescription::MultiplexValues muxValuesS0 { qMakePair(2, 4) };
+    const QCanSignalDescription::MultiplexValues muxValuesS0 { {2, 4} };
     s2.addMultiplexSignal(s0.name(), muxValuesS0);
 
     QCanSignalDescription s3; // depends on mux2 (so indirectly on mux1)
@@ -701,7 +701,7 @@ void tst_QCanFrameProcessor::parseExtendedMultiplexedSignals()
     s4.setStartBit(8);
     s4.setBitLength(8);
     s4.setMultiplexState(QtCanBus::MultiplexState::MultiplexedSignal);
-    const QCanSignalDescription::MultiplexValues muxValuesS1 { qMakePair(2, 3), qMakePair(5, 5) };
+    const QCanSignalDescription::MultiplexValues muxValuesS1 { {2, 3}, {5, 5} };
     s4.addMultiplexSignal(s1.name(), muxValuesS1);
 
     const QtCanBus::UniqueId uniqueId = 123;
@@ -1529,7 +1529,7 @@ void tst_QCanFrameProcessor::prepareMultiplexedPayload()
     s2.setStartBit(4);
     s2.setBitLength(12);
     s2.setMultiplexState(QtCanBus::MultiplexState::MultiplexedSignal);
-    const QCanSignalDescription::MultiplexValues muxValuesS0 { qMakePair(2, 4) };
+    const QCanSignalDescription::MultiplexValues muxValuesS0 { {2, 4} };
     s2.addMultiplexSignal(s0.name(), muxValuesS0);
 
     QCanSignalDescription s3; // depends on mux2 (so indirectly on mux1)
@@ -1546,7 +1546,7 @@ void tst_QCanFrameProcessor::prepareMultiplexedPayload()
     s4.setStartBit(8);
     s4.setBitLength(8);
     s4.setMultiplexState(QtCanBus::MultiplexState::MultiplexedSignal);
-    const QCanSignalDescription::MultiplexValues muxValuesS1 { qMakePair(2, 3), qMakePair(5, 5) };
+    const QCanSignalDescription::MultiplexValues muxValuesS1 { {2, 3}, {5, 5} };
     s4.addMultiplexSignal(s1.name(), muxValuesS1);
 
     const QtCanBus::UniqueId uniqueId = 123;
@@ -1683,7 +1683,7 @@ void tst_QCanFrameProcessor::prepareWithErrorsAndWarnings_data()
     signalDesc.setStartBit(3);
     signalDesc.setBitLength(12);
     signalDesc.setMultiplexState(QtCanBus::MultiplexState::MultiplexedSignal);
-    const QCanSignalDescription::MultiplexValues muxValuesS0 { qMakePair(2, 4), qMakePair(6, 6) };
+    const QCanSignalDescription::MultiplexValues muxValuesS0 { {2, 4}, {6, 6} };
     signalDesc.addMultiplexSignal("s0", muxValuesS0);
     messageDesc.addSignalDescription(signalDesc);
 
@@ -1701,7 +1701,7 @@ void tst_QCanFrameProcessor::prepareWithErrorsAndWarnings_data()
     signalDesc.setBitLength(8);
     signalDesc.setMultiplexState(QtCanBus::MultiplexState::MultiplexedSignal);
     signalDesc.addMultiplexSignal("s0", 1);
-    const QCanSignalDescription::MultiplexValues muxValuesS2 { qMakePair(1, 3), qMakePair(5, 6) };
+    const QCanSignalDescription::MultiplexValues muxValuesS2 { {1, 3}, {5, 6} };
     signalDesc.addMultiplexSignal("s2", muxValuesS2);
     messageDesc.addSignalDescription(signalDesc);
 

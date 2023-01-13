@@ -162,6 +162,32 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
+    \struct QCanSignalDescription::MultiplexValueRange
+    \inmodule QtSerialBus
+    \since 6.5
+
+    \brief Defines a range of values for a multiplexor signal.
+
+    Each multiplexor signal can have several ranges of values assigned to it.
+    This type represents one range. Both minimum and maximum values are
+    included in the range. Minimum and maximum values can be equal, so a
+    MultiplexValueRange is never empty. If maximum is less than minimum, the
+    values will be swapped while doing the range check.
+
+    \sa {Multiplexed Signals Explained}
+*/
+
+/*!
+    \variable QCanSignalDescription::MultiplexValueRange::minimum
+    \brief the minimum value of the range.
+*/
+
+/*!
+    \variable QCanSignalDescription::MultiplexValueRange::maximum
+    \brief the maximum value of the range.
+*/
+
+/*!
     \typealias QCanSignalDescription::MultiplexValues
 */
 
@@ -747,7 +773,7 @@ void QCanSignalDescription::addMultiplexSignal(const QString &name, const Multip
 void QCanSignalDescription::addMultiplexSignal(const QString &name, const QVariant &value)
 {
     d.detach();
-    d->muxSignals.insert(name, { qMakePair(value, value) });
+    d->muxSignals.insert(name, { {value, value} });
 }
 
 // copied from qtbase/src/testlib/qtestcase.cpp
@@ -820,6 +846,14 @@ QDebug QCanSignalDescription::debugStreaming(QDebug dbg, const QCanSignalDescrip
     dbg << ")";
     return dbg;
 }
+
+QDebug QCanSignalDescription::MultiplexValueRange::debugStreaming(QDebug dbg,
+                                                                  const MultiplexValueRange &range)
+{
+    QDebugStateSaver saver(dbg);
+    dbg.nospace() << "MultiplexValueRange(" << range.minimum << ", " << range.maximum << ")";
+    return dbg;
+}
 #endif // QT_NO_DEBUG_STREAM
 
 template <typename T>
@@ -828,8 +862,8 @@ static bool checkValue(const QVariant &valueVar,
 {
     const T val = valueVar.value<T>();
     for (const auto &pair : ranges) {
-        T min = pair.first.value<T>();
-        T max = pair.second.value<T>();
+        T min = pair.minimum.value<T>();
+        T max = pair.maximum.value<T>();
         if (min > max)
             max = std::exchange(min, max);
         if (val >= min && val <= max)
