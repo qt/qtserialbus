@@ -62,18 +62,20 @@ QCanUniqueIdDescription::QCanUniqueIdDescription(const QCanUniqueIdDescription &
 }
 
 /*!
+    \fn QCanUniqueIdDescription::QCanUniqueIdDescription(QCanUniqueIdDescription &&other) noexcept
+
     Creates a unique identifier description by moving from \a other.
 
     \note The moved-from QCanUniqueIdDescription object can only be destroyed or
     assigned to. The effect of calling other functions than the destructor or
     one of the assignment operators is undefined.
 */
-QCanUniqueIdDescription::QCanUniqueIdDescription(QCanUniqueIdDescription &&other) noexcept = default;
 
 /*!
+    \fn QCanUniqueIdDescription::~QCanUniqueIdDescription()
+
     Destroys this unique identifier description.
 */
-QCanUniqueIdDescription::~QCanUniqueIdDescription() = default;
 
 QT_DEFINE_QESDP_SPECIALIZATION_DTOR(QCanUniqueIdDescriptionPrivate)
 

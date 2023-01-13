@@ -184,18 +184,20 @@ QCanSignalDescription::QCanSignalDescription(const QCanSignalDescription &other)
 }
 
 /*!
+    \fn QCanSignalDescription::QCanSignalDescription(QCanSignalDescription &&other) noexcept
+
     Creates a signal description by moving from \a other.
 
     \note The moved-from QCanSignalDescription object can only be destroyed or
     assigned to. The effect of calling other functions than the destructor or
     one of the assignment operators is undefined.
 */
-QCanSignalDescription::QCanSignalDescription(QCanSignalDescription &&other) noexcept = default;
 
 /*!
+    \fn QCanSignalDescription::~QCanSignalDescription()
+
     Destroys this signal description.
 */
-QCanSignalDescription::~QCanSignalDescription() = default;
 
 QT_DEFINE_QESDP_SPECIALIZATION_DTOR(QCanSignalDescriptionPrivate)
 

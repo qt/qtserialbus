@@ -24,8 +24,8 @@ public:
 
     QCanSignalDescription();
     QCanSignalDescription(const QCanSignalDescription &other);
-    QCanSignalDescription(QCanSignalDescription &&other) noexcept;
-    ~QCanSignalDescription();
+    QCanSignalDescription(QCanSignalDescription &&other) noexcept = default;
+    ~QCanSignalDescription() = default;
 
     QCanSignalDescription &operator=(const QCanSignalDescription &other);
     QT_MOVE_ASSIGNMENT_OPERATOR_IMPL_VIA_PURE_SWAP(QCanSignalDescription)
