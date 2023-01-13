@@ -662,8 +662,7 @@ void tst_QCanDbcFileParser::parseFile_data()
         signalDesc.setMultiplexState(QtCanBus::MultiplexState::SwitchAndSignal);
         signalDesc.setStartBit(4);
         signalDesc.setBitLength(4);
-        signalDesc.addMultiplexSignal("s0", { qMakePair(1U, 1U), qMakePair(5U, 5U),
-                                              qMakePair(9U, 9U) });
+        signalDesc.addMultiplexSignal("s0", { {1U, 1U}, {5U, 5U}, {9U, 9U} });
         messageDesc.addSignalDescription(signalDesc);
 
         signalDesc.clearMultiplexSignals();
@@ -672,8 +671,7 @@ void tst_QCanDbcFileParser::parseFile_data()
         signalDesc.setMultiplexState(QtCanBus::MultiplexState::MultiplexedSignal);
         signalDesc.setStartBit(4);
         signalDesc.setBitLength(12);
-        signalDesc.addMultiplexSignal("s0", { qMakePair(2U, 4U), qMakePair(6U, 8U),
-                                              qMakePair(10U, 10U) });
+        signalDesc.addMultiplexSignal("s0", { {2U, 4U}, {6U, 8U}, {10U, 10U} });
         messageDesc.addSignalDescription(signalDesc);
 
         signalDesc.clearMultiplexSignals();
@@ -687,7 +685,7 @@ void tst_QCanDbcFileParser::parseFile_data()
         signalDesc.setName("s4");
         signalDesc.setStartBit(8);
         signalDesc.setBitLength(8);
-        signalDesc.addMultiplexSignal("s1", { qMakePair(2U, 3U), qMakePair(5U, 5U) });
+        signalDesc.addMultiplexSignal("s1", { {2U, 3U}, {5U, 5U} });
         messageDesc.addSignalDescription(signalDesc);
 
         signalDesc.clearMultiplexSignals();
@@ -829,8 +827,7 @@ void tst_QCanDbcFileParser::parseFile_data()
         signalDesc.setMultiplexState(QtCanBus::MultiplexState::SwitchAndSignal);
         signalDesc.setStartBit(4);
         signalDesc.setBitLength(4);
-        signalDesc.addMultiplexSignal("s0", { qMakePair(1U, 1U), qMakePair(5U, 5U),
-                                              qMakePair(9U, 9U) });
+        signalDesc.addMultiplexSignal("s0", { {1U, 1U}, {5U, 5U}, {9U, 9U} });
         otherDesc.addSignalDescription(signalDesc);
 
         signalDesc.clearMultiplexSignals();
@@ -839,8 +836,7 @@ void tst_QCanDbcFileParser::parseFile_data()
         signalDesc.setMultiplexState(QtCanBus::MultiplexState::MultiplexedSignal);
         signalDesc.setStartBit(4);
         signalDesc.setBitLength(12);
-        signalDesc.addMultiplexSignal("s0", { qMakePair(2U, 4U), qMakePair(6U, 8U),
-                                              qMakePair(10U, 10U) });
+        signalDesc.addMultiplexSignal("s0", { {2U, 4U}, {6U, 8U}, {10U, 10U} });
         otherDesc.addSignalDescription(signalDesc);
 
         signalDesc.clearMultiplexSignals();
@@ -854,7 +850,7 @@ void tst_QCanDbcFileParser::parseFile_data()
         signalDesc.setName("s4");
         signalDesc.setStartBit(8);
         signalDesc.setBitLength(8);
-        signalDesc.addMultiplexSignal("s1", { qMakePair(2U, 3U), qMakePair(5U, 5U) });
+        signalDesc.addMultiplexSignal("s1", { {2U, 3U}, {5U, 5U} });
         otherDesc.addSignalDescription(signalDesc);
 
         signalDesc.clearMultiplexSignals();

@@ -208,7 +208,7 @@ void tst_QCanSignalDescription::comparison()
     {
         QCanSignalDescription d1 = d;
         QCanSignalDescription::MultiplexSignalValues muxValues;
-        muxValues.insert("s0", QCanSignalDescription::MultiplexValues{ qMakePair(1, 1) });
+        muxValues.insert("s0", QCanSignalDescription::MultiplexValues{ {1, 1} });
         d1.setMultiplexSignals(muxValues);
         QCOMPARE_NE(d1, d);
         QVERIFY(!QCanSignalDescriptionPrivate::get(d1)->isShared());

@@ -6,6 +6,7 @@
 
 #include <QtCore/QDebug>
 #include <QtCore/QExplicitlySharedDataPointer>
+#include <QtCore/QVariant>
 
 #include <QtSerialBus/qcancommondefinitions.h>
 #include <QtSerialBus/qtserialbusglobal.h>
@@ -18,7 +19,30 @@ QT_DECLARE_QESDP_SPECIALIZATION_DTOR_WITH_EXPORT(QCanSignalDescriptionPrivate, Q
 class Q_SERIALBUS_EXPORT QCanSignalDescription
 {
 public:
-    using MultiplexValues = QList<QPair<QVariant, QVariant>>;
+    struct MultiplexValueRange {
+        QVariant minimum;
+        QVariant maximum;
+    private:
+        friend bool operator==(const MultiplexValueRange &lhs,
+                               const MultiplexValueRange &rhs) noexcept
+        {
+            return lhs.minimum == rhs.minimum && lhs.maximum == rhs.maximum;
+        }
+        friend bool operator!=(const MultiplexValueRange &lhs,
+                               const MultiplexValueRange &rhs) noexcept
+        {
+            return !(lhs == rhs);
+        }
+        friend size_t qHash(const MultiplexValueRange &, size_t) noexcept = delete;
+#ifndef QT_NO_DEBUG_STREAM
+        friend QDebug operator<<(QDebug dbg, const MultiplexValueRange &range)
+        {
+            return debugStreaming(dbg, range);
+        }
+        static QDebug debugStreaming(QDebug dbg, const MultiplexValueRange &range);
+#endif // QT_NO_DEBUG_STREAM
+    };
+    using MultiplexValues = QList<MultiplexValueRange>;
     using MultiplexSignalValues = QHash<QString, MultiplexValues>;
 
 
