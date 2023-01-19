@@ -17,7 +17,7 @@ class QCanDbcFileParserPrivate;
 class QCanMessageDescription;
 class QCanUniqueIdDescription;
 
-class Q_SERIALBUS_EXPORT QCanDbcFileParser
+class QCanDbcFileParser
 {
 public:
     enum class Error : quint8 {
@@ -33,20 +33,20 @@ public:
     using SignalValueDescriptions = QHash<QString, ValueDescriptions>;
     using MessageValueDescriptions = QHash<QtCanBus::UniqueId, SignalValueDescriptions>;
 
-    QCanDbcFileParser();
-    ~QCanDbcFileParser();
+    Q_SERIALBUS_EXPORT QCanDbcFileParser();
+    Q_SERIALBUS_EXPORT ~QCanDbcFileParser();
 
-    bool parse(const QString &fileName);
-    bool parse(const QStringList &fileNames);
+    Q_SERIALBUS_EXPORT bool parse(const QString &fileName);
+    Q_SERIALBUS_EXPORT bool parse(const QStringList &fileNames);
 
-    QList<QCanMessageDescription> messageDescriptions() const;
-    MessageValueDescriptions messageValueDescriptions() const;
+    Q_SERIALBUS_EXPORT QList<QCanMessageDescription> messageDescriptions() const;
+    Q_SERIALBUS_EXPORT MessageValueDescriptions messageValueDescriptions() const;
 
-    Error error() const;
-    QString errorString() const;
-    QStringList warnings() const;
+    Q_SERIALBUS_EXPORT Error error() const;
+    Q_SERIALBUS_EXPORT QString errorString() const;
+    Q_SERIALBUS_EXPORT QStringList warnings() const;
 
-    static QCanUniqueIdDescription uniqueIdDescription();
+    Q_SERIALBUS_EXPORT static QCanUniqueIdDescription uniqueIdDescription();
 
 private:
     std::unique_ptr<QCanDbcFileParserPrivate> d;

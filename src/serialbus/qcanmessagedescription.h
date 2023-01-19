@@ -17,15 +17,15 @@ class QCanSignalDescription;
 class QCanMessageDescriptionPrivate;
 QT_DECLARE_QESDP_SPECIALIZATION_DTOR_WITH_EXPORT(QCanMessageDescriptionPrivate, Q_SERIALBUS_EXPORT)
 
-class Q_SERIALBUS_EXPORT QCanMessageDescription
+class QCanMessageDescription
 {
 public:
-    QCanMessageDescription();
-    QCanMessageDescription(const QCanMessageDescription &other);
+    Q_SERIALBUS_EXPORT QCanMessageDescription();
+    Q_SERIALBUS_EXPORT QCanMessageDescription(const QCanMessageDescription &other);
     QCanMessageDescription(QCanMessageDescription &&other) noexcept = default;
     ~QCanMessageDescription() = default;
 
-    QCanMessageDescription &operator=(const QCanMessageDescription &other);
+    Q_SERIALBUS_EXPORT QCanMessageDescription &operator=(const QCanMessageDescription &other);
     QT_MOVE_ASSIGNMENT_OPERATOR_IMPL_VIA_PURE_SWAP(QCanMessageDescription)
 
     friend bool operator==(const QCanMessageDescription &lhs, const QCanMessageDescription &rhs)
@@ -39,27 +39,28 @@ public:
 
     void swap(QCanMessageDescription &other) noexcept { d.swap(other.d); }
 
-    bool isValid() const;
+    Q_SERIALBUS_EXPORT bool isValid() const;
 
-    QtCanBus::UniqueId uniqueId() const;
-    void setUniqueId(QtCanBus::UniqueId id);
+    Q_SERIALBUS_EXPORT QtCanBus::UniqueId uniqueId() const;
+    Q_SERIALBUS_EXPORT void setUniqueId(QtCanBus::UniqueId id);
 
-    QString name() const;
-    void setName(const QString &name);
+    Q_SERIALBUS_EXPORT QString name() const;
+    Q_SERIALBUS_EXPORT void setName(const QString &name);
 
-    quint8 size() const;
-    void setSize(quint8 size);
+    Q_SERIALBUS_EXPORT quint8 size() const;
+    Q_SERIALBUS_EXPORT void setSize(quint8 size);
 
-    QString transmitter() const;
-    void setTransmitter(const QString &transmitter);
+    Q_SERIALBUS_EXPORT QString transmitter() const;
+    Q_SERIALBUS_EXPORT void setTransmitter(const QString &transmitter);
 
-    QString comment() const;
-    void setComment(const QString &text);
+    Q_SERIALBUS_EXPORT QString comment() const;
+    Q_SERIALBUS_EXPORT void setComment(const QString &text);
 
-    QList<QCanSignalDescription> signalDescriptions() const;
-    QCanSignalDescription signalDescriptionForName(const QString &name) const;
-    void clearSignalDescriptions();
-    void addSignalDescription(const QCanSignalDescription &description);
+    Q_SERIALBUS_EXPORT QList<QCanSignalDescription> signalDescriptions() const;
+    Q_SERIALBUS_EXPORT QCanSignalDescription signalDescriptionForName(const QString &name) const;
+    Q_SERIALBUS_EXPORT void clearSignalDescriptions();
+    Q_SERIALBUS_EXPORT void addSignalDescription(const QCanSignalDescription &description);
+    Q_SERIALBUS_EXPORT
     void setSignalDescriptions(const QList<QCanSignalDescription> &descriptions);
 
 private:
@@ -75,7 +76,7 @@ private:
     {
         return debugStreaming(dbg, msg);
     }
-    static QDebug debugStreaming(QDebug dbg, const QCanMessageDescription &msg);
+    Q_SERIALBUS_EXPORT static QDebug debugStreaming(QDebug dbg, const QCanMessageDescription &msg);
 #endif // QT_NO_DEBUG_STREAM
 };
 

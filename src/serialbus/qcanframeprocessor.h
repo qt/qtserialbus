@@ -18,7 +18,7 @@ class QCanMessageDescription;
 class QCanUniqueIdDescription;
 class QCanFrameProcessorPrivate;
 
-class Q_SERIALBUS_EXPORT QCanFrameProcessor
+class QCanFrameProcessor
 {
 public:
     enum class Error : quint8 {
@@ -34,23 +34,26 @@ public:
         QVariantMap signalValues;
     };
 
-    QCanFrameProcessor();
-    ~QCanFrameProcessor();
+    Q_SERIALBUS_EXPORT QCanFrameProcessor();
+    Q_SERIALBUS_EXPORT ~QCanFrameProcessor();
 
-    QCanBusFrame prepareFrame(QtCanBus::UniqueId uniqueId, const QVariantMap &signalValues);
-    ParseResult parseFrame(const QCanBusFrame &frame);
+    Q_SERIALBUS_EXPORT QCanBusFrame prepareFrame(QtCanBus::UniqueId uniqueId,
+                                                 const QVariantMap &signalValues);
+    Q_SERIALBUS_EXPORT ParseResult parseFrame(const QCanBusFrame &frame);
 
-    Error error() const;
-    QString errorString() const;
-    QStringList warnings() const;
+    Q_SERIALBUS_EXPORT Error error() const;
+    Q_SERIALBUS_EXPORT QString errorString() const;
+    Q_SERIALBUS_EXPORT QStringList warnings() const;
 
-    QList<QCanMessageDescription> messageDescriptions() const;
+    Q_SERIALBUS_EXPORT QList<QCanMessageDescription> messageDescriptions() const;
+    Q_SERIALBUS_EXPORT
     void addMessageDescriptions(const QList<QCanMessageDescription> &descriptions);
+    Q_SERIALBUS_EXPORT
     void setMessageDescriptions(const QList<QCanMessageDescription> &descriptions);
-    void clearMessageDescriptions();
+    Q_SERIALBUS_EXPORT void clearMessageDescriptions();
 
-    QCanUniqueIdDescription uniqueIdDescription() const;
-    void setUniqueIdDescription(const QCanUniqueIdDescription &description);
+    Q_SERIALBUS_EXPORT QCanUniqueIdDescription uniqueIdDescription() const;
+    Q_SERIALBUS_EXPORT void setUniqueIdDescription(const QCanUniqueIdDescription &description);
 
 private:
     std::unique_ptr<QCanFrameProcessorPrivate> d;
