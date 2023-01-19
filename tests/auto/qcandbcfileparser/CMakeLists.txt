@@ -19,10 +19,10 @@ qt_internal_add_test(tst_qcandbcfileparser
 
 qt_internal_extend_target(tst_qcandbcfileparser CONDITION NOT ANDROID AND NOT IOS
     DEFINES
-        QT_TEST_DATADIR=\\\"${CMAKE_CURRENT_SOURCE_DIR}/data\\\"
+        QT_TEST_DATADIR="${CMAKE_CURRENT_SOURCE_DIR}/data"
 )
 
 qt_internal_extend_target(tst_qcandbcfileparser CONDITION ANDROID OR IOS
     DEFINES
-        QT_TEST_DATADIR=\\\":/data\\\"
+        QT_TEST_DATADIR=":/data"
 )
