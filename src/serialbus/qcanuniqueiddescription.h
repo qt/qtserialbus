@@ -14,32 +14,32 @@ QT_BEGIN_NAMESPACE
 class QCanUniqueIdDescriptionPrivate;
 QT_DECLARE_QESDP_SPECIALIZATION_DTOR_WITH_EXPORT(QCanUniqueIdDescriptionPrivate, Q_SERIALBUS_EXPORT)
 
-class Q_SERIALBUS_EXPORT QCanUniqueIdDescription
+class QCanUniqueIdDescription
 {
 public:
-    QCanUniqueIdDescription();
-    QCanUniqueIdDescription(const QCanUniqueIdDescription &other);
+    Q_SERIALBUS_EXPORT QCanUniqueIdDescription();
+    Q_SERIALBUS_EXPORT QCanUniqueIdDescription(const QCanUniqueIdDescription &other);
     QCanUniqueIdDescription(QCanUniqueIdDescription &&other) noexcept = default;
     ~QCanUniqueIdDescription() = default;
 
-    QCanUniqueIdDescription &operator=(const QCanUniqueIdDescription &other);
+    Q_SERIALBUS_EXPORT QCanUniqueIdDescription &operator=(const QCanUniqueIdDescription &other);
     QT_MOVE_ASSIGNMENT_OPERATOR_IMPL_VIA_PURE_SWAP(QCanUniqueIdDescription)
 
     void swap(QCanUniqueIdDescription &other) noexcept { d.swap(other.d); }
 
-    bool isValid() const;
+    Q_SERIALBUS_EXPORT bool isValid() const;
 
-    QtCanBus::DataSource source() const;
-    void setSource(QtCanBus::DataSource source);
+    Q_SERIALBUS_EXPORT QtCanBus::DataSource source() const;
+    Q_SERIALBUS_EXPORT void setSource(QtCanBus::DataSource source);
 
-    quint16 startBit() const;
-    void setStartBit(quint16 bit);
+    Q_SERIALBUS_EXPORT quint16 startBit() const;
+    Q_SERIALBUS_EXPORT void setStartBit(quint16 bit);
 
-    quint8 bitLength() const;
-    void setBitLength(quint8 length);
+    Q_SERIALBUS_EXPORT quint8 bitLength() const;
+    Q_SERIALBUS_EXPORT void setBitLength(quint8 length);
 
-    QSysInfo::Endian endian() const;
-    void setEndian(QSysInfo::Endian endian);
+    Q_SERIALBUS_EXPORT QSysInfo::Endian endian() const;
+    Q_SERIALBUS_EXPORT void setEndian(QSysInfo::Endian endian);
 
 private:
     QExplicitlySharedDataPointer<QCanUniqueIdDescriptionPrivate> d;

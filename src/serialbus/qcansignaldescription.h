@@ -16,7 +16,7 @@ QT_BEGIN_NAMESPACE
 class QCanSignalDescriptionPrivate;
 QT_DECLARE_QESDP_SPECIALIZATION_DTOR_WITH_EXPORT(QCanSignalDescriptionPrivate, Q_SERIALBUS_EXPORT)
 
-class Q_SERIALBUS_EXPORT QCanSignalDescription
+class QCanSignalDescription
 {
 public:
     struct MultiplexValueRange {
@@ -39,6 +39,7 @@ public:
         {
             return debugStreaming(dbg, range);
         }
+        Q_SERIALBUS_EXPORT
         static QDebug debugStreaming(QDebug dbg, const MultiplexValueRange &range);
 #endif // QT_NO_DEBUG_STREAM
     };
@@ -46,66 +47,67 @@ public:
     using MultiplexSignalValues = QHash<QString, MultiplexValues>;
 
 
-    QCanSignalDescription();
-    QCanSignalDescription(const QCanSignalDescription &other);
+    Q_SERIALBUS_EXPORT QCanSignalDescription();
+    Q_SERIALBUS_EXPORT QCanSignalDescription(const QCanSignalDescription &other);
     QCanSignalDescription(QCanSignalDescription &&other) noexcept = default;
     ~QCanSignalDescription() = default;
 
-    QCanSignalDescription &operator=(const QCanSignalDescription &other);
+    Q_SERIALBUS_EXPORT QCanSignalDescription &operator=(const QCanSignalDescription &other);
     QT_MOVE_ASSIGNMENT_OPERATOR_IMPL_VIA_PURE_SWAP(QCanSignalDescription)
 
     void swap(QCanSignalDescription &other) noexcept { d.swap(other.d); }
 
-    bool isValid() const;
+    Q_SERIALBUS_EXPORT bool isValid() const;
 
-    QString name() const;
-    void setName(const QString &name);
+    Q_SERIALBUS_EXPORT QString name() const;
+    Q_SERIALBUS_EXPORT void setName(const QString &name);
 
-    QString physicalUnit() const;
-    void setPhysicalUnit(const QString &unit);
+    Q_SERIALBUS_EXPORT QString physicalUnit() const;
+    Q_SERIALBUS_EXPORT void setPhysicalUnit(const QString &unit);
 
-    QString receiver() const;
-    void setReceiver(const QString &receiver);
+    Q_SERIALBUS_EXPORT QString receiver() const;
+    Q_SERIALBUS_EXPORT void setReceiver(const QString &receiver);
 
-    QString comment() const;
-    void setComment(const QString &text);
+    Q_SERIALBUS_EXPORT QString comment() const;
+    Q_SERIALBUS_EXPORT void setComment(const QString &text);
 
-    QtCanBus::DataSource dataSource() const;
-    void setDataSource(QtCanBus::DataSource source);
+    Q_SERIALBUS_EXPORT QtCanBus::DataSource dataSource() const;
+    Q_SERIALBUS_EXPORT void setDataSource(QtCanBus::DataSource source);
 
-    QSysInfo::Endian dataEndian() const;
-    void setDataEndian(QSysInfo::Endian endian);
+    Q_SERIALBUS_EXPORT QSysInfo::Endian dataEndian() const;
+    Q_SERIALBUS_EXPORT void setDataEndian(QSysInfo::Endian endian);
 
-    QtCanBus::DataFormat dataFormat() const;
-    void setDataFormat(QtCanBus::DataFormat format);
+    Q_SERIALBUS_EXPORT QtCanBus::DataFormat dataFormat() const;
+    Q_SERIALBUS_EXPORT void setDataFormat(QtCanBus::DataFormat format);
 
-    quint16 startBit() const;
-    void setStartBit(quint16 bit);
+    Q_SERIALBUS_EXPORT quint16 startBit() const;
+    Q_SERIALBUS_EXPORT void setStartBit(quint16 bit);
 
-    quint16 bitLength() const;
-    void setBitLength(quint16 length);
+    Q_SERIALBUS_EXPORT quint16 bitLength() const;
+    Q_SERIALBUS_EXPORT void setBitLength(quint16 length);
 
-    double factor() const;
-    void setFactor(double factor);
+    Q_SERIALBUS_EXPORT double factor() const;
+    Q_SERIALBUS_EXPORT void setFactor(double factor);
 
-    double offset() const;
-    void setOffset(double offset);
+    Q_SERIALBUS_EXPORT double offset() const;
+    Q_SERIALBUS_EXPORT void setOffset(double offset);
 
-    double scaling() const;
-    void setScaling(double scaling);
+    Q_SERIALBUS_EXPORT double scaling() const;
+    Q_SERIALBUS_EXPORT void setScaling(double scaling);
 
-    double minimum() const;
-    double maximum() const;
-    void setRange(double minimum, double maximum);
+    Q_SERIALBUS_EXPORT double minimum() const;
+    Q_SERIALBUS_EXPORT double maximum() const;
+    Q_SERIALBUS_EXPORT void setRange(double minimum, double maximum);
 
-    QtCanBus::MultiplexState multiplexState() const;
-    void setMultiplexState(QtCanBus::MultiplexState state);
+    Q_SERIALBUS_EXPORT QtCanBus::MultiplexState multiplexState() const;
+    Q_SERIALBUS_EXPORT void setMultiplexState(QtCanBus::MultiplexState state);
 
-    MultiplexSignalValues multiplexSignals() const;
-    void clearMultiplexSignals();
-    void setMultiplexSignals(const MultiplexSignalValues &multiplexorSignals);
-    void addMultiplexSignal(const QString &name, const MultiplexValues &ranges);
-    void addMultiplexSignal(const QString &name, const QVariant &value);
+    Q_SERIALBUS_EXPORT MultiplexSignalValues multiplexSignals() const;
+    Q_SERIALBUS_EXPORT void clearMultiplexSignals();
+    Q_SERIALBUS_EXPORT void setMultiplexSignals(const MultiplexSignalValues &multiplexorSignals);
+    Q_SERIALBUS_EXPORT void addMultiplexSignal(const QString &name,
+                                               const MultiplexValues &ranges);
+    Q_SERIALBUS_EXPORT void addMultiplexSignal(const QString &name, const QVariant &value);
 
 private:
     QExplicitlySharedDataPointer<QCanSignalDescriptionPrivate> d;
@@ -118,7 +120,7 @@ private:
     {
         return debugStreaming(dbg, sig);
     }
-    static QDebug debugStreaming(QDebug dbg, const QCanSignalDescription &sig);
+    Q_SERIALBUS_EXPORT static QDebug debugStreaming(QDebug dbg, const QCanSignalDescription &sig);
 #endif // QT_NO_DEBUG_STREAM
 };
 
