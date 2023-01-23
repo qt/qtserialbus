@@ -55,6 +55,8 @@ private:
     friend class QCanUniqueIdDescriptionPrivate;
 
     static bool equals(const QCanUniqueIdDescription &lhs, const QCanUniqueIdDescription &rhs);
+
+    friend void qHash(const QCanUniqueIdDescription &desc, size_t seed) noexcept = delete;
 };
 
 QT_END_NAMESPACE
