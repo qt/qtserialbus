@@ -459,7 +459,7 @@ QCanDbcFileParserPrivate::extractMessage(const QRegularExpressionMatch &match)
 
     bool ok = false;
 
-    const auto id = match.capturedView(u"messageId"_s).toUInt(&ok);
+    const QtCanBus::UniqueId id{match.capturedView(u"messageId"_s).toUInt(&ok)};
     if (ok) {
         desc.setUniqueId(id);
     } else {
@@ -660,7 +660,7 @@ void QCanDbcFileParserPrivate::parseSignalType(const QStringView data)
     m_lineOffset = match.capturedEnd(0);
 
     bool ok = false;
-    const auto uid = match.capturedView(u"messageId"_s).toUInt(&ok);
+    const QtCanBus::UniqueId uid{match.capturedView(u"messageId"_s).toUInt(&ok)};
     if (!ok) {
         addWarning(QObject::tr("Failed to parse frame id from string %1").arg(data));
         return;
@@ -706,7 +706,7 @@ void QCanDbcFileParserPrivate::parseSignalType(const QStringView data)
         }
     } else {
         addWarning(QObject::tr("Failed to find message description for unique id %1. "
-                               "Skipping string %2").arg(uid).arg(data));
+                               "Skipping string %2").arg(qToUnderlying(uid)).arg(data));
     }
 }
 
@@ -743,7 +743,7 @@ void QCanDbcFileParserPrivate::parseComment(const QStringView data)
     const auto type = match.capturedView(u"type"_s);
 
     bool ok = false;
-    const auto uid = match.capturedView(u"messageId"_s).toUInt(&ok);
+    const QtCanBus::UniqueId uid{match.capturedView(u"messageId"_s).toUInt(&ok)};
     if (!ok) {
         addWarning(QObject::tr("Failed to parse frame id from string %1").arg(data));
         return;
@@ -752,7 +752,7 @@ void QCanDbcFileParserPrivate::parseComment(const QStringView data)
     auto messageDesc = m_messageDescriptions.value(uid);
     if (!messageDesc.isValid()) {
         addWarning(QObject::tr("Failed to find message description for unique id %1. "
-                               "Skipping string %2").arg(uid).arg(data));
+                               "Skipping string %2").arg(qToUnderlying(uid)).arg(data));
         return;
     }
 
@@ -807,7 +807,7 @@ void QCanDbcFileParserPrivate::parseExtendedMux(const QStringView data)
     m_lineOffset = match.capturedEnd(0);
 
     bool ok = false;
-    const auto uid = match.capturedView(u"messageId"_s).toUInt(&ok);
+    const QtCanBus::UniqueId uid{match.capturedView(u"messageId"_s).toUInt(&ok)};
     if (!ok) {
         addWarning(QObject::tr("Failed to parse frame id from string %1").arg(data));
         return;
@@ -816,7 +816,7 @@ void QCanDbcFileParserPrivate::parseExtendedMux(const QStringView data)
     auto messageDesc = m_messageDescriptions.value(uid);
     if (!messageDesc.isValid()) {
         addWarning(QObject::tr("Failed to find message description for unique id %1. "
-                               "Skipping string %2").arg(uid).arg(data));
+                               "Skipping string %2").arg(qToUnderlying(uid)).arg(data));
         return;
     }
 
@@ -907,7 +907,7 @@ void QCanDbcFileParserPrivate::parseValueDescriptions(const QStringView data)
     m_lineOffset = match.capturedEnd(0);
 
     bool ok = false;
-    const auto uid = match.capturedView(u"messageId"_s).toUInt(&ok);
+    const QtCanBus::UniqueId uid{match.capturedView(u"messageId"_s).toUInt(&ok)};
     if (!ok) {
         addWarning(QObject::tr("Failed to parse value description from string %1").arg(data));
         return;
@@ -917,7 +917,7 @@ void QCanDbcFileParserPrivate::parseValueDescriptions(const QStringView data)
     const auto messageDesc = m_messageDescriptions.value(uid);
     if (!messageDesc.isValid()) {
         addWarning(QObject::tr("Failed to find message description for unique id %1. "
-                               "Skipping string %2").arg(uid).arg(data));
+                               "Skipping string %2").arg(qToUnderlying(uid)).arg(data));
         return;
     }
 
@@ -1021,7 +1021,8 @@ void QCanDbcFileParserPrivate::postProcessSignalMultiplexing()
     for (const auto &uid : std::as_const(uidsToRemove)) {
         m_messageDescriptions.remove(uid);
         addWarning(QObject::tr("Message description with unique id %1 is skipped because "
-                               "it has invalid multiplexing description.").arg(uid));
+                               "it has invalid multiplexing description.").
+                   arg(qToUnderlying(uid)));
     }
 }
 
@@ -1036,10 +1037,11 @@ void QCanDbcFileParserPrivate::addCurrentMessage()
         auto uid = m_currentMessage.uniqueId();
         if (!m_currentMessage.isValid()) {
             addWarning(QObject::tr("Message description with unique id %1 is skipped "
-                                   "because it's not valid.").arg(uid));
+                                   "because it's not valid.").arg(qToUnderlying(uid)));
         } else if (m_messageDescriptions.contains(uid)) {
             addWarning(QObject::tr("Message description with unique id %1 is skipped "
-                                   "because such unique id is already used.").arg(uid));
+                                   "because such unique id is already used.").
+                       arg(qToUnderlying(uid)));
         } else {
             m_messageDescriptions.insert(uid, m_currentMessage);
         }

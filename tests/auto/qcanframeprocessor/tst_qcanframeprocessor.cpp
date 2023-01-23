@@ -423,7 +423,7 @@ void tst_QCanFrameProcessor::parseSignal()
     uidDesc.setStartBit(0);
     uidDesc.setBitLength(4);
 
-    const QtCanBus::UniqueId expectedUid = 0x0A;
+    const QtCanBus::UniqueId expectedUid{0x0A};
 
     const auto messageSize = sourceIsPayload ? sizeof(data) : 1;
     QCanMessageDescription message;
@@ -439,7 +439,7 @@ void tst_QCanFrameProcessor::parseSignal()
 
     QCanBusFrame frame;
     if (sourceIsPayload) {
-        frame.setFrameId(expectedUid);
+        frame.setFrameId(static_cast<QCanBusFrame::FrameId>(expectedUid));
         const QByteArray payload(reinterpret_cast<const char *>(&data), sizeof(data));
         frame.setPayload(payload);
     } else {
@@ -502,7 +502,7 @@ void tst_QCanFrameProcessor::parseWithValueConversion()
     sig.setOffset(offset);
     sig.setScaling(scaling);
 
-    const QtCanBus::UniqueId uniqueId = 123;
+    const QtCanBus::UniqueId uniqueId{123};
 
     QCanMessageDescription message;
     message.setName("test_message");
@@ -519,7 +519,8 @@ void tst_QCanFrameProcessor::parseWithValueConversion()
     parser.setUniqueIdDescription(uidDesc);
     parser.addMessageDescriptions({ message });
 
-    QCanBusFrame frame(uniqueId, QByteArray(1, char(payloadValue)));
+    QCanBusFrame frame(static_cast<QCanBusFrame::FrameId>(uniqueId),
+                       QByteArray(1, char(payloadValue)));
     QVERIFY(frame.isValid());
 
     const auto result = parser.parseFrame(frame);
@@ -601,7 +602,7 @@ void tst_QCanFrameProcessor::parseMultiplexedSignals()
     s2.setMultiplexState(QtCanBus::MultiplexState::MultiplexedSignal);
     s2.addMultiplexSignal(s0.name(), s2MuxValue);
 
-    const QtCanBus::UniqueId uniqueId = 123;
+    const QtCanBus::UniqueId uniqueId{123};
 
     QCanMessageDescription msg;
     msg.setName("test");
@@ -617,7 +618,7 @@ void tst_QCanFrameProcessor::parseMultiplexedSignals()
     parser.setUniqueIdDescription(uidDesc);
     parser.addMessageDescriptions({ msg });
 
-    QCanBusFrame frame(msg.uniqueId(), payload);
+    QCanBusFrame frame(static_cast<QCanBusFrame::FrameId>(msg.uniqueId()), payload);
     QVERIFY(frame.isValid());
 
     const auto result = parser.parseFrame(frame);
@@ -704,7 +705,7 @@ void tst_QCanFrameProcessor::parseExtendedMultiplexedSignals()
     const QCanSignalDescription::MultiplexValues muxValuesS1 { {2, 3}, {5, 5} };
     s4.addMultiplexSignal(s1.name(), muxValuesS1);
 
-    const QtCanBus::UniqueId uniqueId = 123;
+    const QtCanBus::UniqueId uniqueId{123};
 
     QCanMessageDescription msg;
     msg.setName("test");
@@ -720,7 +721,7 @@ void tst_QCanFrameProcessor::parseExtendedMultiplexedSignals()
     parser.setUniqueIdDescription(uidDesc);
     parser.addMessageDescriptions({ msg });
 
-    QCanBusFrame frame(msg.uniqueId(), payload);
+    QCanBusFrame frame(static_cast<QCanBusFrame::FrameId>(msg.uniqueId()), payload);
     QVERIFY(frame.isValid());
 
     const auto result = parser.parseFrame(frame);
@@ -793,7 +794,7 @@ void tst_QCanFrameProcessor::parseWithErrorsAndWarnings_data()
 
     QCanMessageDescription messageDesc;
     messageDesc.setName("testMessage");
-    messageDesc.setUniqueId(123);
+    messageDesc.setUniqueId(QtCanBus::UniqueId{123});
     messageDesc.setSize(2);
     messageDesc.addSignalDescription(signalDesc);
 
@@ -907,7 +908,7 @@ void tst_QCanFrameProcessor::extractUniqueId_data()
     uidDesc.setSource(QtCanBus::DataSource::FrameId);
     uidDesc.setBitLength(12);
 
-    const QtCanBus::UniqueId uniqueId = 0x0965;
+    const quint32 uniqueId = 0x0965;
     for (quint16 startBit = 0; startBit < 8; ++startBit) {
         uidDesc.setStartBit(startBit);
         uidDesc.setEndian(QSysInfo::Endian::LittleEndian);
@@ -915,7 +916,7 @@ void tst_QCanFrameProcessor::extractUniqueId_data()
         QTest::addRow("frameId, LE, start %d", startBit)
                 << uidDesc
                 << QCanBusFrame(frameIdLe, QByteArray(1, 0x01))
-                << uniqueId;
+                << QtCanBus::UniqueId{uniqueId};
     }
 
     static constexpr quint16 startBitsFrame[] = { 3, 2, 1, 0, 15, 14, 13, 12 };
@@ -931,7 +932,7 @@ void tst_QCanFrameProcessor::extractUniqueId_data()
         QTest::addRow("frameId, BE, start %d", startBit)
                 << uidDesc
                 << QCanBusFrame(frameIdBe, QByteArray(1, 0x01))
-                << uniqueId;
+                << QtCanBus::UniqueId{uniqueId};
     }
 
     // unique id in payload, the 1st byte of the payload is used for signal,
@@ -945,7 +946,7 @@ void tst_QCanFrameProcessor::extractUniqueId_data()
         QTest::addRow("payload, LE, offset %d", startBit)
                 << uidDesc
                 << QCanBusFrame(0, payloadData)
-                << uniqueId;
+                << QtCanBus::UniqueId{uniqueId};
     }
 
     static constexpr quint16 startBitsPayload[] = { 11, 10, 9, 8, 23, 22, 21, 20 };
@@ -962,7 +963,7 @@ void tst_QCanFrameProcessor::extractUniqueId_data()
         QTest::addRow("payload, BE, offset %d", startBit)
                 << uidDesc
                 << QCanBusFrame(0, payloadData)
-                << uniqueId;
+                << QtCanBus::UniqueId{uniqueId};
     }
 }
 
@@ -1371,7 +1372,7 @@ void tst_QCanFrameProcessor::prepareFrame()
                                            : QtCanBus::DataSource::Payload;
     const auto uidLength = sourceInPayload ? 29 : 8;
 
-    static constexpr QtCanBus::UniqueId uniqueId = 123;
+    static constexpr quint32 uniqueId = 123;
 
     QCanUniqueIdDescription uidDesc;
     uidDesc.setEndian(QSysInfo::Endian::LittleEndian);
@@ -1382,7 +1383,7 @@ void tst_QCanFrameProcessor::prepareFrame()
     const auto messageSize = sourceInPayload ? sizeof(expectedData) : 1;
     QCanMessageDescription messageDesc;
     messageDesc.setName("test");
-    messageDesc.setUniqueId(uniqueId);
+    messageDesc.setUniqueId(QtCanBus::UniqueId{uniqueId});
     messageDesc.setSize(messageSize);
     messageDesc.setSignalDescriptions({ signalDesc });
 
@@ -1404,7 +1405,7 @@ void tst_QCanFrameProcessor::prepareFrame()
     QCanFrameProcessor processor;
     processor.setUniqueIdDescription(uidDesc);
     processor.addMessageDescriptions({ messageDesc });
-    const QCanBusFrame frame = processor.prepareFrame(uniqueId, signalValues);
+    const QCanBusFrame frame = processor.prepareFrame(QtCanBus::UniqueId{uniqueId}, signalValues);
 
     QVERIFY(frame.isValid());
     QCOMPARE(frame.frameId(), expectedFrame.frameId());
@@ -1447,7 +1448,7 @@ void tst_QCanFrameProcessor::prepareWithValueConversion()
     signalDesc.setOffset(offset);
     signalDesc.setScaling(scaling);
 
-    const QtCanBus::UniqueId uniqueId = 123;
+    const QtCanBus::UniqueId uniqueId{123};
 
     QCanMessageDescription messageDesc;
     messageDesc.setUniqueId(uniqueId);
@@ -1466,7 +1467,7 @@ void tst_QCanFrameProcessor::prepareWithValueConversion()
     const QCanBusFrame frame = processor.prepareFrame(uniqueId, signalValues);
 
     QVERIFY(frame.isValid());
-    QCOMPARE(frame.frameId(), uniqueId);
+    QCOMPARE(frame.frameId(), static_cast<QCanBusFrame::FrameId>(uniqueId));
     QCOMPARE(frame.payload(), expectedPayload);
 }
 
@@ -1549,7 +1550,7 @@ void tst_QCanFrameProcessor::prepareMultiplexedPayload()
     const QCanSignalDescription::MultiplexValues muxValuesS1 { {2, 3}, {5, 5} };
     s4.addMultiplexSignal(s1.name(), muxValuesS1);
 
-    const QtCanBus::UniqueId uniqueId = 123;
+    const QtCanBus::UniqueId uniqueId{123};
 
     QCanMessageDescription msg;
     msg.setName("test");
@@ -1568,7 +1569,7 @@ void tst_QCanFrameProcessor::prepareMultiplexedPayload()
     const QCanBusFrame frame = processor.prepareFrame(msg.uniqueId(), signalValues);
 
     QVERIFY(frame.isValid());
-    QCOMPARE(frame.frameId(), uniqueId);
+    QCOMPARE(frame.frameId(), static_cast<QCanBusFrame::FrameId>(uniqueId));
     QCOMPARE(frame.payload(), expectedPayload);
 }
 
@@ -1606,7 +1607,7 @@ void tst_QCanFrameProcessor::prepareWithErrorsAndWarnings_data()
     signalDesc.setBitLength(4);
 
     QCanMessageDescription messageDesc;
-    messageDesc.setUniqueId(123);
+    messageDesc.setUniqueId(QtCanBus::UniqueId{123});
     messageDesc.setSize(2);
     messageDesc.addSignalDescription(signalDesc);
 
@@ -1768,7 +1769,7 @@ void tst_QCanFrameProcessor::prepareUniqueId_data()
     QTest::addColumn<QVariantMap>("signalValues");
     QTest::addColumn<QCanBusFrame>("expectedFrame");
 
-    const QtCanBus::UniqueId uniqueId = 0x0965;
+    const quint32 uniqueId = 0x0965;
 
     QCanSignalDescription signalDesc;
     signalDesc.setName("s0");
@@ -1780,7 +1781,7 @@ void tst_QCanFrameProcessor::prepareUniqueId_data()
 
     QCanMessageDescription messageDesc;
     messageDesc.setName("test");
-    messageDesc.setUniqueId(uniqueId);
+    messageDesc.setUniqueId(QtCanBus::UniqueId{uniqueId});
     messageDesc.setSize(1);
     messageDesc.addSignalDescription(signalDesc);
 
@@ -1795,8 +1796,8 @@ void tst_QCanFrameProcessor::prepareUniqueId_data()
         uidDesc.setEndian(QSysInfo::Endian::LittleEndian);
         const QCanBusFrame::FrameId frameId = qFromLittleEndian(uniqueId) << startBit;
         QTest::addRow("frameId, LE, start %d", startBit)
-                << uidDesc << messageDesc << uniqueId << signalValues
-                << QCanBusFrame(frameId, QByteArray(1, 0x01));
+                << uidDesc << messageDesc << QtCanBus::UniqueId{uniqueId}
+                << signalValues << QCanBusFrame(frameId, QByteArray(1, 0x01));
     }
 
     static constexpr quint16 startBitsFrame[] = { 3, 2, 1, 0, 15, 14, 13, 12 };
@@ -1810,8 +1811,8 @@ void tst_QCanFrameProcessor::prepareUniqueId_data()
         uidDesc.setEndian(QSysInfo::Endian::BigEndian);
         uidDesc.setStartBit(startBit);
         QTest::addRow("frameId, BE, offser %d", startBit)
-                << uidDesc << messageDesc << uniqueId << signalValues
-                << QCanBusFrame(frameId, QByteArray(1, 0x01));
+                << uidDesc << messageDesc << QtCanBus::UniqueId{uniqueId}
+                << signalValues << QCanBusFrame(frameId, QByteArray(1, 0x01));
     }
 
     // Encode unique id into payload. The 1st byte of the payload is already
@@ -1825,8 +1826,8 @@ void tst_QCanFrameProcessor::prepareUniqueId_data()
         const quint32 payload = 0x01 | qFromLittleEndian(uniqueId) << startBit;
         const QByteArray payloadData(reinterpret_cast<const char *>(&payload), sizeof(payload));
         QTest::addRow("payload, LE, offser %d", startBit)
-                << uidDesc << messageDesc << uniqueId << signalValues
-                << QCanBusFrame(0, payloadData);
+                << uidDesc << messageDesc << QtCanBus::UniqueId{uniqueId}
+                << signalValues << QCanBusFrame(0, payloadData);
     }
 
     static constexpr quint16 startBitsPayload[] = { 11, 10, 9, 8, 23, 22, 21, 20 };
@@ -1841,8 +1842,8 @@ void tst_QCanFrameProcessor::prepareUniqueId_data()
         uidDesc.setEndian(QSysInfo::Endian::BigEndian);
         uidDesc.setStartBit(startBit);
         QTest::addRow("payload, BE, start %d", startBit)
-                << uidDesc << messageDesc << uniqueId << signalValues
-                << QCanBusFrame(0, payloadData);
+                << uidDesc << messageDesc << QtCanBus::UniqueId{uniqueId}
+                << signalValues << QCanBusFrame(0, payloadData);
     }
 }
 
@@ -1879,11 +1880,11 @@ void tst_QCanFrameProcessor::roundtrip_data()
         uidDesc.setStartBit(0);
         uidDesc.setBitLength(11);
 
-        const QtCanBus::UniqueId uniqueId = 1467;
+        const quint32 uniqueId = 1467;
 
         QCanMessageDescription messageDesc;
         messageDesc.setName("test");
-        messageDesc.setUniqueId(uniqueId);
+        messageDesc.setUniqueId(QtCanBus::UniqueId{uniqueId});
         messageDesc.setSize(8);
 
         // s0 - 4 bits [0:3], signed int
@@ -1933,7 +1934,8 @@ void tst_QCanFrameProcessor::roundtrip_data()
 
         QCanBusFrame inputFrame(uniqueId, payload);
 
-        QTest::addRow("LE") << messageDesc << uidDesc << inputFrame << uniqueId << signalValues;
+        QTest::addRow("LE") << messageDesc << uidDesc << inputFrame
+                            << QtCanBus::UniqueId{uniqueId} << signalValues;
     }
     {
         QCanUniqueIdDescription uidDesc;
@@ -1942,11 +1944,11 @@ void tst_QCanFrameProcessor::roundtrip_data()
         uidDesc.setStartBit(7);
         uidDesc.setBitLength(11);
 
-        const QtCanBus::UniqueId uniqueId = 1467; // 0x60B7 for the specified layout
+        const quint32 uniqueId = 1467; // 0x60B7 for the specified layout
 
         QCanMessageDescription messageDesc;
         messageDesc.setName("test");
-        messageDesc.setUniqueId(uniqueId);
+        messageDesc.setUniqueId(QtCanBus::UniqueId{uniqueId});
         messageDesc.setSize(8);
 
         // s0 - 4 bits [7:4], signed int
@@ -1996,7 +1998,8 @@ void tst_QCanFrameProcessor::roundtrip_data()
 
         QCanBusFrame inputFrame(0x60B7, payload);
 
-        QTest::addRow("BE") << messageDesc << uidDesc << inputFrame << uniqueId << signalValues;
+        QTest::addRow("BE") << messageDesc << uidDesc << inputFrame
+                            << QtCanBus::UniqueId{uniqueId} << signalValues;
     }
 }
 

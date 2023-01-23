@@ -133,7 +133,7 @@ void tst_QCanDbcFileParser::parseFile_data()
     QCanMessageDescription messageDesc;
     messageDesc.setName("Test");
     messageDesc.setSize(3);
-    messageDesc.setUniqueId(1234);
+    messageDesc.setUniqueId(QtCanBus::UniqueId{1234});
     messageDesc.setTransmitter("Vector__XXX");
 
     {
@@ -273,7 +273,7 @@ void tst_QCanDbcFileParser::parseFile_data()
         QCanMessageDescription doubleMessage = messageDesc;
         doubleMessage.clearSignalDescriptions();
         doubleMessage.setName("Test1");
-        doubleMessage.setUniqueId(1235);
+        doubleMessage.setUniqueId(QtCanBus::UniqueId{1235});
         doubleMessage.setSize(8);
 
         signalDesc.setName("s3");
@@ -475,7 +475,7 @@ void tst_QCanDbcFileParser::parseFile_data()
         QCanMessageDescription doubleMessage = messageDesc;
         doubleMessage.clearSignalDescriptions();
         doubleMessage.setName("Test1");
-        doubleMessage.setUniqueId(1235);
+        doubleMessage.setUniqueId(QtCanBus::UniqueId{1235});
         doubleMessage.setSize(8);
 
         signalDesc.setName("s3");
@@ -562,7 +562,7 @@ void tst_QCanDbcFileParser::parseFile_data()
         QCanMessageDescription otherDesc = messageDesc;
         otherDesc.clearSignalDescriptions();
         otherDesc.setName("Test1");
-        otherDesc.setUniqueId(1235);
+        otherDesc.setUniqueId(QtCanBus::UniqueId{1235});
         otherDesc.setSize(1);
         otherDesc.setComment("comment for Test1.");
 
@@ -808,7 +808,7 @@ void tst_QCanDbcFileParser::parseFile_data()
         QCanMessageDescription otherDesc;
         otherDesc.setName("Test1");
         otherDesc.setSize(3);
-        otherDesc.setUniqueId(1235);
+        otherDesc.setUniqueId(QtCanBus::UniqueId{1235});
         otherDesc.setTransmitter("Vector__XXX");
 
         signalDesc.setName("s0");
@@ -970,8 +970,8 @@ void tst_QCanDbcFileParser::valueDescriptions()
     };
 
     QCanDbcFileParser::MessageValueDescriptions expectedDescriptions;
-    expectedDescriptions.insert(1234, test_value_descriptions);
-    expectedDescriptions.insert(1235, test1_value_descriptions);
+    expectedDescriptions.insert(QtCanBus::UniqueId{1234}, test_value_descriptions);
+    expectedDescriptions.insert(QtCanBus::UniqueId{1235}, test1_value_descriptions);
 
     const QStringList expectedWarnings {
         u"Failed to find message description for unique id 1236. Skipping string "

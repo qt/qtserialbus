@@ -34,9 +34,11 @@ enum class MultiplexState : quint8 {
     SwitchAndSignal = MultiplexorSwitch | MultiplexedSignal,
 };
 
-using UniqueId = quint32;
+enum class UniqueId : quint32 {};
 
 } // namespace QtCanBus
+
+Q_SERIALBUS_EXPORT QtCanBus::UniqueId qbswap(QtCanBus::UniqueId src);
 
 #ifndef QT_NO_DEBUG_STREAM
 
@@ -45,6 +47,7 @@ class QDebug;
 Q_SERIALBUS_EXPORT QDebug operator<<(QDebug dbg, QtCanBus::DataSource source);
 Q_SERIALBUS_EXPORT QDebug operator<<(QDebug dbg, QtCanBus::DataFormat format);
 Q_SERIALBUS_EXPORT QDebug operator<<(QDebug dbg, QtCanBus::MultiplexState state);
+Q_SERIALBUS_EXPORT QDebug operator<<(QDebug dbg, QtCanBus::UniqueId uid);
 
 #endif // QT_NO_DEBUG_STREAM
 

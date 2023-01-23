@@ -42,7 +42,7 @@ void tst_QCanMessageDescription::init()
 
     d = QCanMessageDescription();
     d.setName("test");
-    d.setUniqueId(123);
+    d.setUniqueId(QtCanBus::UniqueId{123});
     d.setSize(2);
     d.setSignalDescriptions({ s0, s1 });
 }
@@ -51,7 +51,7 @@ void tst_QCanMessageDescription::construct()
 {
     QCanMessageDescription desc;
     QVERIFY(!desc.isValid());
-    QCOMPARE(desc.uniqueId(), 0);
+    QCOMPARE(desc.uniqueId(), QtCanBus::UniqueId{0});
     QCOMPARE(desc.name(), QString());
     QCOMPARE(desc.size(), 0);
     QCOMPARE(desc.transmitter(), QString());
@@ -125,7 +125,7 @@ void tst_QCanMessageDescription::comparison()
     }
     {
         QCanMessageDescription d1 = d;
-        d1.setUniqueId(456);
+        d1.setUniqueId(QtCanBus::UniqueId{456});
         QCOMPARE_NE(d1, d);
         QVERIFY(!QCanMessageDescriptionPrivate::get(d)->isShared());
         QVERIFY(!QCanMessageDescriptionPrivate::get(d1)->isShared());
