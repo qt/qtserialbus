@@ -30,7 +30,7 @@ public:
     };
 
     struct ParseResult {
-        QtCanBus::UniqueId uniqueId = 0;
+        QtCanBus::UniqueId uniqueId = QtCanBus::UniqueId{0};
         QVariantMap signalValues;
     };
 

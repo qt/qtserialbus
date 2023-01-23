@@ -26,7 +26,7 @@ public:
     QString name;
     QString transmitter;
     QString comment;
-    QtCanBus::UniqueId id = 0;
+    QtCanBus::UniqueId id{0};
     quint8 size = 0; // even CAN FD has max 64 bytes
     QHash<QString, QCanSignalDescription> messageSignals;
 

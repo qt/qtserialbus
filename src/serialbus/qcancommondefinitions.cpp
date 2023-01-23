@@ -3,6 +3,8 @@
 
 #include "qcancommondefinitions.h"
 
+#include <QtCore/qendian.h>
+
 #ifndef QT_NO_DEBUG_STREAM
 #include <QtCore/QDebug>
 #endif // QT_NO_DEBUG_STREAM
@@ -62,6 +64,12 @@ QT_BEGIN_NAMESPACE
     \typealias QtCanBus::UniqueId
 */
 
+QtCanBus::UniqueId qbswap(QtCanBus::UniqueId src)
+{
+    const auto uintval = qbswap_helper(qToUnderlying(src));
+    return QtCanBus::UniqueId{uintval};
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug dbg, QtCanBus::DataSource source)
 {
@@ -117,6 +125,12 @@ QDebug operator<<(QDebug dbg, QtCanBus::MultiplexState state)
         dbg << "SwitchAndSignal";
         break;
     }
+    return dbg;
+}
+
+QDebug operator<<(QDebug dbg, QtCanBus::UniqueId uid)
+{
+    dbg << qToUnderlying(uid);
     return dbg;
 }
 #endif // QT_NO_DEBUG_STREAM
