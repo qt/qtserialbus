@@ -122,6 +122,8 @@ private:
 
     static bool equals(const QCanSignalDescription &lhs, const QCanSignalDescription &rhs);
 
+    friend void qHash(const QCanSignalDescription &desc, size_t seed) noexcept = delete;
+
 #ifndef QT_NO_DEBUG_STREAM
     friend QDebug operator<<(QDebug dbg, const QCanSignalDescription &sig)
     {

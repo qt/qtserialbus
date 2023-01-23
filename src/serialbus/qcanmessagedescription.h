@@ -68,6 +68,8 @@ private:
 
     static bool equals(const QCanMessageDescription &lhs, const QCanMessageDescription &rhs);
 
+    friend void qHash(const QCanMessageDescription &desc, size_t seed) noexcept = delete;
+
 #ifndef QT_NO_DEBUG_STREAM
     friend QDebug operator<<(QDebug dbg, const QCanMessageDescription &msg)
     {
