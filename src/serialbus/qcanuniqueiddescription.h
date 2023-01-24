@@ -25,15 +25,6 @@ public:
     QCanUniqueIdDescription &operator=(const QCanUniqueIdDescription &other);
     QT_MOVE_ASSIGNMENT_OPERATOR_IMPL_VIA_PURE_SWAP(QCanUniqueIdDescription)
 
-    friend bool operator==(const QCanUniqueIdDescription &lhs, const QCanUniqueIdDescription &rhs)
-    {
-        return equals(lhs, rhs);
-    }
-    friend bool operator!=(const QCanUniqueIdDescription &lhs, const QCanUniqueIdDescription &rhs)
-    {
-        return !equals(lhs, rhs);
-    }
-
     void swap(QCanUniqueIdDescription &other) noexcept { d.swap(other.d); }
 
     bool isValid() const;
@@ -53,8 +44,6 @@ public:
 private:
     QExplicitlySharedDataPointer<QCanUniqueIdDescriptionPrivate> d;
     friend class QCanUniqueIdDescriptionPrivate;
-
-    static bool equals(const QCanUniqueIdDescription &lhs, const QCanUniqueIdDescription &rhs);
 
     friend void qHash(const QCanUniqueIdDescription &desc, size_t seed) noexcept = delete;
 };

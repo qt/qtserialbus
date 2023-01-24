@@ -28,15 +28,6 @@ public:
     QCanMessageDescription &operator=(const QCanMessageDescription &other);
     QT_MOVE_ASSIGNMENT_OPERATOR_IMPL_VIA_PURE_SWAP(QCanMessageDescription)
 
-    friend bool operator==(const QCanMessageDescription &lhs, const QCanMessageDescription &rhs)
-    {
-        return equals(lhs, rhs);
-    }
-    friend bool operator!=(const QCanMessageDescription &lhs, const QCanMessageDescription &rhs)
-    {
-        return !equals(lhs, rhs);
-    }
-
     void swap(QCanMessageDescription &other) noexcept { d.swap(other.d); }
 
     bool isValid() const;
@@ -65,8 +56,6 @@ public:
 private:
     QExplicitlySharedDataPointer<QCanMessageDescriptionPrivate> d;
     friend class QCanMessageDescriptionPrivate;
-
-    static bool equals(const QCanMessageDescription &lhs, const QCanMessageDescription &rhs);
 
     friend void qHash(const QCanMessageDescription &desc, size_t seed) noexcept = delete;
 

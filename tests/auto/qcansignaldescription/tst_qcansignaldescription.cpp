@@ -6,6 +6,8 @@
 #include <QtSerialBus/qcansignaldescription.h>
 #include <QtSerialBus/private/qcansignaldescription_p.h>
 
+#include "qcansignaldescription_helpers.h"
+
 QT_USE_NAMESPACE
 
 class tst_QCanSignalDescription : public QObject

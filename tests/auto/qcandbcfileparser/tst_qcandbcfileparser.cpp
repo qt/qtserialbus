@@ -8,6 +8,9 @@
 #include <QtSerialBus/QCanSignalDescription>
 #include <QtSerialBus/QCanUniqueIdDescription>
 
+#include "qcanmessagedescription_helpers.h"
+#include "qcanuniqueiddescription_helpers.h"
+
 QT_USE_NAMESPACE
 
 using namespace Qt::StringLiterals;

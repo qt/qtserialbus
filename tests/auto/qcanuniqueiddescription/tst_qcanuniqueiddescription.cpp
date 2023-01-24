@@ -6,6 +6,8 @@
 #include <QtSerialBus/qcanuniqueiddescription.h>
 #include <QtSerialBus/private/qcanuniqueiddescription_p.h>
 
+#include "qcanuniqueiddescription_helpers.h"
+
 QT_USE_NAMESPACE
 
 class tst_QCanUniqueIdDescription : public QObject
