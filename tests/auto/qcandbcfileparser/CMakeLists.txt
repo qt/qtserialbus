@@ -6,9 +6,13 @@ file(GLOB_RECURSE test_data_glob
      data/*)
 list(APPEND test_data ${test_data_glob})
 
+get_filename_component(SHARED_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../shared ABSOLUTE)
+
 qt_internal_add_test(tst_qcandbcfileparser
     SOURCES
         tst_qcandbcfileparser.cpp
+    INCLUDE_DIRECTORIES
+        ${SHARED_DIR}
     LIBRARIES
         Qt::Network
         Qt::SerialBus

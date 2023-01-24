@@ -55,15 +55,6 @@ public:
     Q_SERIALBUS_EXPORT QCanSignalDescription &operator=(const QCanSignalDescription &other);
     QT_MOVE_ASSIGNMENT_OPERATOR_IMPL_VIA_PURE_SWAP(QCanSignalDescription)
 
-    friend bool operator==(const QCanSignalDescription &lhs, const QCanSignalDescription &rhs)
-    {
-        return equals(lhs, rhs);
-    }
-    friend bool operator!=(const QCanSignalDescription &lhs, const QCanSignalDescription &rhs)
-    {
-        return !equals(lhs, rhs);
-    }
-
     void swap(QCanSignalDescription &other) noexcept { d.swap(other.d); }
 
     Q_SERIALBUS_EXPORT bool isValid() const;
@@ -121,8 +112,6 @@ public:
 private:
     QExplicitlySharedDataPointer<QCanSignalDescriptionPrivate> d;
     friend class QCanSignalDescriptionPrivate;
-
-    static bool equals(const QCanSignalDescription &lhs, const QCanSignalDescription &rhs);
 
     friend void qHash(const QCanSignalDescription &desc, size_t seed) noexcept = delete;
 

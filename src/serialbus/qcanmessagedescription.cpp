@@ -100,20 +100,6 @@ QCanMessageDescription &QCanMessageDescription::operator=(const QCanMessageDescr
 */
 
 /*!
-    \fn bool QCanMessageDescription::operator==(const QCanMessageDescription &lhs, const QCanMessageDescription &rhs)
-
-    Returns \c true if all of the \a lhs object's values are the same as those
-    of \a rhs. Otherwise returns \c false.
-*/
-
-/*!
-    \fn bool QCanMessageDescription::operator!=(const QCanMessageDescription &lhs, const QCanMessageDescription &rhs)
-
-    Returns \c true if any of the \a lhs object's values are not the same as
-    those of \a rhs. Otherwise returns \c false.
-*/
-
-/*!
     Returns \c true when the message description is valid and \c false
     otherwise.
 
@@ -332,16 +318,6 @@ void QCanMessageDescription::setSignalDescriptions(const QList<QCanSignalDescrip
     d->messageSignals.reserve(descriptions.size());
     for (const auto &desc : descriptions)
         d->messageSignals.insert(desc.name(), desc);
-}
-
-bool QCanMessageDescription::equals(const QCanMessageDescription &lhs, const QCanMessageDescription &rhs)
-{
-    return lhs.d->name == rhs.d->name
-            && lhs.d->transmitter == rhs.d->transmitter
-            && lhs.d->comment == rhs.d->comment
-            && lhs.d->id == rhs.d->id
-            && lhs.d->size == rhs.d->size
-            && lhs.d->messageSignals == rhs.d->messageSignals;
 }
 
 #ifndef QT_NO_DEBUG_STREAM

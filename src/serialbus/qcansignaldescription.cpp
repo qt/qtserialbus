@@ -247,20 +247,6 @@ QCanSignalDescription &QCanSignalDescription::operator=(const QCanSignalDescript
 */
 
 /*!
-    \fn bool QCanSignalDescription::operator==(const QCanSignalDescription &lhs, const QCanSignalDescription &rhs)
-
-    Returns \c true if all of the \a lhs object's values are the same as those
-    of \a rhs. Otherwise returns \c false.
-*/
-
-/*!
-    \fn bool QCanSignalDescription::operator!=(const QCanSignalDescription &lhs, const QCanSignalDescription &rhs)
-
-    Returns \c true if any of the \a lhs object's values are not the same as
-    those of \a rhs. Otherwise returns \c false.
-*/
-
-/*!
     Returns \c true when the signal description is valid and \c false otherwise.
 
     A valid signal description \e must fulfill the following conditions:
@@ -774,46 +760,6 @@ void QCanSignalDescription::addMultiplexSignal(const QString &name, const QVaria
 {
     d.detach();
     d->muxSignals.insert(name, { {value, value} });
-}
-
-// copied from qtbase/src/testlib/qtestcase.cpp
-template <typename T>
-static bool floatingCompare(const T &actual, const T &expected)
-{
-    switch (qFpClassify(expected))
-    {
-    case FP_INFINITE:
-        return (expected < 0) == (actual < 0) && qFpClassify(actual) == FP_INFINITE;
-    case FP_NAN:
-        return qFpClassify(actual) == FP_NAN;
-    default:
-        if (!qFuzzyIsNull(expected))
-            return qFuzzyCompare(actual, expected);
-        Q_FALLTHROUGH();
-    case FP_SUBNORMAL: // subnormal is always fuzzily null
-    case FP_ZERO:
-        return qFuzzyIsNull(actual);
-    }
-}
-
-bool QCanSignalDescription::equals(const QCanSignalDescription &lhs, const QCanSignalDescription &rhs)
-{
-    return lhs.d->name == rhs.d->name
-            && lhs.d->unit == rhs.d->unit
-            && lhs.d->receiver == rhs.d->receiver
-            && lhs.d->comment == rhs.d->comment
-            && lhs.d->source == rhs.d->source
-            && lhs.d->endian == rhs.d->endian
-            && lhs.d->format == rhs.d->format
-            && lhs.d->startBit == rhs.d->startBit
-            && lhs.d->dataLength == rhs.d->dataLength
-            && lhs.d->muxState == rhs.d->muxState
-            && lhs.d->muxSignals == rhs.d->muxSignals
-            && floatingCompare(lhs.d->factor, rhs.d->factor)
-            && floatingCompare(lhs.d->offset, rhs.d->offset)
-            && floatingCompare(lhs.d->scaling, rhs.d->scaling)
-            && floatingCompare(lhs.d->minimum, rhs.d->minimum)
-            && floatingCompare(lhs.d->maximum, rhs.d->maximum);
 }
 
 #ifndef QT_NO_DEBUG_STREAM

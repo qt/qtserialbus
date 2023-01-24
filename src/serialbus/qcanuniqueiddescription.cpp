@@ -99,20 +99,6 @@ QCanUniqueIdDescription &QCanUniqueIdDescription::operator=(const QCanUniqueIdDe
 */
 
 /*!
-    \fn bool QCanUniqueIdDescription::operator==(const QCanUniqueIdDescription &lhs, const QCanUniqueIdDescription &rhs)
-
-    Returns \c true if all of the \a lhs object's values are the same as those
-    of \a rhs. Otherwise returns \c false.
-*/
-
-/*!
-    \fn bool QCanUniqueIdDescription::operator!=(const QCanUniqueIdDescription &lhs, const QCanUniqueIdDescription &rhs)
-
-    Returns \c true if any of the \a lhs object's values are not the same as
-    those of \a rhs. Otherwise returns \c false.
-*/
-
-/*!
     Returns \c true when this unique identifier description is valid and
     \c false otherwise.
 
@@ -214,14 +200,6 @@ void QCanUniqueIdDescription::setEndian(QSysInfo::Endian endian)
 {
     d.detach();
     d->endian = endian;
-}
-
-bool QCanUniqueIdDescription::equals(const QCanUniqueIdDescription &lhs, const QCanUniqueIdDescription &rhs)
-{
-    return lhs.d->source == rhs.d->source
-            && lhs.d->endian == rhs.d->endian
-            && lhs.d->startBit == rhs.d->startBit
-            && lhs.d->bitLength == rhs.d->bitLength;
 }
 
 QCanUniqueIdDescriptionPrivate *QCanUniqueIdDescriptionPrivate::get(const QCanUniqueIdDescription &desc)
