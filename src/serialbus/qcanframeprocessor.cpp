@@ -250,7 +250,7 @@ QCanBusFrame QCanFrameProcessor::prepareFrame(QtCanBus::UniqueId uniqueId,
         if (!descriptionsHash.contains(signalName)) {
             d->addWarning(QObject::tr("Skipping signal %1. It is not found in "
                                       "message description for unique id %2.").
-                          arg(signalName).arg(uniqueId));
+                          arg(signalName, QString::number(uniqueId)));
             continue;
         }
 
@@ -512,7 +512,7 @@ QCanFrameProcessor::ParseResult QCanFrameProcessor::parseFrame(const QCanBusFram
                 if (!desc.isValid()) {
                     d->addWarning(QObject::tr("Skipping signal %1 in message with unique id %2"
                                               " because its description is invalid.").
-                                  arg(desc.name()).arg(uniqueId));
+                                  arg(desc.name(), QString::number(uniqueId)));
                     continue;
                 }
                 const QVariant value = d->decodeSignal(frame, desc);
@@ -569,7 +569,7 @@ QVariant QCanFrameProcessorPrivate::decodeSignal(const QCanBusFrame &frame,
     if (signalDataEnd >= maxDataLength) {
         addWarning(QObject::tr("Skipping signal %1 in message with unique id %2. "
                                "Its expected length exceeds the data length.").
-                   arg(signalDesc.name()).arg(frame.frameId()));
+                   arg(signalDesc.name(), QString::number(frame.frameId())));
         return QVariant();
     }
 
