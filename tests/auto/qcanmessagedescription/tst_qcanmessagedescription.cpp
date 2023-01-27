@@ -64,12 +64,12 @@ void tst_QCanMessageDescription::copy()
     QVERIFY(!QCanMessageDescriptionPrivate::get(d)->isShared());
 
     QCanMessageDescription d1(d);
-    QCOMPARE(d1, d);
+    QVERIFY(equals(d1, d));
     QVERIFY(QCanMessageDescriptionPrivate::get(d)->isShared());
     QVERIFY(QCanMessageDescriptionPrivate::get(d1)->isShared());
 
     QCanMessageDescription d2 = d;
-    QCOMPARE(d2, d);
+    QVERIFY(equals(d2, d));
     QVERIFY(QCanMessageDescriptionPrivate::get(d)->isShared());
     QVERIFY(QCanMessageDescriptionPrivate::get(d2)->isShared());
 }
@@ -84,18 +84,18 @@ void tst_QCanMessageDescription::move()
     otherD.setUniqueId(d.uniqueId());
     otherD.setSize(d.size());
     otherD.setSignalDescriptions(d.signalDescriptions());
-    QCOMPARE(otherD, d);
+    QVERIFY(equals(otherD, d));
 
     QCanMessageDescription d1(std::move(d));
-    QCOMPARE(otherD, d1);
+    QVERIFY(equals(otherD, d1));
     QVERIFY(!QCanMessageDescriptionPrivate::get(d1)->isShared());
 
     QCanMessageDescription d2 = std::move(d1);
-    QCOMPARE(otherD, d2);
+    QVERIFY(equals(otherD, d2));
     QVERIFY(!QCanMessageDescriptionPrivate::get(d2)->isShared());
 
     d = std::move(d2);
-    QCOMPARE(otherD, d);
+    QVERIFY(equals(otherD, d));
     QVERIFY(!QCanMessageDescriptionPrivate::get(d)->isShared());
 }
 
@@ -103,7 +103,7 @@ void tst_QCanMessageDescription::comparison()
 {
     {
         QCanMessageDescription d1 = d;
-        QCOMPARE(d1, d);
+        QVERIFY(equals(d1, d));
         // also check that calling const methods does not detach
         d1.isValid();
         d1.uniqueId();
@@ -119,42 +119,42 @@ void tst_QCanMessageDescription::comparison()
     {
         QCanMessageDescription d1 = d;
         d1.setName("test1");
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanMessageDescriptionPrivate::get(d)->isShared());
         QVERIFY(!QCanMessageDescriptionPrivate::get(d1)->isShared());
     }
     {
         QCanMessageDescription d1 = d;
         d1.setUniqueId(QtCanBus::UniqueId{456});
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanMessageDescriptionPrivate::get(d)->isShared());
         QVERIFY(!QCanMessageDescriptionPrivate::get(d1)->isShared());
     }
     {
         QCanMessageDescription d1 = d;
         d1.setSize(3);
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanMessageDescriptionPrivate::get(d)->isShared());
         QVERIFY(!QCanMessageDescriptionPrivate::get(d1)->isShared());
     }
     {
         QCanMessageDescription d1 = d;
         d1.setTransmitter("t");
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanMessageDescriptionPrivate::get(d)->isShared());
         QVERIFY(!QCanMessageDescriptionPrivate::get(d1)->isShared());
     }
     {
         QCanMessageDescription d1 = d;
         d1.setComment("comment");
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanMessageDescriptionPrivate::get(d)->isShared());
         QVERIFY(!QCanMessageDescriptionPrivate::get(d1)->isShared());
     }
     {
         QCanMessageDescription d1 = d;
         d1.clearSignalDescriptions();
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanMessageDescriptionPrivate::get(d)->isShared());
         QVERIFY(!QCanMessageDescriptionPrivate::get(d1)->isShared());
     }
@@ -165,14 +165,14 @@ void tst_QCanMessageDescription::comparison()
     {
         QCanMessageDescription d1 = d;
         d1.addSignalDescription(s);
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanMessageDescriptionPrivate::get(d)->isShared());
         QVERIFY(!QCanMessageDescriptionPrivate::get(d1)->isShared());
     }
     {
         QCanMessageDescription d1 = d;
         d1.setSignalDescriptions({ s });
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanMessageDescriptionPrivate::get(d)->isShared());
         QVERIFY(!QCanMessageDescriptionPrivate::get(d1)->isShared());
     }

@@ -57,12 +57,12 @@ void tst_QCanSignalDescription::copy()
     QCanSignalDescription d1 = d;
     QVERIFY(QCanSignalDescriptionPrivate::get(d)->isShared());
     QVERIFY(QCanSignalDescriptionPrivate::get(d1)->isShared());
-    QCOMPARE(d1, d);
+    QVERIFY(equals(d1, d));
 
     QCanSignalDescription d2(d);
     QVERIFY(QCanSignalDescriptionPrivate::get(d)->isShared());
     QVERIFY(QCanSignalDescriptionPrivate::get(d2)->isShared());
-    QCOMPARE(d2, d);
+    QVERIFY(equals(d2, d));
 }
 
 void tst_QCanSignalDescription::move()
@@ -95,7 +95,7 @@ void tst_QCanSignalDescription::comparison()
 
     {
         QCanSignalDescription d1 = d;
-        QCOMPARE(d1, d);
+        QVERIFY(equals(d1, d));
         // also check that calling const methods does not detach
         d1.isValid();
         d1.name();
@@ -120,91 +120,91 @@ void tst_QCanSignalDescription::comparison()
     {
         QCanSignalDescription d1 = d;
         d1.setName("test1");
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanSignalDescriptionPrivate::get(d1)->isShared());
     }
     {
         QCanSignalDescription d1 = d;
         d1.setPhysicalUnit("");
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanSignalDescriptionPrivate::get(d1)->isShared());
     }
     {
         QCanSignalDescription d1 = d;
         d1.setReceiver("");
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanSignalDescriptionPrivate::get(d1)->isShared());
     }
     {
         QCanSignalDescription d1 = d;
         d1.setComment("comment");
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanSignalDescriptionPrivate::get(d1)->isShared());
     }
     {
         QCanSignalDescription d1 = d;
         d1.setDataSource(QtCanBus::DataSource::FrameId);
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanSignalDescriptionPrivate::get(d1)->isShared());
     }
     {
         QCanSignalDescription d1 = d;
         d1.setDataEndian(QSysInfo::Endian::LittleEndian);
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanSignalDescriptionPrivate::get(d1)->isShared());
     }
     {
         QCanSignalDescription d1 = d;
         d1.setDataFormat(QtCanBus::DataFormat::Float);
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanSignalDescriptionPrivate::get(d1)->isShared());
     }
     {
         QCanSignalDescription d1 = d;
         d1.setStartBit(1);
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanSignalDescriptionPrivate::get(d1)->isShared());
     }
     {
         QCanSignalDescription d1 = d;
         d1.setBitLength(32);
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanSignalDescriptionPrivate::get(d1)->isShared());
     }
     {
         QCanSignalDescription d1 = d;
         d1.setFactor(3.0);
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanSignalDescriptionPrivate::get(d1)->isShared());
     }
     {
         QCanSignalDescription d1 = d;
         d1.setOffset(5.5);
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanSignalDescriptionPrivate::get(d1)->isShared());
     }
     {
         QCanSignalDescription d1 = d;
         d1.setScaling(0.1);
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanSignalDescriptionPrivate::get(d1)->isShared());
     }
     {
         QCanSignalDescription d1 = d;
         d1.setRange(-10.5, 10.5);
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanSignalDescriptionPrivate::get(d1)->isShared());
     }
     {
         QCanSignalDescription d1 = d;
         d1.setMultiplexState(QtCanBus::MultiplexState::SwitchAndSignal);
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanSignalDescriptionPrivate::get(d1)->isShared());
     }
     {
         QCanSignalDescription d1 = d;
         d1.clearMultiplexSignals();
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanSignalDescriptionPrivate::get(d1)->isShared());
     }
     {
@@ -212,13 +212,13 @@ void tst_QCanSignalDescription::comparison()
         QCanSignalDescription::MultiplexSignalValues muxValues;
         muxValues.insert("s0", QCanSignalDescription::MultiplexValues{ {1, 1} });
         d1.setMultiplexSignals(muxValues);
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanSignalDescriptionPrivate::get(d1)->isShared());
     }
     {
         QCanSignalDescription d1 = d;
         d1.addMultiplexSignal("s0", 1);
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanSignalDescriptionPrivate::get(d1)->isShared());
     }
 }

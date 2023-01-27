@@ -46,6 +46,10 @@ private:
     friend class QCanUniqueIdDescriptionPrivate;
 
     friend void qHash(const QCanUniqueIdDescription &desc, size_t seed) noexcept = delete;
+    friend void operator==(const QCanUniqueIdDescription &lhs,
+                           const QCanUniqueIdDescription &rhs) noexcept = delete;
+    friend void operator!=(const QCanUniqueIdDescription &lhs,
+                           const QCanUniqueIdDescription &rhs) noexcept = delete;
 };
 
 QT_END_NAMESPACE
