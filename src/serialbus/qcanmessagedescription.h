@@ -59,6 +59,10 @@ private:
     friend class QCanMessageDescriptionPrivate;
 
     friend void qHash(const QCanMessageDescription &desc, size_t seed) noexcept = delete;
+    friend void operator==(const QCanMessageDescription &lhs,
+                           const QCanMessageDescription &rhs) noexcept = delete;
+    friend void operator!=(const QCanMessageDescription &lhs,
+                           const QCanMessageDescription &rhs) noexcept = delete;
 
 #ifndef QT_NO_DEBUG_STREAM
     friend QDebug operator<<(QDebug dbg, const QCanMessageDescription &msg)

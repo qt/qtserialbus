@@ -114,6 +114,10 @@ private:
     friend class QCanSignalDescriptionPrivate;
 
     friend void qHash(const QCanSignalDescription &desc, size_t seed) noexcept = delete;
+    friend void operator==(const QCanSignalDescription &lhs,
+                           const QCanSignalDescription &rhs) noexcept = delete;
+    friend void operator!=(const QCanSignalDescription &lhs,
+                           const QCanSignalDescription &rhs) noexcept = delete;
 
 #ifndef QT_NO_DEBUG_STREAM
     friend QDebug operator<<(QDebug dbg, const QCanSignalDescription &sig)

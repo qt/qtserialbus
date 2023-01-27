@@ -8,19 +8,12 @@
 
 QT_BEGIN_NAMESPACE
 
-inline bool operator==(const QCanUniqueIdDescription &lhs,
-                       const QCanUniqueIdDescription &rhs) noexcept
+inline bool equals(const QCanUniqueIdDescription &lhs, const QCanUniqueIdDescription &rhs) noexcept
 {
     return lhs.source() == rhs.source()
             && lhs.startBit() == rhs.startBit()
             && lhs.bitLength() == rhs.bitLength()
             && lhs.endian() == rhs.endian();
-}
-
-inline bool operator!=(const QCanUniqueIdDescription &lhs,
-                       const QCanUniqueIdDescription &rhs) noexcept
-{
-    return !(lhs == rhs);
 }
 
 QT_END_NAMESPACE

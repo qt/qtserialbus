@@ -51,12 +51,12 @@ void tst_QCanUniqueIdDescription::copy()
     QVERIFY(!QCanUniqueIdDescriptionPrivate::get(d)->isShared());
 
     QCanUniqueIdDescription d1(d);
-    QCOMPARE(d1, d);
+    QVERIFY(equals(d1, d));
     QVERIFY(QCanUniqueIdDescriptionPrivate::get(d)->isShared());
     QVERIFY(QCanUniqueIdDescriptionPrivate::get(d1)->isShared());
 
     QCanUniqueIdDescription d2 = d;
-    QCOMPARE(d2, d);
+    QVERIFY(equals(d2, d));
     QVERIFY(QCanUniqueIdDescriptionPrivate::get(d)->isShared());
     QVERIFY(QCanUniqueIdDescriptionPrivate::get(d2)->isShared());
 }
@@ -73,15 +73,15 @@ void tst_QCanUniqueIdDescription::move()
     otherD.setBitLength(d.bitLength());
 
     QCanUniqueIdDescription d1(std::move(d));
-    QCOMPARE(d1, otherD);
+    QVERIFY(equals(d1, otherD));
     QVERIFY(!QCanUniqueIdDescriptionPrivate::get(d1)->isShared());
 
     QCanUniqueIdDescription d2 = std::move(d1);
-    QCOMPARE(d2, otherD);
+    QVERIFY(equals(d2, otherD));
     QVERIFY(!QCanUniqueIdDescriptionPrivate::get(d2)->isShared());
 
     d = std::move(d2);
-    QCOMPARE(d, otherD);
+    QVERIFY(equals(d, otherD));
     QVERIFY(!QCanUniqueIdDescriptionPrivate::get(d)->isShared());
 }
 
@@ -89,7 +89,7 @@ void tst_QCanUniqueIdDescription::comparison()
 {
     {
         QCanUniqueIdDescription d1 = d;
-        QCOMPARE(d1, d);
+        QVERIFY(equals(d1, d));
         // also check that calling const methods does not detach
         d1.isValid();
         d1.source();
@@ -102,28 +102,28 @@ void tst_QCanUniqueIdDescription::comparison()
     {
         QCanUniqueIdDescription d1 = d;
         d1.setSource(QtCanBus::DataSource::Payload);
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanUniqueIdDescriptionPrivate::get(d)->isShared());
         QVERIFY(!QCanUniqueIdDescriptionPrivate::get(d1)->isShared());
     }
     {
         QCanUniqueIdDescription d1 = d;
         d1.setEndian(QSysInfo::Endian::BigEndian);
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanUniqueIdDescriptionPrivate::get(d)->isShared());
         QVERIFY(!QCanUniqueIdDescriptionPrivate::get(d1)->isShared());
     }
     {
         QCanUniqueIdDescription d1 = d;
         d1.setStartBit(1);
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanUniqueIdDescriptionPrivate::get(d)->isShared());
         QVERIFY(!QCanUniqueIdDescriptionPrivate::get(d1)->isShared());
     }
     {
         QCanUniqueIdDescription d1 = d;
         d1.setBitLength(10);
-        QCOMPARE_NE(d1, d);
+        QVERIFY(!equals(d1, d));
         QVERIFY(!QCanUniqueIdDescriptionPrivate::get(d)->isShared());
         QVERIFY(!QCanUniqueIdDescriptionPrivate::get(d1)->isShared());
     }

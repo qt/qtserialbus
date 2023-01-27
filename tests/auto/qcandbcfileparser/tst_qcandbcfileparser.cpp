@@ -54,7 +54,7 @@ void tst_QCanDbcFileParser::uinqueId()
     expectedDesc.setStartBit(0);
     expectedDesc.setBitLength(29);
 
-    QCOMPARE_EQ(QCanDbcFileParser::uniqueIdDescription(), expectedDesc);
+    QVERIFY(equals(QCanDbcFileParser::uniqueIdDescription(), expectedDesc));
 }
 
 void tst_QCanDbcFileParser::parseFile_data()
@@ -934,7 +934,7 @@ void tst_QCanDbcFileParser::parseFile()
     std::sort(messageDescriptions.begin(), messageDescriptions.end(), messageDescComparator);
     std::sort(expectedMessageDescriptions.begin(), expectedMessageDescriptions.end(),
               messageDescComparator);
-    QCOMPARE_EQ(messageDescriptions, expectedMessageDescriptions);
+    QVERIFY(equals(messageDescriptions, expectedMessageDescriptions));
 }
 
 void tst_QCanDbcFileParser::valueDescriptions()

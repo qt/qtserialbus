@@ -30,8 +30,7 @@ bool floatingCompare(const T &actual, const T &expected)
     }
 }
 
-inline bool operator==(const QCanSignalDescription &lhs,
-                       const QCanSignalDescription &rhs) noexcept
+inline bool equals(const QCanSignalDescription &lhs, const QCanSignalDescription &rhs) noexcept
 {
     return lhs.name() == rhs.name()
             && lhs.physicalUnit() == rhs.physicalUnit()
@@ -51,10 +50,18 @@ inline bool operator==(const QCanSignalDescription &lhs,
             && lhs.multiplexSignals() == rhs.multiplexSignals();
 }
 
-inline bool operator!=(const QCanSignalDescription &lhs,
-                       const QCanSignalDescription &rhs) noexcept
+inline bool equals(const QList<QCanSignalDescription> &lhs,
+                   const QList<QCanSignalDescription> &rhs) noexcept
 {
-    return !(lhs == rhs);
+    if (lhs.size() != rhs.size())
+        return false;
+
+    for (qsizetype idx = 0; idx < lhs.size(); ++idx) {
+        if (!equals(lhs.at(idx), rhs.at(idx)))
+            return false;
+    }
+
+    return true;
 }
 
 QT_END_NAMESPACE

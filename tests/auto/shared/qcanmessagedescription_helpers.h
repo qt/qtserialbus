@@ -10,21 +10,28 @@
 
 QT_BEGIN_NAMESPACE
 
-inline bool operator==(const QCanMessageDescription &lhs,
-                       const QCanMessageDescription &rhs) noexcept
+inline bool equals(const QCanMessageDescription &lhs, const QCanMessageDescription &rhs) noexcept
 {
     return lhs.uniqueId() == rhs.uniqueId()
             && lhs.name() == rhs.name()
             && lhs.size() == rhs.size()
             && lhs.transmitter() == rhs.transmitter()
             && lhs.comment() == rhs.comment()
-            && lhs.signalDescriptions() == rhs.signalDescriptions();
+            && equals(lhs.signalDescriptions(), rhs.signalDescriptions());
 }
 
-inline bool operator!=(const QCanMessageDescription &lhs,
-                       const QCanMessageDescription &rhs) noexcept
+inline bool equals(const QList<QCanMessageDescription> &lhs,
+                   const QList<QCanMessageDescription> &rhs) noexcept
 {
-    return !(lhs == rhs);
+    if (lhs.size() != rhs.size())
+        return false;
+
+    for (qsizetype idx = 0; idx < lhs.size(); ++idx) {
+        if (!equals(lhs.at(idx), rhs.at(idx)))
+            return false;
+    }
+
+    return true;
 }
 
 QT_END_NAMESPACE
