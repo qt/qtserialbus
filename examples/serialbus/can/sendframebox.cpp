@@ -208,6 +208,7 @@ SendFrameBox::SendFrameBox(QWidget *parent) :
     frameIdOrPayloadChanged();
 
     connect(m_ui->sendButton, &QPushButton::clicked, [this]() {
+    //! [prepare_can_frame]
         const uint frameId = m_ui->frameIdEdit->text().toUInt(nullptr, 16);
         QString data = m_ui->payloadEdit->text();
         m_ui->payloadEdit->setText(formatHexData(data));
@@ -222,6 +223,7 @@ SendFrameBox::SendFrameBox(QWidget *parent) :
             frame.setFrameType(QCanBusFrame::ErrorFrame);
         else if (m_ui->remoteFrame->isChecked())
             frame.setFrameType(QCanBusFrame::RemoteRequestFrame);
+    //! [prepare_can_frame]
 
         emit sendFrame(frame);
     });
