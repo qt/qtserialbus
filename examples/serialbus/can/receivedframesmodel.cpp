@@ -59,7 +59,7 @@ QVariant ReceivedFramesModel::headerData(int section, Qt::Orientation orientatio
         case Timestamp:
             return QSize(130, 25);
         case Flags:
-            return QSize(25, 25);
+            return QSize(50, 25);
         case CanID:
             return QSize(50, 25);
         case DLC:
