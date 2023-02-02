@@ -27,7 +27,7 @@ private slots:
 private:
     void fillBitRates();
 
-    int m_isFlexibleDataRateEnabled = false;
+    bool m_isFlexibleDataRateEnabled = false;
     QIntValidator *m_customSpeedValidator = nullptr;
 };
 
