@@ -107,9 +107,11 @@ void MainWindow::connectDevice()
     else
         m_model->setQueueLimit(0);
 
+//! [create_can_device_0]
     QString errorString;
     m_canDevice.reset(QCanBus::instance()->createDevice(p.pluginName, p.deviceInterfaceName,
                                                         &errorString));
+//! [create_can_device_0]
     if (!m_canDevice) {
         m_status->setText(tr("Error creating device '%1', reason: '%2'")
                           .arg(p.pluginName, errorString));
@@ -118,12 +120,14 @@ void MainWindow::connectDevice()
 
     m_numberFramesWritten = 0;
 
+//! [create_can_device_1]
     connect(m_canDevice.get(), &QCanBusDevice::errorOccurred,
             this, &MainWindow::processErrors);
     connect(m_canDevice.get(), &QCanBusDevice::framesReceived,
             this, &MainWindow::processReceivedFrames);
     connect(m_canDevice.get(), &QCanBusDevice::framesWritten,
             this, &MainWindow::processFramesWritten);
+//! [create_can_device_1]
 
     if (p.useConfigurationEnabled) {
         for (const ConnectDialog::ConfigurationItem &item : p.configurations)
@@ -244,6 +248,7 @@ void MainWindow::processReceivedFrames()
     if (!m_canDevice)
         return;
 
+//! [receive_can_frame]
     while (m_canDevice->framesAvailable()) {
         m_numberFramesReceived++;
         const QCanBusFrame frame = m_canDevice->readFrame();
@@ -266,6 +271,7 @@ void MainWindow::processReceivedFrames()
         m_model->appendFrame(QStringList({QString::number(m_numberFramesReceived),
                                           time, flags, id, dlc, data}));
     }
+//! [receive_can_frame]
 }
 
 void MainWindow::sendFrame(const QCanBusFrame &frame) const
@@ -273,7 +279,9 @@ void MainWindow::sendFrame(const QCanBusFrame &frame) const
     if (!m_canDevice)
         return;
 
+//! [send_can_frame]
     m_canDevice->writeFrame(frame);
+//! [send_can_frame]
 }
 
 void MainWindow::onAppendFramesTimeout()
