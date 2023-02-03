@@ -6,9 +6,6 @@ project(can LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-
 if(NOT DEFINED INSTALL_EXAMPLESDIR)
     set(INSTALL_EXAMPLESDIR "examples")
 endif()
@@ -16,6 +13,8 @@ endif()
 set(INSTALL_EXAMPLEDIR "${INSTALL_EXAMPLESDIR}/serialbus/can")
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Network SerialBus Widgets)
+
+qt_standard_project_setup()
 
 qt_add_executable(can
     bitratebox.cpp bitratebox.h
@@ -34,7 +33,7 @@ set_target_properties(can PROPERTIES
     MACOSX_BUNDLE TRUE
 )
 
-target_link_libraries(can PUBLIC
+target_link_libraries(can PRIVATE
     Qt::Core
     Qt::Gui
     Qt::Network
@@ -50,7 +49,7 @@ set(can_resource_files
     "images/disconnect.png"
 )
 
-qt6_add_resources(can "can"
+qt_add_resources(can "can"
     PREFIX
         "/"
     FILES
