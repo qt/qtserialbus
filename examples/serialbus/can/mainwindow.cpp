@@ -260,10 +260,11 @@ void MainWindow::processReceivedFrames()
 
         const QString flags = frameFlags(frame);
 
-        const QString id = QString::number(frame.frameId(), 16);
+        const QString id = QString::number(frame.frameId(), 16).toUpper();
         const QString dlc = QString::number(frame.payload().size());
 
-        m_model->appendFrame(QStringList({QString::number(m_numberFramesReceived), time, flags, id, dlc, data}));
+        m_model->appendFrame(QStringList({QString::number(m_numberFramesReceived),
+                                          time, flags, id, dlc, data}));
     }
 }
 

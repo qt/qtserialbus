@@ -8,6 +8,7 @@
 #include <QAction>
 #include <QApplication>
 #include <QClipboard>
+#include <QHeaderView>
 #include <QKeyEvent>
 #include <QMenu>
 
@@ -45,6 +46,7 @@ void ReceivedFramesView::setModel(QAbstractItemModel *model)
         const QSize size = model->headerData(i, Qt::Horizontal, Qt::SizeHintRole).value<QSize>();
         setColumnWidth(i, size.width());
     }
+    horizontalHeader()->setStretchLastSection(true);
 }
 
 void ReceivedFramesView::keyPressEvent(QKeyEvent *event)
