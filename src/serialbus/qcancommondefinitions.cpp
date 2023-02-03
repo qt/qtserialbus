@@ -61,7 +61,11 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
-    \typealias QtCanBus::UniqueId
+    \enum QtCanBus::UniqueId
+
+    Represents a CAN unique identifier. The underlying type is quint32.
+
+    An enum is used to avoid implicit conversions to or from unsigned int.
 */
 
 QtCanBus::UniqueId qbswap(QtCanBus::UniqueId src)
