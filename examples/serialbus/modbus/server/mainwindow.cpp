@@ -212,10 +212,15 @@ void MainWindow::setRegister(const QString &value)
     if (registers.contains(objectName)) {
         bool ok = true;
         const quint16 id = quint16(QObject::sender()->property("ID").toUInt());
-        if (objectName.startsWith(QStringLiteral("inReg")))
-            ok = modbusDevice->setData(QModbusDataUnit::InputRegisters, id, value.toUShort(&ok, 16));
-        else if (objectName.startsWith(QStringLiteral("holdReg")))
-            ok = modbusDevice->setData(QModbusDataUnit::HoldingRegisters, id, value.toUShort(&ok, 16));
+        if (objectName.startsWith(QStringLiteral("inReg"))) {
+            const auto uval = value.toUShort(&ok, 16);
+            if (ok)
+                ok = modbusDevice->setData(QModbusDataUnit::InputRegisters, id, uval);
+        } else if (objectName.startsWith(QStringLiteral("holdReg"))) {
+            const auto uval = value.toUShort(&ok, 16);
+            if (ok)
+                ok = modbusDevice->setData(QModbusDataUnit::HoldingRegisters, id, uval);
+        }
 
         if (!ok)
             statusBar()->showMessage(tr("Could not set register: ") + modbusDevice->errorString(),
