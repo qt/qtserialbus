@@ -14,7 +14,8 @@
 
     \include examples-run.qdocinc
 
-    This example must be used in conjunction with the \l {Modbus Client example}.
+    This example must be used in conjunction with the
+    \l {modbus/client}{Modbus Client example}.
     This example should be started and put into the listen state before the
     Modbus client example is started. Subsequent interactions between the two
     examples use the Modbus protocol.

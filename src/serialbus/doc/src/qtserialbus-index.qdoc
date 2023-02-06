@@ -75,7 +75,7 @@
 
     \list
          \li \l {can}{CAN Bus Manager example}
-         \li \l {Modbus Client example}
+         \li \l {modbus/client}{Modbus Client example}
          \li \l {Modbus Server example}
          \li \l {Modbus Custom command example}
     \endlist
