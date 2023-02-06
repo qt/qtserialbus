@@ -12,8 +12,9 @@
     or TCP. The shown dialog allows the definition of standard requests and
     displays incoming responses.
 
-    The example must be used in conjunction with the \l {Modbus server example}
-    or another Modbus device which is either connected via TCP or Serial Port.
+    The example must be used in conjunction with the
+    \l {modbus/server}{Modbus Server example} or another Modbus device which is
+    either connected via TCP or Serial Port.
 
     Key classes used in this example:
 

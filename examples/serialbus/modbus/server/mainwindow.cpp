@@ -82,6 +82,7 @@ void MainWindow::onCurrentConnectTypeChanged(int index)
         modbusDevice = nullptr;
     }
 
+//! [create_server_0]
     auto type = static_cast<ModbusConnection>(index);
     if (type == Serial) {
 #if QT_CONFIG(modbus_serialport)
@@ -100,12 +101,14 @@ void MainWindow::onCurrentConnectTypeChanged(int index)
         if (currentUrl.port() <= 0)
             ui->portEdit->setText(QLatin1String("127.0.0.1:50200"));
     }
+//! [create_server_0]
     ui->listenOnlyBox->setEnabled(type == Serial);
 
     if (!modbusDevice) {
         ui->connectButton->setDisabled(true);
         statusBar()->showMessage(tr("Could not create Modbus server."), 5000);
     } else {
+//! [create_server_1]
         QModbusDataUnitMap reg;
         reg.insert(QModbusDataUnit::Coils, { QModbusDataUnit::Coils, 0, 10 });
         reg.insert(QModbusDataUnit::DiscreteInputs, { QModbusDataUnit::DiscreteInputs, 0, 10 });
@@ -113,9 +116,12 @@ void MainWindow::onCurrentConnectTypeChanged(int index)
         reg.insert(QModbusDataUnit::HoldingRegisters, { QModbusDataUnit::HoldingRegisters, 0, 10 });
 
         modbusDevice->setMap(reg);
+//! [create_server_1]
 
+//! [connect_data_written]
         connect(modbusDevice, &QModbusServer::dataWritten,
                 this, &MainWindow::updateWidgets);
+//! [connect_data_written]
         connect(modbusDevice, &QModbusServer::stateChanged,
                 this, &MainWindow::onStateChanged);
         connect(modbusDevice, &QModbusServer::errorOccurred,
@@ -151,6 +157,7 @@ void MainWindow::onConnectButtonClicked()
     statusBar()->clearMessage();
 
     if (intendToConnect) {
+//! [create_server_2]
         if (static_cast<ModbusConnection>(ui->connectType->currentIndex()) == Serial) {
             modbusDevice->setConnectionParameter(QModbusDevice::SerialPortNameParameter,
                 ui->portEdit->text());
@@ -170,6 +177,7 @@ void MainWindow::onConnectButtonClicked()
             modbusDevice->setConnectionParameter(QModbusDevice::NetworkAddressParameter, url.host());
         }
         modbusDevice->setServerAddress(ui->serverEdit->text().toInt());
+//! [create_server_2]
         if (!modbusDevice->connectDevice()) {
             statusBar()->showMessage(tr("Connect failed: ") + modbusDevice->errorString(), 5000);
         } else {
@@ -211,6 +219,7 @@ void MainWindow::discreteInputChanged(int id)
     bitChanged(id, QModbusDataUnit::DiscreteInputs, button->isChecked());
 }
 
+//! [update_data_locally]
 void MainWindow::bitChanged(int id, QModbusDataUnit::RegisterType table, bool value)
 {
     if (!modbusDevice)
@@ -244,7 +253,9 @@ void MainWindow::setRegister(const QString &value)
                                      5000);
     }
 }
+//! [update_data_locally]
 
+//! [update_data_from_remote]
 void MainWindow::updateWidgets(QModbusDataUnit::RegisterType table, int address, int size)
 {
     for (int i = 0; i < size; ++i) {
@@ -265,6 +276,7 @@ void MainWindow::updateWidgets(QModbusDataUnit::RegisterType table, int address,
         }
     }
 }
+//! [update_data_from_remote]
 
 // -- private
 
