@@ -130,6 +130,7 @@ void MainWindow::onConnectTypeChanged(int index)
         modbusDevice = nullptr;
     }
 
+//! [create_client_0]
     auto type = static_cast<ModbusConnection>(index);
     if (type == Serial) {
 #if QT_CONFIG(modbus_serialport)
@@ -148,6 +149,7 @@ void MainWindow::onConnectTypeChanged(int index)
         if (currentUrl.port() <= 0)
             ui->portEdit->setText(QLatin1String("127.0.0.1:50200"));
     }
+//! [create_client_0]
 
     connect(modbusDevice, &QModbusClient::errorOccurred, [this](QModbusDevice::Error) {
         statusBar()->showMessage(modbusDevice->errorString(), 5000);
@@ -169,6 +171,7 @@ void MainWindow::onConnectButtonClicked()
 
     statusBar()->clearMessage();
     if (modbusDevice->state() != QModbusDevice::ConnectedState) {
+//! [create_client_1]
         const auto settings = m_settingsDialog->settings();
         if (static_cast<ModbusConnection>(ui->connectType->currentIndex()) == Serial) {
             modbusDevice->setConnectionParameter(QModbusDevice::SerialPortNameParameter,
@@ -190,6 +193,7 @@ void MainWindow::onConnectButtonClicked()
         }
         modbusDevice->setTimeout(settings.responseTime);
         modbusDevice->setNumberOfRetries(settings.numberOfRetries);
+//! [create_client_1]
         if (!modbusDevice->connectDevice()) {
             statusBar()->showMessage(tr("Connect failed: %1").arg(modbusDevice->errorString()), 5000);
         } else {
@@ -226,6 +230,7 @@ void MainWindow::onReadButtonClicked()
     ui->readValue->clear();
     statusBar()->clearMessage();
 
+//! [read_data_1]
     if (auto *reply = modbusDevice->sendReadRequest(readRequest(), ui->serverEdit->value())) {
         if (!reply->isFinished())
             connect(reply, &QModbusReply::finished, this, &MainWindow::onReadReady);
@@ -234,8 +239,10 @@ void MainWindow::onReadButtonClicked()
     } else {
         statusBar()->showMessage(tr("Read error: %1").arg(modbusDevice->errorString()), 5000);
     }
+//! [read_data_1]
 }
 
+//! [read_data_2]
 void MainWindow::onReadReady()
 {
     auto reply = qobject_cast<QModbusReply *>(sender());
@@ -262,6 +269,7 @@ void MainWindow::onReadReady()
 
     reply->deleteLater();
 }
+//! [read_data_2]
 
 void MainWindow::onWriteButtonClicked()
 {
@@ -269,6 +277,7 @@ void MainWindow::onWriteButtonClicked()
         return;
     statusBar()->clearMessage();
 
+//! [write_data_0]
     QModbusDataUnit writeUnit = writeRequest();
     QModbusDataUnit::RegisterType table = writeUnit.registerType();
     for (qsizetype i = 0, total = writeUnit.valueCount(); i < total; ++i) {
@@ -300,6 +309,7 @@ void MainWindow::onWriteButtonClicked()
     } else {
         statusBar()->showMessage(tr("Write error: %1").arg(modbusDevice->errorString()), 5000);
     }
+//! [write_data_0]
 }
 
 void MainWindow::onReadWriteButtonClicked()
@@ -344,6 +354,7 @@ void MainWindow::onWriteTableChanged(int index)
     ui->writeGroupBox->setEnabled(coilsOrHolding);
 }
 
+//! [read_data_0]
 QModbusDataUnit MainWindow::readRequest() const
 {
     const auto table = ui->writeTable->currentData().value<QModbusDataUnit::RegisterType>();
@@ -356,6 +367,7 @@ QModbusDataUnit MainWindow::readRequest() const
                                    quint16(10 - startAddress));
     return QModbusDataUnit(table, startAddress, numberOfEntries);
 }
+//! [read_data_0]
 
 QModbusDataUnit MainWindow::writeRequest() const
 {
