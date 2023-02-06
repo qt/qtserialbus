@@ -4,9 +4,6 @@
 cmake_minimum_required(VERSION 3.16)
 project(modbusserver LANGUAGES CXX)
 
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-
 if(NOT DEFINED INSTALL_EXAMPLESDIR)
     set(INSTALL_EXAMPLESDIR "examples")
 endif()
@@ -14,6 +11,8 @@ endif()
 set(INSTALL_EXAMPLEDIR "${INSTALL_EXAMPLESDIR}/serialbus/modbus/server")
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Network SerialBus Widgets)
+
+qt_standard_project_setup()
 
 qt_add_executable(modbusserver
     main.cpp
@@ -26,7 +25,7 @@ set_target_properties(modbusserver PROPERTIES
     MACOSX_BUNDLE TRUE
 )
 
-target_link_libraries(modbusserver PUBLIC
+target_link_libraries(modbusserver PRIVATE
     Qt::Core
     Qt::Gui
     Qt::Network
@@ -42,7 +41,7 @@ set(server_resource_files
     "images/settings.png"
 )
 
-qt6_add_resources(modbusserver "server"
+qt_add_resources(modbusserver "server"
     PREFIX
         "/"
     FILES
@@ -50,7 +49,7 @@ qt6_add_resources(modbusserver "server"
 )
 
 if(QT_FEATURE_modbus_serialport)
-    target_link_libraries(modbusserver PUBLIC
+    target_link_libraries(modbusserver PRIVATE
         Qt::SerialPort
     )
 endif()
