@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Modbus Custom Command</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_3">
@@ -39,7 +39,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>127.0.0.1:502</string>
+         <string>127.0.0.1:50200</string>
         </property>
        </widget>
       </item>

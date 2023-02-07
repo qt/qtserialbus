@@ -15,6 +15,8 @@ MainWindow::MainWindow(QWidget* parent)
     ui->setupUi(this);
     ui->statusbar->setSizeGripEnabled(false);
 
+    ui->addressPort->setToolTip(tr("Enter <ip address>:<port> pair."));
+
     setupConnections();
     setupClientContainer();
     setupServerContainer();
@@ -88,6 +90,7 @@ void MainWindow::onConnectButtonClicked()
 void MainWindow::onStateChanged(int state)
 {
     ui->serverAddress->setEnabled(state == QModbusDevice::UnconnectedState);
+    ui->addressPort->setEnabled(state == QModbusDevice::UnconnectedState);
     ui->actionConnect->setEnabled(state == QModbusDevice::UnconnectedState);
     ui->actionDisconnect->setEnabled(state == QModbusDevice::ConnectedState);
 
