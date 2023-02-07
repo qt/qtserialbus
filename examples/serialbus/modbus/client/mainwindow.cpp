@@ -9,6 +9,7 @@
 #include <QModbusTcpClient>
 #if QT_CONFIG(modbus_serialport)
 #    include <QModbusRtuSerialClient>
+#    include <QSerialPortInfo>
 #endif
 #include <QStandardItemModel>
 #include <QStatusBar>
@@ -44,6 +45,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->writeTable->addItem(tr("Discrete Inputs"), QModbusDataUnit::DiscreteInputs);
     ui->writeTable->addItem(tr("Input Registers"), QModbusDataUnit::InputRegisters);
     ui->writeTable->addItem(tr("Holding Registers"), QModbusDataUnit::HoldingRegisters);
+
+    ui->portEdit->setToolTip(tr("For serial connection enter COM port name\n"
+                                "(eg. COM1, ttyS0, etc).\n"
+                                "For TCP connection enter\n<ip address>:<port> pair."));
 
 #if QT_CONFIG(modbus_serialport)
     ui->connectType->setCurrentIndex(0);
@@ -129,11 +134,19 @@ void MainWindow::onConnectTypeChanged(int index)
     if (type == Serial) {
 #if QT_CONFIG(modbus_serialport)
         modbusDevice = new QModbusRtuSerialClient(this);
+        // Try to fill in the first available serial port name if the line edit
+        // is empty, or contains a url (assume that ':' is only a part of url).
+        const auto ports = QSerialPortInfo::availablePorts();
+        const auto currentText = ui->portEdit->text();
+        if (!ports.isEmpty() && (currentText.isEmpty() || currentText.contains(u':')))
+            ui->portEdit->setText(ports.front().portName());
 #endif
     } else if (type == Tcp) {
         modbusDevice = new QModbusTcpClient(this);
-        if (ui->portEdit->text().isEmpty())
-            ui->portEdit->setText(QLatin1String("127.0.0.1:502"));
+        const QUrl currentUrl = QUrl::fromUserInput(ui->portEdit->text());
+        // Check if we already have <ip address>:<port>
+        if (currentUrl.port() <= 0)
+            ui->portEdit->setText(QLatin1String("127.0.0.1:50200"));
     }
 
     connect(modbusDevice, &QModbusClient::errorOccurred, [this](QModbusDevice::Error) {
@@ -200,6 +213,10 @@ void MainWindow::onModbusStateChanged(int state)
         ui->connectButton->setText(tr("Connect"));
     else if (state == QModbusDevice::ConnectedState)
         ui->connectButton->setText(tr("Disconnect"));
+
+    ui->connectType->setEnabled(!connected);
+    ui->portEdit->setEnabled(!connected);
+    ui->serverEdit->setEnabled(!connected);
 }
 
 void MainWindow::onReadButtonClicked()
