@@ -7,6 +7,7 @@
 
 #if QT_CONFIG(modbus_serialport)
 #    include <QModbusRtuSerialServer>
+#    include <QSerialPortInfo>
 #endif
 #include <QModbusTcpServer>
 #include <QRegularExpression>
@@ -25,6 +26,10 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     setupWidgetContainers();
+
+    ui->portEdit->setToolTip(tr("For serial connection enter COM port name\n"
+                                "(eg. COM1, ttyS0, etc).\n"
+                                "For TCP connection enter\n<ip address>:<port> pair."));
 
 #if QT_CONFIG(modbus_serialport)
     ui->connectType->setCurrentIndex(0);
@@ -81,11 +86,19 @@ void MainWindow::onCurrentConnectTypeChanged(int index)
     if (type == Serial) {
 #if QT_CONFIG(modbus_serialport)
         modbusDevice = new QModbusRtuSerialServer(this);
+        // Try to fill in the first available serial port name if the line edit
+        // is empty, or contains a url (assume that ':' is only a part of url).
+        const auto ports = QSerialPortInfo::availablePorts();
+        const auto currentText = ui->portEdit->text();
+        if (!ports.isEmpty() && (currentText.isEmpty() || currentText.contains(u':')))
+            ui->portEdit->setText(ports.front().portName());
 #endif
     } else if (type == Tcp) {
         modbusDevice = new QModbusTcpServer(this);
-        if (ui->portEdit->text().isEmpty())
-            ui->portEdit->setText(QLatin1String("127.0.0.1:502"));
+        const QUrl currentUrl = QUrl::fromUserInput(ui->portEdit->text());
+        // Check if we already have <ip address>:<port>
+        if (currentUrl.port() <= 0)
+            ui->portEdit->setText(QLatin1String("127.0.0.1:50200"));
     }
     ui->listenOnlyBox->setEnabled(type == Serial);
 
@@ -180,6 +193,10 @@ void MainWindow::onStateChanged(int state)
         ui->connectButton->setText(tr("Connect"));
     else if (state == QModbusDevice::ConnectedState)
         ui->connectButton->setText(tr("Disconnect"));
+
+    ui->connectType->setEnabled(!connected);
+    ui->portEdit->setEnabled(!connected);
+    ui->serverEdit->setEnabled(!connected);
 }
 
 void MainWindow::coilChanged(int id)
