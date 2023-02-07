@@ -131,7 +131,9 @@ void QModbusTcpServer::close()
     if (d->m_tcpServer->isListening())
         d->m_tcpServer->close();
 
-    for (auto socket : qAsConst(d->connections))
+    const auto childSockets =
+            d->m_tcpServer->findChildren<QTcpSocket *>(QString(), Qt::FindDirectChildrenOnly);
+    for (auto socket : childSockets)
         socket->disconnectFromHost();
 
     setState(QModbusDevice::UnconnectedState);

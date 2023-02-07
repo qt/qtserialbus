@@ -132,8 +132,6 @@ public:
                 return;
             }
 
-            connections.append(socket);
-
             auto buffer = new QByteArray();
 
             QObject::connect(socket, &QObject::destroyed, socket, [buffer]() {
@@ -141,8 +139,6 @@ public:
                 delete buffer;
             });
             QObject::connect(socket, &QTcpSocket::disconnected, q, [socket, this]() {
-                connections.removeAll(socket);
-
                 Q_Q(QModbusTcpServer);
                 emit q->modbusClientDisconnected(socket);
                 socket->deleteLater();
@@ -226,7 +222,6 @@ public:
     }
 
     QTcpServer *m_tcpServer { nullptr };
-    QList<QTcpSocket *> connections;
 
     std::unique_ptr<QModbusTcpConnectionObserver> m_observer;
 
