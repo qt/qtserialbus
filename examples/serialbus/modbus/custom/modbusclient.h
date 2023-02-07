@@ -6,6 +6,7 @@
 #ifndef MODBUSCLIENT_H
 #define MODBUSCLIENT_H
 
+//! [custom_client]
 class ModbusClient : public QModbusTcpClient
 {
     Q_OBJECT
@@ -20,5 +21,6 @@ public:
 private:
     bool processPrivateResponse(const QModbusResponse &response, QModbusDataUnit *data) override;
 };
+//! [custom_client]
 
 #endif // MODBUSCLIENT_H

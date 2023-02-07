@@ -6,6 +6,7 @@
 #ifndef MODBUSSERVER_H
 #define MODBUSSERVER_H
 
+//! [custom_server]
 class ModbusServer : public QModbusTcpServer
 {
     Q_OBJECT
@@ -17,5 +18,6 @@ public:
 private:
     QModbusResponse processPrivateRequest(const QModbusPdu &request) override;
 };
+//! [custom_server]
 
 #endif // MODBUSSERVER_H

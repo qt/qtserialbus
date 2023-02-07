@@ -40,6 +40,7 @@ QModbusResponse ModbusServer::processPrivateRequest(const QModbusPdu &request)
     if (!request.isValid())
         return QModbusServer::processPrivateRequest(request);
 
+//! [handle_custom_read]
     if (ModbusClient::CustomRead == request.functionCode()) {
         quint16 startAddress, count;
         request.decodeData(&startAddress, &count);
@@ -51,7 +52,9 @@ QModbusResponse ModbusServer::processPrivateRequest(const QModbusPdu &request)
         }
         return QModbusResponse(request.functionCode(), startAddress, quint8(count * 2), unit.values());
     }
+//! [handle_custom_read]
 
+//! [handle_custom_write]
     if (ModbusClient::CustomWrite == request.functionCode()) {
         quint8 byteCount;
         quint16 startAddress, numberOfRegisters;
@@ -79,6 +82,7 @@ QModbusResponse ModbusServer::processPrivateRequest(const QModbusPdu &request)
 
         return QModbusResponse(request.functionCode(), startAddress, numberOfRegisters);
     }
+//! [handle_custom_write]
 
     return QModbusServer::processPrivateRequest(request);
 }
