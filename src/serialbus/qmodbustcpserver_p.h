@@ -103,7 +103,7 @@ public:
 
             auto buffer = new QByteArray();
 
-            QObject::connect(socket, &QObject::destroyed, q, [buffer]() {
+            QObject::connect(socket, &QObject::destroyed, socket, [buffer]() {
                 // cleanup buffer
                 delete buffer;
             });
