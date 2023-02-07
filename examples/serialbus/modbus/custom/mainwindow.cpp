@@ -146,6 +146,7 @@ void MainWindow::onReadButtonClicked()
 
 void MainWindow::onWriteButtonClicked()
 {
+//! [generate_modbus_request]
     QModbusDataUnit unit {
         QModbusDataUnit::HoldingRegisters,
         ui->startAddress->value(),
@@ -162,7 +163,9 @@ void MainWindow::onWriteButtonClicked()
         quint16(unit.startAddress()),
         quint16(unit.valueCount()), byteCount, unit.values()
     };
+//! [generate_modbus_request]
 
+//! [send_custom_command]
     if (auto *reply = m_client.sendRawRequest(writeRequest, ui->serverAddress->value())) {
         if (!reply->isFinished()) {
             connect(reply, &QModbusReply::finished, this, [this, reply]() {
@@ -182,6 +185,7 @@ void MainWindow::onWriteButtonClicked()
     } else {
         statusBar()->showMessage(tr("Write error: ") + m_client.errorString(), 5000);
     }
+//! [send_custom_command]
 }
 
 void MainWindow::setupClientContainer()

@@ -31,6 +31,7 @@ ModbusClient::ModbusClient(QObject *parent)
     });
 }
 
+//! [process_custom_read]
 static bool collateBytes(const QModbusPdu &response, QModbusDataUnit *data)
 {
     if (response.dataSize() < MinimumReadResponseSize)
@@ -56,7 +57,9 @@ static bool collateBytes(const QModbusPdu &response, QModbusDataUnit *data)
     }
     return true;
 }
+//! [process_custom_read]
 
+//! [process_custom_write]
 static bool collateMultipleValues(const QModbusPdu &response, QModbusDataUnit *data)
 {
     if (response.dataSize() != WriteResponseSize)
@@ -72,7 +75,9 @@ static bool collateMultipleValues(const QModbusPdu &response, QModbusDataUnit *d
         *data = {QModbusDataUnit::HoldingRegisters, address, count};
     return true;
 }
+//! [process_custom_write]
 
+//! [private_response]
 bool ModbusClient::processPrivateResponse(const QModbusResponse &response, QModbusDataUnit *data)
 {
     if (!response.isValid())
@@ -85,3 +90,4 @@ bool ModbusClient::processPrivateResponse(const QModbusResponse &response, QModb
         return collateMultipleValues(response, data);
     return QModbusClient::processPrivateResponse(response, data);
 }
+//! [private_response]

@@ -77,7 +77,7 @@
          \li \l {can}{CAN Bus Manager example}
          \li \l {modbus/client}{Modbus Client example}
          \li \l {modbus/server}{Modbus Server example}
-         \li \l {Modbus Custom command example}
+         \li \l {modbus/custom}{Modbus Custom Command example}
     \endlist
 
     \section1 Module Evolution

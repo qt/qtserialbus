@@ -142,7 +142,7 @@
          </font>
         </property>
         <property name="text">
-         <string>0X41</string>
+         <string>0x41</string>
         </property>
        </widget>
       </item>
@@ -199,7 +199,7 @@
          </font>
         </property>
         <property name="text">
-         <string>0X42</string>
+         <string>0x42</string>
         </property>
        </widget>
       </item>
