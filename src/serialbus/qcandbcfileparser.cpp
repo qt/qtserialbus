@@ -38,7 +38,7 @@ QT_BEGIN_NAMESPACE
 
     Call the \l error() method to get the error which occurred during the
     parsing. If the parsing completes successfully, this method will return
-    \l {QCanDbcFileParser::}{NoError}. Otherwise, you can use an
+    \l {QCanDbcFileParser::}{None}. Otherwise, you can use an
     \l errorString() method to get the string representation of an error.
 
     During the parsing some non-critical problems may occur as well. Such
@@ -128,9 +128,9 @@ QT_BEGIN_NAMESPACE
     This enum represents the possible errors that can happen during the parsing
     of a DBC file.
 
-    \value NoError No error occurred.
-    \value FileReadError An error occurred while opening or reading the file.
-    \value ParseError An error occurred while parsing the content of the file.
+    \value None No error occurred.
+    \value FileReading An error occurred while opening or reading the file.
+    \value Parsing An error occurred while parsing the content of the file.
 */
 
 /*!
@@ -311,7 +311,7 @@ static constexpr auto kCharStrRegExp = "((?![\\\"\\\\])[\x20-\x7e])*"_L1;
 void QCanDbcFileParserPrivate::reset()
 {
     m_fileName.clear();
-    m_error = QCanDbcFileParser::Error::NoError;
+    m_error = QCanDbcFileParser::Error::None;
     m_errorString.clear();
     m_warnings.clear();
     m_lineOffset = 0;
@@ -331,7 +331,7 @@ bool QCanDbcFileParserPrivate::parseFile(const QString &fileName)
 {
     QFile f(fileName);
     if (!f.open(QIODevice::ReadOnly)) {
-        m_error = QCanDbcFileParser::Error::FileReadError;
+        m_error = QCanDbcFileParser::Error::FileReading;
         m_errorString = f.errorString();
         return false;
     }
@@ -362,7 +362,7 @@ bool QCanDbcFileParserPrivate::processLine(const QStringView line)
     if (data.startsWith(kMessageDef)) {
         if (m_seenExtraData) {
             // Unexpected position of message description
-            m_error = QCanDbcFileParser::Error::ParseError;
+            m_error = QCanDbcFileParser::Error::Parsing;
             m_errorString = QObject::tr("Failed to parse file %1. Unexpected position "
                                         "of %2 section.").arg(m_fileName, kMessageDef);
             return false;
@@ -377,7 +377,7 @@ bool QCanDbcFileParserPrivate::processLine(const QStringView line)
     while (data.startsWith(kSignalDef)) {
         if (!m_isProcessingMessage || m_seenExtraData) {
             // Unexpected position of signal description
-            m_error = QCanDbcFileParser::Error::ParseError;
+            m_error = QCanDbcFileParser::Error::Parsing;
             m_errorString = QObject::tr("Failed to parse file %1. Unexpected position "
                                         "of %2 section.").arg(m_fileName, kSignalDef);
             return false;

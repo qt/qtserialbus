@@ -46,7 +46,7 @@ public:
     QList<QCanMessageDescription> getMessages() const;
 
     QString m_fileName;
-    QCanDbcFileParser::Error m_error = QCanDbcFileParser::Error::NoError;
+    QCanDbcFileParser::Error m_error = QCanDbcFileParser::Error::None;
     QString m_errorString;
     QStringList m_warnings;
     qsizetype m_lineOffset = 0;

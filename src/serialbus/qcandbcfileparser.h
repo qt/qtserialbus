@@ -21,9 +21,9 @@ class QCanDbcFileParser
 {
 public:
     enum class Error : quint8 {
-        NoError = 0,
-        FileReadError,
-        ParseError
+        None = 0,
+        FileReading,
+        Parsing
     };
 
     // The DBC protocol uses unsigned_integer to describe the supported values.

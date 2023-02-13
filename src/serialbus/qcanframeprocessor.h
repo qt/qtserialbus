@@ -22,11 +22,11 @@ class QCanFrameProcessor
 {
 public:
     enum class Error : quint8 {
-        NoError = 0,
+        None = 0,
         InvalidFrame,
         UnsupportedFrameFormat,
-        DecodingError,
-        EncodingError,
+        Decoding,
+        Encoding,
     };
 
     struct ParseResult {

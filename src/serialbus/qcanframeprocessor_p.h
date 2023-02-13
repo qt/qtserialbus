@@ -42,7 +42,7 @@ public:
 
     static QCanFrameProcessorPrivate *get(const QCanFrameProcessor &processor);
 
-    QCanFrameProcessor::Error error = QCanFrameProcessor::Error::NoError;
+    QCanFrameProcessor::Error error = QCanFrameProcessor::Error::None;
     QString errorString;
     QStringList warnings;
     QHash<QtCanBus::UniqueId, QCanMessageDescription> messages;
