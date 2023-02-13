@@ -39,7 +39,7 @@ void tst_QCanDbcFileParser::initTestCase()
 void tst_QCanDbcFileParser::construct()
 {
     QCanDbcFileParser parser;
-    QCOMPARE(parser.error(), QCanDbcFileParser::Error::NoError);
+    QCOMPARE(parser.error(), QCanDbcFileParser::Error::None);
     QVERIFY(parser.errorString().isEmpty());
     QVERIFY(parser.warnings().isEmpty());
     QVERIFY(parser.messageDescriptions().isEmpty());
@@ -75,7 +75,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QTest::addRow("invalid filename")
                 << QStringList{ u"nonexisting_file.dbc"_s }
-                << QCanDbcFileParser::Error::FileReadError << errorDesc
+                << QCanDbcFileParser::Error::FileReading << errorDesc
                 << QStringList() << QList<QCanMessageDescription>();
     }
 
@@ -88,7 +88,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
     QTest::addRow("invalid message definitions")
             << QStringList{ u"invalid_messages.dbc"_s }
-            << QCanDbcFileParser::Error::NoError << QString()
+            << QCanDbcFileParser::Error::None << QString()
             << expectedWarnings
             << QList<QCanMessageDescription>();
 
@@ -126,7 +126,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
     QTest::addRow("invalid signal definitions")
             << QStringList{ u"invalid_signals.dbc"_s }
-            << QCanDbcFileParser::Error::NoError << QString()
+            << QCanDbcFileParser::Error::None << QString()
             << expectedWarnings
             << QList<QCanMessageDescription>();
 
@@ -175,7 +175,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QTest::addRow("different signal names")
                 << QStringList{ u"signal_names.dbc"_s }
-                << QCanDbcFileParser::Error::NoError << QString()
+                << QCanDbcFileParser::Error::None << QString()
                 << expectedWarnings << descriptions;
     }
 
@@ -205,7 +205,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QTest::addRow("valid message and signals")
                 << QStringList{ u"valid_message_and_signals.dbc"_s }
-                << QCanDbcFileParser::Error::NoError << QString()
+                << QCanDbcFileParser::Error::None << QString()
                 << QStringList() << descriptions;
     }
 
@@ -237,7 +237,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QTest::addRow("different endian")
                 << QStringList{ u"different_endian.dbc"_s }
-                << QCanDbcFileParser::Error::NoError << QString()
+                << QCanDbcFileParser::Error::None << QString()
                 << QStringList() << descriptions;
     }
 
@@ -286,7 +286,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QTest::addRow("different data types")
                 << QStringList{ u"different_data_types.dbc"_s }
-                << QCanDbcFileParser::Error::NoError << QString()
+                << QCanDbcFileParser::Error::None << QString()
                 << QStringList() << descriptions;
     }
 
@@ -342,7 +342,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QTest::addRow("different factor and offset")
                 << QStringList{ u"different_factor_offset.dbc"_s }
-                << QCanDbcFileParser::Error::NoError << QString()
+                << QCanDbcFileParser::Error::None << QString()
                 << QStringList() << descriptions;
     }
 
@@ -398,7 +398,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QTest::addRow("different ranges")
                 << QStringList{ u"different_ranges.dbc"_s }
-                << QCanDbcFileParser::Error::NoError << QString()
+                << QCanDbcFileParser::Error::None << QString()
                 << QStringList() << descriptions;
     }
 
@@ -439,7 +439,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QTest::addRow("multiple receivers")
                 << QStringList{ u"multiple_receivers.dbc"_s }
-                << QCanDbcFileParser::Error::NoError << QString()
+                << QCanDbcFileParser::Error::None << QString()
                 << QStringList() << descriptions;
     }
 
@@ -488,7 +488,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QTest::addRow("message and signals in one line")
                 << QStringList{ u"message_signals_in_one_line.dbc"_s }
-                << QCanDbcFileParser::Error::NoError << QString()
+                << QCanDbcFileParser::Error::None << QString()
                 << QStringList() << descriptions;
     }
 
@@ -530,7 +530,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QTest::addRow("random whitespaces")
                 << QStringList{ u"random_whitespaces.dbc"_s }
-                << QCanDbcFileParser::Error::NoError << QString()
+                << QCanDbcFileParser::Error::None << QString()
                 << QStringList() << descriptions;
     }
 
@@ -578,7 +578,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QTest::addRow("comments processing")
                 << QStringList{ u"messages_with_comments.dbc"_s }
-                << QCanDbcFileParser::Error::NoError << QString()
+                << QCanDbcFileParser::Error::None << QString()
                 << QStringList() << descriptions;
 
         messageDesc.setComment("");
@@ -637,7 +637,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QTest::addRow("simple multiplexing")
                 << QStringList{ u"simple_multiplexing.dbc"_s }
-                << QCanDbcFileParser::Error::NoError << QString()
+                << QCanDbcFileParser::Error::None << QString()
                 << expectedWarnings << descriptions;
     }
 
@@ -726,7 +726,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QTest::addRow("extended multiplexing")
                 << QStringList{ u"extended_multiplexing.dbc"_s }
-                << QCanDbcFileParser::Error::NoError << QString()
+                << QCanDbcFileParser::Error::None << QString()
                 << expectedWarnings << descriptions;
     }
 
@@ -760,7 +760,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QTest::addRow("char string test")
                 << QStringList{ u"char_string_test.dbc"_s }
-                << QCanDbcFileParser::Error::NoError << QString()
+                << QCanDbcFileParser::Error::None << QString()
                 << expectedWarnings << descriptions;
     }
 
@@ -771,7 +771,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QTest::addRow("invalid message desc pos")
                 << QStringList{ fileName }
-                << QCanDbcFileParser::Error::ParseError << expectedError
+                << QCanDbcFileParser::Error::Parsing << expectedError
                 << QStringList() << QList<QCanMessageDescription>();
     }
 
@@ -782,7 +782,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QTest::addRow("invalid signal desc pos")
                 << QStringList{ fileName }
-                << QCanDbcFileParser::Error::ParseError << expectedError
+                << QCanDbcFileParser::Error::Parsing << expectedError
                 << QStringList() << QList<QCanMessageDescription>();
     }
 
@@ -876,7 +876,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QTest::addRow("multiple files")
                 << QStringList{ u"multiple_files_1.dbc"_s, u"multiple_files_2.dbc"_s }
-                << QCanDbcFileParser::Error::NoError << QString()
+                << QCanDbcFileParser::Error::None << QString()
                 << expectedWarnings << descriptions;
     }
 
@@ -887,7 +887,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
         QTest::addRow("multiple files and error")
                 << QStringList{ u"multiple_files_1.dbc"_s, fileName }
-                << QCanDbcFileParser::Error::ParseError << expectedError
+                << QCanDbcFileParser::Error::Parsing << expectedError
                 << QStringList() << QList<QCanMessageDescription>();
     }
 }
@@ -914,7 +914,7 @@ void tst_QCanDbcFileParser::parseFile()
     QCOMPARE_EQ(parser.error(), expectedError);
     QCOMPARE_EQ(parser.errorString(), expectedErrorDescription);
 
-    if (expectedError != QCanDbcFileParser::Error::NoError)
+    if (expectedError != QCanDbcFileParser::Error::None)
         return; // no need to compare other data if we already had an error
 
     // Some warnings may come in unspecified order, so sort them before
@@ -985,7 +985,7 @@ void tst_QCanDbcFileParser::valueDescriptions()
     const QString fileName = u"value_descriptions.dbc"_s;
     QCanDbcFileParser parser;
     parser.parse(m_filesDir + fileName);
-    QCOMPARE(parser.error(), QCanDbcFileParser::Error::NoError);
+    QCOMPARE(parser.error(), QCanDbcFileParser::Error::None);
 
     QCOMPARE(parser.messageValueDescriptions(), expectedDescriptions);
     QCOMPARE(parser.warnings(), expectedWarnings);
@@ -998,7 +998,7 @@ void tst_QCanDbcFileParser::resetState()
     QCanDbcFileParser parser;
     parser.parse(m_filesDir + fileName);
 
-    QCOMPARE(parser.error(), QCanDbcFileParser::Error::NoError);
+    QCOMPARE(parser.error(), QCanDbcFileParser::Error::None);
     QVERIFY(!parser.messageDescriptions().isEmpty());
     QVERIFY(!parser.warnings().isEmpty());
     QVERIFY(!parser.messageValueDescriptions().isEmpty());
@@ -1007,7 +1007,7 @@ void tst_QCanDbcFileParser::resetState()
     // other getters should return default values
     const QString invalidName = u"invalid_file"_s;
     parser.parse(m_filesDir + invalidName);
-    QCOMPARE(parser.error(), QCanDbcFileParser::Error::FileReadError);
+    QCOMPARE(parser.error(), QCanDbcFileParser::Error::FileReading);
     QVERIFY(parser.messageDescriptions().isEmpty());
     QVERIFY(parser.warnings().isEmpty());
     QVERIFY(parser.messageValueDescriptions().isEmpty());

@@ -66,7 +66,7 @@ void tst_QCanFrameProcessor::construct()
     QCanFrameProcessor p;
 
     QVERIFY(p.messageDescriptions().isEmpty());
-    QCOMPARE(p.error(), QCanFrameProcessor::Error::NoError);
+    QCOMPARE(p.error(), QCanFrameProcessor::Error::None);
     QVERIFY(p.errorString().isEmpty());
     QVERIFY(p.warnings().isEmpty());
     QVERIFY(!p.uniqueIdDescription().isValid());
@@ -761,7 +761,7 @@ void tst_QCanFrameProcessor::parseWithErrorsAndWarnings_data()
     QTest::addRow("No UID description")
             << QCanMessageDescription() << QCanUniqueIdDescription()
             << QCanBusFrame(123, QByteArray(2, 0x01))
-            << QCanFrameProcessor::Error::DecodingError
+            << QCanFrameProcessor::Error::Decoding
             << tr("No valid unique identifier description is specified.")
             << QStringList() << QtCanBus::UniqueId(0) << QVariantMap();
 
@@ -773,7 +773,7 @@ void tst_QCanFrameProcessor::parseWithErrorsAndWarnings_data()
     QTest::addRow("UID extraction failed")
             << QCanMessageDescription() << uidDesc
             << QCanBusFrame(123, QByteArray(2, 0x01))
-            << QCanFrameProcessor::Error::DecodingError
+            << QCanFrameProcessor::Error::Decoding
             << tr("Failed to extract unique id from the frame.")
             << QStringList() << QtCanBus::UniqueId(0) << QVariantMap();
 
@@ -783,7 +783,7 @@ void tst_QCanFrameProcessor::parseWithErrorsAndWarnings_data()
     QTest::addRow("Unknown unique id")
             << QCanMessageDescription() << uidDesc
             << QCanBusFrame(123, QByteArray(8, 0x01))
-            << QCanFrameProcessor::Error::DecodingError
+            << QCanFrameProcessor::Error::Decoding
             << tr("Could not find a message description for unique id 123.")
             << QStringList() << QtCanBus::UniqueId(0) << QVariantMap();
 
@@ -801,7 +801,7 @@ void tst_QCanFrameProcessor::parseWithErrorsAndWarnings_data()
     QTest::addRow("Invalid payload size")
             << messageDesc << uidDesc
             << QCanBusFrame(123, QByteArray(8, 0x01))
-            << QCanFrameProcessor::Error::DecodingError
+            << QCanFrameProcessor::Error::Decoding
             << tr("Payload size does not match message description. "
                   "Actual size = 8, expected size = 2.")
             << QStringList()
@@ -824,7 +824,7 @@ void tst_QCanFrameProcessor::parseWithErrorsAndWarnings_data()
     // Invalid signal skipped, and we still get results from other signals
     QTest::addRow("invalid signal desc warning")
             << messageDesc << uidDesc << QCanBusFrame(123, QByteArray(8, 0x01))
-            << QCanFrameProcessor::Error::NoError << QString()
+            << QCanFrameProcessor::Error::None << QString()
             << expectedWarnings << QtCanBus::UniqueId(123)
             << QVariantMap({ qMakePair("s0", 0x0101) });
 
@@ -848,7 +848,7 @@ void tst_QCanFrameProcessor::parseWithErrorsAndWarnings_data()
     // Two invalid signals skipped, two valid results are received
     QTest::addRow("invalid signal desc warning")
             << messageDesc << uidDesc << QCanBusFrame(123, QByteArray(8, 0x01))
-            << QCanFrameProcessor::Error::NoError << QString()
+            << QCanFrameProcessor::Error::None << QString()
             << expectedWarnings << QtCanBus::UniqueId(123)
             << QVariantMap({ qMakePair("s0", 0x0101), qMakePair("s1", 0x01) });
 }
@@ -1588,7 +1588,7 @@ void tst_QCanFrameProcessor::prepareWithErrorsAndWarnings_data()
     QTest::addRow("no UID description")
             << QCanMessageDescription() << QCanUniqueIdDescription()
             << QtCanBus::UniqueId(0) << QVariantMap()
-            << QCanFrameProcessor::Error::EncodingError
+            << QCanFrameProcessor::Error::Encoding
             << tr("No valid unique identifier description is specified.")
             << QStringList() << QCanBusFrame::FrameId(0) << QByteArray();
 
@@ -1597,7 +1597,7 @@ void tst_QCanFrameProcessor::prepareWithErrorsAndWarnings_data()
 
     QTest::addRow("no message description")
             << QCanMessageDescription() << uidDesc << QtCanBus::UniqueId(123)
-            << QVariantMap() << QCanFrameProcessor::Error::EncodingError
+            << QVariantMap() << QCanFrameProcessor::Error::Encoding
             << tr("Failed to find message description for unique id 123.")
             << QStringList() << QCanBusFrame::FrameId(0) << QByteArray();
 
@@ -1617,7 +1617,7 @@ void tst_QCanFrameProcessor::prepareWithErrorsAndWarnings_data()
 
     QTest::addRow("set UID fail")
             << messageDesc << uidDesc << messageDesc.uniqueId()
-            << QVariantMap() << QCanFrameProcessor::Error::EncodingError
+            << QVariantMap() << QCanFrameProcessor::Error::Encoding
             << tr("Failed to encode unique id 123 into the frame")
             << QStringList() << QCanBusFrame::FrameId(0) << QByteArray();
 
@@ -1631,7 +1631,7 @@ void tst_QCanFrameProcessor::prepareWithErrorsAndWarnings_data()
     QTest::addRow("no signal description")
             << messageDesc << uidDesc << messageDesc.uniqueId()
             << QVariantMap({ qMakePair("s0", 1), qMakePair("s1", 2) })
-            << QCanFrameProcessor::Error::NoError << QString()
+            << QCanFrameProcessor::Error::None << QString()
             << warnings << QCanBusFrame::FrameId(messageDesc.uniqueId())
             << QByteArray::fromHex("0100");
 
@@ -1647,7 +1647,7 @@ void tst_QCanFrameProcessor::prepareWithErrorsAndWarnings_data()
     QTest::addRow("invalid signal description")
             << messageDesc << uidDesc << messageDesc.uniqueId()
             << QVariantMap({ qMakePair("s0", 1), qMakePair("s1", 2), qMakePair("s2", 3) })
-            << QCanFrameProcessor::Error::NoError << QString()
+            << QCanFrameProcessor::Error::None << QString()
             << warnings << QCanBusFrame::FrameId(messageDesc.uniqueId())
             << QByteArray::fromHex("0100");
 
@@ -1664,7 +1664,7 @@ void tst_QCanFrameProcessor::prepareWithErrorsAndWarnings_data()
             << messageDesc << uidDesc << messageDesc.uniqueId()
             << QVariantMap({ qMakePair("s0", 1), qMakePair("s1", 2),
                              qMakePair("s2", 3), qMakePair("s3", 4) })
-            << QCanFrameProcessor::Error::NoError << QString()
+            << QCanFrameProcessor::Error::None << QString()
             << warnings << QCanBusFrame::FrameId(messageDesc.uniqueId())
             << QByteArray::fromHex("0100");
 
@@ -1723,7 +1723,7 @@ void tst_QCanFrameProcessor::prepareWithErrorsAndWarnings_data()
             << messageDesc << uidDesc << messageDesc.uniqueId()
             << QVariantMap({ qMakePair("s0", 1), qMakePair("s1", 10), qMakePair("s2", 2),
                              qMakePair("s3", 5), qMakePair("s4", 6) })
-            << QCanFrameProcessor::Error::NoError << QString()
+            << QCanFrameProcessor::Error::None << QString()
             << warnings << QCanBusFrame::FrameId(messageDesc.uniqueId())
             << QByteArray::fromHex("1205");
 }
@@ -1860,7 +1860,7 @@ void tst_QCanFrameProcessor::prepareUniqueId()
     processor.setMessageDescriptions({ messageDescription });
 
     const auto result = processor.prepareFrame(uniqueId, signalValues);
-    QCOMPARE(processor.error(), QCanFrameProcessor::Error::NoError);
+    QCOMPARE(processor.error(), QCanFrameProcessor::Error::None);
     QCOMPARE(result.frameId(), expectedFrame.frameId());
     QCOMPARE(result.payload(), expectedFrame.payload());
 }

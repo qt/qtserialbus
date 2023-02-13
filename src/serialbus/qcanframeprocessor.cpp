@@ -111,14 +111,14 @@ static quint16 extractMaxBitNum(quint16 startBit, quint16 bitLength, QSysInfo::E
     This enum represents the possible errors that can occur while
     encoding or decoding the \l QCanBusFrame.
 
-    \value NoError No error occurred.
+    \value None No error occurred.
     \value InvalidFrame The received frame is invalid and cannot be parsed.
     \value UnsupportedFrameFormat The format of the received frame is not
                                   supported and cannot be parsed.
-    \value DecodingError An error occurred during decoding. Use
+    \value Decoding An error occurred during decoding. Use
                          \l errorString() to get a string representation
                          of the error.
-    \value EncodingError An error occurred during encoding. Use
+    \value Encoding An error occurred during encoding. Use
                          \l errorString() to get a string representation
                          of the error.
 */
@@ -195,13 +195,13 @@ QCanBusFrame QCanFrameProcessor::prepareFrame(QtCanBus::UniqueId uniqueId,
     d->resetErrors();
 
     if (!d->uidDescription.isValid()) {
-        d->setError(Error::EncodingError,
+        d->setError(Error::Encoding,
                     QObject::tr("No valid unique identifier description is specified."));
         return QCanBusFrame(QCanBusFrame::InvalidFrame);
     }
 
     if (!d->messages.contains(uniqueId)) {
-        d->setError(Error::EncodingError,
+        d->setError(Error::Encoding,
                     QObject::tr("Failed to find message description for unique id %1.").
                     arg(qToUnderlying(uniqueId)));
         return QCanBusFrame(QCanBusFrame::InvalidFrame);
@@ -218,7 +218,7 @@ QCanBusFrame QCanFrameProcessor::prepareFrame(QtCanBus::UniqueId uniqueId,
         unsigned char *data = uidInPayload ? reinterpret_cast<unsigned char *>(payload.data())
                                            : reinterpret_cast<unsigned char *>(&canFrameId);
         if (!d->fillUniqueId(data, bitsSize, uniqueId)) {
-            d->setError(Error::EncodingError,
+            d->setError(Error::Encoding,
                         QObject::tr("Failed to encode unique id %1 into the frame").
                         arg(qToUnderlying(uniqueId)));
             return QCanBusFrame(QCanBusFrame::InvalidFrame);
@@ -446,21 +446,21 @@ QCanFrameProcessor::ParseResult QCanFrameProcessor::parseFrame(const QCanBusFram
         return {};
     }
     if (!d->uidDescription.isValid()) {
-        d->setError(Error::DecodingError,
+        d->setError(Error::Decoding,
                     QObject::tr("No valid unique identifier description is specified."));
         return {};
     }
 
     const auto uidOpt = d->extractUniqueId(frame);
     if (!uidOpt.has_value()) {
-        d->setError(Error::DecodingError,
+        d->setError(Error::Decoding,
                     QObject::tr("Failed to extract unique id from the frame."));
         return {};
     }
 
     const auto uniqueId = uidOpt.value();
     if (!d->messages.contains(uniqueId)) {
-        d->setError(Error::DecodingError,
+        d->setError(Error::Decoding,
                     QObject::tr("Could not find a message description for unique id %1.").
                     arg(qToUnderlying(uniqueId)));
         return {};
@@ -468,7 +468,7 @@ QCanFrameProcessor::ParseResult QCanFrameProcessor::parseFrame(const QCanBusFram
 
     const auto message = d->messages.value(uniqueId);
     if (message.size() != frame.payload().size()) {
-        d->setError(Error::DecodingError,
+        d->setError(Error::Decoding,
                     QObject::tr("Payload size does not match message description. "
                                 "Actual size = %1, expected size = %2.").
                     arg(frame.payload().size()).arg(message.size()));
@@ -538,7 +538,7 @@ QCanFrameProcessor::ParseResult QCanFrameProcessor::parseFrame(const QCanBusFram
 
 void QCanFrameProcessorPrivate::resetErrors()
 {
-    error = QCanFrameProcessor::Error::NoError;
+    error = QCanFrameProcessor::Error::None;
     errorString.clear();
     warnings.clear();
 }
