@@ -49,10 +49,12 @@ inline UniqueId qbswap(UniqueId src) noexcept
 
 class QDebug;
 
-Q_SERIALBUS_EXPORT QDebug operator<<(QDebug dbg, QtCanBus::DataSource source);
-Q_SERIALBUS_EXPORT QDebug operator<<(QDebug dbg, QtCanBus::DataFormat format);
-Q_SERIALBUS_EXPORT QDebug operator<<(QDebug dbg, QtCanBus::MultiplexState state);
-Q_SERIALBUS_EXPORT QDebug operator<<(QDebug dbg, QtCanBus::UniqueId uid);
+namespace QtCanBus {
+Q_SERIALBUS_EXPORT QDebug operator<<(QDebug dbg, DataSource source);
+Q_SERIALBUS_EXPORT QDebug operator<<(QDebug dbg, DataFormat format);
+Q_SERIALBUS_EXPORT QDebug operator<<(QDebug dbg, MultiplexState state);
+Q_SERIALBUS_EXPORT QDebug operator<<(QDebug dbg, UniqueId uid);
+} // namespace QtCanBus
 
 #endif // QT_NO_DEBUG_STREAM
 
