@@ -4,6 +4,7 @@
 #ifndef QCANCOMMONDEFINITIONS_H
 #define QCANCOMMONDEFINITIONS_H
 
+#include <QtCore/qendian.h>
 #include <QtCore/qsysinfo.h>
 #include <QtCore/qtconfigmacros.h>
 #include <QtCore/qtypes.h>
@@ -36,9 +37,13 @@ enum class MultiplexState : quint8 {
 
 enum class UniqueId : quint32 {};
 
+inline UniqueId qbswap(UniqueId src) noexcept
+{
+    return UniqueId{qbswap_helper(qToUnderlying(src))};
+}
+
 } // namespace QtCanBus
 
-Q_SERIALBUS_EXPORT QtCanBus::UniqueId qbswap(QtCanBus::UniqueId src);
 
 #ifndef QT_NO_DEBUG_STREAM
 
