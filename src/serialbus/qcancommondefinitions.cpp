@@ -67,64 +67,64 @@ QT_BEGIN_NAMESPACE
 */
 
 #ifndef QT_NO_DEBUG_STREAM
-QDebug operator<<(QDebug dbg, QtCanBus::DataSource source)
+QDebug QtCanBus::operator<<(QDebug dbg, DataSource source)
 {
     QDebugStateSaver saver(dbg);
     switch (source) {
-    case QtCanBus::DataSource::Payload:
+    case DataSource::Payload:
         dbg << "Payload";
         break;
-    case QtCanBus::DataSource::FrameId:
+    case DataSource::FrameId:
         dbg << "FrameId";
         break;
     }
     return dbg;
 }
 
-QDebug operator<<(QDebug dbg, QtCanBus::DataFormat format)
+QDebug QtCanBus::operator<<(QDebug dbg, DataFormat format)
 {
     QDebugStateSaver saver(dbg);
     switch (format) {
-    case QtCanBus::DataFormat::UnsignedInteger:
+    case DataFormat::UnsignedInteger:
         dbg << "UnsignedInteger";
         break;
-    case QtCanBus::DataFormat::SignedInteger:
+    case DataFormat::SignedInteger:
         dbg << "SignedInteger";
         break;
-    case QtCanBus::DataFormat::Float:
+    case DataFormat::Float:
         dbg << "Float";
         break;
-    case QtCanBus::DataFormat::Double:
+    case DataFormat::Double:
         dbg << "Double";
         break;
-    case QtCanBus::DataFormat::AsciiString:
+    case DataFormat::AsciiString:
         dbg << "ASCII";
         break;
     }
     return dbg;
 }
 
-QDebug operator<<(QDebug dbg, QtCanBus::MultiplexState state)
+QDebug QtCanBus::operator<<(QDebug dbg, MultiplexState state)
 {
     QDebugStateSaver saver(dbg);
     switch (state) {
-    case QtCanBus::MultiplexState::None:
+    case MultiplexState::None:
         dbg << "None";
         break;
-    case QtCanBus::MultiplexState::MultiplexorSwitch:
+    case MultiplexState::MultiplexorSwitch:
         dbg << "MultiplexorSwitch";
         break;
-    case QtCanBus::MultiplexState::MultiplexedSignal:
+    case MultiplexState::MultiplexedSignal:
         dbg << "MultiplexedSignal";
         break;
-    case QtCanBus::MultiplexState::SwitchAndSignal:
+    case MultiplexState::SwitchAndSignal:
         dbg << "SwitchAndSignal";
         break;
     }
     return dbg;
 }
 
-QDebug operator<<(QDebug dbg, QtCanBus::UniqueId uid)
+QDebug QtCanBus::operator<<(QDebug dbg, UniqueId uid)
 {
     dbg << qToUnderlying(uid);
     return dbg;
