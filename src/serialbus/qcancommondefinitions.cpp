@@ -3,8 +3,6 @@
 
 #include "qcancommondefinitions.h"
 
-#include <QtCore/qendian.h>
-
 #ifndef QT_NO_DEBUG_STREAM
 #include <QtCore/QDebug>
 #endif // QT_NO_DEBUG_STREAM
@@ -67,12 +65,6 @@ QT_BEGIN_NAMESPACE
 
     An enum is used to avoid implicit conversions to or from unsigned int.
 */
-
-QtCanBus::UniqueId qbswap(QtCanBus::UniqueId src)
-{
-    const auto uintval = qbswap_helper(qToUnderlying(src));
-    return QtCanBus::UniqueId{uintval};
-}
 
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug dbg, QtCanBus::DataSource source)
