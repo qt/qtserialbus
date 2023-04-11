@@ -4,7 +4,7 @@
 /*! \example modbus/custom
     \title Modbus Custom Command
     \ingroup qtserialbus-examples
-    \meta category Connectivity
+    \examplecategory Connectivity
 
     \brief The example shows how to handle custom Modbus function codes.
 

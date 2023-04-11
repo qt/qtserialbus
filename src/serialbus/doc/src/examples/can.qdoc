@@ -4,7 +4,7 @@
 /*! \example can
     \title CAN Bus Manager
     \ingroup qtserialbus-examples
-    \meta category Connectivity
+    \examplecategory Connectivity
 
     \brief The example sends and receives CAN bus frames.
 

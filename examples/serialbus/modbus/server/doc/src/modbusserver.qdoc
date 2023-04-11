@@ -4,7 +4,7 @@
 /*! \example modbus/server
     \title Modbus Server
     \ingroup qtserialbus-examples
-    \meta category Connectivity
+    \examplecategory Connectivity
 
     \brief The example implements a Modbus server application.
 
