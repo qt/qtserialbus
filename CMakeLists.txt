@@ -41,5 +41,6 @@ endif()
 
 find_package(Qt6 ${PROJECT_VERSION} CONFIG REQUIRED COMPONENTS BuildInternals Core Network)
 find_package(Qt6 ${PROJECT_VERSION} CONFIG OPTIONAL_COMPONENTS Gui Widgets SerialPort)
+qt_internal_project_setup()
 
 qt_build_repo()
