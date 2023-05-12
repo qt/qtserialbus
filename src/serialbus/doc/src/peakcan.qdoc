@@ -14,6 +14,10 @@
     (libpcanbasic.so). On macOS the plugin requires the PCBUSB library from
     \l{http://www.mac-can.com}{UV Software}, version is 0.9 or higher.
 
+    \note The Qt versions 5.14 to 6.4 are only compatible to PCBUSB library
+        version 0.8.1, but Qt versions 6.5 and higher requires a PCBUSB
+        version 0.9 upwards.
+
     \note QCanBusDeviceInfo::alias() is only supported on Windows and with
         PCAN-Basic 4.4.0 or higher.
 
