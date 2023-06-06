@@ -36,7 +36,7 @@ BS_:
 BU_:
 
 
-BO_ 1235 Test1: 1 Vector__XXX
+BO_ 2566844926 Test1: 1 Vector__XXX
  SG_ s2 : 7|8@0+ (1,0) [0|0] "unit" Vector__XXX
 
 BO_ 1234 Test: 2 Vector__XXX
@@ -45,8 +45,8 @@ BO_ 1234 Test: 2 Vector__XXX
 
 
 
-CM_ BO_ 1235 "comment for Test1." ;
-CM_ SG_ 1235 s2   "comment for s2"  ;
+CM_ BO_ 2566844926 "comment for Test1." ;
+CM_ SG_ 2566844926 s2   "comment for s2"  ;
 CM_ BO_ 1234   "Comment for message Test";
 CM_ SG_  1234  s1  "comment for s1" ;
 CM_ SG_ 1234 s0 "Comment for s0";

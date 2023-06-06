@@ -12,6 +12,8 @@
 #include <QtCore/QFile>
 #include <QtCore/QRegularExpression>
 
+#include <optional>
+
 QT_BEGIN_NAMESPACE
 
 /*!
@@ -408,6 +410,15 @@ bool QCanDbcFileParserPrivate::processLine(const QStringView line)
     return true;
 }
 
+static std::optional<QtCanBus::UniqueId> extractUniqueId(QStringView view)
+{
+    bool ok = false;
+    const uint value = view.toUInt(&ok);
+    if (ok)
+        return QtCanBus::UniqueId{value & 0x1FFFFFFF};
+    return std::nullopt;
+}
+
 /*!
     \internal
     Returns \c false only in case of hard error. Returns \c true even if some
@@ -457,16 +468,15 @@ QCanDbcFileParserPrivate::extractMessage(const QRegularExpressionMatch &match)
     QCanMessageDescription desc;
     desc.setName(match.captured(u"name"_s));
 
-    bool ok = false;
-
-    const QtCanBus::UniqueId id{match.capturedView(u"messageId"_s).toUInt(&ok)};
-    if (ok) {
-        desc.setUniqueId(id);
+    const auto id = extractUniqueId(match.capturedView(u"messageId"_s));
+    if (id.has_value()) {
+        desc.setUniqueId(id.value());
     } else {
         addWarning(QObject::tr("Failed to parse frame id for message %1").arg(desc.name()));
         return {};
     }
 
+    bool ok = false;
     const auto size = match.capturedView(u"size"_s).toUInt(&ok);
     if (ok) {
         desc.setSize(size);
@@ -659,18 +669,19 @@ void QCanDbcFileParserPrivate::parseSignalType(const QStringView data)
 
     m_lineOffset = match.capturedEnd(0);
 
-    bool ok = false;
-    const QtCanBus::UniqueId uid{match.capturedView(u"messageId"_s).toUInt(&ok)};
-    if (!ok) {
+    const auto uidOptional = extractUniqueId(match.capturedView(u"messageId"_s));
+    if (!uidOptional) {
         addWarning(QObject::tr("Failed to parse frame id from string %1").arg(data));
         return;
     }
 
+    const QtCanBus::UniqueId uid = uidOptional.value();
     auto msgDesc = m_messageDescriptions.value(uid);
     if (msgDesc.isValid()) {
         const QString sigName = match.captured(u"sigName"_s);
         auto sigDesc = msgDesc.signalDescriptionForName(sigName);
         if (sigDesc.isValid()) {
+            bool ok = false;
             const auto type = match.capturedView(u"type").toUInt(&ok);
             if (ok) {
                 bool sigDescChanged = false;
@@ -742,13 +753,13 @@ void QCanDbcFileParserPrivate::parseComment(const QStringView data)
 
     const auto type = match.capturedView(u"type"_s);
 
-    bool ok = false;
-    const QtCanBus::UniqueId uid{match.capturedView(u"messageId"_s).toUInt(&ok)};
-    if (!ok) {
+    const auto uidOptional = extractUniqueId(match.capturedView(u"messageId"_s));
+    if (!uidOptional) {
         addWarning(QObject::tr("Failed to parse frame id from string %1").arg(data));
         return;
     }
 
+    const QtCanBus::UniqueId uid = uidOptional.value();
     auto messageDesc = m_messageDescriptions.value(uid);
     if (!messageDesc.isValid()) {
         addWarning(QObject::tr("Failed to find message description for unique id %1. "
@@ -806,13 +817,13 @@ void QCanDbcFileParserPrivate::parseExtendedMux(const QStringView data)
 
     m_lineOffset = match.capturedEnd(0);
 
-    bool ok = false;
-    const QtCanBus::UniqueId uid{match.capturedView(u"messageId"_s).toUInt(&ok)};
-    if (!ok) {
+    const auto uidOptional = extractUniqueId(match.capturedView(u"messageId"_s));
+    if (!uidOptional) {
         addWarning(QObject::tr("Failed to parse frame id from string %1").arg(data));
         return;
     }
 
+    const QtCanBus::UniqueId uid = uidOptional.value();
     auto messageDesc = m_messageDescriptions.value(uid);
     if (!messageDesc.isValid()) {
         addWarning(QObject::tr("Failed to find message description for unique id %1. "
@@ -906,13 +917,13 @@ void QCanDbcFileParserPrivate::parseValueDescriptions(const QStringView data)
 
     m_lineOffset = match.capturedEnd(0);
 
-    bool ok = false;
-    const QtCanBus::UniqueId uid{match.capturedView(u"messageId"_s).toUInt(&ok)};
-    if (!ok) {
+    const auto uidOptional = extractUniqueId(match.capturedView(u"messageId"_s));
+    if (!uidOptional) {
         addWarning(QObject::tr("Failed to parse value description from string %1").arg(data));
         return;
     }
 
+    const QtCanBus::UniqueId uid = uidOptional.value();
     // Check if the message exists
     const auto messageDesc = m_messageDescriptions.value(uid);
     if (!messageDesc.isValid()) {
