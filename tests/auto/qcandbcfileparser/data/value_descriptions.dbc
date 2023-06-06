@@ -39,7 +39,7 @@ VAL_TABLE_ ValueTable1 5 "blue" 4 "green" 3 "red" ;
 VAL_TABLE_ ValueTable0 2 "Description for the value '0x2'" 1 "Description for the value '0x1'" 0 "Description for the value '0x0'" ;
 
 
-BO_ 1235 Test1: 2 Vector__XXX
+BO_ 2566844926 Test1: 2 Vector__XXX
  SG_ s2 : 8|8@1+ (1,0) [0|0] "" Vector__XXX
  SG_ s1 : 0|8@1+ (1,0) [0|0] "" Vector__XXX
 
@@ -48,13 +48,13 @@ BO_ 1234 Test: 2 Vector__XXX
  SG_ s0 : 0|8@1+ (1,0) [0|0] "" Vector__XXX
 
 
-VAL_ 1235 s2 4 "Value4"  3 "Value3"  2 "Value2"  1   "Value1" 0 "Value0" ;
-VAL_  1235  s1   5   "b"  4  "g"  3   "r"   ;
+VAL_ 2566844926 s2 4 "Value4"  3 "Value3"  2 "Value2"  1   "Value1" 0 "Value0" ;
+VAL_  2566844926  s1   5   "b"  4  "g"  3   "r"   ;
 VAL_ 1234 s1 5 "blue" 4 "green" 3 "red" ;
 VAL_ 1234 s0 2 "Description for the value '0x2'" 1 "Description for the value '0x1'" 0 "Description for the value '0x0'" ;
 
 CM_ "Invalid descriptions go here";
 VAL_ 1236 s2 4 "Value4" 3 "Value3" 2 "Value2" 1 "Value1" 0 "Value0" ;
-VAL_ 1235 s3 4 "Value4" 3 "Value3" 2 "Value2" 1 "Value1" 0 "Value0" ;
-VAL_ 1235 s2 4 "Value4" 3 "Value3" 2 "Value2" 1 "Value1" 0 ;
+VAL_ 2566844926 s3 4 "Value4" 3 "Value3" 2 "Value2" 1 "Value1" 0 "Value0" ;
+VAL_ 2566844926 s2 4 "Value4" 3 "Value3" 2 "Value2" 1 "Value1" 0 ;
 

@@ -273,7 +273,7 @@ void tst_QCanDbcFileParser::parseFile_data()
         QCanMessageDescription doubleMessage = messageDesc;
         doubleMessage.clearSignalDescriptions();
         doubleMessage.setName("Test1");
-        doubleMessage.setUniqueId(QtCanBus::UniqueId{1235});
+        doubleMessage.setUniqueId(QtCanBus::UniqueId{0x18fef1fe});
         doubleMessage.setSize(8);
 
         signalDesc.setName("s3");
@@ -475,7 +475,7 @@ void tst_QCanDbcFileParser::parseFile_data()
         QCanMessageDescription doubleMessage = messageDesc;
         doubleMessage.clearSignalDescriptions();
         doubleMessage.setName("Test1");
-        doubleMessage.setUniqueId(QtCanBus::UniqueId{1235});
+        doubleMessage.setUniqueId(QtCanBus::UniqueId{0x18fef1fe});
         doubleMessage.setSize(8);
 
         signalDesc.setName("s3");
@@ -562,7 +562,7 @@ void tst_QCanDbcFileParser::parseFile_data()
         QCanMessageDescription otherDesc = messageDesc;
         otherDesc.clearSignalDescriptions();
         otherDesc.setName("Test1");
-        otherDesc.setUniqueId(QtCanBus::UniqueId{1235});
+        otherDesc.setUniqueId(QtCanBus::UniqueId{0x18fef1fe});
         otherDesc.setSize(1);
         otherDesc.setComment("comment for Test1.");
 
@@ -711,10 +711,10 @@ void tst_QCanDbcFileParser::parseFile_data()
             u"Failed to find message description for unique id 12371. Skipping string "
              "SG_MUL_VAL_  12371 s4 s1 2-3, 5-5;"_s,
             u"Failed to find signal description for signal s11. Skipping string "
-             "SG_MUL_VAL_  1235 s4 s11 2-3, 5-5;"_s,
+             "SG_MUL_VAL_  2566844926 s4 s11 2-3, 5-5;"_s,
             u"Failed to find signal description for signal s6. Skipping string "
              "SG_MUL_VAL_  1236 s6 s1 2-3, 5-5;"_s,
-            u"Message description with unique id 1235 is skipped because it has invalid "
+            u"Message description with unique id 419361278 is skipped because it has invalid "
              "multiplexing description."_s,
             u"Message description with unique id 1236 is skipped because it has invalid "
              "multiplexing description."_s,
@@ -971,15 +971,15 @@ void tst_QCanDbcFileParser::valueDescriptions()
 
     QCanDbcFileParser::MessageValueDescriptions expectedDescriptions;
     expectedDescriptions.insert(QtCanBus::UniqueId{1234}, test_value_descriptions);
-    expectedDescriptions.insert(QtCanBus::UniqueId{1235}, test1_value_descriptions);
+    expectedDescriptions.insert(QtCanBus::UniqueId{0x18fef1fe}, test1_value_descriptions);
 
     const QStringList expectedWarnings {
         u"Failed to find message description for unique id 1236. Skipping string "
          "VAL_ 1236 s2 4 \"Value4\" 3 \"Value3\" 2 \"Value2\" 1 \"Value1\" 0 \"Value0\" ;"_s,
         u"Failed to find signal description for signal s3. Skipping string "
-         "VAL_ 1235 s3 4 \"Value4\" 3 \"Value3\" 2 \"Value2\" 1 \"Value1\" 0 \"Value0\" ;"_s,
+         "VAL_ 2566844926 s3 4 \"Value4\" 3 \"Value3\" 2 \"Value2\" 1 \"Value1\" 0 \"Value0\" ;"_s,
         u"Failed to parse value description from string "
-         "VAL_ 1235 s2 4 \"Value4\" 3 \"Value3\" 2 \"Value2\" 1 \"Value1\" 0 ;"_s
+         "VAL_ 2566844926 s2 4 \"Value4\" 3 \"Value3\" 2 \"Value2\" 1 \"Value1\" 0 ;"_s
     };
 
     const QString fileName = u"value_descriptions.dbc"_s;
