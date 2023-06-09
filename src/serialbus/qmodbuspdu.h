@@ -187,6 +187,7 @@ private:
 };
 Q_SERIALBUS_EXPORT QDebug operator<<(QDebug debug, const QModbusPdu &pdu);
 Q_SERIALBUS_EXPORT QDataStream &operator<<(QDataStream &stream, const QModbusPdu &pdu);
+Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &stream, QModbusPdu::FunctionCode &code);
 
 class QModbusRequest : public QModbusPdu
 {
