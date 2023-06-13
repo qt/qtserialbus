@@ -12,6 +12,8 @@
 
 QT_BEGIN_NAMESPACE
 
+using namespace Qt::Literals::StringLiterals;
+
 Q_DECLARE_LOGGING_CATEGORY(QT_CANBUS_PLUGINS_VIRTUALCAN)
 
 enum {
@@ -188,7 +190,7 @@ void VirtualCanBackend::close()
 {
     qCDebug(QT_CANBUS_PLUGINS_VIRTUALCAN, "Client [%p] sends disconnect to server.", this);
 
-    m_clientSocket->write("disconnect:can" + QByteArray::number(m_channel) + '\n');
+    m_clientSocket->write(QByteArray("disconnect:can"_ba + QByteArray::number(m_channel) + '\n'));
 }
 
 void VirtualCanBackend::setConfigurationParameter(ConfigurationKey key, const QVariant &value)
@@ -294,7 +296,7 @@ QCanBusDeviceInfo VirtualCanBackend::deviceInfo() const
 void VirtualCanBackend::clientConnected()
 {
     qCInfo(QT_CANBUS_PLUGINS_VIRTUALCAN, "Client [%p] socket connected.", this);
-    m_clientSocket->write("connect:can" + QByteArray::number(m_channel) + '\n');
+    m_clientSocket->write(QByteArray("connect:can"_ba + QByteArray::number(m_channel) + '\n'));
 
     setState(QCanBusDevice::ConnectedState);
 }
@@ -313,7 +315,7 @@ void VirtualCanBackend::clientReadyRead()
         qCDebug(QT_CANBUS_PLUGINS_VIRTUALCAN, "Client [%p] received: '%s'.",
                 this, answer.constData());
 
-        if (answer.startsWith("disconnect:can" + QByteArray::number(m_channel))) {
+        if (answer.startsWith(QByteArray("disconnect:can"_ba + QByteArray::number(m_channel)))) {
             m_clientSocket->disconnectFromHost();
             continue;
         }
