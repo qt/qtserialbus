@@ -745,7 +745,7 @@ void tst_QCanDbcFileParser::parseFile_data()
         signalDesc.setOffset(0.0);
         signalDesc.setRange(0.0, 0.0);
         signalDesc.setPhysicalUnit(" !#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                                   "[]^_`abcdefghijklmnopqrstuvwxyz{|}~");
+                                   "[]^_`abcdefghijklmnopqrstuvwxyz{|}~°");
         signalDesc.setReceiver("Vector__XXX");
         messageDesc.addSignalDescription(signalDesc);
 
