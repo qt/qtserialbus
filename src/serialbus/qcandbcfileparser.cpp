@@ -306,9 +306,8 @@ static constexpr auto kMaybeSpaceRegExp = "[ ]*"_L1;
 static constexpr auto kMuxIndicatorRegExp = "M|m\\d+M?"_L1;
 static constexpr auto kByteOrderRegExp = "0|1"_L1;
 static constexpr auto kValueTypeRegExp = "\\+|\\-"_L1;
-// The pattern matches all ASCII characters in range 0x20 - 0x7E, except
-// double-quote (") and backslash (\).
-static constexpr auto kCharStrRegExp = "((?![\\\"\\\\])[\x20-\x7e])*"_L1;
+// The pattern matches all printable characters, except double-quote (") and backslash (\).
+static constexpr auto kCharStrRegExp = "((?![\\\"\\\\])\\P{Cc})*"_L1;
 
 void QCanDbcFileParserPrivate::reset()
 {
@@ -341,7 +340,7 @@ bool QCanDbcFileParserPrivate::parseFile(const QString &fileName)
     m_seenExtraData = false;
 
     while (!f.atEnd()) {
-        const QString str = QString::fromLatin1(f.readLine().trimmed());
+        const QString str = QString::fromUtf8(f.readLine().trimmed());
         if (!processLine({str.constData(), str.size()})) // also sets the error properly
             return false;
     }
