@@ -5,7 +5,6 @@
     \group qtserialbus-examples
     \title Qt SerialBus Examples
     \brief Examples for the Qt SerialBus module
-    \ingroup all-examples
     \ingroup qtserialbus
 
     These are the \l{Qt Serial Bus} examples.
