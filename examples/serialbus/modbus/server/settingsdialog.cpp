@@ -17,7 +17,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->stopBitsCombo->setCurrentText(QString::number(m_settings.stopBits));
 #endif
 
-    connect(ui->applyButton, &QPushButton::clicked, [this]() {
+    connect(ui->applyButton, &QPushButton::clicked, this, [this]() {
 #if QT_CONFIG(modbus_serialport)
         m_settings.parity = ui->parityCombo->currentIndex();
         if (m_settings.parity > 0)

@@ -12,7 +12,7 @@ QT_BEGIN_NAMESPACE
 TestCanBackend::TestCanBackend() :
     simulateReceivingTimer(new QTimer(this))
 {
-    connect(simulateReceivingTimer, &QTimer::timeout, [this]() {
+    connect(simulateReceivingTimer, &QTimer::timeout, this, [this]() {
         const quint64 timeStamp = QDateTime::currentDateTime().toMSecsSinceEpoch();
         QCanBusFrame dummyFrame(12, "def");
         dummyFrame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(timeStamp * 1000));

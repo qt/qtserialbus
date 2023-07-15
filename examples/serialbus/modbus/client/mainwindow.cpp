@@ -151,7 +151,7 @@ void MainWindow::onConnectTypeChanged(int index)
     }
 //! [create_client_0]
 
-    connect(modbusDevice, &QModbusClient::errorOccurred, [this](QModbusDevice::Error) {
+    connect(modbusDevice, &QModbusClient::errorOccurred, this, [this](QModbusDevice::Error) {
         statusBar()->showMessage(modbusDevice->errorString(), 5000);
     });
 

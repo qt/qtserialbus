@@ -203,11 +203,11 @@ SendFrameBox::SendFrameBox(QWidget *parent) :
                                          ? QString() : tr("Cannot send because Payload hex string is invalid."));
         }
     };
-    connect(m_ui->frameIdEdit, &QLineEdit::textChanged, frameIdOrPayloadChanged);
-    connect(m_ui->payloadEdit, &QLineEdit::textChanged, frameIdOrPayloadChanged);
+    connect(m_ui->frameIdEdit, &QLineEdit::textChanged, this, frameIdOrPayloadChanged);
+    connect(m_ui->payloadEdit, &QLineEdit::textChanged, this, frameIdOrPayloadChanged);
     frameIdOrPayloadChanged();
 
-    connect(m_ui->sendButton, &QPushButton::clicked, [this]() {
+    connect(m_ui->sendButton, &QPushButton::clicked, this, [this]() {
     //! [prepare_can_frame]
         const uint frameId = m_ui->frameIdEdit->text().toUInt(nullptr, 16);
         QString data = m_ui->payloadEdit->text();

@@ -19,7 +19,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->timeoutSpinner->setValue(m_settings.responseTime);
     ui->retriesSpinner->setValue(m_settings.numberOfRetries);
 
-    connect(ui->applyButton, &QPushButton::clicked, [this]() {
+    connect(ui->applyButton, &QPushButton::clicked, this, [this]() {
 #if QT_CONFIG(modbus_serialport)
         m_settings.parity = ui->parityCombo->currentIndex();
         if (m_settings.parity > 0)

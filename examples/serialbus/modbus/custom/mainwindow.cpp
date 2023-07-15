@@ -44,13 +44,13 @@ void MainWindow::setupConnections()
 
     // client
     connect(&m_client, &QModbusServer::stateChanged, this, &MainWindow::onStateChanged);
-    connect(&m_client, &QModbusServer::errorOccurred, [this](QModbusDevice::Error) {
+    connect(&m_client, &QModbusServer::errorOccurred, this, [this](QModbusDevice::Error) {
         statusBar()->showMessage(m_client.errorString(), 5000);
     });
 
     // server
     connect(&m_server, &QModbusServer::dataWritten, this, &MainWindow::updateWidgets);
-    connect(&m_server, &QModbusServer::errorOccurred, [this](QModbusDevice::Error) {
+    connect(&m_server, &QModbusServer::errorOccurred, this, [this](QModbusDevice::Error) {
         statusBar()->showMessage(m_server.errorString(), 5000);
     });
 }
