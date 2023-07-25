@@ -6,7 +6,7 @@
 
 // The pragma is required to generate proper headers for source compatibility.
 #if 0
-#pragma qt_deprecates(QModbusRtuSerialSlave)
+#pragma qt_deprecates(QModbusRtuSerialSlave, 7.0)
 #endif
 
 #include <QtSerialBus/qmodbusserver.h>
