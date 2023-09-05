@@ -321,16 +321,16 @@ typedef struct {
 typedef struct {
      quint32 id;
      quint32 flags;
-     quint16 dlc;
-     quint16 reserved[7];
-     quint16 data[XL_CAN_MAX_DATA_LEN];
+     quint8 dlc;
+     quint8 reserved[7];
+     quint8 data[XL_CAN_MAX_DATA_LEN];
 } XL_CAN_TX_MSG;
 
 typedef struct {
-    quint32 tag;
-    quint32 transId;
-    quint32 channelIndex;
-    quint32 reserved[3];
+    quint16 tag;
+    quint16 transId;
+    quint8 channelIndex;
+    quint8 reserved[3];
     union {
         XL_CAN_TX_MSG canMsg;
     } tagData;
