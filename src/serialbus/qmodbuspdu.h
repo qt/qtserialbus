@@ -235,14 +235,6 @@ Q_SERIALBUS_EXPORT QDataStream &operator>>(QDataStream &stream, QModbusResponse 
 inline QDataStream &operator<<(QDataStream &stream, const QModbusResponse &pdu)
 { return stream << static_cast<const QModbusPdu &>(pdu); }
 
-Q_DECLARE_TYPEINFO(QModbusPdu, Q_RELOCATABLE_TYPE);
-Q_DECLARE_TYPEINFO(QModbusPdu::ExceptionCode, Q_PRIMITIVE_TYPE);
-Q_DECLARE_TYPEINFO(QModbusPdu::FunctionCode, Q_PRIMITIVE_TYPE);
-
-Q_DECLARE_TYPEINFO(QModbusRequest, Q_RELOCATABLE_TYPE);
-Q_DECLARE_TYPEINFO(QModbusResponse, Q_RELOCATABLE_TYPE);
-Q_DECLARE_TYPEINFO(QModbusExceptionResponse, Q_RELOCATABLE_TYPE);
-
 QT_END_NAMESPACE
 
 Q_DECLARE_METATYPE(QModbusPdu::ExceptionCode)
