@@ -38,5 +38,10 @@ exampledirs += ../../../examples/serialbus \
 
 imagedirs   += images
 
+manifestmeta.highlighted.names = \
+    "QtSerialBus/CAN Bus Manager" \
+    "QtSerialBus/Modbus Client" \
+    "QtSerialBus/Modbus Server"
+
 navigation.landingpage = "Qt Serial Bus"
 navigation.cppclassespage = "Qt Serial Bus C++ Classes"
