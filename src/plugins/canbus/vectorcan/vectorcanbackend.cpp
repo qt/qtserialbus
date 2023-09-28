@@ -53,6 +53,8 @@ QList<QCanBusDeviceInfo> VectorCanBackend::interfaces()
     for (uint i = 0; i < config.channelCount; ++i) {
         if (config.channel[i].hwType == XL_HWTYPE_NONE)
             continue;
+        if (!(config.channel[i].channelBusCapabilities & XL_BUS_ACTIVE_CAP_CAN))
+            continue;
 
         const bool isVirtual = config.channel[i].hwType == XL_HWTYPE_VIRTUAL;
         const bool isFd = config.channel[i].channelCapabilities & XL_CHANNEL_FLAG_CANFD_SUPPORT;
