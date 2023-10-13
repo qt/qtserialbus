@@ -9,6 +9,9 @@
 #include <QtSerialBus/qmodbuspdu.h>
 
 #include <private/qmodbusdevice_p.h>
+
+#include <QtCore/qpointer.h>
+
 #include <limits.h>
 
 //
