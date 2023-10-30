@@ -161,9 +161,11 @@ QCanDbcFileParser::~QCanDbcFileParser() = default;
     Call the \l warnings() method to get the list of warnings that were
     logged during the parsing.
 
-    \note This method expects the file contents to be encoded in UTF-8.
+    \note This method expects the file contents to be encoded in UTF-8. If the
+    file has a different encoding, decode it first, and use \l parseData()
+    to extract the DBC information.
 
-    \sa messageDescriptions(), error(), warnings()
+    \sa messageDescriptions(), error(), warnings(), parseData()
 */
 bool QCanDbcFileParser::parse(const QString &fileName)
 {
@@ -186,9 +188,11 @@ bool QCanDbcFileParser::parse(const QString &fileName)
     Call the \l warnings() method to get the list of warnings that were
     logged during the parsing.
 
-    \note This method expects the file contents to be encoded in UTF-8.
+    \note This method expects the file contents to be encoded in UTF-8. If the
+    file has a different encoding, decode it first, and use \l parseData()
+    to extract the DBC information.
 
-    \sa messageDescriptions(), error(), warnings()
+    \sa messageDescriptions(), error(), warnings(), parseData()
 */
 bool QCanDbcFileParser::parse(const QStringList &fileNames)
 {
@@ -198,6 +202,43 @@ bool QCanDbcFileParser::parse(const QStringList &fileNames)
             return false;
     }
     return true;
+}
+
+/*!
+    \since 6.7
+
+    Parses the input data \a data and returns \c true if the parsing completed
+    successfully or \c false otherwise.
+
+    If the parsing completed successfully, call the \l messageDescriptions()
+    method to get the list of all extracted message descriptions.
+
+    If the parsing failed, call the \l error() and \l errorString() methods
+    to get the information about the error.
+
+    Call the \l warnings() method to get the list of warnings that were
+    logged during the parsing.
+
+    The method expects that \a data is the content of a valid DBC file,
+    properly converted to QStringView.
+
+    Use this method when the input file has an encoding different from UTF-8.
+
+    \code
+    // Read the data from a DBC file with custom encoding
+    const QByteArray initialData = ...;
+    // Convert to UTF-16 using QStringDecoder or some other way
+    const QString decodedData = ...;
+    QCanDbcFileParser parser;
+    const bool result = parser.parseData(decodedData);
+    \endcode
+
+    \sa messageDescriptions(), error(), warnings(), parse()
+*/
+bool QCanDbcFileParser::parseData(QStringView data)
+{
+    d->reset();
+    return d->parseData(data);
 }
 
 /*!
@@ -355,6 +396,47 @@ bool QCanDbcFileParserPrivate::parseFile(const QString &fileName)
     return true;
 }
 
+struct ReadData
+{
+    qsizetype index;
+    QStringView result;
+};
+
+static ReadData readUntilNewline(QStringView in, qsizetype from)
+{
+    const qsizetype idx = in.indexOf('\n'_L1, from);
+
+    return (idx == -1) ? ReadData{idx, in.sliced(from).trimmed()}
+                       : ReadData{idx, in.sliced(from, idx - from).trimmed()};
+}
+
+/*!
+    \internal
+    The implementation basically copies parseFile(), including all
+    post-processing. The only difference is in extracting the data.
+*/
+bool QCanDbcFileParserPrivate::parseData(QStringView data)
+{
+    if (data.isEmpty()) {
+        m_error = QCanDbcFileParser::Error::Parsing;
+        m_errorString = QObject::tr("Empty input data.");
+        return false;
+    }
+    m_seenExtraData = false;
+    qsizetype from = 0;
+    while (true) {
+        const auto [idx, sv] = readUntilNewline(data, from);
+        if (!processLine(sv))
+            return false;
+        if (idx == -1) // reached the end of the string
+            break;
+        from = idx + 1;
+    }
+    addCurrentMessage();
+    postProcessSignalMultiplexing();
+    return true;
+}
+
 /*!
     \internal
     Returns \c false only in case of hard error. Returns \c true even if some
@@ -364,12 +446,20 @@ bool QCanDbcFileParserPrivate::processLine(const QStringView line)
 {
     QStringView data = line;
     m_lineOffset = 0;
+
+    auto handleParsingError = [this](QLatin1StringView section) {
+        m_error = QCanDbcFileParser::Error::Parsing;
+        m_errorString = !m_fileName.isEmpty()
+                ? QObject::tr("Failed to parse file %1. Unexpected position "
+                              "of %2 section.").arg(m_fileName, section)
+                : QObject::tr("Failed to parse input data. Unexpected position "
+                              "of %1 section.").arg(section);
+    };
+
     if (data.startsWith(kMessageDef)) {
         if (m_seenExtraData) {
             // Unexpected position of message description
-            m_error = QCanDbcFileParser::Error::Parsing;
-            m_errorString = QObject::tr("Failed to parse file %1. Unexpected position "
-                                        "of %2 section.").arg(m_fileName, kMessageDef);
+            handleParsingError(kMessageDef);
             return false;
         }
         addCurrentMessage();
@@ -382,9 +472,7 @@ bool QCanDbcFileParserPrivate::processLine(const QStringView line)
     while (data.startsWith(kSignalDef)) {
         if (!m_isProcessingMessage || m_seenExtraData) {
             // Unexpected position of signal description
-            m_error = QCanDbcFileParser::Error::Parsing;
-            m_errorString = QObject::tr("Failed to parse file %1. Unexpected position "
-                                        "of %2 section.").arg(m_fileName, kSignalDef);
+            handleParsingError(kSignalDef);
             return false;
         }
         if (!parseSignal(data))

@@ -38,6 +38,7 @@ public:
 
     Q_SERIALBUS_EXPORT bool parse(const QString &fileName);
     Q_SERIALBUS_EXPORT bool parse(const QStringList &fileNames);
+    Q_SERIALBUS_EXPORT bool parseData(QStringView data);
 
     Q_SERIALBUS_EXPORT QList<QCanMessageDescription> messageDescriptions() const;
     Q_SERIALBUS_EXPORT MessageValueDescriptions messageValueDescriptions() const;

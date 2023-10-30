@@ -19,6 +19,7 @@ class tst_QCanDbcFileParser : public QObject
 {
     Q_OBJECT
 private slots:
+    void initTestCase_data();
     void initTestCase();
     void construct();
     void uinqueId();
@@ -30,6 +31,13 @@ private slots:
 private:
     QString m_filesDir;
 };
+
+void tst_QCanDbcFileParser::initTestCase_data()
+{
+    QTest::addColumn<bool>("readFromFile");
+    QTest::newRow("from_file") << true;
+    QTest::newRow("from_input_data") << false;
+}
 
 void tst_QCanDbcFileParser::initTestCase()
 {
@@ -899,19 +907,39 @@ void tst_QCanDbcFileParser::parseFile()
     QFETCH(QString, expectedErrorDescription);
     QFETCH(QStringList, expectedWarnings);
     QFETCH(QList<QCanMessageDescription>, expectedMessageDescriptions);
+    QFETCH_GLOBAL(bool, readFromFile);
 
     QVERIFY(!fileNames.isEmpty());
 
     QCanDbcFileParser parser;
-    if (fileNames.size() > 1) {
-        QStringList files;
-        for (const auto &fn : fileNames)
-            files.push_back(m_filesDir + fn);
-        parser.parse(files);
+    if (readFromFile) {
+        if (fileNames.size() > 1) {
+            QStringList files;
+            for (const auto &fn : fileNames)
+                files.push_back(m_filesDir + fn);
+            parser.parse(files);
+        } else {
+            parser.parse(m_filesDir + fileNames.first());
+        }
     } else {
-        parser.parse(m_filesDir + fileNames.first());
+        // read the file outside of the parser
+        if (fileNames.size() > 1)
+            QSKIP("parseData() does not support multiple files");
+
+        QByteArray allData;
+        QFile f(m_filesDir + fileNames.first());
+        if (f.open(QIODevice::ReadOnly))
+            allData = f.readAll();
+        f.close();
+        if (allData.isEmpty())
+            QSKIP("No valid input file provided");
+        const QString inputData = QString::fromUtf8(allData);
+        parser.parseData(inputData);
     }
+
     QCOMPARE_EQ(parser.error(), expectedError);
+    if (!readFromFile && expectedErrorDescription.contains("Failed to parse file"))
+        expectedErrorDescription.replace(QRegularExpression(u"file .+dbc"_s), u"input data"_s);
     QCOMPARE_EQ(parser.errorString(), expectedErrorDescription);
 
     if (expectedError != QCanDbcFileParser::Error::None)
@@ -937,8 +965,24 @@ void tst_QCanDbcFileParser::parseFile()
     QVERIFY(equals(messageDescriptions, expectedMessageDescriptions));
 }
 
+static bool parseHelper(QCanDbcFileParser *parser, const QString &name, bool readFromFile)
+{
+    if (readFromFile)
+        return parser->parse(name);
+
+    QString data;
+    QFile f(name);
+    if (f.open(QIODevice::ReadOnly)) {
+        data = QString::fromUtf8(f.readAll());
+        f.close();
+    }
+    return parser->parseData(data);
+}
+
 void tst_QCanDbcFileParser::valueDescriptions()
 {
+    QFETCH_GLOBAL(bool, readFromFile);
+
     QCanDbcFileParser::ValueDescriptions s0_test_value_descriptions;
     s0_test_value_descriptions.insert(0, u"Description for the value '0x0'"_s);
     s0_test_value_descriptions.insert(1, u"Description for the value '0x1'"_s);
@@ -982,21 +1026,23 @@ void tst_QCanDbcFileParser::valueDescriptions()
          "VAL_ 2566844926 s2 4 \"Value4\" 3 \"Value3\" 2 \"Value2\" 1 \"Value1\" 0 ;"_s
     };
 
-    const QString fileName = u"value_descriptions.dbc"_s;
     QCanDbcFileParser parser;
-    parser.parse(m_filesDir + fileName);
-    QCOMPARE(parser.error(), QCanDbcFileParser::Error::None);
+    const QString fileName = u"value_descriptions.dbc"_s;
+    QVERIFY(parseHelper(&parser, m_filesDir + fileName, readFromFile));
 
+    QCOMPARE(parser.error(), QCanDbcFileParser::Error::None);
     QCOMPARE(parser.messageValueDescriptions(), expectedDescriptions);
     QCOMPARE(parser.warnings(), expectedWarnings);
 }
 
 void tst_QCanDbcFileParser::resetState()
 {
+    QFETCH_GLOBAL(bool, readFromFile);
+
     // Test that the state is correctly reset between parsings
     const QString fileName = u"value_descriptions.dbc"_s;
     QCanDbcFileParser parser;
-    parser.parse(m_filesDir + fileName);
+    QVERIFY(parseHelper(&parser, m_filesDir + fileName, readFromFile));
 
     QCOMPARE(parser.error(), QCanDbcFileParser::Error::None);
     QVERIFY(!parser.messageDescriptions().isEmpty());
@@ -1006,8 +1052,11 @@ void tst_QCanDbcFileParser::resetState()
     // Now when we parse an invalid file, we should get an error, and all
     // other getters should return default values
     const QString invalidName = u"invalid_file"_s;
-    parser.parse(m_filesDir + invalidName);
-    QCOMPARE(parser.error(), QCanDbcFileParser::Error::FileReading);
+    QVERIFY(!parseHelper(&parser, m_filesDir + invalidName, readFromFile));
+
+    const auto expectedError = readFromFile ? QCanDbcFileParser::Error::FileReading
+                                            : QCanDbcFileParser::Error::Parsing;
+    QCOMPARE(parser.error(), expectedError);
     QVERIFY(parser.messageDescriptions().isEmpty());
     QVERIFY(parser.warnings().isEmpty());
     QVERIFY(parser.messageValueDescriptions().isEmpty());

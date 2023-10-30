@@ -29,6 +29,7 @@ class QCanDbcFileParserPrivate
 public:
     void reset();
     bool parseFile(const QString &fileName);
+    bool parseData(QStringView data);
     bool processLine(const QStringView line);
     bool parseMessage(const QStringView data);
     QCanMessageDescription extractMessage(const QRegularExpressionMatch &match);
