@@ -41,7 +41,6 @@ qt_internal_add_module(SerialBus
         Qt::CorePrivate
         Qt::Network
     GENERATE_CPP_EXPORTS
-    GENERATE_PRIVATE_CPP_EXPORTS
 )
 
 ## Scopes:
