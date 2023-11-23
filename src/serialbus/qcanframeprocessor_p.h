@@ -15,7 +15,7 @@
 // We mean it.
 //
 
-#include "private/qtserialbusexports_p.h"
+#include "qtserialbusexports.h"
 #include "qcanframeprocessor.h"
 #include "qcanmessagedescription.h"
 #include "qcanuniqueiddescription.h"

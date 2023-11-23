@@ -15,7 +15,7 @@
 // We mean it.
 //
 
-#include "private/qtserialbusexports_p.h"
+#include "qtserialbusexports.h"
 #include "qcansignaldescription.h"
 
 #include <QtCore/QHash>
@@ -24,7 +24,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class Q_SERIALBUS_PRIVATE_EXPORT QCanSignalDescriptionPrivate : public QSharedData
+class Q_SERIALBUS_EXPORT QCanSignalDescriptionPrivate : public QSharedData
 {
 public:
     QString name;

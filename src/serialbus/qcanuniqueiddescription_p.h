@@ -15,12 +15,12 @@
 // We mean it.
 //
 
-#include "private/qtserialbusexports_p.h"
+#include "qtserialbusexports.h"
 #include "qcanuniqueiddescription.h"
 
 QT_BEGIN_NAMESPACE
 
-class Q_SERIALBUS_PRIVATE_EXPORT QCanUniqueIdDescriptionPrivate : public QSharedData
+class Q_SERIALBUS_EXPORT QCanUniqueIdDescriptionPrivate : public QSharedData
 {
 public:
     QtCanBus::DataSource source = QtCanBus::DataSource::FrameId;

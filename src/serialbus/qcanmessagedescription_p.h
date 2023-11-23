@@ -15,12 +15,12 @@
 // We mean it.
 //
 
-#include "private/qtserialbusexports_p.h"
+#include "qtserialbusexports.h"
 #include "qcanmessagedescription.h"
 
 QT_BEGIN_NAMESPACE
 
-class Q_SERIALBUS_PRIVATE_EXPORT QCanMessageDescriptionPrivate : public QSharedData
+class Q_SERIALBUS_EXPORT QCanMessageDescriptionPrivate : public QSharedData
 {
 public:
     QString name;
