@@ -170,7 +170,7 @@ void SocketCanBackend::resetConfigurations()
     QCanBusDevice::setConfigurationParameter(
                 QCanBusDevice::CanFdKey, false);
     QCanBusDevice::setConfigurationParameter(
-                QCanBusDevice::BitRateKey, 500000);
+                QCanBusDevice::BitRateKey, QVariant());
 }
 
 bool SocketCanBackend::open()
@@ -318,8 +318,10 @@ bool SocketCanBackend::applyConfigurationParameter(ConfigurationKey key, const Q
     }
     case QCanBusDevice::BitRateKey:
     {
-        const quint32 bitRate = value.toUInt();
-        success = libSocketCan->setBitrate(canSocketName, bitRate);
+        if (!value.isNull()) {
+            const quint32 bitRate = value.toUInt();
+            success = libSocketCan->setBitrate(canSocketName, bitRate);
+        }
         break;
     }
     default:
