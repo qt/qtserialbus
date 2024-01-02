@@ -300,7 +300,7 @@ void tst_QCanDbcFileParser::parseFile_data()
 
     {
         messageDesc.clearSignalDescriptions();
-        messageDesc.setSize(6);
+        messageDesc.setSize(8);
 
         QCanSignalDescription signalDesc;
         signalDesc.setName("s0");
@@ -344,6 +344,18 @@ void tst_QCanDbcFileParser::parseFile_data()
         signalDesc.setStartBit(40);
         signalDesc.setFactor(2.5); // float and scientific values
         signalDesc.setOffset(1.000123e01);
+        messageDesc.addSignalDescription(signalDesc);
+
+        signalDesc.setName("s6");
+        signalDesc.setStartBit(48);
+        signalDesc.setFactor(2e-003);
+        signalDesc.setOffset(1e02);
+        messageDesc.addSignalDescription(signalDesc);
+
+        signalDesc.setName("s7");
+        signalDesc.setStartBit(56);
+        signalDesc.setFactor(1.e4);
+        signalDesc.setOffset(2.E-02);
         messageDesc.addSignalDescription(signalDesc);
 
         QList<QCanMessageDescription> descriptions { messageDesc };
