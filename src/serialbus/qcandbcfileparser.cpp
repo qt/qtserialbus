@@ -344,7 +344,7 @@ static constexpr auto kExtendedMuxDef = "SG_MUL_VAL_ "_L1;
 static constexpr auto kValDef = "VAL_ "_L1;
 
 static constexpr auto kUnsignedIntRegExp = "\\d+"_L1;
-static constexpr auto kDoubleRegExp = "[+-]?\\d+(.\\d+([eE][+-]?\\d+)?)?"_L1;
+static constexpr auto kDoubleRegExp = "[+-]?\\d+((.\\d*)?([eE][+-]?\\d+)?)?"_L1;
 static constexpr auto kDbcIdentRegExp = "[_[:alpha:]][_[:alnum:]]+"_L1;
 static constexpr auto kOneOrMoreSpaceRegExp = "[ ]+"_L1;
 static constexpr auto kMaybeSpaceRegExp = "[ ]*"_L1;
