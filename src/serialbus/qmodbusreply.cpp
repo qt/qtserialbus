@@ -83,7 +83,7 @@ public:
 /*!
     Constructs a QModbusReply object with a given \a type and the specified \a parent.
 
-    The reply will be send to the Modbus client represented by
+    The reply will be sent to the Modbus client represented by
     \a serverAddress.
 */
 QModbusReply::QModbusReply(ReplyType type, int serverAddress, QObject *parent)
@@ -149,7 +149,7 @@ void QModbusReply::setFinished(bool isFinished)
     request then the returned \l QModbusDataUnit instance is invalid.
 
     \note If the \l type() of the reply is \l QModbusReply::Broadcast, the
-    return value will always be invalid. If the l type() of the reply is
+    return value will always be invalid. If the \l type() of the reply is
     \l QModbusReply::Raw, the return value might be invalid depending on the
     implementation of \l QModbusClient::processPrivateResponse().
 
