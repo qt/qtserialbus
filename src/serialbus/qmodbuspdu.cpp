@@ -765,7 +765,7 @@ int QModbusResponse::calculateDataSize(const QModbusResponse &response)
         }
 
         const QByteArray data = response.data();
-        quint8 numOfObjects = quint8(data[5]);
+        quint8 numOfObjects = (data[4]==0)?  quint8(data[5])-quint8(data[6]) : quint8(data[4])-quint8(data[6]);
         quint8 objectSize = quint8(data[7]);
 
         // 6 byte header size + (2 * n bytes fixed per object) + first object size
