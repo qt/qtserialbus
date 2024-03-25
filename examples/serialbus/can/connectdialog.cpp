@@ -264,7 +264,7 @@ void ConnectDialog::updateSettings()
 
         // process data bitrate
         const int dataBitrate = m_ui->dataBitrateBox->bitRate();
-        if (dataBitrate > 0) {
+        if (dataBitrate > 0 && m_ui->canFdBox->currentData().toBool()) {
             const ConfigurationItem item(QCanBusDevice::DataBitRateKey, QVariant(dataBitrate));
             m_currentSettings.configurations.append(item);
         }
