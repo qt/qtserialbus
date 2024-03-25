@@ -62,7 +62,8 @@ void MainWindow::initActionsConnections()
 
     connect(m_ui->sendFrameBox, &SendFrameBox::sendFrame, this, &MainWindow::sendFrame);
     connect(m_ui->actionConnect, &QAction::triggered, this, [this]() {
-        m_canDevice.release()->deleteLater();
+        if (m_canDevice)
+            m_canDevice.release()->deleteLater();
         m_connectDialog->show();
     });
     connect(m_connectDialog, &QDialog::accepted, this, &MainWindow::connectDevice);
