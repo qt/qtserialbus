@@ -226,22 +226,27 @@ bool VectorCanBackendPrivate::open()
             portHandle = XL_INVALID_PORTHANDLE;
             return false;
         }
-    }
-    if (usesCanFd && arbBitRate != 0) {
-        XLcanFdConf xlfdconf = xlCanFdConfInit(arbBitRate, dataBitRate);
+        if (usesCanFd && arbBitRate != 0) {
+            if (permissionMask != 0) {
+                XLcanFdConf xlfdconf = xlCanFdConfInit(arbBitRate, dataBitRate);
 
-        const XLstatus status = ::xlCanFdSetConfiguration(portHandle, channelMask, &xlfdconf);
-        if (Q_UNLIKELY(status != XL_SUCCESS)) {
-            const QString errorString = systemErrorString(status);
-            if (status == XL_ERR_INVALID_ACCESS) {
-                qCWarning(QT_CANBUS_PLUGINS_VECTORCAN, "Unable to change the configuration: %ls.",
-                          qUtf16Printable(errorString));
-                q->setError(errorString, QCanBusDevice::CanBusError::ConfigurationError);
+                const XLstatus statusFd = ::xlCanFdSetConfiguration(portHandle, channelMask, &xlfdconf);
+                if (Q_UNLIKELY(statusFd != XL_SUCCESS)) {
+                    const QString errorString = systemErrorString(statusFd);
+                    if (statusFd == XL_ERR_INVALID_ACCESS) {
+                        qCWarning(QT_CANBUS_PLUGINS_VECTORCAN, "Unable to change the configuration: %ls.",
+                                  qUtf16Printable(errorString));
+                        q->setError(errorString, QCanBusDevice::CanBusError::ConfigurationError);
+                    } else {
+                        qCWarning(QT_CANBUS_PLUGINS_VECTORCAN, "Connection error: %ls.",
+                                  qUtf16Printable(errorString));
+                        q->setError(errorString, QCanBusDevice::CanBusError::ConnectionError);
+                        return false;
+                    }
+                }
             } else {
-                qCWarning(QT_CANBUS_PLUGINS_VECTORCAN, "Connection error: %ls.",
-                          qUtf16Printable(errorString));
-                q->setError(errorString, QCanBusDevice::CanBusError::ConnectionError);
-                return false;
+                qCWarning(QT_CANBUS_PLUGINS_VECTORCAN, "No init access for channel %d! "
+                                                       "Using existing configuration!", channelIndex);
             }
         }
     }
