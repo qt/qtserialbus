@@ -45,7 +45,7 @@ QCanBusDeviceInfo::~QCanBusDeviceInfo() = default;
 /*!
     \fn QCanBusDeviceInfo &QCanBusDeviceInfo::operator=(QCanBusDeviceInfo &&other)
 
-    Move-assigns other to this QCanBusDeviceInfo instance.
+    Move-assigns \a other to this QCanBusDeviceInfo instance.
 */
 
 /*!
