@@ -36,7 +36,8 @@
     This plugin requires the PCAN device drivers and the PCAN-Basic library
     version 4.0.0 or higher on Windows (pcanbasic.dll) and Linux (libpcanbasic.so).
     On macOS the plugin requires the PCBUSB library from
-    \l{http://www.mac-can.com}{UV Software}.
+    \l{http://www.mac-can.com}{UV Software}. For Qt versions from 5.14 up to
+    6.4 (both including), only PCBUSB version 0.8.1 is supported.
 
     \section1 Creating CAN Bus Devices
 
