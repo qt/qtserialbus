@@ -1,7 +1,7 @@
 dependencies:
   ../tqtc-qtbase:
-    ref: abcb395fab834c7d42ed81246e1b18ed9da4498e
+    ref: d7eeb84bf4a7c0dd41ab631a5e26e6d19155c292
     required: true
   ../tqtc-qtserialport:
-    ref: 8264983e8a4a5efedcf3300294f5ca4c7ecc128d
+    ref: 3ed04e32994e83f3f0d3bd2ac4cbc7c1b06613ac
     required: false
