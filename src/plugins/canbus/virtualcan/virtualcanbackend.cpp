@@ -5,6 +5,7 @@
 
 #include <QtCore/qdatetime.h>
 #include <QtCore/qloggingcategory.h>
+#include <QtCore/qmutex.h>
 #include <QtCore/qregularexpression.h>
 
 #include <QtNetwork/qtcpserver.h>
@@ -133,6 +134,7 @@ void VirtualCanServer::readyRead()
 }
 
 Q_GLOBAL_STATIC(VirtualCanServer, g_server)
+static QBasicMutex g_serverMutex;
 
 VirtualCanBackend::VirtualCanBackend(const QString &interface, QObject *parent)
     : QCanBusDevice(parent)
@@ -174,8 +176,10 @@ bool VirtualCanBackend::open()
     const QHostAddress address = host.isEmpty() ? QHostAddress::LocalHost : QHostAddress(host);
     const quint16 port = static_cast<quint16>(m_url.port(ServerDefaultTcpPort));
 
-    if (address.isLoopback())
+    if (address.isLoopback()) {
+        const QMutexLocker locker(&g_serverMutex);
         g_server->start(port);
+    }
 
     m_clientSocket = new QTcpSocket(this);
     m_clientSocket->connectToHost(address, port, QIODevice::ReadWrite);
