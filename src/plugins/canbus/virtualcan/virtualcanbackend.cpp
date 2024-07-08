@@ -7,6 +7,7 @@
 #include <QtCore/qloggingcategory.h>
 #include <QtCore/qmutex.h>
 #include <QtCore/qregularexpression.h>
+#include <QtCore/qthread.h>
 
 #include <QtNetwork/qtcpserver.h>
 #include <QtNetwork/qtcpsocket.h>
@@ -45,6 +46,13 @@ void VirtualCanServer::start(quint16 port)
     // If there is already a server object, return immediately
     if (m_server) {
         qCInfo(QT_CANBUS_PLUGINS_VIRTUALCAN, "Server [%p] is already running.", this);
+        return;
+    }
+
+    if (QThread::currentThread() != this->thread()) {
+        // This can happen if this methode is invoked a second time by a different thread
+        // than when it was invoked the first time, and the first time the QTcpServer
+        // couldn't listen because the TCP port was taken by a different process on the system
         return;
     }
 
