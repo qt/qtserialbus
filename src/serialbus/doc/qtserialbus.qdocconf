@@ -15,11 +15,20 @@ qhp.QtSerialBus.virtualFolder       = qtserialbus
 qhp.QtSerialBus.indexTitle          = Qt Serial Bus
 qhp.QtSerialBus.indexRoot           =
 
-qhp.QtSerialBus.subprojects         = classes
+qhp.QtSerialBus.subprojects = manual examples classes
+
 qhp.QtSerialBus.subprojects.classes.title = C++ Classes
 qhp.QtSerialBus.subprojects.classes.indexTitle = Qt Serial Bus C++ Classes
 qhp.QtSerialBus.subprojects.classes.selectors = class fake:headerfile
 qhp.QtSerialBus.subprojects.classes.sortPages = true
+
+qhp.QtSerialBus.subprojects.examples.title = Examples
+qhp.QtSerialBus.subprojects.examples.indexTitle = Qt SerialBus Examples
+qhp.QtSerialBus.subprojects.examples.selectors = example
+
+qhp.QtSerialBus.subprojects.manual.title = Qt Serial Bus
+qhp.QtSerialBus.subprojects.manual.indexTitle = Qt Serial Bus module topics
+qhp.QtSerialBus.subprojects.manual.type = manual
 
 tagfile                 = ../../../doc/qtserialbus/qtserialbus.tags
 
@@ -45,3 +54,6 @@ manifestmeta.highlighted.names = \
 
 navigation.landingpage = "Qt Serial Bus"
 navigation.cppclassespage = "Qt Serial Bus C++ Classes"
+# Auto-generate navigation linking based on "Qt Serial Bus module topics":
+navigation.toctitles = "Qt Serial Bus module topics"
+navigation.toctitles.inclusive = false
