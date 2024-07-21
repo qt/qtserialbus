@@ -16,7 +16,7 @@
 
 QT_BEGIN_NAMESPACE
 
-Q_LOGGING_CATEGORY(QT_CANBUS, "qt.canbus")
+Q_STATIC_LOGGING_CATEGORY(QT_CANBUS, "qt.canbus")
 
 /*!
     \class QCanBusDevice
