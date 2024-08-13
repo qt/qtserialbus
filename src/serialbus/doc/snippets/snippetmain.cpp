@@ -1,12 +1,14 @@
 // Copyright (C) 2017 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
-#include <QVariant>
 #include <QCanBusDevice>
+#include <QVariant>
+
+#include <memory>
 
 int main(int /*argc*/, char ** /*argv*/)
 {
-    QCanBusDevice *device = nullptr;
+    std::unique_ptr<QCanBusDevice> device = std::make_unique<QCanBusDevice>();
 
     //! [Filter Examples]
     QCanBusDevice::Filter filter;
