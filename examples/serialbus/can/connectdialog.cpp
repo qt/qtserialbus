@@ -37,7 +37,7 @@ ConnectDialog::ConnectDialog(QWidget *parent) :
             this, &ConnectDialog::pluginChanged);
     connect(m_ui->interfaceListBox, &QComboBox::currentTextChanged,
             this, &ConnectDialog::interfaceChanged);
-    connect(m_ui->ringBufferBox, &QCheckBox::stateChanged, this, [this](int state){
+    connect(m_ui->ringBufferBox, &QCheckBox::checkStateChanged, this, [this](Qt::CheckState state){
             m_ui->ringBufferLimitBox->setEnabled(state == Qt::CheckState::Checked);
     });
 
