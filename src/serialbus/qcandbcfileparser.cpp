@@ -161,6 +161,8 @@ QCanDbcFileParser::~QCanDbcFileParser() = default;
     Call the \l warnings() method to get the list of warnings that were
     logged during the parsing.
 
+    \note This method expects the file contents to be encoded in UTF-8.
+
     \sa messageDescriptions(), error(), warnings()
 */
 bool QCanDbcFileParser::parse(const QString &fileName)
@@ -183,6 +185,8 @@ bool QCanDbcFileParser::parse(const QString &fileName)
 
     Call the \l warnings() method to get the list of warnings that were
     logged during the parsing.
+
+    \note This method expects the file contents to be encoded in UTF-8.
 
     \sa messageDescriptions(), error(), warnings()
 */
