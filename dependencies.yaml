@@ -1,7 +1,7 @@
 dependencies:
   ../qtbase:
-    ref: d612dcd249850a0815cc0396b92d57179a4493f8
+    ref: c5a4e3f790eb4157e33eac2402110f71a76a5418
     required: true
   ../qtserialport:
-    ref: bfe8ee77c7915ad1baa5f8e12c99242a58aacdd0
+    ref: fc95f4ba4014ff929a53e1bfb0ea33cce23557c5
     required: false
