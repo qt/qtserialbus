@@ -21,7 +21,7 @@ Q_DECLARE_LOGGING_CATEGORY(QT_CANBUS_PLUGINS_VIRTUALCAN)
 
 enum {
     ServerDefaultTcpPort = 35468,
-    VirtualChannels = 2
+    VirtualChannels = 10
 };
 
 static const char RemoteRequestFlag    = 'R';
@@ -219,8 +219,8 @@ void VirtualCanBackend::setConfigurationParameter(ConfigurationKey key, const QV
     Format:  "<CAN-Channel>:<Flags>#<CAN-ID>#<Data-Bytes>\n"
     Example: "can0:XF#123#123456\n"
 
-    The first part is the destination CAN channel, "can0" or "can1",
-    followed by the flags list:
+    The first part is the destination CAN channel, "can0", "can1",
+    up to "can9", followed by the flags list:
 
     * R - Remote Request
     * X - Extended Frame Format

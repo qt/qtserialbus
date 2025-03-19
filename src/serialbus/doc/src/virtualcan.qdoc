@@ -37,7 +37,7 @@
     \endcode
 
     Where \e can0 is the active CAN channel name. The VirtualCAN plugin
-    provides two channels "can0" and "can1". Both can be used as CAN 2.0
+    provides ten channels from "can0" to "can9". All can be used as CAN 2.0
     or CAN FD channels. All applications connected to one of these channels
     receive all messages that are sent to this channel.
 
