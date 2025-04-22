@@ -35,7 +35,7 @@ public:
     QString errorText;
 
     QList<QCanBusFrame> incomingFrames;
-    QMutex incomingFramesGuard;
+    mutable QMutex incomingFramesGuard;
     QList<QCanBusFrame> outgoingFrames;
     QList<ConfigEntry> configOptions;
 
