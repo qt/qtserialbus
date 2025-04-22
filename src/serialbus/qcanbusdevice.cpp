@@ -416,7 +416,10 @@ QString QCanBusDevice::errorString() const
 */
 qint64 QCanBusDevice::framesAvailable() const
 {
-    return d_func()->incomingFrames.size();
+    Q_D(const QCanBusDevice);
+
+    QMutexLocker locker(&d->incomingFramesGuard);
+    return d->incomingFrames.size();
 }
 
 /*!
