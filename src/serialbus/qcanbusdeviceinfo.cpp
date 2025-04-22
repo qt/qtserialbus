@@ -23,6 +23,15 @@ QT_BEGIN_NAMESPACE
 QCanBusDeviceInfo::QCanBusDeviceInfo(const QCanBusDeviceInfo &) = default;
 
 /*!
+    Move-constructs a CAN bus device info from \a other.
+    \since 6.10
+*/
+QCanBusDeviceInfo::QCanBusDeviceInfo(QCanBusDeviceInfo &&other)
+    : d_ptr(std::move(other.d_ptr))
+{
+}
+
+/*!
     Constructs a CAN bus device info from QCanBusDeviceInfoPrivate \a dd.
     \internal
 */

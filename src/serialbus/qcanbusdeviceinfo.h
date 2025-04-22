@@ -17,6 +17,7 @@ class Q_SERIALBUS_EXPORT QCanBusDeviceInfo
 public:
     QCanBusDeviceInfo() = delete;
     QCanBusDeviceInfo(const QCanBusDeviceInfo &other);
+    QCanBusDeviceInfo(QCanBusDeviceInfo &&other);
     ~QCanBusDeviceInfo();
 
     void swap(QCanBusDeviceInfo &other) noexcept
