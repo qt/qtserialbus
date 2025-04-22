@@ -329,9 +329,8 @@ void QCanBusDevice::setConfigurationParameter(ConfigurationKey key, const QVaria
     for (int i = 0; i < d->configOptions.size(); i++) {
         if (d->configOptions.at(i).first == key) {
             if (value.isValid()) {
-                ConfigEntry entry = d->configOptions.at(i);
+                ConfigEntry &entry = d->configOptions[i];
                 entry.second = value;
-                d->configOptions.replace(i, entry);
             } else {
                 d->configOptions.remove(i);
             }
