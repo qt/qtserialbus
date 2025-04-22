@@ -573,7 +573,7 @@ bool QCanBusDevice::waitForFramesWritten(int msecs)
     // do not enter this function recursively
     if (Q_UNLIKELY(d_func()->waitForWrittenEntered)) {
         qCWarning(QT_CANBUS, "QCanBusDevice::waitForFramesWritten() must not be called "
-                             "recursively. Check that no slot containing waitForFramesReceived() "
+                             "recursively. Check that no slot containing waitForFramesWritten() "
                              "is called in response to framesWritten(qint64) or "
                              "errorOccurred(CanBusError) signals.");
         setError(tr("QCanBusDevice::waitForFramesWritten() must not be called recursively."),
