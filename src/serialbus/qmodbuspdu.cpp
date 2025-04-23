@@ -123,7 +123,7 @@ static QDataStream &pduFromStream(QDataStream &stream, Type type, QModbusPdu *pd
                           : QModbusRequest::calculateDataSize(*pdu);
 
     if (isResponse && (code == QModbusPdu::EncapsulatedInterfaceTransport)) {
-        quint8 meiType;
+        quint8 meiType = 0;
         pdu->decodeData(&meiType);
         if (meiType == EncapsulatedInterfaceTransport::ReadDeviceIdentification) {
             int left = size, offset = 0;
@@ -148,7 +148,7 @@ static QDataStream &pduFromStream(QDataStream &stream, Type type, QModbusPdu *pd
             data.resize(int(stream.device()->size() - 1)); // One byte for the function code.
         }
     } else if (pdu->functionCode() == QModbusPdu::Diagnostics) {
-        quint16 subCode;
+        quint16 subCode = 0xffff;
         pdu->decodeData(&subCode);
         if (subCode == Diagnostics::ReturnQueryData)
             data.resize(int(stream.device()->size() - 1)); // One byte for the function code.
@@ -570,7 +570,7 @@ int QModbusRequest::calculateDataSize(const QModbusRequest &request)
     case QModbusPdu::EncapsulatedInterfaceTransport: {
         if (request.dataSize() < minimum)
             break;  // can't calculate, let's return -1 to indicate error
-        quint8 meiType;
+        quint8 meiType = 0;
         request.decodeData(&meiType);
         // ReadDeviceIdentification -> 3 == MEI type + Read device ID + Object Id
         size = (meiType == EncapsulatedInterfaceTransport::ReadDeviceIdentification) ? 3 : minimum;
@@ -743,7 +743,7 @@ int QModbusResponse::calculateDataSize(const QModbusResponse &response)
         break;
     case QModbusResponse::ReadFifoQueue: {
         if (response.dataSize() >= 2) {
-            quint16 rawSize;
+            quint16 rawSize = 0;
             response.decodeData(&rawSize);
             size = rawSize + 2; // 2 bytes size info
         }
