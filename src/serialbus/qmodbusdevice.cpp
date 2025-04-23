@@ -257,7 +257,7 @@ bool QModbusDevice::connectDevice()
 */
 void QModbusDevice::disconnectDevice()
 {
-    if (state() == QModbusDevice::UnconnectedState)
+    if (auto s = state(); s == QModbusDevice::UnconnectedState || s == QModbusDevice::ClosingState)
         return;
 
     setState(QModbusDevice::ClosingState);
