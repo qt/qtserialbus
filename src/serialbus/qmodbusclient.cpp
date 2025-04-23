@@ -306,7 +306,7 @@ QModbusRequest QModbusClientPrivate::createRWRequest(const QModbusDataUnit &read
                                                      const QModbusDataUnit &write) const
 {
     if ((read.registerType() != QModbusDataUnit::HoldingRegisters)
-        && (write.registerType() != QModbusDataUnit::HoldingRegisters)) {
+        || (write.registerType() != QModbusDataUnit::HoldingRegisters)) {
         return QModbusRequest();
     }
 
