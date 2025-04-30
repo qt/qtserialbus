@@ -87,7 +87,7 @@ void MainWindow::on_sendButton_clicked()
     if (reply) {
         sendButton->setDisabled(true);
         if (!reply->isFinished()) {
-            connect(reply, &QModbusReply::finished, [reply, this]() {
+            connect(reply, &QModbusReply::finished, this, [reply, this]() {
                 sendButton->setEnabled(true);
                 qDebug() << "Receive: Asynchronous response PDU: " << reply->rawResult() << Qt::endl;
             });
@@ -150,7 +150,7 @@ void MainWindow::on_connectButton_clicked()
         emit disconnectButton->clicked();
     }, Qt::QueuedConnection);
 
-    connect(m_device, &QModbusDevice::stateChanged, [](QModbusDevice::State state) {
+    connect(m_device, &QModbusDevice::stateChanged, this, [](QModbusDevice::State state) {
         switch (state) {
         case QModbusDevice::UnconnectedState:
             qDebug().noquote() << QStringLiteral("State: Entered unconnected state.");
