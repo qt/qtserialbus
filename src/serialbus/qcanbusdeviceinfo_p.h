@@ -1,5 +1,5 @@
 // Copyright (C) 2021 Andre Hartmann <aha_1980@gmx.de>
-// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial
 
 #ifndef QCANBUSDEVICEINFO_P_H
 #define QCANBUSDEVICEINFO_P_H

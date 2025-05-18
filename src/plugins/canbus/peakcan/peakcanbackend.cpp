@@ -1,7 +1,7 @@
 // Copyright (C) 2017 Denis Shienkov <denis.shienkov@gmail.com>
 // Copyright (c) 2020 Andre Hartmann <aha_1980@gmx.de>
 // Copyright (C) 2017 The Qt Company Ltd.
-// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial
 // Qt-Security score:critical reason:data-parser
 
 #include "peakcanbackend.h"
