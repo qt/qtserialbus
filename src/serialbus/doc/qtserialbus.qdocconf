@@ -7,6 +7,9 @@ version                 = $QT_VERSION
 
 examplesinstallpath     = serialbus
 
+# Path to the root of qtserialbus (for automatic linking to source code)
+url.sources.rootdir     = ../../..
+
 qhp.projects            = QtSerialBus
 
 qhp.QtSerialBus.file         = qtserialbus.qhp
