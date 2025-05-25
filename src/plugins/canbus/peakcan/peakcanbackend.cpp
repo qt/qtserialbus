@@ -407,8 +407,8 @@ bool PeakCanBackendPrivate::open()
 
     if (Q_UNLIKELY(st != PCAN_ERROR_OK)) {
         const QString errorString = systemErrorString(st);
-        qCCritical(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot initialize hardware: %ls",
-                   qUtf16Printable(errorString));
+        qCCritical(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot initialize channel %u hardware: %ls",
+                   uint(channelIndex), qUtf16Printable(errorString));
         q->setError(errorString, QCanBusDevice::ConnectionError);
         return false;
     }
@@ -418,8 +418,8 @@ bool PeakCanBackendPrivate::open()
         readHandle = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
         if (Q_UNLIKELY(!readHandle)) {
             const QString errorString = qt_error_string(int(::GetLastError()));
-            qCCritical(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot create receive event handler: %ls",
-                       qUtf16Printable(errorString));
+            qCCritical(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot create channel %u receive event handler: %ls",
+                       uint(channelIndex), qUtf16Printable(errorString));
             q->setError(errorString, QCanBusDevice::ConnectionError);
             return false;
         }
@@ -427,7 +427,10 @@ bool PeakCanBackendPrivate::open()
 
     const TPCANStatus err = ::CAN_SetValue(channelIndex, PCAN_RECEIVE_EVENT, &readHandle, sizeof(readHandle));
     if (Q_UNLIKELY(err != PCAN_ERROR_OK)) {
-        q->setError(systemErrorString(err), QCanBusDevice::ConnectionError);
+        const QString errorString = systemErrorString(err);
+        qCCritical(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot register channel %u receive event handler: %ls",
+                   uint(channelIndex), qUtf16Printable(errorString));
+        q->setError(errorString, QCanBusDevice::ConnectionError);
         return false;
     }
 
@@ -435,8 +438,8 @@ bool PeakCanBackendPrivate::open()
     const TPCANStatus err = ::CAN_GetValue(channelIndex, PCAN_RECEIVE_EVENT, &readHandle, sizeof(readHandle));
     if (Q_UNLIKELY(err != PCAN_ERROR_OK)) {
         const QString errorString = systemErrorString(err);
-        qCCritical(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot create receive event handler: %ls",
-                   qUtf16Printable(errorString));
+        qCCritical(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot create channel %u receive event handler: %ls",
+                   uint(channelIndex), qUtf16Printable(errorString));
         q->setError(errorString, QCanBusDevice::ConnectionError);
         return false;
     }
@@ -472,8 +475,12 @@ void PeakCanBackendPrivate::close()
     }
 
     const TPCANStatus st = ::CAN_Uninitialize(channelIndex);
-    if (Q_UNLIKELY(st != PCAN_ERROR_OK))
-        q->setError(systemErrorString(st), QCanBusDevice::ConnectionError);
+    if (Q_UNLIKELY(st != PCAN_ERROR_OK)) {
+        const QString errorString = systemErrorString(st);
+        qCCritical(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot uninitialize channel %u: %ls",
+                   uint(channelIndex), qUtf16Printable(errorString));
+        q->setError(errorString, QCanBusDevice::ConnectionError);
+    }
 
 #if defined(Q_OS_WIN32)
     if (readHandle && (readHandle != INVALID_HANDLE_VALUE)) {
@@ -695,8 +702,12 @@ void PeakCanBackendPrivate::startRead()
 
             const TPCANStatus st = ::CAN_ReadFD(channelIndex, &message, &timestamp);
             if (st != PCAN_ERROR_OK) {
-                if (Q_UNLIKELY(st != PCAN_ERROR_QRCVEMPTY))
-                    q->setError(systemErrorString(st), QCanBusDevice::ReadError);
+                if (Q_UNLIKELY(st != PCAN_ERROR_QRCVEMPTY)) {
+                    const QString errorString = systemErrorString(st);
+                    qCWarning(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot read frame: %ls",
+                              qUtf16Printable(errorString));
+                    q->setError(errorString, QCanBusDevice::ReadError);
+                }
                 break;
             }
 
@@ -722,8 +733,12 @@ void PeakCanBackendPrivate::startRead()
 
             const TPCANStatus st = ::CAN_Read(channelIndex, &message, &timestamp);
             if (st != PCAN_ERROR_OK) {
-                if (Q_UNLIKELY(st != PCAN_ERROR_QRCVEMPTY))
-                    q->setError(systemErrorString(st), QCanBusDevice::ReadError);
+                if (Q_UNLIKELY(st != PCAN_ERROR_QRCVEMPTY)) {
+                    const QString errorString = systemErrorString(st);
+                    qCWarning(QT_CANBUS_PLUGINS_PEAKCAN, "Cannot read frame: %ls",
+                              qUtf16Printable(errorString));
+                    q->setError(errorString, QCanBusDevice::ReadError);
+                }
                 break;
             }
 
@@ -846,14 +861,17 @@ bool PeakCanBackend::writeFrame(const QCanBusFrame &newData)
         return false;
 
     if (Q_UNLIKELY(!newData.isValid())) {
-        setError(tr("Cannot write invalid QCanBusFrame"), QCanBusDevice::WriteError);
+        const QString errorString = tr("Cannot write invalid QCanBusFrame");
+        qCWarning(QT_CANBUS_PLUGINS_PEAKCAN, "%ls", qUtf16Printable(errorString));
+        setError(errorString, QCanBusDevice::WriteError);
         return false;
     }
 
     if (Q_UNLIKELY(newData.frameType() != QCanBusFrame::DataFrame
                    && newData.frameType() != QCanBusFrame::RemoteRequestFrame)) {
-        setError(tr("Unable to write a frame with unacceptable type"),
-                 QCanBusDevice::WriteError);
+        const QString errorString = tr("Cannot write QCanBusFrame with type %1").arg(newData.frameType());
+        qCWarning(QT_CANBUS_PLUGINS_PEAKCAN, "%ls", qUtf16Printable(errorString));
+        setError(errorString, QCanBusDevice::WriteError);
         return false;
     }
 
