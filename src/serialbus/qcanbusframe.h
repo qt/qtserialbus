@@ -14,6 +14,8 @@ class QDataStream;
 
 class Q_SERIALBUS_EXPORT QCanBusFrame
 {
+    Q_GADGET
+
 public:
     using FrameId = quint32;
 
@@ -40,6 +42,7 @@ public:
         RemoteRequestFrame  = 0x3,
         InvalidFrame        = 0x4
     };
+    Q_ENUM(FrameType)
 
     explicit QCanBusFrame(FrameType type = DataFrame) noexcept :
         isExtendedFrame(0x0),
@@ -73,6 +76,7 @@ public:
     };
     Q_DECLARE_FLAGS(FrameErrors, FrameError)
     Q_FLAGS(FrameErrors)
+    Q_ENUM(FrameError)
 
     explicit QCanBusFrame(QCanBusFrame::FrameId identifier, const QByteArray &data) :
         format(DataFrame),
