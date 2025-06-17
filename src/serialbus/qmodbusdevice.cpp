@@ -199,7 +199,7 @@ void QModbusDevice::setConnectionParameter(ConnectionParameter parameter, const 
                                     PDU's function code not matching.
 
     If any of the above intermediate errors occurred, the frame is likely
-    resent until the maximum number of retries has been reached.
+    present until the maximum number of retries has been reached.
 
     The list of intermediate errors can be inspected from the \l QModbusReply
     intermediate errors function.
