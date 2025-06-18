@@ -12,12 +12,14 @@ QT_BEGIN_NAMESPACE
 
 class QCanBusDeviceInfoPrivate;
 
+QT_DECLARE_QSDP_SPECIALIZATION_DTOR(QCanBusDeviceInfoPrivate)
+
 class Q_SERIALBUS_EXPORT QCanBusDeviceInfo
 {
 public:
     QCanBusDeviceInfo() = delete;
     QCanBusDeviceInfo(const QCanBusDeviceInfo &other);
-    QCanBusDeviceInfo(QCanBusDeviceInfo &&other);
+    QCanBusDeviceInfo(QCanBusDeviceInfo &&other) noexcept = default;
     ~QCanBusDeviceInfo();
 
     void swap(QCanBusDeviceInfo &other) noexcept
