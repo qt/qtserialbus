@@ -327,7 +327,7 @@ bool VectorCanBackendPrivate::setConfigurationParameter(QCanBusDevice::Configura
     {
         if (value.toBool()) {
             XLdriverConfig config;
-            if (Q_UNLIKELY(::xlGetDriverConfig(&config) == XL_SUCCESS)) {
+            if (Q_LIKELY(::xlGetDriverConfig(&config) == XL_SUCCESS)) {
                 if (config.channel[channelIndex].channelCapabilities & XL_CHANNEL_FLAG_CANFD_SUPPORT) {
                     usesCanFd = true;
                     return true;
