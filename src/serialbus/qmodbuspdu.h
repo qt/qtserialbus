@@ -110,7 +110,11 @@ private:
     };
 
     template <typename T>
-    using is_pod = std::integral_constant<bool, std::is_trivial<T>::value && std::is_standard_layout<T>::value>;
+    using is_pod = std::conjunction<
+            std::is_trivially_copyable<T>,
+            std::is_trivially_default_constructible<T>,
+            std::is_standard_layout<T>
+        >;
 
     template <typename T> void encode(QDataStream *stream, const T &t) {
         static_assert(is_pod<T>::value, "Only POD types supported.");
