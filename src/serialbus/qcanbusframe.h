@@ -75,8 +75,7 @@ public:
         //only 29 bits usable
     };
     Q_DECLARE_FLAGS(FrameErrors, FrameError)
-    Q_FLAGS(FrameErrors)
-    Q_ENUM(FrameError)
+    Q_FLAG(FrameErrors)
 
     explicit QCanBusFrame(QCanBusFrame::FrameId identifier, const QByteArray &data) :
         format(DataFrame),
