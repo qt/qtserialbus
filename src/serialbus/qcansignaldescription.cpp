@@ -66,6 +66,8 @@ QT_BEGIN_NAMESPACE
     following image:
 
     \image canbus_signals_le.png
+            {Little endian CAN signal bit layout: blue and orange blocks
+            showing two values across bytes 0-2 with LSB and MSB positions}
 
     Here the columns represent bit numbers, and the rows represent byte numbers.
     \c {LSB} marks the first (least significant) bit of the value, and \c {MSB}
@@ -94,6 +96,8 @@ QT_BEGIN_NAMESPACE
     The following image represents the value layout for the big endian case:
 
     \image canbus_signals_be.png
+            {Big endian CAN signal bit layout: blue and orange blocks
+            showing two values across bytes 0-2 with MSB and LSB positions}
 
     The values can be represented in QCanSignalDescription in the following
     way:

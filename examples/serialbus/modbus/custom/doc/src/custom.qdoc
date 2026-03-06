@@ -18,6 +18,8 @@
     codes.
 
     \image ../images/custom.png
+           {Modbus Custom Command window with Server and Client register
+           tables, custom function codes 0x41 (Read) and 0x42 (Write)}
 
     \section1 User-Defined Modbus Function Codes
 
