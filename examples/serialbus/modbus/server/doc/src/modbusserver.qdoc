@@ -26,6 +26,8 @@
     \endlist
 
     \image ../images/modbusserver.png
+           {Modbus Server with connection settings, Coils and Discrete Inputs
+           checkboxes, Input Registers and Holding Registers columns}
 
     \section1 Creating a QModbusServer
 

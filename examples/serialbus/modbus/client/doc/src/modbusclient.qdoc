@@ -25,6 +25,8 @@
     \endlist
 
     \image ../images/modbusclient.png
+           {Modbus Client with connection settings, Read/Write sections,
+           and result showing register addresses with hexadecimal values}
 
     \section1 Creating a QModbusClient
 

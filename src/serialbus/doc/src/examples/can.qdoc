@@ -20,6 +20,8 @@
     \endlist
 
     \image ../images/can-example.png
+           {CAN Manager with Send CAN frame controls (Frame Type, ID, Payload)
+           and Received CAN frames table showing timestamps and payloads}
 
     \section1 Creating a QCanBusDevice
 
