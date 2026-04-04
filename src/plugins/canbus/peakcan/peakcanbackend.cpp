@@ -549,7 +549,7 @@ QString PeakCanBackendPrivate::systemErrorString(TPCANStatus errorCode)
     QByteArray buffer(256, 0);
     if (Q_UNLIKELY(::CAN_GetErrorText(errorCode, 0, buffer.data()) != PCAN_ERROR_OK))
         return PeakCanBackend::tr("Unable to retrieve an error string");
-    return QString::fromLatin1(buffer);
+    return QString::fromLatin1(buffer.constData(), -1);
 }
 
 enum CanFrameDlc {
