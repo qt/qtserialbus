@@ -468,7 +468,9 @@ void VectorCanBackendPrivate::startRead()
                 }
                 break;
             }
-            if (event.tag != XL_CAN_EV_TAG_RX_OK)
+            const bool isReceivedFrame = event.tag == XL_CAN_EV_TAG_RX_OK;
+            const bool isEchoFrame = transmitEcho && (event.tag == XL_CAN_EV_TAG_TX_OK);
+            if (!isReceivedFrame && !isEchoFrame)
                 continue;
 
             const XL_CAN_EV_RX_MSG &msg = event.tagData.canRxOkMsg;
@@ -489,6 +491,7 @@ void VectorCanBackendPrivate::startRead()
             frame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(event.timeStamp / 1000));
             frame.setExtendedFrameFormat(msg.id & XL_CAN_EXT_MSG_ID);
             frame.setBitrateSwitch(msg.flags & XL_CAN_RXMSG_FLAG_BRS);
+            frame.setLocalEcho(isEchoFrame);
             frame.setFrameType((msg.flags & XL_CAN_RXMSG_FLAG_RTR)
                                 ? QCanBusFrame::RemoteRequestFrame
                                 : (msg.flags & XL_CAN_RXMSG_FLAG_EF)
