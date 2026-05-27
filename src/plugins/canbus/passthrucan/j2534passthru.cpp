@@ -38,6 +38,8 @@ const int StringBufferSize = 256;
 
 } // anonymous namespace
 
+QT_BEGIN_NAMESPACE
+
 Q_LOGGING_CATEGORY(QT_CANBUS_PLUGINS_PASSTHRU, "qt.canbus.plugins.passthru", QtWarningMsg)
 
 namespace J2534 {
@@ -188,3 +190,5 @@ PassThru::Status PassThru::handleResult(long statusCode)
 }
 
 } // namespace J2534
+
+QT_END_NAMESPACE
