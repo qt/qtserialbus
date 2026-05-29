@@ -5,6 +5,7 @@
 #include <QtSerialBus/qcanbusframe.h>
 
 #include <QtCore/qtimer.h>
+#include <QtCore/QElapsedTimer>
 #include <QtCore/QtPlugin>
 #include <QtTest/qsignalspy.h>
 #include <QtTest/qtest.h>
