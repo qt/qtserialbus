@@ -171,15 +171,6 @@ bool TinyCanBackendPrivate::open()
         }
     }
 
-    {
-        const int ret = ::CanSetMode(channelIndex, OP_CAN_START, CAN_CMD_ALL_CLEAR);
-        if (Q_UNLIKELY(ret < 0)) {
-            q->setError(systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
-            ::CanDeviceClose(channelIndex);
-            return false;
-        }
-    }
-
     writeNotifier = new TinyCanWriteNotifier(this, q);
     writeNotifier->setInterval(0);
 
@@ -500,6 +491,13 @@ bool TinyCanBackend::open()
                           key, qUtf16Printable(param.toString()));
             }
         }
+    }
+
+    const int ret = ::CanSetMode(d->channelIndex, OP_CAN_START, CAN_CMD_ALL_CLEAR);
+    if (Q_UNLIKELY(ret < 0)) {
+        setError(d->systemErrorString(ret), QCanBusDevice::CanBusError::ConnectionError);
+        close();
+        return false;
     }
 
     setState(QCanBusDevice::ConnectedState);
