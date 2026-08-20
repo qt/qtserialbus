@@ -147,7 +147,7 @@ void QModbusRtuSerialServer::close()
 QModbusResponse QModbusRtuSerialServer::processRequest(const QModbusPdu &request)
 {
     if (request.functionCode() == QModbusRequest::EncapsulatedInterfaceTransport) {
-        quint8 meiType;
+        quint8 meiType = 0;
         request.decodeData(&meiType);
         if (meiType == EncapsulatedInterfaceTransport::CanOpenGeneralReference) {
             return QModbusExceptionResponse(request.functionCode(),

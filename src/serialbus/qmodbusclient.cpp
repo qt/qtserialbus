@@ -306,7 +306,7 @@ QModbusRequest QModbusClientPrivate::createRWRequest(const QModbusDataUnit &read
                                                      const QModbusDataUnit &write) const
 {
     if ((read.registerType() != QModbusDataUnit::HoldingRegisters)
-        && (write.registerType() != QModbusDataUnit::HoldingRegisters)) {
+        || (write.registerType() != QModbusDataUnit::HoldingRegisters)) {
         return QModbusRequest();
     }
 
@@ -509,7 +509,7 @@ bool QModbusClientPrivate::collateSingleValue(const QModbusPdu &response,
     if (response.dataSize() != QModbusResponse::minimumDataSize(response))
         return false;
 
-    quint16 address, value;
+    quint16 address = 0, value = 0xffff;
     response.decodeData(&address, &value);
     if ((type == QModbusDataUnit::Coils) && (value != Coil::Off) && (value != Coil::On))
         return false;
@@ -544,7 +544,7 @@ bool QModbusClientPrivate::collateMultipleValues(const QModbusPdu &response,
     if (response.dataSize() != QModbusResponse::minimumDataSize(response))
         return false;
 
-    quint16 address, count;
+    quint16 address = 0, count = 0;
     response.decodeData(&address, &count);
 
     // number of registers to write is 1-123 per request

@@ -329,9 +329,8 @@ void QCanBusDevice::setConfigurationParameter(ConfigurationKey key, const QVaria
     for (int i = 0; i < d->configOptions.size(); i++) {
         if (d->configOptions.at(i).first == key) {
             if (value.isValid()) {
-                ConfigEntry entry = d->configOptions.at(i);
+                ConfigEntry &entry = d->configOptions[i];
                 entry.second = value;
-                d->configOptions.replace(i, entry);
             } else {
                 d->configOptions.remove(i);
             }
@@ -416,7 +415,10 @@ QString QCanBusDevice::errorString() const
 */
 qint64 QCanBusDevice::framesAvailable() const
 {
-    return d_func()->incomingFrames.size();
+    Q_D(const QCanBusDevice);
+
+    QMutexLocker locker(&d->incomingFramesGuard);
+    return d->incomingFrames.size();
 }
 
 /*!
@@ -571,7 +573,7 @@ bool QCanBusDevice::waitForFramesWritten(int msecs)
     // do not enter this function recursively
     if (Q_UNLIKELY(d_func()->waitForWrittenEntered)) {
         qCWarning(QT_CANBUS, "QCanBusDevice::waitForFramesWritten() must not be called "
-                             "recursively. Check that no slot containing waitForFramesReceived() "
+                             "recursively. Check that no slot containing waitForFramesWritten() "
                              "is called in response to framesWritten(qint64) or "
                              "errorOccurred(CanBusError) signals.");
         setError(tr("QCanBusDevice::waitForFramesWritten() must not be called recursively."),

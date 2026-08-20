@@ -41,11 +41,11 @@ public:
         QMenu menu(this);
         menu.addAction(tr("Clear"), this, &QPlainTextEdit::clear);
 #ifndef QT_NO_CLIPBOARD
-        menu.addAction(tr("Copy"), this, &QPlainTextEdit::copy, QKeySequence::Copy);
+        menu.addAction(tr("Copy"), QKeySequence::Copy, this, &QPlainTextEdit::copy);
 #endif
         menu.addSeparator();
-        menu.addAction(tr("Select All"), this, &QPlainTextEdit::selectAll,
-            QKeySequence::SelectAll);
+        menu.addAction(tr("Select All"), QKeySequence::SelectAll,
+                       this, &QPlainTextEdit::selectAll);
         menu.exec(event->globalPos());
     }
 };
