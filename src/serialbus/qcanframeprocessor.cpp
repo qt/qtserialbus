@@ -28,7 +28,8 @@ QT_BEGIN_NAMESPACE
 
 // Helper method to extract the max bit number of the signal.
 // Note that for BE it's not the last bit of the signal.
-static quint16 extractMaxBitNum(quint16 startBit, quint16 bitLength, QSysInfo::Endian endian)
+// The two quint16 inputs can combine past their own width, so this result must not truncate.
+static qsizetype extractMaxBitNum(quint16 startBit, quint16 bitLength, QSysInfo::Endian endian)
 {
 #ifdef USE_DBC_COMPATIBLE_BE_HANDLING
     if (endian == QSysInfo::Endian::LittleEndian) {
@@ -684,7 +685,8 @@ static QVariant extractValue(const unsigned char *data, const QCanSignalDescript
             // types, so we convert the value to uchar *.
             unsigned char *valueData = reinterpret_cast<unsigned char *>(&value);
             quint16 valueIdx = 0;
-            for (auto i = start; i < start + length; ++i, ++valueIdx) {
+            const qsizetype end = start + length;
+            for (qsizetype i = start; i < end; ++i, ++valueIdx) {
                 const auto byteIdx = i / 8;
                 const auto bitIdx = i % 8;
                 if (data[byteIdx] & (0x01 << bitIdx))
@@ -852,7 +854,8 @@ static QVariant parseAscii(const unsigned char *data, const QCanSignalDescriptio
 
     char *valueData = value.data();
     quint16 valueIdx = 0;
-    for (quint16 i = start; i < start + length; ++i, ++valueIdx) {
+    const qsizetype end = start + length;
+    for (qsizetype i = start; i < end; ++i, ++valueIdx) {
         const auto byteIdx = i / 8;
         const auto bitIdx = i % 8;
         if (data[byteIdx] & (0x01 << bitIdx))
