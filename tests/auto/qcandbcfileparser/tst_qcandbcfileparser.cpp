@@ -807,6 +807,46 @@ void tst_QCanDbcFileParser::parseFile_data()
     }
 
     {
+        // startBit and bitLength narrow to quint16, size narrows to quint8, so a
+        // value above the field width must be rejected at ingestion rather than
+        // silently wrapped into a small, seemingly valid offset.
+        QCanMessageDescription oversizedMsg;
+        oversizedMsg.setName("Test");
+        oversizedMsg.setSize(8);
+        oversizedMsg.setUniqueId(QtCanBus::UniqueId{1234});
+        oversizedMsg.setTransmitter("Vector__XXX");
+
+        QCanSignalDescription goodSignal;
+        goodSignal.setName("goodSignal");
+        goodSignal.setDataEndian(QSysInfo::Endian::LittleEndian);
+        goodSignal.setDataFormat(QtCanBus::DataFormat::UnsignedInteger);
+        goodSignal.setDataSource(QtCanBus::DataSource::Payload);
+        goodSignal.setStartBit(0);
+        goodSignal.setBitLength(8);
+        goodSignal.setFactor(1.0);
+        goodSignal.setOffset(0.0);
+        goodSignal.setRange(0.0, 0.0);
+        goodSignal.setPhysicalUnit("");
+        goodSignal.setReceiver("Vector__XXX");
+        oversizedMsg.addSignalDescription(goodSignal);
+
+        const QStringList expectedWarnings = {
+            u"Failed to parse start bit for signal badStart"_s,
+            u"Failed to parse signal description from string "
+             "SG_ badStart : 70000|8@1+ (1,0) [0|0] \"\" Vector__XXX"_s,
+            u"Failed to parse bit length for signal badLength"_s,
+            u"Failed to parse signal description from string "
+             "SG_ badLength : 0|70000@1+ (1,0) [0|0] \"\" Vector__XXX"_s,
+        };
+
+        QTest::addRow("out-of-range signal fields")
+                << QStringList{ u"oversized_signal.dbc"_s }
+                << QCanDbcFileParser::Error::None << QString()
+                << expectedWarnings
+                << QList<QCanMessageDescription>{ oversizedMsg };
+    }
+
+    {
         // Check that we get message descriptions and warnings from all files
         messageDesc.clearSignalDescriptions();
         messageDesc.setSize(4);
