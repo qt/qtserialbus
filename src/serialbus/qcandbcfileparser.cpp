@@ -13,6 +13,7 @@
 #include <QtCore/QFile>
 #include <QtCore/QRegularExpression>
 
+#include <limits>
 #include <optional>
 
 QT_BEGIN_NAMESPACE
@@ -570,7 +571,7 @@ QCanDbcFileParserPrivate::extractMessage(const QRegularExpressionMatch &match)
 
     bool ok = false;
     const auto size = match.capturedView(u"size"_s).toUInt(&ok);
-    if (ok) {
+    if (ok && size <= std::numeric_limits<quint8>::max()) {
         desc.setSize(size);
     } else {
         addWarning(QObject::tr("Failed to parse size for message %1").arg(desc.name()));
@@ -675,7 +676,7 @@ QCanSignalDescription QCanDbcFileParserPrivate::extractSignal(const QRegularExpr
     }
 
     const uint startBit = match.capturedView(u"startBit"_s).toUInt(&ok);
-    if (ok) {
+    if (ok && startBit <= std::numeric_limits<quint16>::max()) {
         desc.setStartBit(startBit);
     } else {
         addWarning(QObject::tr("Failed to parse start bit for signal %1").arg(desc.name()));
@@ -683,7 +684,7 @@ QCanSignalDescription QCanDbcFileParserPrivate::extractSignal(const QRegularExpr
     }
 
     const uint bitLength = match.capturedView(u"sigSize"_s).toUInt(&ok);
-    if (ok) {
+    if (ok && bitLength <= std::numeric_limits<quint16>::max()) {
         desc.setBitLength(bitLength);
     } else {
         addWarning(QObject::tr("Failed to parse bit length for signal %1").arg(desc.name()));
