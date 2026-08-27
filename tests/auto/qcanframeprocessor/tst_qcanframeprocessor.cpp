@@ -851,6 +851,45 @@ void tst_QCanFrameProcessor::parseWithErrorsAndWarnings_data()
             << QCanFrameProcessor::Error::None << QString()
             << expectedWarnings << QtCanBus::UniqueId(123)
             << QVariantMap({ qMakePair("s0", 0x0101), qMakePair("s1", 0x01) });
+
+    // Signals whose end-of-signal bit position exceeds 65535 must be skipped:
+    // that position must not truncate to a small value that passes the bounds
+    // check while the untruncated start bit drives the memory access.
+    // The end bit position calculation depends on endianness, so
+    // both endians are covered.
+    QCanMessageDescription truncationMsg;
+    truncationMsg.setName("truncationMessage");
+    truncationMsg.setUniqueId(QtCanBus::UniqueId{123});
+    truncationMsg.setSize(8);
+
+    QCanSignalDescription oobLittleEndian;
+    oobLittleEndian.setName("oobLittleEndian");
+    oobLittleEndian.setDataEndian(QSysInfo::Endian::LittleEndian);
+    oobLittleEndian.setDataFormat(QtCanBus::DataFormat::UnsignedInteger);
+    oobLittleEndian.setStartBit(65480); // 65480 + 64 - 1 = 65543, truncates to 7
+    oobLittleEndian.setBitLength(64);
+    truncationMsg.addSignalDescription(oobLittleEndian);
+
+    QCanSignalDescription oobBigEndian;
+    oobBigEndian.setName("oobBigEndian");
+    oobBigEndian.setDataEndian(QSysInfo::Endian::BigEndian);
+    oobBigEndian.setDataFormat(QtCanBus::DataFormat::UnsignedInteger);
+    oobBigEndian.setStartBit(65535); // last byte 8199 -> bit 65591, truncates to 55
+    oobBigEndian.setBitLength(64);
+    truncationMsg.addSignalDescription(oobBigEndian);
+
+    const QStringList truncationWarnings = {
+        tr("Skipping signal oobLittleEndian in message with unique id 123. "
+           "Its expected length exceeds the data length."),
+        tr("Skipping signal oobBigEndian in message with unique id 123. "
+           "Its expected length exceeds the data length.")
+    };
+
+    QTest::addRow("signal offset exceeds quint16")
+            << truncationMsg << uidDesc << QCanBusFrame(123, QByteArray(8, 0x41))
+            << QCanFrameProcessor::Error::None << QString()
+            << truncationWarnings << QtCanBus::UniqueId(123)
+            << QVariantMap();
 }
 
 void tst_QCanFrameProcessor::parseWithErrorsAndWarnings()
@@ -1726,6 +1765,31 @@ void tst_QCanFrameProcessor::prepareWithErrorsAndWarnings_data()
             << QCanFrameProcessor::Error::None << QString()
             << warnings << QCanBusFrame::FrameId(messageDesc.uniqueId())
             << QByteArray::fromHex("1205");
+
+    // A signal whose (startBit + bitLength) exceeds 65535 must be skipped, not
+    // encoded: otherwise the truncated end-of-signal position passes the bounds
+    // check while the untruncated start offset drives an out-of-bounds write.
+    QCanMessageDescription truncationMsg;
+    truncationMsg.setUniqueId(QtCanBus::UniqueId{123});
+    truncationMsg.setSize(8);
+
+    QCanSignalDescription oobWrite;
+    oobWrite.setName("oobWrite");
+    oobWrite.setDataEndian(QSysInfo::Endian::LittleEndian);
+    oobWrite.setDataFormat(QtCanBus::DataFormat::UnsignedInteger);
+    oobWrite.setStartBit(65480); // 65480 + 64 - 1 = 65543, truncates to 7
+    oobWrite.setBitLength(64);
+    truncationMsg.addSignalDescription(oobWrite);
+
+    QTest::addRow("signal offset exceeds quint16")
+            << truncationMsg << uidDesc << truncationMsg.uniqueId()
+            << QVariantMap({ qMakePair("oobWrite",
+                                       QVariant::fromValue<quint64>(0xdeadbeefcafebabeULL)) })
+            << QCanFrameProcessor::Error::None << QString()
+            << QStringList{ tr("Skipping signal oobWrite. Its length exceeds the "
+                               "expected message length.") }
+            << QCanBusFrame::FrameId(truncationMsg.uniqueId())
+            << QByteArray(8, 0x00);
 }
 
 void tst_QCanFrameProcessor::prepareWithErrorsAndWarnings()
