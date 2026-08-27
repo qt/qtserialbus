@@ -1,0 +1,4 @@
+BO_ 1234 Test : 8 Vector__XXX
+ SG_ goodSignal : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ badStart : 70000|8@1+ (1,0) [0|0] "" Vector__XXX
+ SG_ badLength : 0|70000@1+ (1,0) [0|0] "" Vector__XXX
