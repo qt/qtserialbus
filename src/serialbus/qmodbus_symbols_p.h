@@ -16,6 +16,11 @@
 // We mean it.
 //
 
+// MBAP header: transaction id (2), protocol id (2), length (2), unit id (1)
+constexpr int mbpaHeaderSize = 7;
+// The 253 byte maximum PDU plus the MBAP header
+constexpr int maxBytesModbusADU = 260;
+
 enum Coil {
     On = 0xff00,
     Off = 0x0000

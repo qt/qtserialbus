@@ -10,6 +10,7 @@
 #include <QtNetwork/qtcpsocket.h>
 #include "QtSerialBus/qmodbustcpclient.h"
 
+#include "private/qmodbus_symbols_p.h"
 #include "private/qmodbusclient_p.h"
 
 //
@@ -226,7 +227,6 @@ public:
     QTcpSocket *m_socket = nullptr;
     QByteArray responseBuffer;
     QHash<quint16, QueueElement> m_transactionStore;
-    int mbpaHeaderSize = 7;
 
 private:   // Private to avoid using the wrong id inside the timer lambda,
     quint16 m_transactionId = 0; // capturing 'this' will not copy the id.
