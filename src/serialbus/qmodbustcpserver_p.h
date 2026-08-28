@@ -135,11 +135,18 @@ public:
                         << Qt::hex << transactionId << "Protocol Id:" << protocolId << "PDU bytes:"
                         << bytesPdu << "Unit Id:" << unitId;
 
-                    // The length field is the byte count of the following fields, including the Unit
-                    // Identifier and the PDU, so we remove on byte.
-                    bytesPdu--;
+                    const int current = mbapAduSize(bytesPdu);
+                    if (!isValidAduSize(current)) {
+                        // Resynchronizing would be guesswork, the next frame could start
+                        // anywhere. Disconnect before reporting, the slot may delete socket.
+                        qCWarning(QT_MODBUS) << "(TCP server) Invalid MBAP length field:"
+                            << bytesPdu << "closing connection.";
+                        socket->disconnectFromHost();
+                        forwardError(QModbusTcpServer::tr("Received invalid MBAP length field."),
+                                     QModbusDevice::ProtocolError);
+                        return;
+                    }
 
-                    const quint16 current = mbpaHeaderSize + bytesPdu;
                     if (buffer->size() < current) {
                         qCDebug(QT_MODBUS) << "(TCP server) PDU too short. Waiting for more data";
                         return;
