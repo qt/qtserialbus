@@ -591,6 +591,12 @@ private slots:
         // the framing, here rejected later because the padding is not a valid PDU.
         QTest::newRow("maximum length")
             << (QByteArray::fromHex("0000000000fe01") + QByteArray(253, 0x03)) << true;
+
+        // A legal length of 2 declares a one byte PDU, too short for the read
+        // response it claims to be. The missing bytes must not be taken from what
+        // follows the frame, or the application is handed a fabricated register.
+        QTest::newRow("declared length bounds the PDU")
+            << (QByteArray::fromHex("0000000000020103") + QByteArray::fromHex("02beef")) << true;
     }
 
     void testTcpMbapLengthField()
