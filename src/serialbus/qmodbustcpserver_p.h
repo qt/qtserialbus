@@ -14,6 +14,7 @@
 #include <QtNetwork/qtcpsocket.h>
 #include <QtSerialBus/qmodbustcpserver.h>
 
+#include <private/qmodbus_symbols_p.h>
 #include <private/qmodbusserver_p.h>
 
 #include <memory>
@@ -192,9 +193,6 @@ public:
     QTcpServer *m_tcpServer { nullptr };
 
     std::unique_ptr<QModbusTcpConnectionObserver> m_observer;
-
-    static const qint8 mbpaHeaderSize = 7;
-    static const qint16 maxBytesModbusADU = 260;
 };
 
 QT_END_NAMESPACE
