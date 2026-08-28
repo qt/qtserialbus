@@ -2,9 +2,13 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only
 
 #include <QtSerialBus/qmodbusclient.h>
+#include <QtSerialBus/qmodbustcpclient.h>
 #include <private/qmodbusclient_p.h>
 #include <private/qmodbus_symbols_p.h>
 
+#include <QtCore/qendian.h>
+#include <QtNetwork/qtcpserver.h>
+#include <QtNetwork/qtcpsocket.h>
 #include <QtTest/QtTest>
 
 class TestClient : public QModbusClient
@@ -570,6 +574,68 @@ private slots:
         // The default implementation is empty and returns a null pointer.
         QCOMPARE(client.d_func()->sendRequest(request, 1, &unit), reply);
         QCOMPARE(client.d_func()->sendRequest(request, 1, nullptr), reply);
+    }
+
+    void testTcpMbapLengthField_data()
+    {
+        QTest::addColumn<QByteArray>("frame");
+        QTest::addColumn<bool>("accepted");
+
+        // MBAP header: transaction id (2), protocol id (2), length (2), unit id (1).
+        // The length field counts the unit id, so 2 is its smallest legal value.
+        QTest::newRow("length zero") << QByteArray::fromHex("00000000000001") << false;
+        QTest::newRow("length one") << QByteArray::fromHex("00000000000101") << false;
+        QTest::newRow("one above the maximum") << QByteArray::fromHex("0000000000ff01") << false;
+        QTest::newRow("length huge") << QByteArray::fromHex("00000000ffff01") << false;
+        // 254 describes the largest legal frame, a 260 byte ADU. It is accepted by
+        // the framing, here rejected later because the padding is not a valid PDU.
+        QTest::newRow("maximum length")
+            << (QByteArray::fromHex("0000000000fe01") + QByteArray(253, 0x03)) << true;
+    }
+
+    void testTcpMbapLengthField()
+    {
+        QFETCH(QByteArray, frame);
+        QFETCH(bool, accepted);
+
+        QTcpServer server;
+        QVERIFY(server.listen(QHostAddress::LocalHost, 0));
+
+        QModbusTcpClient client;
+        client.setConnectionParameter(QModbusDevice::NetworkAddressParameter,
+            QStringLiteral("127.0.0.1"));
+        client.setConnectionParameter(QModbusDevice::NetworkPortParameter, server.serverPort());
+        QVERIFY(client.connectDevice());
+        QTRY_COMPARE(client.state(), QModbusDevice::ConnectedState);
+        QTRY_VERIFY(server.hasPendingConnections());
+        QTcpSocket *remote = server.nextPendingConnection();
+
+        QModbusReply *reply = client.sendReadRequest(
+            QModbusDataUnit(QModbusDataUnit::HoldingRegisters, 0, 1), 1);
+        QVERIFY(reply);
+
+        if (!accepted) {
+            const QByteArray warning = "(TCP client) Invalid MBAP length field: "
+                + QByteArray::number(qFromBigEndian<quint16>(frame.constData() + 4))
+                + " closing connection.";
+            QTest::ignoreMessage(QtWarningMsg, warning.constData());
+        }
+
+        remote->write(frame);
+        QTRY_VERIFY(reply->isFinished());
+
+        if (!accepted) {
+            QCOMPARE(reply->error(), QModbusDevice::ReplyAbortedError);
+            QTRY_COMPARE(client.state(), QModbusDevice::UnconnectedState);
+            QCOMPARE(client.error(), QModbusDevice::ProtocolError);
+            return;
+        }
+
+        // Accepted by the framing, so the connection survives and only the
+        // bogus PDU is rejected. No value reaches the application.
+        QCOMPARE(reply->error(), QModbusDevice::InvalidResponseError);
+        QCOMPARE(reply->result().valueCount(), 0);
+        QCOMPARE(client.state(), QModbusDevice::ConnectedState);
     }
 };
 

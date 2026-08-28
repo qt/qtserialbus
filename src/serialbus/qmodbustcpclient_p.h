@@ -92,11 +92,18 @@ public:
                 qCDebug(QT_MODBUS) << "(TCP client) tid:" << Qt::hex << transactionId << "size:"
                     << bytesPdu << "server address:" << serverAddress;
 
-                // The length field is the byte count of the following fields, including the Unit
-                // Identifier and the PDU, so we remove on byte.
-                bytesPdu--;
+                const int tcpAduSize = mbapAduSize(bytesPdu);
+                if (!isValidAduSize(tcpAduSize)) {
+                    // Resynchronizing would be guesswork, the next frame could start anywhere.
+                    qCWarning(QT_MODBUS) << "(TCP client) Invalid MBAP length field:" << bytesPdu
+                        << "closing connection.";
+                    Q_Q(QModbusTcpClient);
+                    m_socket->disconnectFromHost();
+                    q->setError(QModbusTcpClient::tr("Received invalid MBAP length field."),
+                                QModbusDevice::ProtocolError);
+                    return;
+                }
 
-                int tcpAduSize = mbpaHeaderSize + bytesPdu;
                 if (responseBuffer.size() < tcpAduSize) {
                     qCDebug(QT_MODBUS) << "(TCP client) PDU too short. Waiting for more data";
                     return;
