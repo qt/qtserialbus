@@ -16,10 +16,26 @@
 // We mean it.
 //
 
+#include <QtCore/qtypes.h>
+
 // MBAP header: transaction id (2), protocol id (2), length (2), unit id (1)
 constexpr int mbpaHeaderSize = 7;
 // The 253 byte maximum PDU plus the MBAP header
 constexpr int maxBytesModbusADU = 260;
+
+// The length field counts the Unit Identifier, which mbpaHeaderSize already
+// includes, so the frame is one byte shorter than the two added together.
+constexpr int mbapAduSize(quint16 mbapLength)
+{
+    return mbpaHeaderSize + mbapLength - 1;
+}
+
+// The smallest frame carries a one byte PDU, the function code alone. The
+// largest is a maxBytesModbusADU sized frame.
+constexpr bool isValidAduSize(int aduSize)
+{
+    return aduSize >= mbpaHeaderSize + 1 && aduSize <= maxBytesModbusADU;
+}
 
 enum Coil {
     On = 0xff00,

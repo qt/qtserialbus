@@ -9,6 +9,9 @@
 #include <QtSerialBus/qmodbusdeviceidentification.h>
 
 #include <QtCore/qdebug.h>
+#include <QtCore/qendian.h>
+#include <QtNetwork/qtcpserver.h>
+#include <QtNetwork/qtcpsocket.h>
 #include <QtTest/QtTest>
 
 class TestServer : public QModbusServer
@@ -1198,6 +1201,75 @@ private slots:
 
         request = QModbusRequest(QModbusRequest::ReportServerId);
         QCOMPARE(local.processRequest(request).exceptionCode(), QModbusPdu::IllegalFunction);
+    }
+
+    void testTcpMbapLengthField_data()
+    {
+        QTest::addColumn<QByteArray>("wire");
+        QTest::addColumn<QByteArray>("expected");
+
+        // A valid request, appended to every rejected frame: it must not be
+        // answered out of a desynchronized buffer.
+        const QByteArray request = QByteArray::fromHex("000100000006ff0300000001");
+
+        // MBAP header: transaction id (2), protocol id (2), length (2), unit id (1).
+        // The length field counts the unit id, so 2 is its smallest legal value.
+        QTest::newRow("length zero")
+            << QByteArray::fromHex("000200000000ff") + request << QByteArray();
+        QTest::newRow("length one")
+            << QByteArray::fromHex("000200000001ff") + request << QByteArray();
+        QTest::newRow("one above the maximum")
+            << QByteArray::fromHex("0002000000ffff") + request << QByteArray();
+        QTest::newRow("length huge")
+            << QByteArray::fromHex("00020000ffffff") + request << QByteArray();
+
+        // 254 describes the largest legal frame, a 260 byte ADU. It is answered,
+        // here with an exception because the padding is not a valid PDU.
+        QTest::newRow("maximum length")
+            << QByteArray::fromHex("0002000000feff") + QByteArray(253, 0x03)
+            << QByteArray::fromHex("000200000003ff8303");
+    }
+
+    void testTcpMbapLengthField()
+    {
+        QFETCH(QByteArray, wire);
+        QFETCH(QByteArray, expected);
+
+        QModbusTcpServer modbusServer;
+        modbusServer.setMap({ { QModbusDataUnit::HoldingRegisters,
+            { QModbusDataUnit::HoldingRegisters, 0, MAP_RANGE } } });
+        modbusServer.setConnectionParameter(QModbusDevice::NetworkAddressParameter,
+            QStringLiteral("127.0.0.1"));
+        modbusServer.setConnectionParameter(QModbusDevice::NetworkPortParameter, 0);
+        QVERIFY(modbusServer.connectDevice());
+
+        // The listening socket is a child, so the port the OS picked is reachable
+        // without binding a second time and racing for the same port.
+        auto *listener = modbusServer.findChild<QTcpServer *>();
+        QVERIFY(listener);
+
+        QTcpSocket socket;
+        socket.connectToHost(QHostAddress::LocalHost, listener->serverPort());
+        QTRY_COMPARE(socket.state(), QAbstractSocket::ConnectedState);
+
+        if (expected.isEmpty()) {
+            const QByteArray warning = "(TCP server) Invalid MBAP length field: "
+                + QByteArray::number(qFromBigEndian<quint16>(wire.constData() + 4))
+                + " closing connection.";
+            QTest::ignoreMessage(QtWarningMsg, warning.constData());
+        }
+
+        socket.write(wire);
+        if (expected.isEmpty()) {
+            QTRY_COMPARE(socket.state(), QAbstractSocket::UnconnectedState);
+            QCOMPARE(socket.readAll(), QByteArray());
+            QCOMPARE(modbusServer.error(), QModbusDevice::ProtocolError);
+            return;
+        }
+
+        QTRY_COMPARE(socket.bytesAvailable(), qint64(expected.size()));
+        QCOMPARE(socket.readAll(), expected);
+        QCOMPARE(socket.state(), QAbstractSocket::ConnectedState);
     }
 
     void testQModbusServerOptions()
