@@ -1228,6 +1228,15 @@ private slots:
         QTest::newRow("maximum length")
             << QByteArray::fromHex("0002000000feff") + QByteArray(253, 0x03)
             << QByteArray::fromHex("000200000003ff8303");
+
+        // A legal length of 2 declares a one byte PDU, too short for the function
+        // code it carries. The missing bytes must not be taken from the request
+        // that follows: the short frame is answered with an exception and the
+        // following request with its own correct response.
+        QTest::newRow("declared length bounds the PDU")
+            << QByteArray::fromHex("00bb00000002ff03") + request
+            << QByteArray::fromHex("00bb00000003ff8001")
+                    + QByteArray::fromHex("000100000005ff03020000");
     }
 
     void testTcpMbapLengthField()

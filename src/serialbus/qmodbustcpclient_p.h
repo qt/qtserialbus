@@ -109,8 +109,12 @@ public:
                     return;
                 }
 
+                // Parse the PDU out of the declared frame only. QModbusPdu sizes its data
+                // from the function code and reads to the end of the device, so an
+                // unbounded stream lets it consume bytes belonging to the next frame.
                 QModbusResponse responsePdu;
-                input >> responsePdu;
+                QDataStream pdu(responseBuffer.sliced(mbpaHeaderSize, tcpAduSize - mbpaHeaderSize));
+                pdu >> responsePdu;
                 qCDebug(QT_MODBUS) << "(TCP client) Received PDU:" << responsePdu.functionCode()
                                    << responsePdu.data().toHex();
 

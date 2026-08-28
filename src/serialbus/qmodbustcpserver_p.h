@@ -152,8 +152,12 @@ public:
                         return;
                     }
 
+                    // Parse the PDU out of the declared frame only. QModbusPdu sizes its
+                    // data from the function code and reads to the end of the device, so an
+                    // unbounded stream lets it consume bytes belonging to the next frame.
                     QModbusRequest request;
-                    input >> request;
+                    QDataStream pdu(buffer->sliced(mbpaHeaderSize, current - mbpaHeaderSize));
+                    pdu >> request;
 
                     buffer->remove(0, current);
 
