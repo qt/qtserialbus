@@ -121,7 +121,7 @@ public:
                     qCDebug(QT_MODBUS_LOW).noquote() << "(TCP server) Read buffer: 0x"
                         + buffer->toHex();
 
-                    if (buffer->size() < mbpaHeaderSize) {
+                    if (buffer->size() < mbapHeaderSize) {
                         qCDebug(QT_MODBUS) << "(TCP server) MBPA header too short. Waiting for more data.";
                         return;
                     }
@@ -156,7 +156,7 @@ public:
                     // data from the function code and reads to the end of the device, so an
                     // unbounded stream lets it consume bytes belonging to the next frame.
                     QModbusRequest request;
-                    QDataStream pdu(buffer->sliced(mbpaHeaderSize, current - mbpaHeaderSize));
+                    QDataStream pdu(buffer->sliced(mbapHeaderSize, current - mbapHeaderSize));
                     pdu >> request;
 
                     buffer->remove(0, current);

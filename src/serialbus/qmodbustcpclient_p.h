@@ -74,7 +74,7 @@ public:
 
             while (!responseBuffer.isEmpty()) {
                 // can we read enough for Modbus ADU header?
-                if (responseBuffer.size() < mbpaHeaderSize) {
+                if (responseBuffer.size() < mbapHeaderSize) {
                     qCDebug(QT_MODBUS_LOW) << "(TCP client) MBPA header too short. Waiting for more data.";
                     return;
                 }
@@ -113,7 +113,7 @@ public:
                 // from the function code and reads to the end of the device, so an
                 // unbounded stream lets it consume bytes belonging to the next frame.
                 QModbusResponse responsePdu;
-                QDataStream pdu(responseBuffer.sliced(mbpaHeaderSize, tcpAduSize - mbpaHeaderSize));
+                QDataStream pdu(responseBuffer.sliced(mbapHeaderSize, tcpAduSize - mbapHeaderSize));
                 pdu >> responsePdu;
                 qCDebug(QT_MODBUS) << "(TCP client) Received PDU:" << responsePdu.functionCode()
                                    << responsePdu.data().toHex();
