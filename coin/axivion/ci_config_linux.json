@@ -28,7 +28,7 @@
             ],
             "ir": "build/$(env:TESTED_MODULE_COIN).ir",
             "plugin_files": [
-                "build/plugins/*/lib*.so*.ir"
+                "build/plugins/**/lib*.so*.ir"
             ]
         }
     },
