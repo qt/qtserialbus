@@ -366,8 +366,10 @@ void TinyCanBackendPrivate::startRead()
             continue;
         }
 
+        const qsizetype dataSize = std::min(qsizetype(message.Flags.Flag.Len),
+                                            qsizetype(sizeof(message.Data.Bytes)));
         QCanBusFrame frame(message.Id, QByteArray(reinterpret_cast<char *>(message.Data.Bytes),
-                                                  int(message.Flags.Flag.Len)));
+                                                  dataSize));
         frame.setTimeStamp(QCanBusFrame::TimeStamp(message.Time.Sec, message.Time.USec));
         frame.setExtendedFrameFormat(message.Flags.Flag.EFF);
 

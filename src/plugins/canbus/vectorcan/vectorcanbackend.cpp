@@ -475,15 +475,22 @@ void VectorCanBackendPrivate::startRead()
 
             const XL_CAN_EV_RX_MSG &msg = event.tagData.canRxOkMsg;
 
-            int dataLength = msg.dlc;
-            switch (msg.dlc) {
-            case 9: dataLength = 12; break;
-            case 10: dataLength = 16; break;
-            case 11: dataLength = 20; break;
-            case 12: dataLength = 24; break;
-            case 13: dataLength = 32; break;
-            case 14: dataLength = 48; break;
-            case 15: dataLength = 64; break;
+            if (Q_UNLIKELY(msg.dlc > 15))
+                continue;
+
+            qsizetype dataLength = msg.dlc;
+            if (msg.flags & XL_CAN_RXMSG_FLAG_EDL) {
+                switch (msg.dlc) {
+                case 9: dataLength = 12; break;
+                case 10: dataLength = 16; break;
+                case 11: dataLength = 20; break;
+                case 12: dataLength = 24; break;
+                case 13: dataLength = 32; break;
+                case 14: dataLength = 48; break;
+                case 15: dataLength = 64; break;
+                }
+            } else {
+                dataLength = std::min(dataLength, qsizetype(8));
             }
 
             QCanBusFrame frame(msg.id & ~XL_CAN_EXT_MSG_ID,
@@ -520,8 +527,10 @@ void VectorCanBackendPrivate::startRead()
             if ((msg.flags & XL_CAN_MSG_FLAG_TX_COMPLETED) && !transmitEcho)
                 continue;
 
+            const qsizetype dataSize = std::min(qsizetype(msg.dlc),
+                                                qsizetype(sizeof(msg.data)));
             QCanBusFrame frame(msg.id & ~XL_CAN_EXT_MSG_ID,
-                QByteArray(reinterpret_cast<const char *>(msg.data), int(msg.dlc)));
+                QByteArray(reinterpret_cast<const char *>(msg.data), dataSize));
             frame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(event.timeStamp / 1000));
             frame.setExtendedFrameFormat(msg.id & XL_CAN_EXT_MSG_ID);
             frame.setLocalEcho(msg.flags & XL_CAN_MSG_FLAG_TX_COMPLETED);
