@@ -5,6 +5,7 @@
 #ifndef QCANBUSDEVICE_P_H
 #define QCANBUSDEVICE_P_H
 
+#include <QtCore/qelapsedtimer.h>
 #include <QtCore/qmutex.h>
 #include <QtSerialBus/qcanbusdevice.h>
 
@@ -37,6 +38,9 @@ public:
 
     QList<QCanBusFrame> incomingFrames;
     mutable QMutex incomingFramesGuard;
+    qsizetype receiveQueueLimit = 0;
+    bool receiveQueueOverflowed = false;
+    QElapsedTimer lastReceiveQueueOverflowReport;
     QList<QCanBusFrame> outgoingFrames;
     QList<ConfigEntry> configOptions;
 

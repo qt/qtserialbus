@@ -88,6 +88,7 @@ void MainWindow::processErrors(QCanBusDevice::CanBusError error) const
 {
     switch (error) {
     case QCanBusDevice::ReadError:
+    case QCanBusDevice::ReceiveQueueOverflowError:
     case QCanBusDevice::WriteError:
     case QCanBusDevice::ConnectionError:
     case QCanBusDevice::ConfigurationError:

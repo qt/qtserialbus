@@ -4,6 +4,8 @@
 #include <QtSerialBus/qcanbusdevice.h>
 #include <QtSerialBus/qcanbusframe.h>
 
+#include <QtCore/qpointer.h>
+#include <QtCore/qscopeguard.h>
 #include <QtCore/qtimer.h>
 #include <QtCore/QElapsedTimer>
 #include <QtCore/QtPlugin>
@@ -37,6 +39,20 @@ public:
         enqueueReceivedFrames({referenceFrame});
 
         return true;
+    }
+
+    bool triggerNewFrames(qsizetype count)
+    {
+        if (state() != QCanBusDevice::ConnectedState)
+            return false;
+
+        enqueueReceivedFrames(QList<QCanBusFrame>(count, referenceFrame));
+        return true;
+    }
+
+    void triggerFrames(const QList<QCanBusFrame> &frames)
+    {
+        enqueueReceivedFrames(frames);
     }
 
     bool open() override
@@ -133,6 +149,15 @@ private slots:
     void write();
     void read();
     void readAll();
+    void receiveQueueLimit();
+    void receiveQueueOverflowThrottling();
+    void receiveQueueOverflowRecovery_data();
+    void receiveQueueOverflowRecovery();
+    void waitForFramesReceivedWithQueueOverflow_data();
+    void waitForFramesReceivedWithQueueOverflow();
+    void reentrantQueueOverflow();
+    void deletionDuringQueueOverflow_data();
+    void deletionDuringQueueOverflow();
     void clearInputBuffer();
     void clearOutputBuffer();
     void error();
@@ -294,6 +319,309 @@ void tst_QCanBusDevice::readAll()
     QCOMPARE(device->error(), QCanBusDevice::NoError);
     QCOMPARE(FrameNumber, frames.size());
     QVERIFY(!device->framesAvailable());
+}
+
+void tst_QCanBusDevice::receiveQueueLimit()
+{
+    const auto cleanup = qScopeGuard([this] {
+        device->setReceiveQueueLimit(0);
+        device->clear(QCanBusDevice::Input);
+    });
+    QCOMPARE(device->receiveQueueLimit(), 0);
+
+    QSignalSpy errorSpy(device.get(), &QCanBusDevice::errorOccurred);
+    QSignalSpy receivedSpy(device.get(), &QCanBusDevice::framesReceived);
+    device->setReceiveQueueLimit(2);
+    QCOMPARE(device->receiveQueueLimit(), 2);
+
+    device->setReceiveQueueLimit(-1);
+    QCOMPARE(device->receiveQueueLimit(), 2);
+
+    device->clear(QCanBusDevice::Input);
+    const QCanBusFrame first(11, QByteArray(1, 'a'));
+    const QCanBusFrame second(22, QByteArray(1, 'b'));
+    const QCanBusFrame third(33, QByteArray(1, 'c'));
+    device->triggerFrames({first, second, third});
+    QCOMPARE(device->framesAvailable(), 2);
+    QCOMPARE(errorSpy.size(), 1);
+    QCOMPARE(errorSpy.constFirst().constFirst().value<QCanBusDevice::CanBusError>(),
+             QCanBusDevice::ReceiveQueueOverflowError);
+    QCOMPARE(receivedSpy.size(), 1);
+    const auto firstBatch = device->readAllFrames();
+    QCOMPARE(firstBatch.size(), 2);
+    QCOMPARE(firstBatch.at(0).frameId(), QCanBusFrame::FrameId(11));
+    QCOMPARE(firstBatch.at(1).frameId(), QCanBusFrame::FrameId(22));
+    QVERIFY(device->readAllFrames().isEmpty());
+
+    // A burst larger than the limit still delivers the oldest frames.
+    QVERIFY(device->triggerNewFrames(3));
+    QCOMPARE(device->framesAvailable(), 2);
+    QCOMPARE(receivedSpy.size(), 2);
+
+    // More arrivals while full neither enqueue nor restart the episode.
+    const qsizetype fullQueueReports = errorSpy.size();
+    device->setReceiveQueueLimit(2);
+    QVERIFY(device->triggerNewFrame());
+    QCOMPARE(errorSpy.size(), fullQueueReports);
+    QCOMPARE(receivedSpy.size(), 2);
+
+    QVERIFY(device->readFrame().isValid());
+    QCOMPARE(device->error(), QCanBusDevice::NoError);
+    QVERIFY(device->triggerNewFrame());
+    QCOMPARE(device->framesAvailable(), 2);
+    QVERIFY(device->triggerNewFrame());
+
+    // Raising the limit creates room for another frame.
+    device->setReceiveQueueLimit(3);
+    QVERIFY(device->triggerNewFrame());
+    QCOMPARE(device->framesAvailable(), 3);
+    QVERIFY(device->triggerNewFrame());
+
+    // A full queue stays bounded and does not report the same episode again,
+    // even after the rate limit expires.
+    const qsizetype ongoingEpisodeReports = errorSpy.size();
+    QElapsedTimer throttleTimer;
+    throttleTimer.start();
+    QTRY_VERIFY_WITH_TIMEOUT(throttleTimer.elapsed() >= 1100, 1500);
+    const qsizetype receivedSignals = receivedSpy.size();
+    device->triggerFrames({first, second, third});
+    device->triggerFrames({});
+    QCOMPARE(device->framesAvailable(), 3);
+    QCOMPARE(errorSpy.size(), ongoingEpisodeReports);
+    QCOMPARE(receivedSpy.size(), receivedSignals);
+
+    // Disabling the limit preserves the queue and accepts more frames.
+    device->setReceiveQueueLimit(0);
+    QCOMPARE(device->framesAvailable(), 3);
+    device->triggerFrames({first});
+    QCOMPARE(device->framesAvailable(), 4);
+    QCOMPARE(errorSpy.size(), ongoingEpisodeReports);
+
+    // Lowering the limit while full keeps the oldest queued frames.
+    device->clear(QCanBusDevice::Input);
+    errorSpy.clear();
+    device->triggerFrames({first, second, third});
+    QCOMPARE(device->framesAvailable(), 3);
+    device->setReceiveQueueLimit(2);
+    QCOMPARE(device->framesAvailable(), 2);
+    QCOMPARE(errorSpy.size(), 1);
+    QCOMPARE(errorSpy.constFirst().constFirst().value<QCanBusDevice::CanBusError>(),
+             QCanBusDevice::ReceiveQueueOverflowError);
+    const auto retained = device->readAllFrames();
+    QCOMPARE(retained.size(), 2);
+    QCOMPARE(retained.at(0).frameId(), QCanBusFrame::FrameId(11));
+    QCOMPARE(retained.at(1).frameId(), QCanBusFrame::FrameId(22));
+
+    // A partially fitting batch preserves the oldest frames.
+    device->triggerFrames({first});
+    device->triggerFrames({second, third});
+    QCOMPARE(device->framesAvailable(), 2);
+    const auto partialBatch = device->readAllFrames();
+    QCOMPARE(partialBatch.at(0).frameId(), QCanBusFrame::FrameId(11));
+    QCOMPARE(partialBatch.at(1).frameId(), QCanBusFrame::FrameId(22));
+
+    device->setReceiveQueueLimit(1);
+    device->triggerFrames({first, second, third});
+    QCOMPARE(device->framesAvailable(), 1);
+    QCOMPARE(device->readFrame().frameId(), QCanBusFrame::FrameId(11));
+    device->setReceiveQueueLimit(0);
+    QCOMPARE(device->receiveQueueLimit(), 0);
+    QCOMPARE(device->framesAvailable(), 0);
+
+    const qsizetype previousReports = errorSpy.size();
+    throttleTimer.restart();
+    QTRY_VERIFY_WITH_TIMEOUT(throttleTimer.elapsed() >= 1100, 1500);
+    device->setReceiveQueueLimit(1);
+    device->triggerFrames({first, second});
+    QCOMPARE(errorSpy.size(), previousReports + 1);
+}
+
+void tst_QCanBusDevice::receiveQueueOverflowThrottling()
+{
+    // Only assert suppression when both episodes finished within the throttle
+    // interval. Retry if scheduling delayed the test past that interval.
+    for (int attempt = 0; attempt < 3; ++attempt) {
+        tst_Backend local;
+        QVERIFY(!local.connectDevice()); // first connection intentionally fails
+        QVERIFY(local.connectDevice());
+        local.setReceiveQueueLimit(1);
+        QSignalSpy errorSpy(&local, &QCanBusDevice::errorOccurred);
+        const QList<QCanBusFrame> frames = {QCanBusFrame(1, {}), QCanBusFrame(2, {})};
+
+        QElapsedTimer timer;
+        timer.start();
+        local.triggerFrames(frames);
+        QCOMPARE(errorSpy.size(), 1);
+        QCOMPARE(local.readAllFrames().size(), 1);
+        local.triggerFrames(frames);
+        QCOMPARE(local.framesAvailable(), 1);
+        if (timer.elapsed() >= 1000)
+            continue;
+        QCOMPARE(errorSpy.size(), 1);
+        return;
+    }
+    QSKIP("Scheduling delayed every attempt past the overflow throttle interval.");
+}
+
+enum class RecoveryType { ReadFrame, ReadAll, ClearInput, RaiseLimit };
+
+void tst_QCanBusDevice::receiveQueueOverflowRecovery_data()
+{
+    QTest::addColumn<RecoveryType>("recovery");
+    QTest::newRow("read-frame") << RecoveryType::ReadFrame;
+    QTest::newRow("read-all") << RecoveryType::ReadAll;
+    QTest::newRow("clear-input") << RecoveryType::ClearInput;
+    QTest::newRow("raise-limit") << RecoveryType::RaiseLimit;
+}
+
+void tst_QCanBusDevice::receiveQueueOverflowRecovery()
+{
+    QFETCH(RecoveryType, recovery);
+
+    tst_Backend local;
+    QVERIFY(!local.connectDevice()); // first connection intentionally fails
+    QVERIFY(local.connectDevice());
+    local.setReceiveQueueLimit(2);
+    QSignalSpy errorSpy(&local, &QCanBusDevice::errorOccurred);
+
+    QVERIFY(local.triggerNewFrames(3));
+    QCOMPARE(local.framesAvailable(), 2);
+    QCOMPARE(errorSpy.size(), 1);
+
+    QElapsedTimer throttleTimer;
+    throttleTimer.start();
+    QTRY_VERIFY_WITH_TIMEOUT(throttleTimer.elapsed() >= 1100, 1500);
+
+    switch (recovery) {
+    case RecoveryType::ReadFrame:
+        QVERIFY(local.readFrame().isValid());
+        break;
+    case RecoveryType::ReadAll:
+        QCOMPARE(local.readAllFrames().size(), 2);
+        break;
+    case RecoveryType::ClearInput:
+        local.clear(QCanBusDevice::Input);
+        break;
+    case RecoveryType::RaiseLimit:
+        local.setReceiveQueueLimit(3);
+        break;
+    }
+
+    QVERIFY(local.triggerNewFrames(3));
+    QCOMPARE(local.framesAvailable(), local.receiveQueueLimit());
+    QCOMPARE(errorSpy.size(), 2);
+    QCOMPARE(local.error(), QCanBusDevice::ReceiveQueueOverflowError);
+}
+
+void tst_QCanBusDevice::waitForFramesReceivedWithQueueOverflow_data()
+{
+    QTest::addColumn<bool>("queueFull");
+    QTest::newRow("partial-batch") << false;
+    QTest::newRow("full-queue") << true;
+}
+
+void tst_QCanBusDevice::waitForFramesReceivedWithQueueOverflow()
+{
+    QFETCH(bool, queueFull);
+
+    tst_Backend local;
+    QVERIFY(!local.connectDevice()); // first connection intentionally fails
+    QVERIFY(local.connectDevice());
+    local.setReceiveQueueLimit(1);
+    if (queueFull)
+        QVERIFY(local.triggerNewFrame());
+    QSignalSpy errorSpy(&local, &QCanBusDevice::errorOccurred);
+    QSignalSpy receivedSpy(&local, &QCanBusDevice::framesReceived);
+
+    QTimer::singleShot(0, &local, [&local] { local.triggerNewFrames(2); });
+    QVERIFY(!local.waitForFramesReceived(1000));
+    QCOMPARE(local.error(), QCanBusDevice::ReceiveQueueOverflowError);
+    QCOMPARE(errorSpy.size(), 1);
+    QCOMPARE(receivedSpy.size(), queueFull ? 0 : 1);
+    QCOMPARE(local.readAllFrames().size(), 1);
+
+    // A subsequent batch that fits still wakes a blocking reader successfully.
+    QTimer::singleShot(0, &local, [&local] { local.triggerNewFrame(); });
+    QVERIFY(local.waitForFramesReceived(1000));
+    QCOMPARE(local.error(), QCanBusDevice::NoError);
+    QCOMPARE(local.framesAvailable(), 1);
+    QCOMPARE(errorSpy.size(), 1);
+}
+
+void tst_QCanBusDevice::reentrantQueueOverflow()
+{
+    tst_Backend local;
+    QVERIFY(!local.connectDevice());
+    QVERIFY(local.connectDevice());
+    local.setReceiveQueueLimit(1);
+    QSignalSpy errorSpy(&local, &QCanBusDevice::errorOccurred);
+
+    bool nested = false;
+    QElapsedTimer nestedReportTimer;
+    connect(&local, &QCanBusDevice::framesReceived, this, [&] {
+        if (nested)
+            return;
+        nested = true;
+        QCOMPARE(local.readAllFrames().size(), 1);
+        QElapsedTimer timer;
+        timer.start();
+        QTRY_VERIFY_WITH_TIMEOUT(timer.elapsed() >= 1100, 1500);
+        nestedReportTimer.start();
+        QVERIFY(local.triggerNewFrames(2));
+    });
+
+    QVERIFY(local.triggerNewFrames(2));
+    QCOMPARE(local.framesAvailable(), 1);
+    QVERIFY(nestedReportTimer.isValid());
+    if (nestedReportTimer.elapsed() >= 1000)
+        QSKIP("Scheduling delayed the outer report past the overflow throttle interval.");
+    QCOMPARE(errorSpy.size(), 1);
+    QCOMPARE(local.error(), QCanBusDevice::ReceiveQueueOverflowError);
+}
+
+void tst_QCanBusDevice::deletionDuringQueueOverflow_data()
+{
+    QTest::addColumn<bool>("lowerLimit");
+    QTest::addColumn<bool>("deleteOnError");
+    QTest::newRow("enqueue-error") << false << true;
+    QTest::newRow("enqueue-received") << false << false;
+    QTest::newRow("lower-limit-error") << true << true;
+}
+
+void tst_QCanBusDevice::deletionDuringQueueOverflow()
+{
+    QFETCH(bool, lowerLimit);
+    QFETCH(bool, deleteOnError);
+
+    auto local = std::make_unique<tst_Backend>();
+    QPointer<tst_Backend> guard(local.get());
+    const QList<QCanBusFrame> frames = {QCanBusFrame(1, {}), QCanBusFrame(2, {})};
+    if (lowerLimit)
+        local->triggerFrames(frames);
+    else
+        local->setReceiveQueueLimit(1);
+    int receivedSignals = 0;
+    int errorSignals = 0;
+    connect(local.get(), &QCanBusDevice::framesReceived, this, [&] { ++receivedSignals; });
+    connect(local.get(), &QCanBusDevice::errorOccurred, this, [&] { ++errorSignals; });
+    const auto deleteDevice = [&local] {
+        QCOMPARE(local->receiveQueueLimit(), 1);
+        QCOMPARE(local->framesAvailable(), 1);
+        local->setReceiveQueueLimit(0);
+        delete local.release();
+    };
+    if (deleteOnError)
+        connect(local.get(), &QCanBusDevice::errorOccurred, this, deleteDevice);
+    else
+        connect(local.get(), &QCanBusDevice::framesReceived, this, deleteDevice);
+
+    if (lowerLimit)
+        local->setReceiveQueueLimit(1);
+    else
+        local->triggerFrames(frames);
+    QVERIFY(!guard);
+    QCOMPARE(receivedSignals, lowerLimit ? 0 : 1);
+    QCOMPARE(errorSignals, deleteOnError ? 1 : 0);
 }
 
 void tst_QCanBusDevice::clearInputBuffer()

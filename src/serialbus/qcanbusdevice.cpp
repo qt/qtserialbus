@@ -12,6 +12,7 @@
 #include <QtCore/qdatastream.h>
 #include <QtCore/qeventloop.h>
 #include <QtCore/qloggingcategory.h>
+#include <QtCore/qpointer.h>
 #include <QtCore/qscopedvaluerollback.h>
 #include <QtCore/qtimer.h>
 
@@ -46,6 +47,8 @@ Q_STATIC_LOGGING_CATEGORY(QT_CANBUS, "qt.canbus")
                                 in Qt 5.14.
     \value TimeoutError         An timeout occurred while waiting for frames written or
                                 received. This enum was introduced in Qt 5.14.
+    \value [since 6.13] ReceiveQueueOverflowError Frames were dropped because the
+                                receive queue limit was exceeded.
 */
 
 /*!
@@ -251,10 +254,32 @@ void QCanBusDevice::clearError()
     d->lastError = NoError;
 }
 
+static bool beginReceiveQueueOverflow(QCanBusDevicePrivate *d)
+{
+    if (d->receiveQueueOverflowed)
+        return false;
+    d->receiveQueueOverflowed = true;
+    return true;
+}
+
+static bool reportReceiveQueueOverflow(QCanBusDevicePrivate *d)
+{
+    // Keep the reporting rate limit across episodes, even if readers make room.
+    if (d->lastReceiveQueueOverflowReport.isValid()
+        && d->lastReceiveQueueOverflowReport.elapsed() < 1000) {
+        return false;
+    }
+    d->lastReceiveQueueOverflowReport.start();
+    return true;
+}
+
 /*!
     Appends \a newFrames to the internal list of frames which can be
-    accessed using \l readFrame() and emits the \l framesReceived()
-    signal.
+    accessed using \l readFrame(), and emits the \l framesReceived()
+    signal if any frames were queued. When the receive queue limit is reached,
+    the frames that do not fit are discarded. If an overflow error is reported
+    for a batch that queues frames, framesReceived() is emitted before
+    errorOccurred().
 
     Subclasses must call this function when they receive frames.
 
@@ -266,10 +291,101 @@ void QCanBusDevice::enqueueReceivedFrames(const QList<QCanBusFrame> &newFrames)
     if (Q_UNLIKELY(newFrames.isEmpty()))
         return;
 
-    d->incomingFramesGuard.lock();
-    d->incomingFrames.append(newFrames);
-    d->incomingFramesGuard.unlock();
-    emit framesReceived();
+    bool overflow = false;
+    bool framesAdded = false;
+    {
+        QMutexLocker locker(&d->incomingFramesGuard);
+        qsizetype available = newFrames.size();
+        if (d->receiveQueueLimit > 0)
+            available = qBound(qsizetype(0), available,
+                               d->receiveQueueLimit - d->incomingFrames.size());
+        if (available == newFrames.size()) {
+            d->incomingFrames.append(newFrames);
+            framesAdded = true;
+        } else {
+            if (available > 0) {
+                d->incomingFrames.reserve(d->incomingFrames.size() + available);
+                for (qsizetype i = 0; i < available; ++i)
+                    d->incomingFrames.append(newFrames.at(i));
+                framesAdded = true;
+            }
+            overflow = beginReceiveQueueOverflow(d);
+        }
+    }
+
+    QPointer<QCanBusDevice> guard(this);
+    if (framesAdded)
+        emit framesReceived();
+    // Keep the overflow error as the final result of a blocking receive wait.
+    if (overflow && guard) {
+        // A framesReceived() handler may have reported a newer overflow.
+        {
+            QMutexLocker locker(&d->incomingFramesGuard);
+            overflow = reportReceiveQueueOverflow(d);
+        }
+        if (overflow)
+            setError(tr("Receive queue limit exceeded; incoming frames were dropped."),
+                     ReceiveQueueOverflowError);
+    }
+}
+
+/*!
+    Sets the maximum number of frames that can be held in the receive queue.
+    If the queue already contains more than \a maxFrames, the newest frames are
+    discarded. A value of 0 (the default) means that the queue is unlimited.
+    Negative values are ignored.
+
+    When an enqueue would exceed the limit, only the frames that fit are
+    queued, in arrival order. The rest are discarded. Queue overflows, including
+    those caused by lowering the limit, are reported as a
+    \l QCanBusDevice::ReceiveQueueOverflowError at most once per overflow
+    episode and at most once per second. The episode ends when room is made by reading
+    or raising the limit, readAllFrames() is called, or the input queue is
+    cleared. Some drops may therefore occur without another error signal.
+    This limit applies to the QCanBusDevice queue, not to buffers in a CAN
+    driver, operating system socket, or CAN plugin.
+
+    \since 6.13
+    \sa receiveQueueLimit(), framesAvailable(), readFrame(), readAllFrames()
+*/
+void QCanBusDevice::setReceiveQueueLimit(qsizetype maxFrames)
+{
+    Q_D(QCanBusDevice);
+
+    if (maxFrames < 0) {
+        qCWarning(QT_CANBUS, "Receive queue limit cannot be negative.");
+        return;
+    }
+    bool overflow = false;
+    {
+        QMutexLocker locker(&d->incomingFramesGuard);
+        d->receiveQueueLimit = maxFrames;
+        if (maxFrames == 0 || d->incomingFrames.size() < maxFrames) {
+            d->receiveQueueOverflowed = false;
+        } else if (d->incomingFrames.size() > maxFrames) {
+            d->incomingFrames.resize(maxFrames);
+            if (beginReceiveQueueOverflow(d))
+                overflow = reportReceiveQueueOverflow(d);
+        }
+    }
+
+    if (overflow)
+        setError(tr("Receive queue limit exceeded; queued frames were discarded."),
+                 ReceiveQueueOverflowError);
+}
+
+/*!
+    Returns the maximum number of frames that can be held in the receive queue,
+    or 0 if the queue is unlimited.
+
+    \since 6.13
+    \sa setReceiveQueueLimit()
+*/
+qsizetype QCanBusDevice::receiveQueueLimit() const
+{
+    Q_D(const QCanBusDevice);
+    QMutexLocker locker(&d->incomingFramesGuard);
+    return d->receiveQueueLimit;
 }
 
 /*!
@@ -412,6 +528,10 @@ QString QCanBusDevice::errorString() const
     Returns the number of available frames. If no frames are available,
     this function returns 0.
 
+    By default, the receive queue is unlimited, so applications are responsible
+    for draining it promptly. Use setReceiveQueueLimit() to bound the number of
+    queued frames.
+
     \sa clear(), readFrame(), readAllFrames()
 */
 qint64 QCanBusDevice::framesAvailable() const
@@ -545,6 +665,7 @@ void QCanBusDevice::clear(QCanBusDevice::Directions direction)
     if (direction & Direction::Input) {
         QMutexLocker locker(&d->incomingFramesGuard);
         d->incomingFrames.clear();
+        d->receiveQueueOverflowed = false;
     }
 
     if (direction & Direction::Output)
@@ -747,7 +868,9 @@ QCanBusFrame QCanBusDevice::readFrame()
     if (Q_UNLIKELY(d->incomingFrames.isEmpty()))
         return QCanBusFrame(QCanBusFrame::InvalidFrame);
 
-    return d->incomingFrames.takeFirst();
+    const QCanBusFrame frame = d->incomingFrames.takeFirst();
+    d->receiveQueueOverflowed = false;
+    return frame;
 }
 
 /*!
@@ -776,6 +899,7 @@ QList<QCanBusFrame> QCanBusDevice::readAllFrames()
 
     QList<QCanBusFrame> result;
     result.swap(d->incomingFrames);
+    d->receiveQueueOverflowed = false;
     return result;
 }
 

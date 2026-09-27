@@ -31,7 +31,8 @@ public:
         ConfigurationError,
         UnknownError,
         OperationError,
-        TimeoutError
+        TimeoutError,
+        ReceiveQueueOverflowError
     };
     Q_ENUM(CanBusError)
 
@@ -101,6 +102,8 @@ public:
     QCanBusFrame readFrame();
     QList<QCanBusFrame> readAllFrames();
     qint64 framesAvailable() const;
+    void setReceiveQueueLimit(qsizetype maxFrames);
+    qsizetype receiveQueueLimit() const;
     qint64 framesToWrite() const;
 
     virtual void resetController();
