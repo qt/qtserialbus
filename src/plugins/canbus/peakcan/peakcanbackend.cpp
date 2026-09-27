@@ -716,7 +716,12 @@ void PeakCanBackendPrivate::startRead()
             if (Q_UNLIKELY(message.MSGTYPE & PCAN_MESSAGE_STATUS))
                 continue;
 
-            const int size = dlcToSize(static_cast<CanFrameDlc>(message.DLC));
+            if (Q_UNLIKELY(message.DLC > 15))
+                continue;
+
+            qsizetype size = std::min(qsizetype(message.DLC), qsizetype(8));
+            if (message.MSGTYPE & PCAN_MESSAGE_FD)
+                size = dlcToSize(static_cast<CanFrameDlc>(message.DLC));
             QCanBusFrame frame(message.ID, QByteArray(reinterpret_cast<const char *>(message.DATA), size));
             frame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(static_cast<qint64>(timestamp)));
             frame.setExtendedFrameFormat(message.MSGTYPE & PCAN_MESSAGE_EXTENDED);
@@ -747,7 +752,8 @@ void PeakCanBackendPrivate::startRead()
             if (Q_UNLIKELY(message.MSGTYPE & PCAN_MESSAGE_STATUS))
                 continue;
 
-            const int size = static_cast<int>(message.LEN);
+            const qsizetype size = std::min(qsizetype(message.LEN),
+                                            qsizetype(sizeof(message.DATA)));
             QCanBusFrame frame(message.ID, QByteArray(reinterpret_cast<const char *>(message.DATA), size));
             const quint64 millis = timestamp.millis + Q_UINT64_C(0x100000000) * timestamp.millis_overflow;
             const quint64 micros = Q_UINT64_C(1000) * millis + timestamp.micros;

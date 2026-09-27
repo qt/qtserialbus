@@ -15,6 +15,8 @@
 #include <QtCore/qregularexpression.h>
 #include <QtCore/qtimer.h>
 
+#include <algorithm>
+
 QT_BEGIN_NAMESPACE
 
 Q_DECLARE_LOGGING_CATEGORY(QT_CANBUS_PLUGINS_SYSTECCAN)
@@ -386,9 +388,10 @@ void SystecCanBackendPrivate::readAllReceivedMessages()
             break;
         }
 
+        const qsizetype dataSize = std::min(qsizetype(message.m_bDLC),
+                                            qsizetype(sizeof(message.m_bData)));
         QCanBusFrame frame(message.m_dwID,
-                           QByteArray(reinterpret_cast<const char *>(message.m_bData),
-                                      int(message.m_bDLC)));
+                           QByteArray(reinterpret_cast<const char *>(message.m_bData), dataSize));
 
         // TODO: Timestamp can also be set to 100 us resolution with kUcanModeHighResTimer
         frame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(message.m_dwTime * 1000));
