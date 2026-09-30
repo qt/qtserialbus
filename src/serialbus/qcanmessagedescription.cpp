@@ -33,7 +33,7 @@ QT_BEGIN_NAMESPACE
     The QCanMessageDescription class provides methods to control all those
     parameters.
 
-    \section2 Message ID
+    \section1 Message ID
     The message ID is a unique identifier, which is used to select the proper
     message description when decoding the incoming \l QCanBusFrame or encoding
     a \l QCanBusFrame based on the provided data.
@@ -41,7 +41,7 @@ QT_BEGIN_NAMESPACE
     See \l QCanUniqueIdDescription documentation for more details on the unique
     identifier description.
 
-    \section2 Signal Description
+    \section1 Signal Description
     The signal description is represented by the \l QCanSignalDescription
     class. The QCanMessageDescription class only provides a list of signals that
     belong to the message.

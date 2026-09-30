@@ -21,7 +21,7 @@ QT_BEGIN_NAMESPACE
     and later use it to decode a received \l QCanBusFrame or encode the input
     data into a \l QCanBusFrame that can be sent to the receiver.
 
-    \section2 General Description
+    \section1 General Description
 
     Each CAN frame can contain multiple values. The rules to extract the values
     from a CAN frame include the following:
@@ -50,7 +50,7 @@ QT_BEGIN_NAMESPACE
     The QCanSignalDescription class provides methods to control all those
     parameters.
 
-    \section2 Data Endianness Processing
+    \section1 Data Endianness Processing
 
     Little endian and big endian data is encoded differently.
     For big endian values, start bit positions are given for the most
@@ -60,7 +60,7 @@ QT_BEGIN_NAMESPACE
     Let's consider two examples. In both examples we will encode two 12-bit
     values in the 3-byte payload.
 
-    \section3 Little Endian
+    \section2 Little Endian
 
     For the little endian case the data layout can be represented by the
     following image:
@@ -91,7 +91,7 @@ QT_BEGIN_NAMESPACE
     // other parameters for signal2
     \endcode
 
-    \section3 Big Endian
+    \section2 Big Endian
 
     The following image represents the value layout for the big endian case:
 
@@ -119,7 +119,7 @@ QT_BEGIN_NAMESPACE
     Note how the start bits are different from the little endian case. Also the
     values are aligned differently.
 
-    \section2 Multiplexed Signals Explained
+    \section1 Multiplexed Signals Explained
 
     There are two common ways to encode the data in the CAN payload:
     \list
@@ -144,7 +144,7 @@ QT_BEGIN_NAMESPACE
     In such cases the signal can be extracted from the payload only when all
     multiplexors contain the expected values.
 
-    \section2 Value Conversions
+    \section1 Value Conversions
 
     In many cases the signals transferred over CAN bus cannot hold the full
     range of the physical values that they represent. To overcome these
