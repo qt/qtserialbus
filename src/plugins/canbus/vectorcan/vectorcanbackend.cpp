@@ -490,6 +490,7 @@ void VectorCanBackendPrivate::startRead()
                 QByteArray(reinterpret_cast<const char *>(msg.data), dataLength));
             frame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(event.timeStamp / 1000));
             frame.setExtendedFrameFormat(msg.id & XL_CAN_EXT_MSG_ID);
+            frame.setFlexibleDataRateFormat(msg.flags & XL_CAN_RXMSG_FLAG_EDL);
             frame.setBitrateSwitch(msg.flags & XL_CAN_RXMSG_FLAG_BRS);
             frame.setErrorStateIndicator(msg.flags & XL_CAN_RXMSG_FLAG_ESI);
             frame.setLocalEcho(isEchoFrame);
