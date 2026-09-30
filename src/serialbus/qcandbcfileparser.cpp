@@ -73,7 +73,7 @@ QT_BEGIN_NAMESPACE
     extracted message descriptions, error code, or warnings) are reset once the
     next parsing starts.
 
-    \section2 Supported Keywords
+    \section1 Supported Keywords
 
     The current implementation supports only a subset of keywords that you can
     find in a DBC file:
