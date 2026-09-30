@@ -491,6 +491,7 @@ void VectorCanBackendPrivate::startRead()
             frame.setTimeStamp(QCanBusFrame::TimeStamp::fromMicroSeconds(event.timeStamp / 1000));
             frame.setExtendedFrameFormat(msg.id & XL_CAN_EXT_MSG_ID);
             frame.setBitrateSwitch(msg.flags & XL_CAN_RXMSG_FLAG_BRS);
+            frame.setErrorStateIndicator(msg.flags & XL_CAN_RXMSG_FLAG_ESI);
             frame.setLocalEcho(isEchoFrame);
             frame.setFrameType((msg.flags & XL_CAN_RXMSG_FLAG_RTR)
                                 ? QCanBusFrame::RemoteRequestFrame
