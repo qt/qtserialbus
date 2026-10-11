@@ -42,7 +42,7 @@ void ReadTask::handleFrames() {
         }
 
         if (m_showFlags) {
-            QLatin1String flags("- - -  ");
+            QString flags = QStringLiteral("- - -  ");
 
             if (frame.hasBitrateSwitch())
                 flags[0] = QLatin1Char('B');
