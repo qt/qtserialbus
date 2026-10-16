@@ -20,31 +20,35 @@ QT_BEGIN_NAMESPACE
 class QCanBusPrivate
 {
 public:
-    QCanBusPrivate() { }
-    QCanBusPrivate(int index, const QCborMap &meta) : meta(meta), index(index) {}
-
-    QCborMap meta;
     QObject *factory = nullptr;
     int index = -1;
 };
 
-Q_GLOBAL_STATIC_WITH_ARGS(QFactoryLoader, qFactoryLoader,
-    (QCanBusFactory_iid, QLatin1String("/canbus")))
+namespace {
+struct QCanBusLoader
+{
+    QCanBusLoader();
 
-typedef QMap<QString, QCanBusPrivate> QCanBusPluginStore;
-Q_GLOBAL_STATIC(QCanBusPluginStore, qCanBusPlugins)
+    QFactoryLoader loader{QCanBusFactory_iid, QLatin1String("/canbus")};
+    QMap<QString, QCanBusPrivate> store;
+};
+} // unnamed namespace
+
+Q_GLOBAL_STATIC(QCanBusLoader, qCanBusLoader)
 
 static QCanBus *globalInstance = nullptr;
 
-static void loadPlugins()
+QCanBusLoader::QCanBusLoader()
 {
-    const QList<QPluginParsedMetaData> meta = qFactoryLoader()->metaData();
+    const QList<QPluginParsedMetaData> meta = loader.metaData();
     for (int i = 0; i < meta.size(); i++) {
         const QCborMap obj = meta.at(i).value(QtPluginMetaDataKeys::MetaData).toMap();
         if (obj.isEmpty())
             continue;
 
-        qCanBusPlugins()->insert(obj.value(QLatin1String("Key")).toString(), {i, obj});
+        QCanBusPrivate &d = store[obj.value(QLatin1String("Key")).toString()];
+        if (d.index == -1)
+            d.index = i;
     }
 }
 
@@ -75,7 +79,7 @@ QCanBus *QCanBus::instance()
 */
 QStringList QCanBus::plugins() const
 {
-    return qCanBusPlugins()->keys();
+    return qCanBusLoader()->store.keys();
 }
 
 static void setErrorMessage(QString *result, const QString &message)
@@ -88,17 +92,19 @@ static void setErrorMessage(QString *result, const QString &message)
 
 static QObject *canBusFactory(const QString &plugin, QString *errorMessage)
 {
-    if (Q_UNLIKELY(!qCanBusPlugins()->contains(plugin))) {
+    QCanBusLoader *globals = qCanBusLoader();
+    if (Q_UNLIKELY(!globals->store.contains(plugin))) {
         setErrorMessage(errorMessage, QCanBus::tr("No such plugin: '%1'").arg(plugin));
         return nullptr;
     }
 
-    QCanBusPrivate d = qCanBusPlugins()->value(plugin);
+    QCanBusPrivate d = globals->store.value(plugin);
     if (!d.factory) {
-        d.factory = qFactoryLoader->instance(d.index);
-
-        if (d.factory)
-            qCanBusPlugins()->insert(plugin, d);
+        if (d.index != -1) {
+            d.factory = globals->loader.instance(d.index);
+            if (d.factory)
+                globals->store.insert(plugin, d);
+        }
     }
 
     if (Q_UNLIKELY(!d.factory))
@@ -215,7 +221,7 @@ QCanBusDevice *QCanBus::createDevice(const QString &plugin, const QString &inter
 QCanBus::QCanBus(QObject *parent) :
     QObject(parent)
 {
-    loadPlugins();
+    qCanBusLoader(); // trigger plugin discovery
 }
 
 QT_END_NAMESPACE
