@@ -21,7 +21,7 @@ class QCanBusPrivate
 {
 public:
     QObject *factory = nullptr;
-    int index = -1;
+    QList<int> indexes;
 };
 
 namespace {
@@ -47,8 +47,7 @@ QCanBusLoader::QCanBusLoader()
             continue;
 
         QCanBusPrivate &d = store[obj.value(QLatin1String("Key")).toString()];
-        if (d.index == -1)
-            d.index = i;
+        d.indexes.append(i);
     }
 }
 
@@ -100,10 +99,12 @@ static QObject *canBusFactory(const QString &plugin, QString *errorMessage)
 
     QCanBusPrivate d = globals->store.value(plugin);
     if (!d.factory) {
-        if (d.index != -1) {
-            d.factory = globals->loader.instance(d.index);
-            if (d.factory)
+        for (int index : std::as_const(d.indexes)) {
+            d.factory = globals->loader.instance(index);
+            if (d.factory) {
                 globals->store.insert(plugin, d);
+                break;
+            }
         }
     }
 
