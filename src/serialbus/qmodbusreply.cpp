@@ -250,7 +250,7 @@ void QModbusReply::setRawResult(const QModbusResponse &response)
 
 /*!
     \since 6.0
-    \fn void intermediateErrorOccurred(QModbusDevice::IntermediateError error)
+    \fn void QModbusReply::intermediateErrorOccurred(QModbusDevice::IntermediateError error)
 
     This signal is emitted when an error has been detected in the processing of
     this reply. The error will be described by the error code \a error.
